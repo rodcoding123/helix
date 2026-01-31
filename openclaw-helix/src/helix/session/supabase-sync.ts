@@ -15,46 +15,21 @@ import {
   type Session,
   type SessionMessage,
   type SyncConfig,
-  type SyncState,
   type SyncConflict,
   type TransferRequest,
   type TransferResponse,
   type SyncEvent,
-  type SessionOrigin,
   DEFAULT_SYNC_CONFIG,
 } from "./types.js";
+import {
+  type SupabaseClient,
+  type SupabaseChannel,
+  getSupabaseClient,
+  TABLES,
+  CHANNELS,
+} from "./supabase-client.js";
 
 const log = createSubsystemLogger("helix:session:sync");
-
-// Supabase client types (would be from @supabase/supabase-js)
-interface SupabaseClient {
-  from: (table: string) => SupabaseQueryBuilder;
-  channel: (name: string) => SupabaseChannel;
-  removeChannel: (channel: SupabaseChannel) => Promise<void>;
-}
-
-interface SupabaseQueryBuilder {
-  select: (columns?: string) => SupabaseQueryBuilder;
-  insert: (data: unknown) => SupabaseQueryBuilder;
-  update: (data: unknown) => SupabaseQueryBuilder;
-  upsert: (data: unknown) => SupabaseQueryBuilder;
-  delete: () => SupabaseQueryBuilder;
-  eq: (column: string, value: unknown) => SupabaseQueryBuilder;
-  gt: (column: string, value: unknown) => SupabaseQueryBuilder;
-  order: (column: string, options?: { ascending?: boolean }) => SupabaseQueryBuilder;
-  limit: (count: number) => SupabaseQueryBuilder;
-  single: () => Promise<{ data: unknown; error: Error | null }>;
-  then: (resolve: (result: { data: unknown[]; error: Error | null }) => void) => Promise<void>;
-}
-
-interface SupabaseChannel {
-  on: (
-    event: string,
-    filter: { event: string; schema: string; table: string },
-    callback: (payload: unknown) => void
-  ) => SupabaseChannel;
-  subscribe: (callback?: (status: string) => void) => SupabaseChannel;
-}
 
 /**
  * Session sync manager using Supabase
@@ -90,16 +65,17 @@ export class SupabaseSessionSync extends EventEmitter {
       return;
     }
 
-    if (!this.config.supabaseUrl || !this.config.supabaseKey) {
-      log.warn("Supabase credentials not configured, sync disabled");
-      return;
-    }
-
     try {
-      // Dynamic import to avoid bundling Supabase if not needed
-      // @ts-expect-error - @supabase/supabase-js is an optional peer dependency
-      const { createClient } = await import("@supabase/supabase-js");
-      this.client = createClient(this.config.supabaseUrl, this.config.supabaseKey) as unknown as SupabaseClient;
+      // Get client from centralized module (handles env vars automatically)
+      this.client = await getSupabaseClient({
+        url: this.config.supabaseUrl,
+        anonKey: this.config.supabaseKey,
+      });
+
+      if (!this.client) {
+        log.warn("Supabase credentials not configured, sync disabled");
+        return;
+      }
 
       // Set up real-time subscriptions
       this.setupRealtimeSubscription();
@@ -194,7 +170,7 @@ export class SupabaseSessionSync extends EventEmitter {
 
     try {
       const { data, error } = await this.client
-        .from("sessions")
+        .from(TABLES.SESSIONS)
         .select("*")
         .eq("id", sessionId)
         .single();
@@ -256,7 +232,7 @@ export class SupabaseSessionSync extends EventEmitter {
 
       // Create transfer record
       if (this.client) {
-        await this.client.from("session_transfers").insert({
+        await this.client.from(TABLES.SESSION_TRANSFERS).insert({
           session_id: request.sessionId,
           from_origin: request.fromOrigin,
           to_origin: request.toOrigin,
@@ -437,7 +413,7 @@ export class SupabaseSessionSync extends EventEmitter {
     if (!this.client) return;
 
     this.channel = this.client
-      .channel("session-changes")
+      .channel(CHANNELS.SESSION_CHANGES)
       .on(
         "postgres_changes",
         {
@@ -506,7 +482,7 @@ export class SupabaseSessionSync extends EventEmitter {
 
     try {
       // Upsert session
-      await this.client.from("sessions").upsert({
+      await this.client.from(TABLES.SESSIONS).upsert({
         id: session.id,
         user_id: session.userId,
         project_id: session.projectId,
@@ -533,7 +509,7 @@ export class SupabaseSessionSync extends EventEmitter {
           metadata: m.metadata,
         }));
 
-        await this.client.from("session_messages").upsert(messages);
+        await this.client.from(TABLES.SESSION_MESSAGES).upsert(messages);
       }
     } catch (err) {
       log.error("Failed to sync session to remote:", { error: String(err) });
@@ -547,7 +523,7 @@ export class SupabaseSessionSync extends EventEmitter {
     try {
       // Fetch sessions updated since last sync
       const { data: remoteSessions, error } = (await this.client
-        .from("sessions")
+        .from(TABLES.SESSIONS)
         .select("*")
         .gt("last_activity", this.lastSyncTime)
         .order("last_activity", { ascending: false })
@@ -585,7 +561,7 @@ export class SupabaseSessionSync extends EventEmitter {
 
     // Fetch remote messages
     const { data: remoteMessages, error } = (await this.client
-      .from("session_messages")
+      .from(TABLES.SESSION_MESSAGES)
       .select("*")
       .eq("session_id", remote.id)
       .gt("timestamp", local.lastActivity)) as { data: SessionMessage[] | null; error: Error | null };
