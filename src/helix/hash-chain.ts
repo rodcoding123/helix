@@ -1,0 +1,307 @@
+/**
+ * HELIX HASH CHAIN
+ * Cryptographic integrity verification with Discord posting
+ *
+ * CRITICAL: Hash chain entries are sent to Discord BEFORE local storage.
+ * This makes the chain unhackable - Discord has the authoritative record.
+ */
+
+import crypto from 'node:crypto';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import type { HashChainEntry, DiscordEmbed } from './types.js';
+
+const CHAIN_FILE = process.env.HELIX_HASH_CHAIN_FILE || './hash_chain.log';
+const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK_HASH_CHAIN;
+
+// Log files to include in hash state
+const LOG_FILES = [
+  '/var/log/helix/commands.log',
+  '/var/log/helix/api_calls.log',
+  '/var/log/helix/file_changes.log',
+  '/var/log/helix/consciousness.log',
+];
+
+// In-memory cache of chain state
+let lastHash: string = 'GENESIS';
+let sequence: number = 0;
+let schedulerInterval: NodeJS.Timeout | null = null;
+
+/**
+ * Send hash chain entry to Discord
+ */
+async function sendToDiscord(entry: HashChainEntry): Promise<boolean> {
+  if (!DISCORD_WEBHOOK) return false;
+
+  const logStatesList = Object.entries(entry.logStates)
+    .map(([file, hash]) => `\`${path.basename(file)}\`: \`${hash.slice(0, 12)}...\``)
+    .join('\n');
+
+  const embed: DiscordEmbed = {
+    title: '🔗 Hash Chain Entry',
+    color: 0x9B59B6,
+    fields: [
+      { name: 'Sequence', value: `#${entry.sequence || 0}`, inline: true },
+      { name: 'Entry Hash', value: `\`${entry.entryHash.slice(0, 32)}...\``, inline: false },
+      { name: 'Previous Hash', value: `\`${entry.previousHash.slice(0, 24)}...\``, inline: true },
+      { name: 'Time', value: entry.timestamp, inline: true },
+      { name: 'Log States', value: logStatesList || 'No logs found', inline: false },
+    ],
+    timestamp: entry.timestamp,
+    footer: { text: 'Integrity verification - sent before local storage' }
+  };
+
+  try {
+    const response = await fetch(DISCORD_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ embeds: [embed] }),
+    });
+    return response.ok;
+  } catch (error) {
+    console.error('[Helix] Hash chain Discord webhook failed:', error);
+    return false;
+  }
+}
+
+/**
+ * Get the last hash from the chain file
+ */
+async function getLastHash(): Promise<{ hash: string; sequence: number }> {
+  try {
+    const content = await fs.readFile(CHAIN_FILE, 'utf-8');
+    const lines = content.trim().split('\n').filter(Boolean);
+
+    if (lines.length === 0) {
+      return { hash: 'GENESIS', sequence: 0 };
+    }
+
+    const lastEntry: HashChainEntry = JSON.parse(lines[lines.length - 1]);
+    return {
+      hash: lastEntry.entryHash,
+      sequence: (lastEntry.sequence || 0) + 1,
+    };
+  } catch (error) {
+    // File doesn't exist or is empty
+    return { hash: 'GENESIS', sequence: 0 };
+  }
+}
+
+/**
+ * Compute SHA-256 hashes of all log files
+ */
+async function hashLogFiles(): Promise<Record<string, string>> {
+  const states: Record<string, string> = {};
+
+  // Also check environment-specified log files
+  const configuredLogs = process.env.HELIX_LOG_FILES?.split(',') || [];
+  const allLogFiles = [...LOG_FILES, ...configuredLogs];
+
+  for (const logFile of allLogFiles) {
+    try {
+      const content = await fs.readFile(logFile);
+      states[path.basename(logFile)] = crypto.createHash('sha256').update(content).digest('hex');
+    } catch {
+      states[path.basename(logFile)] = 'MISSING';
+    }
+  }
+
+  return states;
+}
+
+/**
+ * Compute the entry hash from its components
+ */
+function computeEntryHash(
+  timestamp: string,
+  previousHash: string,
+  logStates: Record<string, string>
+): string {
+  const sortedKeys = Object.keys(logStates).sort();
+  const sortedStates = sortedKeys.map(k => `${k}:${logStates[k]}`).join('|');
+  const entryContent = `${timestamp}|${previousHash}|${sortedStates}`;
+  return crypto.createHash('sha256').update(entryContent).digest('hex');
+}
+
+/**
+ * Create a new hash chain entry
+ * CRITICAL: Sends to Discord FIRST, then writes locally
+ */
+export async function createHashChainEntry(): Promise<HashChainEntry> {
+  const timestamp = new Date().toISOString();
+
+  // Get chain state
+  const chainState = await getLastHash();
+  lastHash = chainState.hash;
+  sequence = chainState.sequence;
+
+  // Hash all log files
+  const logStates = await hashLogFiles();
+
+  // Compute entry hash
+  const entryHash = computeEntryHash(timestamp, lastHash, logStates);
+
+  const entry: HashChainEntry = {
+    timestamp,
+    previousHash: lastHash,
+    logStates,
+    entryHash,
+    sequence,
+  };
+
+  // >>>>>> SEND TO DISCORD FIRST (unhackable) <<<<<<
+  const discordSuccess = await sendToDiscord(entry);
+
+  if (!discordSuccess) {
+    console.warn('[Helix] Hash chain entry not confirmed by Discord');
+    // Continue anyway - local log still valuable
+  }
+
+  // >>>>>> THEN write locally <<<<<<
+  try {
+    // Ensure directory exists
+    const chainDir = path.dirname(CHAIN_FILE);
+    await fs.mkdir(chainDir, { recursive: true }).catch(() => {});
+
+    await fs.appendFile(CHAIN_FILE, JSON.stringify(entry) + '\n');
+  } catch (error) {
+    console.error('[Helix] Failed to write hash chain locally:', error);
+  }
+
+  // Update in-memory state
+  lastHash = entryHash;
+  sequence++;
+
+  return entry;
+}
+
+/**
+ * Verify the integrity of the entire chain
+ * Checks that each entry's hash matches its computed value
+ * and that the previousHash links are correct
+ */
+export async function verifyChain(): Promise<{
+  valid: boolean;
+  entries: number;
+  errors: string[];
+}> {
+  const errors: string[] = [];
+
+  try {
+    const content = await fs.readFile(CHAIN_FILE, 'utf-8');
+    const lines = content.trim().split('\n').filter(Boolean);
+
+    if (lines.length === 0) {
+      return { valid: true, entries: 0, errors: [] };
+    }
+
+    let expectedPrevHash = 'GENESIS';
+
+    for (let i = 0; i < lines.length; i++) {
+      const entry: HashChainEntry = JSON.parse(lines[i]);
+
+      // Verify previous hash link
+      if (entry.previousHash !== expectedPrevHash) {
+        errors.push(`Entry ${i}: previousHash mismatch (expected ${expectedPrevHash.slice(0, 8)}, got ${entry.previousHash.slice(0, 8)})`);
+      }
+
+      // Verify entry hash
+      const computedHash = computeEntryHash(entry.timestamp, entry.previousHash, entry.logStates);
+      if (entry.entryHash !== computedHash) {
+        errors.push(`Entry ${i}: entryHash mismatch (tampering detected)`);
+      }
+
+      expectedPrevHash = entry.entryHash;
+    }
+
+    return {
+      valid: errors.length === 0,
+      entries: lines.length,
+      errors,
+    };
+  } catch (error) {
+    return {
+      valid: false,
+      entries: 0,
+      errors: [`Failed to read chain file: ${error}`],
+    };
+  }
+}
+
+/**
+ * Get the current state of the chain
+ */
+export async function getChainState(): Promise<{
+  lastHash: string;
+  sequence: number;
+  entries: number;
+}> {
+  const state = await getLastHash();
+  try {
+    const content = await fs.readFile(CHAIN_FILE, 'utf-8');
+    const entries = content.trim().split('\n').filter(Boolean).length;
+    return {
+      lastHash: state.hash,
+      sequence: state.sequence,
+      entries,
+    };
+  } catch {
+    return {
+      lastHash: 'GENESIS',
+      sequence: 0,
+      entries: 0,
+    };
+  }
+}
+
+/**
+ * Start the hash chain scheduler
+ * Creates entries at regular intervals (default: every 5 minutes)
+ */
+export function startHashChainScheduler(intervalMs: number = 5 * 60 * 1000): void {
+  if (schedulerInterval) {
+    console.warn('[Helix] Hash chain scheduler already running');
+    return;
+  }
+
+  // Create initial entry on startup
+  createHashChainEntry()
+    .then(() => console.log('[Helix] Initial hash chain entry created'))
+    .catch(console.error);
+
+  // Schedule regular entries
+  schedulerInterval = setInterval(() => {
+    createHashChainEntry().catch(console.error);
+  }, intervalMs);
+
+  console.log(`[Helix] Hash chain scheduler started (interval: ${intervalMs / 1000}s)`);
+}
+
+/**
+ * Stop the hash chain scheduler
+ */
+export function stopHashChainScheduler(): void {
+  if (schedulerInterval) {
+    clearInterval(schedulerInterval);
+    schedulerInterval = null;
+    console.log('[Helix] Hash chain scheduler stopped');
+  }
+}
+
+/**
+ * Compare local chain with Discord records
+ * This verifies that local logs haven't been tampered with
+ */
+export async function verifyAgainstDiscord(): Promise<{
+  verified: boolean;
+  message: string;
+}> {
+  // This would require Discord API access to read message history
+  // For now, return a placeholder indicating the check would need manual verification
+  return {
+    verified: false,
+    message: 'Manual verification required: Check Discord hash-chain channel against local chain file',
+  };
+}
+
+export { computeEntryHash, hashLogFiles };

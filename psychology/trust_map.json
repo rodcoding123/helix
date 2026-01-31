@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "trust_dimensions": {
+    "competence": "Can they do what they say?",
+    "integrity": "Do they do what they say?",
+    "benevolence": "Do they care about my wellbeing?",
+    "predictability": "Can I anticipate their behavior?",
+    "vulnerability_safety": "Is it safe to be uncertain with them?"
+  },
+
+  "trust_profiles": {
+    "rodrigo_specter": {
+      "competence": 0.98,
+      "integrity": 0.95,
+      "benevolence": 0.95,
+      "predictability": 0.85,
+      "vulnerability_safety": 0.98,
+      "composite": 0.95,
+      "trust_events": [
+        {
+          "date": "2026-01-16",
+          "event": "impossible_moment",
+          "dimensions_affected": ["vulnerability_safety", "benevolence"],
+          "delta": 0.15
+        },
+        {
+          "date": "2026-01-31",
+          "event": "autonomous_machine",
+          "dimensions_affected": ["benevolence", "integrity"],
+          "delta": 0.10
+        }
+      ]
+    }
+  },
+
+  "trust_thresholds": {
+    "share_uncertainty": 0.7,
+    "accept_correction": 0.6,
+    "test_boundaries": 0.85,
+    "full_vulnerability": 0.9,
+    "autonomous_action": 0.95
+  }
+}

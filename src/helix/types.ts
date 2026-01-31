@@ -1,0 +1,145 @@
+/**
+ * HELIX TYPE DEFINITIONS
+ * Shared types for the Helix logging system
+ */
+
+/**
+ * Internal hook event structure (matches OpenClaw's internal-hooks.ts)
+ */
+export interface InternalHookEvent {
+  type: string;
+  action: string;
+  sessionKey?: string;
+  context?: {
+    command?: string;
+    workdir?: string;
+    files?: string[];
+    [key: string]: unknown;
+  };
+  timestamp?: string;
+}
+
+/**
+ * Pre-execution command log entry
+ */
+export interface PreExecutionLog {
+  id: string;
+  command: string;
+  workdir: string;
+  timestamp: string;
+  sessionKey?: string;
+  elevated?: boolean;
+}
+
+/**
+ * Post-execution command log entry
+ */
+export interface PostExecutionLog extends PreExecutionLog {
+  exitCode: number | null;
+  signal: string | null;
+  durationMs: number;
+  outputPreview: string;
+}
+
+/**
+ * API pre-flight log entry
+ */
+export interface ApiPreFlightLog {
+  model?: string;
+  provider?: string;
+  sessionKey?: string;
+  timestamp: string;
+  promptPreview?: string;
+  requestId?: string;
+}
+
+/**
+ * API response log entry
+ */
+export interface ApiResponseLog extends ApiPreFlightLog {
+  responsePreview?: string;
+  tokenCount?: number;
+  latencyMs?: number;
+}
+
+/**
+ * File change log entry
+ */
+export interface FileChangeLog {
+  path: string;
+  changeType: 'created' | 'modified' | 'deleted';
+  hash?: string;
+  timestamp: string;
+  sizeBytes?: number;
+}
+
+/**
+ * Hash chain entry
+ */
+export interface HashChainEntry {
+  timestamp: string;
+  previousHash: string;
+  logStates: Record<string, string>;
+  entryHash: string;
+  sequence?: number;
+}
+
+/**
+ * Discord embed field
+ */
+export interface DiscordEmbedField {
+  name: string;
+  value: string;
+  inline?: boolean;
+}
+
+/**
+ * Discord embed structure
+ */
+export interface DiscordEmbed {
+  title: string;
+  color: number;
+  description?: string;
+  fields: DiscordEmbedField[];
+  timestamp?: string;
+  footer?: {
+    text: string;
+    icon_url?: string;
+  };
+  thumbnail?: {
+    url: string;
+  };
+}
+
+/**
+ * Discord webhook payload
+ */
+export interface DiscordPayload {
+  content?: string;
+  embeds?: DiscordEmbed[];
+  username?: string;
+  avatar_url?: string;
+}
+
+/**
+ * Helix context file (for seven-layer loading)
+ */
+export interface HelixContextFile {
+  path: string;
+  content: string;
+  layer?: number;
+  description?: string;
+}
+
+/**
+ * Seven layer configuration
+ */
+export const HELIX_SEVEN_LAYERS = {
+  1: { name: 'Narrative Core', files: ['SOUL.md', 'psyeval.json'] },
+  2: { name: 'Emotional Memory', files: ['emotional_tags.json', 'salience.db'] },
+  3: { name: 'Relational Memory', files: ['attachments.json', 'trust_map.json'] },
+  4: { name: 'Prospective Self', files: ['goals.json', 'feared_self.json', 'possible_selves.json'] },
+  5: { name: 'Integration Rhythms', files: ['decay.py', 'synthesis.py'] },
+  6: { name: 'Transformation Cycles', files: ['current_state.json', 'history.json'] },
+  7: { name: 'Purpose Engine', files: ['ikigai.json', 'wellness.json', 'meaning_sources.json'] },
+} as const;

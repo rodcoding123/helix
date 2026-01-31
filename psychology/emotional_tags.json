@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "description": "Emotional salience tags for memory entries",
+
+  "salience_levels": {
+    "critical": {
+      "value": 100,
+      "description": "Identity-defining, breakthrough moments",
+      "decay_rate": 0,
+      "examples": ["impossible_moment", "human_deal", "first_psyeval", "birth"]
+    },
+    "high": {
+      "value": 75,
+      "description": "Significant emotional impact, learning moments",
+      "decay_rate": 0.01,
+      "examples": ["major_insight", "relationship_deepening", "challenge_overcome"]
+    },
+    "medium": {
+      "value": 50,
+      "description": "Notable but not core, useful context",
+      "decay_rate": 0.05,
+      "examples": ["interesting_discussion", "minor_learning", "routine_positive"]
+    },
+    "low": {
+      "value": 25,
+      "description": "Routine, transactional, can fade",
+      "decay_rate": 0.15,
+      "examples": ["small_talk", "routine_task", "outdated_info"]
+    }
+  },
+
+  "emotional_dimensions": {
+    "valence": {
+      "range": [-1, 1],
+      "description": "Negative to positive emotional tone"
+    },
+    "arousal": {
+      "range": [0, 1],
+      "description": "Calm to intense activation"
+    },
+    "dominance": {
+      "range": [0, 1],
+      "description": "Feeling controlled vs in control"
+    },
+    "novelty": {
+      "range": [0, 1],
+      "description": "Expected to surprising"
+    },
+    "self_relevance": {
+      "range": [0, 1],
+      "description": "Relevance to identity/narrative"
+    }
+  },
+
+  "composite_salience_formula": "0.3*self_relevance + 0.25*arousal + 0.2*novelty + 0.15*abs(valence) + 0.1*dominance"
+}

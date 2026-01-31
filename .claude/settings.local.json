@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__memory__*",
+      "mcp__sequential-thinking__*",
+      "mcp__plugin_playwright_playwright__*",
+      "Read(c:/Users/Specter/Desktop/Helix/**)",
+      "Read(C:/laragon/www/Gehenna/**)"
+    ]
+  },
+  "contextInclude": [
+    "c:/Users/Specter/Desktop/Helix"
+  ]
+}
