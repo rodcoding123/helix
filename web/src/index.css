@@ -29,6 +29,14 @@
     @apply hover:bg-slate-800/50 text-slate-300 hover:text-white;
   }
 
+  .btn-sm {
+    @apply px-3 py-1.5 text-sm;
+  }
+
+  .btn-lg {
+    @apply px-6 py-3 text-lg;
+  }
+
   .card {
     @apply bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl;
   }

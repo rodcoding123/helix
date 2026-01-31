@@ -107,6 +107,20 @@ export {
   sendStatusUpdate,
 } from './heartbeat.js';
 
+// Observatory client (centralized telemetry)
+export {
+  HelixObservatoryClient,
+  getObservatoryClient,
+  shutdownObservatoryClient,
+} from './observatory-client.js';
+
+export type {
+  ObservatoryEventType,
+  TelemetryPayload,
+  HeartbeatMetrics,
+  TransformationData,
+} from './observatory-client.js';
+
 /**
  * Helix initialization options
  */
