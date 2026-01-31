@@ -1,3 +1,6 @@
+/* Helix Void Pulse Design System */
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,25 +11,67 @@
   }
 
   body {
-    @apply bg-slate-950 text-slate-100 antialiased;
+    @apply bg-void text-text-primary antialiased font-body;
+    background-color: #050505;
+  }
+
+  /* Typography defaults */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+
+  code, pre, .mono {
+    @apply font-mono;
+  }
+
+  /* Selection color */
+  ::selection {
+    @apply bg-helix-500/30 text-white;
   }
 }
 
 @layer components {
+  /* ===========================================
+     BUTTONS
+     =========================================== */
   .btn {
-    @apply inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg transition-all duration-200;
+    @apply inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg transition-all duration-300 ease-smooth;
   }
 
   .btn-primary {
-    @apply bg-helix-600 hover:bg-helix-500 text-white shadow-lg hover:shadow-helix-500/25;
+    @apply bg-helix-500 hover:bg-helix-400 text-white shadow-lg hover:shadow-glow-blue;
+    @apply active:scale-[0.98] transform;
+  }
+
+  .btn-cta {
+    @apply bg-gradient-helix text-white font-semibold shadow-lg hover:shadow-glow-mixed;
+    @apply hover:brightness-110 active:scale-[0.98] transform;
   }
 
   .btn-secondary {
-    @apply bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700;
+    @apply bg-bg-secondary/80 hover:bg-bg-tertiary text-text-primary;
+    @apply border border-white/10 hover:border-white/20 backdrop-blur-sm;
+    @apply active:scale-[0.98] transform;
   }
 
   .btn-ghost {
-    @apply hover:bg-slate-800/50 text-slate-300 hover:text-white;
+    @apply hover:bg-white/5 text-text-secondary hover:text-white;
+    @apply active:scale-[0.98] transform;
+  }
+
+  .btn-accent {
+    @apply bg-accent-500 hover:bg-accent-400 text-white shadow-lg hover:shadow-glow-purple;
+    @apply active:scale-[0.98] transform;
+  }
+
+  .btn-outline {
+    @apply border border-helix-500/50 text-helix-400 hover:bg-helix-500/10 hover:border-helix-500;
+    @apply active:scale-[0.98] transform;
+  }
+
+  .btn-danger {
+    @apply bg-danger/20 text-danger hover:bg-danger/30 border border-danger/30;
+    @apply active:scale-[0.98] transform;
   }
 
   .btn-sm {
@@ -37,60 +82,395 @@
     @apply px-6 py-3 text-lg;
   }
 
+  /* ===========================================
+     CARDS
+     =========================================== */
   .card {
-    @apply bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl;
+    @apply bg-bg-secondary/50 backdrop-blur-sm border border-white/10 rounded-xl;
+    @apply transition-all duration-300;
   }
 
+  .card-elevated {
+    @apply bg-bg-secondary/80 backdrop-blur-md border border-white/10 rounded-xl;
+    @apply shadow-card-elevated;
+  }
+
+  .card-glow {
+    @apply bg-bg-secondary/50 backdrop-blur-sm border border-helix-500/30 rounded-xl;
+    @apply shadow-glow-blue;
+  }
+
+  .card-interactive {
+    @apply bg-bg-secondary/50 backdrop-blur-sm border border-white/10 rounded-xl;
+    @apply hover:border-helix-500/50 hover:shadow-glow-blue transition-all duration-300;
+    @apply cursor-pointer;
+  }
+
+  .card-glass {
+    @apply bg-bg-secondary/30 backdrop-blur-xl border border-white/10 rounded-xl;
+  }
+
+  /* ===========================================
+     FORMS
+     =========================================== */
   .input {
-    @apply w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-helix-500 focus:border-transparent transition-all;
+    @apply w-full px-4 py-3 bg-bg-tertiary border border-white/10 rounded-lg;
+    @apply text-white placeholder-text-tertiary;
+    @apply focus:outline-none focus:ring-2 focus:ring-helix-500/50 focus:border-helix-500/50;
+    @apply transition-all duration-200;
+  }
+
+  .input-error {
+    @apply border-danger/50 focus:ring-danger/50 focus:border-danger/50;
   }
 
   .label {
-    @apply block text-sm font-medium text-slate-300 mb-1;
+    @apply block text-sm font-medium text-text-secondary mb-1.5;
   }
 
+  .select {
+    @apply w-full px-4 py-3 bg-bg-tertiary border border-white/10 rounded-lg;
+    @apply text-white appearance-none cursor-pointer;
+    @apply focus:outline-none focus:ring-2 focus:ring-helix-500/50 focus:border-helix-500/50;
+    @apply transition-all duration-200;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23A1A1AA' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+  }
+
+  .textarea {
+    @apply w-full px-4 py-3 bg-bg-tertiary border border-white/10 rounded-lg;
+    @apply text-white placeholder-text-tertiary resize-none;
+    @apply focus:outline-none focus:ring-2 focus:ring-helix-500/50 focus:border-helix-500/50;
+    @apply transition-all duration-200;
+  }
+
+  /* ===========================================
+     BADGES
+     =========================================== */
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium;
+    @apply border backdrop-blur-sm;
+  }
+
+  .badge-default {
+    @apply bg-bg-tertiary/50 border-white/10 text-text-secondary;
+  }
+
+  .badge-helix {
+    @apply bg-helix-500/10 border-helix-500/30 text-helix-400;
+  }
+
+  .badge-accent {
+    @apply bg-accent-500/10 border-accent-500/30 text-accent-400;
+  }
+
+  .badge-success {
+    @apply bg-success/10 border-success/30 text-success;
+  }
+
+  .badge-danger {
+    @apply bg-danger/10 border-danger/30 text-danger;
+  }
+
+  .badge-warning {
+    @apply bg-warning/10 border-warning/30 text-warning;
+  }
+
+  /* ===========================================
+     LINKS
+     =========================================== */
   .link {
-    @apply text-helix-400 hover:text-helix-300 transition-colors;
+    @apply text-helix-400 hover:text-helix-300 transition-colors duration-200;
+  }
+
+  .link-underline {
+    @apply text-helix-400 hover:text-helix-300 transition-colors duration-200;
+    @apply underline underline-offset-4 decoration-helix-500/50 hover:decoration-helix-400;
+  }
+
+  /* ===========================================
+     DIVIDERS
+     =========================================== */
+  .divider {
+    @apply border-t border-white/10;
+  }
+
+  .divider-gradient {
+    @apply h-px bg-gradient-to-r from-transparent via-white/20 to-transparent;
   }
 }
 
 @layer utilities {
+  /* ===========================================
+     TEXT EFFECTS
+     =========================================== */
   .text-gradient {
-    @apply bg-gradient-to-r from-helix-400 to-consciousness bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-helix-400 to-accent-400 bg-clip-text text-transparent;
   }
 
+  .text-gradient-helix {
+    @apply bg-gradient-helix bg-clip-text text-transparent;
+  }
+
+  .text-glow {
+    text-shadow: 0 0 20px rgba(6, 134, 212, 0.5);
+  }
+
+  /* ===========================================
+     GLOW EFFECTS
+     =========================================== */
   .glow-helix {
-    box-shadow: 0 0 40px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 0 40px rgba(6, 134, 212, 0.3);
   }
 
-  .animate-float {
-    animation: float 6s ease-in-out infinite;
+  .glow-accent {
+    box-shadow: 0 0 40px rgba(114, 52, 237, 0.3);
+  }
+
+  .glow-mixed {
+    box-shadow: 0 0 60px rgba(6, 134, 212, 0.2), 0 0 40px rgba(114, 52, 237, 0.15);
+  }
+
+  /* ===========================================
+     GRADIENT ORBS (Hero backgrounds)
+     =========================================== */
+  .gradient-orb {
+    @apply absolute rounded-full blur-[100px] opacity-50;
+    @apply animate-gradient-shift;
+  }
+
+  .gradient-orb-blue {
+    @apply bg-helix-500/30;
+  }
+
+  .gradient-orb-purple {
+    @apply bg-accent-500/30;
+  }
+
+  .gradient-orb-mixed {
+    background: radial-gradient(circle, rgba(6, 134, 212, 0.3) 0%, rgba(114, 52, 237, 0.2) 100%);
+  }
+
+  /* ===========================================
+     FLOATING BADGES
+     =========================================== */
+  .floating-badge {
+    @apply absolute px-4 py-2 rounded-xl;
+    @apply bg-bg-secondary/80 backdrop-blur-md border border-white/10;
+    @apply text-sm font-medium text-text-primary;
+    @apply shadow-card-elevated animate-float-badge;
+  }
+
+  /* ===========================================
+     GLASS MORPHISM
+     =========================================== */
+  .glass {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+  }
+
+  .glass-heavy {
+    @apply bg-bg-secondary/80 backdrop-blur-2xl border border-white/10;
+  }
+
+  /* ===========================================
+     SHIMMER EFFECT
+     =========================================== */
+  .shimmer {
+    @apply relative overflow-hidden;
+  }
+
+  .shimmer::after {
+    content: '';
+    @apply absolute inset-0 -translate-x-full;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
+    animation: shimmer 2s infinite;
+  }
+
+  /* ===========================================
+     SKELETON LOADERS
+     =========================================== */
+  .skeleton {
+    @apply bg-bg-tertiary/50 animate-pulse rounded;
+  }
+
+  /* ===========================================
+     NAV LINK ANIMATION
+     =========================================== */
+  .nav-link {
+    @apply relative text-text-secondary hover:text-white transition-colors duration-200;
+  }
+
+  .nav-link::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-helix-500;
+    @apply transition-all duration-300 ease-smooth;
+  }
+
+  .nav-link:hover::after,
+  .nav-link.active::after {
+    @apply w-full;
+  }
+
+  .nav-link.active {
+    @apply text-white;
+  }
+
+  /* ===========================================
+     SCROLLBAR STYLING
+     =========================================== */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-white/10 rounded-full;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-white/20;
+  }
+
+  /* ===========================================
+     FOCUS RING
+     =========================================== */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-helix-500/50 focus:ring-offset-2 focus:ring-offset-void;
+  }
+
+  /* ===========================================
+     REDUCED MOTION
+     =========================================== */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-/* Custom scrollbar */
+/* ===========================================
+   CUSTOM SCROLLBAR (Global)
+   =========================================== */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-slate-900;
+  background: #0a0a0a;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-700 rounded-full;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-slate-600;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ===========================================
+   DNA HELIX RING ANIMATIONS
+   =========================================== */
+.helix-ring {
+  @apply absolute inset-0;
+  transform-origin: center center;
+}
+
+.helix-ring-outer {
+  animation: ring-rotate 60s linear infinite;
+}
+
+.helix-ring-middle {
+  animation: ring-rotate 45s linear infinite reverse;
+}
+
+.helix-ring-inner {
+  animation: ring-rotate 30s linear infinite;
+}
+
+@keyframes ring-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===========================================
+   HERO CONTENT STAGGER
+   =========================================== */
+.hero-animate > *:nth-child(1) { animation-delay: 0.1s; }
+.hero-animate > *:nth-child(2) { animation-delay: 0.2s; }
+.hero-animate > *:nth-child(3) { animation-delay: 0.3s; }
+.hero-animate > *:nth-child(4) { animation-delay: 0.4s; }
+.hero-animate > *:nth-child(5) { animation-delay: 0.5s; }
+.hero-animate > *:nth-child(6) { animation-delay: 0.6s; }
+
+.hero-animate > * {
+  opacity: 0;
+  animation: hero-reveal 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes hero-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===========================================
+   CTA BUTTON SHIMMER
+   =========================================== */
+.btn-cta-shimmer {
+  @apply relative overflow-hidden;
+}
+
+.btn-cta-shimmer::before {
+  content: '';
+  @apply absolute inset-0 -translate-x-full;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
+  transition: transform 0.6s ease;
+}
+
+.btn-cta-shimmer:hover::before {
+  transform: translateX(100%);
+}
+
+/* ===========================================
+   PULSE DOT (Connection indicator)
+   =========================================== */
+.pulse-dot {
+  @apply relative inline-flex h-3 w-3;
+}
+
+.pulse-dot::before {
+  @apply absolute inline-flex h-full w-full animate-ping rounded-full bg-helix-400 opacity-75;
+  content: '';
+}
+
+.pulse-dot::after {
+  @apply relative inline-flex h-3 w-3 rounded-full bg-helix-500;
+  content: '';
 }

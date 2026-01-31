@@ -8,7 +8,7 @@ import { useGatewayConnection } from '@/hooks/useGatewayConnection';
 import { useStreaming } from '@/hooks/useStreaming';
 import { usePanels } from '@/hooks/usePanels';
 import { cn } from '@/lib/utils';
-import { Layout, Maximize2, Minimize2, Settings, PanelLeftClose, PanelLeft } from 'lucide-react';
+import { Cpu, Maximize2, Minimize2, Settings, PanelLeftClose, PanelLeft, Sparkles } from 'lucide-react';
 
 interface CodeInterfaceProps {
   instanceKey: string;
@@ -101,16 +101,16 @@ export function CodeInterface({
     <div
       className={cn(
         'flex flex-col h-full',
-        isFullscreen && 'fixed inset-0 z-50 bg-slate-950',
+        isFullscreen && 'fixed inset-0 z-50 bg-void',
         className
       )}
     >
       {/* Toolbar */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-slate-700 bg-slate-900/50">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5 bg-bg-secondary/80 backdrop-blur-sm">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => setShowSidebar(!showSidebar)}
-            className="p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-lg text-text-secondary hover:text-white hover:bg-white/5 transition-colors"
             title={showSidebar ? 'Hide panels' : 'Show panels'}
           >
             {showSidebar ? (
@@ -119,19 +119,24 @@ export function CodeInterface({
               <PanelLeft className="h-4 w-4" />
             )}
           </button>
-          <h2 className="text-sm font-medium text-slate-200">Code Interface</h2>
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-helix-500/10 border border-helix-500/20">
+              <Cpu className="h-4 w-4 text-helix-400" />
+            </div>
+            <h2 className="text-sm font-display font-semibold text-white">Code Interface</h2>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
           {/* Panel toggles */}
-          <div className="flex items-center gap-1 mr-2">
+          <div className="flex items-center gap-1 p-1 rounded-lg bg-bg-tertiary/50 mr-2">
             <button
               onClick={() => togglePanel('thinking')}
               className={cn(
-                'px-2 py-1 text-xs rounded transition-colors',
+                'px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200',
                 isPanelVisible('thinking')
-                  ? 'bg-helix-500/20 text-helix-400'
-                  : 'text-slate-500 hover:text-slate-300'
+                  ? 'bg-helix-500 text-white shadow-sm'
+                  : 'text-text-secondary hover:text-white'
               )}
             >
               Thinking
@@ -139,10 +144,10 @@ export function CodeInterface({
             <button
               onClick={() => togglePanel('terminal')}
               className={cn(
-                'px-2 py-1 text-xs rounded transition-colors',
+                'px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200',
                 isPanelVisible('terminal')
-                  ? 'bg-emerald-500/20 text-emerald-400'
-                  : 'text-slate-500 hover:text-slate-300'
+                  ? 'bg-success text-white shadow-sm'
+                  : 'text-text-secondary hover:text-white'
               )}
             >
               Terminal
@@ -150,10 +155,10 @@ export function CodeInterface({
             <button
               onClick={() => togglePanel('diff')}
               className={cn(
-                'px-2 py-1 text-xs rounded transition-colors',
+                'px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200',
                 isPanelVisible('diff')
-                  ? 'bg-amber-500/20 text-amber-400'
-                  : 'text-slate-500 hover:text-slate-300'
+                  ? 'bg-warning text-bg-primary shadow-sm'
+                  : 'text-text-secondary hover:text-white'
               )}
             >
               Diff
@@ -162,14 +167,14 @@ export function CodeInterface({
 
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-lg text-text-secondary hover:text-white hover:bg-white/5 transition-colors"
             title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
           >
             {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </button>
 
           <button
-            className="p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-lg text-text-secondary hover:text-white hover:bg-white/5 transition-colors"
             title="Settings"
           >
             <Settings className="h-4 w-4" />
@@ -178,10 +183,10 @@ export function CodeInterface({
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden bg-bg-primary">
         {/* Side panels */}
         {showSidebar && (
-          <div className="w-96 flex-shrink-0 flex flex-col gap-4 p-4 overflow-y-auto border-r border-slate-700 bg-slate-950/50">
+          <div className="w-96 flex-shrink-0 flex flex-col gap-4 p-4 overflow-y-auto border-r border-white/5 bg-bg-secondary/50">
             {isPanelVisible('thinking') && (
               <ThinkingPanel thinking={thinking} onToggle={() => togglePanel('thinking')} />
             )}
@@ -203,20 +208,22 @@ export function CodeInterface({
         {/* Chat area */}
         <div className="flex-1 flex flex-col min-w-0">
           {/* Messages would go here */}
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto p-6">
             {!isConnected ? (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
-                  <Layout className="h-12 w-12 text-slate-600 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-slate-300 mb-2">
+                  <div className="mx-auto mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-helix-500/10 border border-helix-500/20">
+                    <Cpu className="h-8 w-8 text-helix-400 animate-pulse" />
+                  </div>
+                  <h3 className="text-xl font-display font-semibold text-white mb-2">
                     Connecting to Helix...
                   </h3>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-text-secondary max-w-sm mx-auto">
                     Establishing secure connection to your instance
                   </p>
                   <button
                     onClick={() => connect()}
-                    className="mt-4 px-4 py-2 rounded-lg bg-helix-500 text-white hover:bg-helix-600 transition-colors"
+                    className="mt-6 btn btn-primary"
                   >
                     Retry Connection
                   </button>
@@ -224,14 +231,16 @@ export function CodeInterface({
               </div>
             ) : messages.length === 0 ? (
               <div className="flex items-center justify-center h-full">
-                <div className="text-center max-w-md">
-                  <Layout className="h-12 w-12 text-helix-500 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-slate-300 mb-2">Ready to Code</h3>
-                  <p className="text-sm text-slate-500 mb-6">
+                <div className="text-center max-w-lg">
+                  <div className="mx-auto mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-helix shadow-glow-blue">
+                    <Sparkles className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-display font-bold text-white mb-3">Ready to Code</h3>
+                  <p className="text-text-secondary mb-8">
                     Connected to your Helix instance. Ask anything and watch the AI think, execute
                     tools, and transform code in real-time.
                   </p>
-                  <div className="grid grid-cols-2 gap-2 text-left">
+                  <div className="grid grid-cols-2 gap-3 text-left">
                     {[
                       'Debug this function',
                       'Add error handling',
@@ -241,7 +250,7 @@ export function CodeInterface({
                       <button
                         key={suggestion}
                         onClick={() => handleSend(suggestion)}
-                        className="px-3 py-2 text-sm rounded-lg bg-slate-800/50 text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors text-left"
+                        className="px-4 py-3 text-sm rounded-xl bg-bg-tertiary/50 border border-white/5 text-text-secondary hover:text-white hover:border-helix-500/30 hover:bg-bg-tertiary transition-all duration-200 text-left"
                       >
                         {suggestion}
                       </button>
@@ -253,8 +262,8 @@ export function CodeInterface({
               <div className="space-y-4">
                 {/* Render messages here */}
                 {thinking && (
-                  <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-                    <p className="text-sm text-slate-400 whitespace-pre-wrap">{thinking}</p>
+                  <div className="p-4 rounded-xl bg-bg-tertiary/50 border border-helix-500/20">
+                    <p className="text-sm text-text-secondary whitespace-pre-wrap font-mono">{thinking}</p>
                   </div>
                 )}
               </div>
@@ -262,7 +271,7 @@ export function CodeInterface({
           </div>
 
           {/* Chat input */}
-          <div className="p-4 border-t border-slate-700">
+          <div className="p-4 border-t border-white/5 bg-bg-secondary/30">
             <ChatInput
               onSend={handleSend}
               onInterrupt={handleInterrupt}
@@ -278,7 +287,7 @@ export function CodeInterface({
         connectionStatus={status}
         instanceName={`Instance ${instanceKey.slice(0, 8)}`}
         sessionDuration={sessionDuration}
-        className="border-t border-slate-700"
+        className="border-t border-white/5"
       />
     </div>
   );

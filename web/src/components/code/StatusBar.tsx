@@ -42,26 +42,26 @@ export function StatusBar({
     connected: {
       icon: Wifi,
       label: 'Connected',
-      color: 'text-emerald-400',
-      bgColor: 'bg-emerald-400',
+      color: 'text-success',
+      bgColor: 'bg-success',
     },
     connecting: {
       icon: Activity,
       label: 'Connecting...',
-      color: 'text-amber-400',
-      bgColor: 'bg-amber-400',
+      color: 'text-warning',
+      bgColor: 'bg-warning',
     },
     disconnected: {
       icon: WifiOff,
       label: 'Disconnected',
-      color: 'text-slate-500',
-      bgColor: 'bg-slate-500',
+      color: 'text-text-tertiary',
+      bgColor: 'bg-text-tertiary',
     },
     error: {
       icon: AlertCircle,
       label: 'Error',
-      color: 'text-rose-400',
-      bgColor: 'bg-rose-400',
+      color: 'text-danger',
+      bgColor: 'bg-danger',
     },
   };
 
@@ -71,8 +71,8 @@ export function StatusBar({
   return (
     <div
       className={cn(
-        'flex items-center justify-between px-4 py-2 rounded-lg',
-        'bg-slate-900/80 border border-slate-700 backdrop-blur',
+        'flex items-center justify-between px-4 py-2.5',
+        'bg-bg-secondary/80 backdrop-blur-sm',
         className
       )}
     >
@@ -90,29 +90,29 @@ export function StatusBar({
             <span className={cn('relative inline-flex h-2 w-2 rounded-full', status.bgColor)} />
           </span>
           <StatusIcon className={cn('h-4 w-4', status.color)} />
-          <span className={cn('text-sm', status.color)}>{status.label}</span>
+          <span className={cn('text-sm font-medium', status.color)}>{status.label}</span>
         </div>
 
         {connectionStatus === 'connected' && (
-          <div className="flex items-center gap-1 text-sm text-slate-400">
-            <span className="text-slate-600">•</span>
-            <span>{instanceName}</span>
+          <div className="flex items-center gap-1.5 text-sm text-text-secondary">
+            <span className="text-white/20">•</span>
+            <span className="font-mono text-xs">{instanceName}</span>
           </div>
         )}
       </div>
 
       {/* Right: Session stats */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-6">
         {/* Session duration */}
-        <div className="flex items-center gap-2 text-sm text-slate-400">
-          <Clock className="h-4 w-4" />
-          <span>{formatDuration(sessionDuration)}</span>
+        <div className="flex items-center gap-2 text-sm text-text-secondary">
+          <Clock className="h-4 w-4 text-text-tertiary" />
+          <span className="font-mono">{formatDuration(sessionDuration)}</span>
         </div>
 
         {/* Tokens used */}
-        <div className="flex items-center gap-2 text-sm text-slate-400">
-          <Cpu className="h-4 w-4" />
-          <span>{formatTokens(tokensUsed)} tokens</span>
+        <div className="flex items-center gap-2 text-sm text-text-secondary">
+          <Cpu className="h-4 w-4 text-text-tertiary" />
+          <span className="font-mono">{formatTokens(tokensUsed)} tokens</span>
         </div>
       </div>
     </div>

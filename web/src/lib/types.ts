@@ -158,6 +158,7 @@ export interface PricingTier {
   features: string[];
   highlighted?: boolean;
   cta: string;
+  description?: string;
 }
 
 export const PRICING_TIERS: PricingTier[] = [

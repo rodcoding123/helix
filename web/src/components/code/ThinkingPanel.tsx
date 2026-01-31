@@ -30,28 +30,31 @@ export function ThinkingPanel({
   return (
     <div
       className={cn(
-        'flex flex-col rounded-lg border border-slate-700 bg-slate-900/80 backdrop-blur',
+        'flex flex-col rounded-xl border border-white/10 bg-bg-secondary/80 backdrop-blur-sm',
+        'hover:border-helix-500/30 transition-colors',
         className
       )}
     >
       {/* Header */}
       <button
         onClick={onToggle}
-        className="flex items-center justify-between px-4 py-2 border-b border-slate-700 hover:bg-slate-800/50 transition-colors"
+        className="flex items-center justify-between px-4 py-3 border-b border-white/5 hover:bg-white/5 transition-colors rounded-t-xl"
       >
         <div className="flex items-center gap-2">
-          <Brain className="h-4 w-4 text-helix-400" />
-          <span className="text-sm font-medium text-slate-200">Thinking</span>
+          <div className="p-1.5 rounded-lg bg-helix-500/10 border border-helix-500/20">
+            <Brain className="h-3.5 w-3.5 text-helix-400" />
+          </div>
+          <span className="text-sm font-display font-medium text-white">Thinking</span>
           {hasContent && (
-            <span className="px-2 py-0.5 text-xs rounded-full bg-helix-500/20 text-helix-400">
+            <span className="px-2 py-0.5 text-xs rounded-full bg-helix-500/20 text-helix-400 font-mono">
               {lines.length} lines
             </span>
           )}
         </div>
         {isExpanded ? (
-          <ChevronUp className="h-4 w-4 text-slate-400" />
+          <ChevronUp className="h-4 w-4 text-text-tertiary" />
         ) : (
-          <ChevronDown className="h-4 w-4 text-slate-400" />
+          <ChevronDown className="h-4 w-4 text-text-tertiary" />
         )}
       </button>
 
@@ -68,10 +71,10 @@ export function ThinkingPanel({
                 <div
                   key={index}
                   className={cn(
-                    'text-slate-300',
-                    line.startsWith('##') && 'text-helix-400 font-semibold mt-2',
-                    line.startsWith('-') && 'text-slate-400 pl-4',
-                    line.startsWith('*') && 'text-amber-400'
+                    'text-text-secondary',
+                    line.startsWith('##') && 'text-helix-400 font-semibold mt-3',
+                    line.startsWith('-') && 'text-text-tertiary pl-4',
+                    line.startsWith('*') && 'text-warning'
                   )}
                 >
                   {line || '\u00A0'}
@@ -79,7 +82,7 @@ export function ThinkingPanel({
               ))}
             </div>
           ) : (
-            <div className="flex items-center justify-center h-24 text-slate-500">
+            <div className="flex items-center justify-center h-24 text-text-tertiary">
               <p>Waiting for Helix to think...</p>
             </div>
           )}
@@ -88,14 +91,14 @@ export function ThinkingPanel({
 
       {/* Streaming indicator */}
       {hasContent && !thinking.endsWith('\n\n') && (
-        <div className="px-4 py-2 border-t border-slate-700">
+        <div className="px-4 py-2.5 border-t border-white/5">
           <div className="flex items-center gap-2">
             <div className="flex gap-1">
               <span className="h-1.5 w-1.5 rounded-full bg-helix-400 animate-pulse" />
-              <span className="h-1.5 w-1.5 rounded-full bg-helix-400 animate-pulse delay-100" />
-              <span className="h-1.5 w-1.5 rounded-full bg-helix-400 animate-pulse delay-200" />
+              <span className="h-1.5 w-1.5 rounded-full bg-helix-400 animate-pulse [animation-delay:100ms]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-helix-400 animate-pulse [animation-delay:200ms]" />
             </div>
-            <span className="text-xs text-slate-500">Processing...</span>
+            <span className="text-xs text-text-tertiary">Processing...</span>
           </div>
         </div>
       )}

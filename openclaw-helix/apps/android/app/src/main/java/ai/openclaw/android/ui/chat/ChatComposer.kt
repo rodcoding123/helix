@@ -36,9 +36,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import ai.openclaw.android.chat.ChatSessionEntry
+import ai.openclaw.android.ui.HelixColors
+import ai.openclaw.android.ui.StatusColors
 
 @Composable
 fun ChatComposer(
@@ -69,12 +70,12 @@ fun ChatComposer(
   val canSend = pendingRunCount == 0 && (input.trim().isNotEmpty() || attachments.isNotEmpty()) && healthOk
 
   Surface(
-    shape = MaterialTheme.shapes.large,
-    color = MaterialTheme.colorScheme.surfaceContainer,
+    shape = RoundedCornerShape(20.dp),
+    color = HelixColors.BgSecondary,
     tonalElevation = 0.dp,
     shadowElevation = 0.dp,
   ) {
-    Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
       Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -84,6 +85,10 @@ fun ChatComposer(
           FilledTonalButton(
             onClick = { showSessionMenu = true },
             contentPadding = ButtonDefaults.ContentPadding,
+            colors = ButtonDefaults.filledTonalButtonColors(
+              containerColor = HelixColors.BgTertiary,
+              contentColor = HelixColors.TextSecondary,
+            ),
           ) {
             Text("Session: $currentSessionLabel")
           }
@@ -98,7 +103,7 @@ fun ChatComposer(
                 },
                 trailingIcon = {
                   if (entry.key == sessionKey) {
-                    Text("✓")
+                    Text("✓", color = HelixColors.HelixBlue)
                   } else {
                     Spacer(modifier = Modifier.width(10.dp))
                   }
@@ -112,6 +117,10 @@ fun ChatComposer(
           FilledTonalButton(
             onClick = { showThinkingMenu = true },
             contentPadding = ButtonDefaults.ContentPadding,
+            colors = ButtonDefaults.filledTonalButtonColors(
+              containerColor = HelixColors.BgTertiary,
+              contentColor = HelixColors.TextSecondary,
+            ),
           ) {
             Text("Thinking: ${thinkingLabel(thinkingLevel)}")
           }
@@ -126,11 +135,25 @@ fun ChatComposer(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        FilledTonalIconButton(onClick = onRefresh, modifier = Modifier.size(42.dp)) {
+        FilledTonalIconButton(
+          onClick = onRefresh,
+          modifier = Modifier.size(42.dp),
+          colors = IconButtonDefaults.filledTonalIconButtonColors(
+            containerColor = HelixColors.BgTertiary,
+            contentColor = HelixColors.TextSecondary,
+          ),
+        ) {
           Icon(Icons.Default.Refresh, contentDescription = "Refresh")
         }
 
-        FilledTonalIconButton(onClick = onPickImages, modifier = Modifier.size(42.dp)) {
+        FilledTonalIconButton(
+          onClick = onPickImages,
+          modifier = Modifier.size(42.dp),
+          colors = IconButtonDefaults.filledTonalIconButtonColors(
+            containerColor = HelixColors.BgTertiary,
+            contentColor = HelixColors.TextSecondary,
+          ),
+        ) {
           Icon(Icons.Default.AttachFile, contentDescription = "Add image")
         }
       }
@@ -143,7 +166,7 @@ fun ChatComposer(
         value = input,
         onValueChange = { input = it },
         modifier = Modifier.fillMaxWidth(),
-        placeholder = { Text("Message OpenClaw…") },
+        placeholder = { Text("Message Helix…", color = HelixColors.TextTertiary) },
         minLines = 2,
         maxLines = 6,
       )
@@ -157,18 +180,25 @@ fun ChatComposer(
             onClick = onAbort,
             colors =
               IconButtonDefaults.filledTonalIconButtonColors(
-                containerColor = Color(0x33E74C3C),
-                contentColor = Color(0xFFE74C3C),
+                containerColor = HelixColors.Danger.copy(alpha = 0.2f),
+                contentColor = HelixColors.Danger,
               ),
           ) {
             Icon(Icons.Default.Stop, contentDescription = "Abort")
           }
         } else {
-          FilledTonalIconButton(onClick = {
-            val text = input
-            input = ""
-            onSend(text)
-          }, enabled = canSend) {
+          FilledTonalIconButton(
+            onClick = {
+              val text = input
+              input = ""
+              onSend(text)
+            },
+            enabled = canSend,
+            colors = IconButtonDefaults.filledTonalIconButtonColors(
+              containerColor = if (canSend) HelixColors.HelixBlue else HelixColors.BgTertiary,
+              contentColor = if (canSend) HelixColors.TextPrimary else HelixColors.TextTertiary,
+            ),
+          ) {
             Icon(Icons.Default.ArrowUpward, contentDescription = "Send")
           }
         }
@@ -178,7 +208,7 @@ fun ChatComposer(
         Text(
           text = errorText,
           style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.error,
+          color = HelixColors.Danger,
           maxLines = 2,
         )
       }
@@ -190,23 +220,23 @@ fun ChatComposer(
 private fun ConnectionPill(sessionLabel: String, healthOk: Boolean) {
   Surface(
     shape = RoundedCornerShape(999.dp),
-    color = MaterialTheme.colorScheme.surfaceContainerHighest,
+    color = HelixColors.BgTertiary,
   ) {
     Row(
-      modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+      modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
       horizontalArrangement = Arrangement.spacedBy(8.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
       Surface(
         modifier = Modifier.size(7.dp),
         shape = androidx.compose.foundation.shape.CircleShape,
-        color = if (healthOk) Color(0xFF2ECC71) else Color(0xFFF39C12),
+        color = if (healthOk) StatusColors.Connected else StatusColors.Connecting,
       ) {}
-      Text(sessionLabel, style = MaterialTheme.typography.labelSmall)
+      Text(sessionLabel, style = MaterialTheme.typography.labelSmall, color = HelixColors.TextPrimary)
       Text(
         if (healthOk) "Connected" else "Connecting…",
         style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        color = HelixColors.TextSecondary,
       )
     }
   }
@@ -227,7 +257,7 @@ private fun ThinkingMenuItem(
     },
     trailingIcon = {
       if (value == current.trim().lowercase()) {
-        Text("✓")
+        Text("✓", color = HelixColors.HelixBlue)
       } else {
         Spacer(modifier = Modifier.width(10.dp))
       }
@@ -266,19 +296,23 @@ private fun AttachmentsStrip(
 private fun AttachmentChip(fileName: String, onRemove: () -> Unit) {
   Surface(
     shape = RoundedCornerShape(999.dp),
-    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+    color = HelixColors.HelixBlue.copy(alpha = 0.15f),
   ) {
     Row(
-      modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+      modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-      Text(text = fileName, style = MaterialTheme.typography.bodySmall, maxLines = 1)
+      Text(text = fileName, style = MaterialTheme.typography.bodySmall, maxLines = 1, color = HelixColors.HelixBlue)
       FilledTonalIconButton(
         onClick = onRemove,
-        modifier = Modifier.size(30.dp),
+        modifier = Modifier.size(26.dp),
+        colors = IconButtonDefaults.filledTonalIconButtonColors(
+          containerColor = HelixColors.Danger.copy(alpha = 0.2f),
+          contentColor = HelixColors.Danger,
+        ),
       ) {
-        Text("×")
+        Text("×", color = HelixColors.Danger)
       }
     }
   }

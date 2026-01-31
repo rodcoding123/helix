@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 63.57 132.51">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: url(#linear-gradient);
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="-8.37" y1="106.41" x2="72.6" y2="25.44" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#16c0cf"/>
+      <stop offset="0" stop-color="#18bccf"/>
+      <stop offset=".14" stop-color="#3986d7"/>
+      <stop offset=".27" stop-color="#525bdd"/>
+      <stop offset=".38" stop-color="#653ce2"/>
+      <stop offset=".47" stop-color="#7029e5"/>
+      <stop offset=".54" stop-color="#7523e6"/>
+      <stop offset=".6" stop-color="#6d2ee4"/>
+      <stop offset=".7" stop-color="#5a4edf"/>
+      <stop offset=".85" stop-color="#3b82d8"/>
+      <stop offset="1" stop-color="#16c0cf"/>
+    </linearGradient>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <path class="cls-1" d="M58.83,132.51s4.28-19.75-30.35-38.67C15.06,86.5-6.03,75.31,1.63,55.17c0,0,2.55,14.1,29.48,28.87,42.59,23.36,27.72,48.47,27.72,48.47ZM32.46,48.47c26.93,14.77,29.48,28.87,29.48,28.87,7.65-20.14-13.43-31.33-26.85-38.67C.47,19.75,4.75,0,4.75,0c0,0-14.87,25.12,27.72,48.47ZM9.95,61.19c4.43-7.83,14.5-11.91,14.5-11.91-5.02-2.88-11.14-7.52-11.14-7.52-5.48,2.82-8.86,8.73-8.86,8.73,1.88,6.98,5.51,10.7,5.51,10.7ZM52.52,70.85c-4.43,7.83-14.5,11.91-14.5,11.91,5.02,2.88,11.14,7.52,11.14,7.52,5.48-2.82,8.86-8.73,8.86-8.73-1.88-6.98-5.51-10.7-5.51-10.7ZM45,64.72c-14.9-12.76-28.06,0-28.06,0,15.58,13.16,28.06,0,28.06,0ZM8.84,91.3H2.23v6.61h6.61v-6.61ZM19.22,103.12h-7.65v7.65h7.65v-7.65ZM9.68,114h-5.24v5.24h5.24v-5.24ZM21.44,93.84h-5.31v5.31h5.31v-5.31ZM34.12,103.12h-9.13v4.43h9.13v-4.43ZM45,114h-20.54v3.63h20.54v-3.63ZM50.6,35.78h6.61v-6.61h-6.61v6.61ZM40.23,23.96h7.65v-7.65h-7.65v7.65ZM49.76,13.09h5.24v-5.24h-5.24v5.24ZM38.01,33.24h5.31v-5.31h-5.31v5.31ZM25.33,23.96h9.13v-4.43h-9.13v4.43ZM14.45,13.09h20.54v-3.63H14.45v3.63Z"/>
+  </g>
+</svg>

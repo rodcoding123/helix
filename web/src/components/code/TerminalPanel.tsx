@@ -21,25 +21,27 @@ function ToolCallItem({ tool, isCurrent }: { tool: ToolCall; isCurrent: boolean 
   const status = tool.status || (tool.output ? 'success' : isCurrent ? 'running' : 'pending');
 
   const statusIcon = {
-    pending: <Clock className="h-3.5 w-3.5 text-slate-500" />,
-    running: <Clock className="h-3.5 w-3.5 text-amber-400 animate-spin" />,
-    success: <CheckCircle className="h-3.5 w-3.5 text-emerald-400" />,
-    error: <XCircle className="h-3.5 w-3.5 text-rose-400" />,
+    pending: <Clock className="h-3.5 w-3.5 text-text-tertiary" />,
+    running: <Clock className="h-3.5 w-3.5 text-warning animate-spin" />,
+    success: <CheckCircle className="h-3.5 w-3.5 text-success" />,
+    error: <XCircle className="h-3.5 w-3.5 text-danger" />,
   };
 
   return (
     <div
       className={cn(
-        'rounded-lg border p-3 transition-all',
-        isCurrent ? 'border-amber-500/50 bg-amber-500/10' : 'border-slate-700 bg-slate-800/50'
+        'rounded-xl border p-3 transition-all',
+        isCurrent
+          ? 'border-warning/50 bg-warning/10'
+          : 'border-white/5 bg-bg-tertiary/50 hover:border-white/10'
       )}
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           {statusIcon[status]}
-          <span className="font-mono text-sm text-slate-200">{tool.name}</span>
+          <span className="font-mono text-sm text-white">{tool.name}</span>
         </div>
-        <span className="text-xs text-slate-500">
+        <span className="text-xs text-text-tertiary font-mono">
           {status === 'running' ? 'Running...' : status}
         </span>
       </div>
@@ -47,8 +49,8 @@ function ToolCallItem({ tool, isCurrent }: { tool: ToolCall; isCurrent: boolean 
       {/* Input preview */}
       {Object.keys(tool.input).length > 0 && (
         <div className="mb-2">
-          <p className="text-xs text-slate-500 mb-1">Input:</p>
-          <pre className="text-xs text-slate-400 bg-slate-900/50 rounded p-2 overflow-x-auto">
+          <p className="text-xs text-text-tertiary mb-1.5">Input:</p>
+          <pre className="text-xs text-text-secondary bg-void rounded-lg p-2.5 overflow-x-auto font-mono border border-white/5">
             {JSON.stringify(tool.input, null, 2).slice(0, 500)}
             {JSON.stringify(tool.input, null, 2).length > 500 && '...'}
           </pre>
@@ -58,8 +60,8 @@ function ToolCallItem({ tool, isCurrent }: { tool: ToolCall; isCurrent: boolean 
       {/* Output preview */}
       {tool.output && (
         <div>
-          <p className="text-xs text-slate-500 mb-1">Output:</p>
-          <pre className="text-xs text-slate-400 bg-slate-900/50 rounded p-2 overflow-x-auto max-h-32">
+          <p className="text-xs text-text-tertiary mb-1.5">Output:</p>
+          <pre className="text-xs text-text-secondary bg-void rounded-lg p-2.5 overflow-x-auto max-h-32 font-mono border border-white/5">
             {tool.output.slice(0, 1000)}
             {tool.output.length > 1000 && '...'}
           </pre>
@@ -90,28 +92,31 @@ export function TerminalPanel({
   return (
     <div
       className={cn(
-        'flex flex-col rounded-lg border border-slate-700 bg-slate-900/80 backdrop-blur',
+        'flex flex-col rounded-xl border border-white/10 bg-bg-secondary/80 backdrop-blur-sm',
+        'hover:border-success/30 transition-colors',
         className
       )}
     >
       {/* Header */}
       <button
         onClick={onToggle}
-        className="flex items-center justify-between px-4 py-2 border-b border-slate-700 hover:bg-slate-800/50 transition-colors"
+        className="flex items-center justify-between px-4 py-3 border-b border-white/5 hover:bg-white/5 transition-colors rounded-t-xl"
       >
         <div className="flex items-center gap-2">
-          <Terminal className="h-4 w-4 text-emerald-400" />
-          <span className="text-sm font-medium text-slate-200">Terminal</span>
+          <div className="p-1.5 rounded-lg bg-success/10 border border-success/20">
+            <Terminal className="h-3.5 w-3.5 text-success" />
+          </div>
+          <span className="text-sm font-display font-medium text-white">Terminal</span>
           {allToolCalls.length > 0 && (
-            <span className="px-2 py-0.5 text-xs rounded-full bg-emerald-500/20 text-emerald-400">
+            <span className="px-2 py-0.5 text-xs rounded-full bg-success/20 text-success font-mono">
               {allToolCalls.length} calls
             </span>
           )}
         </div>
         {isExpanded ? (
-          <ChevronUp className="h-4 w-4 text-slate-400" />
+          <ChevronUp className="h-4 w-4 text-text-tertiary" />
         ) : (
-          <ChevronDown className="h-4 w-4 text-slate-400" />
+          <ChevronDown className="h-4 w-4 text-text-tertiary" />
         )}
       </button>
 
@@ -131,7 +136,7 @@ export function TerminalPanel({
               />
             ))
           ) : (
-            <div className="flex items-center justify-center h-24 text-slate-500">
+            <div className="flex items-center justify-center h-24 text-text-tertiary">
               <p>No tool calls yet</p>
             </div>
           )}

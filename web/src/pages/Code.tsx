@@ -3,6 +3,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { TierGate } from '@/components/auth/TierGate';
 import { CodeInterface } from '@/components/code';
 import { getInstances } from '@/lib/api';
+import { Terminal, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import type { Instance } from '@/lib/types';
 
 export function Code() {
@@ -36,18 +38,18 @@ export function Code() {
 
   return (
     <TierGate requiredTier="architect" className="h-full">
-      <div className="h-full flex flex-col">
+      <div className="h-full flex flex-col bg-bg-primary">
         {/* Instance selector header */}
         {instances.length > 1 && (
-          <div className="flex items-center gap-4 px-6 py-3 border-b border-slate-700 bg-slate-900/50">
-            <label className="text-sm text-slate-400">Instance:</label>
+          <div className="flex items-center gap-4 px-6 py-3 border-b border-white/5 bg-bg-secondary/50 backdrop-blur-sm">
+            <label className="text-sm text-text-secondary">Instance:</label>
             <select
               value={selectedInstance?.id || ''}
               onChange={e => {
                 const instance = instances.find(i => i.id === e.target.value);
                 setSelectedInstance(instance || null);
               }}
-              className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-200 focus:border-helix-500 focus:ring-1 focus:ring-helix-500 outline-none"
+              className="bg-bg-tertiary border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:border-helix-500/50 focus:ring-2 focus:ring-helix-500/20 outline-none transition-all"
             >
               {instances.map(instance => (
                 <option key={instance.id} value={instance.id}>
@@ -63,8 +65,8 @@ export function Code() {
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
-                <div className="animate-spin h-10 w-10 border-2 border-helix-500 border-t-transparent rounded-full mx-auto mb-4" />
-                <p className="text-slate-400">Loading instances...</p>
+                <div className="animate-spin h-12 w-12 border-2 border-helix-500 border-t-transparent rounded-full mx-auto mb-6" />
+                <p className="text-text-secondary">Loading instances...</p>
               </div>
             </div>
           ) : selectedInstance ? (
@@ -76,17 +78,21 @@ export function Code() {
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center max-w-md p-8">
-                <h3 className="text-xl font-medium text-slate-200 mb-3">No Instances Found</h3>
-                <p className="text-slate-400 mb-6">
+                <div className="mx-auto mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-helix-500/10 border border-helix-500/20">
+                  <Terminal className="h-8 w-8 text-helix-400" />
+                </div>
+                <h3 className="text-2xl font-display font-bold text-white mb-3">No Instances Found</h3>
+                <p className="text-text-secondary mb-8">
                   You need to register a Helix instance before using the Code Interface. Run Helix
                   locally and it will automatically appear here.
                 </p>
-                <a
-                  href="/docs/getting-started"
-                  className="inline-flex items-center px-4 py-2 rounded-lg bg-helix-500 text-white hover:bg-helix-600 transition-colors"
+                <Link
+                  to="/docs/getting-started"
+                  className="btn btn-cta btn-cta-shimmer gap-2"
                 >
                   Getting Started Guide
-                </a>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
               </div>
             </div>
           )}

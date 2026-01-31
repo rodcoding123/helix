@@ -52,13 +52,17 @@ export function ChatInput({
 
   return (
     <div
-      className={cn('rounded-lg border border-slate-700 bg-slate-900/80 backdrop-blur', className)}
+      className={cn(
+        'rounded-xl border border-white/10 bg-bg-secondary/80 backdrop-blur-sm',
+        'hover:border-white/20 transition-colors',
+        className
+      )}
     >
       <div className="flex items-end gap-2 p-3">
         {/* Attachment button (future) */}
         <button
           type="button"
-          className="p-2 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors"
+          className="p-2 rounded-lg text-text-tertiary hover:text-white hover:bg-white/5 transition-colors"
           title="Attach file (coming soon)"
           disabled
         >
@@ -76,11 +80,12 @@ export function ChatInput({
             disabled={!isConnected}
             rows={1}
             className={cn(
-              'w-full resize-none rounded-lg bg-slate-800/50 px-4 py-3',
-              'text-slate-200 placeholder:text-slate-500',
-              'border border-slate-700 focus:border-helix-500 focus:ring-1 focus:ring-helix-500',
-              'transition-colors outline-none',
-              'disabled:opacity-50 disabled:cursor-not-allowed'
+              'w-full resize-none rounded-xl bg-bg-tertiary/50 px-4 py-3',
+              'text-white placeholder:text-text-tertiary',
+              'border border-white/5 focus:border-helix-500/50 focus:ring-2 focus:ring-helix-500/20',
+              'transition-all duration-200 outline-none',
+              'disabled:opacity-50 disabled:cursor-not-allowed',
+              'font-body'
             )}
           />
         </div>
@@ -94,8 +99,8 @@ export function ChatInput({
             className={cn(
               'p-2 rounded-lg transition-colors',
               isConnected
-                ? 'text-slate-400 hover:text-helix-400 hover:bg-slate-800'
-                : 'text-slate-600 cursor-not-allowed'
+                ? 'text-text-secondary hover:text-helix-400 hover:bg-helix-500/10'
+                : 'text-text-tertiary cursor-not-allowed'
             )}
             title="Voice input (coming soon)"
           >
@@ -108,7 +113,7 @@ export function ChatInput({
           <button
             type="button"
             onClick={onInterrupt}
-            className="p-2 rounded-lg bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 transition-colors"
+            className="p-2.5 rounded-xl bg-danger/20 text-danger hover:bg-danger/30 transition-colors"
             title="Stop generation"
           >
             <StopCircle className="h-5 w-5" />
@@ -119,10 +124,10 @@ export function ChatInput({
             onClick={handleSubmit}
             disabled={!canSend}
             className={cn(
-              'p-2 rounded-lg transition-colors',
+              'p-2.5 rounded-xl transition-all duration-200',
               canSend
-                ? 'bg-helix-500 text-white hover:bg-helix-600'
-                : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                ? 'bg-gradient-helix text-white shadow-glow-blue hover:shadow-lg'
+                : 'bg-bg-tertiary text-text-tertiary cursor-not-allowed'
             )}
             title="Send message"
           >
@@ -132,9 +137,9 @@ export function ChatInput({
       </div>
 
       {/* Character count and hints */}
-      <div className="flex items-center justify-between px-4 py-2 border-t border-slate-700/50 text-xs text-slate-500">
+      <div className="flex items-center justify-between px-4 py-2 border-t border-white/5 text-xs text-text-tertiary">
         <span>Press Enter to send, Shift+Enter for new line</span>
-        <span>{message.length}/10000</span>
+        <span className="font-mono">{message.length}/10000</span>
       </div>
     </div>
   );
