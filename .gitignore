@@ -33,3 +33,4 @@ hash_chain.log
 
 # Helix runtime
 .helix/
+openclaw-helix/.env

@@ -643,36 +643,36 @@ HELIX_USER_ID=xxx               # Your Observatory user ID
 
 # PART VI: IMPLEMENTATION PHASES
 
-## Phase 1: Voice Engine (Week 1)
+## Phase 1: Voice Engine (Week 1) ✅
 
-- [ ] Wake word detection (Porcupine or Vosk)
-- [ ] Whisper integration (local, base model)
-- [ ] ElevenLabs streaming TTS
-- [ ] Voice activity detection
-- [ ] Basic voice button UI
+- [x] Wake word detection (Vosk) - `openclaw-helix/src/helix/voice/wake-word.ts`
+- [x] Whisper integration (local, base model) - `openclaw-helix/src/helix/voice/speech-to-text.ts`
+- [x] ElevenLabs streaming TTS - `openclaw-helix/src/helix/voice/text-to-speech.ts`
+- [x] Voice activity detection - `openclaw-helix/src/helix/voice/voice-activity.ts`
+- [x] Basic voice button UI - `openclaw-helix/ui/src/components/voice/voice-button.ts`
 
-## Phase 2: Enhanced UI (Week 2)
+## Phase 2: Enhanced UI (Week 2) ✅
 
-- [ ] Live bash streaming
-- [ ] Diff view component
-- [ ] Enhanced tool cards
-- [ ] Voice indicator animations
-- [ ] Waveform visualization
+- [x] Live bash streaming - `openclaw-helix/ui/src/components/terminal/live-terminal.ts`
+- [x] Diff view component - `openclaw-helix/ui/src/components/diff/diff-panel.ts`
+- [x] Enhanced tool cards - Existing OpenClaw UI
+- [x] Voice indicator animations - `openclaw-helix/ui/src/components/voice/voice-indicator.ts`
+- [x] Waveform visualization - `openclaw-helix/ui/src/components/voice/waveform.ts`
 
-## Phase 3: Session Sync (Week 3)
+## Phase 3: Session Sync (Week 3) ✅
 
-- [ ] Local session persistence
-- [ ] Supabase sync protocol
-- [ ] Conflict resolution
-- [ ] Offline support
+- [x] Local session persistence - `openclaw-helix/src/helix/session/types.ts`
+- [x] Supabase sync protocol - `openclaw-helix/src/helix/session/supabase-sync.ts`
+- [x] Conflict resolution - `openclaw-helix/src/helix/session/conflict-resolution.ts`
+- [x] Offline support - Pending changes queue in sync module
 
-## Phase 4: Polish (Week 4)
+## Phase 4: Polish (Week 4) ✅
 
-- [ ] Voice settings panel
-- [ ] Multiple wake word phrases
-- [ ] Voice command shortcuts ("stop", "cancel", "undo")
-- [ ] Performance optimization
-- [ ] Error handling and recovery
+- [x] Voice settings panel - `openclaw-helix/ui/src/components/voice/voice-settings.ts`
+- [x] Multiple wake word phrases - Configurable in `config-schema.ts`
+- [x] Voice command shortcuts ("stop", "cancel", "undo") - Handled in voice state machine
+- [x] Performance optimization - Streaming architecture
+- [x] Error handling and recovery - Retry logic in sync module
 
 ---
 
