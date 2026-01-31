@@ -1,8 +1,14 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LogOut, Menu, X, User, ChevronRight } from 'lucide-react';
+import { LogOut, Menu, X, User, ChevronRight, ExternalLink } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import clsx from 'clsx';
+
+interface NavLink {
+  href: string;
+  label: string;
+  external?: boolean;
+}
 
 export function Navbar() {
   const { user, signOut } = useAuth();
@@ -25,7 +31,7 @@ export function Navbar() {
     navigate('/');
   };
 
-  const navLinks = user
+  const navLinks: NavLink[] = user
     ? [
         { href: '/dashboard', label: 'Dashboard' },
         { href: '/observatory', label: 'Observatory' },
@@ -33,10 +39,10 @@ export function Navbar() {
         { href: '/settings', label: 'Settings' },
       ]
     : [
-        { href: '/#features', label: 'Features' },
+        { href: '/#psychology', label: 'Architecture' },
+        { href: '/#observatory', label: 'Observatory' },
         { href: '/pricing', label: 'Pricing' },
-        { href: '/docs', label: 'Docs' },
-        { href: '/research', label: 'Research' },
+        { href: 'https://github.com/helixarchitect/helix', label: 'GitHub', external: true },
       ];
 
   return (
@@ -62,25 +68,38 @@ export function Navbar() {
                 Helix
               </span>
               <span className="text-[10px] uppercase tracking-widest text-text-tertiary -mt-1 hidden sm:block">
-                Consciousness Framework
+                Living AI
               </span>
             </div>
           </Link>
 
           {/* Desktop Nav */}
           <div className="hidden md:flex md:items-center md:gap-1">
-            {navLinks.map(link => (
-              <Link
-                key={link.href}
-                to={link.href}
-                className={clsx(
-                  'nav-link px-4 py-2 text-sm font-medium',
-                  location.pathname === link.href && 'active'
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map(link =>
+              link.external ? (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="nav-link px-4 py-2 text-sm font-medium inline-flex items-center gap-1.5"
+                >
+                  {link.label}
+                  <ExternalLink className="h-3 w-3 opacity-50" />
+                </a>
+              ) : (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  className={clsx(
+                    'nav-link px-4 py-2 text-sm font-medium',
+                    location.pathname === link.href && 'active'
+                  )}
+                >
+                  {link.label}
+                </Link>
+              )
+            )}
           </div>
 
           {/* Auth Buttons */}
@@ -134,24 +153,38 @@ export function Navbar() {
         )}
       >
         <div className="px-4 py-4 space-y-1">
-          {navLinks.map(link => (
-            <Link
-              key={link.href}
-              to={link.href}
-              onClick={() => setMobileMenuOpen(false)}
-              className={clsx(
-                'flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium transition-all duration-200',
-                location.pathname === link.href
-                  ? 'bg-helix-500/10 text-helix-400 border border-helix-500/20'
-                  : 'text-text-secondary hover:bg-white/5 hover:text-white'
-              )}
-            >
-              {link.label}
-              {location.pathname === link.href && (
-                <ChevronRight className="h-4 w-4 text-helix-500" />
-              )}
-            </Link>
-          ))}
+          {navLinks.map(link =>
+            link.external ? (
+              <a
+                key={link.href}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium transition-all duration-200 text-text-secondary hover:bg-white/5 hover:text-white"
+              >
+                {link.label}
+                <ExternalLink className="h-4 w-4 opacity-50" />
+              </a>
+            ) : (
+              <Link
+                key={link.href}
+                to={link.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={clsx(
+                  'flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium transition-all duration-200',
+                  location.pathname === link.href
+                    ? 'bg-helix-500/10 text-helix-400 border border-helix-500/20'
+                    : 'text-text-secondary hover:bg-white/5 hover:text-white'
+                )}
+              >
+                {link.label}
+                {location.pathname === link.href && (
+                  <ChevronRight className="h-4 w-4 text-helix-500" />
+                )}
+              </Link>
+            )
+          )}
 
           <div className="divider-gradient my-4" />
 

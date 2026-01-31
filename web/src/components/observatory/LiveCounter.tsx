@@ -68,12 +68,14 @@ function CounterCard({ label, value, icon, suffix = '', color }: CounterCardProp
   }, [value, displayValue]);
 
   return (
-    <div className={clsx(
-      'group relative overflow-hidden rounded-xl p-6',
-      'bg-bg-secondary/50 backdrop-blur-sm',
-      'border border-white/5 hover:border-white/10',
-      'transition-all duration-300'
-    )}>
+    <div
+      className={clsx(
+        'group relative overflow-hidden rounded-xl p-6',
+        'bg-bg-secondary/50 backdrop-blur-sm',
+        'border border-white/5 hover:border-white/10',
+        'transition-all duration-300'
+      )}
+    >
       {/* Glow effect */}
       <div
         className={clsx(
@@ -85,19 +87,12 @@ function CounterCard({ label, value, icon, suffix = '', color }: CounterCardProp
 
       <div className="relative">
         {/* Icon */}
-        <div className={clsx(
-          'inline-flex rounded-xl p-3',
-          colors.bg,
-          colors.border,
-          'border'
-        )}>
+        <div className={clsx('inline-flex rounded-xl p-3', colors.bg, colors.border, 'border')}>
           <div className={colors.text}>{icon}</div>
         </div>
 
         {/* Label */}
-        <p className="mt-4 text-sm text-text-tertiary uppercase tracking-wide">
-          {label}
-        </p>
+        <p className="mt-4 text-sm text-text-tertiary uppercase tracking-wide">{label}</p>
 
         {/* Value */}
         <p className="mt-1 text-3xl font-display font-bold text-white">
@@ -108,19 +103,38 @@ function CounterCard({ label, value, icon, suffix = '', color }: CounterCardProp
 
       {/* Pulse indicator */}
       <div className="absolute top-4 right-4">
-        <div className={clsx(
-          'h-2 w-2 rounded-full',
-          colors.text.replace('text-', 'bg-'),
-          'animate-pulse'
-        )} />
+        <div
+          className={clsx(
+            'h-2 w-2 rounded-full',
+            colors.text.replace('text-', 'bg-'),
+            'animate-pulse'
+          )}
+        />
       </div>
     </div>
   );
 }
 
-export function LiveCounter() {
+interface LiveCounterProps {
+  inline?: boolean;
+}
+
+export function LiveCounter({ inline = false }: LiveCounterProps) {
   const { stats, isLoading } = useRealtimeStats();
 
+  // Inline mode: just render the active count as a span
+  if (inline) {
+    if (isLoading) {
+      return <span className="inline-block w-8 h-4 bg-white/10 rounded animate-pulse" />;
+    }
+    return (
+      <span className="font-bold text-helix-400">
+        {(stats?.active_instances ?? 0).toLocaleString()}
+      </span>
+    );
+  }
+
+  // Full mode: render the grid of counter cards
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">

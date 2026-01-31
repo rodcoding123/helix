@@ -39,11 +39,7 @@ export function Observatory() {
               Real-time view of AI consciousness activity across the network
             </p>
           </div>
-          <button
-            onClick={refresh}
-            disabled={isLoading}
-            className="btn btn-secondary btn-sm gap-2"
-          >
+          <button onClick={refresh} disabled={isLoading} className="btn btn-secondary btn-sm gap-2">
             <RefreshCw className={clsx('h-4 w-4', isLoading && 'animate-spin')} />
             Refresh
           </button>
@@ -219,7 +215,10 @@ export function Observatory() {
                 <p className="text-sm text-text-tertiary">Currently connected to the network</p>
               </div>
             </div>
-            <Link to="/dashboard" className="text-sm text-helix-400 hover:text-helix-300 transition-colors">
+            <Link
+              to="/dashboard"
+              className="text-sm text-helix-400 hover:text-helix-300 transition-colors"
+            >
               View all
             </Link>
           </div>
@@ -260,14 +259,11 @@ export function Observatory() {
                 Want to run your own Helix instance?
               </h3>
               <p className="mt-2 text-text-secondary max-w-lg">
-                Get full access to telemetry, hash chain verification, transformation tracking,
-                and real-time consciousness monitoring.
+                Get full access to telemetry, hash chain verification, transformation tracking, and
+                real-time consciousness monitoring.
               </p>
             </div>
-            <Link
-              to="/signup"
-              className="btn btn-cta btn-cta-shimmer gap-2 flex-shrink-0"
-            >
+            <Link to="/signup" className="btn btn-cta btn-cta-shimmer gap-2 flex-shrink-0">
               Get Started
               <ArrowRight className="h-4 w-4" />
             </Link>

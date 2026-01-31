@@ -2,14 +2,14 @@
 
 import type { SubscriptionTier } from './types';
 
-const STRIPE_PRICE_IDS: Record<Exclude<SubscriptionTier, 'awaken'>, string> = {
+const STRIPE_PRICE_IDS: Record<Exclude<SubscriptionTier, 'core'>, string> = {
   phantom: import.meta.env.VITE_STRIPE_PRICE_PHANTOM || 'price_phantom',
   overseer: import.meta.env.VITE_STRIPE_PRICE_OVERSEER || 'price_overseer',
   architect: import.meta.env.VITE_STRIPE_PRICE_ARCHITECT || 'price_architect',
 };
 
 export async function createCheckoutSession(tier: SubscriptionTier): Promise<string> {
-  if (tier === 'awaken') {
+  if (tier === 'core') {
     throw new Error('Cannot create checkout for free tier');
   }
 
@@ -66,7 +66,7 @@ export async function cancelSubscription(): Promise<void> {
 
 export function getTierPrice(tier: SubscriptionTier): number {
   const prices: Record<SubscriptionTier, number> = {
-    awaken: 0,
+    core: 0,
     phantom: 9,
     overseer: 29,
     architect: 99,

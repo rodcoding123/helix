@@ -30,11 +30,7 @@ export function DNAHelix({ className = '', size = 'lg' }: DNAHelixProps) {
       {/* Glow effect background */}
       <div className="absolute inset-0 rounded-full bg-gradient-radial from-helix-500/10 via-accent-500/5 to-transparent blur-xl" />
 
-      <svg
-        viewBox={`0 0 ${width} ${height}`}
-        className="w-full h-full"
-        aria-hidden="true"
-      >
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full" aria-hidden="true">
         <defs>
           {/* Gradient for rings */}
           <linearGradient id="helixGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -71,7 +67,7 @@ export function DNAHelix({ className = '', size = 'lg' }: DNAHelixProps) {
         </defs>
 
         {/* Outer Ring - Slowest rotation */}
-        <g className="helix-ring-outer" style={{ transformOrigin: `${center}px ${center}px` }}>
+        <g className="helix-ring-outer">
           <circle
             cx={center}
             cy={center}
@@ -104,7 +100,7 @@ export function DNAHelix({ className = '', size = 'lg' }: DNAHelixProps) {
         </g>
 
         {/* Middle Ring - Medium rotation, reverse direction */}
-        <g className="helix-ring-middle" style={{ transformOrigin: `${center}px ${center}px` }}>
+        <g className="helix-ring-middle">
           <circle
             cx={center}
             cy={center}
@@ -137,7 +133,7 @@ export function DNAHelix({ className = '', size = 'lg' }: DNAHelixProps) {
         </g>
 
         {/* Inner Ring - Fastest rotation */}
-        <g className="helix-ring-inner" style={{ transformOrigin: `${center}px ${center}px` }}>
+        <g className="helix-ring-inner">
           <circle
             cx={center}
             cy={center}
@@ -188,14 +184,7 @@ export function DNAHelix({ className = '', size = 'lg' }: DNAHelixProps) {
           filter="url(#softGlow)"
           className="animate-pulse-glow-slow"
         />
-        <circle
-          cx={center}
-          cy={center}
-          r={6}
-          fill="#fff"
-          opacity={0.9}
-          filter="url(#softGlow)"
-        />
+        <circle cx={center} cy={center} r={6} fill="#fff" opacity={0.9} filter="url(#softGlow)" />
       </svg>
 
       {/* Center Label */}

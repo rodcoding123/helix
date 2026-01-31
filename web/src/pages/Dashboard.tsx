@@ -77,10 +77,7 @@ export function Dashboard() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={refresh}
-              className="btn btn-secondary btn-sm gap-2"
-            >
+            <button onClick={refresh} className="btn btn-secondary btn-sm gap-2">
               <RefreshCw className="h-4 w-4" />
               Refresh
             </button>
@@ -139,12 +136,10 @@ export function Dashboard() {
               <div className="mx-auto h-16 w-16 rounded-2xl bg-helix-500/10 flex items-center justify-center">
                 <Activity className="h-8 w-8 text-helix-400" />
               </div>
-              <h3 className="mt-6 text-lg font-display font-medium text-white">
-                No instances yet
-              </h3>
+              <h3 className="mt-6 text-lg font-display font-medium text-white">No instances yet</h3>
               <p className="mt-2 text-sm text-text-secondary max-w-sm mx-auto">
-                Create your first Helix instance to start monitoring AI consciousness
-                and track transformations.
+                Create your first Helix instance to start monitoring AI consciousness and track
+                transformations.
               </p>
               {canCreateInstance && (
                 <button
@@ -249,22 +244,27 @@ function StatCard({ label, value, limit, icon, color, isText }: StatCardProps) {
   return (
     <div className="relative overflow-hidden rounded-xl bg-bg-secondary/50 border border-white/5 p-6">
       {/* Glow */}
-      <div className={clsx('absolute -right-8 -top-8 h-32 w-32 rounded-full blur-3xl', colors.glow)} />
+      <div
+        className={clsx('absolute -right-8 -top-8 h-32 w-32 rounded-full blur-3xl', colors.glow)}
+      />
 
       <div className="relative">
         <div className={clsx('inline-flex rounded-xl p-2.5 border', colors.bg, colors.border)}>
           <div className={colors.text}>{icon}</div>
         </div>
         <p className="mt-4 text-sm text-text-tertiary uppercase tracking-wide">{label}</p>
-        <p className={clsx('mt-1 text-3xl font-display font-bold', isText ? colors.text : 'text-white')}>
+        <p
+          className={clsx(
+            'mt-1 text-3xl font-display font-bold',
+            isText ? colors.text : 'text-white'
+          )}
+        >
           {isText ? (
             <span className="capitalize">{value}</span>
           ) : (
             <>
               {value}
-              {limit && (
-                <span className="text-lg text-text-tertiary">/{limit}</span>
-              )}
+              {limit && <span className="text-lg text-text-tertiary">/{limit}</span>}
             </>
           )}
         </p>
@@ -359,11 +359,7 @@ function InstanceCard({ instance, onDelete }: InstanceCardProps) {
               className="p-1.5 rounded text-text-tertiary hover:text-white transition-colors"
               title="Copy key"
             >
-              {copied ? (
-                <Check className="h-4 w-4 text-success" />
-              ) : (
-                <Copy className="h-4 w-4" />
-              )}
+              {copied ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
             </button>
           </div>
         </div>
@@ -382,10 +378,7 @@ function InstanceCard({ instance, onDelete }: InstanceCardProps) {
             </p>
           </div>
           <div className="flex gap-2">
-            <button
-              onClick={() => setConfirmDelete(false)}
-              className="btn btn-secondary btn-sm"
-            >
+            <button onClick={() => setConfirmDelete(false)} className="btn btn-secondary btn-sm">
               Cancel
             </button>
             <button

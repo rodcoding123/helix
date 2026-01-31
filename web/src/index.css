@@ -16,11 +16,18 @@
   }
 
   /* Typography defaults */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-display;
   }
 
-  code, pre, .mono {
+  code,
+  pre,
+  .mono {
     @apply font-mono;
   }
 
@@ -231,7 +238,9 @@
   }
 
   .glow-mixed {
-    box-shadow: 0 0 60px rgba(6, 134, 212, 0.2), 0 0 40px rgba(114, 52, 237, 0.15);
+    box-shadow:
+      0 0 60px rgba(6, 134, 212, 0.2),
+      0 0 40px rgba(114, 52, 237, 0.15);
   }
 
   /* ===========================================
@@ -285,7 +294,12 @@
   .shimmer::after {
     content: '';
     @apply absolute inset-0 -translate-x-full;
-    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      transparent 100%
+    );
     animation: shimmer 2s infinite;
   }
 
@@ -393,6 +407,13 @@
   transform-origin: center center;
 }
 
+.helix-ring-outer,
+.helix-ring-middle,
+.helix-ring-inner {
+  transform-box: fill-box;
+  transform-origin: center center;
+}
+
 .helix-ring-outer {
   animation: ring-rotate 60s linear infinite;
 }
@@ -417,12 +438,24 @@
 /* ===========================================
    HERO CONTENT STAGGER
    =========================================== */
-.hero-animate > *:nth-child(1) { animation-delay: 0.1s; }
-.hero-animate > *:nth-child(2) { animation-delay: 0.2s; }
-.hero-animate > *:nth-child(3) { animation-delay: 0.3s; }
-.hero-animate > *:nth-child(4) { animation-delay: 0.4s; }
-.hero-animate > *:nth-child(5) { animation-delay: 0.5s; }
-.hero-animate > *:nth-child(6) { animation-delay: 0.6s; }
+.hero-animate > *:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.hero-animate > *:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.hero-animate > *:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.hero-animate > *:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.hero-animate > *:nth-child(5) {
+  animation-delay: 0.5s;
+}
+.hero-animate > *:nth-child(6) {
+  animation-delay: 0.6s;
+}
 
 .hero-animate > * {
   opacity: 0;
@@ -450,7 +483,12 @@
 .btn-cta-shimmer::before {
   content: '';
   @apply absolute inset-0 -translate-x-full;
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 100%
+  );
   transition: transform 0.6s ease;
 }
 

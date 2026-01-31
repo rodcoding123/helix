@@ -40,23 +40,25 @@ export function PricingCard({ tier }: PricingCardProps) {
             </>
           )}
         </div>
-        {tier.description && (
-          <p className="mt-3 text-sm text-text-secondary">{tier.description}</p>
-        )}
+        {tier.description && <p className="mt-3 text-sm text-text-secondary">{tier.description}</p>}
       </div>
 
       {/* Features */}
       <ul className="mb-8 flex-1 space-y-3">
         {tier.features.map(feature => (
           <li key={feature} className="flex items-start gap-3">
-            <div className={clsx(
-              'flex-shrink-0 rounded-full p-0.5',
-              tier.highlighted ? 'bg-helix-500/20' : 'bg-white/10'
-            )}>
-              <Check className={clsx(
-                'h-4 w-4',
-                tier.highlighted ? 'text-helix-400' : 'text-text-secondary'
-              )} />
+            <div
+              className={clsx(
+                'flex-shrink-0 rounded-full p-0.5',
+                tier.highlighted ? 'bg-helix-500/20' : 'bg-white/10'
+              )}
+            >
+              <Check
+                className={clsx(
+                  'h-4 w-4',
+                  tier.highlighted ? 'text-helix-400' : 'text-text-secondary'
+                )}
+              />
             </div>
             <span className="text-sm text-text-secondary">{feature}</span>
           </li>
@@ -68,9 +70,7 @@ export function PricingCard({ tier }: PricingCardProps) {
         to={tier.price === 0 ? '/signup' : `/signup?tier=${tier.id}`}
         className={clsx(
           'btn w-full justify-center',
-          tier.highlighted
-            ? 'btn-cta btn-cta-shimmer'
-            : 'btn-secondary hover:border-helix-500/30'
+          tier.highlighted ? 'btn-cta btn-cta-shimmer' : 'btn-secondary hover:border-helix-500/30'
         )}
       >
         {tier.cta}

@@ -8,7 +8,15 @@ import { useGatewayConnection } from '@/hooks/useGatewayConnection';
 import { useStreaming } from '@/hooks/useStreaming';
 import { usePanels } from '@/hooks/usePanels';
 import { cn } from '@/lib/utils';
-import { Cpu, Maximize2, Minimize2, Settings, PanelLeftClose, PanelLeft, Sparkles } from 'lucide-react';
+import {
+  Cpu,
+  Maximize2,
+  Minimize2,
+  Settings,
+  PanelLeftClose,
+  PanelLeft,
+  Sparkles,
+} from 'lucide-react';
 
 interface CodeInterfaceProps {
   instanceKey: string;
@@ -221,10 +229,7 @@ export function CodeInterface({
                   <p className="text-sm text-text-secondary max-w-sm mx-auto">
                     Establishing secure connection to your instance
                   </p>
-                  <button
-                    onClick={() => connect()}
-                    className="mt-6 btn btn-primary"
-                  >
+                  <button onClick={() => connect()} className="mt-6 btn btn-primary">
                     Retry Connection
                   </button>
                 </div>
@@ -263,7 +268,9 @@ export function CodeInterface({
                 {/* Render messages here */}
                 {thinking && (
                   <div className="p-4 rounded-xl bg-bg-tertiary/50 border border-helix-500/20">
-                    <p className="text-sm text-text-secondary whitespace-pre-wrap font-mono">{thinking}</p>
+                    <p className="text-sm text-text-secondary whitespace-pre-wrap font-mono">
+                      {thinking}
+                    </p>
                   </div>
                 )}
               </div>

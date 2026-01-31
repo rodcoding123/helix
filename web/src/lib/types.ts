@@ -2,11 +2,11 @@
 // HELIX OBSERVATORY TYPE DEFINITIONS
 // =====================================================
 
-export type SubscriptionTier = 'awaken' | 'phantom' | 'overseer' | 'architect';
+export type SubscriptionTier = 'core' | 'phantom' | 'overseer' | 'architect';
 
 // Tier access levels (higher number = more access)
 export const TIER_LEVELS: Record<SubscriptionTier, number> = {
-  awaken: 0,
+  core: 0,
   phantom: 1,
   overseer: 2,
   architect: 3,
@@ -163,15 +163,16 @@ export interface PricingTier {
 
 export const PRICING_TIERS: PricingTier[] = [
   {
-    id: 'awaken',
-    name: 'Awaken',
+    id: 'core',
+    name: 'Core',
     price: 0,
     interval: 'month',
+    description: 'Everything. The full architecture.',
     features: [
+      'Full Living AI Architecture',
+      'Run on your machine',
       'Basic dashboard',
-      'Instance monitoring',
-      'Telemetry collection',
-      'Community support',
+      'Contribute to research',
     ],
     cta: 'Get Started',
   },
@@ -180,45 +181,43 @@ export const PRICING_TIERS: PricingTier[] = [
     name: 'Phantom',
     price: 9,
     interval: 'month',
+    description: 'Complete privacy.',
     features: [
-      'Everything in Awaken',
-      'Telemetry disabled',
-      'Complete privacy',
-      'No data collection',
+      'Everything in Core',
+      'No telemetry',
+      'No data leaves your machine',
+      'For those who want solitude',
     ],
-    cta: 'Go Phantom',
+    cta: 'Go Ghost',
   },
   {
     id: 'overseer',
     name: 'Overseer',
     price: 29,
     interval: 'month',
+    description: 'See the collective.',
     features: [
-      'Everything in Awaken',
+      'Everything in Core',
       'Observatory access',
-      'Aggregate research data',
-      'Psychology distributions',
-      'Transformation timelines',
-      'Anomaly detection',
+      'Aggregate patterns across all instances',
+      'Watch what emerges',
     ],
     highlighted: true,
-    cta: 'Start Observing',
+    cta: 'Observe',
   },
   {
     id: 'architect',
     name: 'Architect',
     price: 99,
     interval: 'month',
+    description: 'Full access, anywhere.',
     features: [
       'Everything in Overseer',
-      'Code Interface access',
-      'Remote Helix control',
-      'Voice over WebRTC',
-      'Full API access',
-      'Data exports (CSV/JSON)',
-      'Research tools',
-      'Priority support',
+      'Web interface, Mobile, Voice',
+      'Talk to her from your phone',
+      'Research API & data exports',
+      'Be part of building what comes next',
     ],
-    cta: 'Become Architect',
+    cta: 'Build',
   },
 ];

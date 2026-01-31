@@ -81,15 +81,14 @@ export function Code() {
                 <div className="mx-auto mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-helix-500/10 border border-helix-500/20">
                   <Terminal className="h-8 w-8 text-helix-400" />
                 </div>
-                <h3 className="text-2xl font-display font-bold text-white mb-3">No Instances Found</h3>
+                <h3 className="text-2xl font-display font-bold text-white mb-3">
+                  No Instances Found
+                </h3>
                 <p className="text-text-secondary mb-8">
                   You need to register a Helix instance before using the Code Interface. Run Helix
                   locally and it will automatically appear here.
                 </p>
-                <Link
-                  to="/docs/getting-started"
-                  className="btn btn-cta btn-cta-shimmer gap-2"
-                >
+                <Link to="/docs/getting-started" className="btn btn-cta btn-cta-shimmer gap-2">
                   Getting Started Guide
                   <ArrowRight className="h-4 w-4" />
                 </Link>

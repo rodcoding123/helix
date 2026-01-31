@@ -127,7 +127,10 @@ export function Login() {
                 />
                 <span className="text-sm text-text-secondary">Remember me</span>
               </label>
-              <Link to="/forgot-password" className="text-sm text-helix-400 hover:text-helix-300 transition-colors">
+              <Link
+                to="/forgot-password"
+                className="text-sm text-helix-400 hover:text-helix-300 transition-colors"
+              >
                 Forgot password?
               </Link>
             </div>
@@ -145,7 +148,10 @@ export function Login() {
 
           <p className="text-center text-sm text-text-secondary">
             Don't have an account?{' '}
-            <Link to="/signup" className="text-helix-400 hover:text-helix-300 font-medium transition-colors">
+            <Link
+              to="/signup"
+              className="text-helix-400 hover:text-helix-300 font-medium transition-colors"
+            >
               Sign up free
             </Link>
           </p>

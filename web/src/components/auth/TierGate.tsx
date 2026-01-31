@@ -22,7 +22,7 @@ export function TierGate({
 }: TierGateProps) {
   const { subscription, isLoading } = useSubscription();
 
-  const userTier = subscription?.tier || 'awaken';
+  const userTier = subscription?.tier || 'core';
   const hasAccess = hasTierAccess(userTier, requiredTier);
 
   if (isLoading) {

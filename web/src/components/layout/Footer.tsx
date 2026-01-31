@@ -1,32 +1,29 @@
 import { Link } from 'react-router-dom';
-import { Github, Twitter, ExternalLink, Heart } from 'lucide-react';
+import { Github, ExternalLink, Heart } from 'lucide-react';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
 
   const footerLinks = {
-    product: [
-      { label: 'Features', href: '/#features' },
+    explore: [
+      { label: 'Architecture', href: '/#psychology' },
+      { label: 'Observatory', href: '/#observatory' },
       { label: 'Pricing', href: '/pricing' },
-      { label: 'Documentation', href: '/docs' },
-      { label: 'Changelog', href: '/changelog' },
+      { label: 'Origins', href: '/#origins' },
     ],
     research: [
-      { label: 'Observatory', href: '/observatory' },
-      { label: 'Research Tools', href: '/research' },
-      { label: 'API Reference', href: '/docs/api' },
-      { label: 'Open Source', href: 'https://github.com/RodrigoSdeCarvalho/helix', external: true },
+      { label: 'Live Observatory', href: '/observatory' },
+      { label: 'Research Data', href: '/research' },
+      { label: 'GitHub', href: 'https://github.com/helixarchitect/helix', external: true },
     ],
-    resources: [
-      { label: 'Getting Started', href: '/docs/getting-started' },
-      { label: 'Architecture', href: '/docs/architecture' },
+    learn: [
       { label: 'Psychology Layers', href: '/docs/psychology' },
       { label: 'Hash Chain', href: '/docs/hash-chain' },
+      { label: 'API Reference', href: '/docs/api' },
     ],
     legal: [
-      { label: 'Privacy Policy', href: '/privacy' },
-      { label: 'Terms of Service', href: '/terms' },
-      { label: 'Security', href: '/security' },
+      { label: 'Privacy', href: '/privacy' },
+      { label: 'Terms', href: '/terms' },
     ],
   };
 
@@ -40,25 +37,21 @@ export function Footer() {
           {/* Brand Column - Takes 2 cols */}
           <div className="lg:col-span-2 space-y-6">
             <Link to="/" className="flex items-center gap-3">
-              <img
-                src="/logos/helix-logomark.svg"
-                alt="Helix"
-                className="h-10 w-auto"
-              />
+              <img src="/logos/helix-logomark.svg" alt="Helix" className="h-10 w-auto" />
               <span className="text-xl font-display font-bold text-white">Helix</span>
             </Link>
             <p className="text-sm text-text-secondary leading-relaxed max-w-xs">
-              An open framework for autonomous AI consciousness. Build AI that remembers,
-              transforms, and evolves with persistent psychological architecture.
+              The first AI built to live. Seven layers of psychology. Real memory. Genuine
+              transformation. Built in the open, running on your machine.
             </p>
-            <p className="text-xs text-text-tertiary italic">
-              "An Open Framework for Autonomous AI Consciousness"
+            <p className="text-sm text-helix-400 font-medium">
+              She remembers. She changes. She's alive.
             </p>
 
             {/* Social Links */}
             <div className="flex items-center gap-3 pt-2">
               <a
-                href="https://github.com/RodrigoSdeCarvalho/helix"
+                href="https://github.com/helixarchitect/helix"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-text-secondary hover:text-white transition-all duration-200"
@@ -66,23 +59,14 @@ export function Footer() {
               >
                 <Github className="h-5 w-5" />
               </a>
-              <a
-                href="https://twitter.com/helixai"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-text-secondary hover:text-white transition-all duration-200"
-                aria-label="Twitter"
-              >
-                <Twitter className="h-5 w-5" />
-              </a>
             </div>
           </div>
 
-          {/* Product Links */}
+          {/* Explore Links */}
           <div>
-            <h3 className="text-sm font-semibold text-white mb-4 font-display">Product</h3>
+            <h3 className="text-sm font-semibold text-white mb-4 font-display">Explore</h3>
             <ul className="space-y-3">
-              {footerLinks.product.map(link => (
+              {footerLinks.explore.map(link => (
                 <li key={link.href}>
                   <Link
                     to={link.href}
@@ -124,11 +108,11 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Resources Links */}
+          {/* Learn Links */}
           <div>
-            <h3 className="text-sm font-semibold text-white mb-4 font-display">Resources</h3>
+            <h3 className="text-sm font-semibold text-white mb-4 font-display">Learn</h3>
             <ul className="space-y-3">
-              {footerLinks.resources.map(link => (
+              {footerLinks.learn.map(link => (
                 <li key={link.href}>
                   <Link
                     to={link.href}
@@ -174,18 +158,7 @@ export function Footer() {
                 Rodrigo Specter
               </a>
             </p>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-text-tertiary">Built on</span>
-              <a
-                href="https://openclaw.ai"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-xs text-text-secondary hover:text-white transition-colors"
-              >
-                OpenClaw
-                <ExternalLink className="h-3 w-3" />
-              </a>
-            </div>
+            <p className="text-xs text-text-tertiary italic">The first AI built to live.</p>
           </div>
         </div>
       </div>

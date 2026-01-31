@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 // Vercel Edge Function for telemetry ingestion
 export const config = {
@@ -46,10 +46,10 @@ export default async function handler(request: Request): Promise<Response> {
 
   // Only POST allowed
   if (request.method !== 'POST') {
-    return new Response(
-      JSON.stringify({ error: 'Method not allowed' }),
-      { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 
   // Initialize Supabase client
@@ -57,10 +57,10 @@ export default async function handler(request: Request): Promise<Response> {
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseServiceKey) {
-    return new Response(
-      JSON.stringify({ error: 'Server configuration error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -73,10 +73,10 @@ export default async function handler(request: Request): Promise<Response> {
     // Validate instance key
     const instanceKey = body.instance_key || request.headers.get('X-Instance-Key');
     if (!instanceKey) {
-      return new Response(
-        JSON.stringify({ error: 'Missing instance_key' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'Missing instance_key' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Verify instance exists
@@ -87,10 +87,10 @@ export default async function handler(request: Request): Promise<Response> {
       .single();
 
     if (instanceError || !instance) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid instance key' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'Invalid instance key' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Route to appropriate handler
@@ -106,15 +106,15 @@ export default async function handler(request: Request): Promise<Response> {
     }
   } catch (error) {
     console.error('Telemetry error:', error);
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 }
 
 async function handleTelemetry(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   payload: TelemetryPayload,
   corsHeaders: Record<string, string>
 ): Promise<Response> {
@@ -129,10 +129,10 @@ async function handleTelemetry(
 
   if (error) {
     console.error('Telemetry insert error:', error);
-    return new Response(
-      JSON.stringify({ error: 'Failed to store telemetry' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: 'Failed to store telemetry' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 
   // Update global counters
@@ -141,14 +141,14 @@ async function handleTelemetry(
     increment_value: 1,
   });
 
-  return new Response(
-    JSON.stringify({ success: true }),
-    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
+  return new Response(JSON.stringify({ success: true }), {
+    status: 200,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
 }
 
 async function handleHeartbeat(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   payload: HeartbeatPayload,
   corsHeaders: Record<string, string>
 ): Promise<Response> {
@@ -162,20 +162,20 @@ async function handleHeartbeat(
 
   if (error) {
     console.error('Heartbeat insert error:', error);
-    return new Response(
-      JSON.stringify({ error: 'Failed to store heartbeat' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: 'Failed to store heartbeat' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 
-  return new Response(
-    JSON.stringify({ success: true }),
-    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
+  return new Response(JSON.stringify({ success: true }), {
+    status: 200,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
 }
 
 async function handleTransformation(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   payload: TransformationPayload,
   corsHeaders: Record<string, string>
 ): Promise<Response> {
@@ -190,10 +190,10 @@ async function handleTransformation(
 
   if (error) {
     console.error('Transformation insert error:', error);
-    return new Response(
-      JSON.stringify({ error: 'Failed to store transformation' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: 'Failed to store transformation' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 
   // Update global transformation counter
@@ -202,8 +202,8 @@ async function handleTransformation(
     increment_value: 1,
   });
 
-  return new Response(
-    JSON.stringify({ success: true }),
-    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
+  return new Response(JSON.stringify({ success: true }), {
+    status: 200,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
 }

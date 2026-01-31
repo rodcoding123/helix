@@ -76,9 +76,8 @@ export function Signup() {
           </div>
           <h1 className="text-3xl font-display font-bold text-white">Check Your Email</h1>
           <p className="mt-4 text-text-secondary">
-            We've sent a confirmation link to{' '}
-            <strong className="text-white">{email}</strong>. Click the link to activate your
-            account.
+            We've sent a confirmation link to <strong className="text-white">{email}</strong>. Click
+            the link to activate your account.
           </p>
           <button onClick={() => navigate('/login')} className="btn btn-primary mt-8">
             Go to Login
@@ -212,9 +211,7 @@ export function Signup() {
                         req.met ? 'text-success' : 'text-text-tertiary'
                       )}
                     >
-                      <Check
-                        className={clsx('h-3 w-3', req.met ? 'opacity-100' : 'opacity-30')}
-                      />
+                      <Check className={clsx('h-3 w-3', req.met ? 'opacity-100' : 'opacity-30')} />
                       {req.text}
                     </div>
                   ))}
