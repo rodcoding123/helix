@@ -20,7 +20,7 @@ export function Code() {
         setInstances(data);
 
         // Auto-select first active instance
-        const activeInstance = data.find((i) => i.is_active) || data[0];
+        const activeInstance = data.find(i => i.is_active) || data[0];
         if (activeInstance) {
           setSelectedInstance(activeInstance);
         }
@@ -43,13 +43,13 @@ export function Code() {
             <label className="text-sm text-slate-400">Instance:</label>
             <select
               value={selectedInstance?.id || ''}
-              onChange={(e) => {
-                const instance = instances.find((i) => i.id === e.target.value);
+              onChange={e => {
+                const instance = instances.find(i => i.id === e.target.value);
                 setSelectedInstance(instance || null);
               }}
               className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-200 focus:border-helix-500 focus:ring-1 focus:ring-helix-500 outline-none"
             >
-              {instances.map((instance) => (
+              {instances.map(instance => (
                 <option key={instance.id} value={instance.id}>
                   {instance.name} {instance.is_active ? '(Active)' : ''}
                 </option>
@@ -76,12 +76,10 @@ export function Code() {
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center max-w-md p-8">
-                <h3 className="text-xl font-medium text-slate-200 mb-3">
-                  No Instances Found
-                </h3>
+                <h3 className="text-xl font-medium text-slate-200 mb-3">No Instances Found</h3>
                 <p className="text-slate-400 mb-6">
-                  You need to register a Helix instance before using the Code Interface.
-                  Run Helix locally and it will automatically appear here.
+                  You need to register a Helix instance before using the Code Interface. Run Helix
+                  locally and it will automatically appear here.
                 </p>
                 <a
                   href="/docs/getting-started"

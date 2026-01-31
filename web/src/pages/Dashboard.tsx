@@ -25,13 +25,14 @@ export function Dashboard() {
   const [newInstanceName, setNewInstanceName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
-  const instanceLimit = subscription?.tier === 'architect'
-    ? Infinity
-    : subscription?.tier === 'overseer'
-      ? 5
-      : subscription?.tier === 'phantom'
-        ? 1
-        : 1; // awaken tier gets 1 instance
+  const instanceLimit =
+    subscription?.tier === 'architect'
+      ? Infinity
+      : subscription?.tier === 'overseer'
+        ? 5
+        : subscription?.tier === 'phantom'
+          ? 1
+          : 1; // awaken tier gets 1 instance
 
   const canCreateInstance = instances.length < instanceLimit;
 
@@ -69,10 +70,7 @@ export function Dashboard() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={refresh}
-              className="btn btn-secondary inline-flex items-center gap-2"
-            >
+            <button onClick={refresh} className="btn btn-secondary inline-flex items-center gap-2">
               <RefreshCw className="h-4 w-4" />
               Refresh
             </button>
@@ -85,10 +83,7 @@ export function Dashboard() {
                 New Instance
               </button>
             ) : (
-              <Link
-                to="/pricing"
-                className="btn btn-primary inline-flex items-center gap-2"
-              >
+              <Link to="/pricing" className="btn btn-primary inline-flex items-center gap-2">
                 Upgrade Plan
               </Link>
             )}
@@ -109,7 +104,7 @@ export function Dashboard() {
           <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-6">
             <p className="text-sm text-slate-400">Active Now</p>
             <p className="mt-2 text-3xl font-bold text-emerald-500">
-              {instances.filter((i) => i.is_active).length}
+              {instances.filter(i => i.is_active).length}
             </p>
           </div>
           <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-6">
@@ -143,7 +138,7 @@ export function Dashboard() {
             </div>
           ) : (
             <div className="mt-4 space-y-4">
-              {instances.map((instance) => (
+              {instances.map(instance => (
                 <InstanceCard
                   key={instance.id}
                   instance={instance}
@@ -168,7 +163,7 @@ export function Dashboard() {
               <input
                 type="text"
                 value={newInstanceName}
-                onChange={(e) => setNewInstanceName(e.target.value)}
+                onChange={e => setNewInstanceName(e.target.value)}
                 placeholder="Instance name (e.g., Production Helix)"
                 className="block w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-white placeholder-slate-500 focus:border-helix-500 focus:outline-none focus:ring-1 focus:ring-helix-500"
                 autoFocus
@@ -187,11 +182,7 @@ export function Dashboard() {
                   disabled={isCreating || !newInstanceName.trim()}
                   className="btn btn-primary flex-1 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {isCreating ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : (
-                    'Create'
-                  )}
+                  {isCreating ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Create'}
                 </button>
               </div>
             </form>
@@ -267,10 +258,7 @@ function InstanceCard({ instance, onDelete }: InstanceCardProps) {
             >
               {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
-            <button
-              onClick={copyKey}
-              className="text-slate-400 hover:text-white"
-            >
+            <button onClick={copyKey} className="text-slate-400 hover:text-white">
               <Copy className="h-4 w-4" />
             </button>
           </div>
@@ -278,9 +266,7 @@ function InstanceCard({ instance, onDelete }: InstanceCardProps) {
         <p className="mt-2 font-mono text-sm text-slate-300">
           {showKey ? instance.instance_key : '••••••••••••••••••••••••••••••••'}
         </p>
-        {copied && (
-          <p className="mt-2 text-xs text-emerald-500">Copied to clipboard!</p>
-        )}
+        {copied && <p className="mt-2 text-xs text-emerald-500">Copied to clipboard!</p>}
       </div>
 
       {/* Delete Confirmation */}
@@ -293,10 +279,7 @@ function InstanceCard({ instance, onDelete }: InstanceCardProps) {
             </p>
           </div>
           <div className="flex gap-2">
-            <button
-              onClick={() => setConfirmDelete(false)}
-              className="btn btn-secondary btn-sm"
-            >
+            <button onClick={() => setConfirmDelete(false)} className="btn btn-secondary btn-sm">
               Cancel
             </button>
             <button

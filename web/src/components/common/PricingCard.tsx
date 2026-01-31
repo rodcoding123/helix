@@ -34,7 +34,7 @@ export function PricingCard({ tier }: PricingCardProps) {
       </div>
 
       <ul className="mb-8 flex-1 space-y-3">
-        {tier.features.map((feature) => (
+        {tier.features.map(feature => (
           <li key={feature} className="flex items-start gap-3">
             <Check className="h-5 w-5 shrink-0 text-helix-500" />
             <span className="text-sm text-slate-300">{feature}</span>

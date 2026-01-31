@@ -16,10 +16,7 @@ import type {
 // =====================================================
 
 export async function getSubscription(): Promise<Subscription | null> {
-  const { data, error } = await supabase
-    .from('subscriptions')
-    .select('*')
-    .single();
+  const { data, error } = await supabase.from('subscriptions').select('*').single();
 
   if (error) {
     console.error('Error fetching subscription:', error);
@@ -48,11 +45,7 @@ export async function getInstances(): Promise<Instance[]> {
 }
 
 export async function getInstance(id: string): Promise<Instance | null> {
-  const { data, error } = await supabase
-    .from('instances')
-    .select('*')
-    .eq('id', id)
-    .single();
+  const { data, error } = await supabase.from('instances').select('*').eq('id', id).single();
 
   if (error) {
     console.error('Error fetching instance:', error);
@@ -62,11 +55,10 @@ export async function getInstance(id: string): Promise<Instance | null> {
   return data;
 }
 
-export async function createInstance(
-  name: string,
-  instanceKey: string
-): Promise<Instance | null> {
-  const { data: { user } } = await supabase.auth.getUser();
+export async function createInstance(name: string, instanceKey: string): Promise<Instance | null> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return null;
 
   const { data, error } = await supabase
@@ -88,10 +80,7 @@ export async function createInstance(
 }
 
 export async function deleteInstance(id: string): Promise<boolean> {
-  const { error } = await supabase
-    .from('instances')
-    .delete()
-    .eq('id', id);
+  const { error } = await supabase.from('instances').delete().eq('id', id);
 
   if (error) {
     console.error('Error deleting instance:', error);
@@ -123,10 +112,7 @@ export async function getLiveStats(): Promise<LiveStats | null> {
   return data?.[0] || null;
 }
 
-export async function getDailyStats(
-  startDate: string,
-  endDate: string
-): Promise<DailyStats[]> {
+export async function getDailyStats(startDate: string, endDate: string): Promise<DailyStats[]> {
   const { data, error } = await supabase
     .from('daily_stats')
     .select('*')
@@ -222,10 +208,7 @@ export async function getInstanceTransformations(
 // ANOMALIES API
 // =====================================================
 
-export async function getAnomalies(
-  instanceKey?: string,
-  limit = 50
-): Promise<Anomaly[]> {
+export async function getAnomalies(instanceKey?: string, limit = 50): Promise<Anomaly[]> {
   let query = supabase
     .from('anomalies')
     .select('*')
@@ -246,11 +229,10 @@ export async function getAnomalies(
   return data || [];
 }
 
-export async function acknowledgeAnomaly(
-  id: string,
-  notes?: string
-): Promise<boolean> {
-  const { data: { user } } = await supabase.auth.getUser();
+export async function acknowledgeAnomaly(id: string, notes?: string): Promise<boolean> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return false;
 
   const { error } = await supabase

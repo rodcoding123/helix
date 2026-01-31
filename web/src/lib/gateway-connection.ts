@@ -57,7 +57,7 @@ export class GatewayConnection {
           resolve();
         };
 
-        this.ws.onmessage = (event) => {
+        this.ws.onmessage = event => {
           try {
             const message = JSON.parse(event.data) as GatewayMessage;
             this.config.onMessage(message);
@@ -66,7 +66,7 @@ export class GatewayConnection {
           }
         };
 
-        this.ws.onerror = (event) => {
+        this.ws.onerror = event => {
           console.error('WebSocket error:', event);
           this.config.onError(new Error('WebSocket connection error'));
         };

@@ -16,7 +16,7 @@ export function useStreaming(): UseStreamingReturn {
   const [state, setState] = useState<StreamState>(createStreamState);
 
   const processMessage = useCallback((message: GatewayMessage) => {
-    setState((prev) => {
+    setState(prev => {
       const newState = { ...prev };
 
       switch (message.type) {

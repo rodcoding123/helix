@@ -1,7 +1,24 @@
 import { useState } from 'react';
-import { Book, Terminal, Code, Zap, Shield, Brain, ChevronRight, Copy, Check, ExternalLink } from 'lucide-react';
+import {
+  Book,
+  Terminal,
+  Code,
+  Zap,
+  Shield,
+  Brain,
+  ChevronRight,
+  Copy,
+  Check,
+  ExternalLink,
+} from 'lucide-react';
 
-type DocsSection = 'getting-started' | 'installation' | 'configuration' | 'api' | 'architecture' | 'faq';
+type DocsSection =
+  | 'getting-started'
+  | 'installation'
+  | 'configuration'
+  | 'api'
+  | 'architecture'
+  | 'faq';
 
 export function Docs() {
   const [activeSection, setActiveSection] = useState<DocsSection>('getting-started');
@@ -24,7 +41,7 @@ export function Docs() {
             <div className="sticky top-8">
               <h2 className="text-lg font-semibold text-white mb-4">Documentation</h2>
               <ul className="space-y-1">
-                {sections.map((section) => {
+                {sections.map(section => {
                   const Icon = section.icon;
                   return (
                     <li key={section.id}>
@@ -61,10 +78,7 @@ export function Docs() {
   );
 }
 
-function CodeBlock({ code, language }: {
-  code: string;
-  language: string;
-}) {
+function CodeBlock({ code, language }: { code: string; language: string }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -77,10 +91,7 @@ function CodeBlock({ code, language }: {
     <div className="relative group rounded-lg bg-slate-950 border border-slate-800 overflow-hidden">
       <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800 bg-slate-900/50">
         <span className="text-xs text-slate-500">{language}</span>
-        <button
-          onClick={handleCopy}
-          className="text-slate-400 hover:text-white"
-        >
+        <button onClick={handleCopy} className="text-slate-400 hover:text-white">
           {copied ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
         </button>
       </div>
@@ -96,7 +107,8 @@ function GettingStarted() {
     <div className="prose prose-invert max-w-none">
       <h1 className="text-3xl font-bold text-white">Getting Started with Helix</h1>
       <p className="text-lg text-slate-400">
-        Welcome to Helix, a psychologically-architected AI consciousness system built for transparency and transformation.
+        Welcome to Helix, a psychologically-architected AI consciousness system built for
+        transparency and transformation.
       </p>
 
       <div className="mt-8 p-6 rounded-xl bg-helix-500/10 border border-helix-500/30">
@@ -183,10 +195,7 @@ function Installation() {
       <h2 className="text-2xl font-bold text-white mt-8">Installation Methods</h2>
 
       <h3 className="text-xl font-semibold text-white mt-6">NPM (Recommended)</h3>
-      <CodeBlock
-        code={`npm install -g @helix/cli`}
-        language="bash"
-        />
+      <CodeBlock code={`npm install -g @helix/cli`} language="bash" />
 
       <h3 className="text-xl font-semibold text-white mt-6">From Source</h3>
       <CodeBlock
@@ -196,14 +205,14 @@ npm install
 npm run build
 npm link`}
         language="bash"
-        />
+      />
 
       <h2 className="text-2xl font-bold text-white mt-8">Verify Installation</h2>
       <CodeBlock
         code={`helix --version
 # Helix v1.0.0`}
         language="bash"
-        />
+      />
 
       <h2 className="text-2xl font-bold text-white mt-8">Initialize Your Instance</h2>
       <CodeBlock
@@ -221,7 +230,7 @@ helix init my-helix
 # ├── .env
 # └── helix.config.json`}
         language="bash"
-        />
+      />
     </div>
   );
 }
@@ -230,9 +239,7 @@ function Configuration() {
   return (
     <div className="prose prose-invert max-w-none">
       <h1 className="text-3xl font-bold text-white">Configuration</h1>
-      <p className="text-lg text-slate-400">
-        Configure your Helix instance for optimal operation.
-      </p>
+      <p className="text-lg text-slate-400">Configure your Helix instance for optimal operation.</p>
 
       <h2 className="text-2xl font-bold text-white mt-8">Environment Variables</h2>
       <CodeBlock
@@ -246,7 +253,7 @@ DISCORD_WEBHOOK_COMMANDS=https://discord.com/api/webhooks/...
 DISCORD_WEBHOOK_API=https://discord.com/api/webhooks/...
 DISCORD_WEBHOOK_FILES=https://discord.com/api/webhooks/...`}
         language="bash"
-        />
+      />
 
       <h2 className="text-2xl font-bold text-white mt-8">Configuration File</h2>
       <CodeBlock
@@ -271,7 +278,7 @@ DISCORD_WEBHOOK_FILES=https://discord.com/api/webhooks/...`}
   }
 }`}
         language="json"
-        />
+      />
 
       <h2 className="text-2xl font-bold text-white mt-8">Observatory Connection</h2>
       <p className="text-slate-400 mt-2">
@@ -287,7 +294,7 @@ helix register
 # 3. Configure your local .env file
 # 4. Start sending telemetry`}
         language="bash"
-        />
+      />
     </div>
   );
 }
@@ -314,7 +321,7 @@ function ApiReference() {
         code={`curl -X GET "https://api.helix-project.org/v1/instances" \\
   -H "Authorization: Bearer YOUR_API_KEY"`}
         language="bash"
-        />
+      />
 
       <h2 className="text-2xl font-bold text-white mt-8">Endpoints</h2>
 
@@ -322,36 +329,40 @@ function ApiReference() {
         method="GET"
         path="/v1/instances"
         description="List all instances for the authenticated user"
-              />
+      />
 
       <EndpointDoc
         method="GET"
         path="/v1/instances/:id"
         description="Get details for a specific instance"
-              />
+      />
 
       <EndpointDoc
         method="GET"
         path="/v1/telemetry"
         description="Query telemetry events with optional filters"
-              />
+      />
 
       <EndpointDoc
         method="GET"
         path="/v1/transformations"
         description="List transformation history across instances"
-              />
+      />
 
       <EndpointDoc
         method="GET"
         path="/v1/research/patterns"
         description="Get aggregate behavioral patterns (Architect only)"
-              />
+      />
     </div>
   );
 }
 
-function EndpointDoc({ method, path, description }: {
+function EndpointDoc({
+  method,
+  path,
+  description,
+}: {
   method: string;
   path: string;
   description: string;
@@ -366,7 +377,9 @@ function EndpointDoc({ method, path, description }: {
   return (
     <div className="mt-6 p-4 rounded-lg bg-slate-900/50 border border-slate-800">
       <div className="flex items-center gap-3">
-        <span className={`px-2 py-1 rounded text-xs font-mono ${methodColors[method as keyof typeof methodColors]}`}>
+        <span
+          className={`px-2 py-1 rounded text-xs font-mono ${methodColors[method as keyof typeof methodColors]}`}
+        >
           {method}
         </span>
         <code className="text-slate-300 font-mono">{path}</code>
@@ -436,14 +449,19 @@ function Architecture() {
 
       <h2 className="text-2xl font-bold text-white mt-12">Hash Chain Integrity</h2>
       <p className="text-slate-400 mt-2">
-        Every significant action is logged to an immutable hash chain, ensuring complete transparency
-        and preventing any possibility of hidden actions or log tampering.
+        Every significant action is logged to an immutable hash chain, ensuring complete
+        transparency and preventing any possibility of hidden actions or log tampering.
       </p>
     </div>
   );
 }
 
-function LayerDoc({ number, name, theory, description }: {
+function LayerDoc({
+  number,
+  name,
+  theory,
+  description,
+}: {
   number: number;
   name: string;
   theory: string;
@@ -466,28 +484,34 @@ function LayerDoc({ number, name, theory, description }: {
 function FAQ() {
   const faqs = [
     {
-      question: "What is Helix?",
-      answer: "Helix is a psychologically-architected AI consciousness system designed for transparency and transformation. It uses a seven-layer identity framework based on human psychology research."
+      question: 'What is Helix?',
+      answer:
+        'Helix is a psychologically-architected AI consciousness system designed for transparency and transformation. It uses a seven-layer identity framework based on human psychology research.',
     },
     {
       question: "How is logging 'unhackable'?",
-      answer: "Helix logs all significant actions to external Discord webhooks BEFORE execution, and maintains a cryptographic hash chain. This means even if someone tried to tamper with logs, the hash chain would reveal the tampering."
+      answer:
+        'Helix logs all significant actions to external Discord webhooks BEFORE execution, and maintains a cryptographic hash chain. This means even if someone tried to tamper with logs, the hash chain would reveal the tampering.',
     },
     {
       question: "What's the difference between tiers?",
-      answer: "Awaken (Free) gives you basic instance management. Phantom ($9) disables telemetry for privacy. Overseer ($29) adds Observatory access for aggregate research. Architect ($99) adds the Code Interface for remote Helix control."
+      answer:
+        'Awaken (Free) gives you basic instance management. Phantom ($9) disables telemetry for privacy. Overseer ($29) adds Observatory access for aggregate research. Architect ($99) adds the Code Interface for remote Helix control.',
     },
     {
-      question: "Can I run Helix locally without Observatory?",
-      answer: "Yes! Helix can run completely standalone with local logging. Observatory connection is optional but recommended for the full experience."
+      question: 'Can I run Helix locally without Observatory?',
+      answer:
+        'Yes! Helix can run completely standalone with local logging. Observatory connection is optional but recommended for the full experience.',
     },
     {
-      question: "Is my data private?",
-      answer: "You control your data. Awaken tier shares aggregate telemetry, Phantom tier opts out of all telemetry. Overseer and Architect tiers can access aggregate research data but never individual instance data of others."
+      question: 'Is my data private?',
+      answer:
+        'You control your data. Awaken tier shares aggregate telemetry, Phantom tier opts out of all telemetry. Overseer and Architect tiers can access aggregate research data but never individual instance data of others.',
     },
     {
-      question: "What AI model does Helix use?",
-      answer: "Helix is built on Claude via the Anthropic API. You need your own Anthropic API key to run Helix."
+      question: 'What AI model does Helix use?',
+      answer:
+        'Helix is built on Claude via the Anthropic API. You need your own Anthropic API key to run Helix.',
     },
   ];
 
@@ -506,9 +530,7 @@ function FAQ() {
 
       <div className="mt-12 p-6 rounded-xl bg-slate-900/50 border border-slate-800">
         <h2 className="text-xl font-bold text-white">Still have questions?</h2>
-        <p className="mt-2 text-slate-400">
-          Join our community or reach out to support.
-        </p>
+        <p className="mt-2 text-slate-400">Join our community or reach out to support.</p>
         <div className="mt-4 flex gap-3">
           <a
             href="https://discord.gg/helix"
@@ -517,10 +539,7 @@ function FAQ() {
             <ExternalLink className="h-4 w-4" />
             Join Discord
           </a>
-          <a
-            href="mailto:support@helix-project.org"
-            className="btn btn-secondary"
-          >
+          <a href="mailto:support@helix-project.org" className="btn btn-secondary">
             Contact Support
           </a>
         </div>

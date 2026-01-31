@@ -35,7 +35,8 @@ export function useVoice(options: UseVoiceOptions): UseVoiceReturn {
     }
 
     const config: VoiceConfig = {
-      signalingUrl: options.signalingUrl || `wss://gateway.helix-project.org/v1/voice/${options.instanceKey}`,
+      signalingUrl:
+        options.signalingUrl || `wss://gateway.helix-project.org/v1/voice/${options.instanceKey}`,
       instanceKey: options.instanceKey,
       authToken: options.authToken,
       onStateChange: setState,

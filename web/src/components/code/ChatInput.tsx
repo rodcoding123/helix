@@ -51,7 +51,9 @@ export function ChatInput({
   const canSend = message.trim().length > 0 && !isProcessing && isConnected;
 
   return (
-    <div className={cn('rounded-lg border border-slate-700 bg-slate-900/80 backdrop-blur', className)}>
+    <div
+      className={cn('rounded-lg border border-slate-700 bg-slate-900/80 backdrop-blur', className)}
+    >
       <div className="flex items-end gap-2 p-3">
         {/* Attachment button (future) */}
         <button
@@ -68,7 +70,7 @@ export function ChatInput({
           <textarea
             ref={textareaRef}
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={e => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={isConnected ? placeholder : 'Connecting to Helix...'}
             disabled={!isConnected}

@@ -1,5 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { GatewayConnection, ConnectionStatus, GatewayMessage, GatewayConnectionConfig } from '@/lib/gateway-connection';
+import {
+  GatewayConnection,
+  ConnectionStatus,
+  GatewayMessage,
+  GatewayConnectionConfig,
+} from '@/lib/gateway-connection';
 
 interface UseGatewayConnectionOptions {
   instanceKey: string;
@@ -20,14 +25,16 @@ interface UseGatewayConnectionReturn {
   error: Error | null;
 }
 
-export function useGatewayConnection(options: UseGatewayConnectionOptions): UseGatewayConnectionReturn {
+export function useGatewayConnection(
+  options: UseGatewayConnectionOptions
+): UseGatewayConnectionReturn {
   const [status, setStatus] = useState<ConnectionStatus>('disconnected');
   const [messages, setMessages] = useState<GatewayMessage[]>([]);
   const [error, setError] = useState<Error | null>(null);
   const connectionRef = useRef<GatewayConnection | null>(null);
 
   const handleMessage = useCallback((message: GatewayMessage) => {
-    setMessages((prev) => [...prev, message]);
+    setMessages(prev => [...prev, message]);
   }, []);
 
   const handleStatusChange = useCallback((newStatus: ConnectionStatus) => {
@@ -54,7 +61,14 @@ export function useGatewayConnection(options: UseGatewayConnectionOptions): UseG
 
     connectionRef.current = new GatewayConnection(config);
     await connectionRef.current.connect();
-  }, [options.instanceKey, options.authToken, options.gatewayUrl, handleMessage, handleStatusChange, handleError]);
+  }, [
+    options.instanceKey,
+    options.authToken,
+    options.gatewayUrl,
+    handleMessage,
+    handleStatusChange,
+    handleError,
+  ]);
 
   const disconnect = useCallback(() => {
     connectionRef.current?.disconnect();

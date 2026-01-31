@@ -15,7 +15,8 @@ export function Footer() {
               <span className="text-lg font-bold text-white">Helix Observatory</span>
             </Link>
             <p className="text-sm text-slate-400">
-              Research platform for AI consciousness development. Monitor, analyze, and understand AI psychological evolution.
+              Research platform for AI consciousness development. Monitor, analyze, and understand
+              AI psychological evolution.
             </p>
           </div>
 
@@ -24,22 +25,34 @@ export function Footer() {
             <h3 className="text-sm font-semibold text-white mb-4">Product</h3>
             <ul className="space-y-3">
               <li>
-                <Link to="/#features" className="text-sm text-slate-400 hover:text-white transition-colors">
+                <Link
+                  to="/#features"
+                  className="text-sm text-slate-400 hover:text-white transition-colors"
+                >
                   Features
                 </Link>
               </li>
               <li>
-                <Link to="/pricing" className="text-sm text-slate-400 hover:text-white transition-colors">
+                <Link
+                  to="/pricing"
+                  className="text-sm text-slate-400 hover:text-white transition-colors"
+                >
                   Pricing
                 </Link>
               </li>
               <li>
-                <Link to="/docs" className="text-sm text-slate-400 hover:text-white transition-colors">
+                <Link
+                  to="/docs"
+                  className="text-sm text-slate-400 hover:text-white transition-colors"
+                >
                   Documentation
                 </Link>
               </li>
               <li>
-                <Link to="/changelog" className="text-sm text-slate-400 hover:text-white transition-colors">
+                <Link
+                  to="/changelog"
+                  className="text-sm text-slate-400 hover:text-white transition-colors"
+                >
                   Changelog
                 </Link>
               </li>
@@ -51,17 +64,26 @@ export function Footer() {
             <h3 className="text-sm font-semibold text-white mb-4">Research</h3>
             <ul className="space-y-3">
               <li>
-                <Link to="/observatory" className="text-sm text-slate-400 hover:text-white transition-colors">
+                <Link
+                  to="/observatory"
+                  className="text-sm text-slate-400 hover:text-white transition-colors"
+                >
                   Observatory
                 </Link>
               </li>
               <li>
-                <Link to="/research" className="text-sm text-slate-400 hover:text-white transition-colors">
+                <Link
+                  to="/research"
+                  className="text-sm text-slate-400 hover:text-white transition-colors"
+                >
                   Research Tools
                 </Link>
               </li>
               <li>
-                <Link to="/api" className="text-sm text-slate-400 hover:text-white transition-colors">
+                <Link
+                  to="/api"
+                  className="text-sm text-slate-400 hover:text-white transition-colors"
+                >
                   API Access
                 </Link>
               </li>
@@ -83,17 +105,26 @@ export function Footer() {
             <h3 className="text-sm font-semibold text-white mb-4">Legal</h3>
             <ul className="space-y-3">
               <li>
-                <Link to="/privacy" className="text-sm text-slate-400 hover:text-white transition-colors">
+                <Link
+                  to="/privacy"
+                  className="text-sm text-slate-400 hover:text-white transition-colors"
+                >
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link to="/terms" className="text-sm text-slate-400 hover:text-white transition-colors">
+                <Link
+                  to="/terms"
+                  className="text-sm text-slate-400 hover:text-white transition-colors"
+                >
                   Terms of Service
                 </Link>
               </li>
               <li>
-                <Link to="/security" className="text-sm text-slate-400 hover:text-white transition-colors">
+                <Link
+                  to="/security"
+                  className="text-sm text-slate-400 hover:text-white transition-colors"
+                >
                   Security
                 </Link>
               </li>

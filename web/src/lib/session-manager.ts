@@ -73,17 +73,15 @@ export class SessionManager {
   }
 
   async syncSession(session: Session): Promise<void> {
-    const { error } = await supabase
-      .from('sessions')
-      .upsert({
-        id: session.id,
-        instance_key: session.instance_key,
-        user_id: session.user_id,
-        started_at: session.started_at,
-        ended_at: session.ended_at,
-        source: session.source,
-        metadata: session.metadata,
-      });
+    const { error } = await supabase.from('sessions').upsert({
+      id: session.id,
+      instance_key: session.instance_key,
+      user_id: session.user_id,
+      started_at: session.started_at,
+      ended_at: session.ended_at,
+      source: session.source,
+      metadata: session.metadata,
+    });
 
     if (error) throw error;
   }
@@ -132,11 +130,11 @@ export class SessionManager {
           table: 'session_messages',
           filter: `session_id=eq.${sessionId}`,
         },
-        (payload) => {
+        payload => {
           if (payload.eventType === 'INSERT' && this.currentSession) {
             const newMessage = payload.new as SessionMessage;
             // Only add if not already present (avoid duplicates from local sync)
-            if (!this.currentSession.messages.find((m) => m.id === newMessage.id)) {
+            if (!this.currentSession.messages.find(m => m.id === newMessage.id)) {
               this.currentSession.messages.push(newMessage);
               this.config.onSessionUpdate(this.currentSession);
             }
@@ -211,10 +209,7 @@ export class SessionManager {
     this.setStatus('syncing');
 
     try {
-      await supabase
-        .from('sessions')
-        .update({ source: 'local' })
-        .eq('id', this.currentSession.id);
+      await supabase.from('sessions').update({ source: 'local' }).eq('id', this.currentSession.id);
 
       this.currentSession.source = 'local';
       this.setStatus('synced');

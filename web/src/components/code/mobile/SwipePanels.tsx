@@ -101,7 +101,7 @@ export function SwipePanels({
             width: `${panels.length * 100}%`,
           }}
         >
-          {panels.map((panel) => (
+          {panels.map(panel => (
             <div
               key={panel.id}
               className="h-full overflow-y-auto"
@@ -121,9 +121,7 @@ export function SwipePanels({
             onClick={() => goToPanel(index)}
             className={cn(
               'h-1.5 rounded-full transition-all',
-              index === currentIndex
-                ? 'w-4 bg-helix-500'
-                : 'w-1.5 bg-slate-600 hover:bg-slate-500'
+              index === currentIndex ? 'w-4 bg-helix-500' : 'w-1.5 bg-slate-600 hover:bg-slate-500'
             )}
           />
         ))}

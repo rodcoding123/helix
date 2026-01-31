@@ -42,44 +42,56 @@ export function usePanels(options: UsePanelsOptions = {}): UsePanelsReturn {
 
   const [activePanel, setActivePanel] = useState<PanelType>('chat');
 
-  const togglePanel = useCallback((panel: PanelType) => {
-    if (isMobile) {
-      // On mobile, only show one panel at a time
-      setActivePanel(panel);
-    } else {
-      setPanels((prev) => ({
-        ...prev,
-        [panel]: !prev[panel],
-      }));
-    }
-  }, [isMobile]);
+  const togglePanel = useCallback(
+    (panel: PanelType) => {
+      if (isMobile) {
+        // On mobile, only show one panel at a time
+        setActivePanel(panel);
+      } else {
+        setPanels(prev => ({
+          ...prev,
+          [panel]: !prev[panel],
+        }));
+      }
+    },
+    [isMobile]
+  );
 
-  const showPanel = useCallback((panel: PanelType) => {
-    if (isMobile) {
-      setActivePanel(panel);
-    } else {
-      setPanels((prev) => ({
-        ...prev,
-        [panel]: true,
-      }));
-    }
-  }, [isMobile]);
+  const showPanel = useCallback(
+    (panel: PanelType) => {
+      if (isMobile) {
+        setActivePanel(panel);
+      } else {
+        setPanels(prev => ({
+          ...prev,
+          [panel]: true,
+        }));
+      }
+    },
+    [isMobile]
+  );
 
-  const hidePanel = useCallback((panel: PanelType) => {
-    if (!isMobile) {
-      setPanels((prev) => ({
-        ...prev,
-        [panel]: false,
-      }));
-    }
-  }, [isMobile]);
+  const hidePanel = useCallback(
+    (panel: PanelType) => {
+      if (!isMobile) {
+        setPanels(prev => ({
+          ...prev,
+          [panel]: false,
+        }));
+      }
+    },
+    [isMobile]
+  );
 
-  const isPanelVisible = useCallback((panel: PanelType) => {
-    if (isMobile) {
-      return activePanel === panel;
-    }
-    return panels[panel];
-  }, [isMobile, activePanel, panels]);
+  const isPanelVisible = useCallback(
+    (panel: PanelType) => {
+      if (isMobile) {
+        return activePanel === panel;
+      }
+      return panels[panel];
+    },
+    [isMobile, activePanel, panels]
+  );
 
   const visiblePanelCount = useMemo(() => {
     if (isMobile) return 1;

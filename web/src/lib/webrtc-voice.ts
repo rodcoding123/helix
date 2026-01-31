@@ -106,15 +106,17 @@ export class WebRTCVoice {
 
       this.signalingWs.onopen = () => {
         // Authenticate
-        this.signalingWs?.send(JSON.stringify({
-          type: 'auth',
-          instanceKey: this.config.instanceKey,
-          token: this.config.authToken,
-        }));
+        this.signalingWs?.send(
+          JSON.stringify({
+            type: 'auth',
+            instanceKey: this.config.instanceKey,
+            token: this.config.authToken,
+          })
+        );
         resolve();
       };
 
-      this.signalingWs.onmessage = async (event) => {
+      this.signalingWs.onmessage = async event => {
         const message = JSON.parse(event.data);
         await this.handleSignalingMessage(message);
       };
@@ -144,13 +146,13 @@ export class WebRTCVoice {
 
     // Add local tracks
     if (this.localStream) {
-      this.localStream.getTracks().forEach((track) => {
+      this.localStream.getTracks().forEach(track => {
         this.peerConnection?.addTrack(track, this.localStream!);
       });
     }
 
     // Handle incoming tracks
-    this.peerConnection.ontrack = (event) => {
+    this.peerConnection.ontrack = event => {
       this.remoteStream = event.streams[0];
       // Play remote audio
       const audio = new Audio();
@@ -159,12 +161,14 @@ export class WebRTCVoice {
     };
 
     // Handle ICE candidates
-    this.peerConnection.onicecandidate = (event) => {
+    this.peerConnection.onicecandidate = event => {
       if (event.candidate) {
-        this.signalingWs?.send(JSON.stringify({
-          type: 'ice-candidate',
-          candidate: event.candidate,
-        }));
+        this.signalingWs?.send(
+          JSON.stringify({
+            type: 'ice-candidate',
+            candidate: event.candidate,
+          })
+        );
       }
     };
 
@@ -195,10 +199,7 @@ export class WebRTCVoice {
         await this.handleIceCandidate(message.candidate as RTCIceCandidateInit);
         break;
       case 'transcript':
-        this.config.onTranscript?.(
-          message.text as string,
-          message.isFinal as boolean
-        );
+        this.config.onTranscript?.(message.text as string, message.isFinal as boolean);
         break;
     }
   }
@@ -210,10 +211,12 @@ export class WebRTCVoice {
     const answer = await this.peerConnection.createAnswer();
     await this.peerConnection.setLocalDescription(answer);
 
-    this.signalingWs?.send(JSON.stringify({
-      type: 'answer',
-      sdp: answer,
-    }));
+    this.signalingWs?.send(
+      JSON.stringify({
+        type: 'answer',
+        sdp: answer,
+      })
+    );
   }
 
   private async handleAnswer(sdp: RTCSessionDescriptionInit): Promise<void> {
@@ -232,15 +235,17 @@ export class WebRTCVoice {
     const offer = await this.peerConnection.createOffer();
     await this.peerConnection.setLocalDescription(offer);
 
-    this.signalingWs?.send(JSON.stringify({
-      type: 'offer',
-      sdp: offer,
-    }));
+    this.signalingWs?.send(
+      JSON.stringify({
+        type: 'offer',
+        sdp: offer,
+      })
+    );
   }
 
   setMuted(muted: boolean): void {
     if (this.localStream) {
-      this.localStream.getAudioTracks().forEach((track) => {
+      this.localStream.getAudioTracks().forEach(track => {
         track.enabled = !muted;
       });
     }
@@ -260,7 +265,7 @@ export class WebRTCVoice {
     }
 
     if (this.localStream) {
-      this.localStream.getTracks().forEach((track) => track.stop());
+      this.localStream.getTracks().forEach(track => track.stop());
       this.localStream = null;
     }
 

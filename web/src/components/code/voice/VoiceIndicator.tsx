@@ -58,22 +58,10 @@ export function VoiceIndicator({ state, className }: VoiceIndicatorProps) {
 
   return (
     <div
-      className={cn(
-        'flex items-center gap-2 px-3 py-1.5 rounded-full',
-        current.bgColor,
-        className
-      )}
+      className={cn('flex items-center gap-2 px-3 py-1.5 rounded-full', current.bgColor, className)}
     >
-      <Icon
-        className={cn(
-          'h-3.5 w-3.5',
-          current.color,
-          current.animate && 'animate-pulse'
-        )}
-      />
-      <span className={cn('text-xs font-medium', current.color)}>
-        {current.label}
-      </span>
+      <Icon className={cn('h-3.5 w-3.5', current.color, current.animate && 'animate-pulse')} />
+      <span className={cn('text-xs font-medium', current.color)}>{current.label}</span>
     </div>
   );
 }

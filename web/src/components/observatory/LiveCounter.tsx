@@ -20,7 +20,7 @@ function CounterCard({ label, value, icon, suffix = '', color }: CounterCardProp
 
     const step = Math.ceil(Math.abs(diff) / 20);
     const interval = setInterval(() => {
-      setDisplayValue((prev) => {
+      setDisplayValue(prev => {
         if (diff > 0) {
           return Math.min(prev + step, value);
         } else {
@@ -34,11 +34,11 @@ function CounterCard({ label, value, icon, suffix = '', color }: CounterCardProp
 
   return (
     <div className="relative overflow-hidden rounded-xl bg-slate-900/50 p-6 border border-slate-800">
-      <div className={`absolute -right-4 -top-4 h-24 w-24 rounded-full ${color} opacity-10 blur-2xl`} />
+      <div
+        className={`absolute -right-4 -top-4 h-24 w-24 rounded-full ${color} opacity-10 blur-2xl`}
+      />
       <div className="relative">
-        <div className={`inline-flex rounded-lg ${color} bg-opacity-20 p-3`}>
-          {icon}
-        </div>
+        <div className={`inline-flex rounded-lg ${color} bg-opacity-20 p-3`}>{icon}</div>
         <p className="mt-4 text-sm text-slate-400">{label}</p>
         <p className="mt-1 text-3xl font-bold text-white">
           {displayValue.toLocaleString()}

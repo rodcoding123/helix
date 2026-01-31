@@ -46,7 +46,7 @@ export function TierGate({
   }
 
   // Get the required tier info
-  const requiredTierInfo = PRICING_TIERS.find((t) => t.id === requiredTier);
+  const requiredTierInfo = PRICING_TIERS.find(t => t.id === requiredTier);
 
   return (
     <div className={cn('flex items-center justify-center min-h-[400px]', className)}>
@@ -61,8 +61,8 @@ export function TierGate({
 
         <p className="text-slate-400 mb-6">
           This feature requires the {requiredTierInfo?.name || requiredTier} plan
-          {requiredTierInfo && ` ($${requiredTierInfo.price}/month)`}.
-          Upgrade to unlock this and other premium features.
+          {requiredTierInfo && ` ($${requiredTierInfo.price}/month)`}. Upgrade to unlock this and
+          other premium features.
         </p>
 
         {requiredTierInfo && (

@@ -14,11 +14,7 @@ interface DiffPanelProps {
 }
 
 function DiffLine({ line, lineNumber }: { line: string; lineNumber: number }) {
-  const type = line.startsWith('+')
-    ? 'added'
-    : line.startsWith('-')
-      ? 'removed'
-      : 'unchanged';
+  const type = line.startsWith('+') ? 'added' : line.startsWith('-') ? 'removed' : 'unchanged';
 
   return (
     <div
@@ -69,7 +65,7 @@ export function DiffPanel({
   const stats = useMemo(() => {
     let added = 0;
     let removed = 0;
-    diffLines.forEach((line) => {
+    diffLines.forEach(line => {
       if (line.startsWith('+')) added++;
       else if (line.startsWith('-')) removed++;
     });
@@ -93,9 +89,7 @@ export function DiffPanel({
         <div className="flex items-center gap-2">
           <FileCode className="h-4 w-4 text-amber-400" />
           <span className="text-sm font-medium text-slate-200">Diff</span>
-          {fileName && (
-            <span className="text-xs text-slate-500 font-mono">{fileName}</span>
-          )}
+          {fileName && <span className="text-xs text-slate-500 font-mono">{fileName}</span>}
         </div>
         <div className="flex items-center gap-3">
           {hasChanges && (
@@ -114,10 +108,7 @@ export function DiffPanel({
 
       {/* Content */}
       {isExpanded && (
-        <div
-          className="flex-1 overflow-y-auto"
-          style={{ maxHeight: '400px' }}
-        >
+        <div className="flex-1 overflow-y-auto" style={{ maxHeight: '400px' }}>
           {hasChanges ? (
             <div className="divide-y divide-slate-800">
               {diffLines.map((line, index) => (

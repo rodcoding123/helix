@@ -1,11 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Brain,
-  Zap,
-  ArrowRight,
-  RefreshCw,
-} from 'lucide-react';
+import { Brain, Zap, ArrowRight, RefreshCw } from 'lucide-react';
 import { LiveCounter } from '@/components/observatory/LiveCounter';
 import { useRealtimeStats } from '@/hooks/useRealtime';
 import {
@@ -61,7 +56,7 @@ export function Observatory() {
               <p className="text-sm text-slate-400">Events over time</p>
             </div>
             <div className="flex items-center gap-2">
-              {(['1h', '24h', '7d'] as const).map((range) => (
+              {(['1h', '24h', '7d'] as const).map(range => (
                 <button
                   key={range}
                   onClick={() => setTimeRange(range)}
@@ -93,12 +88,7 @@ export function Observatory() {
                   tickLine={false}
                   axisLine={false}
                 />
-                <YAxis
-                  stroke="#64748b"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                />
+                <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: '#1e293b',
@@ -143,12 +133,7 @@ export function Observatory() {
                     tickLine={false}
                     axisLine={false}
                   />
-                  <YAxis
-                    stroke="#64748b"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                  />
+                  <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: '#1e293b',
@@ -193,17 +178,12 @@ export function Observatory() {
         <div className="mt-12 rounded-xl border border-helix-500/30 bg-gradient-to-r from-helix-500/10 to-transparent p-8">
           <div className="flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
             <div>
-              <h3 className="text-xl font-bold text-white">
-                Want to run your own Helix instance?
-              </h3>
+              <h3 className="text-xl font-bold text-white">Want to run your own Helix instance?</h3>
               <p className="mt-2 text-slate-400">
                 Get full access to telemetry, hash chain verification, and anomaly detection.
               </p>
             </div>
-            <Link
-              to="/signup"
-              className="btn btn-primary inline-flex items-center gap-2"
-            >
+            <Link to="/signup" className="btn btn-primary inline-flex items-center gap-2">
               Get Started
               <ArrowRight className="h-4 w-4" />
             </Link>
@@ -231,10 +211,7 @@ function EventTypeBar({ label, value, max, color }: EventTypeBarProps) {
         <span className="text-slate-400">{value}%</span>
       </div>
       <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-800">
-        <div
-          className={`h-full rounded-full ${color}`}
-          style={{ width: `${percentage}%` }}
-        />
+        <div className={`h-full rounded-full ${color}`} style={{ width: `${percentage}%` }} />
       </div>
     </div>
   );

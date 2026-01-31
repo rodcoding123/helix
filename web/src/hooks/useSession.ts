@@ -1,5 +1,11 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { SessionManager, Session, SessionMessage, SessionStatus, SessionManagerConfig } from '@/lib/session-manager';
+import {
+  SessionManager,
+  Session,
+  SessionMessage,
+  SessionStatus,
+  SessionManagerConfig,
+} from '@/lib/session-manager';
 import { useAuth } from './useAuth';
 
 interface UseSessionOptions {
@@ -73,19 +79,22 @@ export function useSession(options: UseSessionOptions): UseSessionReturn {
     }
   }, []);
 
-  const addMessage = useCallback(async (message: Omit<SessionMessage, 'id' | 'timestamp'>): Promise<SessionMessage | null> => {
-    if (!managerRef.current) {
-      setError(new Error('Session manager not initialized'));
-      return null;
-    }
+  const addMessage = useCallback(
+    async (message: Omit<SessionMessage, 'id' | 'timestamp'>): Promise<SessionMessage | null> => {
+      if (!managerRef.current) {
+        setError(new Error('Session manager not initialized'));
+        return null;
+      }
 
-    try {
-      return await managerRef.current.addMessage(message);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to add message'));
-      return null;
-    }
-  }, []);
+      try {
+        return await managerRef.current.addMessage(message);
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Failed to add message'));
+        return null;
+      }
+    },
+    []
+  );
 
   const loadSession = useCallback(async (sessionId: string) => {
     if (!managerRef.current) {

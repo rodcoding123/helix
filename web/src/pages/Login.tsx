@@ -40,9 +40,7 @@ export function Login() {
       <div className="w-full max-w-md">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-white">Welcome Back</h1>
-          <p className="mt-2 text-slate-400">
-            Sign in to access your Helix dashboard
-          </p>
+          <p className="mt-2 text-slate-400">Sign in to access your Helix dashboard</p>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
@@ -62,7 +60,7 @@ export function Login() {
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={e => setEmail(e.target.value)}
                 required
                 autoComplete="email"
                 className="mt-1 block w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 text-white placeholder-slate-500 focus:border-helix-500 focus:outline-none focus:ring-1 focus:ring-helix-500"
@@ -79,7 +77,7 @@ export function Login() {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={e => setPassword(e.target.value)}
                   required
                   autoComplete="current-password"
                   className="block w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 pr-12 text-white placeholder-slate-500 focus:border-helix-500 focus:outline-none focus:ring-1 focus:ring-helix-500"
@@ -90,11 +88,7 @@ export function Login() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
             </div>
@@ -108,10 +102,7 @@ export function Login() {
               />
               <span className="text-sm text-slate-400">Remember me</span>
             </label>
-            <Link
-              to="/forgot-password"
-              className="text-sm text-helix-400 hover:text-helix-300"
-            >
+            <Link to="/forgot-password" className="text-sm text-helix-400 hover:text-helix-300">
               Forgot password?
             </Link>
           </div>
@@ -121,11 +112,7 @@ export function Login() {
             disabled={isLoading}
             className="btn btn-primary w-full justify-center py-3 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isLoading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              'Sign In'
-            )}
+            {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Sign In'}
           </button>
 
           <p className="text-center text-sm text-slate-400">

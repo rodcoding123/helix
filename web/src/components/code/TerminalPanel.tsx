@@ -31,9 +31,7 @@ function ToolCallItem({ tool, isCurrent }: { tool: ToolCall; isCurrent: boolean 
     <div
       className={cn(
         'rounded-lg border p-3 transition-all',
-        isCurrent
-          ? 'border-amber-500/50 bg-amber-500/10'
-          : 'border-slate-700 bg-slate-800/50'
+        isCurrent ? 'border-amber-500/50 bg-amber-500/10' : 'border-slate-700 bg-slate-800/50'
       )}
     >
       <div className="flex items-center justify-between mb-2">
@@ -87,9 +85,7 @@ export function TerminalPanel({
     }
   }, [toolCalls, currentToolCall, isExpanded]);
 
-  const allToolCalls = currentToolCall
-    ? [...toolCalls, currentToolCall]
-    : toolCalls;
+  const allToolCalls = currentToolCall ? [...toolCalls, currentToolCall] : toolCalls;
 
   return (
     <div

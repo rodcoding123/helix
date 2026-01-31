@@ -119,7 +119,7 @@ export function MobileLayout({
 
       {/* Tab bar */}
       <div className="flex border-t border-slate-700 bg-slate-900">
-        {tabs.map((tab) => {
+        {tabs.map(tab => {
           const Icon = tab.icon;
           const isActive = activePanel === tab.id;
 
@@ -129,9 +129,7 @@ export function MobileLayout({
               onClick={() => setActivePanel(tab.id)}
               className={cn(
                 'flex-1 flex flex-col items-center gap-1 py-3 transition-colors',
-                isActive
-                  ? 'text-helix-400 bg-helix-500/10'
-                  : 'text-slate-500 hover:text-slate-300'
+                isActive ? 'text-helix-400 bg-helix-500/10' : 'text-slate-500 hover:text-slate-300'
               )}
             >
               <Icon className="h-5 w-5" />

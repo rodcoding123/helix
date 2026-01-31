@@ -1,8 +1,22 @@
 import { useState } from 'react';
-import { User, Key, CreditCard, Bell, Shield, Trash2, ExternalLink, Copy, Eye, EyeOff, Check } from 'lucide-react';
+import {
+  User as UserIcon,
+  Key,
+  CreditCard,
+  Bell,
+  Shield,
+  Trash2,
+  ExternalLink,
+  Copy,
+  Eye,
+  EyeOff,
+  Check,
+} from 'lucide-react';
+import type { User } from '@supabase/supabase-js';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { PRICING_TIERS } from '@/lib/types';
+import type { Subscription } from '@/lib/types';
 
 type SettingsTab = 'account' | 'api' | 'billing' | 'notifications' | 'security';
 
@@ -11,8 +25,8 @@ export function Settings() {
   const { subscription } = useSubscription();
   const [activeTab, setActiveTab] = useState<SettingsTab>('account');
 
-  const tabs: { id: SettingsTab; label: string; icon: typeof User }[] = [
-    { id: 'account', label: 'Account', icon: User },
+  const tabs: { id: SettingsTab; label: string; icon: typeof UserIcon }[] = [
+    { id: 'account', label: 'Account', icon: UserIcon },
     { id: 'api', label: 'API Keys', icon: Key },
     { id: 'billing', label: 'Billing', icon: CreditCard },
     { id: 'notifications', label: 'Notifications', icon: Bell },
@@ -29,7 +43,7 @@ export function Settings() {
           {/* Sidebar */}
           <nav className="w-48 flex-shrink-0">
             <ul className="space-y-1">
-              {tabs.map((tab) => {
+              {tabs.map(tab => {
                 const Icon = tab.icon;
                 return (
                   <li key={tab.id}>
@@ -64,7 +78,7 @@ export function Settings() {
   );
 }
 
-function AccountSettings({ user, onSignOut }: { user: any; onSignOut: () => void }) {
+function AccountSettings({ user, onSignOut }: { user: User | null; onSignOut: () => void }) {
   const [email, setEmail] = useState(user?.email || '');
 
   return (
@@ -78,7 +92,7 @@ function AccountSettings({ user, onSignOut }: { user: any; onSignOut: () => void
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
               className="w-full px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 focus:border-helix-500 focus:ring-1 focus:ring-helix-500 outline-none"
             />
           </div>
@@ -154,7 +168,11 @@ function ApiSettings() {
                 onClick={copyKey}
                 className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
               >
-                {copied ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+                {copied ? (
+                  <Check className="h-4 w-4 text-emerald-400" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
               </button>
             </div>
           </div>
@@ -187,8 +205,8 @@ function ApiSettings() {
   );
 }
 
-function BillingSettings({ subscription }: { subscription: any }) {
-  const currentTier = PRICING_TIERS.find((t) => t.id === subscription?.tier) || PRICING_TIERS[0];
+function BillingSettings({ subscription }: { subscription: Subscription | null }) {
+  const currentTier = PRICING_TIERS.find(t => t.id === subscription?.tier) || PRICING_TIERS[0];
 
   return (
     <div className="space-y-6">
@@ -198,9 +216,7 @@ function BillingSettings({ subscription }: { subscription: any }) {
         <div className="flex items-center justify-between p-4 rounded-lg bg-slate-800/50 mb-4">
           <div>
             <p className="text-lg font-semibold text-white">{currentTier.name}</p>
-            <p className="text-sm text-slate-400">
-              ${currentTier.price}/month
-            </p>
+            <p className="text-sm text-slate-400">${currentTier.price}/month</p>
           </div>
           <span className="px-3 py-1 rounded-full bg-helix-500/20 text-helix-400 text-sm">
             Active
@@ -303,7 +319,12 @@ function NotificationSettings() {
   );
 }
 
-function ToggleItem({ label, description, checked, onChange }: {
+function ToggleItem({
+  label,
+  description,
+  checked,
+  onChange,
+}: {
   label: string;
   description: string;
   checked: boolean;
@@ -341,7 +362,9 @@ function SecuritySettings() {
         </p>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-2">Current Password</label>
+            <label className="block text-sm font-medium text-slate-400 mb-2">
+              Current Password
+            </label>
             <input
               type="password"
               className="w-full px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 focus:border-helix-500 focus:ring-1 focus:ring-helix-500 outline-none"
@@ -355,7 +378,9 @@ function SecuritySettings() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-2">Confirm New Password</label>
+            <label className="block text-sm font-medium text-slate-400 mb-2">
+              Confirm New Password
+            </label>
             <input
               type="password"
               className="w-full px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 focus:border-helix-500 focus:ring-1 focus:ring-helix-500 outline-none"

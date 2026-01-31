@@ -27,21 +27,16 @@ export function CodeInterface({
   const [showSidebar, setShowSidebar] = useState(true);
   const [sessionStart] = useState(() => Date.now());
   const [sessionDuration, setSessionDuration] = useState(0);
-  const [toolCallHistory, setToolCallHistory] = useState<Array<{
-    name: string;
-    input: Record<string, unknown>;
-    output?: string;
-  }>>([]);
+  const [toolCallHistory, setToolCallHistory] = useState<
+    Array<{
+      name: string;
+      input: Record<string, unknown>;
+      output?: string;
+    }>
+  >([]);
 
   // Connection hook
-  const {
-    status,
-    messages,
-    connect,
-    sendMessage,
-    interrupt,
-    isConnected,
-  } = useGatewayConnection({
+  const { status, messages, connect, sendMessage, interrupt, isConnected } = useGatewayConnection({
     instanceKey,
     authToken,
     gatewayUrl,
@@ -49,19 +44,10 @@ export function CodeInterface({
   });
 
   // Streaming state
-  const {
-    thinking,
-    currentToolCall,
-    isComplete,
-    processMessage,
-    reset,
-  } = useStreaming();
+  const { thinking, currentToolCall, isComplete, processMessage, reset } = useStreaming();
 
   // Panel visibility
-  const {
-    isPanelVisible,
-    togglePanel,
-  } = usePanels({
+  const { isPanelVisible, togglePanel } = usePanels({
     defaultPanels: { thinking: true, terminal: true, diff: false, chat: true },
   });
 
@@ -73,7 +59,7 @@ export function CodeInterface({
 
       // Track completed tool calls
       if (latestMessage.type === 'tool_result' && currentToolCall) {
-        setToolCallHistory((prev) => [
+        setToolCallHistory(prev => [
           ...prev,
           {
             name: currentToolCall.name,
@@ -94,11 +80,14 @@ export function CodeInterface({
   }, [sessionStart]);
 
   // Handle send
-  const handleSend = useCallback((message: string) => {
-    reset();
-    setToolCallHistory([]);
-    sendMessage(message);
-  }, [reset, sendMessage]);
+  const handleSend = useCallback(
+    (message: string) => {
+      reset();
+      setToolCallHistory([]);
+      sendMessage(message);
+    },
+    [reset, sendMessage]
+  );
 
   // Handle interrupt
   const handleInterrupt = useCallback(() => {
@@ -176,11 +165,7 @@ export function CodeInterface({
             className="p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
             title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
           >
-            {isFullscreen ? (
-              <Minimize2 className="h-4 w-4" />
-            ) : (
-              <Maximize2 className="h-4 w-4" />
-            )}
+            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </button>
 
           <button
@@ -198,10 +183,7 @@ export function CodeInterface({
         {showSidebar && (
           <div className="w-96 flex-shrink-0 flex flex-col gap-4 p-4 overflow-y-auto border-r border-slate-700 bg-slate-950/50">
             {isPanelVisible('thinking') && (
-              <ThinkingPanel
-                thinking={thinking}
-                onToggle={() => togglePanel('thinking')}
-              />
+              <ThinkingPanel thinking={thinking} onToggle={() => togglePanel('thinking')} />
             )}
 
             {isPanelVisible('terminal') && (
@@ -213,10 +195,7 @@ export function CodeInterface({
             )}
 
             {isPanelVisible('diff') && (
-              <DiffPanel
-                diffLines={[]}
-                onToggle={() => togglePanel('diff')}
-              />
+              <DiffPanel diffLines={[]} onToggle={() => togglePanel('diff')} />
             )}
           </div>
         )}
@@ -247,11 +226,10 @@ export function CodeInterface({
               <div className="flex items-center justify-center h-full">
                 <div className="text-center max-w-md">
                   <Layout className="h-12 w-12 text-helix-500 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-slate-300 mb-2">
-                    Ready to Code
-                  </h3>
+                  <h3 className="text-lg font-medium text-slate-300 mb-2">Ready to Code</h3>
                   <p className="text-sm text-slate-500 mb-6">
-                    Connected to your Helix instance. Ask anything and watch the AI think, execute tools, and transform code in real-time.
+                    Connected to your Helix instance. Ask anything and watch the AI think, execute
+                    tools, and transform code in real-time.
                   </p>
                   <div className="grid grid-cols-2 gap-2 text-left">
                     {[
@@ -259,7 +237,7 @@ export function CodeInterface({
                       'Add error handling',
                       'Refactor for clarity',
                       'Write tests for...',
-                    ].map((suggestion) => (
+                    ].map(suggestion => (
                       <button
                         key={suggestion}
                         onClick={() => handleSend(suggestion)}

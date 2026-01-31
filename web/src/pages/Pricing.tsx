@@ -8,9 +8,7 @@ export function Pricing() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-white">
-            Simple, Transparent Pricing
-          </h1>
+          <h1 className="text-4xl font-bold text-white">Simple, Transparent Pricing</h1>
           <p className="mt-4 text-lg text-slate-400">
             Choose the plan that fits your research needs. Upgrade or downgrade anytime.
           </p>
@@ -18,16 +16,14 @@ export function Pricing() {
 
         {/* Pricing Cards */}
         <div className="mt-16 grid gap-8 lg:grid-cols-4">
-          {PRICING_TIERS.map((tier) => (
+          {PRICING_TIERS.map(tier => (
             <PricingCard key={tier.id} tier={tier} />
           ))}
         </div>
 
         {/* FAQ Section */}
         <div className="mt-24">
-          <h2 className="text-center text-2xl font-bold text-white">
-            Frequently Asked Questions
-          </h2>
+          <h2 className="text-center text-2xl font-bold text-white">Frequently Asked Questions</h2>
 
           <div className="mt-12 grid gap-8 lg:grid-cols-2">
             <FAQItem
@@ -59,17 +55,18 @@ export function Pricing() {
 
         {/* Comparison Table */}
         <div className="mt-24">
-          <h2 className="text-center text-2xl font-bold text-white">
-            Feature Comparison
-          </h2>
+          <h2 className="text-center text-2xl font-bold text-white">Feature Comparison</h2>
 
           <div className="mt-12 overflow-x-auto">
             <table className="w-full border-collapse text-left">
               <thead>
                 <tr className="border-b border-slate-800">
                   <th className="py-4 pr-4 text-sm font-medium text-slate-400">Feature</th>
-                  {PRICING_TIERS.map((tier) => (
-                    <th key={tier.id} className="px-4 py-4 text-center text-sm font-medium text-white">
+                  {PRICING_TIERS.map(tier => (
+                    <th
+                      key={tier.id}
+                      className="px-4 py-4 text-center text-sm font-medium text-white"
+                    >
                       {tier.name}
                     </th>
                   ))}
@@ -80,34 +77,19 @@ export function Pricing() {
                   feature="Observatory Access"
                   values={['Public only', 'Full', 'Full', 'Full + Priority']}
                 />
-                <ComparisonRow
-                  feature="Helix Instances"
-                  values={['0', '1', '5', 'Unlimited']}
-                />
+                <ComparisonRow feature="Helix Instances" values={['0', '1', '5', 'Unlimited']} />
                 <ComparisonRow
                   feature="Telemetry Retention"
                   values={['-', '7 days', '30 days', '1 year']}
                 />
-                <ComparisonRow
-                  feature="API Access"
-                  values={[false, true, true, true]}
-                />
+                <ComparisonRow feature="API Access" values={[false, true, true, true]} />
                 <ComparisonRow
                   feature="Hash Chain Verification"
                   values={[false, true, true, true]}
                 />
-                <ComparisonRow
-                  feature="Anomaly Detection"
-                  values={[false, false, true, true]}
-                />
-                <ComparisonRow
-                  feature="Instance Snapshots"
-                  values={[false, false, true, true]}
-                />
-                <ComparisonRow
-                  feature="Team Sharing"
-                  values={[false, false, false, true]}
-                />
+                <ComparisonRow feature="Anomaly Detection" values={[false, false, true, true]} />
+                <ComparisonRow feature="Instance Snapshots" values={[false, false, true, true]} />
+                <ComparisonRow feature="Team Sharing" values={[false, false, false, true]} />
                 <ComparisonRow
                   feature="Support"
                   values={['Community', 'Email', 'Priority', 'Dedicated']}

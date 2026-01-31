@@ -32,16 +32,11 @@ export function AudioVisualizer({
   }, [audioLevel, isActive]);
 
   return (
-    <div
-      className={cn(
-        'flex items-end justify-center gap-1 h-8',
-        className
-      )}
-    >
+    <div className={cn('flex items-end justify-center gap-1 h-8', className)}>
       {Array.from({ length: barCount }).map((_, index) => (
         <div
           key={index}
-          ref={(el) => {
+          ref={el => {
             if (el) barsRef.current[index] = el;
           }}
           className={cn(
@@ -76,10 +71,7 @@ export function CircularVisualizer({
 
   return (
     <div
-      className={cn(
-        'relative flex items-center justify-center',
-        className
-      )}
+      className={cn('relative flex items-center justify-center', className)}
       style={{ width: size, height: size }}
     >
       {/* Outer ring */}

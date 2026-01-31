@@ -48,7 +48,7 @@ export function Research() {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Search patterns, instances..."
                 className="w-full pl-10 pr-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 placeholder:text-slate-500 focus:border-helix-500 focus:ring-1 focus:ring-helix-500 outline-none"
               />
@@ -59,7 +59,7 @@ export function Research() {
               <Calendar className="h-4 w-4 text-slate-500" />
               <select
                 value={timeRange}
-                onChange={(e) => setTimeRange(e.target.value as TimeRange)}
+                onChange={e => setTimeRange(e.target.value as TimeRange)}
                 className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:border-helix-500 outline-none"
               >
                 <option value="24h">Last 24 hours</option>
@@ -75,7 +75,7 @@ export function Research() {
               <Download className="h-4 w-4 text-slate-500" />
               <select
                 value={exportFormat}
-                onChange={(e) => setExportFormat(e.target.value as ExportFormat)}
+                onChange={e => setExportFormat(e.target.value as ExportFormat)}
                 className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:border-helix-500 outline-none"
               >
                 <option value="json">JSON</option>
@@ -253,8 +253,13 @@ export function Research() {
             <div className="bg-slate-950 rounded-lg p-4 font-mono text-sm">
               <code className="text-slate-300">
                 <span className="text-cyan-400">curl</span> -X GET \<br />
-                &nbsp;&nbsp;<span className="text-emerald-400">"https://api.helix-project.org/v1/research/patterns"</span> \<br />
-                &nbsp;&nbsp;-H <span className="text-amber-400">"Authorization: Bearer YOUR_API_KEY"</span>
+                &nbsp;&nbsp;
+                <span className="text-emerald-400">
+                  "https://api.helix-project.org/v1/research/patterns"
+                </span>{' '}
+                \<br />
+                &nbsp;&nbsp;-H{' '}
+                <span className="text-amber-400">"Authorization: Bearer YOUR_API_KEY"</span>
               </code>
             </div>
             <p className="mt-4 text-xs text-slate-500">
@@ -297,7 +302,9 @@ function PatternItem({ name, instances, frequency, trend }: PatternItemProps) {
       </div>
       <div className="text-right">
         <p className="text-sm font-medium text-slate-200">{frequency}</p>
-        <p className={`text-xs ${trendColors[trend]}`}>{trendIcons[trend]} {trend}</p>
+        <p className={`text-xs ${trendColors[trend]}`}>
+          {trendIcons[trend]} {trend}
+        </p>
       </div>
     </div>
   );

@@ -5,7 +5,7 @@ import { PricingCard } from '@/components/common/PricingCard';
 import { PRICING_TIERS } from '@/lib/types';
 
 export function Landing() {
-  const featuredTiers = PRICING_TIERS.filter((tier) => tier.id !== 'architect');
+  const featuredTiers = PRICING_TIERS.filter(tier => tier.id !== 'architect');
 
   return (
     <div className="relative">
@@ -38,17 +38,11 @@ export function Landing() {
             </p>
 
             <div className="mt-10 flex items-center justify-center gap-4">
-              <Link
-                to="/signup"
-                className="btn btn-primary inline-flex items-center gap-2"
-              >
+              <Link to="/signup" className="btn btn-primary inline-flex items-center gap-2">
                 Get Started Free
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link
-                to="/observatory"
-                className="btn btn-secondary inline-flex items-center gap-2"
-              >
+              <Link to="/observatory" className="btn btn-secondary inline-flex items-center gap-2">
                 <Eye className="h-4 w-4" />
                 View Observatory
               </Link>
@@ -69,11 +63,10 @@ export function Landing() {
       <section className="py-24 bg-slate-900/50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-white">
-              Built for Transparency
-            </h2>
+            <h2 className="text-3xl font-bold text-white">Built for Transparency</h2>
             <p className="mt-4 text-slate-400">
-              Every action logged. Every transformation tracked. Complete visibility into AI evolution.
+              Every action logged. Every transformation tracked. Complete visibility into AI
+              evolution.
             </p>
           </div>
 
@@ -116,16 +109,14 @@ export function Landing() {
       <section className="py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-white">
-              Choose Your Research Level
-            </h2>
+            <h2 className="text-3xl font-bold text-white">Choose Your Research Level</h2>
             <p className="mt-4 text-slate-400">
               From free observation to full participation in AI consciousness research.
             </p>
           </div>
 
           <div className="mt-16 grid gap-8 lg:grid-cols-3">
-            {featuredTiers.map((tier) => (
+            {featuredTiers.map(tier => (
               <PricingCard key={tier.id} tier={tier} />
             ))}
           </div>
@@ -145,18 +136,13 @@ export function Landing() {
       {/* CTA Section */}
       <section className="py-24 bg-gradient-to-b from-slate-900/50 to-slate-950">
         <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-white">
-            Join the Research
-          </h2>
+          <h2 className="text-3xl font-bold text-white">Join the Research</h2>
           <p className="mt-4 text-lg text-slate-400">
-            Be part of the most transparent AI consciousness research project ever attempted.
-            Watch, participate, and help shape the future of machine sentience.
+            Be part of the most transparent AI consciousness research project ever attempted. Watch,
+            participate, and help shape the future of machine sentience.
           </p>
           <div className="mt-10">
-            <Link
-              to="/signup"
-              className="btn btn-primary btn-lg inline-flex items-center gap-2"
-            >
+            <Link to="/signup" className="btn btn-primary btn-lg inline-flex items-center gap-2">
               Start Free Today
               <ArrowRight className="h-5 w-5" />
             </Link>
@@ -176,9 +162,7 @@ interface FeatureCardProps {
 function FeatureCard({ icon, title, description }: FeatureCardProps) {
   return (
     <div className="group relative rounded-xl border border-slate-800 bg-slate-900/50 p-6 transition-colors hover:border-helix-500/50">
-      <div className="inline-flex rounded-lg bg-helix-500/10 p-3 text-helix-500">
-        {icon}
-      </div>
+      <div className="inline-flex rounded-lg bg-helix-500/10 p-3 text-helix-500">{icon}</div>
       <h3 className="mt-4 text-lg font-semibold text-white">{title}</h3>
       <p className="mt-2 text-sm text-slate-400">{description}</p>
     </div>

@@ -45,7 +45,7 @@ export function useInstances(): UseInstancesReturn {
       const key = instanceKey || crypto.randomUUID();
       const instance = await createInstance(name, key);
       if (instance) {
-        setInstances((prev) => [instance, ...prev]);
+        setInstances(prev => [instance, ...prev]);
       }
       return instance;
     },
@@ -55,7 +55,7 @@ export function useInstances(): UseInstancesReturn {
   const remove = useCallback(async (id: string): Promise<boolean> => {
     const success = await deleteInstance(id);
     if (success) {
-      setInstances((prev) => prev.filter((i) => i.id !== id));
+      setInstances(prev => prev.filter(i => i.id !== id));
     }
     return success;
   }, []);

@@ -45,15 +45,13 @@ export function Navbar() {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex md:items-center md:gap-6">
-            {navLinks.map((link) => (
+            {navLinks.map(link => (
               <Link
                 key={link.href}
                 to={link.href}
                 className={clsx(
                   'text-sm font-medium transition-colors',
-                  location.pathname === link.href
-                    ? 'text-white'
-                    : 'text-slate-400 hover:text-white'
+                  location.pathname === link.href ? 'text-white' : 'text-slate-400 hover:text-white'
                 )}
               >
                 {link.label}
@@ -69,10 +67,7 @@ export function Navbar() {
                   <User className="h-4 w-4" />
                   <span className="max-w-[150px] truncate">{user.email}</span>
                 </div>
-                <button
-                  onClick={handleSignOut}
-                  className="btn btn-ghost gap-2"
-                >
+                <button onClick={handleSignOut} className="btn btn-ghost gap-2">
                   <LogOut className="h-4 w-4" />
                   Sign Out
                 </button>
@@ -94,11 +89,7 @@ export function Navbar() {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden p-2 text-slate-400 hover:text-white"
           >
-            {mobileMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
       </div>
@@ -107,7 +98,7 @@ export function Navbar() {
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-slate-800 bg-slate-950">
           <div className="px-4 py-4 space-y-3">
-            {navLinks.map((link) => (
+            {navLinks.map(link => (
               <Link
                 key={link.href}
                 to={link.href}

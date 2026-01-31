@@ -10,7 +10,7 @@ export function Signup() {
   const { signUp } = useAuth();
 
   const selectedTierId = searchParams.get('tier') || 'free';
-  const selectedTier = PRICING_TIERS.find((t) => t.id === selectedTierId) || PRICING_TIERS[0];
+  const selectedTier = PRICING_TIERS.find(t => t.id === selectedTierId) || PRICING_TIERS[0];
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,7 +27,7 @@ export function Signup() {
     { met: /[0-9]/.test(password), text: 'One number' },
   ];
 
-  const allRequirementsMet = passwordRequirements.every((r) => r.met);
+  const allRequirementsMet = passwordRequirements.every(r => r.met);
   const passwordsMatch = password === confirmPassword && confirmPassword.length > 0;
 
   async function handleSubmit(e: React.FormEvent) {
@@ -69,13 +69,10 @@ export function Signup() {
           </div>
           <h1 className="text-3xl font-bold text-white">Check Your Email</h1>
           <p className="mt-4 text-slate-400">
-            We've sent a confirmation link to <strong className="text-white">{email}</strong>.
-            Click the link to activate your account.
+            We've sent a confirmation link to <strong className="text-white">{email}</strong>. Click
+            the link to activate your account.
           </p>
-          <button
-            onClick={() => navigate('/login')}
-            className="btn btn-primary mt-8"
-          >
+          <button onClick={() => navigate('/login')} className="btn btn-primary mt-8">
             Go to Login
           </button>
         </div>
@@ -88,9 +85,7 @@ export function Signup() {
       <div className="w-full max-w-md">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-white">Create Account</h1>
-          <p className="mt-2 text-slate-400">
-            Join the Helix Observatory research platform
-          </p>
+          <p className="mt-2 text-slate-400">Join the Helix Observatory research platform</p>
         </div>
 
         {/* Selected Plan */}
@@ -132,7 +127,7 @@ export function Signup() {
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={e => setEmail(e.target.value)}
                 required
                 autoComplete="email"
                 className="mt-1 block w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 text-white placeholder-slate-500 focus:border-helix-500 focus:outline-none focus:ring-1 focus:ring-helix-500"
@@ -149,7 +144,7 @@ export function Signup() {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={e => setPassword(e.target.value)}
                   required
                   autoComplete="new-password"
                   className="block w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 pr-12 text-white placeholder-slate-500 focus:border-helix-500 focus:outline-none focus:ring-1 focus:ring-helix-500"
@@ -160,16 +155,12 @@ export function Signup() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
               {/* Password Requirements */}
               <div className="mt-3 space-y-2">
-                {passwordRequirements.map((req) => (
+                {passwordRequirements.map(req => (
                   <div
                     key={req.text}
                     className={`flex items-center gap-2 text-xs ${
@@ -191,7 +182,7 @@ export function Signup() {
                 id="confirmPassword"
                 type={showPassword ? 'text' : 'password'}
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={e => setConfirmPassword(e.target.value)}
                 required
                 autoComplete="new-password"
                 className={`mt-1 block w-full rounded-lg border bg-slate-900 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-1 ${
@@ -230,11 +221,7 @@ export function Signup() {
             disabled={isLoading || !allRequirementsMet}
             className="btn btn-primary w-full justify-center py-3 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isLoading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              'Create Account'
-            )}
+            {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Create Account'}
           </button>
 
           <p className="text-center text-sm text-slate-400">
