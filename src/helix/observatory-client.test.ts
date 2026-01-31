@@ -9,6 +9,45 @@ import {
   shutdownObservatoryClient,
 } from './observatory-client.js';
 
+// Type for parsed telemetry body
+interface TelemetryBody {
+  instance_key: string;
+  event_type: string;
+  payload: {
+    status?: string;
+    metrics?: {
+      cpu_load?: number;
+      memory_used_mb?: number;
+    };
+    transformation?: string;
+    fromState?: string;
+    toState?: string;
+    details?: {
+      trigger?: string;
+      description?: string;
+      expected?: string;
+      actual?: string;
+    };
+    layer?: number;
+    content?: string;
+    sha256?: string;
+    updated_at?: string;
+    anomaly_type?: string;
+    severity?: string;
+    description?: string;
+    [key: string]: unknown;
+  };
+  timestamp: string;
+  hash: string;
+  previous_hash: string;
+}
+
+// Helper to safely parse mock fetch body
+function parseMockCallBody(mockFn: ReturnType<typeof vi.fn>, callIndex = 0): TelemetryBody {
+  const calls = mockFn.mock.calls as Array<[string, { body: string }]>;
+  return JSON.parse(calls[callIndex][1].body) as TelemetryBody;
+}
+
 // Mock fetch globally
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
@@ -86,7 +125,7 @@ describe('HelixObservatoryClient - sendTelemetry', () => {
 
     await client.sendTelemetry('heartbeat', { status: 'healthy' });
 
-    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const callBody = parseMockCallBody(mockFetch, 0);
     expect(callBody.instance_key).toBe('test-instance');
     expect(callBody.event_type).toBe('heartbeat');
     expect(callBody.payload).toEqual({ status: 'healthy' });
@@ -100,7 +139,7 @@ describe('HelixObservatoryClient - sendTelemetry', () => {
 
     await client.sendTelemetry('heartbeat', { status: 'healthy' }, 'custom-hash', 'custom-prev');
 
-    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const callBody = parseMockCallBody(mockFetch, 0);
     expect(callBody.hash).toBe('custom-hash');
     expect(callBody.previous_hash).toBe('custom-prev');
   });
@@ -156,7 +195,7 @@ describe('HelixObservatoryClient - sendHeartbeat', () => {
     const result = await client.sendHeartbeat('healthy');
 
     expect(result).toBe(true);
-    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const callBody = parseMockCallBody(mockFetch, 0);
     expect(callBody.event_type).toBe('heartbeat');
     expect(callBody.payload.status).toBe('healthy');
   });
@@ -170,9 +209,9 @@ describe('HelixObservatoryClient - sendHeartbeat', () => {
       memory_total_mb: 1024,
     });
 
-    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(callBody.payload.metrics.cpu_load).toBe(0.5);
-    expect(callBody.payload.metrics.memory_used_mb).toBe(512);
+    const callBody = parseMockCallBody(mockFetch, 0);
+    expect(callBody.payload.metrics?.cpu_load).toBe(0.5);
+    expect(callBody.payload.metrics?.memory_used_mb).toBe(512);
   });
 });
 
@@ -199,7 +238,7 @@ describe('HelixObservatoryClient - sendTransformation', () => {
       'Testing transformation'
     );
 
-    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const callBody = parseMockCallBody(mockFetch, 0);
     expect(callBody.event_type).toBe('transformation');
     expect(callBody.payload.layer).toBe(1);
     expect(callBody.payload.layer_name).toBe('Narrative Core');
@@ -225,7 +264,7 @@ describe('HelixObservatoryClient - sendTransformation', () => {
     for (let layer = 1; layer <= 7; layer++) {
       await client.sendTransformation(layer, 'from', 'to', 'trigger');
 
-      const callBody = JSON.parse(mockFetch.mock.calls[layer - 1][1].body);
+      const callBody = parseMockCallBody(mockFetch, layer - 1);
       expect(callBody.payload.layer_name).toBe(layerNames[layer - 1]);
     }
   });
@@ -248,7 +287,7 @@ describe('HelixObservatoryClient - sendCommand', () => {
 
     await client.sendCommand('ls -la', '/home/user', 'completed', 0, 150);
 
-    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const callBody = parseMockCallBody(mockFetch, 0);
     expect(callBody.event_type).toBe('command');
     expect(callBody.payload.command).toBe('ls -la');
     expect(callBody.payload.workdir).toBe('/home/user');
@@ -275,7 +314,7 @@ describe('HelixObservatoryClient - sendApiCall', () => {
 
     await client.sendApiCall('claude-3-opus', 'anthropic', 'completed', 1500, 2000);
 
-    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const callBody = parseMockCallBody(mockFetch, 0);
     expect(callBody.event_type).toBe('api_call');
     expect(callBody.payload.model).toBe('claude-3-opus');
     expect(callBody.payload.provider).toBe('anthropic');
@@ -301,7 +340,7 @@ describe('HelixObservatoryClient - sendFileChange', () => {
 
     await client.sendFileChange('/path/to/file.ts', 'modified', 1024, 'abc123');
 
-    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const callBody = parseMockCallBody(mockFetch, 0);
     expect(callBody.event_type).toBe('file_change');
     expect(callBody.payload.path).toBe('/path/to/file.ts');
     expect(callBody.payload.change_type).toBe('modified');
@@ -330,13 +369,13 @@ describe('HelixObservatoryClient - sendAnomaly', () => {
       actual: 'def456',
     });
 
-    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const callBody = parseMockCallBody(mockFetch, 0);
     expect(callBody.event_type).toBe('anomaly');
     expect(callBody.payload.anomaly_type).toBe('hash_mismatch');
     expect(callBody.payload.severity).toBe('high');
     expect(callBody.payload.description).toBe('Hash chain integrity compromised');
-    expect(callBody.payload.details.expected).toBe('abc123');
-    expect(callBody.payload.details.actual).toBe('def456');
+    expect(callBody.payload.details?.expected).toBe('abc123');
+    expect(callBody.payload.details?.actual).toBe('def456');
   });
 });
 
@@ -432,7 +471,14 @@ describe('HelixObservatoryClient - Shutdown', () => {
 
 describe('Observatory Event Types', () => {
   it('should support all required event types', () => {
-    const eventTypes = ['command', 'api_call', 'file_change', 'heartbeat', 'transformation', 'anomaly'];
+    const eventTypes = [
+      'command',
+      'api_call',
+      'file_change',
+      'heartbeat',
+      'transformation',
+      'anomaly',
+    ];
 
     eventTypes.forEach(type => {
       expect(typeof type).toBe('string');

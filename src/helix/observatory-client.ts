@@ -107,11 +107,7 @@ export class HelixObservatoryClient {
    * @param observatoryUrl - Base URL of the Observatory (default: http://localhost:3000)
    * @param retryConfig - Optional retry configuration
    */
-  constructor(
-    instanceKey: string,
-    observatoryUrl?: string,
-    retryConfig?: Partial<RetryConfig>
-  ) {
+  constructor(instanceKey: string, observatoryUrl?: string, retryConfig?: Partial<RetryConfig>) {
     this.instanceKey = instanceKey;
     this.observatoryUrl = observatoryUrl || process.env.OBSERVATORY_URL || DEFAULT_OBSERVATORY_URL;
     this.retryConfig = { ...DEFAULT_RETRY_CONFIG, ...retryConfig };
@@ -303,7 +299,9 @@ export class HelixObservatoryClient {
   private async flushOfflineQueue(): Promise<void> {
     if (this.offlineQueue.length === 0) return;
 
-    console.log(`[Helix Observatory] Attempting to flush ${this.offlineQueue.length} queued events`);
+    console.log(
+      `[Helix Observatory] Attempting to flush ${this.offlineQueue.length} queued events`
+    );
 
     // Try a connectivity check first
     try {
@@ -352,10 +350,7 @@ export class HelixObservatoryClient {
    * @param status - Current status (e.g., 'healthy', 'degraded', 'error')
    * @param metrics - Optional system metrics
    */
-  public async sendHeartbeat(
-    status: string,
-    metrics?: HeartbeatMetrics
-  ): Promise<boolean> {
+  public async sendHeartbeat(status: string, metrics?: HeartbeatMetrics): Promise<boolean> {
     const payload: Record<string, unknown> = {
       status,
       timestamp: new Date().toISOString(),
@@ -609,9 +604,7 @@ export function getObservatoryClient(
 ): HelixObservatoryClient {
   if (!defaultClient) {
     if (!instanceKey) {
-      throw new Error(
-        '[Helix Observatory] Instance key required when creating default client'
-      );
+      throw new Error('[Helix Observatory] Instance key required when creating default client');
     }
     defaultClient = new HelixObservatoryClient(instanceKey, observatoryUrl);
   }

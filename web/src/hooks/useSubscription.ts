@@ -14,10 +14,10 @@ interface UseSubscriptionReturn {
 }
 
 const TIER_LEVELS: Record<SubscriptionTier, number> = {
-  free: 0,
-  ghost: 1,
-  observatory: 2,
-  observatory_pro: 3,
+  awaken: 0,
+  phantom: 1,
+  overseer: 2,
+  architect: 3,
 };
 
 export function useSubscription(): UseSubscriptionReturn {
@@ -44,7 +44,7 @@ export function useSubscription(): UseSubscriptionReturn {
       setSubscription({
         id: '',
         user_id: user.id,
-        tier: 'free',
+        tier: 'awaken',
         cancel_at_period_end: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -59,7 +59,7 @@ export function useSubscription(): UseSubscriptionReturn {
 
   const hasAccess = useCallback(
     (requiredTier: SubscriptionTier) => {
-      const currentLevel = TIER_LEVELS[subscription?.tier || 'free'];
+      const currentLevel = TIER_LEVELS[subscription?.tier || 'awaken'];
       const requiredLevel = TIER_LEVELS[requiredTier];
       return currentLevel >= requiredLevel;
     },
@@ -68,7 +68,7 @@ export function useSubscription(): UseSubscriptionReturn {
 
   return {
     subscription,
-    tier: subscription?.tier || 'free',
+    tier: subscription?.tier || 'awaken',
     loading,
     isLoading: loading,
     error,

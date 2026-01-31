@@ -9,6 +9,10 @@ import { Login } from '@/pages/Login';
 import { Signup } from '@/pages/Signup';
 import { Dashboard } from '@/pages/Dashboard';
 import { Observatory } from '@/pages/Observatory';
+import { Code } from '@/pages/Code';
+import { Research } from '@/pages/Research';
+import { Settings } from '@/pages/Settings';
+import { Docs } from '@/pages/Docs';
 
 export function App() {
   return (
@@ -31,6 +35,31 @@ export function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/code"
+                element={
+                  <ProtectedRoute>
+                    <Code />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/research"
+                element={
+                  <ProtectedRoute>
+                    <Research />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/docs" element={<Docs />} />
             </Routes>
           </main>
           <Footer />

@@ -25,13 +25,13 @@ export function Dashboard() {
   const [newInstanceName, setNewInstanceName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
-  const instanceLimit = subscription?.tier === 'observatory_pro'
+  const instanceLimit = subscription?.tier === 'architect'
     ? Infinity
-    : subscription?.tier === 'observatory'
+    : subscription?.tier === 'overseer'
       ? 5
-      : subscription?.tier === 'ghost'
+      : subscription?.tier === 'phantom'
         ? 1
-        : 0;
+        : 1; // awaken tier gets 1 instance
 
   const canCreateInstance = instances.length < instanceLimit;
 

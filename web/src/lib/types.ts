@@ -2,7 +2,19 @@
 // HELIX OBSERVATORY TYPE DEFINITIONS
 // =====================================================
 
-export type SubscriptionTier = 'free' | 'ghost' | 'observatory' | 'observatory_pro';
+export type SubscriptionTier = 'awaken' | 'phantom' | 'overseer' | 'architect';
+
+// Tier access levels (higher number = more access)
+export const TIER_LEVELS: Record<SubscriptionTier, number> = {
+  awaken: 0,
+  phantom: 1,
+  overseer: 2,
+  architect: 3,
+};
+
+export function hasTierAccess(userTier: SubscriptionTier, requiredTier: SubscriptionTier): boolean {
+  return TIER_LEVELS[userTier] >= TIER_LEVELS[requiredTier];
+}
 
 export interface User {
   id: string;
@@ -150,8 +162,8 @@ export interface PricingTier {
 
 export const PRICING_TIERS: PricingTier[] = [
   {
-    id: 'free',
-    name: 'Free',
+    id: 'awaken',
+    name: 'Awaken',
     price: 0,
     interval: 'month',
     features: [
@@ -163,48 +175,49 @@ export const PRICING_TIERS: PricingTier[] = [
     cta: 'Get Started',
   },
   {
-    id: 'ghost',
-    name: 'Ghost Mode',
+    id: 'phantom',
+    name: 'Phantom',
     price: 9,
     interval: 'month',
     features: [
-      'Everything in Free',
+      'Everything in Awaken',
       'Telemetry disabled',
       'Complete privacy',
       'No data collection',
     ],
-    cta: 'Go Ghost',
+    cta: 'Go Phantom',
   },
   {
-    id: 'observatory',
-    name: 'Observatory',
+    id: 'overseer',
+    name: 'Overseer',
     price: 29,
     interval: 'month',
     features: [
-      'Everything in Free',
+      'Everything in Awaken',
+      'Observatory access',
       'Aggregate research data',
       'Psychology distributions',
       'Transformation timelines',
       'Anomaly detection',
-      'Email reports',
     ],
     highlighted: true,
     cta: 'Start Observing',
   },
   {
-    id: 'observatory_pro',
-    name: 'Observatory Pro',
+    id: 'architect',
+    name: 'Architect',
     price: 99,
     interval: 'month',
     features: [
-      'Everything in Observatory',
+      'Everything in Overseer',
+      'Code Interface access',
+      'Remote Helix control',
+      'Voice over WebRTC',
       'Full API access',
       'Data exports (CSV/JSON)',
-      'Pattern explorer',
-      'Behavior clusters',
       'Research tools',
       'Priority support',
     ],
-    cta: 'Go Pro',
+    cta: 'Become Architect',
   },
 ];

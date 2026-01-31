@@ -5,7 +5,7 @@ import { PricingCard } from '@/components/common/PricingCard';
 import { PRICING_TIERS } from '@/lib/types';
 
 export function Landing() {
-  const featuredTiers = PRICING_TIERS.filter((tier) => tier.id !== 'observatory_pro');
+  const featuredTiers = PRICING_TIERS.filter((tier) => tier.id !== 'architect');
 
   return (
     <div className="relative">

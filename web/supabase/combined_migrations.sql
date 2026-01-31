@@ -24,10 +24,10 @@ CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 -- =====================================================
 
 CREATE TYPE subscription_tier AS ENUM (
-  'free',           -- Telemetry on, basic dashboard
-  'ghost',          -- $9/mo - Telemetry off, privacy
-  'observatory',    -- $29/mo - View aggregate data
-  'observatory_pro' -- $99/mo - API access, exports, research tools
+  'Free',           -- Telemetry on, basic dashboard
+  'Phantom',          -- $9/mo - Telemetry off, privacy
+  'Overseer',    -- $29/mo - View aggregate data
+  'Architect' -- $99/mo - API access, exports, research tools
 );
 
 -- =====================================================
@@ -37,7 +37,7 @@ CREATE TYPE subscription_tier AS ENUM (
 CREATE TABLE subscriptions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES auth.users NOT NULL UNIQUE,
-  tier subscription_tier DEFAULT 'free',
+  tier subscription_tier DEFAULT 'Free',
   stripe_customer_id TEXT,
   stripe_subscription_id TEXT,
   stripe_price_id TEXT,
@@ -136,7 +136,7 @@ CREATE OR REPLACE FUNCTION create_subscription_for_user()
 RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO subscriptions (user_id, tier)
-  VALUES (NEW.id, 'free');
+  VALUES (NEW.id, 'Free');
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -184,8 +184,8 @@ CREATE TABLE telemetry (
   client_timestamp TIMESTAMPTZ,
   server_timestamp TIMESTAMPTZ DEFAULT NOW(),
 
-  -- Indexing
-  event_date DATE GENERATED ALWAYS AS (DATE(server_timestamp)) STORED
+  -- Indexing (using UTC timezone for immutability)
+  event_date DATE GENERATED ALWAYS AS ((server_timestamp AT TIME ZONE 'UTC')::DATE) STORED
 );
 
 -- Indexes for performance
@@ -583,6 +583,7 @@ CREATE POLICY "Anyone can view global counters"
 
 -- Function to atomically increment a global counter
 -- Note: This replaces the Migration 003 version with upsert support
+DROP FUNCTION IF EXISTS increment_counter(TEXT, INTEGER);
 CREATE OR REPLACE FUNCTION increment_counter(counter_name TEXT, increment_value INTEGER DEFAULT 1)
 RETURNS VOID AS $$
 BEGIN
@@ -601,6 +602,7 @@ $$ LANGUAGE plpgsql;
 
 -- Function to get real-time observatory stats
 -- Note: This replaces the Migration 003 version with more detailed stats
+DROP FUNCTION IF EXISTS get_live_stats();
 CREATE OR REPLACE FUNCTION get_live_stats()
 RETURNS JSON AS $$
 DECLARE
@@ -695,9 +697,9 @@ RETURNS VOID AS $$
 BEGIN
   -- Delete telemetry older than retention period
   -- Free: No telemetry stored
-  -- Ghost: 7 days
-  -- Observatory: 30 days
-  -- Observatory Pro: 365 days
+  -- Phantom: 7 days
+  -- Overseer: 30 days
+  -- Architect: 365 days
 
   DELETE FROM telemetry t
   WHERE t.server_timestamp < NOW() - INTERVAL '365 days';
@@ -707,14 +709,14 @@ BEGIN
   WHERE t.instance_key IN (
     SELECT i.instance_key FROM instances i
     JOIN subscriptions s ON i.user_id = s.user_id
-    WHERE s.tier = 'ghost' AND t.server_timestamp < NOW() - INTERVAL '7 days'
+    WHERE s.tier = 'Phantom' AND t.server_timestamp < NOW() - INTERVAL '7 days'
   );
 
   DELETE FROM telemetry t
   WHERE t.instance_key IN (
     SELECT i.instance_key FROM instances i
     JOIN subscriptions s ON i.user_id = s.user_id
-    WHERE s.tier = 'observatory' AND t.server_timestamp < NOW() - INTERVAL '30 days'
+    WHERE s.tier = 'Overseer' AND t.server_timestamp < NOW() - INTERVAL '30 days'
   );
 
   -- Clean up old heartbeats (keep only 24 hours)
