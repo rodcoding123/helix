@@ -109,7 +109,7 @@ export function Dashboard() {
           <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-6">
             <p className="text-sm text-slate-400">Active Now</p>
             <p className="mt-2 text-3xl font-bold text-emerald-500">
-              {instances.filter((i) => i.status === 'online').length}
+              {instances.filter((i) => i.is_active).length}
             </p>
           </div>
           <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-6">
@@ -213,16 +213,12 @@ function InstanceCard({ instance, onDelete }: InstanceCardProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   async function copyKey() {
-    await navigator.clipboard.writeText(instance.instanceKey);
+    await navigator.clipboard.writeText(instance.instance_key);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
 
-  const statusColor = {
-    online: 'bg-emerald-500',
-    offline: 'bg-slate-500',
-    error: 'bg-red-500',
-  }[instance.status];
+  const statusColor = instance.is_active ? 'bg-emerald-500' : 'bg-slate-500';
 
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-6">
@@ -232,8 +228,8 @@ function InstanceCard({ instance, onDelete }: InstanceCardProps) {
           <div>
             <h3 className="font-semibold text-white">{instance.name}</h3>
             <p className="text-sm text-slate-400">
-              {instance.lastSeen
-                ? `Last seen ${formatDistanceToNow(new Date(instance.lastSeen))} ago`
+              {instance.last_seen
+                ? `Last seen ${formatDistanceToNow(new Date(instance.last_seen))} ago`
                 : 'Never connected'}
             </p>
           </div>
@@ -280,7 +276,7 @@ function InstanceCard({ instance, onDelete }: InstanceCardProps) {
           </div>
         </div>
         <p className="mt-2 font-mono text-sm text-slate-300">
-          {showKey ? instance.instanceKey : '••••••••••••••••••••••••••••••••'}
+          {showKey ? instance.instance_key : '••••••••••••••••••••••••••••••••'}
         </p>
         {copied && (
           <p className="mt-2 text-xs text-emerald-500">Copied to clipboard!</p>

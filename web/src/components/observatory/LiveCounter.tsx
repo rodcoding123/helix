@@ -66,25 +66,25 @@ export function LiveCounter() {
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       <CounterCard
         label="Active Instances"
-        value={stats?.activeInstances ?? 0}
+        value={stats?.active_instances ?? 0}
         icon={<Activity className="h-6 w-6 text-emerald-500" />}
         color="bg-emerald-500"
       />
       <CounterCard
         label="Total Transformations"
-        value={stats?.totalTransformations ?? 0}
+        value={stats?.total_transformations ?? 0}
         icon={<Brain className="h-6 w-6 text-helix-500" />}
         color="bg-helix-500"
       />
       <CounterCard
-        label="Events Today"
-        value={stats?.eventsToday ?? 0}
+        label="Total Sessions"
+        value={stats?.total_sessions ?? 0}
         icon={<Zap className="h-6 w-6 text-amber-500" />}
         color="bg-amber-500"
       />
       <CounterCard
-        label="Heartbeats / min"
-        value={stats?.heartbeatsPerMinute ?? 0}
+        label="Total Heartbeats"
+        value={stats?.total_heartbeats ?? 0}
         icon={<Heart className="h-6 w-6 text-rose-500" />}
         color="bg-rose-500"
       />

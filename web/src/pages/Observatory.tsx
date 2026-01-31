@@ -1,11 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Activity,
   Brain,
   Zap,
-  TrendingUp,
-  Clock,
   ArrowRight,
   RefreshCw,
 } from 'lucide-react';
@@ -23,7 +20,7 @@ import {
 } from 'recharts';
 
 export function Observatory() {
-  const { stats, isLoading, refresh } = useRealtimeStats();
+  const { isLoading, refresh } = useRealtimeStats();
   const [timeRange, setTimeRange] = useState<'1h' | '24h' | '7d'>('24h');
 
   // Mock data for charts (in production, this would come from the API)

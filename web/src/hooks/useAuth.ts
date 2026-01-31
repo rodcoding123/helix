@@ -1,18 +1,33 @@
-import { useState, useEffect, useCallback } from 'react';
-import { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
-import { supabase, signIn, signUp, signOut } from '@/lib/supabase';
+import { useState, useEffect, useCallback, createContext, useContext, ReactNode } from 'react';
+import { User, Session, AuthChangeEvent, AuthError } from '@supabase/supabase-js';
+import { supabase, signIn as supabaseSignIn, signUp as supabaseSignUp, signOut as supabaseSignOut } from '@/lib/supabase';
 
-interface UseAuthReturn {
+interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
   error: string | null;
-  signIn: (email: string, password: string) => Promise<boolean>;
-  signUp: (email: string, password: string) => Promise<boolean>;
+  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signUp: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
 }
 
-export function useAuth(): UseAuthReturn {
+const AuthContext = createContext<AuthContextType | null>(null);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const auth = useAuthInternal();
+  return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth(): AuthContextType {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
+
+function useAuthInternal(): AuthContextType {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
@@ -42,34 +57,34 @@ export function useAuth(): UseAuthReturn {
     };
   }, []);
 
-  const handleSignIn = useCallback(async (email: string, password: string) => {
+  const handleSignIn = useCallback(async (email: string, password: string): Promise<{ error: AuthError | null }> => {
     setError(null);
     setLoading(true);
 
-    const { data, error } = await signIn(email, password);
+    const { data, error } = await supabaseSignIn(email, password);
 
     if (error) {
       setError(error.message);
       setLoading(false);
-      return false;
+      return { error };
     }
 
     setUser(data.user);
     setSession(data.session);
     setLoading(false);
-    return true;
+    return { error: null };
   }, []);
 
-  const handleSignUp = useCallback(async (email: string, password: string) => {
+  const handleSignUp = useCallback(async (email: string, password: string): Promise<{ error: AuthError | null }> => {
     setError(null);
     setLoading(true);
 
-    const { data, error } = await signUp(email, password);
+    const { data, error } = await supabaseSignUp(email, password);
 
     if (error) {
       setError(error.message);
       setLoading(false);
-      return false;
+      return { error };
     }
 
     // If email confirmation is required, user will be null
@@ -79,12 +94,12 @@ export function useAuth(): UseAuthReturn {
     }
 
     setLoading(false);
-    return true;
+    return { error: null };
   }, []);
 
   const handleSignOut = useCallback(async () => {
     setError(null);
-    const { error } = await signOut();
+    const { error } = await supabaseSignOut();
 
     if (error) {
       setError(error.message);

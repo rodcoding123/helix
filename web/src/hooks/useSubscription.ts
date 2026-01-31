@@ -7,6 +7,7 @@ interface UseSubscriptionReturn {
   subscription: Subscription | null;
   tier: SubscriptionTier;
   loading: boolean;
+  isLoading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
   hasAccess: (requiredTier: SubscriptionTier) => boolean;
@@ -69,6 +70,7 @@ export function useSubscription(): UseSubscriptionReturn {
     subscription,
     tier: subscription?.tier || 'free',
     loading,
+    isLoading: loading,
     error,
     refresh: fetchSubscription,
     hasAccess,
