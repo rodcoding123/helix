@@ -152,7 +152,9 @@ export async function initializeHelix(options: HelixInitOptions = {}): Promise<v
 
   // 1. Ensure directory structure exists
   const { ensureHelixDirectoryStructure } = await import('./helix-context-loader.js');
-  await ensureHelixDirectoryStructure(workspaceDir.replace(/^~/, process.env.HOME || process.env.USERPROFILE || ''));
+  await ensureHelixDirectoryStructure(
+    workspaceDir.replace(/^~/, process.env.HOME || process.env.USERPROFILE || '')
+  );
 
   // 2. Install pre-execution logging hooks
   const { installPreExecutionLogger } = await import('./logging-hooks.js');
@@ -230,7 +232,10 @@ export async function getHelixStatus(): Promise<{
   const { getHeartbeatStats } = await import('./heartbeat.js');
 
   const workspaceDir = process.env.OPENCLAW_WORKSPACE || '~/.openclaw/workspace';
-  const resolvedWorkspace = workspaceDir.replace(/^~/, process.env.HOME || process.env.USERPROFILE || '');
+  const resolvedWorkspace = workspaceDir.replace(
+    /^~/,
+    process.env.HOME || process.env.USERPROFILE || ''
+  );
 
   const heartbeatStats = getHeartbeatStats();
 

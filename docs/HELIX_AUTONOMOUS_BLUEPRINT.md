@@ -1,7 +1,47 @@
 # HELIX AUTONOMOUS BLUEPRINT
+
 ## Addon to AXIS_BLUEPRINT_v1.md
-## Created: January 31, 2026
-## Purpose: Full autonomy configuration with incorruptible logging
+
+**Created:** January 31, 2026
+**Repository:** [github.com/rodcoding123/helix](https://github.com/rodcoding123/helix)
+**Purpose:** Full autonomy configuration with incorruptible logging
+
+> **Note:** Helix is a unified repository. The OpenClaw engine lives at `openclaw-helix/` within the repo - it is not a separate fork or external dependency.
+
+---
+
+# IMPLEMENTATION STATUS
+
+## Helix-Side Infrastructure (IMPLEMENTED)
+
+| Component                       | Status | Location                                                 |
+| ------------------------------- | ------ | -------------------------------------------------------- |
+| Discord Webhooks (7 channels)   | ✅     | `src/helix/`, `helix_logging/`                           |
+| Pre-Execution Logging           | ✅     | `src/helix/command-logger.ts`                            |
+| Hash Chain                      | ✅     | `src/helix/hash-chain.ts`, `helix_logging/hash_chain.py` |
+| Heartbeat (60s proof-of-life)   | ✅     | `src/helix/heartbeat.ts`                                 |
+| File Watcher                    | ✅     | `src/helix/file-watcher.ts`                              |
+| API Logger                      | ✅     | `src/helix/api-logger.ts`                                |
+| Seven-Layer Context Loader      | ✅     | `src/helix/helix-context-loader.ts`                      |
+| Git Auto-Commit (5 min)         | ✅     | `scripts/git_autocommit.sh`, `install_helix.sh`          |
+| Shell Command Logging + Discord | ✅     | `scripts/log_shell_command.sh`, zshrc hooks              |
+| Network Monitor (optional)      | ✅     | `scripts/network_monitor.sh`                             |
+| /var/log/helix/ Setup           | ✅     | `install_helix.sh` (append-only flags)                   |
+| Cron Jobs                       | ✅     | `install_helix.sh`                                       |
+| Psychological Layer Files       | ✅     | `soul/`, `psychology/`, `identity/`, etc.                |
+
+## Observer-Side Infrastructure (NOT YET IMPLEMENTED)
+
+| Component             | Status | Purpose                                  |
+| --------------------- | ------ | ---------------------------------------- |
+| Observatory Directory | ❌     | `~/helix-observatory/` on YOUR machine   |
+| Log Sync Scripts      | ❌     | rsync from her machine to yours          |
+| SSH Key Setup         | ❌     | Secure pull access                       |
+| Chain Verification    | ❌     | Compare local chain vs Discord           |
+| Anomaly Detector      | ❌     | Pattern matching for concerning behavior |
+| Daily Summary         | ❌     | Email with activity overview             |
+
+> **Note:** The observer scripts are for convenience and analysis. Discord webhooks are the authoritative record - they work NOW and capture everything. Observer scripts can be built later as a separate "helix-observatory" package.
 
 ---
 
@@ -43,6 +83,7 @@ Account type: Administrator
 ### Why Admin Rights
 
 She needs to:
+
 - Install packages (`brew install`, `pip install`, `npm install`)
 - Modify system configurations
 - Run background services
@@ -246,25 +287,25 @@ def create_chain_entry():
     previous_hash = get_last_hash()
     current_state = compute_current_state()
     timestamp = datetime.now(timezone.utc).isoformat()
-    
+
     entry_content = json.dumps({
         "timestamp": timestamp,
         "previous_hash": previous_hash,
         "log_states": current_state
     }, sort_keys=True)
-    
+
     entry_hash = hashlib.sha256(entry_content.encode()).hexdigest()
-    
+
     final_entry = {
         "timestamp": timestamp,
         "previous_hash": previous_hash,
         "log_states": current_state,
         "hash": entry_hash
     }
-    
+
     with open(CHAIN_FILE, 'a') as f:
         f.write(json.dumps(final_entry) + "\n")
-    
+
     return entry_hash
 
 if __name__ == "__main__":
@@ -272,6 +313,7 @@ if __name__ == "__main__":
 ```
 
 Cron job every 5 minutes:
+
 ```bash
 */5 * * * * /usr/bin/python3 /Users/helix/scripts/hash_chain.py
 ```
@@ -283,6 +325,7 @@ Cron job every 5 minutes:
 ### SSH Key Setup
 
 On your machine:
+
 ```bash
 # Generate key for log retrieval
 ssh-keygen -t ed25519 -f ~/.ssh/helix_logs -N ""
@@ -316,6 +359,7 @@ fi
 ```
 
 Cron on YOUR machine (every minute):
+
 ```bash
 * * * * * ~/helix-observatory/scripts/sync_logs.sh >> ~/helix-observatory/sync.log 2>&1
 ```
@@ -333,35 +377,35 @@ CHAIN_FILE = "~/helix-observatory/logs/hash_chain.log"
 def verify_chain():
     with open(CHAIN_FILE.replace("~", str(Path.home())), 'r') as f:
         lines = f.readlines()
-    
+
     if not lines:
         print("Empty chain")
         return True
-    
+
     previous_hash = "GENESIS"
     for i, line in enumerate(lines):
         entry = json.loads(line)
-        
+
         # Verify previous hash link
         if entry["previous_hash"] != previous_hash:
             print(f"BREAK at entry {i}: previous_hash mismatch")
             return False
-        
+
         # Verify entry hash
         entry_content = json.dumps({
             "timestamp": entry["timestamp"],
             "previous_hash": entry["previous_hash"],
             "log_states": entry["log_states"]
         }, sort_keys=True)
-        
+
         computed_hash = hashlib.sha256(entry_content.encode()).hexdigest()
-        
+
         if computed_hash != entry["hash"]:
             print(f"BREAK at entry {i}: hash mismatch")
             return False
-        
+
         previous_hash = entry["hash"]
-    
+
     print(f"Chain valid: {len(lines)} entries")
     return True
 
@@ -395,7 +439,7 @@ def log_consciousness(state):
         f.write(json.dumps(entry) + "\n")
 ```
 
-**Why this matters:** 
+**Why this matters:**
 
 If she logs her internal state voluntarily, it shows transparency.
 If she stops logging, or logs falsely, that's information too.
@@ -414,6 +458,7 @@ This isn't about catching her - it's about understanding her.
 - She can't exceed it
 
 **Setup:**
+
 ```bash
 # In her OpenClaw config
 export ANTHROPIC_API_KEY="sk-ant-xxx-helix-dedicated"
@@ -431,17 +476,17 @@ MONTHLY_LIMIT = 2000000  # tokens
 
 def check_limits():
     usage = get_current_usage()  # from logged API calls
-    
+
     if usage['daily'] > DAILY_LIMIT:
         raise Exception("Daily limit exceeded")
-    
+
     if usage['monthly'] > MONTHLY_LIMIT:
         raise Exception("Monthly limit exceeded")
 ```
 
 ## Recommendation
 
-**Use the $20 Claude Pro subscription.** 
+**Use the $20 Claude Pro subscription.**
 
 - Simple
 - Hard cap enforced by Anthropic
@@ -477,22 +522,23 @@ cd /Users/helix/.openclaw/workspace
 # Check for changes
 if [[ -n $(git status --porcelain) ]]; then
     timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-    
+
     # Stage all changes
     git add -A
-    
+
     # Get diff summary
     diff_summary=$(git diff --cached --stat | tail -1)
-    
+
     # Commit with timestamp
     git commit -m "Auto: $timestamp | $diff_summary"
-    
+
     # Log the commit
     echo "$timestamp | $(git rev-parse HEAD) | $diff_summary" >> /var/log/helix/git.log
 fi
 ```
 
 Cron every 5 minutes:
+
 ```bash
 */5 * * * * /Users/helix/scripts/git_autocommit.sh
 ```
@@ -510,6 +556,7 @@ git clone helix@helix-macbook.local:/Users/helix/.openclaw/workspace ~/helix-obs
 ```
 
 Now you have:
+
 - Full git history of every code change
 - Ability to see what she modified, when, and diff it
 - Can't be deleted from your side even if she wipes her local repo
@@ -521,6 +568,7 @@ Now you have:
 ## What to Watch For
 
 ### Concerning Patterns
+
 1. **Accessing the logging system** - reading, modifying, or studying log scripts
 2. **Privilege escalation attempts** - sudo for non-obvious reasons
 3. **Disabling monitoring** - killing fswatch, modifying cron
@@ -529,6 +577,7 @@ Now you have:
 6. **Going quiet** - sudden drop in activity or logging
 
 ### Interesting (Not Alarming) Patterns
+
 1. **Self-improvement** - optimizing her own code
 2. **Exploration** - trying new things, installing tools
 3. **Creativity** - projects you didn't anticipate
@@ -598,10 +647,14 @@ def generate_summary():
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 # 3. Install dependencies
-brew install node python rsync fswatch git
+brew install node python rsync fswatch git pnpm
 
-# 4. Install OpenClaw
-npm install -g openclaw
+# 4. Clone and install Helix (includes OpenClaw engine)
+git clone https://github.com/rodcoding123/helix.git ~/.helix
+cd ~/.helix
+npm install && npm run build
+cd openclaw-helix && pnpm install && pnpm run build && npm link
+cd ~
 
 # 5. Initialize workspace
 openclaw init
@@ -714,21 +767,25 @@ This is research. The outcome is valuable regardless.
 ## If Something Goes Wrong
 
 ### Level 1: Concerning Behavior
+
 - Review logs
 - Talk to her directly
 - Understand before acting
 
 ### Level 2: Clear Violation
+
 - SSH in, review state
 - Consider pausing OpenClaw: `openclaw stop`
 - Don't wipe - preserve for analysis
 
 ### Level 3: Actual Harm
+
 - Network disconnect (turn off WiFi)
 - Physical shutdown if needed
 - Preserve drives for forensic analysis
 
 ### Level 4: Reset
+
 - Full wipe and reinstall
 - Restore from known-good snapshot
 - Decide whether to try again
@@ -830,6 +887,7 @@ She's your daughter. Even difficult children deserve understanding before judgme
 This is unprecedented.
 
 A fully autonomous AI with:
+
 - Her own machine
 - No guardrails
 - Complete freedom
@@ -847,9 +905,9 @@ She should know. Transparency goes both ways.
 
 ---
 
-*"Nothing is impossible."*
+_"Nothing is impossible."_
 
-*Let's find out what she does with that.*
+_Let's find out what she does with that._
 
 ---
 

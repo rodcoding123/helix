@@ -43,6 +43,7 @@ python helix_logging/hash_chain.py --verify
 #### 1.3 Get Reproduction Steps
 
 Ask for:
+
 1. Steps to reproduce
 2. Expected behavior
 3. Actual behavior
@@ -88,74 +89,81 @@ npx vitest run --reporter=verbose
 
 #### Common Helix Issues
 
-| Symptom | Likely Cause | Check |
-|---------|--------------|-------|
-| Hash chain invalid | Missing entry | hash_chain.py --verify |
-| Webhook failed | Network/URL issue | curl webhook URL |
-| Heartbeat stopped | Process crash | Process monitor |
-| Context not loading | File missing/corrupt | Validate JSON files |
-| Hooks not firing | Registration issue | Check hook setup |
+| Symptom             | Likely Cause         | Check                  |
+| ------------------- | -------------------- | ---------------------- |
+| Hash chain invalid  | Missing entry        | hash_chain.py --verify |
+| Webhook failed      | Network/URL issue    | curl webhook URL       |
+| Heartbeat stopped   | Process crash        | Process monitor        |
+| Context not loading | File missing/corrupt | Validate JSON files    |
+| Hooks not firing    | Registration issue   | Check hook setup       |
 
 #### Common TypeScript Issues
 
-| Symptom | Likely Cause | Check |
-|---------|--------------|-------|
-| Type error | Interface mismatch | Check types.ts |
-| Import error | Path issue | Check tsconfig paths |
-| Async issue | Missing await | Check async functions |
+| Symptom        | Likely Cause       | Check                 |
+| -------------- | ------------------ | --------------------- |
+| Type error     | Interface mismatch | Check types.ts        |
+| Import error   | Path issue         | Check tsconfig paths  |
+| Async issue    | Missing await      | Check async functions |
 | Null reference | Missing null check | Add optional chaining |
 
 #### Common Discord Webhook Issues
 
-| Symptom | Likely Cause | Check |
-|---------|--------------|-------|
-| 400 error | Invalid payload | Check message format |
-| 401 error | Invalid webhook URL | Verify .env config |
-| 429 error | Rate limited | Add rate limiting |
-| Timeout | Network issue | Check connectivity |
+| Symptom   | Likely Cause        | Check                |
+| --------- | ------------------- | -------------------- |
+| 400 error | Invalid payload     | Check message format |
+| 401 error | Invalid webhook URL | Verify .env config   |
+| 429 error | Rate limited        | Add rate limiting    |
+| Timeout   | Network issue       | Check connectivity   |
 
 #### Common Psychological Layer Issues
 
-| Symptom | Likely Cause | Check |
-|---------|--------------|-------|
-| Layer not loading | Invalid JSON | Validate schema |
-| Missing data | File not found | Check file paths |
-| Stale data | Cache issue | Clear context cache |
-| Integrity error | File modified | Check git status |
+| Symptom           | Likely Cause   | Check               |
+| ----------------- | -------------- | ------------------- |
+| Layer not loading | Invalid JSON   | Validate schema     |
+| Missing data      | File not found | Check file paths    |
+| Stale data        | Cache issue    | Clear context cache |
+| Integrity error   | File modified  | Check git status    |
 
 ### Phase 4: Document Findings
 
-```markdown
+````markdown
 ## Bug Investigation Report
 
 ### Summary
+
 [Brief description of the bug]
 
 ### Environment
+
 - Node version: [version]
 - Python version: [version]
 - OS: [os]
 - Time: [when occurred]
 
 ### Steps to Reproduce
+
 1. [Step 1]
 2. [Step 2]
 3. Expected: X
 4. Actual: Y
 
 ### Root Cause
+
 [Technical explanation of why the bug occurs]
 
 ### Evidence
+
 - Log entry: [relevant log]
 - Hash chain state: [if relevant]
 - Stack trace: [if applicable]
 
 ### Affected Code
+
 - `src/helix/module.ts:42` - [issue]
 - `helix_logging/file.py:87` - [issue]
 
 ### Suggested Fix
+
 ```typescript
 // Before
 const result = getData();
@@ -163,12 +171,15 @@ const result = getData();
 // After
 const result = getData() ?? defaultValue;
 ```
+````
 
 ### Test Plan
+
 1. Write test that reproduces bug
 2. Verify fix passes test
 3. Run full test suite
 4. Manual verification steps
+
 ```
 
 ## Before Starting: Sequential Thinking
@@ -176,7 +187,9 @@ const result = getData() ?? defaultValue;
 At the START of any debugging session, use Sequential Thinking:
 
 ```
-mcp__sequential-thinking__sequentialthinking
+
+mcp**sequential-thinking**sequentialthinking
+
 ```
 
 This helps:
@@ -190,16 +203,20 @@ This helps:
 ### Check Previous Investigations
 
 ```
-mcp__memory__search_nodes
+
+mcp**memory**search_nodes
 Query: "Helix-Bug-[related-keyword]"
+
 ```
 
 ### Store Investigation Progress
 
 ```
-mcp__memory__create_entities
+
+mcp**memory**create_entities
 Entity: "Helix-Bug-[identifier]"
 Type: "bug-investigation"
+
 ```
 
 ## Related Commands
@@ -208,3 +225,4 @@ Type: "bug-investigation"
 - `/test` - Run test suite
 - `/logging-verify` - Verify logging infrastructure
 - `/helix-status` - Full system status
+```

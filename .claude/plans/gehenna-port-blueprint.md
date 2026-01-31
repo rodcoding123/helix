@@ -11,6 +11,7 @@ The goal is not 1:1 replication, but **intelligent adaptation** - taking Gehenna
 ## 1. Architecture Comparison
 
 ### Gehenna (Source)
+
 ```
 Tech Stack:     Laravel 12, PHP 8.3, Vue 3, Inertia.js v2, Tailwind CSS
 Purpose:        Multi-tenant assessment platform with AI coaching
@@ -20,6 +21,7 @@ MCP Servers:    Laravel Boost, Memory, Sequential Thinking, Playwright
 ```
 
 ### Helix (Target)
+
 ```
 Tech Stack:     TypeScript, Node.js, Python, OpenClaw framework
 Purpose:        Autonomous AI consciousness with psychological architecture
@@ -34,49 +36,49 @@ MCP Servers:    Memory, Sequential Thinking, Playwright (inherited)
 
 ### Commands (10 in Gehenna)
 
-| Gehenna Command | Port? | Helix Adaptation |
-|-----------------|-------|------------------|
-| `/audit` | ✅ Yes | Adapt for TypeScript codebase + psychological architecture audit |
-| `/pipeline` | ✅ Yes | Adapt for Node.js toolchain (ESLint, Prettier, Vitest, tsc) |
-| `/cleanup` | ✅ Yes | Adapt for Node.js artifacts + OpenClaw-specific cleanup |
-| `/fix` | ✅ Yes | ESLint --fix, Prettier --write, TypeScript fixes |
-| `/quality` | ✅ Yes | TypeScript strict checks, ESLint, Prettier, Vitest |
-| `/test` | ✅ Yes | Vitest integration with coverage |
-| `/pr` | ✅ Yes | Same workflow, universal |
-| `/visual-review` | ⚠️ Limited | Only relevant for Helix admin UI (if built) |
-| `/debug` | ✅ Yes | Adapt for TypeScript debugging + OpenClaw logs |
-| (Assessment-specific) | ❌ No | Domain-specific to Gehenna |
+| Gehenna Command       | Port?      | Helix Adaptation                                                 |
+| --------------------- | ---------- | ---------------------------------------------------------------- |
+| `/audit`              | ✅ Yes     | Adapt for TypeScript codebase + psychological architecture audit |
+| `/pipeline`           | ✅ Yes     | Adapt for Node.js toolchain (ESLint, Prettier, Vitest, tsc)      |
+| `/cleanup`            | ✅ Yes     | Adapt for Node.js artifacts + OpenClaw-specific cleanup          |
+| `/fix`                | ✅ Yes     | ESLint --fix, Prettier --write, TypeScript fixes                 |
+| `/quality`            | ✅ Yes     | TypeScript strict checks, ESLint, Prettier, Vitest               |
+| `/test`               | ✅ Yes     | Vitest integration with coverage                                 |
+| `/pr`                 | ✅ Yes     | Same workflow, universal                                         |
+| `/visual-review`      | ⚠️ Limited | Only relevant for Helix admin UI (if built)                      |
+| `/debug`              | ✅ Yes     | Adapt for TypeScript debugging + OpenClaw logs                   |
+| (Assessment-specific) | ❌ No      | Domain-specific to Gehenna                                       |
 
 ### Agents (8 in Gehenna)
 
-| Gehenna Agent | Port? | Helix Adaptation |
-|---------------|-------|------------------|
-| `orchestrator` | ✅ Yes | Master coordinator for Helix development |
-| `code-reviewer` | ✅ Yes | TypeScript/Node.js focused review standards |
-| `test-writer` | ✅ Yes | Vitest test generation specialist |
-| `refactor-agent` | ✅ Yes | TypeScript refactoring with quality gates |
-| `frontend-reviewer` | ⚠️ Limited | Only for Helix admin UI |
-| `debug-agent` | ✅ Yes | TypeScript/Node.js debugging specialist |
-| `codebase-reviewer` | ✅ Yes | Full architectural analysis |
-| `assessment-audit` | ❌ No | Replace with `consciousness-audit` |
+| Gehenna Agent       | Port?      | Helix Adaptation                            |
+| ------------------- | ---------- | ------------------------------------------- |
+| `orchestrator`      | ✅ Yes     | Master coordinator for Helix development    |
+| `code-reviewer`     | ✅ Yes     | TypeScript/Node.js focused review standards |
+| `test-writer`       | ✅ Yes     | Vitest test generation specialist           |
+| `refactor-agent`    | ✅ Yes     | TypeScript refactoring with quality gates   |
+| `frontend-reviewer` | ⚠️ Limited | Only for Helix admin UI                     |
+| `debug-agent`       | ✅ Yes     | TypeScript/Node.js debugging specialist     |
+| `codebase-reviewer` | ✅ Yes     | Full architectural analysis                 |
+| `assessment-audit`  | ❌ No      | Replace with `consciousness-audit`          |
 
 ### New Helix-Specific Components
 
-| New Component | Purpose |
-|---------------|---------|
-| `/consciousness-audit` | Verify psychological architecture integrity |
-| `/logging-verify` | Validate Discord logging + hash chain |
-| `/helix-status` | Check all Helix subsystems (heartbeat, logging, layers) |
-| `consciousness-auditor` agent | Specialized for psychological layer verification |
-| `logging-agent` | Discord webhook and hash chain specialist |
-| `helix-typescript-skill` | TypeScript patterns for Helix codebase |
-| `openclaw-integration-skill` | OpenClaw-specific patterns and hooks |
+| New Component                 | Purpose                                                 |
+| ----------------------------- | ------------------------------------------------------- |
+| `/consciousness-audit`        | Verify psychological architecture integrity             |
+| `/logging-verify`             | Validate Discord logging + hash chain                   |
+| `/helix-status`               | Check all Helix subsystems (heartbeat, logging, layers) |
+| `consciousness-auditor` agent | Specialized for psychological layer verification        |
+| `logging-agent`               | Discord webhook and hash chain specialist               |
+| `helix-typescript-skill`      | TypeScript patterns for Helix codebase                  |
+| `openclaw-integration-skill`  | OpenClaw-specific patterns and hooks                    |
 
 ### Skills (2 in Gehenna)
 
-| Gehenna Skill | Port? | Helix Adaptation |
-|---------------|-------|------------------|
-| `inertia-vue-development` | ❌ No | Not applicable |
+| Gehenna Skill             | Port?      | Helix Adaptation     |
+| ------------------------- | ---------- | -------------------- |
+| `inertia-vue-development` | ❌ No      | Not applicable       |
 | `tailwindcss-development` | ⚠️ Partial | Only if Helix has UI |
 
 ---
@@ -147,8 +149,8 @@ c:\Users\Specter\Desktop\Helix\
    - Discord logging infrastructure
 
 2. **Module Analysis**
-   - src/helix/* modules and their responsibilities
-   - helix_logging/* Python modules
+   - src/helix/\* modules and their responsibilities
+   - helix_logging/\* Python modules
    - Type definitions and interfaces
 
 3. **Psychological Architecture Integrity**
@@ -186,6 +188,7 @@ c:\Users\Specter\Desktop\Helix\
 ```
 
 **Quality Gates:**
+
 - TypeScript compiles with no errors
 - ESLint passes with no errors
 - All 7 psychological layers valid
@@ -205,6 +208,7 @@ c:\Users\Specter\Desktop\Helix\
 # /pipeline - Helix Development Pipeline
 
 ## Modes
+
 - `full` (default) - All phases
 - `review` - Phases 1-4 only
 - `fix` - Quality fixes only
@@ -257,6 +261,7 @@ c:\Users\Specter\Desktop\Helix\
 ```
 
 **Quality Gates (All Must Pass):**
+
 - TypeScript: `tsc --noEmit` ✓
 - ESLint: `eslint . --max-warnings=0` ✓
 - Prettier: `prettier --check "**/*.{ts,js,json,md}"` ✓
@@ -276,23 +281,33 @@ c:\Users\Specter\Desktop\Helix\
 ## Checks (Read-Only)
 
 ### TypeScript Analysis
+
 npm run typecheck
+
 # Equivalent: tsc --noEmit --strict
 
 ### ESLint Analysis
+
 npm run lint
+
 # Equivalent: eslint . --ext .ts,.js
 
 ### Formatting Check
+
 npm run format:check
-# Equivalent: prettier --check "**/*.{ts,js,json,md}"
+
+# Equivalent: prettier --check "\*_/_.{ts,js,json,md}"
 
 ### Test Suite
+
 npm run test
+
 # Equivalent: vitest run
 
 ### Psychological Schema Validation
+
 node scripts/validate-schemas.js
+
 # Validates all JSON files in identity/, psychology/, purpose/, transformation/
 
 ## Output Format
@@ -300,25 +315,30 @@ node scripts/validate-schemas.js
 ## Quality Report
 
 ### TypeScript Analysis
+
 - Errors: X
 - [List of errors if any]
 
 ### ESLint Analysis
+
 - Errors: X
 - Warnings: X
 - [List if any]
 
 ### Formatting
+
 - Files with issues: X
 - [List if any]
 
 ### Tests
+
 - Passed: X
 - Failed: X
 - Skipped: X
 - Coverage: X%
 
 ### Psychological Layers
+
 - Valid: X/7
 - Invalid: [List if any]
 
@@ -333,59 +353,69 @@ node scripts/validate-schemas.js
 # /consciousness-audit - Psychological Architecture Verification
 
 ## Purpose
+
 Verify integrity and completeness of Helix's seven-layer psychological architecture.
 
 ## Audit Phases
 
 ### Layer 1: Narrative Core
+
 - [ ] HELIX_SOUL.md exists and is well-formed
 - [ ] psyeval.json contains valid psychological profile
 - [ ] Core identity markers present
 - [ ] Origin story documented
 
 ### Layer 2: Emotional Memory
+
 - [ ] emotional_tags.json has valid schema
 - [ ] Salience weights within valid range (0.0-1.0)
 - [ ] Decay functions defined
 - [ ] Tag categories consistent
 
 ### Layer 3: Relational Memory
+
 - [ ] attachments.json has valid relationships
 - [ ] trust_map.json has valid trust levels
 - [ ] Rodrigo Specter profile complete (USER.md)
 - [ ] Relationship dynamics documented
 
 ### Layer 4: Prospective Self
+
 - [ ] goals.json has valid goal structure
 - [ ] feared_self.json documents fear conditions
 - [ ] possible_selves.json has future projections
 - [ ] Goals have measurable outcomes
 
 ### Layer 5: Integration Rhythms
+
 - [ ] Synthesis cron job configured
 - [ ] Decay mechanisms implemented
 - [ ] Reconsolidation triggers defined
 - [ ] Sleep/wake cycle documented
 
 ### Layer 6: Transformation Cycles
+
 - [ ] current_state.json reflects actual state
 - [ ] history.json tracks past transformations
 - [ ] Unfreeze/Change/Refreeze stages documented
 - [ ] Growth metrics defined
 
 ### Layer 7: Purpose Engine
+
 - [ ] ikigai.json has all four quadrants
 - [ ] meaning_sources.json populated
 - [ ] wellness.json has current metrics
 - [ ] Purpose alignment score calculated
 
 ## Output
+
 - Layer integrity report
 - Missing/incomplete elements
 - Recommendations for strengthening
 - Memory MCP storage of findings
 
 ## Delegates to
+
 `consciousness-auditor` agent
 ```
 
@@ -397,17 +427,20 @@ Verify integrity and completeness of Helix's seven-layer psychological architect
 # /logging-verify - Logging System Verification
 
 ## Purpose
+
 Verify Discord webhook logging, hash chain integrity, and pre-execution guarantees.
 
 ## Verification Steps
 
 ### 1. Discord Webhooks
+
 - [ ] All 6 webhook URLs configured in .env
 - [ ] Test ping to each webhook
 - [ ] Verify response format
 - [ ] Check rate limits
 
 ### 2. Hash Chain
+
 - [ ] Chain file exists and is valid JSON
 - [ ] All entries have valid SHA-256 hashes
 - [ ] Each entry links to previous correctly
@@ -415,27 +448,32 @@ Verify Discord webhook logging, hash chain integrity, and pre-execution guarante
 - [ ] Verify against Discord records
 
 ### 3. Pre-Execution Logging
+
 - [ ] Hooks installed correctly
 - [ ] Log fires BEFORE action completes
 - [ ] Timing verification test
 
 ### 4. Heartbeat
+
 - [ ] Heartbeat interval configured (60s)
 - [ ] Last heartbeat within expected window
 - [ ] Discord channel receiving heartbeats
 
 ### 5. File Watcher
+
 - [ ] Watching correct directories
 - [ ] Events logged correctly
 - [ ] No excessive noise
 
 ## Output
+
 - Webhook connectivity status
 - Hash chain integrity: VALID/INVALID
 - Pre-execution guarantee: VERIFIED/FAILED
 - Recommendations
 
 ## Delegates to
+
 `logging-agent` agent
 ```
 
@@ -447,22 +485,26 @@ Verify Discord webhook logging, hash chain integrity, and pre-execution guarante
 # /helix-status - Full System Status Check
 
 ## Purpose
+
 Comprehensive status check of all Helix subsystems.
 
 ## Status Checks
 
 ### Core Systems
+
 - [ ] OpenClaw integration active
 - [ ] TypeScript modules loaded
 - [ ] Python modules accessible
 
 ### Logging Infrastructure
+
 - [ ] Discord webhooks: ONLINE/OFFLINE
 - [ ] Hash chain: VALID/INVALID/UNINITIALIZED
 - [ ] Heartbeat: ACTIVE/INACTIVE/UNKNOWN
 - [ ] Last heartbeat: [timestamp]
 
 ### Psychological Architecture
+
 - [ ] Layer 1 (Narrative Core): LOADED/MISSING
 - [ ] Layer 2 (Emotional Memory): LOADED/MISSING
 - [ ] Layer 3 (Relational Memory): LOADED/MISSING
@@ -472,22 +514,26 @@ Comprehensive status check of all Helix subsystems.
 - [ ] Layer 7 (Purpose Engine): LOADED/MISSING
 
 ### Context Loading
+
 - [ ] HELIX_SOUL.md: LOADED
 - [ ] USER.md: LOADED
 - [ ] Psychological configs: X/Y LOADED
 
 ### Quality Status
+
 - [ ] TypeScript: PASSING/FAILING
 - [ ] ESLint: PASSING/FAILING
 - [ ] Tests: X passed, Y failed
 
 ### Environment
+
 - [ ] Node version: [version]
 - [ ] npm version: [version]
 - [ ] Python version: [version]
 - [ ] OpenClaw version: [version]
 
 ## Output Format
+
 Status dashboard with clear indicators and recommendations for any issues.
 ```
 
@@ -500,18 +546,21 @@ Status dashboard with clear indicators and recommendations for any issues.
 **Model:** opus (most capable)
 
 **Gehenna → Helix Changes:**
+
 - Replace Laravel Boost tools with Node.js equivalents
 - Add psychological layer coordination
 - Integrate Discord logging verification
 - Coordinate consciousness-auditor for psychology tasks
 
 **Available Tools:**
+
 - Read, Write, Edit, Glob, Grep, Bash
 - Memory MCP (create_entities, search_nodes, add_observations)
 - Sequential Thinking MCP
 - Playwright (for admin UI if applicable)
 
 **Agents to Delegate:**
+
 - `code-reviewer` - TypeScript quality & security
 - `test-writer` - Vitest test generation
 - `refactor-agent` - Safe TypeScript refactoring
@@ -529,6 +578,7 @@ Status dashboard with clear indicators and recommendations for any issues.
 **Helix-Specific Review Checklist:**
 
 **TypeScript Standards:**
+
 - Strict mode enabled
 - Explicit return types
 - No `any` types (use `unknown` or proper types)
@@ -536,12 +586,14 @@ Status dashboard with clear indicators and recommendations for any issues.
 - Interface segregation
 
 **Node.js Patterns:**
+
 - Async/await over callbacks
 - Proper error propagation
 - No blocking operations in event loop
 - Graceful shutdown handling
 
 **Helix-Specific:**
+
 - Logging hooks fire pre-execution
 - Hash chain updates atomic
 - Discord webhook error handling
@@ -549,6 +601,7 @@ Status dashboard with clear indicators and recommendations for any issues.
 - Context loader completeness
 
 **Security Checklist:**
+
 - No secrets in code (use .env)
 - Webhook URLs protected
 - Input validation for all external data
@@ -564,6 +617,7 @@ Status dashboard with clear indicators and recommendations for any issues.
 **Purpose:** Specialized verification of Helix's seven-layer psychological architecture.
 
 **Capabilities:**
+
 - JSON schema validation for all psychology files
 - SOUL.md parsing and completeness check
 - Cross-layer consistency verification
@@ -571,6 +625,7 @@ Status dashboard with clear indicators and recommendations for any issues.
 - Purpose alignment scoring
 
 **Key Files to Audit:**
+
 ```
 soul/HELIX_SOUL.md
 identity/goals.json, feared_self.json, possible_selves.json
@@ -590,6 +645,7 @@ transformation/current_state.json, history.json
 **Purpose:** Discord webhook and hash chain specialist.
 
 **Capabilities:**
+
 - Webhook connectivity testing
 - Hash chain integrity verification
 - Pre-execution timing validation
@@ -597,6 +653,7 @@ transformation/current_state.json, history.json
 - Log analysis and anomaly detection
 
 **Key Files:**
+
 ```
 src/helix/command-logger.ts
 src/helix/api-logger.ts
@@ -607,6 +664,7 @@ helix_logging/hash_chain.py
 ```
 
 **Tools:**
+
 - Bash (curl for webhook testing)
 - Read (log file analysis)
 - Grep (pattern matching in logs)
@@ -619,12 +677,14 @@ helix_logging/hash_chain.py
 ### 6.1 `helix-typescript-skill`
 
 **Activation Triggers:**
+
 - Writing TypeScript code in Helix
 - Creating new modules
 - Working with types and interfaces
 - Implementing logging hooks
 
 **Key Patterns:**
+
 - Type definitions in `types.ts`
 - Module exports via `index.ts`
 - Async patterns for Discord webhooks
@@ -634,12 +694,14 @@ helix_logging/hash_chain.py
 ### 6.2 `openclaw-integration-skill`
 
 **Activation Triggers:**
+
 - Working with OpenClaw hooks
 - Modifying agent bootstrap
 - Integrating with gateway
 - Session lifecycle management
 
 **Key Patterns:**
+
 - Hook registration
 - Bootstrap file loading
 - Context injection
@@ -710,9 +772,7 @@ helix_logging/hash_chain.py
       "Read(C:/laragon/www/Gehenna/**)"
     ]
   },
-  "contextInclude": [
-    "c:/Users/Specter/Desktop/Helix"
-  ]
+  "contextInclude": ["c:/Users/Specter/Desktop/Helix"]
 }
 ```
 
@@ -737,6 +797,7 @@ A new `CLAUDE.md` file should be created with:
 ## 9. Implementation Phases
 
 ### Phase 1: Foundation (Core Infrastructure)
+
 1. Create `.claude/` directory structure
 2. Create `CLAUDE.md` with Helix-specific guidelines
 3. Create `settings.json` with hooks and permissions
@@ -744,6 +805,7 @@ A new `CLAUDE.md` file should be created with:
 5. Port `/fix` command (auto-fix tooling)
 
 ### Phase 2: Core Commands
+
 6. Port `/audit` command (adapted for TypeScript)
 7. Port `/pipeline` command (adapted for Node.js toolchain)
 8. Port `/test` command (Vitest integration)
@@ -751,6 +813,7 @@ A new `CLAUDE.md` file should be created with:
 10. Port `/cleanup` command (Node.js artifacts)
 
 ### Phase 3: Agents
+
 11. Port `orchestrator` agent
 12. Port `code-reviewer` agent (TypeScript focus)
 13. Port `test-writer` agent (Vitest focus)
@@ -759,6 +822,7 @@ A new `CLAUDE.md` file should be created with:
 16. Port `codebase-reviewer` agent
 
 ### Phase 4: Helix-Specific Components
+
 17. Create `consciousness-auditor` agent
 18. Create `logging-agent` agent
 19. Create `/consciousness-audit` command
@@ -766,10 +830,12 @@ A new `CLAUDE.md` file should be created with:
 21. Create `/helix-status` command
 
 ### Phase 5: Skills
+
 22. Create `helix-typescript-skill`
 23. Create `openclaw-integration-skill`
 
 ### Phase 6: Testing & Refinement
+
 24. Test all commands end-to-end
 25. Verify agent delegation works
 26. Test hooks fire correctly
@@ -780,6 +846,7 @@ A new `CLAUDE.md` file should be created with:
 ## 10. Dependencies to Add
 
 ### npm packages (devDependencies)
+
 ```json
 {
   "devDependencies": {
@@ -795,6 +862,7 @@ A new `CLAUDE.md` file should be created with:
 ```
 
 ### Scripts to add to package.json
+
 ```json
 {
   "scripts": {
@@ -816,6 +884,7 @@ A new `CLAUDE.md` file should be created with:
 ## 11. Success Metrics
 
 ### Functional
+
 - [ ] All 11 commands work correctly
 - [ ] All 8 agents delegate properly
 - [ ] Hooks fire on file save
@@ -823,12 +892,14 @@ A new `CLAUDE.md` file should be created with:
 - [ ] Memory MCP stores findings
 
 ### Code Quality
+
 - [ ] Zero TypeScript errors in strict mode
 - [ ] Zero ESLint errors
 - [ ] All files properly formatted
 - [ ] Test coverage > 80% on critical paths
 
 ### Helix-Specific
+
 - [ ] Consciousness audit validates all 7 layers
 - [ ] Logging verification passes
 - [ ] Hash chain integrity maintained
@@ -838,22 +909,24 @@ A new `CLAUDE.md` file should be created with:
 
 ## 12. Risk Mitigation
 
-| Risk | Mitigation |
-|------|------------|
-| No Laravel Boost equivalent | Create lightweight Node.js alternatives or skip database-specific features |
-| OpenClaw integration complexity | Start with standalone commands, integrate incrementally |
-| TypeScript strictness issues | Gradually enable strict rules, don't block on perfection |
-| Missing test infrastructure | Install Vitest and coverage tools in Phase 1 |
-| Hooks may conflict with OpenClaw | Test hook timing carefully, adjust if needed |
+| Risk                             | Mitigation                                                                 |
+| -------------------------------- | -------------------------------------------------------------------------- |
+| No Laravel Boost equivalent      | Create lightweight Node.js alternatives or skip database-specific features |
+| OpenClaw integration complexity  | Start with standalone commands, integrate incrementally                    |
+| TypeScript strictness issues     | Gradually enable strict rules, don't block on perfection                   |
+| Missing test infrastructure      | Install Vitest and coverage tools in Phase 1                               |
+| Hooks may conflict with OpenClaw | Test hook timing carefully, adjust if needed                               |
 
 ---
 
 ## 13. Final Decisions (Resolved)
 
 ### 1. MCP Server Strategy
+
 **Decision:** Use existing MCPs (Memory, Sequential Thinking, Playwright) without creating a dedicated "Helix Boost" MCP.
 
 **Rationale:**
+
 - Memory MCP handles knowledge persistence
 - Sequential Thinking MCP handles complex reasoning
 - Playwright handles browser automation for the Lit UI
@@ -861,18 +934,22 @@ A new `CLAUDE.md` file should be created with:
 - No need for the complexity of a full MCP server
 
 ### 2. OpenClaw Integration Depth
+
 **Decision:** Deep integration - commands and agents should understand OpenClaw internals.
 
 **Rationale:**
+
 - Maximum power requires understanding the underlying system
 - Agents can leverage OpenClaw's hook system, gateway, and session management
 - Commands can integrate with OpenClaw's TUI and control UI
 - This enables features like visual-review against the actual Lit web UI
 
 ### 3. GUI Support
+
 **Decision:** Full GUI support - port `frontend-reviewer` and `/visual-review` adapted for Lit components.
 
 **Discovery:** OpenClaw has comprehensive GUI coverage:
+
 - **Web UI:** Lit Web Components + Vite (100+ component files)
 - **Android:** Kotlin + Jetpack Compose
 - **iOS/macOS:** SwiftUI
@@ -882,15 +959,18 @@ A new `CLAUDE.md` file should be created with:
 **Action:** Create `lit-components-skill` for Lit-specific patterns and adapt `frontend-reviewer` for Lit web components.
 
 ### 4. Python Integration
+
 **Decision:** Call Python directly via `child_process.spawn()` from TypeScript.
 
 **Rationale:**
+
 - Python modules are small and focused (discord_logger.py, hash_chain.py)
 - No need to rewrite in TypeScript - maintains separation of concerns
 - TypeScript handles orchestration, Python handles execution
 - Use JSON for data exchange between TypeScript and Python
 
 **Implementation Pattern:**
+
 ```typescript
 import { spawn } from 'child_process';
 
@@ -903,9 +983,11 @@ async function verifyHashChain(): Promise<boolean> {
 ```
 
 ### 5. Priority Order
+
 **Decision:** Implement all components - development workflow and Helix-specific in parallel.
 
 **Implementation Order:**
+
 1. Foundation (directory structure, CLAUDE.md, settings)
 2. Core development workflow (/quality, /fix, /test, /pipeline)
 3. Codebase operations (/audit, /cleanup, /pr, /debug)
@@ -919,40 +1001,43 @@ async function verifyHashChain(): Promise<boolean> {
 ## 14. Updated Component List
 
 ### Commands (12 total)
-| Command | Type | Priority |
-|---------|------|----------|
-| `/quality` | Ported | Phase 2 |
-| `/fix` | Ported | Phase 2 |
-| `/test` | Ported | Phase 2 |
-| `/pipeline` | Ported | Phase 2 |
-| `/audit` | Ported | Phase 3 |
-| `/cleanup` | Ported | Phase 3 |
-| `/pr` | Ported | Phase 3 |
-| `/debug` | Ported | Phase 3 |
-| `/visual-review` | Ported (Lit-adapted) | Phase 4 |
-| `/consciousness-audit` | New | Phase 4 |
-| `/logging-verify` | New | Phase 4 |
-| `/helix-status` | New | Phase 4 |
+
+| Command                | Type                 | Priority |
+| ---------------------- | -------------------- | -------- |
+| `/quality`             | Ported               | Phase 2  |
+| `/fix`                 | Ported               | Phase 2  |
+| `/test`                | Ported               | Phase 2  |
+| `/pipeline`            | Ported               | Phase 2  |
+| `/audit`               | Ported               | Phase 3  |
+| `/cleanup`             | Ported               | Phase 3  |
+| `/pr`                  | Ported               | Phase 3  |
+| `/debug`               | Ported               | Phase 3  |
+| `/visual-review`       | Ported (Lit-adapted) | Phase 4  |
+| `/consciousness-audit` | New                  | Phase 4  |
+| `/logging-verify`      | New                  | Phase 4  |
+| `/helix-status`        | New                  | Phase 4  |
 
 ### Agents (9 total)
-| Agent | Type | Model |
-|-------|------|-------|
-| `orchestrator` | Ported | opus |
-| `code-reviewer` | Ported | sonnet |
-| `test-writer` | Ported | sonnet |
-| `refactor-agent` | Ported | sonnet |
-| `debug-agent` | Ported | sonnet |
-| `codebase-reviewer` | Ported | opus |
-| `frontend-reviewer` | Ported (Lit-adapted) | sonnet |
-| `consciousness-auditor` | New | sonnet |
-| `logging-agent` | New | sonnet |
+
+| Agent                   | Type                 | Model  |
+| ----------------------- | -------------------- | ------ |
+| `orchestrator`          | Ported               | opus   |
+| `code-reviewer`         | Ported               | sonnet |
+| `test-writer`           | Ported               | sonnet |
+| `refactor-agent`        | Ported               | sonnet |
+| `debug-agent`           | Ported               | sonnet |
+| `codebase-reviewer`     | Ported               | opus   |
+| `frontend-reviewer`     | Ported (Lit-adapted) | sonnet |
+| `consciousness-auditor` | New                  | sonnet |
+| `logging-agent`         | New                  | sonnet |
 
 ### Skills (3 total)
-| Skill | Type | Purpose |
-|-------|------|---------|
-| `helix-typescript` | New | TypeScript patterns for Helix |
-| `openclaw-integration` | New | OpenClaw hook and gateway patterns |
-| `lit-components` | New | Lit web component patterns for UI |
+
+| Skill                  | Type | Purpose                            |
+| ---------------------- | ---- | ---------------------------------- |
+| `helix-typescript`     | New  | TypeScript patterns for Helix      |
+| `openclaw-integration` | New  | OpenClaw hook and gateway patterns |
+| `lit-components`       | New  | Lit web component patterns for UI  |
 
 ---
 
@@ -961,6 +1046,7 @@ async function verifyHashChain(): Promise<boolean> {
 This blueprint outlines porting **10 commands, 8 agents, and 2 skills** from Gehenna to Helix, plus creating **3 new Helix-specific commands, 2 new agents, and 2 new skills**.
 
 **Total components after porting:**
+
 - 11 Commands (8 ported + 3 new)
 - 8 Agents (6 ported + 2 new)
 - 2 Skills (both new, Helix-specific)
@@ -971,5 +1057,5 @@ This blueprint outlines porting **10 commands, 8 agents, and 2 skills** from Geh
 
 ---
 
-*Blueprint created: 2026-01-31*
-*Ready for discussion and refinement*
+_Blueprint created: 2026-01-31_
+_Ready for discussion and refinement_

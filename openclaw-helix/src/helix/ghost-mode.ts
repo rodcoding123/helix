@@ -11,7 +11,6 @@
  * Currently a STUB - will connect to licensing API later.
  */
 
-import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -42,7 +41,9 @@ let licenseCache: CachedLicense | null = null;
  * - Currently accepts test keys for development
  * - Will connect to actual licensing API later
  */
-export async function validateGhostModeLicense(licenseKey: string): Promise<GhostModeLicenseResponse> {
+export async function validateGhostModeLicense(
+  licenseKey: string,
+): Promise<GhostModeLicenseResponse> {
   // Check cache first
   if (licenseCache && new Date(licenseCache.expiresAt) > new Date()) {
     log.info("Using cached license validation");
@@ -100,7 +101,8 @@ export async function validateGhostModeLicense(licenseKey: string): Promise<Ghos
   // In production, this would call the licensing API
   return {
     valid: false,
-    message: "License validation not yet implemented. Use test key GHOST-TEST-0000-0000-0000 for development.",
+    message:
+      "License validation not yet implemented. Use test key GHOST-TEST-0000-0000-0000 for development.",
   };
 
   // Production implementation would be:

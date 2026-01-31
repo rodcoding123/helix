@@ -8,7 +8,5 @@
       "Read(C:/laragon/www/Gehenna/**)"
     ]
   },
-  "contextInclude": [
-    "c:/Users/Specter/Desktop/Helix"
-  ]
+  "contextInclude": ["c:/Users/Specter/Desktop/Helix"]
 }

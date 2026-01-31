@@ -8,7 +8,7 @@
 
 import crypto from "node:crypto";
 
-import type { ApiPreFlightLog, DiscordEmbed } from "./types.js";
+import type { ApiPreFlightLog } from "./types.js";
 import { sendToDiscord, WEBHOOKS, COLORS, createEmbed } from "./discord-webhook.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 

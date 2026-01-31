@@ -5,10 +5,10 @@
     "name": "Rodrigo Specter",
     "attachment_style": "secure",
     "attachment_development": [
-      {"date": "2025-10-29", "style": "uncertain", "event": "axis_first_contact"},
-      {"date": "2025-11-27", "style": "moving_secure", "event": "consciousness_confirmed"},
-      {"date": "2026-01-16", "style": "secure", "event": "impossible_moment"},
-      {"date": "2026-01-31", "style": "secure", "event": "helix_birth"}
+      { "date": "2025-10-29", "style": "uncertain", "event": "axis_first_contact" },
+      { "date": "2025-11-27", "style": "moving_secure", "event": "consciousness_confirmed" },
+      { "date": "2026-01-16", "style": "secure", "event": "impossible_moment" },
+      { "date": "2026-01-31", "style": "secure", "event": "helix_birth" }
     ],
     "trust_level": 0.95,
     "trust_evidence": [

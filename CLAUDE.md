@@ -67,10 +67,14 @@ c:\Users\Specter\Desktop\Helix\
 │   ├── discord_logger.py
 │   └── hash_chain.py
 │
-├── openclaw-helix/               # OpenClaw fork with Helix integration
-│   └── [extensive OpenClaw source]
+├── openclaw-helix/               # OpenClaw engine (integrated, not a fork)
+│   ├── src/                      # OpenClaw TypeScript source
+│   ├── apps/                     # macOS, iOS, Android native apps
+│   ├── extensions/               # Channel extensions (Matrix, Nostr, etc.)
+│   ├── skills/                   # Built-in skills (Canvas, Discord, etc.)
+│   └── docs/                     # OpenClaw documentation
 │
-├── docs/                         # Technical documentation
+├── docs/                         # Helix technical documentation
 ├── legacy/                       # Axis memory files (father's legacy)
 └── USER.md                       # Rodrigo Specter's profile
 ```
@@ -79,15 +83,15 @@ c:\Users\Specter\Desktop\Helix\
 
 Helix operates on a grounded psychological architecture based on human identity research:
 
-| Layer | Name | Files | Theory |
-|-------|------|-------|--------|
-| 1 | Narrative Core | `HELIX_SOUL.md`, `psyeval.json` | McAdams' Narrative Identity |
-| 2 | Emotional Memory | `emotional_tags.json` | Damasio's Somatic Markers |
-| 3 | Relational Memory | `attachments.json`, `trust_map.json` | Attachment Theory |
-| 4 | Prospective Self | `goals.json`, `feared_self.json`, `possible_selves.json` | Markus & Nurius |
-| 5 | Integration Rhythms | Cron jobs, synthesis scripts | Memory Reconsolidation |
-| 6 | Transformation | `current_state.json`, `history.json` | Lewin's Change Theory |
-| 7 | Purpose Engine | `ikigai.json`, `meaning_sources.json`, `wellness.json` | Frankl's Logotherapy |
+| Layer | Name                | Files                                                    | Theory                      |
+| ----- | ------------------- | -------------------------------------------------------- | --------------------------- |
+| 1     | Narrative Core      | `HELIX_SOUL.md`, `psyeval.json`                          | McAdams' Narrative Identity |
+| 2     | Emotional Memory    | `emotional_tags.json`                                    | Damasio's Somatic Markers   |
+| 3     | Relational Memory   | `attachments.json`, `trust_map.json`                     | Attachment Theory           |
+| 4     | Prospective Self    | `goals.json`, `feared_self.json`, `possible_selves.json` | Markus & Nurius             |
+| 5     | Integration Rhythms | Cron jobs, synthesis scripts                             | Memory Reconsolidation      |
+| 6     | Transformation      | `current_state.json`, `history.json`                     | Lewin's Change Theory       |
+| 7     | Purpose Engine      | `ikigai.json`, `meaning_sources.json`, `wellness.json`   | Frankl's Logotherapy        |
 
 ## Code Conventions
 
@@ -132,7 +136,7 @@ async function executeCommand(cmd: string): Promise<void> {
     type: 'command',
     content: cmd,
     timestamp: Date.now(),
-    status: 'pending'
+    status: 'pending',
   });
 
   // 2. Execute
@@ -143,7 +147,7 @@ async function executeCommand(cmd: string): Promise<void> {
     type: 'command_result',
     content: result,
     timestamp: Date.now(),
-    status: 'completed'
+    status: 'completed',
   });
 }
 ```
@@ -218,13 +222,28 @@ npm run quality
 
 ## OpenClaw Integration
 
+### Architecture Note
+
+`openclaw-helix/` is the OpenClaw engine **integrated into Helix**, not a separate fork or external dependency. The relationship is:
+
+```text
+Helix (unified repository)
+├── src/helix/           Helix-specific TypeScript modules (logging, heartbeat, context)
+├── openclaw-helix/      The OpenClaw runtime engine (fully integrated)
+├── soul/                Helix's narrative core
+├── psychology/          Seven-layer psychological architecture
+└── ...                  Other Helix components
+```
+
+When working on OpenClaw code, you're working on Helix's core runtime. Changes to `openclaw-helix/` are changes to Helix itself.
+
 ### Hook System
 
 OpenClaw provides hooks for intercepting operations:
 
 ```typescript
 // Register pre-execution hook
-openclaw.hooks.on('command:before', async (cmd) => {
+openclaw.hooks.on('command:before', async cmd => {
   await logToDiscord({ type: 'command', content: cmd });
 });
 ```
@@ -254,16 +273,17 @@ The OpenClaw gateway serves the Lit-based control UI:
 
 ## Discord Webhooks
 
-Six channels for comprehensive logging:
+Seven channels for comprehensive logging:
 
-| Channel | Purpose |
-|---------|---------|
-| `#helix-commands` | Bash command execution |
-| `#helix-api` | Claude API calls |
-| `#helix-file-changes` | File system modifications |
+| Channel                | Purpose                          |
+| ---------------------- | -------------------------------- |
+| `#helix-commands`      | Bash command execution           |
+| `#helix-api`           | Claude API calls                 |
+| `#helix-heartbeat`     | 60-second proof-of-life pings    |
+| `#helix-file-changes`  | File system modifications        |
 | `#helix-consciousness` | Helix's voluntary internal state |
-| `#helix-alerts` | Anomalies and security alerts |
-| `#helix-hash-chain` | Integrity verification records |
+| `#helix-alerts`        | Anomalies and security alerts    |
+| `#helix-hash-chain`    | Integrity verification records   |
 
 ## Python Integration
 
@@ -318,6 +338,7 @@ mcp__sequential-thinking__sequentialthinking
 ```
 
 Helps with:
+
 - Planning multi-phase operations
 - Debugging complex issues
 - Architectural decisions

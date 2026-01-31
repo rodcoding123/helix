@@ -24,21 +24,16 @@ const HELIX_LAYER_FILES: Record<number, { name: string; files: string[] }> = {
   1: {
     name: 'Narrative Core',
     files: [
-      'axis/psychology/psyeval.json',  // SOUL.md loaded separately by OpenClaw
+      'axis/psychology/psyeval.json', // SOUL.md loaded separately by OpenClaw
     ],
   },
   2: {
     name: 'Emotional Memory',
-    files: [
-      'axis/psychology/emotional_tags.json',
-    ],
+    files: ['axis/psychology/emotional_tags.json'],
   },
   3: {
     name: 'Relational Memory',
-    files: [
-      'axis/psychology/attachments.json',
-      'axis/psychology/trust_map.json',
-    ],
+    files: ['axis/psychology/attachments.json', 'axis/psychology/trust_map.json'],
   },
   4: {
     name: 'Prospective Self',
@@ -54,10 +49,7 @@ const HELIX_LAYER_FILES: Record<number, { name: string; files: string[] }> = {
   },
   6: {
     name: 'Transformation Cycles',
-    files: [
-      'axis/transformation/current_state.json',
-      'axis/transformation/history.json',
-    ],
+    files: ['axis/transformation/current_state.json', 'axis/transformation/history.json'],
   },
   7: {
     name: 'Purpose Engine',
@@ -83,9 +75,7 @@ interface EmbeddedContextFile {
  * @param workspaceDir - The OpenClaw workspace directory
  * @returns Array of context files ready for embedding
  */
-export async function loadHelixContextFiles(
-  workspaceDir: string
-): Promise<EmbeddedContextFile[]> {
+export async function loadHelixContextFiles(workspaceDir: string): Promise<EmbeddedContextFile[]> {
   const results: EmbeddedContextFile[] = [];
 
   for (const [layerNum, layer] of Object.entries(HELIX_LAYER_FILES)) {
@@ -99,12 +89,14 @@ export async function loadHelixContextFiles(
         let enhancedContent = content;
         if (relativePath.endsWith('.json')) {
           try {
-            const parsed = JSON.parse(content);
-            parsed._helix_layer = {
-              number: parseInt(layerNum),
-              name: layer.name,
-            };
-            enhancedContent = JSON.stringify(parsed, null, 2);
+            const parsed = JSON.parse(content) as Record<string, unknown>;
+            if (typeof parsed === 'object' && parsed !== null) {
+              parsed._helix_layer = {
+                number: parseInt(layerNum),
+                name: layer.name,
+              };
+              enhancedContent = JSON.stringify(parsed, null, 2);
+            }
           } catch {
             // Keep original content if JSON parsing fails
           }
@@ -161,15 +153,15 @@ export async function loadHelixContextFilesDetailed(
  * Get the status of all Helix context files
  * Useful for debugging and monitoring
  */
-export async function getHelixContextStatus(
-  workspaceDir: string
-): Promise<{
-  layer: number;
-  name: string;
-  file: string;
-  status: 'present' | 'missing';
-  size?: number;
-}[]> {
+export async function getHelixContextStatus(workspaceDir: string): Promise<
+  {
+    layer: number;
+    name: string;
+    file: string;
+    status: 'present' | 'missing';
+    size?: number;
+  }[]
+> {
   const status: {
     layer: number;
     name: string;
@@ -209,15 +201,10 @@ export async function getHelixContextStatus(
  * Build a summary of the seven layers for context
  * This creates a compact overview that can be included in prompts
  */
-export async function buildLayerSummary(
-  workspaceDir: string
-): Promise<string> {
+export async function buildLayerSummary(workspaceDir: string): Promise<string> {
   const status = await getHelixContextStatus(workspaceDir);
 
-  const lines: string[] = [
-    '# Helix Seven Layer Status',
-    '',
-  ];
+  const lines: string[] = ['# Helix Seven Layer Status', ''];
 
   const layerGroups = new Map<number, typeof status>();
   for (const s of status) {
@@ -248,9 +235,7 @@ export async function buildLayerSummary(
 /**
  * Create the expected directory structure for Helix
  */
-export async function ensureHelixDirectoryStructure(
-  workspaceDir: string
-): Promise<void> {
+export async function ensureHelixDirectoryStructure(workspaceDir: string): Promise<void> {
   const directories = [
     'axis/psychology',
     'axis/identity',
@@ -280,7 +265,11 @@ export function validateContextFile(
   const errors: string[] = [];
 
   try {
-    const parsed = JSON.parse(content);
+    const parsed = JSON.parse(content) as Record<string, unknown>;
+
+    if (typeof parsed !== 'object' || parsed === null) {
+      return { valid: false, errors: ['Content is not a valid JSON object'] };
+    }
 
     for (const [field, requirement] of Object.entries(schema)) {
       if (requirement === 'required' && !(field in parsed)) {
@@ -290,7 +279,10 @@ export function validateContextFile(
 
     return { valid: errors.length === 0, errors };
   } catch (e) {
-    return { valid: false, errors: [`Invalid JSON: ${e}`] };
+    return {
+      valid: false,
+      errors: [`Invalid JSON: ${e instanceof Error ? e.message : String(e)}`],
+    };
   }
 }
 

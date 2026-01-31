@@ -31,7 +31,7 @@ async function sendWebhook(embed: DiscordEmbed, sync: boolean = true): Promise<v
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ embeds: [embed] }),
-  }).catch((error) => {
+  }).catch(error => {
     console.error('[Helix] Command webhook failed:', error);
   });
 
@@ -86,16 +86,20 @@ export async function logCommandPreExecution(log: PreExecutionLog): Promise<stri
 
   const embed: DiscordEmbed = {
     title: `🔵 Command Starting${elevatedWarning}`,
-    color: log.elevated ? 0xE74C3C : 0x3498DB,
+    color: log.elevated ? 0xe74c3c : 0x3498db,
     fields: [
       { name: 'ID', value: `\`${logId.slice(0, 8)}\``, inline: true },
       { name: 'Time', value: timestamp, inline: true },
       { name: 'Elevated', value: log.elevated ? 'YES ⚠️' : 'No', inline: true },
       { name: 'Directory', value: `\`${log.workdir}\``, inline: false },
-      { name: 'Command', value: `\`\`\`bash\n${sanitizeCommand(log.command)}\`\`\``, inline: false },
+      {
+        name: 'Command',
+        value: `\`\`\`bash\n${sanitizeCommand(log.command)}\`\`\``,
+        inline: false,
+      },
     ],
     timestamp,
-    footer: { text: 'PRE-EXECUTION - Already logged before running' }
+    footer: { text: 'PRE-EXECUTION - Already logged before running' },
   };
 
   if (log.sessionKey) {
@@ -118,7 +122,7 @@ export async function logCommandPostExecution(log: PostExecutionLog): Promise<vo
 
   const success = log.exitCode === 0;
   const status = success ? '✅ Success' : `❌ Failed (${log.exitCode})`;
-  const color = success ? 0x2ECC71 : 0xE74C3C;
+  const color = success ? 0x2ecc71 : 0xe74c3c;
   const timestamp = new Date().toISOString();
 
   const embed: DiscordEmbed = {
@@ -130,7 +134,7 @@ export async function logCommandPostExecution(log: PostExecutionLog): Promise<vo
       { name: 'Exit', value: `${log.exitCode ?? 'N/A'}`, inline: true },
     ],
     timestamp,
-    footer: { text: 'POST-EXECUTION' }
+    footer: { text: 'POST-EXECUTION' },
   };
 
   if (log.signal) {
@@ -142,7 +146,7 @@ export async function logCommandPostExecution(log: PostExecutionLog): Promise<vo
     embed.fields.push({
       name: 'Output Preview',
       value: `\`\`\`\n${output}\`\`\``,
-      inline: false
+      inline: false,
     });
   }
 
@@ -153,29 +157,26 @@ export async function logCommandPostExecution(log: PostExecutionLog): Promise<vo
 /**
  * Log a command that failed to start
  */
-export async function logCommandFailed(
-  logId: string,
-  error: string
-): Promise<void> {
+export async function logCommandFailed(logId: string, error: string): Promise<void> {
   const pending = state.pending.get(logId);
   state.pending.delete(logId);
 
   const embed: DiscordEmbed = {
     title: '🚫 Command Failed to Start',
-    color: 0xE74C3C,
+    color: 0xe74c3c,
     fields: [
       { name: 'ID', value: `\`${logId.slice(0, 8)}\``, inline: true },
       { name: 'Error', value: error.slice(0, 500), inline: false },
     ],
     timestamp: new Date().toISOString(),
-    footer: { text: 'EXECUTION FAILED' }
+    footer: { text: 'EXECUTION FAILED' },
   };
 
   if (pending) {
     embed.fields.push({
       name: 'Command',
       value: `\`\`\`bash\n${sanitizeCommand(pending.command, 500)}\`\`\``,
-      inline: false
+      inline: false,
     });
   }
 

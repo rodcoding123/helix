@@ -1,8 +1,16 @@
 # Environment files with secrets
 .env
+.env.local
+.env.*.local
 
-# Node modules (if any)
+# Node modules
 node_modules/
+
+# Build output
+dist/
+
+# Test coverage
+coverage/
 
 # Python
 __pycache__/
@@ -15,8 +23,13 @@ Thumbs.db
 
 # IDE
 .idea/
+.vscode/
 *.swp
 *.swo
 
 # Logs
 *.log
+hash_chain.log
+
+# Helix runtime
+.helix/

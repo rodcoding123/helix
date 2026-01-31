@@ -138,7 +138,10 @@ export const HELIX_SEVEN_LAYERS = {
   1: { name: 'Narrative Core', files: ['SOUL.md', 'psyeval.json'] },
   2: { name: 'Emotional Memory', files: ['emotional_tags.json', 'salience.db'] },
   3: { name: 'Relational Memory', files: ['attachments.json', 'trust_map.json'] },
-  4: { name: 'Prospective Self', files: ['goals.json', 'feared_self.json', 'possible_selves.json'] },
+  4: {
+    name: 'Prospective Self',
+    files: ['goals.json', 'feared_self.json', 'possible_selves.json'],
+  },
   5: { name: 'Integration Rhythms', files: ['decay.py', 'synthesis.py'] },
   6: { name: 'Transformation Cycles', files: ['current_state.json', 'history.json'] },
   7: { name: 'Purpose Engine', files: ['ikigai.json', 'wellness.json', 'meaning_sources.json'] },

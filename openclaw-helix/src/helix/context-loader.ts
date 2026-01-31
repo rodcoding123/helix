@@ -35,9 +35,7 @@ export interface EmbeddedContextFile {
  * @param workspaceDir - The OpenClaw workspace directory
  * @returns Array of context files ready for embedding
  */
-export async function loadHelixContextFiles(
-  workspaceDir: string,
-): Promise<EmbeddedContextFile[]> {
+export async function loadHelixContextFiles(workspaceDir: string): Promise<EmbeddedContextFile[]> {
   const results: EmbeddedContextFile[] = [];
   const axisDir = path.join(workspaceDir, "axis");
 
@@ -115,9 +113,7 @@ export async function loadHelixContextFilesDetailed(
  * Get the status of all Helix context files
  * Useful for debugging and monitoring
  */
-export async function getHelixContextStatus(
-  workspaceDir: string,
-): Promise<
+export async function getHelixContextStatus(workspaceDir: string): Promise<
   {
     layer: number;
     name: string;

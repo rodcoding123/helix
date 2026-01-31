@@ -36,19 +36,19 @@ Phase 11: Push to Remote              - Push to origin (automatic)
 
 ## Modes
 
-| Mode | Phases | Description |
-|------|--------|-------------|
-| (default) | 1-11 | Full pipeline with push |
-| `review` | 1-4 | Just review, no changes |
-| `fix` | 5-11 | Fix, commit, and push |
-| `quick` | 8-11 | Verify, format, commit, push |
+| Mode      | Phases | Description                  |
+| --------- | ------ | ---------------------------- |
+| (default) | 1-11   | Full pipeline with push      |
+| `review`  | 1-4    | Just review, no changes      |
+| `fix`     | 5-11   | Fix, commit, and push        |
+| `quick`   | 8-11   | Verify, format, commit, push |
 
 ## Flags
 
-| Flag | Description |
-|------|-------------|
-| `--no-push` | Skip pushing to remote |
-| `--pr` | Create pull request after push |
+| Flag        | Description                    |
+| ----------- | ------------------------------ |
+| `--no-push` | Skip pushing to remote         |
+| `--pr`      | Create pull request after push |
 
 ## Instructions
 
@@ -105,14 +105,14 @@ Type: "pipeline-session"
 
 All must pass before commit:
 
-| Check | Requirement |
-|-------|-------------|
-| TypeScript | `tsc --noEmit` passes |
-| ESLint | No errors |
-| Prettier | All files formatted |
-| Tests | All passing |
-| Build | `npm run build` succeeds |
-| Psychology | All layer files valid |
+| Check      | Requirement              |
+| ---------- | ------------------------ |
+| TypeScript | `tsc --noEmit` passes    |
+| ESLint     | No errors                |
+| Prettier   | All files formatted      |
+| Tests      | All passing              |
+| Build      | `npm run build` succeeds |
+| Psychology | All layer files valid    |
 
 ## Output Format
 
@@ -120,11 +120,13 @@ All must pass before commit:
 ## Pipeline Report
 
 ### Configuration
+
 - Mode: [full/review/fix/quick]
 - Push: [yes/no]
 - PR: [yes/no]
 
 ### Modified Files
+
 - src/helix/hash-chain.ts
 - src/helix/command-logger.ts
 - psychology/trust_map.json
@@ -132,48 +134,53 @@ All must pass before commit:
 
 ### Phase Results
 
-| Phase | Status | Duration |
-|-------|--------|----------|
-| 1. Gather Files | PASS | 2s |
-| 2. Quality Baseline | PASS | 15s |
-| 3. Code Review | PASS | 30s |
-| 4. Psychological Check | PASS | 5s |
-| 5. Fix Critical | PASS | 10s |
-| 6. Generate Tests | PASS | 20s |
-| 7. Final Verification | PASS | 15s |
-| 8. Fix Remaining | PASS | 5s |
-| 9. Format | PASS | 8s |
-| 10. Commit | PASS | 2s |
-| 11. Push | PASS | 5s |
+| Phase                  | Status | Duration |
+| ---------------------- | ------ | -------- |
+| 1. Gather Files        | PASS   | 2s       |
+| 2. Quality Baseline    | PASS   | 15s      |
+| 3. Code Review         | PASS   | 30s      |
+| 4. Psychological Check | PASS   | 5s       |
+| 5. Fix Critical        | PASS   | 10s      |
+| 6. Generate Tests      | PASS   | 20s      |
+| 7. Final Verification  | PASS   | 15s      |
+| 8. Fix Remaining       | PASS   | 5s       |
+| 9. Format              | PASS   | 8s       |
+| 10. Commit             | PASS   | 2s       |
+| 11. Push               | PASS   | 5s       |
 
 ### Code Review Summary
 
-| File | Score | Critical | Warnings |
-|------|-------|----------|----------|
-| hash-chain.ts | A | 0 | 1 |
-| command-logger.ts | B | 1 | 2 |
+| File              | Score | Critical | Warnings |
+| ----------------- | ----- | -------- | -------- |
+| hash-chain.ts     | A     | 0        | 1        |
+| command-logger.ts | B     | 1        | 2        |
 
 ### Issues Summary
+
 - Critical: X (fixed: Y)
 - Warning: X (fixed: Y)
 - Suggestions: X (applied: Y)
 
 ### Tests Generated
-- src/helix/__tests__/hash-chain.test.ts (5 tests)
-- src/helix/__tests__/command-logger.test.ts (3 tests)
+
+- src/helix/**tests**/hash-chain.test.ts (5 tests)
+- src/helix/**tests**/command-logger.test.ts (3 tests)
 
 ### Commit
+
 - Hash: abc1234
 - Message: "feat: description"
 - Branch: feature/xyz
 
 ### Push/PR
+
 - Remote: origin/feature/xyz
 - PR: #123 (if created)
 
 ### Total Duration: X minutes
 
 ### Recommendation
+
 [Ready for PR review / Merged to main / Needs manual review]
 ```
 

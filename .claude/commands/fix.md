@@ -56,22 +56,27 @@ npx prettier --write "**/*.json"
 ## Fix Report
 
 ### TypeScript/JavaScript (ESLint)
+
 - Files fixed: X
 - [list of files]
 
 ### Formatting (Prettier)
+
 - Files formatted: X
 - [list of files]
 
 ### Python (Black)
+
 - Files formatted: X
 - [list of files]
 
 ### Python (Ruff)
+
 - Issues fixed: X
 - [list of files]
 
 ### Summary
+
 Total files modified: X
 ```
 

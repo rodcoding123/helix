@@ -53,15 +53,15 @@ gh pr create --title "[type]: Description" --body "..."
 
 Use conventional commit prefixes:
 
-| Prefix | Description |
-|--------|-------------|
-| `feat:` | New feature |
-| `fix:` | Bug fix |
+| Prefix      | Description      |
+| ----------- | ---------------- |
+| `feat:`     | New feature      |
+| `fix:`      | Bug fix          |
 | `refactor:` | Code refactoring |
-| `docs:` | Documentation |
-| `test:` | Adding tests |
-| `chore:` | Maintenance |
-| `style:` | Formatting |
+| `docs:`     | Documentation    |
+| `test:`     | Adding tests     |
+| `chore:`    | Maintenance      |
+| `style:`    | Formatting       |
 
 ## PR Body Template
 
@@ -92,6 +92,7 @@ Use conventional commit prefixes:
 - [ ] Hash chain integrity checked
 
 ---
+
 Generated with Claude Code
 ```
 
@@ -101,21 +102,24 @@ Generated with Claude Code
 ## PR Creation Report
 
 ### Quality Gates
-| Check | Status |
-|-------|--------|
-| TypeScript | PASS |
-| ESLint | PASS |
-| Prettier | PASS |
-| Tests | PASS (47 passed) |
-| Build | PASS |
+
+| Check      | Status           |
+| ---------- | ---------------- |
+| TypeScript | PASS             |
+| ESLint     | PASS             |
+| Prettier   | PASS             |
+| Tests      | PASS (47 passed) |
+| Build      | PASS             |
 
 ### Branch Info
+
 - Current: feature/my-feature
 - Base: main
 - Commits: 3
 - Files changed: 5
 
 ### PR Created
+
 - Title: feat: Add hash chain verification
 - URL: https://github.com/user/helix/pull/123
 - Status: Open | Draft

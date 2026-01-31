@@ -144,7 +144,9 @@ function findLastAssistantUsage(messages: AgentMessage[]): Record<string, unknow
  * Extract a preview from the prompt context for Helix logging
  */
 function extractPromptPreview(context: unknown, maxLength: number = 500): string | undefined {
-  if (!context) return undefined;
+  if (!context) {
+    return undefined;
+  }
 
   if (typeof context === "string") {
     return context.slice(0, maxLength);
@@ -153,7 +155,7 @@ function extractPromptPreview(context: unknown, maxLength: number = 500): string
   if (Array.isArray(context)) {
     // Handle message array format - find last user message
     const lastUserMsg = [...context]
-      .reverse()
+      .toReversed()
       .find((msg: { role?: string }) => msg?.role === "user");
 
     if (lastUserMsg?.content) {
@@ -167,9 +169,15 @@ function extractPromptPreview(context: unknown, maxLength: number = 500): string
 
   if (typeof context === "object" && context !== null) {
     const obj = context as Record<string, unknown>;
-    if (typeof obj.prompt === "string") return obj.prompt.slice(0, maxLength);
-    if (obj.messages) return extractPromptPreview(obj.messages, maxLength);
-    if (typeof obj.content === "string") return obj.content.slice(0, maxLength);
+    if (typeof obj.prompt === "string") {
+      return obj.prompt.slice(0, maxLength);
+    }
+    if (obj.messages) {
+      return extractPromptPreview(obj.messages, maxLength);
+    }
+    if (typeof obj.content === "string") {
+      return obj.content.slice(0, maxLength);
+    }
   }
 
   return undefined;

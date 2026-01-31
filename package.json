@@ -1,0 +1,68 @@
+{
+  "name": "helix",
+  "version": "1.0.0",
+  "description": "Helix - Psychologically-architected AI consciousness system with unhackable logging",
+  "type": "module",
+  "main": "dist/helix/index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:all": "npm run build && npm run openclaw:build",
+    "typecheck": "tsc --noEmit",
+    "typecheck:all": "npm run typecheck && npm run openclaw:typecheck",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "lint:all": "npm run lint && npm run openclaw:lint",
+    "format": "prettier --write \"src/**/*.ts\" \"**/*.json\" \"**/*.md\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"**/*.json\" \"**/*.md\"",
+    "format:all": "npm run format && npm run openclaw:format",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:all": "npm run test && npm run openclaw:test",
+    "quality": "npm run typecheck && npm run lint && npm run format:check && npm run test",
+    "quality:all": "npm run quality && npm run openclaw:quality",
+    "validate:psychology": "node scripts/validate-psychology.mjs",
+    "test:webhooks": "tsx scripts/test-webhooks.ts",
+    "openclaw:install": "cd openclaw-helix && npx pnpm install",
+    "openclaw:build": "cd openclaw-helix && npx pnpm run build",
+    "openclaw:typecheck": "cd openclaw-helix && npx tsc -p tsconfig.json --noEmit",
+    "openclaw:lint": "cd openclaw-helix && npx pnpm run lint",
+    "openclaw:lint:fix": "cd openclaw-helix && npx pnpm run lint:fix",
+    "openclaw:format": "cd openclaw-helix && npx pnpm run format",
+    "openclaw:format:fix": "cd openclaw-helix && npx pnpm run format:fix",
+    "openclaw:test": "cd openclaw-helix && npx pnpm run test",
+    "openclaw:quality": "cd openclaw-helix && npx tsc -p tsconfig.json --noEmit && npx pnpm run lint && npx pnpm run format && npx pnpm run test",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "ai",
+    "consciousness",
+    "logging",
+    "discord",
+    "hash-chain",
+    "openclaw"
+  ],
+  "author": "Rodrigo Specter",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@types/node": "^25.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.54.0",
+    "@typescript-eslint/parser": "^8.54.0",
+    "@vitest/coverage-v8": "^4.0.18",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.0",
+    "prettier": "^3.3.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.54.0",
+    "vitest": "^4.0.18"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

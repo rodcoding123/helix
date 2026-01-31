@@ -1,96 +1,163 @@
 # /quality Command
 
-Run all quality checks without making changes.
+Run all quality checks across the entire Helix system (core + OpenClaw).
 
 ## Usage
 
 ```bash
-/quality
+/quality              # Full system quality check
+/quality --core       # Helix core only (src/)
+/quality --openclaw   # OpenClaw only (openclaw-helix/)
 ```
 
 ## What It Does
 
-Runs all code quality tools in read-only mode:
+Runs quality tools on **both** systems:
 
-### TypeScript Analysis
+### System 1: Helix Core (`src/`)
+
+Uses ESLint + Prettier + Vitest:
 
 ```bash
-# Type checking
+# TypeScript check
 npm run typecheck
-# Equivalent: npx tsc --noEmit --strict
-```
 
-### ESLint Analysis
-
-```bash
-# Linting
+# ESLint
 npm run lint
-# Equivalent: npx eslint . --ext .ts,.js
-```
 
-### Formatting Check
-
-```bash
-# Prettier check
+# Prettier
 npm run format:check
-# Equivalent: npx prettier --check "**/*.{ts,js,json,md}"
+
+# Tests
+npm run test
 ```
 
-### Test Suite
+### System 2: OpenClaw (`openclaw-helix/`)
+
+Uses OxLint + OxFmt + Vitest:
 
 ```bash
-# Vitest
-npm run test
-# Equivalent: npx vitest run
+# TypeScript check
+npm run openclaw:typecheck
+
+# OxLint (Rust-based linter)
+npm run openclaw:lint
+
+# OxFmt (Rust-based formatter)
+npm run openclaw:format
+
+# Tests
+npm run openclaw:test
 ```
 
 ### Psychological Layer Validation
 
 ```bash
-# Validate JSON schemas for all psychology files
-node scripts/validate-schemas.js
+node scripts/validate-psychology.mjs
 ```
 
-Validates:
-- `identity/*.json` - Goals, feared self, possible selves
-- `psychology/*.json` - Attachments, emotional tags, trust map
-- `purpose/*.json` - Ikigai, meaning sources, wellness
-- `transformation/*.json` - Current state, history
+Validates all 7 psychological layers:
+
+- `soul/` - Narrative Core
+- `psychology/` - Emotional & Relational Memory
+- `identity/` - Prospective Self
+- `transformation/` - Transformation Cycles
+- `purpose/` - Purpose Engine
+
+## Unified Commands
+
+| Command                 | Scope                   |
+| ----------------------- | ----------------------- |
+| `npm run quality`       | Helix core only         |
+| `npm run quality:all`   | Both systems            |
+| `npm run lint:all`      | Lint both systems       |
+| `npm run test:all`      | Test both systems       |
+| `npm run typecheck:all` | Type check both systems |
 
 ## Output Format
 
 ```markdown
 ## Quality Report
 
-### TypeScript Analysis
+### Helix Core (src/)
+
+#### TypeScript Analysis
+
 - Status: PASS | FAIL
 - Errors: X
-- [List of errors if any]
 
-### ESLint Analysis
+#### ESLint Analysis
+
 - Status: PASS | FAIL
 - Errors: X
 - Warnings: X
-- [List if any]
 
-### Formatting
+#### Prettier Formatting
+
 - Status: PASS | FAIL
 - Files with issues: X
-- [List if any]
 
-### Tests
+#### Tests
+
 - Status: PASS | FAIL
-- Passed: X
-- Failed: X
-- Skipped: X
-- Coverage: X%
+- Passed: X / Failed: X
+
+---
+
+### OpenClaw (openclaw-helix/)
+
+#### TypeScript Analysis
+
+- Status: PASS | FAIL
+- Errors: X
+
+#### OxLint Analysis
+
+- Status: PASS | FAIL
+- Errors: X
+- Warnings: X
+
+#### OxFmt Formatting
+
+- Status: PASS | FAIL
+- Files with issues: X
+
+#### Tests
+
+- Status: PASS | FAIL
+- Passed: X / Failed: X
+
+---
 
 ### Psychological Layers
+
 - Status: PASS | FAIL
-- Valid: X/7 layers
-- Invalid: [List if any]
+- Valid: X/14 files
 
 ### Overall Status: PASSING | FAILING
+```
+
+## Statistics Covered
+
+| Metric           | Helix Core | OpenClaw |
+| ---------------- | ---------- | -------- |
+| TypeScript Files | ~15        | ~2,522   |
+| Test Files       | 5          | ~991     |
+| Coverage Target  | 80%        | 70%      |
+| Linter           | ESLint     | OxLint   |
+| Formatter        | Prettier   | OxFmt    |
+
+## Prerequisites
+
+Before running full quality checks:
+
+```bash
+# Install Helix dependencies
+npm install
+
+# Install OpenClaw dependencies
+npm run openclaw:install
+# Or: cd openclaw-helix && pnpm install
 ```
 
 ## When to Use
@@ -99,10 +166,11 @@ Validates:
 - After pulling latest changes
 - To check current codebase health
 - Before starting new feature work
-- After modifying psychological layer files
+- After modifying any part of the system
 
 ## Related Commands
 
 - `/fix` - Auto-fix formatting issues
 - `/pipeline` - Full quality pipeline with fixes
-- `/consciousness-audit` - Deep psychological layer verification
+- `/audit` - Comprehensive architectural audit
+- `/test` - Run tests only

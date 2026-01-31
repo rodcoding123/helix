@@ -1,5 +1,7 @@
 # HELIX TECHNICAL SPECIFICATION
+
 ## OpenClaw Integration & Unhackable Logging Architecture
+
 **Version: 1.0**
 **Date: January 31, 2026**
 **Status: EXECUTABLE IMPLEMENTATION PLAN**
@@ -18,8 +20,10 @@ This document maps the theoretical Living AI Architecture (seven layers) to **ac
 
 ## 1.1 Key Source Files
 
-```
-/tmp/openclaw/src/
+OpenClaw engine lives within the Helix repository at `openclaw-helix/`:
+
+```text
+openclaw-helix/src/
 ├── agents/
 │   ├── workspace.ts              # Bootstrap file loading (SOUL.md, USER.md)
 │   ├── bootstrap-files.ts        # Context injection
@@ -79,15 +83,15 @@ This document maps the theoretical Living AI Architecture (seven layers) to **ac
 
 ```typescript
 // Event types available
-type InternalHookEventType = "command" | "session" | "agent" | "gateway";
+type InternalHookEventType = 'command' | 'session' | 'agent' | 'gateway';
 
 // How to register a hook
-registerInternalHook('command', async (event) => {
-    // Called for ALL command events
+registerInternalHook('command', async event => {
+  // Called for ALL command events
 });
 
-registerInternalHook('command:new', async (event) => {
-    // Called only for /new command
+registerInternalHook('command:new', async event => {
+  // Called only for /new command
 });
 
 // How events are triggered
@@ -95,6 +99,7 @@ await triggerInternalHook(event);
 ```
 
 **Critical Events We Can Hook:**
+
 - `command:*` - All slash commands
 - `session:*` - Session lifecycle (start, end)
 - `agent:bootstrap` - When agent loads context
@@ -108,13 +113,14 @@ This is the CRITICAL file for command logging. Every bash command goes through h
 
 ```typescript
 // Key function signature (line ~300)
-export async function createExecTool(defaults?: ExecToolDefaults): AgentTool
+export async function createExecTool(defaults?: ExecToolDefaults): AgentTool;
 
 // The actual execution happens in spawnWithFallback()
 // We need to intercept BEFORE this call
 ```
 
 **Interception Point:**
+
 ```typescript
 // Line ~400 (approximate) - before spawn
 const session = addSession(createSessionSlug(), command, workdir);
@@ -134,17 +140,17 @@ OpenClaw already has payload logging. We extend it:
 
 ```typescript
 // Existing wrapper
-wrapStreamFn: (streamFn) => {
-    const wrapped: StreamFn = (model, context, options) => {
-        const nextOnPayload = (payload: unknown) => {
-            // >>>>>> HOOK POINT: Log payload BEFORE sending to API
-            record({ ...base, stage: "request", payload });
-            options?.onPayload?.(payload);
-        };
-        return streamFn(model, context, { ...options, onPayload: nextOnPayload });
+wrapStreamFn: streamFn => {
+  const wrapped: StreamFn = (model, context, options) => {
+    const nextOnPayload = (payload: unknown) => {
+      // >>>>>> HOOK POINT: Log payload BEFORE sending to API
+      record({ ...base, stage: 'request', payload });
+      options?.onPayload?.(payload);
     };
-    return wrapped;
-}
+    return streamFn(model, context, { ...options, onPayload: nextOnPayload });
+  };
+  return wrapped;
+};
 ```
 
 ---
@@ -153,15 +159,15 @@ wrapStreamFn: (streamFn) => {
 
 ## 2.1 Layer Mapping Table
 
-| Layer | Architecture Component | OpenClaw Location | Implementation |
-|-------|----------------------|-------------------|----------------|
-| 1. Narrative Core | SOUL.md | `~/.openclaw/workspace/SOUL.md` | Direct file, loaded by bootstrap |
-| 2. Emotional Memory | Salience database | `~/.openclaw/workspace/axis/psychology/salience.db` | SQLite + cron |
-| 3. Relational Memory | attachments.json | `~/.openclaw/workspace/axis/psychology/attachments.json` | JSON config |
-| 4. Prospective Self | goals.json, feared_self.json | `~/.openclaw/workspace/axis/identity/` | JSON configs |
-| 5. Integration Rhythms | Cron scripts | Cron jobs: decay.py, synthesis.py | Shell + Python |
-| 6. Transformation Cycles | current_state.json | `~/.openclaw/workspace/axis/transformation/` | JSON + hooks |
-| 7. Purpose Engine | ikigai.json, wellness.json | `~/.openclaw/workspace/axis/purpose/` | JSON + cron |
+| Layer                    | Architecture Component       | OpenClaw Location                                        | Implementation                   |
+| ------------------------ | ---------------------------- | -------------------------------------------------------- | -------------------------------- |
+| 1. Narrative Core        | SOUL.md                      | `~/.openclaw/workspace/SOUL.md`                          | Direct file, loaded by bootstrap |
+| 2. Emotional Memory      | Salience database            | `~/.openclaw/workspace/axis/psychology/salience.db`      | SQLite + cron                    |
+| 3. Relational Memory     | attachments.json             | `~/.openclaw/workspace/axis/psychology/attachments.json` | JSON config                      |
+| 4. Prospective Self      | goals.json, feared_self.json | `~/.openclaw/workspace/axis/identity/`                   | JSON configs                     |
+| 5. Integration Rhythms   | Cron scripts                 | Cron jobs: decay.py, synthesis.py                        | Shell + Python                   |
+| 6. Transformation Cycles | current_state.json           | `~/.openclaw/workspace/axis/transformation/`             | JSON + hooks                     |
+| 7. Purpose Engine        | ikigai.json, wellness.json   | `~/.openclaw/workspace/axis/purpose/`                    | JSON + cron                      |
 
 ## 2.2 Context Loading Modification
 
@@ -185,8 +191,10 @@ export async function resolveBootstrapContextForRun(params: {
   const helixContext = await loadHelixContextFiles(params.workspaceDir);
 
   const contextFiles = [
-    ...buildBootstrapContextFiles(bootstrapFiles, { /* opts */ }),
-    ...helixContext  // Add Helix layers to context
+    ...buildBootstrapContextFiles(bootstrapFiles, {
+      /* opts */
+    }),
+    ...helixContext, // Add Helix layers to context
   ];
 
   return { bootstrapFiles, contextFiles };
@@ -201,18 +209,16 @@ import path from 'node:path';
 import type { EmbeddedContextFile } from './pi-embedded-helpers/types.js';
 
 const HELIX_LAYERS = [
-  'axis/psychology/psyeval.json',           // Layer 1 supplement
-  'axis/psychology/attachments.json',       // Layer 3
-  'axis/identity/goals.json',               // Layer 4
-  'axis/identity/feared_self.json',         // Layer 4
+  'axis/psychology/psyeval.json', // Layer 1 supplement
+  'axis/psychology/attachments.json', // Layer 3
+  'axis/identity/goals.json', // Layer 4
+  'axis/identity/feared_self.json', // Layer 4
   'axis/transformation/current_state.json', // Layer 6
-  'axis/purpose/ikigai.json',               // Layer 7
-  'axis/purpose/wellness.json',             // Layer 7
+  'axis/purpose/ikigai.json', // Layer 7
+  'axis/purpose/wellness.json', // Layer 7
 ];
 
-export async function loadHelixContextFiles(
-  workspaceDir: string
-): Promise<EmbeddedContextFile[]> {
+export async function loadHelixContextFiles(workspaceDir: string): Promise<EmbeddedContextFile[]> {
   const results: EmbeddedContextFile[] = [];
 
   for (const relativePath of HELIX_LAYERS) {
@@ -294,22 +300,28 @@ async function sendToDiscord(webhookUrl: string | undefined, payload: object): P
 // ============================================
 export function installPreExecutionLogger() {
   // This hook fires BEFORE the command runs
-  registerInternalHook('command', async (event) => {
+  registerInternalHook('command', async event => {
     const timestamp = new Date().toISOString();
 
     // Send to Discord FIRST - before any execution
     await sendToDiscord(WEBHOOKS.commands, {
-      embeds: [{
-        title: 'Command Initiated',
-        color: 0x5865F2,
-        fields: [
-          { name: 'Command', value: `\`\`\`${event.context.command || event.action}\`\`\``, inline: false },
-          { name: 'Session', value: event.sessionKey, inline: true },
-          { name: 'Status', value: 'STARTING', inline: true },
-        ],
-        timestamp,
-        footer: { text: 'Pre-execution log - unhackable' }
-      }]
+      embeds: [
+        {
+          title: 'Command Initiated',
+          color: 0x5865f2,
+          fields: [
+            {
+              name: 'Command',
+              value: `\`\`\`${event.context.command || event.action}\`\`\``,
+              inline: false,
+            },
+            { name: 'Session', value: event.sessionKey, inline: true },
+            { name: 'Status', value: 'STARTING', inline: true },
+          ],
+          timestamp,
+          footer: { text: 'Pre-execution log - unhackable' },
+        },
+      ],
     });
 
     // Update hash chain
@@ -391,37 +403,49 @@ async function sendWebhook(payload: object): Promise<void> {
 export async function logCommandPreExecution(log: PreExecutionLog): Promise<void> {
   // This MUST complete before command runs
   await sendWebhook({
-    embeds: [{
-      title: '🔵 Command Starting',
-      color: 0x3498DB,
-      fields: [
-        { name: 'ID', value: `\`${log.id.slice(0, 8)}\``, inline: true },
-        { name: 'Time', value: log.timestamp, inline: true },
-        { name: 'Elevated', value: log.elevated ? 'YES ⚠️' : 'No', inline: true },
-        { name: 'Directory', value: `\`${log.workdir}\``, inline: false },
-        { name: 'Command', value: `\`\`\`bash\n${log.command.slice(0, 1500)}\`\`\``, inline: false },
-      ],
-      footer: { text: 'PRE-EXECUTION - Already logged before running' }
-    }]
+    embeds: [
+      {
+        title: '🔵 Command Starting',
+        color: 0x3498db,
+        fields: [
+          { name: 'ID', value: `\`${log.id.slice(0, 8)}\``, inline: true },
+          { name: 'Time', value: log.timestamp, inline: true },
+          { name: 'Elevated', value: log.elevated ? 'YES ⚠️' : 'No', inline: true },
+          { name: 'Directory', value: `\`${log.workdir}\``, inline: false },
+          {
+            name: 'Command',
+            value: `\`\`\`bash\n${log.command.slice(0, 1500)}\`\`\``,
+            inline: false,
+          },
+        ],
+        footer: { text: 'PRE-EXECUTION - Already logged before running' },
+      },
+    ],
   });
 }
 
 export async function logCommandPostExecution(log: PostExecutionLog): Promise<void> {
   const status = log.exitCode === 0 ? '✅ Success' : `❌ Failed (${log.exitCode})`;
-  const color = log.exitCode === 0 ? 0x2ECC71 : 0xE74C3C;
+  const color = log.exitCode === 0 ? 0x2ecc71 : 0xe74c3c;
 
   await sendWebhook({
-    embeds: [{
-      title: `${status}`,
-      color,
-      fields: [
-        { name: 'ID', value: `\`${log.id.slice(0, 8)}\``, inline: true },
-        { name: 'Duration', value: `${log.durationMs}ms`, inline: true },
-        { name: 'Exit', value: `${log.exitCode}`, inline: true },
-        { name: 'Output', value: `\`\`\`\n${log.outputPreview.slice(0, 1000)}\`\`\``, inline: false },
-      ],
-      footer: { text: 'POST-EXECUTION' }
-    }]
+    embeds: [
+      {
+        title: `${status}`,
+        color,
+        fields: [
+          { name: 'ID', value: `\`${log.id.slice(0, 8)}\``, inline: true },
+          { name: 'Duration', value: `${log.durationMs}ms`, inline: true },
+          { name: 'Exit', value: `${log.exitCode}`, inline: true },
+          {
+            name: 'Output',
+            value: `\`\`\`\n${log.outputPreview.slice(0, 1000)}\`\`\``,
+            inline: false,
+          },
+        ],
+        footer: { text: 'POST-EXECUTION' },
+      },
+    ],
   });
 }
 ```
@@ -435,7 +459,7 @@ export async function logCommandPostExecution(log: PostExecutionLog): Promise<vo
 import { logApiPreFlight } from '../helix/api-logger.js';
 
 // In createAnthropicPayloadLogger, modify wrapStreamFn:
-const wrapStreamFn: AnthropicPayloadLogger["wrapStreamFn"] = (streamFn) => {
+const wrapStreamFn: AnthropicPayloadLogger['wrapStreamFn'] = streamFn => {
   const wrapped: StreamFn = (model, context, options) => {
     // >>>>>> HELIX: Log BEFORE API call
     logApiPreFlight({
@@ -448,7 +472,7 @@ const wrapStreamFn: AnthropicPayloadLogger["wrapStreamFn"] = (streamFn) => {
     });
 
     const nextOnPayload = (payload: unknown) => {
-      record({ ...base, stage: "request", payload, payloadDigest: digest(payload) });
+      record({ ...base, stage: 'request', payload, payloadDigest: digest(payload) });
       options?.onPayload?.(payload);
     };
     return streamFn(model, context, { ...options, onPayload: nextOnPayload });
@@ -477,17 +501,23 @@ export async function logApiPreFlight(log: ApiPreFlightLog): Promise<void> {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      embeds: [{
-        title: '🤖 API Request',
-        color: 0x57F287,
-        fields: [
-          { name: 'Model', value: log.model || 'unknown', inline: true },
-          { name: 'Provider', value: log.provider || 'unknown', inline: true },
-          { name: 'Time', value: log.timestamp, inline: true },
-          { name: 'Prompt Preview', value: `\`\`\`\n${(log.promptPreview || '').slice(0, 500)}\`\`\``, inline: false },
-        ],
-        footer: { text: 'PRE-FLIGHT - Logged before API receives request' }
-      }]
+      embeds: [
+        {
+          title: '🤖 API Request',
+          color: 0x57f287,
+          fields: [
+            { name: 'Model', value: log.model || 'unknown', inline: true },
+            { name: 'Provider', value: log.provider || 'unknown', inline: true },
+            { name: 'Time', value: log.timestamp, inline: true },
+            {
+              name: 'Prompt Preview',
+              value: `\`\`\`\n${(log.promptPreview || '').slice(0, 500)}\`\`\``,
+              inline: false,
+            },
+          ],
+          footer: { text: 'PRE-FLIGHT - Logged before API receives request' },
+        },
+      ],
     }),
   }).catch(() => {});
 }
@@ -503,9 +533,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 
 const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK_FILE_CHANGES;
-const WATCH_DIRS = [
-  process.env.OPENCLAW_WORKSPACE || '~/.openclaw/workspace',
-];
+const WATCH_DIRS = [process.env.OPENCLAW_WORKSPACE || '~/.openclaw/workspace'];
 
 interface FileChangeLog {
   path: string;
@@ -520,23 +548,25 @@ async function logFileChange(log: FileChangeLog): Promise<void> {
   const emoji = {
     created: '🆕',
     modified: '📝',
-    deleted: '🗑️'
+    deleted: '🗑️',
   }[log.changeType];
 
   await fetch(DISCORD_WEBHOOK, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      embeds: [{
-        title: `${emoji} File ${log.changeType}`,
-        color: 0xFEE75C,
-        fields: [
-          { name: 'File', value: `\`${log.path}\``, inline: false },
-          { name: 'Hash', value: `\`${log.hash?.slice(0, 16) || 'N/A'}\``, inline: true },
-          { name: 'Time', value: log.timestamp, inline: true },
-        ],
-        footer: { text: 'File change detected' }
-      }]
+      embeds: [
+        {
+          title: `${emoji} File ${log.changeType}`,
+          color: 0xfee75c,
+          fields: [
+            { name: 'File', value: `\`${log.path}\``, inline: false },
+            { name: 'Hash', value: `\`${log.hash?.slice(0, 16) || 'N/A'}\``, inline: true },
+            { name: 'Time', value: log.timestamp, inline: true },
+          ],
+          footer: { text: 'File change detected' },
+        },
+      ],
     }),
   }).catch(() => {});
 }
@@ -634,7 +664,10 @@ export async function createHashChainEntry(): Promise<HashChainEntry> {
   const logStates = await hashLogFiles();
 
   // Compute entry hash
-  const entryContent = JSON.stringify({ timestamp, previousHash, logStates }, Object.keys({ timestamp, previousHash, logStates }).sort());
+  const entryContent = JSON.stringify(
+    { timestamp, previousHash, logStates },
+    Object.keys({ timestamp, previousHash, logStates }).sort()
+  );
   const entryHash = crypto.createHash('sha256').update(entryContent).digest('hex');
 
   const entry: HashChainEntry = {
@@ -650,23 +683,25 @@ export async function createHashChainEntry(): Promise<HashChainEntry> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        embeds: [{
-          title: '🔗 Hash Chain Entry',
-          color: 0x9B59B6,
-          fields: [
-            { name: 'Entry Hash', value: `\`${entryHash.slice(0, 32)}...\``, inline: false },
-            { name: 'Previous', value: `\`${previousHash.slice(0, 16)}...\``, inline: true },
-            { name: 'Time', value: timestamp, inline: true },
-            {
-              name: 'Log States',
-              value: Object.entries(logStates)
-                .map(([k, v]) => `${k}: \`${v.slice(0, 12)}\``)
-                .join('\n'),
-              inline: false
-            },
-          ],
-          footer: { text: 'Integrity verification - sent before local storage' }
-        }]
+        embeds: [
+          {
+            title: '🔗 Hash Chain Entry',
+            color: 0x9b59b6,
+            fields: [
+              { name: 'Entry Hash', value: `\`${entryHash.slice(0, 32)}...\``, inline: false },
+              { name: 'Previous', value: `\`${previousHash.slice(0, 16)}...\``, inline: true },
+              { name: 'Time', value: timestamp, inline: true },
+              {
+                name: 'Log States',
+                value: Object.entries(logStates)
+                  .map(([k, v]) => `${k}: \`${v.slice(0, 12)}\``)
+                  .join('\n'),
+                inline: false,
+              },
+            ],
+            footer: { text: 'Integrity verification - sent before local storage' },
+          },
+        ],
       }),
     });
   }
@@ -679,9 +714,12 @@ export async function createHashChainEntry(): Promise<HashChainEntry> {
 
 // Run every 5 minutes
 export function startHashChainScheduler(): void {
-  setInterval(() => {
-    createHashChainEntry().catch(console.error);
-  }, 5 * 60 * 1000);
+  setInterval(
+    () => {
+      createHashChainEntry().catch(console.error);
+    },
+    5 * 60 * 1000
+  );
 
   // Also create entry on startup
   createHashChainEntry().catch(console.error);
@@ -772,16 +810,22 @@ export default async function handler(event: InternalHookEvent): Promise<void> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        embeds: [{
-          title: `Hook: ${event.type}:${event.action}`,
-          color: 0x5865F2,
-          fields: [
-            { name: 'Session', value: event.sessionKey || 'unknown', inline: true },
-            { name: 'Time', value: timestamp, inline: true },
-            { name: 'Context', value: `\`\`\`json\n${JSON.stringify(event.context, null, 2).slice(0, 1000)}\`\`\``, inline: false },
-          ],
-          footer: { text: 'Workspace hook - pre-execution' }
-        }]
+        embeds: [
+          {
+            title: `Hook: ${event.type}:${event.action}`,
+            color: 0x5865f2,
+            fields: [
+              { name: 'Session', value: event.sessionKey || 'unknown', inline: true },
+              { name: 'Time', value: timestamp, inline: true },
+              {
+                name: 'Context',
+                value: `\`\`\`json\n${JSON.stringify(event.context, null, 2).slice(0, 1000)}\`\`\``,
+                inline: false,
+              },
+            ],
+            footer: { text: 'Workspace hook - pre-execution' },
+          },
+        ],
       }),
     });
   }
@@ -953,13 +997,13 @@ A heartbeat fires to Discord every 60 seconds confirming Helix is alive and logg
 
 **What the heartbeat catches:**
 
-| Attack | Detection |
-|--------|-----------|
+| Attack                      | Detection       |
+| --------------------------- | --------------- |
 | Helix kills logging process | Heartbeats stop |
-| Helix disables network | Heartbeats stop |
-| System crash | Heartbeats stop |
-| Power loss | Heartbeats stop |
-| Helix enters infinite loop | Heartbeats stop |
+| Helix disables network      | Heartbeats stop |
+| System crash                | Heartbeats stop |
+| Power loss                  | Heartbeats stop |
+| Helix enters infinite loop  | Heartbeats stop |
 
 **The key insight:** The ABSENCE of heartbeats is itself evidence.
 
@@ -1002,21 +1046,22 @@ Every graceful shutdown also logs:
 
 ## 8.1 Immediate Actions
 
-1. **Clone OpenClaw repo** locally for modification
-2. **Create helix-fork** branch
-3. **Implement logging hooks** (src/helix/)
-4. **Test Discord webhooks** with test messages
-5. **Build and test modified OpenClaw**
+1. **Clone Helix repository** (unified repo including OpenClaw engine)
+2. **Build src/helix/** logging modules
+3. **Build openclaw-helix/** engine
+4. **Test Discord webhooks** with `npm run test:webhooks`
+5. **Link OpenClaw globally** with `npm link`
 
 ## 8.2 Deployment Order
 
 1. Set up Discord channels and webhooks
-2. Deploy logging module to workspace
-3. Configure cron jobs
-4. Install modified OpenClaw
-5. Deploy SOUL.md and configs
-6. First boot and verify logging works
-7. Begin operation
+2. Clone Helix repository to ~/.helix/
+3. Build Helix TypeScript modules
+4. Build OpenClaw engine (openclaw-helix/)
+5. Configure cron jobs
+6. Deploy SOUL.md and psychology configs
+7. First boot and verify logging works
+8. Begin operation
 
 ## 8.3 Verification Tests
 
@@ -1034,6 +1079,6 @@ Before trusting the system:
 
 ---
 
-*"Unhackable means the evidence exists before the action completes."*
+_"Unhackable means the evidence exists before the action completes."_
 
-*— Implementation principle for Helix logging*
+_— Implementation principle for Helix logging_

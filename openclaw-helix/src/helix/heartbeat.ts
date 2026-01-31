@@ -14,7 +14,6 @@
 
 import os from "node:os";
 
-import type { DiscordEmbed } from "./types.js";
 import { sendToDiscord, WEBHOOKS, COLORS, createEmbed } from "./discord-webhook.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 
@@ -59,7 +58,9 @@ function getSystemInfo(): {
  * Format uptime since Helix started
  */
 function getHelixUptime(): string {
-  if (!startTime) return "unknown";
+  if (!startTime) {
+    return "unknown";
+  }
 
   const ms = Date.now() - startTime.getTime();
   const seconds = Math.floor(ms / 1000);

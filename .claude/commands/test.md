@@ -1,11 +1,13 @@
 # /test Command
 
-Run the test suite with optional filtering.
+Run the test suite across the entire Helix system.
 
 ## Usage
 
 ```bash
-/test                           # Run all tests
+/test                           # Run all tests (both systems)
+/test --core                    # Helix core only
+/test --openclaw                # OpenClaw only
 /test --filter=HashChain        # Filter by name
 /test --coverage                # With coverage report
 /test --watch                   # Watch mode
@@ -13,35 +15,70 @@ Run the test suite with optional filtering.
 
 ## What It Does
 
-### Run Tests
+Runs tests on **both** systems using Vitest:
+
+### Helix Core Tests
 
 ```bash
-# Default - run all tests
+# Run Helix core tests
 npm run test
-# Equivalent: npx vitest run
-
-# With filter
-npx vitest run --filter=TestName
 
 # With coverage
 npm run test:coverage
-# Equivalent: npx vitest run --coverage
 
 # Watch mode
 npm run test:watch
-# Equivalent: npx vitest
 ```
+
+### OpenClaw Tests
+
+```bash
+# Run OpenClaw tests
+npm run openclaw:test
+
+# Or directly
+cd openclaw-helix && pnpm run test
+```
+
+### Run All Tests
+
+```bash
+# Both systems
+npm run test:all
+```
+
+## Test Statistics
+
+| System     | Test Files | Tests   | Coverage Target |
+| ---------- | ---------- | ------- | --------------- |
+| Helix Core | 5          | 66      | 80%             |
+| OpenClaw   | ~991       | ~5,000+ | 70%             |
 
 ## Test Organization
 
+### Helix Core
+
 ```
 src/helix/
-├── __tests__/
-│   ├── hash-chain.test.ts      # Hash chain integrity tests
-│   ├── command-logger.test.ts  # Discord logging tests
-│   ├── heartbeat.test.ts       # Heartbeat mechanism tests
-│   └── context-loader.test.ts  # Psychological context loading tests
-└── [source files]
+├── hash-chain.test.ts       # Hash chain integrity (11 tests)
+├── command-logger.test.ts   # Discord logging (16 tests)
+├── api-logger.test.ts       # API logging (17 tests)
+├── heartbeat.test.ts        # Heartbeat mechanism (13 tests)
+└── types.test.ts            # Type definitions (9 tests)
+```
+
+### OpenClaw
+
+```
+openclaw-helix/
+├── src/**/*.test.ts         # Unit tests (~500 files)
+├── test/                    # Integration tests
+└── vitest configs:
+    ├── vitest.config.ts     # Default config
+    ├── vitest.unit.config.ts
+    ├── vitest.e2e.config.ts
+    ├── vitest.gateway.config.ts
+    └── vitest.live.config.ts
 ```
 
 ## Output Format
@@ -49,65 +86,103 @@ src/helix/
 ```markdown
 ## Test Results
 
-### Summary
+### Helix Core
+
+- Total: 66 tests
+- Passed: 66
+- Failed: 0
+- Duration: 0.27s
+
+### OpenClaw
+
 - Total: X tests
 - Passed: X
 - Failed: X
-- Skipped: X
-- Duration: X.XX seconds
+- Duration: X.XXs
 
-### Failed Tests (if any)
-1. **describe > test_name**
-   - Error: [message]
-   - Location: src/helix/__tests__/file.test.ts:42
+### Combined
+
+- Total: X tests
+- Passed: X
+- Failed: X
+- Overall Status: PASS | FAIL
 
 ### Coverage (if requested)
-- Overall: X%
-- src/helix/hash-chain.ts: X%
-- src/helix/command-logger.ts: X%
-- src/helix/heartbeat.ts: X%
 
-### Recommendations
-- [suggestions for improving coverage]
+**Helix Core:**
+
+- Overall: X%
+- hash-chain.ts: X%
+- command-logger.ts: X%
+- api-logger.ts: X%
+
+**OpenClaw:**
+
+- Overall: X%
+- Lines: 70% threshold
+- Branches: 55% threshold
 ```
 
 ## Common Filters
 
 ```bash
-# By test file
---filter=hash-chain
---filter=command-logger
---filter=heartbeat
+# Helix core filters
+npm run test -- --filter=hash-chain
+npm run test -- --filter=command-logger
+npm run test -- --filter="HashChain"
 
-# By describe block
---filter="HashChain"
---filter="Discord Logger"
+# OpenClaw filters
+cd openclaw-helix && pnpm run test -- --filter=agents
+cd openclaw-helix && pnpm run test -- --filter=gateway
+```
 
-# By test name
---filter="should link entries correctly"
+## OpenClaw Test Variants
+
+```bash
+# Unit tests only
+cd openclaw-helix && pnpm run test:unit
+
+# E2E tests
+cd openclaw-helix && pnpm run test:e2e
+
+# Gateway tests
+cd openclaw-helix && pnpm run test:gateway
+
+# Live tests (requires running services)
+cd openclaw-helix && pnpm run test:live
 ```
 
 ## Troubleshooting
 
-### Tests Failing Unexpectedly
+### Clear Cache
 
 ```bash
-# Clear Vitest cache
+# Helix
 npx vitest --clearCache
 
-# Run with verbose output
+# OpenClaw
+cd openclaw-helix && pnpm exec vitest --clearCache
+```
+
+### Verbose Output
+
+```bash
+# Helix
 npx vitest run --reporter=verbose
+
+# OpenClaw
+cd openclaw-helix && pnpm run test -- --reporter=verbose
 ```
 
 ### Mock Discord Webhooks
 
-Tests should mock Discord webhooks to avoid actual network calls:
+Tests should mock Discord webhooks:
 
 ```typescript
 import { vi } from 'vitest';
 
 vi.mock('./discord-client', () => ({
-  sendWebhook: vi.fn().mockResolvedValue({ success: true })
+  sendWebhook: vi.fn().mockResolvedValue({ success: true }),
 }));
 ```
 
@@ -115,3 +190,4 @@ vi.mock('./discord-client', () => ({
 
 - `/quality` - All quality checks including tests
 - `/pipeline` - Full pipeline with test generation
+- `/audit` - Comprehensive codebase audit

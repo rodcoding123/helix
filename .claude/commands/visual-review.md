@@ -23,24 +23,24 @@ Uses Playwright MCP to capture and analyze the OpenClaw Lit-based web UI.
 
 ### Screenshot Breakpoints
 
-| Name | Width | Height | Device |
-|------|-------|--------|--------|
-| Mobile | 375px | 812px | iPhone SE |
-| Tablet | 768px | 1024px | iPad |
-| Desktop | 1440px | 900px | Desktop |
+| Name    | Width  | Height | Device    |
+| ------- | ------ | ------ | --------- |
+| Mobile  | 375px  | 812px  | iPhone SE |
+| Tablet  | 768px  | 1024px | iPad      |
+| Desktop | 1440px | 900px  | Desktop   |
 
 ### Pages to Review
 
 Based on OpenClaw's UI structure:
 
-| Page | URL | Components |
-|------|-----|------------|
-| Overview | `/` | Status dashboard |
-| Chat | `/chat` | Chat interface |
-| Config | `/config` | Configuration forms |
-| Sessions | `/sessions` | Session management |
-| Logs | `/logs` | Log viewer |
-| Skills | `/skills` | Skill management |
+| Page     | URL         | Components          |
+| -------- | ----------- | ------------------- |
+| Overview | `/`         | Status dashboard    |
+| Chat     | `/chat`     | Chat interface      |
+| Config   | `/config`   | Configuration forms |
+| Sessions | `/sessions` | Session management  |
+| Logs     | `/logs`     | Log viewer          |
+| Skills   | `/skills`   | Skill management    |
 
 ### Accessibility Checklist
 
@@ -55,16 +55,16 @@ Based on OpenClaw's UI structure:
 
 For each Lit component, verify:
 
-| State | Description |
-|-------|-------------|
-| Default | Initial render |
-| Loading | Skeleton/spinner |
-| Error | Error message display |
-| Empty | No data state |
-| Success | Completed action |
-| Disabled | Inactive state |
-| Hover | Mouse over |
-| Focus | Keyboard focus |
+| State    | Description           |
+| -------- | --------------------- |
+| Default  | Initial render        |
+| Loading  | Skeleton/spinner      |
+| Error    | Error message display |
+| Empty    | No data state         |
+| Success  | Completed action      |
+| Disabled | Inactive state        |
+| Hover    | Mouse over            |
+| Focus    | Keyboard focus        |
 
 ## Instructions
 
@@ -108,6 +108,7 @@ mcp__plugin_playwright_playwright__browser_console_messages
 ## Visual Review Report
 
 ### Configuration
+
 - Base URL: http://localhost:3000
 - Pages reviewed: X
 - Breakpoints: Mobile, Tablet, Desktop
@@ -116,24 +117,27 @@ mcp__plugin_playwright_playwright__browser_console_messages
 
 #### Chat Page
 
-| Breakpoint | Status | Issues |
-|------------|--------|--------|
-| Desktop (1440px) | OK | None |
-| Tablet (768px) | OK | None |
-| Mobile (375px) | WARN | Overflow on message list |
+| Breakpoint       | Status | Issues                   |
+| ---------------- | ------ | ------------------------ |
+| Desktop (1440px) | OK     | None                     |
+| Tablet (768px)   | OK     | None                     |
+| Mobile (375px)   | WARN   | Overflow on message list |
 
 **Screenshots:**
+
 - [chat-desktop.png]
 - [chat-tablet.png]
 - [chat-mobile.png]
 
 **Accessibility:**
+
 - [ ] Color contrast: PASS
 - [ ] Keyboard nav: PASS
 - [ ] Focus states: PASS
 - [ ] ARIA labels: WARN - Missing on send button
 
 **Component States:**
+
 - [x] Default render
 - [x] Loading state (skeleton)
 - [x] Empty state (no messages)
@@ -141,11 +145,11 @@ mcp__plugin_playwright_playwright__browser_console_messages
 
 ### Lit Component Analysis
 
-| Component | File | Status | Notes |
-|-----------|------|--------|-------|
-| chat-view | ui/src/ui/chat.ts | OK | |
-| config-form | ui/src/ui/config.ts | WARN | Long forms overflow |
-| session-list | ui/src/ui/sessions.ts | OK | |
+| Component    | File                  | Status | Notes               |
+| ------------ | --------------------- | ------ | ------------------- |
+| chat-view    | ui/src/ui/chat.ts     | OK     |                     |
+| config-form  | ui/src/ui/config.ts   | WARN   | Long forms overflow |
+| session-list | ui/src/ui/sessions.ts | OK     |                     |
 
 ### CSS Issues
 

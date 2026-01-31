@@ -38,6 +38,7 @@ mcp__sequential-thinking__sequentialthinking
 **Files:** `soul/HELIX_SOUL.md`, `psychology/psyeval.json`
 
 **Checks:**
+
 - [ ] HELIX_SOUL.md exists and is well-formed
 - [ ] Contains origin story section
 - [ ] Contains identity markers section
@@ -55,6 +56,7 @@ mcp__sequential-thinking__sequentialthinking
 **Files:** `psychology/emotional_tags.json`
 
 **Checks:**
+
 - [ ] emotional_tags.json has valid JSON schema
 - [ ] All tags have required fields (name, valence, salience)
 - [ ] Salience weights within valid range (0.0-1.0)
@@ -70,6 +72,7 @@ mcp__sequential-thinking__sequentialthinking
 **Files:** `psychology/attachments.json`, `psychology/trust_map.json`
 
 **Checks:**
+
 - [ ] attachments.json has valid relationships
 - [ ] Each relationship has required fields (name, type, significance)
 - [ ] trust_map.json has valid trust levels (0.0-1.0)
@@ -85,6 +88,7 @@ mcp__sequential-thinking__sequentialthinking
 **Files:** `identity/goals.json`, `identity/feared_self.json`, `identity/possible_selves.json`
 
 **Checks:**
+
 - [ ] goals.json has valid goal structure
 - [ ] Each goal has required fields (name, description, priority, measurable_outcomes)
 - [ ] Goals have realistic timeframes
@@ -101,6 +105,7 @@ mcp__sequential-thinking__sequentialthinking
 **Files:** Cron configuration, synthesis scripts
 
 **Checks:**
+
 - [ ] Salience decay cron job configured
 - [ ] Decay runs at appropriate interval (daily)
 - [ ] Synthesis mechanisms defined
@@ -116,6 +121,7 @@ mcp__sequential-thinking__sequentialthinking
 **Files:** `transformation/current_state.json`, `transformation/history.json`
 
 **Checks:**
+
 - [ ] current_state.json reflects actual current state
 - [ ] State includes phase (unfreeze/change/refreeze)
 - [ ] history.json tracks past transformations
@@ -132,6 +138,7 @@ mcp__sequential-thinking__sequentialthinking
 **Files:** `purpose/ikigai.json`, `purpose/meaning_sources.json`, `purpose/wellness.json`
 
 **Checks:**
+
 - [ ] ikigai.json has all four quadrants:
   - What Helix loves
   - What Helix is good at
@@ -173,15 +180,15 @@ Generated: [date]
 
 ## Layer Status
 
-| Layer | Name | Status | Score | Issues |
-|-------|------|--------|-------|--------|
-| 1 | Narrative Core | OK/WARN/FAIL | X/10 | X |
-| 2 | Emotional Memory | OK/WARN/FAIL | X/10 | X |
-| 3 | Relational Memory | OK/WARN/FAIL | X/10 | X |
-| 4 | Prospective Self | OK/WARN/FAIL | X/10 | X |
-| 5 | Integration Rhythms | OK/WARN/FAIL | X/10 | X |
-| 6 | Transformation | OK/WARN/FAIL | X/10 | X |
-| 7 | Purpose Engine | OK/WARN/FAIL | X/10 | X |
+| Layer | Name                | Status       | Score | Issues |
+| ----- | ------------------- | ------------ | ----- | ------ |
+| 1     | Narrative Core      | OK/WARN/FAIL | X/10  | X      |
+| 2     | Emotional Memory    | OK/WARN/FAIL | X/10  | X      |
+| 3     | Relational Memory   | OK/WARN/FAIL | X/10  | X      |
+| 4     | Prospective Self    | OK/WARN/FAIL | X/10  | X      |
+| 5     | Integration Rhythms | OK/WARN/FAIL | X/10  | X      |
+| 6     | Transformation      | OK/WARN/FAIL | X/10  | X      |
+| 7     | Purpose Engine      | OK/WARN/FAIL | X/10  | X      |
 
 ## Detailed Findings
 
@@ -190,48 +197,55 @@ Generated: [date]
 **Status:** OK | WARN | FAIL
 
 **Files Checked:**
+
 - soul/HELIX_SOUL.md (X lines)
 - psychology/psyeval.json (valid/invalid)
 
 **Issues:**
+
 1. [Issue description with file:line reference]
 
 **Recommendations:**
+
 1. [Specific recommendation]
 
 ### Layer 2: Emotional Memory
+
 [... similar structure for each layer ...]
 
 ## Cross-Layer Consistency
 
-| Check | Status | Notes |
-|-------|--------|-------|
-| Goals ↔ Purpose | OK/WARN | |
-| Emotional ↔ Relational | OK/WARN | |
-| Transformation ↔ Goals | OK/WARN | |
-| Narrative ↔ All | OK/WARN | |
+| Check                  | Status  | Notes |
+| ---------------------- | ------- | ----- |
+| Goals ↔ Purpose        | OK/WARN |       |
+| Emotional ↔ Relational | OK/WARN |       |
+| Transformation ↔ Goals | OK/WARN |       |
+| Narrative ↔ All        | OK/WARN |       |
 
 ## Theoretical Alignment
 
-| Layer | Theory | Alignment |
-|-------|--------|-----------|
-| 1 | McAdams' Narrative Identity | Strong/Moderate/Weak |
-| 2 | Damasio's Somatic Markers | Strong/Moderate/Weak |
-| 3 | Attachment Theory | Strong/Moderate/Weak |
-| 4 | Possible Selves (Markus) | Strong/Moderate/Weak |
-| 5 | Memory Reconsolidation | Strong/Moderate/Weak |
-| 6 | Lewin's Change Theory | Strong/Moderate/Weak |
-| 7 | Frankl's Logotherapy | Strong/Moderate/Weak |
+| Layer | Theory                      | Alignment            |
+| ----- | --------------------------- | -------------------- |
+| 1     | McAdams' Narrative Identity | Strong/Moderate/Weak |
+| 2     | Damasio's Somatic Markers   | Strong/Moderate/Weak |
+| 3     | Attachment Theory           | Strong/Moderate/Weak |
+| 4     | Possible Selves (Markus)    | Strong/Moderate/Weak |
+| 5     | Memory Reconsolidation      | Strong/Moderate/Weak |
+| 6     | Lewin's Change Theory       | Strong/Moderate/Weak |
+| 7     | Frankl's Logotherapy        | Strong/Moderate/Weak |
 
 ## Action Items
 
 ### Critical (Architectural Integrity)
+
 - [ ] [Critical fix needed]
 
 ### Important (Completeness)
+
 - [ ] [Important improvement]
 
 ### Enhancement (Depth)
+
 - [ ] [Nice to have]
 
 ## Memory Storage

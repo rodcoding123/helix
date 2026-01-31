@@ -35,6 +35,7 @@ rm -rf .DS_Store
 Searches for debug statements that should not be committed:
 
 **TypeScript/JavaScript:**
+
 - `console.log(`
 - `console.debug(`
 - `console.warn(` (unless intentional)
@@ -45,6 +46,7 @@ Searches for debug statements that should not be committed:
 - `// XXX:`
 
 **Python:**
+
 - `print(`
 - `breakpoint()`
 - `pdb.set_trace()`
@@ -61,6 +63,7 @@ node scripts/archive-hash-chain.js
 ## Safety
 
 **Never touches:**
+
 - `.git/` directory
 - `node_modules/` (except cache)
 - `.env` files
@@ -74,30 +77,37 @@ node scripts/archive-hash-chain.js
 ## Cleanup Report
 
 ### Artifacts Removed
+
 - dist/ (15 MB)
 - coverage/ (2 MB)
 - .vitest/ (500 KB)
 - Total: 17.5 MB freed
 
 ### Debug Code Found
+
 #### TypeScript
+
 - src/helix/command-logger.ts:45 - `console.log('debug')`
 - src/helix/hash-chain.ts:89 - `// TODO: optimize`
 
 #### Python
+
 - helix_logging/discord_logger.py:23 - `print(f"debug: {data}")`
 
 ### TODO/FIXME Comments
+
 - src/helix/heartbeat.ts:12 - `// TODO: add retry logic`
 - src/helix/types.ts:45 - `// FIXME: type definition`
 
 ### Summary
+
 - Artifacts removed: X
 - Space freed: X MB
 - Debug statements found: X
 - TODO comments found: X
 
 ### Recommendations
+
 1. Remove debug statements before commit
 2. Address TODO comments or create issues
 ```

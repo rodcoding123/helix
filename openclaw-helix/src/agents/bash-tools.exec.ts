@@ -8,11 +8,7 @@ import { Type } from "@sinclair/typebox";
 // HELIX: Pre-execution logging
 // Logs fire BEFORE commands execute - unhackable
 // ============================================
-import {
-  logCommandPreExecution,
-  logCommandPostExecution,
-  logCommandFailed,
-} from "../helix/command-logger.js";
+import { logCommandPreExecution, logCommandPostExecution } from "../helix/command-logger.js";
 
 import {
   type ExecAsk,

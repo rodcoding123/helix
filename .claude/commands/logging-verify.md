@@ -28,6 +28,7 @@ Delegate to the **logging-agent** to perform the verification.
 ### 1. Discord Webhook Configuration
 
 **Check .env file:**
+
 ```bash
 # Required webhook URLs
 DISCORD_WEBHOOK_COMMANDS=https://discord.com/api/webhooks/...
@@ -39,6 +40,7 @@ DISCORD_WEBHOOK_HASH_CHAIN=https://discord.com/api/webhooks/...
 ```
 
 **Verification:**
+
 - [ ] All 6 webhook URLs configured
 - [ ] URLs are valid Discord webhook format
 - [ ] No duplicate URLs (each channel unique)
@@ -55,6 +57,7 @@ curl -X POST -H "Content-Type: application/json" \
 ```
 
 **Verification:**
+
 - [ ] Commands channel responds (200 OK)
 - [ ] API channel responds (200 OK)
 - [ ] File changes channel responds (200 OK)
@@ -66,11 +69,13 @@ curl -X POST -H "Content-Type: application/json" \
 ### 3. Hash Chain Integrity
 
 **Local verification:**
+
 ```bash
 python helix_logging/hash_chain.py --verify
 ```
 
 **Verification:**
+
 - [ ] Hash chain file exists
 - [ ] File is valid JSON
 - [ ] All entries have required fields (index, timestamp, data, previousHash, hash)
@@ -90,6 +95,7 @@ Compare local hash chain with Discord records:
 ```
 
 **Verification:**
+
 - [ ] Local entries exist in Discord
 - [ ] No local entries missing from Discord
 - [ ] Hashes match between local and Discord
@@ -108,6 +114,7 @@ Verify that logs fire BEFORE actions complete:
 ```
 
 **Verification:**
+
 - [ ] Pending log arrives before action starts
 - [ ] Timing proves pre-execution (not post)
 - [ ] Action can be observed in logs even if it fails
@@ -115,6 +122,7 @@ Verify that logs fire BEFORE actions complete:
 ### 6. Heartbeat Verification
 
 **Check heartbeat status:**
+
 - [ ] Heartbeat interval configured (60 seconds)
 - [ ] Last heartbeat timestamp exists
 - [ ] Last heartbeat within expected window (< 2 intervals ago)
@@ -124,6 +132,7 @@ Verify that logs fire BEFORE actions complete:
 ### 7. File Watcher Verification
 
 **Check file watcher:**
+
 - [ ] File watcher process running
 - [ ] Watching correct directories (src/helix/, etc.)
 - [ ] Test file change triggers log
@@ -139,15 +148,15 @@ Generated: [date]
 
 ## Summary
 
-| Component | Status | Notes |
-|-----------|--------|-------|
-| Webhook Config | OK/FAIL | |
-| Webhook Connectivity | OK/FAIL | |
-| Hash Chain Integrity | OK/FAIL | |
-| Discord Cross-Verify | OK/FAIL/SKIPPED | |
-| Pre-Execution | OK/FAIL | |
-| Heartbeat | OK/FAIL | |
-| File Watcher | OK/FAIL | |
+| Component            | Status          | Notes |
+| -------------------- | --------------- | ----- |
+| Webhook Config       | OK/FAIL         |       |
+| Webhook Connectivity | OK/FAIL         |       |
+| Hash Chain Integrity | OK/FAIL         |       |
+| Discord Cross-Verify | OK/FAIL/SKIPPED |       |
+| Pre-Execution        | OK/FAIL         |       |
+| Heartbeat            | OK/FAIL         |       |
+| File Watcher         | OK/FAIL         |       |
 
 ## Overall Status: VERIFIED | COMPROMISED | DEGRADED
 
@@ -155,25 +164,25 @@ Generated: [date]
 
 ### 1. Webhook Configuration
 
-| Channel | URL Configured | Valid Format |
-|---------|----------------|--------------|
-| Commands | YES/NO | YES/NO |
-| API | YES/NO | YES/NO |
-| File Changes | YES/NO | YES/NO |
-| Consciousness | YES/NO | YES/NO |
-| Alerts | YES/NO | YES/NO |
-| Hash Chain | YES/NO | YES/NO |
+| Channel       | URL Configured | Valid Format |
+| ------------- | -------------- | ------------ |
+| Commands      | YES/NO         | YES/NO       |
+| API           | YES/NO         | YES/NO       |
+| File Changes  | YES/NO         | YES/NO       |
+| Consciousness | YES/NO         | YES/NO       |
+| Alerts        | YES/NO         | YES/NO       |
+| Hash Chain    | YES/NO         | YES/NO       |
 
 ### 2. Webhook Connectivity
 
-| Channel | Status | Response Time |
-|---------|--------|---------------|
-| Commands | 200 OK | 150ms |
-| API | 200 OK | 142ms |
-| File Changes | 200 OK | 138ms |
-| Consciousness | 200 OK | 145ms |
-| Alerts | 200 OK | 140ms |
-| Hash Chain | 200 OK | 155ms |
+| Channel       | Status | Response Time |
+| ------------- | ------ | ------------- |
+| Commands      | 200 OK | 150ms         |
+| API           | 200 OK | 142ms         |
+| File Changes  | 200 OK | 138ms         |
+| Consciousness | 200 OK | 145ms         |
+| Alerts        | 200 OK | 140ms         |
+| Hash Chain    | 200 OK | 155ms         |
 
 ### 3. Hash Chain Integrity
 
@@ -233,9 +242,11 @@ Generated: [date]
 ## Issues Found
 
 ### Critical
+
 1. [Critical issue requiring immediate attention]
 
 ### Warnings
+
 1. [Warning that should be addressed]
 
 ## Recommendations

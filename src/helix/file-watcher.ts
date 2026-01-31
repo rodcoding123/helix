@@ -31,7 +31,7 @@ const IGNORE_PATTERNS = [
   /~$/,
   /\.DS_Store$/,
   /node_modules\//,
-  /\.env$/,  // Don't log .env changes for security
+  /\.env$/, // Don't log .env changes for security
 ];
 
 // Track file hashes to detect actual changes
@@ -50,7 +50,7 @@ async function sendWebhook(embed: DiscordEmbed): Promise<void> {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ embeds: [embed] }),
-  }).catch((error) => {
+  }).catch(error => {
     console.error('[Helix] File change webhook failed:', error);
   });
 }
@@ -93,13 +93,13 @@ async function logFileChange(log: FileChangeLog): Promise<void> {
   const emojis = {
     created: '🆕',
     modified: '📝',
-    deleted: '🗑️'
+    deleted: '🗑️',
   };
 
   const colors = {
-    created: 0x2ECC71,
-    modified: 0xF1C40F,
-    deleted: 0xE74C3C,
+    created: 0x2ecc71,
+    modified: 0xf1c40f,
+    deleted: 0xe74c3c,
   };
 
   const embed: DiscordEmbed = {
@@ -111,21 +111,20 @@ async function logFileChange(log: FileChangeLog): Promise<void> {
       { name: 'Time', value: log.timestamp, inline: true },
     ],
     timestamp: log.timestamp,
-    footer: { text: 'File change detected' }
+    footer: { text: 'File change detected' },
   };
 
   if (log.hash) {
     embed.fields.push({
       name: 'Hash',
       value: `\`${log.hash.slice(0, 16)}...\``,
-      inline: true
+      inline: true,
     });
   }
 
   if (log.sizeBytes !== undefined) {
-    const sizeStr = log.sizeBytes >= 1024
-      ? `${(log.sizeBytes / 1024).toFixed(1)} KB`
-      : `${log.sizeBytes} bytes`;
+    const sizeStr =
+      log.sizeBytes >= 1024 ? `${(log.sizeBytes / 1024).toFixed(1)} KB` : `${log.sizeBytes} bytes`;
     embed.fields.push({ name: 'Size', value: sizeStr, inline: true });
   }
 
@@ -134,11 +133,11 @@ async function logFileChange(log: FileChangeLog): Promise<void> {
   const filename = path.basename(log.path);
   if (criticalFiles.includes(filename)) {
     embed.title = `⚠️ CRITICAL: ${embed.title}`;
-    embed.color = 0xE74C3C;
+    embed.color = 0xe74c3c;
     embed.fields.push({
       name: 'Warning',
       value: 'This is a critical configuration file',
-      inline: false
+      inline: false,
     });
   }
 
@@ -149,7 +148,7 @@ async function logFileChange(log: FileChangeLog): Promise<void> {
  * Handle file system event
  */
 async function handleFsEvent(
-  eventType: string,
+  _eventType: string,
   filename: string | null,
   watchDir: string
 ): Promise<void> {
@@ -259,13 +258,9 @@ export function startFileWatcher(): void {
 
     // Start watching
     try {
-      const watcher = fs.watch(
-        resolved,
-        { recursive: true },
-        (eventType, filename) => {
-          handleFsEvent(eventType, filename, resolved).catch(console.error);
-        }
-      );
+      const watcher = fs.watch(resolved, { recursive: true }, (eventType, filename) => {
+        handleFsEvent(eventType, filename, resolved).catch(console.error);
+      });
 
       watchers.push(watcher);
       console.log(`[Helix] Watching directory: ${resolved}`);

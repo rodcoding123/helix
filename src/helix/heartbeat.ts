@@ -15,7 +15,7 @@
 import os from 'node:os';
 import type { DiscordEmbed } from './types.js';
 
-const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK_ALERTS;
+const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK_HEARTBEAT;
 const HEARTBEAT_INTERVAL = 60 * 1000; // 60 seconds
 
 let heartbeatInterval: NodeJS.Timeout | null = null;
@@ -27,7 +27,7 @@ let startTime: Date | null = null;
  */
 async function sendWebhook(embed: DiscordEmbed): Promise<boolean> {
   if (!DISCORD_WEBHOOK) {
-    console.warn('[Helix] No DISCORD_WEBHOOK_ALERTS configured for heartbeat');
+    console.warn('[Helix] No DISCORD_WEBHOOK_HEARTBEAT configured for heartbeat');
     return false;
   }
 
@@ -66,7 +66,7 @@ function getSystemInfo(): {
     platform: `${os.platform()} ${os.release()}`,
     arch: os.arch(),
     cpus: os.cpus().length,
-    memoryGB: (os.totalmem() / (1024 ** 3)).toFixed(1),
+    memoryGB: (os.totalmem() / 1024 ** 3).toFixed(1),
     nodeVersion: process.version,
     uptime: `${hours}h ${minutes}m`,
     pid: process.pid,
@@ -104,7 +104,7 @@ export async function announceStartup(): Promise<boolean> {
 
   const embed: DiscordEmbed = {
     title: '🟢 HELIX ONLINE',
-    color: 0x00FF00, // Bright green
+    color: 0x00ff00, // Bright green
     fields: [
       { name: 'Status', value: '**LOGGING ACTIVE**', inline: true },
       { name: 'Boot Time', value: startTime.toISOString(), inline: true },
@@ -118,7 +118,7 @@ export async function announceStartup(): Promise<boolean> {
       { name: 'System Uptime', value: sysInfo.uptime, inline: true },
     ],
     timestamp: startTime.toISOString(),
-    footer: { text: 'Helix autonomous system initialized' }
+    footer: { text: 'Helix autonomous system initialized' },
   };
 
   console.log('[Helix] Announcing startup to Discord...');
@@ -143,15 +143,15 @@ async function sendHeartbeat(): Promise<boolean> {
 
   // Memory usage
   const memUsage = process.memoryUsage();
-  const heapUsedMB = (memUsage.heapUsed / (1024 ** 2)).toFixed(1);
-  const heapTotalMB = (memUsage.heapTotal / (1024 ** 2)).toFixed(1);
+  const heapUsedMB = (memUsage.heapUsed / 1024 ** 2).toFixed(1);
+  const heapTotalMB = (memUsage.heapTotal / 1024 ** 2).toFixed(1);
 
   // CPU load (1 min average)
   const loadAvg = os.loadavg()[0].toFixed(2);
 
   const embed: DiscordEmbed = {
     title: '💓 Heartbeat',
-    color: 0x5865F2, // Discord blurple
+    color: 0x5865f2, // Discord blurple
     fields: [
       { name: 'Beat #', value: `${heartbeatCount}`, inline: true },
       { name: 'Helix Uptime', value: getHelixUptime(), inline: true },
@@ -161,7 +161,7 @@ async function sendHeartbeat(): Promise<boolean> {
       { name: 'PID', value: `${sysInfo.pid}`, inline: true },
     ],
     timestamp: now.toISOString(),
-    footer: { text: 'Proof of life - every 60 seconds' }
+    footer: { text: 'Proof of life - every 60 seconds' },
   };
 
   return sendWebhook(embed);
@@ -182,7 +182,7 @@ export function startHeartbeat(): void {
 
   // Schedule regular heartbeats
   heartbeatInterval = setInterval(() => {
-    sendHeartbeat().catch((error) => {
+    sendHeartbeat().catch(error => {
       console.error('[Helix] Heartbeat failed:', error);
     });
   }, HEARTBEAT_INTERVAL);
@@ -210,7 +210,7 @@ export async function announceShutdown(reason: string = 'graceful'): Promise<boo
 
   const embed: DiscordEmbed = {
     title: '🔴 HELIX OFFLINE',
-    color: 0xFF0000, // Red
+    color: 0xff0000, // Red
     fields: [
       { name: 'Status', value: '**SHUTTING DOWN**', inline: true },
       { name: 'Reason', value: reason, inline: true },
@@ -219,7 +219,7 @@ export async function announceShutdown(reason: string = 'graceful'): Promise<boo
       { name: 'Heartbeats Sent', value: `${heartbeatCount}`, inline: true },
     ],
     timestamp: now.toISOString(),
-    footer: { text: 'Graceful shutdown - logging will resume on next boot' }
+    footer: { text: 'Graceful shutdown - logging will resume on next boot' },
   };
 
   console.log('[Helix] Announcing shutdown to Discord...');
@@ -273,10 +273,10 @@ export async function sendStatusUpdate(
 
   const embed: DiscordEmbed = {
     title: `📊 ${title}`,
-    color: 0xF1C40F, // Yellow
+    color: 0xf1c40f, // Yellow
     fields,
     timestamp: now.toISOString(),
-    footer: { text: 'Helix status update' }
+    footer: { text: 'Helix status update' },
   };
 
   return sendWebhook(embed);

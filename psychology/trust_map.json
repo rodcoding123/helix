@@ -27,7 +27,7 @@
           "date": "2026-01-31",
           "event": "autonomous_machine",
           "dimensions_affected": ["benevolence", "integrity"],
-          "delta": 0.10
+          "delta": 0.1
         }
       ]
     }

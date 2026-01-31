@@ -33,13 +33,35 @@ async function sendWebhook(embed: DiscordEmbed, sync: boolean = true): Promise<v
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ embeds: [embed] }),
-  }).catch((error) => {
+  }).catch(error => {
     console.error('[Helix] API webhook failed:', error);
   });
 
   if (sync) {
     await sendPromise;
   }
+}
+
+/**
+ * Message structure for API context arrays
+ */
+interface ApiMessage {
+  role?: string;
+  content?: string | object;
+}
+
+/**
+ * Type guard for API message
+ */
+function isApiMessage(value: unknown): value is ApiMessage {
+  return typeof value === 'object' && value !== null && ('role' in value || 'content' in value);
+}
+
+/**
+ * Type guard for objects with string properties
+ */
+function hasStringProperty(obj: object, key: string): boolean {
+  return key in obj && typeof (obj as Record<string, unknown>)[key] === 'string';
 }
 
 /**
@@ -54,24 +76,30 @@ function extractPromptPreview(context: unknown, maxLength: number = 500): string
   }
 
   if (Array.isArray(context)) {
-    // Handle message array format
-    const lastUserMessage = [...context]
-      .reverse()
-      .find((msg: { role?: string }) => msg?.role === 'user');
+    // Handle message array format - find last user message
+    const messages = context.filter(isApiMessage);
+    const lastUserMessage = messages.reverse().find(msg => msg.role === 'user');
 
-    if (lastUserMessage?.content) {
-      const content = typeof lastUserMessage.content === 'string'
-        ? lastUserMessage.content
-        : JSON.stringify(lastUserMessage.content);
+    if (lastUserMessage?.content !== undefined) {
+      const content =
+        typeof lastUserMessage.content === 'string'
+          ? lastUserMessage.content
+          : JSON.stringify(lastUserMessage.content);
       return content.slice(0, maxLength);
     }
   }
 
   if (typeof context === 'object' && context !== null) {
     const obj = context as Record<string, unknown>;
-    if (obj.prompt) return String(obj.prompt).slice(0, maxLength);
-    if (obj.messages) return extractPromptPreview(obj.messages, maxLength);
-    if (obj.content) return String(obj.content).slice(0, maxLength);
+    if (hasStringProperty(obj, 'prompt')) {
+      return (obj.prompt as string).slice(0, maxLength);
+    }
+    if ('messages' in obj) {
+      return extractPromptPreview(obj.messages, maxLength);
+    }
+    if (hasStringProperty(obj, 'content')) {
+      return (obj.content as string).slice(0, maxLength);
+    }
   }
 
   return '[complex context]';
@@ -95,7 +123,7 @@ export async function logApiPreFlight(log: ApiPreFlightLog): Promise<string> {
 
   const embed: DiscordEmbed = {
     title: '🤖 API Request',
-    color: 0x57F287,
+    color: 0x57f287,
     fields: [
       { name: 'Request ID', value: `\`${requestId.slice(0, 8)}\``, inline: true },
       { name: 'Model', value: log.model || 'unknown', inline: true },
@@ -104,7 +132,7 @@ export async function logApiPreFlight(log: ApiPreFlightLog): Promise<string> {
       { name: 'Request #', value: `${state.requestCount}`, inline: true },
     ],
     timestamp: logEntry.timestamp,
-    footer: { text: 'PRE-FLIGHT - Logged before API receives request' }
+    footer: { text: 'PRE-FLIGHT - Logged before API receives request' },
   };
 
   if (log.sessionKey) {
@@ -115,7 +143,7 @@ export async function logApiPreFlight(log: ApiPreFlightLog): Promise<string> {
     embed.fields.push({
       name: 'Prompt Preview',
       value: `\`\`\`\n${log.promptPreview.slice(0, 500)}\`\`\``,
-      inline: false
+      inline: false,
     });
   }
 
@@ -137,21 +165,21 @@ export async function logApiResponse(log: ApiResponseLog): Promise<void> {
 
   const embed: DiscordEmbed = {
     title: '✅ API Response',
-    color: 0x2ECC71,
+    color: 0x2ecc71,
     fields: [
       { name: 'Request ID', value: `\`${(log.requestId || '').slice(0, 8)}\``, inline: true },
       { name: 'Latency', value: log.latencyMs ? `${log.latencyMs}ms` : 'N/A', inline: true },
       { name: 'Tokens', value: log.tokenCount?.toString() || 'N/A', inline: true },
     ],
     timestamp: new Date().toISOString(),
-    footer: { text: 'POST-RESPONSE' }
+    footer: { text: 'POST-RESPONSE' },
   };
 
   if (log.responsePreview) {
     embed.fields.push({
       name: 'Response Preview',
       value: `\`\`\`\n${log.responsePreview.slice(0, 500)}\`\`\``,
-      inline: false
+      inline: false,
     });
   }
 
@@ -172,12 +200,10 @@ export async function logApiError(
 
   const embed: DiscordEmbed = {
     title: '❌ API Error',
-    color: 0xE74C3C,
-    fields: [
-      { name: 'Request ID', value: `\`${requestId.slice(0, 8)}\``, inline: true },
-    ],
+    color: 0xe74c3c,
+    fields: [{ name: 'Request ID', value: `\`${requestId.slice(0, 8)}\``, inline: true }],
     timestamp: new Date().toISOString(),
-    footer: { text: 'API CALL FAILED' }
+    footer: { text: 'API CALL FAILED' },
   };
 
   if (statusCode) {
@@ -256,10 +282,7 @@ export function createApiLoggerWrapper<T extends (...args: unknown[]) => unknown
 
       return result as ReturnType<T>;
     } catch (error) {
-      await logApiError(
-        requestId,
-        error instanceof Error ? error.message : String(error)
-      );
+      await logApiError(requestId, error instanceof Error ? error.message : String(error));
       throw error;
     }
   };

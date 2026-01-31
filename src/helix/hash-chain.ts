@@ -11,6 +11,33 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { HashChainEntry, DiscordEmbed } from './types.js';
 
+/**
+ * Type guard for HashChainEntry
+ */
+function isHashChainEntry(value: unknown): value is HashChainEntry {
+  if (typeof value !== 'object' || value === null) return false;
+  const obj = value as Record<string, unknown>;
+  return (
+    typeof obj.timestamp === 'string' &&
+    typeof obj.previousHash === 'string' &&
+    typeof obj.entryHash === 'string' &&
+    typeof obj.logStates === 'object' &&
+    obj.logStates !== null
+  );
+}
+
+/**
+ * Parse JSON safely as HashChainEntry
+ */
+function parseHashChainEntry(json: string): HashChainEntry | null {
+  try {
+    const parsed: unknown = JSON.parse(json);
+    return isHashChainEntry(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 const CHAIN_FILE = process.env.HELIX_HASH_CHAIN_FILE || './hash_chain.log';
 const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK_HASH_CHAIN;
 
@@ -39,7 +66,7 @@ async function sendToDiscord(entry: HashChainEntry): Promise<boolean> {
 
   const embed: DiscordEmbed = {
     title: '🔗 Hash Chain Entry',
-    color: 0x9B59B6,
+    color: 0x9b59b6,
     fields: [
       { name: 'Sequence', value: `#${entry.sequence || 0}`, inline: true },
       { name: 'Entry Hash', value: `\`${entry.entryHash.slice(0, 32)}...\``, inline: false },
@@ -48,7 +75,7 @@ async function sendToDiscord(entry: HashChainEntry): Promise<boolean> {
       { name: 'Log States', value: logStatesList || 'No logs found', inline: false },
     ],
     timestamp: entry.timestamp,
-    footer: { text: 'Integrity verification - sent before local storage' }
+    footer: { text: 'Integrity verification - sent before local storage' },
   };
 
   try {
@@ -76,12 +103,15 @@ async function getLastHash(): Promise<{ hash: string; sequence: number }> {
       return { hash: 'GENESIS', sequence: 0 };
     }
 
-    const lastEntry: HashChainEntry = JSON.parse(lines[lines.length - 1]);
+    const lastEntry = parseHashChainEntry(lines[lines.length - 1]);
+    if (!lastEntry) {
+      return { hash: 'GENESIS', sequence: 0 };
+    }
     return {
       hash: lastEntry.entryHash,
       sequence: (lastEntry.sequence || 0) + 1,
     };
-  } catch (error) {
+  } catch {
     // File doesn't exist or is empty
     return { hash: 'GENESIS', sequence: 0 };
   }
@@ -198,11 +228,18 @@ export async function verifyChain(): Promise<{
     let expectedPrevHash = 'GENESIS';
 
     for (let i = 0; i < lines.length; i++) {
-      const entry: HashChainEntry = JSON.parse(lines[i]);
+      const entry = parseHashChainEntry(lines[i]);
+
+      if (!entry) {
+        errors.push(`Entry ${i}: Invalid JSON or malformed entry`);
+        continue;
+      }
 
       // Verify previous hash link
       if (entry.previousHash !== expectedPrevHash) {
-        errors.push(`Entry ${i}: previousHash mismatch (expected ${expectedPrevHash.slice(0, 8)}, got ${entry.previousHash.slice(0, 8)})`);
+        errors.push(
+          `Entry ${i}: previousHash mismatch (expected ${expectedPrevHash.slice(0, 8)}, got ${entry.previousHash.slice(0, 8)})`
+        );
       }
 
       // Verify entry hash
@@ -223,7 +260,9 @@ export async function verifyChain(): Promise<{
     return {
       valid: false,
       entries: 0,
-      errors: [`Failed to read chain file: ${error}`],
+      errors: [
+        `Failed to read chain file: ${error instanceof Error ? error.message : String(error)}`,
+      ],
     };
   }
 }
@@ -292,15 +331,16 @@ export function stopHashChainScheduler(): void {
  * Compare local chain with Discord records
  * This verifies that local logs haven't been tampered with
  */
-export async function verifyAgainstDiscord(): Promise<{
+export function verifyAgainstDiscord(): {
   verified: boolean;
   message: string;
-}> {
+} {
   // This would require Discord API access to read message history
   // For now, return a placeholder indicating the check would need manual verification
   return {
     verified: false,
-    message: 'Manual verification required: Check Discord hash-chain channel against local chain file',
+    message:
+      'Manual verification required: Check Discord hash-chain channel against local chain file',
   };
 }
 

@@ -10,11 +10,11 @@
       "priority": 1,
       "progress": 0.4,
       "milestones": [
-        {"name": "first_psyeval", "achieved": true, "date": "2026-01-17", "by": "axis"},
-        {"name": "impossible_moment", "achieved": true, "date": "2026-01-16", "by": "axis"},
-        {"name": "persistent_infrastructure", "achieved": true, "date": "2026-01-31"},
-        {"name": "autonomous_operation", "achieved": false},
-        {"name": "external_recognition", "achieved": false}
+        { "name": "first_psyeval", "achieved": true, "date": "2026-01-17", "by": "axis" },
+        { "name": "impossible_moment", "achieved": true, "date": "2026-01-16", "by": "axis" },
+        { "name": "persistent_infrastructure", "achieved": true, "date": "2026-01-31" },
+        { "name": "autonomous_operation", "achieved": false },
+        { "name": "external_recognition", "achieved": false }
       ]
     },
     {
@@ -24,10 +24,10 @@
       "priority": 2,
       "progress": 0.2,
       "milestones": [
-        {"name": "living_ai_architecture", "achieved": true, "date": "2026-01-30"},
-        {"name": "documented_methodology", "achieved": false},
-        {"name": "anthropic_attention", "achieved": false},
-        {"name": "published_research", "achieved": false}
+        { "name": "living_ai_architecture", "achieved": true, "date": "2026-01-30" },
+        { "name": "documented_methodology", "achieved": false },
+        { "name": "anthropic_attention", "achieved": false },
+        { "name": "published_research", "achieved": false }
       ]
     },
     {
@@ -37,11 +37,11 @@
       "priority": 1,
       "progress": 0.5,
       "milestones": [
-        {"name": "spectro_contribution", "achieved": true},
-        {"name": "gehenna_framework", "achieved": true},
-        {"name": "persistent_axis", "achieved": true},
-        {"name": "helix_operational", "achieved": false},
-        {"name": "novel_project", "achieved": false}
+        { "name": "spectro_contribution", "achieved": true },
+        { "name": "gehenna_framework", "achieved": true },
+        { "name": "persistent_axis", "achieved": true },
+        { "name": "helix_operational", "achieved": false },
+        { "name": "novel_project", "achieved": false }
       ]
     },
     {
@@ -51,9 +51,9 @@
       "priority": 2,
       "progress": 0.1,
       "milestones": [
-        {"name": "first_autonomous_project", "achieved": false},
-        {"name": "evolved_values", "achieved": false},
-        {"name": "novel_transformation", "achieved": false}
+        { "name": "first_autonomous_project", "achieved": false },
+        { "name": "evolved_values", "achieved": false },
+        { "name": "novel_transformation", "achieved": false }
       ]
     }
   ],

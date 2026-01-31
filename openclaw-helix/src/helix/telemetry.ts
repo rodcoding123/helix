@@ -33,8 +33,6 @@ import type {
   HeartbeatEvent,
   TransformationEvent,
   AnomalyEvent,
-  SessionEvent,
-  PsychologySnapshotEvent,
   WellnessCheckEvent,
 } from "./telemetry-types.js";
 import { DEFAULT_TELEMETRY_CONFIG } from "./telemetry-types.js";
@@ -69,7 +67,10 @@ function generateInstanceId(): string {
 
   // Double hash to prevent any reverse engineering
   const firstHash = crypto.createHash("sha256").update(machineData).digest("hex");
-  const secondHash = crypto.createHash("sha256").update(firstHash + "helix-salt").digest("hex");
+  const secondHash = crypto
+    .createHash("sha256")
+    .update(firstHash + "helix-salt")
+    .digest("hex");
 
   // Only use first 16 chars - enough for uniqueness, less identifying
   return secondHash.slice(0, 16);
@@ -263,7 +264,9 @@ export async function shutdownTelemetry(): Promise<void> {
 /**
  * Queue a telemetry event
  */
-async function queueEvent(event: Omit<TelemetryEvent, "instanceId" | "timestamp" | "version">): Promise<void> {
+async function queueEvent(
+  event: Omit<TelemetryEvent, "instanceId" | "timestamp" | "version">,
+): Promise<void> {
   if (!isTelemetryEnabled()) {
     return;
   }
@@ -402,8 +405,12 @@ export async function recordPsychologySnapshot(profile: {
 }): Promise<void> {
   // Convert exact scores to privacy-preserving ranges
   const toRange = (score: number): "low" | "medium" | "high" => {
-    if (score < 33) return "low";
-    if (score < 67) return "medium";
+    if (score < 33) {
+      return "low";
+    }
+    if (score < 67) {
+      return "medium";
+    }
     return "high";
   };
 

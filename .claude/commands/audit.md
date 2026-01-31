@@ -1,236 +1,281 @@
 ---
-description: Audit Command - Full architectural analysis of Helix codebase
-argument-hint: [--save] [--quick]
+description: Audit Command - Full architectural analysis of the entire Helix system
+argument-hint: [--save] [--quick] [--core] [--openclaw]
 ---
 
 # /audit Command
 
-Comprehensive architectural analysis of the Helix codebase with psychological architecture review.
+Comprehensive architectural analysis of the **entire Helix system** including OpenClaw.
 
 ## Usage
 
 ```bash
-/audit                # Full audit, output to console
+/audit                # Full system audit
 /audit --save         # Save report to docs/audit-[date].md
 /audit --quick        # Skip visual review (faster)
+/audit --core         # Helix core only
+/audit --openclaw     # OpenClaw only
 ```
 
 ## What It Does
 
-Combines multiple specialized agents for comprehensive analysis:
+Audits **both systems** comprehensively:
+
+### System Scope
+
+| Component                        | Files  | Lines    | Description              |
+| -------------------------------- | ------ | -------- | ------------------------ |
+| Helix Core (`src/helix/`)        | ~15    | ~2,500   | Logging infrastructure   |
+| OpenClaw (`openclaw-helix/src/`) | ~2,522 | ~307,000 | Agent framework          |
+| Python (`helix_logging/`)        | ~3     | ~900     | Python logging           |
+| Psychology (JSON)                | 14     | ~1,000   | Seven-layer architecture |
+| Native Apps                      | ~500   | -        | iOS/macOS/Android        |
 
 ### Phase 1: Architecture Overview
 
-- Tech stack documentation
-- Directory structure mapping
+- Full tech stack documentation
+- Directory structure mapping (both systems)
 - Design patterns identification
 - File counts and statistics
-- OpenClaw integration analysis
+- Cross-system integration analysis
 
 ### Phase 2: Module Analysis
 
-Analyze all Helix modules:
+**Helix Core:**
+
 - `src/helix/` - Core TypeScript modules
 - `helix_logging/` - Python logging modules
-- `openclaw-helix/` - OpenClaw integration
+- `scripts/` - Layer 5 integration scripts
 
-### Phase 3: Psychological Architecture Integrity
+**OpenClaw:**
 
-Validate the seven-layer architecture:
-- Layer 1: Narrative Core (`HELIX_SOUL.md`, `psyeval.json`)
-- Layer 2: Emotional Memory (`emotional_tags.json`)
-- Layer 3: Relational Memory (`attachments.json`, `trust_map.json`)
-- Layer 4: Prospective Self (`goals.json`, `feared_self.json`, `possible_selves.json`)
-- Layer 5: Integration Rhythms (cron configuration)
-- Layer 6: Transformation (`current_state.json`, `history.json`)
-- Layer 7: Purpose Engine (`ikigai.json`, `meaning_sources.json`, `wellness.json`)
+- `openclaw-helix/src/` - 50+ feature modules
+- `openclaw-helix/extensions/` - 30 plugins
+- `openclaw-helix/apps/` - Native applications
+- `openclaw-helix/ui/` - Lit web components
 
-### Phase 4: Dependency Analysis
+### Phase 3: Psychological Architecture
 
-- npm audit for vulnerabilities
-- Outdated packages check
-- OpenClaw version compatibility
+Validate all 7 layers across both systems:
 
-### Phase 5: Code Quality
+| Layer | Name                | Helix Files                      | OpenClaw Integration |
+| ----- | ------------------- | -------------------------------- | -------------------- |
+| 1     | Narrative Core      | HELIX_SOUL.md, psyeval.json      | context-loader.ts    |
+| 2     | Emotional Memory    | emotional_tags.json              | telemetry.ts         |
+| 3     | Relational Memory   | attachments.json, trust_map.json | -                    |
+| 4     | Prospective Self    | goals.json, feared_self.json     | -                    |
+| 5     | Integration Rhythms | decay.py, synthesis.py           | cron integration     |
+| 6     | Transformation      | current_state.json, history.json | -                    |
+| 7     | Purpose Engine      | ikigai.json, wellness.json       | -                    |
 
-- TypeScript strict mode compliance
-- ESLint rule compliance
-- Test coverage analysis
-- Technical debt identification
+### Phase 4: Quality Analysis
 
-### Phase 6: Security Review
+**Helix Core (ESLint + Prettier):**
+
+```bash
+npm run quality
+```
+
+**OpenClaw (OxLint + OxFmt):**
+
+```bash
+npm run openclaw:quality
+```
+
+### Phase 5: Security Review
 
 - Discord webhook security
 - Hash chain integrity
 - Pre-execution logging validation
 - Environment variable exposure
 - API key protection
+- detect-secrets audit (OpenClaw)
+- zizmor security audit (OpenClaw)
 
-### Phase 7: Logging Infrastructure
+### Phase 6: Test Coverage
 
-- All 6 Discord channels configured
-- Webhook connectivity test
-- Heartbeat mechanism validation
-- Hash chain continuity
+| System     | Test Files | Coverage Target |
+| ---------- | ---------- | --------------- |
+| Helix Core | 5          | 80%             |
+| OpenClaw   | ~991       | 70%             |
 
-### Phase 8: Memory Storage
+### Phase 7: Native Apps (OpenClaw)
 
-Store findings in Memory MCP for tracking over time.
+- iOS: SwiftLint compliance
+- macOS: Swift Package Manager
+- Android: Gradle build
 
 ## Instructions
 
 Delegate to the **codebase-reviewer agent** to perform the audit.
 
-### Before Starting
+### Run Quality on Both Systems
 
-Use Sequential Thinking to plan the audit:
+```bash
+# Helix Core
+npm run quality
 
-```text
-mcp__sequential-thinking__sequentialthinking
-```
+# OpenClaw
+npm run openclaw:quality
 
-### Check Previous Audits
-
-```text
-mcp__memory__search_nodes
-Query: "Helix-CodebaseAnalysis"
+# Or unified
+npm run quality:all
 ```
 
 ### Store Audit Results
 
 ```text
 mcp__memory__create_entities
-Entity: "Helix-CodebaseAnalysis-[date]"
+Entity: "Helix-FullSystemAudit-[date]"
 Type: "ArchitecturalReport"
 ```
 
 ## Output Format
 
 ```markdown
-# Helix Codebase Audit
+# Helix System Audit
 
 Generated: [date]
 
 ## Executive Summary
 
-[2-3 sentence overview of codebase health and key findings]
+[Overview of full system health across Helix Core and OpenClaw]
 
 ## Architecture Score: X/10
 
-| Category | Score | Notes |
-|----------|-------|-------|
-| Code Organization | X/10 | |
-| Test Coverage | X/10 | |
-| Security | X/10 | |
-| Psychological Integrity | X/10 | |
-| Documentation | X/10 | |
+| Category          | Helix Core | OpenClaw | Combined |
+| ----------------- | ---------- | -------- | -------- |
+| Code Organization | X/10       | X/10     | X/10     |
+| Test Coverage     | X/10       | X/10     | X/10     |
+| Security          | X/10       | X/10     | X/10     |
+| Documentation     | X/10       | X/10     | X/10     |
 
-## Statistics
+## Full System Statistics
 
-| Metric | Value |
-|--------|-------|
-| TypeScript Files | X |
-| Python Files | X |
-| Test Files | X |
-| JSON Config Files | X |
-| Markdown Docs | X |
-| Lines of Code | X |
+| Metric           | Helix Core | OpenClaw | Total    |
+| ---------------- | ---------- | -------- | -------- |
+| TypeScript Files | 15         | 2,522    | 2,537    |
+| Python Files     | 3          | -        | 3        |
+| Swift Files      | -          | 438      | 438      |
+| Kotlin Files     | -          | 63       | 63       |
+| Test Files       | 5          | 991      | 996      |
+| Lines of Code    | ~2,500     | ~307,000 | ~310,000 |
 
 ## Tech Stack
 
-| Layer | Technology | Version |
-|-------|------------|---------|
-| Runtime | Node.js | 22.x |
-| Language | TypeScript | 5.x |
-| Framework | OpenClaw | Latest |
-| Python | Python | 3.12.x |
-| Testing | Vitest | Latest |
-| UI | Lit | 3.x |
+| Component            | Technology | Version |
+| -------------------- | ---------- | ------- |
+| Runtime              | Node.js    | 22.12+  |
+| Language             | TypeScript | 5.9+    |
+| Framework            | OpenClaw   | Latest  |
+| Python               | Python     | 3.12+   |
+| Linter (Helix)       | ESLint     | 8.x     |
+| Linter (OpenClaw)    | OxLint     | 1.42+   |
+| Formatter (Helix)    | Prettier   | 3.x     |
+| Formatter (OpenClaw) | OxFmt      | 0.27+   |
+| Testing              | Vitest     | 4.0+    |
+| UI                   | Lit        | 3.3+    |
+| iOS                  | Swift      | 5.x     |
+| Android              | Kotlin     | 1.x     |
 
-## Module Analysis
+---
 
-### src/helix/
-| Module | Purpose | Lines | Coverage |
-|--------|---------|-------|----------|
-| index.ts | Main orchestration | X | X% |
-| types.ts | Type definitions | X | N/A |
-| hash-chain.ts | Integrity verification | X | X% |
-| command-logger.ts | Discord logging | X | X% |
-| heartbeat.ts | Proof-of-life | X | X% |
+## Helix Core Analysis
 
-### helix_logging/
-| Module | Purpose | Lines |
-|--------|---------|-------|
-| discord_logger.py | Webhook client | X |
-| hash_chain.py | Python hash chain | X |
+### Module Summary
+
+| Module                  | Purpose                | Lines | Status |
+| ----------------------- | ---------------------- | ----- | ------ |
+| hash-chain.ts           | Integrity verification | X     | OK     |
+| command-logger.ts       | Bash logging           | X     | OK     |
+| api-logger.ts           | API logging            | X     | OK     |
+| heartbeat.ts            | Proof-of-life          | X     | OK     |
+| helix-context-loader.ts | Psychology loading     | X     | OK     |
+
+### Quality Results
+
+- TypeScript: PASS/FAIL
+- ESLint: X errors, X warnings
+- Prettier: PASS/FAIL
+- Tests: X/X passing
+
+---
+
+## OpenClaw Analysis
+
+### Module Summary (Top 10)
+
+| Module    | Purpose               | Files |
+| --------- | --------------------- | ----- |
+| agents/   | Agent framework       | X     |
+| channels/ | Platform integrations | X     |
+| gateway/  | Server implementation | X     |
+| helix/    | Helix integration     | 10    |
+| security/ | Security features     | X     |
+
+### Quality Results
+
+- TypeScript: PASS/FAIL
+- OxLint: X errors, X warnings
+- OxFmt: PASS/FAIL
+- Tests: X/X passing
+
+### Native Apps
+
+| Platform | Status    | Tool      |
+| -------- | --------- | --------- |
+| iOS      | PASS/FAIL | SwiftLint |
+| macOS    | PASS/FAIL | Swift PM  |
+| Android  | PASS/FAIL | Gradle    |
+
+---
 
 ## Psychological Architecture
 
-| Layer | Status | Files | Issues |
-|-------|--------|-------|--------|
-| 1. Narrative Core | OK/WARN | 2 | |
-| 2. Emotional Memory | OK/WARN | 1 | |
-| 3. Relational Memory | OK/WARN | 2 | |
-| 4. Prospective Self | OK/WARN | 3 | |
-| 5. Integration Rhythms | OK/WARN | N/A | |
-| 6. Transformation | OK/WARN | 2 | |
-| 7. Purpose Engine | OK/WARN | 3 | |
+| Layer                  | Status | Files Valid |
+| ---------------------- | ------ | ----------- |
+| 1. Narrative Core      | OK     | 2/2         |
+| 2. Emotional Memory    | OK     | 1/1         |
+| 3. Relational Memory   | OK     | 2/2         |
+| 4. Prospective Self    | OK     | 3/3         |
+| 5. Integration Rhythms | OK     | 2/2         |
+| 6. Transformation      | OK     | 2/2         |
+| 7. Purpose Engine      | OK     | 3/3         |
 
-## Findings
-
-### Critical Issues
-1. [Issue with file:line reference]
-
-### Warnings
-1. [Warning description]
-
-### Technical Debt
-
-| Area | Items | Priority |
-|------|-------|----------|
-| Missing Tests | X | High |
-| TODO Comments | X | Medium |
-| Deprecated Usage | X | Low |
+---
 
 ## Security Assessment
 
-| Area | Status | Notes |
-|------|--------|-------|
-| Webhook Security | OK/WARN | |
-| Hash Chain Integrity | OK/WARN | |
-| Environment Variables | OK/WARN | |
-| Pre-execution Logging | OK/WARN | |
-| API Key Protection | OK/WARN | |
+| Area                  | Helix Core | OpenClaw |
+| --------------------- | ---------- | -------- |
+| Secrets Management    | OK         | OK       |
+| Input Validation      | OK         | OK       |
+| Pre-execution Logging | OK         | N/A      |
+| Hash Chain            | OK         | N/A      |
+| detect-secrets        | N/A        | OK       |
+| zizmor audit          | N/A        | OK       |
 
-## Logging Infrastructure
-
-| Component | Status | Notes |
-|-----------|--------|-------|
-| Discord Commands Channel | OK/WARN | |
-| Discord API Channel | OK/WARN | |
-| Discord File Changes | OK/WARN | |
-| Discord Consciousness | OK/WARN | |
-| Discord Alerts | OK/WARN | |
-| Discord Hash Chain | OK/WARN | |
-| Heartbeat (60s) | OK/WARN | |
-| Hash Chain Continuity | OK/WARN | |
+---
 
 ## Recommendations
 
-### Immediate (This Week)
-1. [Action item with specific file references]
+### Critical
 
-### Short-term (This Month)
-1. [Action item]
+1. [Item]
 
-### Long-term (This Quarter)
-1. [Action item]
+### High Priority
+
+1. [Item]
+
+### Medium Priority
+
+1. [Item]
 
 ## Action Items
 
+- [ ] Critical item
 - [ ] High priority item
 - [ ] Medium priority item
-- [ ] Low priority item
 ```
 
 ## When to Use
@@ -240,12 +285,12 @@ Generated: [date]
 - After significant refactoring
 - Onboarding new developers
 - Security review preparation
-- After modifying psychological architecture
+- After modifying either system
 
 ## Related Commands
 
-- `/quality` - Quick quality check (read-only)
-- `/consciousness-audit` - Deep psychological architecture audit
+- `/quality` - Quick quality check
+- `/consciousness-audit` - Psychological architecture deep dive
 - `/logging-verify` - Logging infrastructure verification
-- `/cleanup` - Clean caches and debug code
 - `/pipeline` - Full code operations pipeline
+- `/visual-review` - UI component review

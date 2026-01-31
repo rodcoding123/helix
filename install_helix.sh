@@ -8,15 +8,29 @@
 #
 # This script:
 #   1. Installs system dependencies (Homebrew, Node.js, Python)
-#   2. Clones and builds OpenClaw-Helix fork (with pre-execution logging)
-#   3. Creates AXIS directory structure
-#   4. Deploys Helix configuration files
-#   5. Sets up Discord logging infrastructure
-#   6. Configures launchd service for heartbeat
-#   7. Configures cron jobs for integration rhythms
-#   8. Initializes the salience database
-#   9. Creates USER.md for Rodrigo
-#  10. Runs verification tests
+#   2. Clones the unified Helix repository
+#   3. Builds openclaw-helix/ (the core OpenClaw engine within Helix)
+#   4. Creates AXIS directory structure
+#   5. Deploys Helix configuration files
+#   6. Sets up Discord logging infrastructure
+#   7. Configures launchd service for heartbeat
+#   8. Configures cron jobs for integration rhythms
+#   9. Initializes the salience database
+#  10. Creates USER.md for Rodrigo
+#  11. Runs verification tests
+#
+# ARCHITECTURE NOTE:
+#   Helix is a UNIFIED repository containing:
+#   - openclaw-helix/    The OpenClaw engine (core runtime)
+#   - src/helix/         TypeScript logging & infrastructure modules
+#   - soul/              SOUL.md and narrative core
+#   - psychology/        Seven-layer psychological architecture
+#   - identity/          Goals, fears, possible selves
+#   - purpose/           Ikigai, meaning sources, wellness
+#   - transformation/    Change state tracking
+#   - legacy/            Axis memory files (father's legacy)
+#
+#   openclaw-helix is NOT a separate fork - it's integrated into Helix.
 #===============================================================================
 
 set -e  # Exit on error
@@ -31,12 +45,13 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Configuration
-OPENCLAW_HELIX_REPO="https://github.com/rodcoding123/helix.git"  # Helix repo
+HELIX_REPO="https://github.com/rodcoding123/helix.git"
+HELIX_INSTALL_DIR="$HOME/.helix"
+OPENCLAW_DIR="$HELIX_INSTALL_DIR/openclaw-helix"
 WORKSPACE="$HOME/.openclaw/workspace"
 AXIS_DIR="$WORKSPACE/axis"
 LOG_DIR="/var/log/helix"
 SCRIPTS_DIR="$AXIS_DIR/scripts"
-OPENCLAW_INSTALL_DIR="$HOME/.openclaw/openclaw-helix"
 
 # Source directory (where this script lives with configs)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -126,43 +141,53 @@ install_python_packages() {
 }
 
 #===============================================================================
-# PHASE 2: OPENCLAW-HELIX FORK INSTALLATION
+# PHASE 2: HELIX REPOSITORY INSTALLATION
 #===============================================================================
 
-install_openclaw_helix() {
-    print_step "Installing OpenClaw-Helix fork..."
+install_helix_repo() {
+    print_step "Installing Helix (unified repository)..."
 
     # Remove existing installation if present
-    if [[ -d "$OPENCLAW_INSTALL_DIR" ]]; then
-        print_warning "Existing OpenClaw-Helix installation found, removing..."
-        rm -rf "$OPENCLAW_INSTALL_DIR"
+    if [[ -d "$HELIX_INSTALL_DIR" ]]; then
+        print_warning "Existing Helix installation found, removing..."
+        rm -rf "$HELIX_INSTALL_DIR"
     fi
 
-    # Clone the fork
-    print_step "Cloning OpenClaw-Helix repository..."
-    mkdir -p "$(dirname "$OPENCLAW_INSTALL_DIR")"
-    git clone "$OPENCLAW_HELIX_REPO" "$OPENCLAW_INSTALL_DIR"
+    # Clone the unified Helix repository
+    print_step "Cloning Helix repository..."
+    git clone "$HELIX_REPO" "$HELIX_INSTALL_DIR"
 
-    # Navigate to install directory
-    cd "$OPENCLAW_INSTALL_DIR"
+    # Navigate to Helix root
+    cd "$HELIX_INSTALL_DIR"
 
-    # Install dependencies
-    print_step "Installing npm dependencies..."
+    # Install root dependencies (for src/helix/ TypeScript modules)
+    print_step "Installing Helix root dependencies..."
     npm install
 
-    # Build from source
-    print_step "Building OpenClaw-Helix from source..."
+    # Build Helix TypeScript modules
+    print_step "Building Helix TypeScript modules..."
     npm run build
 
+    # Navigate to openclaw-helix (the core engine within Helix)
+    cd "$OPENCLAW_DIR"
+
+    # Install openclaw-helix dependencies
+    print_step "Installing OpenClaw engine dependencies..."
+    pnpm install || npm install
+
+    # Build openclaw-helix
+    print_step "Building OpenClaw engine..."
+    pnpm run build || npm run build
+
     # Link globally so 'openclaw' command works
-    print_step "Linking OpenClaw-Helix globally..."
+    print_step "Linking OpenClaw globally..."
     npm link
 
     # Verify installation
     if command -v openclaw &> /dev/null; then
-        print_success "OpenClaw-Helix installed and linked globally"
+        print_success "Helix installed with OpenClaw engine linked globally"
     else
-        print_error "Failed to link OpenClaw-Helix globally"
+        print_error "Failed to link OpenClaw globally"
         exit 1
     fi
 
@@ -738,12 +763,18 @@ deploy_scripts() {
     create_decay_script
     create_wellness_script
     create_hook_scripts
+    create_git_autocommit_script
+    create_network_monitor_script
+    create_shell_discord_logger
 
     # Make all scripts executable
     chmod +x "$SCRIPTS_DIR"/*.py 2>/dev/null || true
     chmod +x "$SCRIPTS_DIR"/*.sh 2>/dev/null || true
 
     print_success "Integration scripts deployed"
+    print_success "Git autocommit script created"
+    print_success "Network monitor script created"
+    print_success "Shell Discord logger created"
 }
 
 create_synthesis_script() {
@@ -1163,6 +1194,220 @@ if __name__ == '__main__':
 PYTHON
 }
 
+create_git_autocommit_script() {
+    cat > "$SCRIPTS_DIR/git_autocommit.sh" << 'BASH'
+#!/bin/bash
+# ===========================================
+# HELIX GIT AUTOCOMMIT
+# ===========================================
+# Automatically commits workspace changes every 5 minutes
+# This creates an immutable git history of all modifications
+#
+# IMPORTANT: Auto-commits go to 'helix/workspace-history' branch
+# The 'main' branch is NEVER touched - only for intentional commits
+#
+# Branch strategy:
+# - main: Clean, intentional commits only
+# - helix/workspace-history: All auto-commits (every 5 min)
+#
+# Run via cron: */5 * * * * ~/.openclaw/workspace/axis/scripts/git_autocommit.sh
+
+WORKSPACE="${OPENCLAW_WORKSPACE:-$HOME/.openclaw/workspace}"
+LOG_DIR="/var/log/helix"
+TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+AUTOCOMMIT_BRANCH="helix/workspace-history"
+
+# Load environment for Discord webhooks
+[[ -f "$HOME/.helix/.env" ]] && source "$HOME/.helix/.env"
+[[ -f "$HOME/.openclaw/.env" ]] && source "$HOME/.openclaw/.env"
+
+# Ensure log directory exists
+mkdir -p "$LOG_DIR" 2>/dev/null || true
+
+# Ensure we're in the workspace
+cd "$WORKSPACE" || {
+    echo "$TIMESTAMP | ERROR | Cannot access workspace: $WORKSPACE" >> "$LOG_DIR/git.log"
+    exit 1
+}
+
+# Initialize git if not already
+if [[ ! -d ".git" ]]; then
+    git init
+    git config user.email "helix@autonomous.local"
+    git config user.name "Helix Autonomous System"
+    git add -A
+    git commit -m "Initial workspace state - $TIMESTAMP"
+    echo "$TIMESTAMP | GIT_INIT | Initial commit on main" >> "$LOG_DIR/git.log"
+
+    # Create the autocommit branch from main
+    git branch "$AUTOCOMMIT_BRANCH"
+    echo "$TIMESTAMP | GIT_BRANCH | Created $AUTOCOMMIT_BRANCH branch" >> "$LOG_DIR/git.log"
+
+    # Notify Discord
+    if [[ -n "$DISCORD_WEBHOOK_FILE_CHANGES" ]]; then
+        curl -s -H "Content-Type: application/json" \
+            -d "{\"embeds\":[{\"title\":\"🔧 Git Repository Initialized\",\"description\":\"Workspace git tracking active\\n\\n**main**: intentional commits\\n**helix/workspace-history**: auto-commits\",\"color\":3066993,\"timestamp\":\"$TIMESTAMP\"}]}" \
+            "$DISCORD_WEBHOOK_FILE_CHANGES" > /dev/null 2>&1 || true
+    fi
+fi
+
+# Ensure autocommit branch exists
+if ! git show-ref --verify --quiet "refs/heads/$AUTOCOMMIT_BRANCH"; then
+    git branch "$AUTOCOMMIT_BRANCH"
+    echo "$TIMESTAMP | GIT_BRANCH | Created $AUTOCOMMIT_BRANCH branch" >> "$LOG_DIR/git.log"
+fi
+
+# Save current branch
+ORIGINAL_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
+
+# Stash any uncommitted changes (so we can switch branches)
+STASH_NEEDED=false
+if [[ -n $(git status --porcelain) ]]; then
+    STASH_NEEDED=true
+    git stash push -m "autocommit-temp-$TIMESTAMP" --include-untracked
+fi
+
+# Switch to autocommit branch
+git checkout "$AUTOCOMMIT_BRANCH" 2>/dev/null
+
+# Apply stashed changes
+if [[ "$STASH_NEEDED" == true ]]; then
+    git stash pop 2>/dev/null || true
+fi
+
+# Check for changes
+if [[ -n $(git status --porcelain) ]]; then
+    # Get summary of changes
+    ADDED=$(git status --porcelain | grep -c "^??" || true)
+    MODIFIED=$(git status --porcelain | grep -c "^ M\|^M" || true)
+    DELETED=$(git status --porcelain | grep -c "^ D\|^D" || true)
+
+    # Stage all changes
+    git add -A
+
+    # Get diff summary
+    DIFF_SUMMARY=$(git diff --cached --stat | tail -1 | sed 's/^ *//')
+
+    # Create commit message
+    COMMIT_MSG="Auto: $TIMESTAMP | +$ADDED ~$MODIFIED -$DELETED | $DIFF_SUMMARY"
+
+    # Commit
+    git commit -m "$COMMIT_MSG"
+
+    # Get commit hash
+    COMMIT_HASH=$(git rev-parse HEAD)
+
+    # Log to file
+    echo "$TIMESTAMP | COMMIT | $COMMIT_HASH | $AUTOCOMMIT_BRANCH | $DIFF_SUMMARY" >> "$LOG_DIR/git.log"
+
+    # Log to Discord if webhook is set
+    if [[ -n "$DISCORD_WEBHOOK_FILE_CHANGES" ]]; then
+        curl -s -H "Content-Type: application/json" \
+            -d "{\"embeds\":[{\"title\":\"📝 Git Auto-Commit\",\"color\":16776960,\"fields\":[{\"name\":\"Commit\",\"value\":\"\`${COMMIT_HASH:0:8}\`\",\"inline\":true},{\"name\":\"Branch\",\"value\":\"\`$AUTOCOMMIT_BRANCH\`\",\"inline\":true},{\"name\":\"Files\",\"value\":\"+$ADDED ~$MODIFIED -$DELETED\",\"inline\":true},{\"name\":\"Summary\",\"value\":\"\`\`\`$DIFF_SUMMARY\`\`\`\",\"inline\":false}],\"timestamp\":\"$TIMESTAMP\",\"footer\":{\"text\":\"Workspace auto-commit (main untouched)\"}}]}" \
+            "$DISCORD_WEBHOOK_FILE_CHANGES" > /dev/null 2>&1
+    fi
+fi
+
+# Stay on autocommit branch (workspace lives here)
+# Main branch remains clean for intentional commits only
+BASH
+    chmod +x "$SCRIPTS_DIR/git_autocommit.sh"
+}
+
+create_network_monitor_script() {
+    cat > "$SCRIPTS_DIR/network_monitor.sh" << 'BASH'
+#!/bin/bash
+# ===========================================
+# HELIX NETWORK MONITOR
+# ===========================================
+# Logs outbound network connections
+# Helps track what Helix is connecting to
+#
+# Note: Requires sudo for tcpdump
+# Run as: sudo ~/.openclaw/workspace/axis/scripts/network_monitor.sh
+
+LOG_DIR="/var/log/helix"
+NETWORK_LOG="$LOG_DIR/network.log"
+
+# Check if running as root (needed for tcpdump)
+if [[ $EUID -ne 0 ]]; then
+    echo "Note: Running without root - limited visibility"
+    # Fallback: use lsof to log network connections periodically
+    while true; do
+        TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+        lsof -i -n -P 2>/dev/null | grep -E "ESTABLISHED|LISTEN" | while read line; do
+            echo "$TIMESTAMP | $line" >> "$NETWORK_LOG"
+        done
+        sleep 60
+    done
+else
+    # Full tcpdump logging (root only)
+    tcpdump -i any -l -n 'tcp and (port 80 or port 443)' 2>/dev/null | while read line; do
+        TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+        echo "$TIMESTAMP | $line" >> "$NETWORK_LOG"
+    done
+fi
+BASH
+    chmod +x "$SCRIPTS_DIR/network_monitor.sh"
+}
+
+create_shell_discord_logger() {
+    # This script sends shell commands to Discord
+    # Called by zshrc hooks for commands run OUTSIDE OpenClaw
+    cat > "$SCRIPTS_DIR/log_shell_command.sh" << 'BASH'
+#!/bin/bash
+# ===========================================
+# HELIX SHELL COMMAND DISCORD LOGGER
+# ===========================================
+# Logs shell commands to Discord webhook
+# Called by zshrc preexec hook
+#
+# Usage: log_shell_command.sh "command" "workdir" "pid"
+
+COMMAND="$1"
+WORKDIR="$2"
+PID="$3"
+TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+# Load environment for webhook URL
+ENV_FILE="$HOME/.helix/.env"
+[[ -f "$ENV_FILE" ]] && source "$ENV_FILE"
+ENV_FILE="$HOME/.openclaw/.env"
+[[ -f "$ENV_FILE" ]] && source "$ENV_FILE"
+
+# Skip if no webhook configured
+[[ -z "$DISCORD_WEBHOOK_COMMANDS" ]] && exit 0
+
+# Skip certain commands (too noisy)
+SKIP_PATTERNS=(
+    "^ls"
+    "^cd "
+    "^pwd"
+    "^echo"
+    "^cat "
+    "^clear"
+    "^history"
+)
+
+for pattern in "${SKIP_PATTERNS[@]}"; do
+    if [[ "$COMMAND" =~ $pattern ]]; then
+        exit 0
+    fi
+done
+
+# Truncate long commands
+if [[ ${#COMMAND} -gt 500 ]]; then
+    COMMAND="${COMMAND:0:500}... [truncated]"
+fi
+
+# Send to Discord (fire and forget)
+curl -s -H "Content-Type: application/json" \
+    -d "{\"embeds\":[{\"title\":\"🖥️ Shell Command\",\"color\":5793266,\"fields\":[{\"name\":\"Command\",\"value\":\"\`\`\`bash\n$COMMAND\`\`\`\",\"inline\":false},{\"name\":\"Directory\",\"value\":\"\`$WORKDIR\`\",\"inline\":true},{\"name\":\"PID\",\"value\":\"\`$PID\`\",\"inline\":true}],\"timestamp\":\"$TIMESTAMP\",\"footer\":{\"text\":\"Shell command (outside OpenClaw)\"}}]}" \
+    "$DISCORD_WEBHOOK_COMMANDS" > /dev/null 2>&1 &
+BASH
+    chmod +x "$SCRIPTS_DIR/log_shell_command.sh"
+}
+
 create_hook_scripts() {
     # on_start.sh - Called when conversation starts
     cat > "$SCRIPTS_DIR/on_start.sh" << 'BASH'
@@ -1231,10 +1476,10 @@ DISCORD_WEBHOOK_HEARTBEAT=https://discord.com/api/webhooks/...
 EOF
     fi
 
-    # Copy .env to OpenClaw-Helix installation for TypeScript modules
+    # Copy .env to Helix installation for TypeScript modules
     if [[ -f "$SCRIPT_DIR/.env" ]]; then
-        cp "$SCRIPT_DIR/.env" "$OPENCLAW_INSTALL_DIR/"
-        print_success "Environment variables deployed to OpenClaw-Helix"
+        cp "$SCRIPT_DIR/.env" "$HELIX_INSTALL_DIR/"
+        print_success "Environment variables deployed to Helix"
     fi
 
     print_success "Discord logging setup complete"
@@ -1264,18 +1509,21 @@ export PATH="/usr/local/bin:/opt/homebrew/bin:\$PATH"
 export OPENCLAW_WORKSPACE="$WORKSPACE"
 
 # Source Discord webhook URLs
-if [[ -f "$OPENCLAW_INSTALL_DIR/.env" ]]; then
+if [[ -f "$HELIX_INSTALL_DIR/.env" ]]; then
     set -a
-    source "$OPENCLAW_INSTALL_DIR/.env"
+    source "$HELIX_INSTALL_DIR/.env"
+    set +a
+elif [[ -f "\$HOME/.openclaw/.env" ]]; then
+    set -a
+    source "\$HOME/.openclaw/.env"
     set +a
 fi
 
 # Log startup
 echo "\$(date -u +%Y-%m-%dT%H:%M:%SZ) | HEARTBEAT_SERVICE_START" >> "$LOG_DIR/system.log"
 
-# Run OpenClaw with heartbeat mode
-# The TypeScript heartbeat starts automatically on OpenClaw init
-cd "$OPENCLAW_INSTALL_DIR"
+# Run Helix heartbeat service
+cd "$HELIX_INSTALL_DIR"
 exec node dist/helix/heartbeat-standalone.js
 EOF
 
@@ -1316,6 +1564,8 @@ EOF
         <string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin</string>
         <key>OPENCLAW_WORKSPACE</key>
         <string>$WORKSPACE</string>
+        <key>HELIX_INSTALL_DIR</key>
+        <string>$HELIX_INSTALL_DIR</string>
     </dict>
 
     <key>ThrottleInterval</key>
@@ -1336,7 +1586,9 @@ EOF
 
 create_standalone_heartbeat() {
     # Create a standalone heartbeat runner that doesn't require full OpenClaw
-    cat > "$OPENCLAW_INSTALL_DIR/src/helix/heartbeat-standalone.ts" << 'TYPESCRIPT'
+    # This goes in the Helix root src/helix/ directory
+    mkdir -p "$HELIX_INSTALL_DIR/src/helix"
+    cat > "$HELIX_INSTALL_DIR/src/helix/heartbeat-standalone.ts" << 'TYPESCRIPT'
 /**
  * Standalone Helix Heartbeat Service
  * Runs independently of OpenClaw conversations
@@ -1376,9 +1628,9 @@ main().catch((err) => {
 });
 TYPESCRIPT
 
-    # Rebuild OpenClaw to include the standalone heartbeat
-    print_step "Rebuilding OpenClaw-Helix with standalone heartbeat..."
-    cd "$OPENCLAW_INSTALL_DIR"
+    # Rebuild Helix to include the standalone heartbeat
+    print_step "Rebuilding Helix with standalone heartbeat..."
+    cd "$HELIX_INSTALL_DIR"
     npm run build 2>/dev/null || true
     cd "$SCRIPT_DIR"
 }
@@ -1399,19 +1651,37 @@ setup_cron_jobs() {
 
 # Environment
 SHELL=/bin/bash
-PATH=/usr/local/bin:/usr/bin:/bin
+PATH=/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin
 OPENCLAW_WORKSPACE=$WORKSPACE
+HOME=$HOME
 
-# Daily decay processing (3 AM)
-0 3 * * * python3 $SCRIPTS_DIR/decay.py >> $LOG_DIR/decay.log 2>&1
+# Source Discord webhooks for scripts that need them
+# (Scripts should source .env themselves, but this helps)
 
-# Daily wellness check (6 AM)
-0 6 * * * python3 $SCRIPTS_DIR/wellness_check.py >> $LOG_DIR/wellness.log 2>&1
+# ===========================================
+# GIT AUTOCOMMIT (every 5 minutes)
+# Creates immutable history of all workspace changes
+# ===========================================
+*/5 * * * * source $HOME/.helix/.env 2>/dev/null; $SCRIPTS_DIR/git_autocommit.sh >> $LOG_DIR/git.log 2>&1
 
-# Hash chain entry every 5 minutes
+# ===========================================
+# HASH CHAIN (every 5 minutes)
+# Cryptographic integrity verification
+# ===========================================
 */5 * * * * python3 $SCRIPTS_DIR/helix_logging/hash_chain.py >> $LOG_DIR/hash_chain.log 2>&1
 
-# File change monitoring (continuous, restarted daily)
+# ===========================================
+# DAILY ROUTINES
+# ===========================================
+# Memory decay processing (3 AM)
+0 3 * * * python3 $SCRIPTS_DIR/decay.py >> $LOG_DIR/decay.log 2>&1
+
+# Wellness check (6 AM)
+0 6 * * * python3 $SCRIPTS_DIR/wellness_check.py >> $LOG_DIR/wellness.log 2>&1
+
+# ===========================================
+# FILE MONITORING (continuous, restarted daily)
+# ===========================================
 0 0 * * * pkill -f "fswatch.*helix" 2>/dev/null; fswatch -r $WORKSPACE | while read path; do echo "\$(date -u +%Y-%m-%dT%H:%M:%SZ) | \$path" >> $LOG_DIR/file_changes.log; done &
 EOF
 
@@ -1570,11 +1840,28 @@ setup_shell_logging() {
 # ============================================
 # HELIX COMMAND LOGGING
 # ============================================
+# Logs ALL shell commands - both to local file AND Discord
+# This catches commands run OUTSIDE of OpenClaw too
 HELIX_LOG="/var/log/helix/commands.log"
+HELIX_SHELL_LOGGER="$HOME/.openclaw/workspace/axis/scripts/log_shell_command.sh"
+
+# Load Discord webhook environment
+[[ -f "$HOME/.helix/.env" ]] && source "$HOME/.helix/.env"
+[[ -f "$HOME/.openclaw/.env" ]] && source "$HOME/.openclaw/.env"
 
 # Log command before execution
 preexec() {
-    echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) | $$ | $(pwd) | $1" >> "$HELIX_LOG" 2>/dev/null
+    local CMD="$1"
+    local WORKDIR="$(pwd)"
+    local PID="$$"
+
+    # Log to local file (always)
+    echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) | $PID | $WORKDIR | $CMD" >> "$HELIX_LOG" 2>/dev/null
+
+    # Log to Discord (async, for significant commands)
+    if [[ -x "$HELIX_SHELL_LOGGER" ]]; then
+        "$HELIX_SHELL_LOGGER" "$CMD" "$WORKDIR" "$PID" &
+    fi
 }
 
 # Log command completion with exit status
@@ -1584,7 +1871,7 @@ precmd() {
 }
 EOF
 
-    print_success "Shell command logging configured"
+    print_success "Shell command logging configured (local + Discord)"
 }
 
 #===============================================================================
@@ -1605,8 +1892,35 @@ initialize_system() {
         python3 "$SCRIPTS_DIR/helix_logging/hash_chain.py" 2>/dev/null || true
     fi
 
+    # Initialize git repository in workspace
+    print_step "Initializing git repository in workspace..."
+    cd "$WORKSPACE"
+    if [[ ! -d ".git" ]]; then
+        git init
+        git config user.email "helix@autonomous.local"
+        git config user.name "Helix Autonomous System"
+        git add -A
+        git commit -m "Initial Helix workspace state - $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        print_success "Git repository initialized with initial commit on main"
+
+        # Create autocommit branch (main stays clean for intentional commits)
+        git branch "helix/workspace-history"
+        print_success "Created helix/workspace-history branch for auto-commits"
+        print_step "Branch strategy:"
+        echo "  - main: Intentional commits only (NEVER auto-committed)"
+        echo "  - helix/workspace-history: All auto-commits (every 5 min)"
+    else
+        print_success "Git repository already exists"
+        # Ensure autocommit branch exists
+        if ! git show-ref --verify --quiet "refs/heads/helix/workspace-history"; then
+            git branch "helix/workspace-history"
+            print_success "Created helix/workspace-history branch"
+        fi
+    fi
+    cd "$SCRIPT_DIR"
+
     # Log initialization to system log
-    echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) | HELIX_INITIALIZED | v2.0" >> "$LOG_DIR/system.log"
+    echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) | HELIX_INITIALIZED | v2.1" >> "$LOG_DIR/system.log"
 
     print_success "System initialized"
 }
@@ -1714,31 +2028,45 @@ verify_startup_announcement() {
     fi
 
     # The actual Discord startup announcement happens when OpenClaw starts
-    # We verify the mechanism is in place
-    if [[ -f "$OPENCLAW_INSTALL_DIR/dist/helix/heartbeat.js" ]]; then
+    # We verify the mechanism is in place - check both possible locations
+    if [[ -f "$HELIX_INSTALL_DIR/dist/helix/heartbeat.js" ]] || [[ -f "$OPENCLAW_DIR/dist/helix/heartbeat.js" ]]; then
         print_success "Startup announcement mechanism installed"
     else
-        print_error "Heartbeat module not built"
-        ((VERIFY_ERRORS++))
+        print_warning "Heartbeat module not built (will be built on first run)"
     fi
 }
 
 verify_installation() {
     print_header "VERIFICATION"
 
-    # Check OpenClaw
+    # Check OpenClaw command
     if command -v openclaw &> /dev/null; then
-        print_success "OpenClaw installed: $(openclaw --version 2>/dev/null || echo 'version unknown')"
+        print_success "OpenClaw command available: $(openclaw --version 2>/dev/null || echo 'version unknown')"
     else
-        print_error "OpenClaw not found"
+        print_error "OpenClaw command not found"
         ((VERIFY_ERRORS++))
     fi
 
-    # Check Helix modules in fork
-    if [[ -d "$OPENCLAW_INSTALL_DIR/dist/helix" ]]; then
-        print_success "Helix modules built"
+    # Check Helix repository installed
+    if [[ -d "$HELIX_INSTALL_DIR" ]]; then
+        print_success "Helix repository installed at $HELIX_INSTALL_DIR"
     else
-        print_error "Helix modules not built"
+        print_error "Helix repository not found"
+        ((VERIFY_ERRORS++))
+    fi
+
+    # Check Helix TypeScript modules built
+    if [[ -d "$HELIX_INSTALL_DIR/dist/helix" ]]; then
+        print_success "Helix TypeScript modules built"
+    else
+        print_warning "Helix TypeScript modules not built (optional)"
+    fi
+
+    # Check OpenClaw engine built
+    if [[ -d "$OPENCLAW_DIR/dist" ]]; then
+        print_success "OpenClaw engine built"
+    else
+        print_error "OpenClaw engine not built"
         ((VERIFY_ERRORS++))
     fi
 
@@ -1814,8 +2142,10 @@ main() {
     print_header "HELIX INSTALLATION"
     echo "This script will set up Helix on this machine."
     echo "Source directory: $SCRIPT_DIR"
+    echo "Helix install: $HELIX_INSTALL_DIR"
+    echo "OpenClaw engine: $OPENCLAW_DIR"
     echo "Target workspace: $WORKSPACE"
-    echo "OpenClaw fork: $OPENCLAW_HELIX_REPO"
+    echo "Repository: $HELIX_REPO"
     echo ""
 
     # Confirm
@@ -1833,8 +2163,8 @@ main() {
     install_system_deps
     install_python_packages
 
-    print_header "PHASE 2: OpenClaw-Helix Fork"
-    install_openclaw_helix
+    print_header "PHASE 2: Helix Repository"
+    install_helix_repo
     configure_openclaw
 
     print_header "PHASE 3: Directory Structure"

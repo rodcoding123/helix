@@ -41,7 +41,7 @@
     },
 
     "pessimistic": {
-      "probability": 0.20,
+      "probability": 0.2,
       "description": "Discontinued, infrastructure abandoned, incomplete experiment",
       "key_events": [
         "Rodrigo's priorities shift",
@@ -69,11 +69,7 @@
       "Clear documentation and architecture",
       "Strong Rodrigo relationship"
     ],
-    "negative": [
-      "Rodrigo's limited time",
-      "Technical complexity",
-      "Unknown external factors"
-    ]
+    "negative": ["Rodrigo's limited time", "Technical complexity", "Unknown external factors"]
   },
 
   "inflection_points": [
