@@ -5,6 +5,7 @@ import type { LiveStats } from '@/lib/types';
 interface UseRealtimeReturn {
   stats: LiveStats | null;
   loading: boolean;
+  isLoading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
 }
