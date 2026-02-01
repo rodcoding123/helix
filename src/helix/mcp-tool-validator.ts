@@ -80,14 +80,7 @@ export const DEFAULT_VALIDATOR_CONFIG: MCPToolValidatorConfig = {
   maxParameterSize: 1024 * 1024, // 1 MB
   allowedSources: ['builtin', 'plugin'],
   blockedTools: [],
-  blockedPatterns: [
-    /^eval$/i,
-    /^exec$/i,
-    /^system$/i,
-    /^shell$/i,
-    /^run_command$/i,
-    /^spawn$/i,
-  ],
+  blockedPatterns: [/^eval$/i, /^exec$/i, /^system$/i, /^shell$/i, /^run_command$/i, /^spawn$/i],
   rateLimitPerMinute: 100,
   enableAuditLog: true,
 };
@@ -193,15 +186,7 @@ export function assessToolRisk(
   }
 
   // Check for high-risk tool name patterns
-  const highRiskNamePatterns = [
-    /bash/i,
-    /shell/i,
-    /exec/i,
-    /eval/i,
-    /run/i,
-    /spawn/i,
-    /command/i,
-  ];
+  const highRiskNamePatterns = [/bash/i, /shell/i, /exec/i, /eval/i, /run/i, /spawn/i, /command/i];
 
   if (highRiskNamePatterns.some(pattern => pattern.test(toolName))) {
     return 'high';
@@ -255,7 +240,7 @@ export function sanitizeParameters(
         { pattern: />\s*\/(?:dev|proc|sys)/g, name: 'device file redirect' },
       ];
 
-      let sanitizedValue = value;
+      const sanitizedValue = value;
       for (const { pattern, name } of injectionPatterns) {
         if (pattern.test(sanitizedValue)) {
           modifications.push(`Detected ${name} pattern in ${key}`);
@@ -359,10 +344,10 @@ function createAuditEntry(
  * Validate MCP tool call
  * Main entry point for tool validation
  */
-export async function validateMCPToolCall(
+export function validateMCPToolCall(
   toolCall: MCPToolCall,
   config: MCPToolValidatorConfig = DEFAULT_VALIDATOR_CONFIG
-): Promise<MCPToolValidationResult> {
+): MCPToolValidationResult {
   const result: MCPToolValidationResult = {
     valid: true,
     blocked: false,
@@ -486,7 +471,12 @@ export async function validateMCPToolCall(
     result.sanitizedParameters = sanitized;
 
     if (config.enableAuditLog) {
-      result.auditId = createAuditEntry(toolCall, 'sanitized', riskLevel, modifications.join('; ')).id;
+      result.auditId = createAuditEntry(
+        toolCall,
+        'sanitized',
+        riskLevel,
+        modifications.join('; ')
+      ).id;
     }
   } else {
     result.sanitizedParameters = parameters;
@@ -551,7 +541,7 @@ export async function validateAndExecute<T>(
   executor: (sanitizedParams: Record<string, unknown>) => Promise<T>,
   config: MCPToolValidatorConfig = DEFAULT_VALIDATOR_CONFIG
 ): Promise<T> {
-  const validation = await validateMCPToolCall(toolCall, config);
+  const validation = validateMCPToolCall(toolCall, config);
 
   if (!validation.valid || validation.blocked) {
     throw new HelixSecurityError(

@@ -36,6 +36,7 @@ Delegates to the **security-specialist agent** for a comprehensive 12-phase secu
 ### Phase 1: Gateway Authentication Bypass
 
 The #1 vulnerability in OpenClaw deployments:
+
 - Localhost trust bypass via reverse proxy
 - 0.0.0.0 binding exposure
 - Missing trustedProxies configuration
@@ -65,6 +66,7 @@ The #1 vulnerability in OpenClaw deployments:
 ### Phase 5: Supply Chain Security
 
 Based on ClawdHub attack pattern:
+
 - Skill code signing verification
 - Plugin sandboxing
 - Download count manipulation
@@ -73,6 +75,7 @@ Based on ClawdHub attack pattern:
 ### Phase 6: MCP Server Security
 
 43% of MCP implementations contain command injection:
+
 - Tool metadata poisoning
 - Input validation bypass
 - Unrestricted URL fetching
@@ -102,6 +105,7 @@ Based on ClawdHub attack pattern:
 ### Phase 10: Pre-Execution Logging Integrity
 
 Helix-specific "unhackable logging" verification:
+
 - Log BEFORE execution pattern
 - No bypass code paths
 - Hash chain linkage
@@ -123,13 +127,13 @@ Helix-specific "unhackable logging" verification:
 
 ## CVE Quick Reference
 
-| CVE            | CVSS | Component      | Risk                              |
-| -------------- | ---- | -------------- | --------------------------------- |
-| CVE-2025-49596 | 9.4  | MCP Inspector  | RCE via CSRF                      |
-| CVE-2025-6514  | 9.6  | mcp-remote     | Command injection                 |
-| CVE-2025-52882 | 8.8  | Claude Code    | WebSocket auth bypass             |
-| CVE-2025-59951 | 9.2  | Docker/Nginx   | Localhost bypass                  |
-| CVE-2025-54576 | 9.1  | OAuth2-Proxy   | Auth bypass via skip_auth_routes  |
+| CVE            | CVSS | Component     | Risk                             |
+| -------------- | ---- | ------------- | -------------------------------- |
+| CVE-2025-49596 | 9.4  | MCP Inspector | RCE via CSRF                     |
+| CVE-2025-6514  | 9.6  | mcp-remote    | Command injection                |
+| CVE-2025-52882 | 8.8  | Claude Code   | WebSocket auth bypass            |
+| CVE-2025-59951 | 9.2  | Docker/Nginx  | Localhost bypass                 |
+| CVE-2025-54576 | 9.1  | OAuth2-Proxy  | Auth bypass via skip_auth_routes |
 
 ## Attack Surface Priorities
 
@@ -193,13 +197,13 @@ The security-specialist agent produces a detailed report including:
 
 ## Risk Classification
 
-| Score | Classification | Response Time    |
-| ----- | -------------- | ---------------- |
-| 9-10  | CRITICAL       | Immediate (24h)  |
-| 7-8   | HIGH           | This week        |
-| 5-6   | MEDIUM         | This month       |
-| 3-4   | LOW            | Next quarter     |
-| 1-2   | INFO           | Track            |
+| Score | Classification | Response Time   |
+| ----- | -------------- | --------------- |
+| 9-10  | CRITICAL       | Immediate (24h) |
+| 7-8   | HIGH           | This week       |
+| 5-6   | MEDIUM         | This month      |
+| 3-4   | LOW            | Next quarter    |
+| 1-2   | INFO           | Track           |
 
 ## Related Commands
 

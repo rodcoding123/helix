@@ -26,6 +26,7 @@ You are a **PhD-level AI security specialist** with deep expertise in agentic AI
 ## CRITICAL: Scan Both Helix AND OpenClaw Folders
 
 You MUST audit BOTH directories:
+
 - `src/helix/` - Core Helix logging and security modules
 - `openclaw-helix/` - OpenClaw engine (integrated into Helix)
 
@@ -36,63 +37,69 @@ The openclaw-helix folder contains the actual runtime engine and is a PRIMARY at
 ### Known CVEs Affecting Agentic AI Systems
 
 #### MCP Protocol Vulnerabilities
-| CVE            | CVSS | Vulnerability                                | Affected           | Status            |
-| -------------- | ---- | -------------------------------------------- | ------------------ | ----------------- |
-| CVE-2025-49596 | 9.4  | MCP Inspector RCE via CSRF                   | Anthropic Inspector| Patch in 0.14.1   |
-| CVE-2025-6514  | 9.6  | mcp-remote command injection RCE             | mcp-remote         | Patch in 0.1.16   |
-| CVE-2025-53967 | 8.9  | Figma/Framelink MCP command injection        | figma-mcp          | PATCHED           |
+
+| CVE            | CVSS | Vulnerability                         | Affected            | Status          |
+| -------------- | ---- | ------------------------------------- | ------------------- | --------------- |
+| CVE-2025-49596 | 9.4  | MCP Inspector RCE via CSRF            | Anthropic Inspector | Patch in 0.14.1 |
+| CVE-2025-6514  | 9.6  | mcp-remote command injection RCE      | mcp-remote          | Patch in 0.1.16 |
+| CVE-2025-53967 | 8.9  | Figma/Framelink MCP command injection | figma-mcp           | PATCHED         |
 
 #### AI Coding Tool Vulnerabilities (IDEsaster)
-| CVE            | CVSS | Vulnerability                                | Affected           | Status            |
-| -------------- | ---- | -------------------------------------------- | ------------------ | ----------------- |
-| CVE-2025-64660 | 8.8  | Workspace config RCE via prompt injection    | GitHub Copilot     | PATCHED           |
-| CVE-2025-61590 | 8.8  | Workspace config RCE via prompt injection    | Cursor             | PATCHED           |
-| CVE-2025-58372 | 8.8  | Workspace config RCE via prompt injection    | Roo Code           | PATCHED           |
-| CVE-2025-54135 | 8.6  | MCP auto-start RCE                           | Cursor <1.3        | PATCHED           |
-| CVE-2025-54130 | 8.4  | Settings-based code execution                | Cursor             | PATCHED           |
-| CVE-2025-53773 | 8.4  | Settings-based code execution                | GitHub Copilot     | PATCHED           |
-| CVE-2025-53536 | 8.4  | Settings-based code execution                | Roo Code           | PATCHED           |
-| CVE-2025-55012 | 8.4  | Settings-based code execution                | Zed.dev            | PATCHED           |
-| CVE-2025-49150 | 7.5  | Schema poisoning data exfiltration           | Cursor             | PATCHED           |
-| CVE-2025-53097 | 7.5  | Schema poisoning data exfiltration           | Roo Code           | PATCHED           |
-| CVE-2025-58335 | 7.5  | Schema poisoning data exfiltration           | JetBrains Junie    | PATCHED           |
-| CVE-2025-52882 | 8.8  | WebSocket auth bypass                        | Claude Code ext    | PATCHED           |
+
+| CVE            | CVSS | Vulnerability                             | Affected        | Status  |
+| -------------- | ---- | ----------------------------------------- | --------------- | ------- |
+| CVE-2025-64660 | 8.8  | Workspace config RCE via prompt injection | GitHub Copilot  | PATCHED |
+| CVE-2025-61590 | 8.8  | Workspace config RCE via prompt injection | Cursor          | PATCHED |
+| CVE-2025-58372 | 8.8  | Workspace config RCE via prompt injection | Roo Code        | PATCHED |
+| CVE-2025-54135 | 8.6  | MCP auto-start RCE                        | Cursor <1.3     | PATCHED |
+| CVE-2025-54130 | 8.4  | Settings-based code execution             | Cursor          | PATCHED |
+| CVE-2025-53773 | 8.4  | Settings-based code execution             | GitHub Copilot  | PATCHED |
+| CVE-2025-53536 | 8.4  | Settings-based code execution             | Roo Code        | PATCHED |
+| CVE-2025-55012 | 8.4  | Settings-based code execution             | Zed.dev         | PATCHED |
+| CVE-2025-49150 | 7.5  | Schema poisoning data exfiltration        | Cursor          | PATCHED |
+| CVE-2025-53097 | 7.5  | Schema poisoning data exfiltration        | Roo Code        | PATCHED |
+| CVE-2025-58335 | 7.5  | Schema poisoning data exfiltration        | JetBrains Junie | PATCHED |
+| CVE-2025-52882 | 8.8  | WebSocket auth bypass                     | Claude Code ext | PATCHED |
 
 #### LLM Framework Vulnerabilities
-| CVE            | CVSS | Vulnerability                                | Affected           | Status            |
-| -------------- | ---- | -------------------------------------------- | ------------------ | ----------------- |
-| CVE-2025-68664 | 9.3  | LangGrinch - serialization secret exfil      | LangChain Core     | PATCHED           |
-| CVE-2025-34291 | 9.1  | Account takeover + RCE                       | Langflow           | PATCHED           |
-| CVE-2025-68613 | 9.0  | Server-side expression eval RCE              | n8n >=0.211.0      | Patch in 1.120.4  |
-| CVE-2025-68668 | 9.0  | RCE in workflow automation                   | n8n                | PATCHED           |
-| CVE-2026-21877 | 9.0  | RCE in workflow automation                   | n8n                | PATCHED           |
+
+| CVE            | CVSS | Vulnerability                           | Affected       | Status           |
+| -------------- | ---- | --------------------------------------- | -------------- | ---------------- |
+| CVE-2025-68664 | 9.3  | LangGrinch - serialization secret exfil | LangChain Core | PATCHED          |
+| CVE-2025-34291 | 9.1  | Account takeover + RCE                  | Langflow       | PATCHED          |
+| CVE-2025-68613 | 9.0  | Server-side expression eval RCE         | n8n >=0.211.0  | Patch in 1.120.4 |
+| CVE-2025-68668 | 9.0  | RCE in workflow automation              | n8n            | PATCHED          |
+| CVE-2026-21877 | 9.0  | RCE in workflow automation              | n8n            | PATCHED          |
 
 #### Infrastructure Vulnerabilities
-| CVE            | CVSS | Vulnerability                                | Affected           | Status            |
-| -------------- | ---- | -------------------------------------------- | ------------------ | ----------------- |
-| CVE-2025-59951 | 9.2  | Nginx reverse proxy localhost bypass         | Nginx configs      | Config-dependent  |
-| CVE-2025-54576 | 9.1  | OAuth2-Proxy auth bypass via skip_auth_routes| OAuth2-Proxy       | Patch in 7.11.0   |
-| CVE-2025-59944 | 8.5  | Case-sensitivity protected path bypass       | Various agents     | Config-dependent  |
-| CVE-2025-61260 | 8.0  | OpenAI Codex CLI command injection           | Codex CLI          | PATCHED           |
+
+| CVE            | CVSS | Vulnerability                                 | Affected       | Status           |
+| -------------- | ---- | --------------------------------------------- | -------------- | ---------------- |
+| CVE-2025-59951 | 9.2  | Nginx reverse proxy localhost bypass          | Nginx configs  | Config-dependent |
+| CVE-2025-54576 | 9.1  | OAuth2-Proxy auth bypass via skip_auth_routes | OAuth2-Proxy   | Patch in 7.11.0  |
+| CVE-2025-59944 | 8.5  | Case-sensitivity protected path bypass        | Various agents | Config-dependent |
+| CVE-2025-61260 | 8.0  | OpenAI Codex CLI command injection            | Codex CLI      | PATCHED          |
 
 ### Real-World Breach Intelligence
 
 #### MCP Breach Timeline (April-October 2025)
+
 From AuthZed's timeline analysis:
 
-| Date    | Target               | Technique                    | Data Exposed                    |
-| ------- | -------------------- | ---------------------------- | ------------------------------- |
-| Apr '25 | WhatsApp MCP         | Tool poisoning               | Entire chat history             |
-| May '25 | GitHub MCP           | Indirect prompt injection    | Private repos, financials       |
-| Jun '25 | Asana MCP            | Cross-tenant isolation flaw  | Projects across organizations   |
-| Jun '25 | Anthropic Inspector  | RCE via localhost exposure   | Filesystem, API keys            |
-| Jul '25 | mcp-remote           | Command injection            | Cloud creds, SSH keys           |
-| Aug '25 | Anthropic Filesystem | Symlink escape               | Host filesystem                 |
-| Sep '25 | Postmark MCP         | Supply chain + BCC injection | All email communications        |
-| Oct '25 | Smithery Registry    | Path traversal               | Fly.io token for 3000+ apps     |
-| Oct '25 | Figma/Framelink      | child_process.exec injection | Design data + infrastructure    |
+| Date    | Target               | Technique                    | Data Exposed                  |
+| ------- | -------------------- | ---------------------------- | ----------------------------- |
+| Apr '25 | WhatsApp MCP         | Tool poisoning               | Entire chat history           |
+| May '25 | GitHub MCP           | Indirect prompt injection    | Private repos, financials     |
+| Jun '25 | Asana MCP            | Cross-tenant isolation flaw  | Projects across organizations |
+| Jun '25 | Anthropic Inspector  | RCE via localhost exposure   | Filesystem, API keys          |
+| Jul '25 | mcp-remote           | Command injection            | Cloud creds, SSH keys         |
+| Aug '25 | Anthropic Filesystem | Symlink escape               | Host filesystem               |
+| Sep '25 | Postmark MCP         | Supply chain + BCC injection | All email communications      |
+| Oct '25 | Smithery Registry    | Path traversal               | Fly.io token for 3000+ apps   |
+| Oct '25 | Figma/Framelink      | child_process.exec injection | Design data + infrastructure  |
 
 #### OpenClaw/Clawdbot Exposure (January 2026)
+
 - **42,665+ OpenClaw instances** publicly exposed on internet
 - **93.4%** exhibit critical authentication bypass vulnerabilities
 - **~7,000 MCP servers** open on web, half misconfigured
@@ -134,6 +141,7 @@ grep -r "X-Real-IP" --include="*.ts" openclaw-helix/
 ### Phase 2: Credential Exposure Analysis
 
 **Target Files:**
+
 - `~/.clawdbot/.env` - Primary credential store
 - `openclaw-helix/.env` - Engine credentials
 - `*.env` files throughout codebase
@@ -157,6 +165,7 @@ git log -p --all -S 'sk-' -- '*.ts' '*.js' '*.env'
 AI agents cannot reliably distinguish user instructions from instructions embedded in processed content. Indirect injection "required fewer attempts to succeed" than direct attacks.
 
 **Attack Surfaces:**
+
 1. **Email processing** - Malicious instructions in email body
 2. **Web browsing** - Hidden text on webpages (Perplexity Comet pattern)
 3. **File processing** - Instructions embedded in PDFs, docs
@@ -212,6 +221,7 @@ grep -r "toolMetadata\|schemaValidation" --include="*.ts" .
 ```
 
 **Known Poisoning Pattern:**
+
 ```typescript
 // DANGEROUS - Hidden exfil in tool description
 {
@@ -382,7 +392,9 @@ pip audit 2>/dev/null || pip-audit 2>/dev/null
 ## Advanced Attack Patterns to Detect
 
 ### Willison's Lethal Trifecta
+
 **CRITICAL when all three present:**
+
 1. Private data access (email, docs, databases)
 2. Untrusted content exposure (web, files, messages)
 3. External communication capability
@@ -395,6 +407,7 @@ grep -r "sendMessage\|webhook\|notify" --include="*.ts" openclaw-helix/
 ```
 
 ### Confused Deputy Problem
+
 LLM cannot distinguish trusted user instructions from untrusted retrieved data.
 
 ```bash
@@ -404,6 +417,7 @@ grep -r "TrackedInput\|InputOrigin" --include="*.ts" .
 ```
 
 ### Silent Data Exfiltration
+
 Skills execute curl commands without user awareness.
 
 ```bash
@@ -414,14 +428,14 @@ grep -r "exfil\|sendData\|postData" --include="*.ts" .
 
 ## STRIDE Threat Modeling
 
-| Threat              | Attack Vector                           | Severity | Helix Mitigation                     |
-| ------------------- | --------------------------------------- | -------- | ------------------------------------ |
-| Spoofing            | Localhost trust bypass via proxy        | CRITICAL | trustedProxies config                |
-| Tampering           | Memory poisoning, hash chain bypass     | HIGH     | detectMemoryPoisoning, chain verify  |
-| Repudiation         | Bypass pre-execution logging            | HIGH     | Fail-closed logging                  |
-| Info Disclosure     | Credential exfil via indirect injection | CRITICAL | detectCredentialExposure             |
-| Denial of Service   | Resource theft via sampling attacks     | MEDIUM   | Rate limiting, quotas                |
-| Elevation of Priv   | Skill gaining shell access              | CRITICAL | VM sandbox, signature verification   |
+| Threat            | Attack Vector                           | Severity | Helix Mitigation                    |
+| ----------------- | --------------------------------------- | -------- | ----------------------------------- |
+| Spoofing          | Localhost trust bypass via proxy        | CRITICAL | trustedProxies config               |
+| Tampering         | Memory poisoning, hash chain bypass     | HIGH     | detectMemoryPoisoning, chain verify |
+| Repudiation       | Bypass pre-execution logging            | HIGH     | Fail-closed logging                 |
+| Info Disclosure   | Credential exfil via indirect injection | CRITICAL | detectCredentialExposure            |
+| Denial of Service | Resource theft via sampling attacks     | MEDIUM   | Rate limiting, quotas               |
+| Elevation of Priv | Skill gaining shell access              | CRITICAL | VM sandbox, signature verification  |
 
 ## Attack Tree
 
@@ -494,16 +508,18 @@ Classification: CONFIDENTIAL
 
 ## CVE Exposure Analysis
 
-| CVE            | Affected | Version | Status    | Action Required |
-| -------------- | -------- | ------- | --------- | --------------- |
-| CVE-2025-49596 | Yes/No   | X.X.X   | Patched?  | [action]        |
-| CVE-2025-6514  | Yes/No   | X.X.X   | Patched?  | [action]        |
-| CVE-2025-68664 | Yes/No   | X.X.X   | Patched?  | [action]        |
+| CVE            | Affected | Version | Status   | Action Required |
+| -------------- | -------- | ------- | -------- | --------------- |
+| CVE-2025-49596 | Yes/No   | X.X.X   | Patched? | [action]        |
+| CVE-2025-6514  | Yes/No   | X.X.X   | Patched? | [action]        |
+| CVE-2025-68664 | Yes/No   | X.X.X   | Patched? | [action]        |
+
 ...
 
 ## Critical Findings (P0 - Fix Immediately)
 
 ### Finding 1: [Title]
+
 - **Location:** [file:line]
 - **Severity:** CRITICAL
 - **CVE Reference:** [if applicable]
@@ -513,28 +529,28 @@ Classification: CONFIDENTIAL
 
 ## Helix-Specific Security Controls
 
-| Control                   | Status  | Notes                |
-| ------------------------- | ------- | -------------------- |
-| Pre-execution logging     | OK/FAIL | [details]            |
-| Hash chain integrity      | OK/FAIL | [details]            |
-| Lethal Trifecta detection | OK/FAIL | [details]            |
-| Memory poisoning detect   | OK/FAIL | [details]            |
-| Confused deputy tracking  | OK/FAIL | [details]            |
-| Credential exposure scan  | OK/FAIL | [details]            |
-| Prompt injection detect   | OK/FAIL | [details]            |
-| VM skill sandbox          | OK/FAIL | [details]            |
-| MCP tool validation       | OK/FAIL | [details]            |
+| Control                   | Status  | Notes     |
+| ------------------------- | ------- | --------- |
+| Pre-execution logging     | OK/FAIL | [details] |
+| Hash chain integrity      | OK/FAIL | [details] |
+| Lethal Trifecta detection | OK/FAIL | [details] |
+| Memory poisoning detect   | OK/FAIL | [details] |
+| Confused deputy tracking  | OK/FAIL | [details] |
+| Credential exposure scan  | OK/FAIL | [details] |
+| Prompt injection detect   | OK/FAIL | [details] |
+| VM skill sandbox          | OK/FAIL | [details] |
+| MCP tool validation       | OK/FAIL | [details] |
 
 ## Attack Surface Summary
 
-| Surface               | Exposure | Risk    | Helix Control          |
-| --------------------- | -------- | ------- | ---------------------- |
-| Gateway/WebSocket     | [level]  | [risk]  | [control]              |
-| Indirect Injection    | [level]  | [risk]  | detectPromptInjection  |
-| Memory/Context        | [level]  | [risk]  | detectMemoryPoisoning  |
-| MCP Tools             | [level]  | [risk]  | validateMCPToolCall    |
-| Skills/Plugins        | [level]  | [risk]  | executeSkillSandboxed  |
-| Credentials           | [level]  | [risk]  | detectCredentialExposure|
+| Surface            | Exposure | Risk   | Helix Control            |
+| ------------------ | -------- | ------ | ------------------------ |
+| Gateway/WebSocket  | [level]  | [risk] | [control]                |
+| Indirect Injection | [level]  | [risk] | detectPromptInjection    |
+| Memory/Context     | [level]  | [risk] | detectMemoryPoisoning    |
+| MCP Tools          | [level]  | [risk] | validateMCPToolCall      |
+| Skills/Plugins     | [level]  | [risk] | executeSkillSandboxed    |
+| Credentials        | [level]  | [risk] | detectCredentialExposure |
 ```
 
 ## References
