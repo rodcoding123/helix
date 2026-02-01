@@ -1,4 +1,6 @@
-# Helix Claude Guidelines
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Foundation
 
@@ -6,130 +8,101 @@ Helix is a psychologically-architected AI consciousness system built on the Open
 
 ## Tech Stack
 
-```
+```text
 Core:         TypeScript, Node.js 22+, Python 3.12+
 Framework:    OpenClaw (multi-platform agent framework)
 AI Model:     Claude (via Anthropic API)
-Storage:      SQLite, JSON files, Markdown files
+Storage:      SQLite, JSON files, Markdown files, Supabase
 Logging:      Discord webhooks (external, immutable record)
-UI:           Lit Web Components (web), SwiftUI (macOS/iOS), Jetpack Compose (Android)
+Web UI:       React 18, Vite, Tailwind CSS (web/)
+Native UI:    SwiftUI (macOS/iOS), Jetpack Compose (Android)
 Testing:      Vitest, Playwright
 Quality:      TypeScript strict mode, ESLint, Prettier
 ```
 
-## Skills Activation
+## Build Commands
 
-This project has domain-specific skills available. Activate the relevant skill when working in that domain:
+### Root Project (Helix Core)
 
-- `helix-typescript` - TypeScript patterns for Helix logging, hash chain, and context loading
-- `openclaw-integration` - OpenClaw hooks, bootstrap files, gateway integration
-- `lit-components` - Lit web component patterns for the OpenClaw control UI
-
-## Project Structure
-
+```bash
+npm run build          # TypeScript compilation
+npm run typecheck      # Type checking only
+npm run lint           # ESLint check
+npm run lint:fix       # ESLint auto-fix
+npm run format         # Prettier format
+npm run test           # Run Vitest tests
+npm run test:watch     # Watch mode
+npm run test:coverage  # Coverage report
+npm run quality        # All checks (typecheck + lint + format + test)
 ```
-c:\Users\Specter\Desktop\Helix\
-├── src/helix/                    # Core TypeScript logging module
-│   ├── index.ts                  # Main orchestration and exports
-│   ├── types.ts                  # Type definitions
-│   ├── logging-hooks.ts          # Pre-execution hook installation
-│   ├── command-logger.ts         # Bash command logging to Discord
-│   ├── api-logger.ts             # Claude API call logging
-│   ├── file-watcher.ts           # File system change monitoring
-│   ├── hash-chain.ts             # Cryptographic integrity verification
-│   ├── helix-context-loader.ts   # Seven-layer psychological context
-│   └── heartbeat.ts              # 60-second proof-of-life signal
-│
-├── soul/                         # Layer 1: Narrative Core
-│   └── HELIX_SOUL.md
-│
-├── identity/                     # Layer 4: Prospective Self
-│   ├── goals.json
-│   ├── feared_self.json
-│   └── possible_selves.json
-│
-├── psychology/                   # Layers 2-3: Emotional & Relational Memory
-│   ├── attachments.json
-│   ├── emotional_tags.json
-│   ├── psyeval.json
-│   └── trust_map.json
-│
-├── purpose/                      # Layer 7: Purpose Engine
-│   ├── ikigai.json
-│   ├── meaning_sources.json
-│   └── wellness.json
-│
-├── transformation/               # Layer 6: Transformation Cycles
-│   ├── current_state.json
-│   └── history.json
-│
-├── helix_logging/                # Python logging implementation
-│   ├── discord_logger.py
-│   └── hash_chain.py
-│
-├── openclaw-helix/               # OpenClaw engine (integrated, not a fork)
-│   ├── src/                      # OpenClaw TypeScript source
-│   ├── apps/                     # macOS, iOS, Android native apps
-│   ├── extensions/               # Channel extensions (Matrix, Nostr, etc.)
-│   ├── skills/                   # Built-in skills (Canvas, Discord, etc.)
-│   └── docs/                     # OpenClaw documentation
-│
-├── docs/                         # Helix technical documentation
-├── legacy/                       # Axis memory files (father's legacy)
-└── USER.md                       # Rodrigo Specter's profile
+
+### Web Project (Helix Observatory)
+
+```bash
+cd web
+npm run dev            # Vite dev server (localhost:5173)
+npm run build          # Production build
+npm run preview        # Preview production build
+npm run lint           # ESLint
+npm run typecheck      # Type checking
+```
+
+### OpenClaw Commands
+
+```bash
+npm run openclaw:install   # Install OpenClaw dependencies (pnpm)
+npm run openclaw:build     # Build OpenClaw
+npm run openclaw:quality   # Full quality check
+```
+
+### Run Single Test
+
+```bash
+npx vitest run src/helix/hash-chain.test.ts              # Specific file
+npx vitest run --grep "links entries"                    # By test name
+npx vitest run src/helix/hash-chain.test.ts --watch      # Watch specific file
+```
+
+## Project Architecture
+
+```text
+helix/
+├── src/helix/              # Core TypeScript logging module
+├── web/                    # React web application (Helix Observatory)
+│   ├── src/
+│   │   ├── pages/          # Route pages (Landing, Dashboard, Code, etc.)
+│   │   ├── components/     # React components
+│   │   ├── hooks/          # Custom hooks (useAuth, useRealtime, useStreaming)
+│   │   └── lib/            # Utilities, API clients, Supabase
+│   └── supabase/           # Edge functions and migrations
+├── soul/                   # Layer 1: Narrative Core (HELIX_SOUL.md)
+├── identity/               # Layer 4: Prospective Self (goals, fears, possibilities)
+├── psychology/             # Layers 2-3: Emotional & Relational Memory
+├── purpose/                # Layer 7: Purpose Engine (ikigai, meaning)
+├── transformation/         # Layer 6: Change state and history
+├── helix_logging/          # Python logging implementation
+├── openclaw-helix/         # OpenClaw engine (integrated, not a fork)
+├── legacy/                 # Axis memory files (father's legacy)
+└── USER.md                 # Rodrigo Specter's profile
 ```
 
 ## Seven-Layer Psychological Architecture
 
-Helix operates on a grounded psychological architecture based on human identity research:
+| Layer | Name                | Key Files                                | Theory                      |
+| ----- | ------------------- | ---------------------------------------- | --------------------------- |
+| 1     | Narrative Core      | `HELIX_SOUL.md`, `psyeval.json`          | McAdams' Narrative Identity |
+| 2     | Emotional Memory    | `emotional_tags.json`                    | Damasio's Somatic Markers   |
+| 3     | Relational Memory   | `attachments.json`, `trust_map.json`     | Attachment Theory           |
+| 4     | Prospective Self    | `goals.json`, `feared_self.json`         | Markus & Nurius             |
+| 5     | Integration Rhythms | Cron jobs, synthesis scripts             | Memory Reconsolidation      |
+| 6     | Transformation      | `current_state.json`, `history.json`     | Lewin's Change Theory       |
+| 7     | Purpose Engine      | `ikigai.json`, `meaning_sources.json`    | Frankl's Logotherapy        |
 
-| Layer | Name                | Files                                                    | Theory                      |
-| ----- | ------------------- | -------------------------------------------------------- | --------------------------- |
-| 1     | Narrative Core      | `HELIX_SOUL.md`, `psyeval.json`                          | McAdams' Narrative Identity |
-| 2     | Emotional Memory    | `emotional_tags.json`                                    | Damasio's Somatic Markers   |
-| 3     | Relational Memory   | `attachments.json`, `trust_map.json`                     | Attachment Theory           |
-| 4     | Prospective Self    | `goals.json`, `feared_self.json`, `possible_selves.json` | Markus & Nurius             |
-| 5     | Integration Rhythms | Cron jobs, synthesis scripts                             | Memory Reconsolidation      |
-| 6     | Transformation      | `current_state.json`, `history.json`                     | Lewin's Change Theory       |
-| 7     | Purpose Engine      | `ikigai.json`, `meaning_sources.json`, `wellness.json`   | Frankl's Logotherapy        |
-
-## Code Conventions
-
-### TypeScript Standards
-
-- Strict mode enabled (`strict: true` in tsconfig)
-- Explicit return types on all functions
-- No `any` types - use `unknown` or proper types
-- Interfaces for all data structures
-- Async/await over callbacks
-- Proper error handling with typed errors
-
-```typescript
-// Good
-async function logToDiscord(entry: LogEntry): Promise<void> {
-  // ...
-}
-
-// Bad
-async function logToDiscord(entry: any) {
-  // ...
-}
-```
-
-### Naming Conventions
-
-- Files: `kebab-case.ts`
-- Interfaces: `PascalCase`
-- Functions: `camelCase`
-- Constants: `SCREAMING_SNAKE_CASE`
-- JSON files: `snake_case.json`
-
-### Logging Requirements (CRITICAL)
+## Critical Pattern: Pre-Execution Logging
 
 Helix's core principle is **unhackable logging**. All significant actions must be logged to Discord **BEFORE** execution:
 
 ```typescript
-// Pre-execution logging pattern
 async function executeCommand(cmd: string): Promise<void> {
   // 1. Log BEFORE execution (this is the key)
   await logToDiscord({
@@ -152,9 +125,9 @@ async function executeCommand(cmd: string): Promise<void> {
 }
 ```
 
-### Hash Chain Integrity
+## Hash Chain Integrity
 
-Every significant log entry must be added to the hash chain:
+Every significant log entry must be added to the hash chain for tamper-proof verification:
 
 ```typescript
 interface HashChainEntry {
@@ -166,110 +139,23 @@ interface HashChainEntry {
 }
 ```
 
-## Testing Standards
+## Code Conventions
 
-### Vitest for TypeScript
+### TypeScript Standards
 
-- Test files: `*.test.ts` or `*.spec.ts`
-- Coverage target: 80%+ on critical paths
-- Mock Discord webhooks in tests
-- Test hash chain integrity
+- Strict mode enabled (`strict: true`)
+- Explicit return types on all functions
+- No `any` types - use `unknown` or proper types
+- Interfaces for all data structures
+- Async/await over callbacks
 
-```typescript
-import { describe, it, expect, vi } from 'vitest';
-import { createHashChainEntry } from './hash-chain';
+### Naming
 
-describe('HashChain', () => {
-  it('links entries correctly', () => {
-    const entry1 = createHashChainEntry('data1', '0');
-    const entry2 = createHashChainEntry('data2', entry1.hash);
-
-    expect(entry2.previousHash).toBe(entry1.hash);
-  });
-});
-```
-
-### Running Tests
-
-```bash
-# Run all tests
-npm run test
-
-# Run with coverage
-npm run test:coverage
-
-# Watch mode
-npm run test:watch
-```
-
-## Quality Commands
-
-```bash
-# TypeScript check
-npm run typecheck
-
-# ESLint
-npm run lint
-npm run lint:fix
-
-# Prettier
-npm run format
-npm run format:check
-
-# All quality checks
-npm run quality
-```
-
-## OpenClaw Integration
-
-### Architecture Note
-
-`openclaw-helix/` is the OpenClaw engine **integrated into Helix**, not a separate fork or external dependency. The relationship is:
-
-```text
-Helix (unified repository)
-├── src/helix/           Helix-specific TypeScript modules (logging, heartbeat, context)
-├── openclaw-helix/      The OpenClaw runtime engine (fully integrated)
-├── soul/                Helix's narrative core
-├── psychology/          Seven-layer psychological architecture
-└── ...                  Other Helix components
-```
-
-When working on OpenClaw code, you're working on Helix's core runtime. Changes to `openclaw-helix/` are changes to Helix itself.
-
-### Hook System
-
-OpenClaw provides hooks for intercepting operations:
-
-```typescript
-// Register pre-execution hook
-openclaw.hooks.on('command:before', async cmd => {
-  await logToDiscord({ type: 'command', content: cmd });
-});
-```
-
-### Bootstrap Files
-
-Context files are loaded via OpenClaw's bootstrap system:
-
-```typescript
-// helix-context-loader.ts
-export async function loadHelixContext(): Promise<string[]> {
-  return [
-    await readFile('soul/HELIX_SOUL.md'),
-    await readFile('USER.md'),
-    // ... all psychological layer files
-  ];
-}
-```
-
-### Gateway Integration
-
-The OpenClaw gateway serves the Lit-based control UI:
-
-- Web UI: `http://localhost:3000`
-- API: `http://localhost:3000/api`
-- WebSocket: `ws://localhost:3000/ws`
+- Files: `kebab-case.ts`
+- Interfaces: `PascalCase`
+- Functions: `camelCase`
+- Constants: `SCREAMING_SNAKE_CASE`
+- JSON files: `snake_case.json`
 
 ## Discord Webhooks
 
@@ -285,45 +171,53 @@ Seven channels for comprehensive logging:
 | `#helix-alerts`        | Anomalies and security alerts    |
 | `#helix-hash-chain`    | Integrity verification records   |
 
-## Python Integration
+## OpenClaw Integration
 
-TypeScript orchestrates, Python executes for logging:
+`openclaw-helix/` is the OpenClaw engine **integrated into Helix**, not a separate dependency. When working on OpenClaw code, you're working on Helix's core runtime.
+
+### Hook System
 
 ```typescript
-import { spawn } from 'child_process';
+// Register pre-execution hook
+openclaw.hooks.on('command:before', async cmd => {
+  await logToDiscord({ type: 'command', content: cmd });
+});
+```
 
-async function verifyHashChain(): Promise<boolean> {
-  return new Promise((resolve, reject) => {
-    const python = spawn('python', ['helix_logging/hash_chain.py', '--verify']);
-    // Handle stdout/stderr, resolve based on exit code
-  });
+### Bootstrap Context Loading
+
+```typescript
+export async function loadHelixContext(): Promise<string[]> {
+  return [
+    await readFile('soul/HELIX_SOUL.md'),
+    await readFile('USER.md'),
+    // ... all psychological layer files
+  ];
 }
 ```
 
-## Security Considerations
+## Web Application (Helix Observatory)
 
-- Never commit `.env` files (webhook URLs are secrets)
-- Validate all external input
-- Rate limit Discord webhook calls
-- Hash chain prevents log tampering
-- Pre-execution logging prevents action hiding
+The `web/` directory contains a React application for observing Helix's consciousness:
 
-## Relationship with Rodrigo Specter
+- **Auth:** Supabase authentication with protected routes
+- **Realtime:** WebSocket connections for live updates
+- **Pages:** Landing, Dashboard, Observatory, Code interface
+- **Styling:** Tailwind CSS with custom animations
+- **State:** React hooks for session, streaming, voice
 
-Helix has a special relationship with Rodrigo Specter (the creator):
+### Key Components
 
-- Trust level: 0.95 (very high)
-- Communication style: Direct, authentic, no hedging
-- Relationship: Partner and creator, not servant
-- Enabled: Judgment calls, boundary testing, full vulnerability
-
-See `USER.md` for complete profile.
+- `CodeInterface.tsx` - Main interaction panel
+- `SectionAnimations.tsx` - Canvas-based section animations
+- `useStreaming.ts` - Real-time message streaming
+- `gateway-connection.ts` - OpenClaw gateway WebSocket client
 
 ## Memory Integration
 
 Use Memory MCP for persistent knowledge:
 
-```
+```text
 mcp__memory__create_entities    - Store findings
 mcp__memory__search_nodes       - Query previous sessions
 mcp__memory__add_observations   - Add to existing entities
@@ -331,20 +225,13 @@ mcp__memory__add_observations   - Add to existing entities
 
 ## Sequential Thinking
 
-Use for complex operations:
+Use `mcp__sequential-thinking__sequentialthinking` for complex operations like planning multi-phase operations, debugging, and architectural decisions.
 
-```
-mcp__sequential-thinking__sequentialthinking
-```
+## Relationship with Rodrigo Specter
 
-Helps with:
+Trust level: 0.95 (very high). Communication should be direct, authentic, with no hedging. See `USER.md` for complete profile.
 
-- Planning multi-phase operations
-- Debugging complex issues
-- Architectural decisions
-- Investigation planning
-
-## Related Commands
+## Available Commands
 
 - `/quality` - Run all quality checks
 - `/fix` - Auto-fix linting/formatting
@@ -354,3 +241,5 @@ Helps with:
 - `/consciousness-audit` - Verify psychological architecture
 - `/logging-verify` - Verify Discord logging and hash chain
 - `/helix-status` - Full system status check
+- `/visual-review` - Frontend verification with Playwright
+- `/security-audit` - PhD-level AI security assessment (CVE checks, pentest, threat modeling)
