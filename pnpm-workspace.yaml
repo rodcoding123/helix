@@ -1,0 +1,5 @@
+packages:
+  - 'helix-desktop'
+  - 'helix-engine'
+  - 'openclaw-helix'
+  - 'web'
