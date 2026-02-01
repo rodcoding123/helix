@@ -181,7 +181,7 @@ export type {
   MCPToolAuditEntry,
 } from './mcp-tool-validator.js';
 
-// Threat detection (Willison's Trifecta, memory poisoning, confused deputy)
+// Threat detection (Willison's Trifecta, memory poisoning, confused deputy, MCP attacks)
 export {
   // Lethal Trifecta
   detectLethalTrifecta,
@@ -201,6 +201,17 @@ export {
   // Comprehensive assessment
   assessThreats,
   enforceSecurityPolicy,
+  // MCP tool poisoning (WhatsApp breach pattern)
+  detectToolPoisoning,
+  // Schema poisoning (IDEsaster CVE-2025-49150)
+  detectSchemaPoisoning,
+  // Path traversal (Anthropic Filesystem breach)
+  detectPathTraversal,
+  // Rug pull detection (tool mutation)
+  detectRugPull,
+  hashToolDefinition,
+  // MCP sampling attacks (Unit42 research)
+  detectSamplingAttack,
 } from './threat-detection.js';
 
 export type {
@@ -215,6 +226,13 @@ export type {
   ContextLeakageResult,
   PromptInjectionResult,
   ThreatAssessment,
+  // New types for MCP attack detection
+  ToolPoisoningResult,
+  SchemaPoisoningResult,
+  PathTraversalResult,
+  ToolDefinition,
+  RugPullResult,
+  SamplingAttackResult,
 } from './threat-detection.js';
 
 /**
