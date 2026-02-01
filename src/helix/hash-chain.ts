@@ -484,7 +484,10 @@ export async function verifyAgainstDiscord(): Promise<DiscordVerificationResult>
         '5. Look for any missing or different hashes',
         '',
         'Recent local hashes (newest first):',
-        ...localHashes.slice(-5).reverse().map((h, i) => `   ${i + 1}. ${h}...`),
+        ...localHashes
+          .slice(-5)
+          .reverse()
+          .map((h, i) => `   ${i + 1}. ${h}...`),
       ];
 
       result.message =

@@ -278,9 +278,7 @@
       "action": "SCMP_ACT_ALLOW"
     },
     {
-      "names": [
-        "personality"
-      ],
+      "names": ["personality"],
       "action": "SCMP_ACT_ALLOW",
       "args": [
         {
@@ -291,9 +289,7 @@
       ]
     },
     {
-      "names": [
-        "personality"
-      ],
+      "names": ["personality"],
       "action": "SCMP_ACT_ALLOW",
       "args": [
         {
@@ -304,9 +300,7 @@
       ]
     },
     {
-      "names": [
-        "personality"
-      ],
+      "names": ["personality"],
       "action": "SCMP_ACT_ALLOW",
       "args": [
         {
@@ -317,9 +311,7 @@
       ]
     },
     {
-      "names": [
-        "personality"
-      ],
+      "names": ["personality"],
       "action": "SCMP_ACT_ALLOW",
       "args": [
         {
@@ -330,9 +322,7 @@
       ]
     },
     {
-      "names": [
-        "personality"
-      ],
+      "names": ["personality"],
       "action": "SCMP_ACT_ALLOW",
       "args": [
         {

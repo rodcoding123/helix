@@ -173,11 +173,11 @@ export function verifySkillSignature(
 /**
  * Validate skill before execution
  */
-export async function validateSkill(
+export function validateSkill(
   skillCode: string,
   metadata: SkillMetadata,
   config: SkillSandboxConfig = DEFAULT_SKILL_SANDBOX_CONFIG
-): Promise<SkillValidationResult> {
+): SkillValidationResult {
   const result: SkillValidationResult = {
     valid: true,
     errors: [],
@@ -315,7 +315,7 @@ export async function executeSkillSandboxed(
 
   try {
     // 1. Validate skill
-    const validation = await validateSkill(skillCode, metadata, config);
+    const validation = validateSkill(skillCode, metadata, config);
 
     auditLog.push(
       createAuditEntry('permission_check', {
@@ -395,12 +395,12 @@ function createSandboxContext(
 ): Record<string, unknown> {
   // Create a minimal console that logs to audit
   const safeConsole = {
-    log: (..._args: unknown[]) => {
+    log: (..._args: unknown[]): void => {
       // Logs captured but not exposed to outside
     },
-    warn: (..._args: unknown[]) => {},
-    error: (..._args: unknown[]) => {},
-    info: (..._args: unknown[]) => {},
+    warn: (..._args: unknown[]): void => {},
+    error: (..._args: unknown[]): void => {},
+    info: (..._args: unknown[]): void => {},
   };
 
   // Safe math functions (no random to ensure determinism)
@@ -427,8 +427,8 @@ function createSandboxContext(
 
   // Safe JSON (no revivers to prevent prototype pollution)
   const safeJSON = {
-    parse: (text: string) => JSON.parse(text),
-    stringify: (value: unknown) => JSON.stringify(value),
+    parse: (text: string): unknown => JSON.parse(text),
+    stringify: (value: unknown): string => JSON.stringify(value),
   };
 
   // Build the sandbox context
@@ -501,11 +501,9 @@ async function executeInIsolation(
 
   // Validate context
   if (!context.metadata || !context.sandboxConfig) {
-    throw new HelixSecurityError(
-      'Invalid execution context',
-      'SECURITY_CONFIG_INVALID',
-      { context }
-    );
+    throw new HelixSecurityError('Invalid execution context', 'SECURITY_CONFIG_INVALID', {
+      context,
+    });
   }
 
   // Create isolated sandbox context
@@ -615,11 +613,13 @@ async function executeInIsolation(
 function createTimeoutPromise(timeoutMs: number): Promise<never> {
   return new Promise((_, reject) => {
     setTimeout(() => {
-      reject(new HelixSecurityError(
-        `Skill execution timed out after ${timeoutMs}ms`,
-        'SECURITY_CONFIG_INVALID',
-        { timeoutMs }
-      ));
+      reject(
+        new HelixSecurityError(
+          `Skill execution timed out after ${timeoutMs}ms`,
+          'SECURITY_CONFIG_INVALID',
+          { timeoutMs }
+        )
+      );
     }, timeoutMs);
   });
 }

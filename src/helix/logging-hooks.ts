@@ -243,7 +243,9 @@ async function updateHashChain(action: string, event: InternalHookEvent): Promis
             { name: 'Session', value: event.sessionKey || 'unknown', inline: true },
           ],
           timestamp,
-          footer: { text: isCritical ? 'Critical hash chain entry (fail-closed)' : 'Hash chain entry' },
+          footer: {
+            text: isCritical ? 'Critical hash chain entry (fail-closed)' : 'Hash chain entry',
+          },
         },
       ],
     },
@@ -301,7 +303,11 @@ export function installPreExecutionLogger(): void {
             title: '🔵 Command Initiated',
             color: 0x5865f2,
             fields: [
-              { name: 'Command', value: `\`\`\`${commandText.slice(0, 1500)}\`\`\``, inline: false },
+              {
+                name: 'Command',
+                value: `\`\`\`${commandText.slice(0, 1500)}\`\`\``,
+                inline: false,
+              },
               { name: 'Session', value: event.sessionKey || 'unknown', inline: true },
               { name: 'Status', value: 'STARTING', inline: true },
             ],

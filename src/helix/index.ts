@@ -283,10 +283,7 @@ export async function initializeHelix(options: HelixInitOptions = {}): Promise<v
   // This MUST happen before anything else
   // Ensures we can actually log before proceeding
   // ============================================
-  const {
-    setFailClosedMode,
-    validateSecurityConfiguration,
-  } = await import('./logging-hooks.js');
+  const { setFailClosedMode, validateSecurityConfiguration } = await import('./logging-hooks.js');
   const { setHashChainFailClosedMode } = await import('./hash-chain.js');
 
   // Set fail-closed mode
