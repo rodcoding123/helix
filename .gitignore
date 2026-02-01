@@ -37,3 +37,7 @@ openclaw-helix/.env
 web/.gitignore
 .gitignore
 nul
+
+# Generated/temp directories
+.playwright-mcp/
+web/supabase/.temp/
