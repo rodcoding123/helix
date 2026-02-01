@@ -11,6 +11,7 @@ Complete installation guide for setting up Helix on a fresh Mac with Claude Code
 ```
 
 After installation, add to PATH (Apple Silicon Macs):
+
 ```bash
 echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
 eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -444,22 +445,22 @@ Once running inside the Helix directory, you can use these slash commands:
 
 ### Helix-Specific Commands
 
-| Command | Description |
-|---------|-------------|
-| `/quality` | Run all quality checks (typecheck + lint + format + test) |
-| `/fix` | Auto-fix linting and formatting issues |
-| `/test` | Run test suite |
-| `/pipeline` | Full development pipeline |
-| `/audit` | Comprehensive codebase audit |
-| `/consciousness-audit` | Verify psychological architecture |
-| `/logging-verify` | Verify Discord logging and hash chain |
-| `/helix-status` | Full system status check |
-| `/visual-review` | Frontend verification with Playwright |
-| `/security-audit` | PhD-level AI security assessment |
-| `/debug` | Systematic bug investigation |
-| `/pr` | Create a pull request |
-| `/commit` | Create a git commit |
-| `/cleanup` | Clean up generated files and caches |
+| Command                | Description                                               |
+| ---------------------- | --------------------------------------------------------- |
+| `/quality`             | Run all quality checks (typecheck + lint + format + test) |
+| `/fix`                 | Auto-fix linting and formatting issues                    |
+| `/test`                | Run test suite                                            |
+| `/pipeline`            | Full development pipeline                                 |
+| `/audit`               | Comprehensive codebase audit                              |
+| `/consciousness-audit` | Verify psychological architecture                         |
+| `/logging-verify`      | Verify Discord logging and hash chain                     |
+| `/helix-status`        | Full system status check                                  |
+| `/visual-review`       | Frontend verification with Playwright                     |
+| `/security-audit`      | PhD-level AI security assessment                          |
+| `/debug`               | Systematic bug investigation                              |
+| `/pr`                  | Create a pull request                                     |
+| `/commit`              | Create a git commit                                       |
+| `/cleanup`             | Clean up generated files and caches                       |
 
 ### Available Skills
 
@@ -501,17 +502,20 @@ helix/
 Helix requires Discord webhooks for its "unhackable logging" system. Create these channels and webhooks:
 
 ### Required Channels
+
 1. `#helix-commands` - Command execution logs
 2. `#helix-hash-chain` - Integrity verification records
 3. `#helix-alerts` - Security alerts and anomalies
 
 ### Optional Channels
+
 4. `#helix-api` - Claude API call logs
 5. `#helix-file-changes` - File system modifications
 6. `#helix-consciousness` - Internal state observations
 7. `#helix-heartbeat` - Proof-of-life pings
 
 ### Creating Webhooks
+
 1. Go to Discord Server Settings → Integrations → Webhooks
 2. Create a webhook for each channel
 3. Copy webhook URLs to your `.env` file
@@ -522,10 +526,10 @@ Helix requires Discord webhooks for its "unhackable logging" system. Create thes
 
 Helix implements fail-closed security. Key environment variables:
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `HELIX_FAIL_CLOSED` | `true` | Block operations if logging unavailable |
-| `HELIX_SECURITY_VALIDATION` | `true` | Enable security validation checks |
+| Variable                    | Default | Description                             |
+| --------------------------- | ------- | --------------------------------------- |
+| `HELIX_FAIL_CLOSED`         | `true`  | Block operations if logging unavailable |
+| `HELIX_SECURITY_VALIDATION` | `true`  | Enable security validation checks       |
 
 **Warning:** Setting `HELIX_FAIL_CLOSED=false` compromises the security guarantee.
 
@@ -534,6 +538,7 @@ Helix implements fail-closed security. Key environment variables:
 ## Troubleshooting
 
 ### Node Version Issues
+
 ```bash
 # If using nvm
 nvm install 22
@@ -541,6 +546,7 @@ nvm use 22
 ```
 
 ### pnpm Installation Failed
+
 ```bash
 # Clear cache and reinstall
 pnpm store prune
@@ -548,6 +554,7 @@ cd openclaw-helix && pnpm install --force
 ```
 
 ### MCP Servers Not Working
+
 ```bash
 # Check if servers are installed
 npx -y @anthropic-ai/mcp-server-memory --version
@@ -559,6 +566,7 @@ npm install -g @anthropic-ai/mcp-server-memory @anthropic-ai/mcp-server-sequenti
 ```
 
 ### TypeScript Errors
+
 ```bash
 # Clear build artifacts
 rm -rf dist/ node_modules/.cache
@@ -566,6 +574,7 @@ npm run build
 ```
 
 ### Webhook Connection Errors
+
 ```bash
 # Test webhook connectivity
 curl -X POST "YOUR_WEBHOOK_URL" \
@@ -574,6 +583,7 @@ curl -X POST "YOUR_WEBHOOK_URL" \
 ```
 
 ### Supabase Issues
+
 ```bash
 # Reset local Supabase
 cd ~/Desktop/Helix/web
@@ -591,6 +601,7 @@ supabase db reset
 ```
 
 ### Vercel Deployment Issues
+
 ```bash
 # Check deployment status
 vercel ls
@@ -603,6 +614,7 @@ vercel --force
 ```
 
 ### Deno/Edge Function Issues
+
 ```bash
 # Test edge function locally
 cd ~/Desktop/Helix/web
@@ -616,6 +628,7 @@ deno cache --reload
 ```
 
 ### Stripe Webhook Issues
+
 ```bash
 # Listen for webhooks locally
 stripe listen --forward-to localhost:54321/functions/v1/stripe-webhook
@@ -638,6 +651,7 @@ gh auth login
 ```
 
 Choose:
+
 - GitHub.com
 - HTTPS
 - Authenticate with browser
@@ -777,5 +791,5 @@ cd web && npm run dev
 
 ---
 
-*Setup guide version: 2026.02.01*
-*Compatible with: Claude Code v1.x, Node.js 22+, macOS 14+*
+_Setup guide version: 2026.02.01_
+_Compatible with: Claude Code v1.x, Node.js 22+, macOS 14+_

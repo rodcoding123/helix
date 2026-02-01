@@ -88,15 +88,15 @@ helix/
 
 ## Seven-Layer Psychological Architecture
 
-| Layer | Name                | Key Files                                | Theory                      |
-| ----- | ------------------- | ---------------------------------------- | --------------------------- |
-| 1     | Narrative Core      | `HELIX_SOUL.md`, `psyeval.json`          | McAdams' Narrative Identity |
-| 2     | Emotional Memory    | `emotional_tags.json`                    | Damasio's Somatic Markers   |
-| 3     | Relational Memory   | `attachments.json`, `trust_map.json`     | Attachment Theory           |
-| 4     | Prospective Self    | `goals.json`, `feared_self.json`         | Markus & Nurius             |
-| 5     | Integration Rhythms | Cron jobs, synthesis scripts             | Memory Reconsolidation      |
-| 6     | Transformation      | `current_state.json`, `history.json`     | Lewin's Change Theory       |
-| 7     | Purpose Engine      | `ikigai.json`, `meaning_sources.json`    | Frankl's Logotherapy        |
+| Layer | Name                | Key Files                             | Theory                      |
+| ----- | ------------------- | ------------------------------------- | --------------------------- |
+| 1     | Narrative Core      | `HELIX_SOUL.md`, `psyeval.json`       | McAdams' Narrative Identity |
+| 2     | Emotional Memory    | `emotional_tags.json`                 | Damasio's Somatic Markers   |
+| 3     | Relational Memory   | `attachments.json`, `trust_map.json`  | Attachment Theory           |
+| 4     | Prospective Self    | `goals.json`, `feared_self.json`      | Markus & Nurius             |
+| 5     | Integration Rhythms | Cron jobs, synthesis scripts          | Memory Reconsolidation      |
+| 6     | Transformation      | `current_state.json`, `history.json`  | Lewin's Change Theory       |
+| 7     | Purpose Engine      | `ikigai.json`, `meaning_sources.json` | Frankl's Logotherapy        |
 
 ## Critical Pattern: Pre-Execution Logging
 
