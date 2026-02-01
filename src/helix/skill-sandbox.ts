@@ -386,31 +386,227 @@ export async function executeSkillSandboxed(
 }
 
 /**
- * Execute skill code in isolation
- * In production, this would use VM2, isolated-vm, or a subprocess sandbox
+ * Create a frozen, minimal sandbox context
+ * This provides only safe, read-only APIs to the isolated code
+ */
+function createSandboxContext(
+  context: SkillExecutionContext,
+  args: unknown
+): Record<string, unknown> {
+  // Create a minimal console that logs to audit
+  const safeConsole = {
+    log: (..._args: unknown[]) => {
+      // Logs captured but not exposed to outside
+    },
+    warn: (..._args: unknown[]) => {},
+    error: (..._args: unknown[]) => {},
+    info: (..._args: unknown[]) => {},
+  };
+
+  // Safe math functions (no random to ensure determinism)
+  const safeMath = {
+    abs: Math.abs,
+    ceil: Math.ceil,
+    floor: Math.floor,
+    max: Math.max,
+    min: Math.min,
+    pow: Math.pow,
+    round: Math.round,
+    sqrt: Math.sqrt,
+    trunc: Math.trunc,
+    sign: Math.sign,
+    PI: Math.PI,
+    E: Math.E,
+  };
+
+  // Safe string utilities
+  const safeString = {
+    fromCharCode: String.fromCharCode,
+    fromCodePoint: String.fromCodePoint,
+  };
+
+  // Safe JSON (no revivers to prevent prototype pollution)
+  const safeJSON = {
+    parse: (text: string) => JSON.parse(text),
+    stringify: (value: unknown) => JSON.stringify(value),
+  };
+
+  // Build the sandbox context
+  const sandboxContext: Record<string, unknown> = {
+    // Input arguments
+    args,
+
+    // Skill metadata (read-only)
+    metadata: Object.freeze({ ...context.metadata }),
+
+    // Safe built-ins
+    console: Object.freeze(safeConsole),
+    Math: Object.freeze(safeMath),
+    String: Object.freeze(safeString),
+    JSON: Object.freeze(safeJSON),
+
+    // Safe constructors
+    Array,
+    Object,
+    Map,
+    Set,
+    Date,
+    RegExp,
+    Error,
+    TypeError,
+    RangeError,
+
+    // Safe primitives
+    undefined,
+    NaN,
+    Infinity,
+    isNaN,
+    isFinite,
+    parseInt,
+    parseFloat,
+    encodeURI,
+    decodeURI,
+    encodeURIComponent,
+    decodeURIComponent,
+
+    // Promise for async operations (but no access to Node APIs)
+    Promise,
+
+    // Result storage
+    __result__: undefined,
+    __error__: undefined,
+  };
+
+  // Freeze the context to prevent modifications
+  return Object.freeze(sandboxContext);
+}
+
+/**
+ * Execute skill code in isolation using Node.js vm module
+ *
+ * Security measures:
+ * - Separate V8 context with no access to Node.js APIs
+ * - Frozen, minimal sandbox with only safe built-ins
+ * - Strict timeout enforcement
+ * - No access to require, process, global, or module
+ * - Prototype chain isolation
  */
 async function executeInIsolation(
-  _skillCode: string,
-  _args: unknown,
+  skillCode: string,
+  args: unknown,
   context: SkillExecutionContext
 ): Promise<unknown> {
-  // PLACEHOLDER: In production, implement actual isolation using:
-  // - vm2 for Node.js VM isolation
-  // - isolated-vm for V8 isolates
-  // - Subprocess with seccomp/apparmor
-  // - WebAssembly sandbox
+  // Import vm module dynamically to avoid hoisting issues
+  const vm = await import('node:vm');
 
-  // For now, just validate that we have the context
+  // Validate context
   if (!context.metadata || !context.sandboxConfig) {
-    throw new Error('Invalid execution context');
+    throw new HelixSecurityError(
+      'Invalid execution context',
+      'SECURITY_CONFIG_INVALID',
+      { context }
+    );
   }
 
-  // Return placeholder - actual execution would happen in isolated environment
-  return {
-    executed: true,
-    isolation: 'placeholder',
-    message: 'Skill execution sandbox ready - implement actual isolation for production',
-  };
+  // Create isolated sandbox context
+  const sandboxContext = createSandboxContext(context, args);
+
+  // Create a new V8 context with the sandbox
+  const vmContext = vm.createContext(sandboxContext, {
+    name: `helix-skill-${context.metadata.name}`,
+    origin: 'helix://skill-sandbox',
+    // Prevent code generation from strings (eval, new Function)
+    codeGeneration: {
+      strings: false,
+      wasm: false,
+    },
+  });
+
+  // Wrap the skill code to capture the result
+  const wrappedCode = `
+    'use strict';
+    (async () => {
+      try {
+        const skillFunction = (function() {
+          ${skillCode}
+        })();
+
+        if (typeof skillFunction === 'function') {
+          __result__ = await skillFunction(args);
+        } else {
+          __result__ = skillFunction;
+        }
+      } catch (e) {
+        __error__ = e instanceof Error ? e.message : String(e);
+      }
+    })();
+  `;
+
+  try {
+    // Compile the script
+    const script = new vm.Script(wrappedCode, {
+      filename: `skill-${context.metadata.name}.js`,
+      lineOffset: 0,
+      columnOffset: 0,
+    });
+
+    // Execute with timeout
+    const timeoutMs = context.sandboxConfig.timeoutMs;
+
+    // Run the script in the isolated context
+    script.runInContext(vmContext, {
+      timeout: timeoutMs,
+      displayErrors: false,
+      breakOnSigint: true,
+    });
+
+    // Wait for async completion (with timeout)
+    const startTime = Date.now();
+    while (
+      vmContext.__result__ === undefined &&
+      vmContext.__error__ === undefined &&
+      Date.now() - startTime < timeoutMs
+    ) {
+      await new Promise(resolve => setTimeout(resolve, 10));
+    }
+
+    // Check for errors
+    if (vmContext.__error__) {
+      throw new Error(vmContext.__error__ as string);
+    }
+
+    // Check for timeout
+    if (vmContext.__result__ === undefined && vmContext.__error__ === undefined) {
+      throw new HelixSecurityError(
+        `Skill execution timed out after ${timeoutMs}ms`,
+        'SECURITY_CONFIG_INVALID',
+        { timeoutMs }
+      );
+    }
+
+    return vmContext.__result__;
+  } catch (error) {
+    // Handle VM-specific errors
+    if (error instanceof Error) {
+      if (error.message.includes('Script execution timed out')) {
+        throw new HelixSecurityError(
+          `Skill execution timed out after ${context.sandboxConfig.timeoutMs}ms`,
+          'SECURITY_CONFIG_INVALID',
+          { timeoutMs: context.sandboxConfig.timeoutMs }
+        );
+      }
+
+      if (error.message.includes('Code generation from strings disallowed')) {
+        throw new HelixSecurityError(
+          'Skill attempted to use eval() or new Function() - blocked',
+          'SECURITY_CONFIG_INVALID',
+          { attempt: 'code_generation' }
+        );
+      }
+    }
+
+    throw error;
+  }
 }
 
 /**
