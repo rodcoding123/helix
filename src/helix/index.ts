@@ -181,6 +181,42 @@ export type {
   MCPToolAuditEntry,
 } from './mcp-tool-validator.js';
 
+// Threat detection (Willison's Trifecta, memory poisoning, confused deputy)
+export {
+  // Lethal Trifecta
+  detectLethalTrifecta,
+  // Memory poisoning
+  detectMemoryPoisoning,
+  createVerifiedMemoryEntry,
+  // Confused deputy
+  detectConfusedDeputy,
+  calculateTrustLevel,
+  // Credential exposure
+  detectCredentialExposure,
+  sanitizeCredentials,
+  // Context leakage
+  detectContextLeakage,
+  // Prompt injection
+  detectPromptInjection,
+  // Comprehensive assessment
+  assessThreats,
+  enforceSecurityPolicy,
+} from './threat-detection.js';
+
+export type {
+  LethalTrifectaStatus,
+  MemoryEntry,
+  MemoryPoisoningResult,
+  TrackedInput,
+  InputOrigin,
+  ConfusedDeputyResult,
+  CredentialExposureResult,
+  AgentContext,
+  ContextLeakageResult,
+  PromptInjectionResult,
+  ThreatAssessment,
+} from './threat-detection.js';
+
 /**
  * Helix initialization options
  */
