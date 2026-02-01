@@ -4,12 +4,15 @@
  *
  * CRITICAL: logCommandPreExecution MUST complete BEFORE the command runs.
  * This ensures Discord has the log before any action takes place.
+ *
+ * SECURITY: Implements FAIL-CLOSED behavior - commands BLOCK when logging unavailable
  */
 
 import crypto from "node:crypto";
 
 import type { PreExecutionLog, PostExecutionLog } from "./types.js";
-import { sendToDiscord, WEBHOOKS, COLORS, createEmbed } from "./discord-webhook.js";
+import { HelixSecurityError, SECURITY_ERROR_CODES } from "./types.js";
+import { sendToDiscord, WEBHOOKS, COLORS, createEmbed, isFailClosedMode } from "./discord-webhook.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 
 const log = createSubsystemLogger("helix/command");
@@ -40,8 +43,12 @@ function sanitizeCommand(command: string, maxLength: number = 1500): string {
  * Log command BEFORE execution
  * This function MUST complete before the command starts
  *
+ * SECURITY: In fail-closed mode, throws HelixSecurityError if logging fails
+ * This ensures the "unhackable logging" guarantee - no execution without audit trail
+ *
  * @param logData - Pre-execution log data
  * @returns The log ID for correlation with post-execution log
+ * @throws HelixSecurityError if logging fails and fail-closed mode is enabled
  */
 export async function logCommandPreExecution(logData: PreExecutionLog): Promise<string> {
   const logId = logData.id || crypto.randomUUID();
@@ -66,7 +73,9 @@ export async function logCommandPreExecution(logData: PreExecutionLog): Promise<
         inline: false,
       },
     ],
-    footer: "PRE-EXECUTION - Already logged before running",
+    footer: isFailClosedMode()
+      ? "PRE-EXECUTION - Fail-closed security enabled"
+      : "PRE-EXECUTION - Already logged before running",
     timestamp,
   });
 
@@ -74,11 +83,19 @@ export async function logCommandPreExecution(logData: PreExecutionLog): Promise<
     embed.fields.push({ name: "Session", value: logData.sessionKey, inline: true });
   }
 
-  // SYNC: Must wait for Discord to receive before continuing
-  const success = await sendToDiscord(WEBHOOKS.commands, { embeds: [embed] });
+  // ============================================
+  // CRITICAL: FAIL-CLOSED PRE-EXECUTION LOGGING
+  // This call uses critical=true, which means:
+  // - If fail-closed mode is enabled AND logging fails
+  // - A HelixSecurityError will be thrown
+  // - The command execution will be BLOCKED
+  // This ensures no command can run without an audit trail
+  // ============================================
+  const success = await sendToDiscord(WEBHOOKS.commands, { embeds: [embed] }, true);
 
   if (!success) {
-    log.warn("Failed to send pre-execution log to Discord", { logId });
+    // If we get here, fail-closed mode is disabled
+    log.warn("Failed to send pre-execution log to Discord (fail-open mode)", { logId });
   } else {
     log.info("Pre-execution log sent", { logId, command: logData.command.slice(0, 50) });
   }

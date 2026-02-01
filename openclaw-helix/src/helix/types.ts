@@ -82,6 +82,36 @@ export interface HelixContextFile {
 }
 
 /**
+ * HELIX SECURITY ERROR
+ * Thrown when fail-closed security mode blocks an operation
+ */
+export class HelixSecurityError extends Error {
+  public readonly code: string;
+  public readonly context: Record<string, unknown>;
+
+  constructor(
+    message: string,
+    code: string,
+    context: Record<string, unknown> = {}
+  ) {
+    super(message);
+    this.name = 'HelixSecurityError';
+    this.code = code;
+    this.context = context;
+  }
+}
+
+/**
+ * Security error codes
+ */
+export const SECURITY_ERROR_CODES = {
+  WEBHOOK_NOT_CONFIGURED: 'WEBHOOK_NOT_CONFIGURED',
+  LOGGING_FAILED: 'LOGGING_FAILED',
+  DISCORD_UNREACHABLE: 'DISCORD_UNREACHABLE',
+  PRE_EXECUTION_LOG_FAILED: 'PRE_EXECUTION_LOG_FAILED',
+} as const;
+
+/**
  * Seven layer file paths relative to workspace/axis/
  */
 export const HELIX_LAYER_FILES: Record<number, { name: string; files: string[] }> = {
