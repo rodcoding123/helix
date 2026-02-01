@@ -4,10 +4,13 @@
  *
  * Core Principle: Logs fire BEFORE actions, not after.
  * Discord webhooks are called synchronously before execution proceeds.
+ *
+ * SECURITY: Implements FAIL-CLOSED behavior - operations BLOCK when logging unavailable
  */
 
 import crypto from 'node:crypto';
-import type { InternalHookEvent } from './types.js';
+import type { InternalHookEvent, WebhookHealthStatus, SecurityConfigStatus } from './types.js';
+import { HelixSecurityError, REQUIRED_WEBHOOKS, OPTIONAL_WEBHOOKS } from './types.js';
 
 // Discord webhook URLs from environment
 const WEBHOOKS = {
@@ -18,6 +21,20 @@ const WEBHOOKS = {
   alerts: process.env.DISCORD_WEBHOOK_ALERTS,
   hashChain: process.env.DISCORD_WEBHOOK_HASH_CHAIN,
 };
+
+// Security mode - when true, operations fail if logging unavailable
+let failClosedMode = true;
+
+/**
+ * Enable or disable fail-closed security mode
+ * WARNING: Disabling this compromises the "unhackable logging" guarantee
+ */
+export function setFailClosedMode(enabled: boolean): void {
+  if (!enabled) {
+    console.warn('[Helix] WARNING: Disabling fail-closed mode compromises security!');
+  }
+  failClosedMode = enabled;
+}
 
 interface DiscordEmbed {
   title: string;
@@ -39,13 +56,24 @@ interface DiscordPayload {
 
 /**
  * Send a payload to a Discord webhook
- * Returns true if successful, false otherwise
+ * In fail-closed mode, throws HelixSecurityError if webhook unavailable
+ * Returns true if successful, false otherwise (only in non-critical mode)
  */
 async function sendToDiscord(
   webhookUrl: string | undefined,
-  payload: DiscordPayload
+  payload: DiscordPayload,
+  critical: boolean = false
 ): Promise<boolean> {
-  if (!webhookUrl) return false;
+  if (!webhookUrl) {
+    if (critical && failClosedMode) {
+      throw new HelixSecurityError(
+        'Critical webhook not configured - execution blocked for security',
+        'WEBHOOK_NOT_CONFIGURED',
+        { payload }
+      );
+    }
+    return false;
+  }
 
   try {
     const response = await fetch(webhookUrl, {
@@ -53,15 +81,140 @@ async function sendToDiscord(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
+
+    if (!response.ok && critical && failClosedMode) {
+      throw new HelixSecurityError(
+        `Critical logging failed (HTTP ${response.status}) - execution blocked`,
+        'LOGGING_FAILED',
+        { status: response.status, payload }
+      );
+    }
+
     return response.ok;
   } catch (error) {
+    if (error instanceof HelixSecurityError) throw error;
+
+    if (critical && failClosedMode) {
+      throw new HelixSecurityError(
+        'Discord unreachable - execution blocked for security',
+        'DISCORD_UNREACHABLE',
+        { error: error instanceof Error ? error.message : String(error) }
+      );
+    }
+
     console.error('[Helix] Discord webhook failed:', error);
     return false;
   }
 }
 
 /**
+ * Check health of a single webhook
+ */
+async function checkSingleWebhook(
+  name: string,
+  url: string | undefined
+): Promise<WebhookHealthStatus> {
+  const status: WebhookHealthStatus = {
+    name,
+    url: url ? `${url.slice(0, 50)}...` : undefined,
+    configured: !!url,
+    reachable: false,
+  };
+
+  if (!url) {
+    status.error = 'Not configured';
+    return status;
+  }
+
+  try {
+    const start = Date.now();
+    // Discord webhooks accept GET to check if they exist
+    const response = await fetch(url, { method: 'GET' });
+    status.latencyMs = Date.now() - start;
+    status.reachable = response.ok;
+    if (!response.ok) {
+      status.error = `HTTP ${response.status}`;
+    }
+  } catch (error) {
+    status.error = error instanceof Error ? error.message : 'Network error';
+  }
+
+  return status;
+}
+
+/**
+ * Check health of all Discord webhooks
+ * Returns detailed status of each webhook
+ */
+export async function checkWebhookHealth(): Promise<WebhookHealthStatus[]> {
+  const checks = [
+    checkSingleWebhook('commands', WEBHOOKS.commands),
+    checkSingleWebhook('api', WEBHOOKS.api),
+    checkSingleWebhook('files', WEBHOOKS.files),
+    checkSingleWebhook('consciousness', WEBHOOKS.consciousness),
+    checkSingleWebhook('alerts', WEBHOOKS.alerts),
+    checkSingleWebhook('hashChain', WEBHOOKS.hashChain),
+  ];
+
+  return Promise.all(checks);
+}
+
+/**
+ * Validate security configuration at startup
+ * MUST be called before any operations - throws if critical webhooks missing
+ */
+export async function validateSecurityConfiguration(): Promise<SecurityConfigStatus> {
+  const status: SecurityConfigStatus = {
+    valid: true,
+    webhooks: [],
+    criticalIssues: [],
+    warnings: [],
+    checkedAt: new Date().toISOString(),
+  };
+
+  // Check all webhooks
+  status.webhooks = await checkWebhookHealth();
+
+  // Check required webhooks
+  for (const envVar of REQUIRED_WEBHOOKS) {
+    const value = process.env[envVar];
+    if (!value) {
+      status.criticalIssues.push(`Missing required webhook: ${envVar}`);
+      status.valid = false;
+    }
+  }
+
+  // Check optional webhooks
+  for (const envVar of OPTIONAL_WEBHOOKS) {
+    const value = process.env[envVar];
+    if (!value) {
+      status.warnings.push(`Missing optional webhook: ${envVar}`);
+    }
+  }
+
+  // Verify critical webhooks are reachable
+  const criticalWebhooks = ['commands', 'hashChain', 'alerts'];
+  for (const webhook of status.webhooks) {
+    if (criticalWebhooks.includes(webhook.name) && !webhook.reachable) {
+      status.criticalIssues.push(`Critical webhook unreachable: ${webhook.name}`);
+      status.valid = false;
+    }
+  }
+
+  if (!status.valid && failClosedMode) {
+    throw new HelixSecurityError(
+      'Security configuration invalid - cannot start',
+      'SECURITY_CONFIG_INVALID',
+      { issues: status.criticalIssues }
+    );
+  }
+
+  return status;
+}
+
+/**
  * Update the hash chain with a new entry
+ * CRITICAL: Uses fail-closed mode for command-related actions
  */
 async function updateHashChain(action: string, event: InternalHookEvent): Promise<void> {
   const timestamp = new Date().toISOString();
@@ -74,21 +227,28 @@ async function updateHashChain(action: string, event: InternalHookEvent): Promis
 
   const hash = crypto.createHash('sha256').update(entryData).digest('hex');
 
-  await sendToDiscord(WEBHOOKS.hashChain, {
-    embeds: [
-      {
-        title: '🔗 Hash Chain Update',
-        color: 0x9b59b6,
-        fields: [
-          { name: 'Action', value: action, inline: true },
-          { name: 'Hash', value: `\`${hash.slice(0, 24)}...\``, inline: true },
-          { name: 'Session', value: event.sessionKey || 'unknown', inline: true },
-        ],
-        timestamp,
-        footer: { text: 'Pre-execution hash chain entry' },
-      },
-    ],
-  });
+  // Command-related hash chain entries are critical (fail-closed)
+  const isCritical = action.startsWith('command');
+
+  await sendToDiscord(
+    WEBHOOKS.hashChain,
+    {
+      embeds: [
+        {
+          title: '🔗 Hash Chain Update',
+          color: 0x9b59b6,
+          fields: [
+            { name: 'Action', value: action, inline: true },
+            { name: 'Hash', value: `\`${hash.slice(0, 24)}...\``, inline: true },
+            { name: 'Session', value: event.sessionKey || 'unknown', inline: true },
+          ],
+          timestamp,
+          footer: { text: isCritical ? 'Critical hash chain entry (fail-closed)' : 'Hash chain entry' },
+        },
+      ],
+    },
+    isCritical
+  );
 }
 
 // Mock registerInternalHook for standalone usage
@@ -126,32 +286,34 @@ export async function triggerHelixHooks(event: InternalHookEvent): Promise<void>
  */
 export function installPreExecutionLogger(): void {
   // Hook for ALL commands - fires BEFORE the command runs
+  // CRITICAL: This uses fail-closed mode - command execution blocks if logging fails
   registerInternalHook('command', async event => {
     const timestamp = new Date().toISOString();
     const commandText = event.context?.command || event.action || 'unknown';
 
     // Send to Discord FIRST - before any execution
-    const success = await sendToDiscord(WEBHOOKS.commands, {
-      embeds: [
-        {
-          title: '🔵 Command Initiated',
-          color: 0x5865f2,
-          fields: [
-            { name: 'Command', value: `\`\`\`${commandText.slice(0, 1500)}\`\`\``, inline: false },
-            { name: 'Session', value: event.sessionKey || 'unknown', inline: true },
-            { name: 'Status', value: 'STARTING', inline: true },
-          ],
-          timestamp,
-          footer: { text: 'Pre-execution log - unhackable' },
-        },
-      ],
-    });
+    // critical=true means this will THROW if logging fails (fail-closed)
+    await sendToDiscord(
+      WEBHOOKS.commands,
+      {
+        embeds: [
+          {
+            title: '🔵 Command Initiated',
+            color: 0x5865f2,
+            fields: [
+              { name: 'Command', value: `\`\`\`${commandText.slice(0, 1500)}\`\`\``, inline: false },
+              { name: 'Session', value: event.sessionKey || 'unknown', inline: true },
+              { name: 'Status', value: 'STARTING', inline: true },
+            ],
+            timestamp,
+            footer: { text: 'Pre-execution log - unhackable (fail-closed)' },
+          },
+        ],
+      },
+      true // CRITICAL - fail-closed mode
+    );
 
-    if (!success) {
-      console.warn('[Helix] Failed to send pre-execution log to Discord');
-    }
-
-    // Update hash chain
+    // Update hash chain (also critical)
     await updateHashChain('command_start', event);
   });
 
@@ -292,4 +454,6 @@ export async function logConsciousnessObservation(
   });
 }
 
-export { sendToDiscord, WEBHOOKS };
+// sendToDiscord is not exported as public - it's internal
+// The security functions are exported via their declarations above
+export { WEBHOOKS };

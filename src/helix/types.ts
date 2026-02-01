@@ -3,6 +3,82 @@
  * Shared types for the Helix logging system
  */
 
+// =============================================================================
+// SECURITY TYPES
+// =============================================================================
+
+/**
+ * Security error thrown when critical logging infrastructure fails
+ * This implements FAIL-CLOSED behavior - operations block when logging unavailable
+ */
+export class HelixSecurityError extends Error {
+  constructor(
+    message: string,
+    public readonly code: HelixSecurityErrorCode,
+    public readonly context?: Record<string, unknown>
+  ) {
+    super(message);
+    this.name = 'HelixSecurityError';
+  }
+}
+
+/**
+ * Security error codes for fail-closed behavior
+ */
+export type HelixSecurityErrorCode =
+  | 'WEBHOOK_UNAVAILABLE'
+  | 'WEBHOOK_NOT_CONFIGURED'
+  | 'LOGGING_FAILED'
+  | 'HASH_CHAIN_BROKEN'
+  | 'DISCORD_UNREACHABLE'
+  | 'SECURITY_CONFIG_INVALID';
+
+/**
+ * Webhook health check result
+ */
+export interface WebhookHealthStatus {
+  name: string;
+  url: string | undefined;
+  configured: boolean;
+  reachable: boolean;
+  latencyMs?: number;
+  error?: string;
+}
+
+/**
+ * Overall security configuration status
+ */
+export interface SecurityConfigStatus {
+  valid: boolean;
+  webhooks: WebhookHealthStatus[];
+  criticalIssues: string[];
+  warnings: string[];
+  checkedAt: string;
+}
+
+/**
+ * Required webhook channels for Helix security model
+ */
+export const REQUIRED_WEBHOOKS = [
+  'DISCORD_WEBHOOK_COMMANDS',
+  'DISCORD_WEBHOOK_HASH_CHAIN',
+  'DISCORD_WEBHOOK_ALERTS',
+] as const;
+
+/**
+ * Optional but recommended webhooks
+ */
+export const OPTIONAL_WEBHOOKS = [
+  'DISCORD_WEBHOOK_API',
+  'DISCORD_WEBHOOK_FILE_CHANGES',
+  'DISCORD_WEBHOOK_CONSCIOUSNESS',
+  'DISCORD_WEBHOOK_HEARTBEAT',
+] as const;
+
+// =============================================================================
+// HOOK TYPES
+// =============================================================================
+
 /**
  * Internal hook event structure (matches OpenClaw's internal-hooks.ts)
  */

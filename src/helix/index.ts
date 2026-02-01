@@ -30,9 +30,17 @@ export type {
   DiscordEmbed,
   DiscordPayload,
   HelixContextFile,
+  WebhookHealthStatus,
+  SecurityConfigStatus,
+  HelixSecurityErrorCode,
 } from './types.js';
 
-export { HELIX_SEVEN_LAYERS } from './types.js';
+export {
+  HELIX_SEVEN_LAYERS,
+  HelixSecurityError,
+  REQUIRED_WEBHOOKS,
+  OPTIONAL_WEBHOOKS,
+} from './types.js';
 
 // Logging hooks
 export {
@@ -40,8 +48,11 @@ export {
   triggerHelixHooks,
   sendAlert,
   logConsciousnessObservation,
-  sendToDiscord,
   WEBHOOKS,
+  // Security functions
+  setFailClosedMode,
+  checkWebhookHealth,
+  validateSecurityConfiguration,
 } from './logging-hooks.js';
 
 // Command logging
@@ -84,7 +95,11 @@ export {
   verifyAgainstDiscord,
   computeEntryHash,
   hashLogFiles,
+  setHashChainFailClosedMode,
 } from './hash-chain.js';
+
+// Re-export the type
+export type { DiscordVerificationResult } from './hash-chain.js';
 
 // Context loading
 export {
@@ -139,6 +154,12 @@ export interface HelixInitOptions {
 
   /** Enable heartbeat (default: true) - sends proof-of-life every 60 seconds */
   enableHeartbeat?: boolean;
+
+  /** Enable fail-closed security mode (default: true) - blocks operations if logging fails */
+  failClosedMode?: boolean;
+
+  /** Skip security validation at startup (NOT RECOMMENDED) */
+  skipSecurityValidation?: boolean;
 }
 
 /**
@@ -152,9 +173,53 @@ export async function initializeHelix(options: HelixInitOptions = {}): Promise<v
     hashChainInterval = 5 * 60 * 1000,
     skipHashChain = false,
     enableHeartbeat = true,
+    failClosedMode = true,
+    skipSecurityValidation = false,
   } = options;
 
   console.log('[Helix] Initializing logging system...');
+
+  // ============================================
+  // STEP -1: SECURITY CONFIGURATION VALIDATION
+  // This MUST happen before anything else
+  // Ensures we can actually log before proceeding
+  // ============================================
+  const {
+    setFailClosedMode,
+    validateSecurityConfiguration,
+  } = await import('./logging-hooks.js');
+  const { setHashChainFailClosedMode } = await import('./hash-chain.js');
+
+  // Set fail-closed mode
+  setFailClosedMode(failClosedMode);
+  setHashChainFailClosedMode(failClosedMode);
+
+  if (!skipSecurityValidation) {
+    console.log('[Helix] Validating security configuration...');
+    const securityStatus = await validateSecurityConfiguration();
+
+    if (!securityStatus.valid) {
+      console.error('[Helix] SECURITY CONFIGURATION INVALID:');
+      for (const issue of securityStatus.criticalIssues) {
+        console.error(`  - ${issue}`);
+      }
+      // In fail-closed mode, validateSecurityConfiguration already throws
+      // This is a fallback for non-fail-closed mode
+      if (!failClosedMode) {
+        console.warn('[Helix] Continuing despite security issues (fail-closed disabled)');
+      }
+    } else {
+      console.log('[Helix] Security configuration validated');
+      if (securityStatus.warnings.length > 0) {
+        console.warn('[Helix] Security warnings:');
+        for (const warning of securityStatus.warnings) {
+          console.warn(`  - ${warning}`);
+        }
+      }
+    }
+  } else {
+    console.warn('[Helix] WARNING: Skipping security validation (not recommended!)');
+  }
 
   // ============================================
   // STEP 0: STARTUP ANNOUNCEMENT (FIRST!)
