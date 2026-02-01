@@ -1,0 +1,170 @@
+.memory-detail {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.memory-detail-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 12px;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.placeholder-icon {
+  font-size: 48px;
+  opacity: 0.5;
+}
+
+.memory-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.memory-detail-type {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.type-icon {
+  font-size: 20px;
+}
+
+.type-label {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: var(--color-primary);
+}
+
+.memory-detail-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.memory-action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.memory-action-button:hover {
+  background: var(--color-border);
+}
+
+.memory-action-button.delete:hover {
+  background: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.memory-detail-content,
+.memory-detail-metadata,
+.memory-detail-tags,
+.memory-detail-relations {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.memory-detail-content h3,
+.memory-detail-metadata h3,
+.memory-detail-tags h3,
+.memory-detail-relations h3 {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-bottom: 12px;
+}
+
+.memory-content-text {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--color-text);
+  white-space: pre-wrap;
+}
+
+.metadata-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.metadata-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metadata-label {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.metadata-value {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.metadata-value.mono {
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 12px;
+}
+
+.metadata-value.score {
+  color: var(--color-primary);
+}
+
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-chip {
+  padding: 4px 12px;
+  background: var(--color-bg-tertiary);
+  border-radius: 16px;
+  font-size: 12px;
+  color: var(--color-text);
+}
+
+.no-relations {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.memory-detail-footer {
+  margin-top: auto;
+  padding: 12px 20px;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg-tertiary);
+}
+
+.memory-id {
+  font-size: 11px;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  color: var(--color-text-secondary);
+}

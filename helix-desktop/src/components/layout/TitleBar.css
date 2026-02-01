@@ -1,0 +1,52 @@
+/* Title Bar */
+.title-bar {
+  display: flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 12px;
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+  user-select: none;
+  -webkit-app-region: drag;
+}
+
+.title-bar-icon {
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.title-bar-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+  flex: 1;
+}
+
+.title-bar-controls {
+  display: flex;
+  gap: 4px;
+  -webkit-app-region: no-drag;
+}
+
+.title-bar-button {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border-radius: 4px;
+  color: var(--color-text-secondary);
+}
+
+.title-bar-button:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text);
+}
+
+.title-bar-button.close:hover {
+  background: var(--color-error);
+  color: white;
+}

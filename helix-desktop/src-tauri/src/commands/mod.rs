@@ -1,0 +1,9 @@
+// Helix Desktop Commands
+
+pub mod gateway;
+pub mod config;
+pub mod keyring;
+pub mod files;
+pub mod system;
+pub mod discord;
+pub mod psychology;

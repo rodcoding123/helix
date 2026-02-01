@@ -1,0 +1,108 @@
+.terminal-panel {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.terminal-panel-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 24px;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.terminal-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+}
+
+.tool-call-entry {
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tool-call-entry.running {
+  border-color: var(--color-primary);
+}
+
+.tool-call-entry.completed {
+  border-color: var(--color-success);
+}
+
+.tool-call-entry.error {
+  border-color: var(--color-error);
+}
+
+.tool-call-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tool-call-name {
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.tool-call-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tool-call-status {
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.tool-call-status.pending { color: var(--color-text-secondary); }
+.tool-call-status.running { color: var(--color-primary); }
+.tool-call-status.completed { color: var(--color-success); }
+.tool-call-status.error { color: var(--color-error); }
+
+.tool-call-duration {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.tool-call-section {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tool-call-section:last-child {
+  border-bottom: none;
+}
+
+.tool-call-section-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+}
+
+.tool-call-code {
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--color-text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+}

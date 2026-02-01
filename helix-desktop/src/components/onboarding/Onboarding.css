@@ -1,0 +1,76 @@
+/* Onboarding */
+.onboarding {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+}
+
+.onboarding-progress {
+  height: 3px;
+  background: var(--color-bg-secondary);
+}
+
+.onboarding-progress-bar {
+  height: 100%;
+  background: var(--color-primary);
+  transition: width 0.3s ease;
+}
+
+/* Step indicator dots */
+.onboarding-steps-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+}
+
+.step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  transition: all 0.3s ease;
+}
+
+.step-dot.active {
+  width: 24px;
+  border-radius: 4px;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.step-dot.completed {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  opacity: 0.6;
+}
+
+.step-dot.optional {
+  border-style: dashed;
+}
+
+.step-dot.optional.completed,
+.step-dot.optional.active {
+  border-style: solid;
+}
+
+.onboarding-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  overflow-y: auto;
+}
+
+/* Validation Errors Container */
+.onboarding-validation-errors {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 48px;
+}

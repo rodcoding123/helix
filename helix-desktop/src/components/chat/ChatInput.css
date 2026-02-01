@@ -1,0 +1,176 @@
+/**
+ * Chat Input Styles - Enhanced with command support
+ */
+
+.chat-input-wrapper {
+  position: relative;
+  padding: 0 1rem 1rem;
+}
+
+.chat-input {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+  position: relative;
+}
+
+.input-prefix {
+  position: absolute;
+  left: 1rem;
+  bottom: 0.875rem;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.prefix-slash {
+  font-family: 'SF Mono', 'Consolas', monospace;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--accent-color);
+}
+
+.prefix-bang {
+  font-family: 'SF Mono', 'Consolas', monospace;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--warning-color, #eab308);
+}
+
+.chat-input textarea {
+  flex: 1;
+  min-height: 44px;
+  max-height: 200px;
+  resize: none;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+  font-family: inherit;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.chat-input textarea:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  background: var(--bg-primary);
+}
+
+.chat-input textarea::placeholder {
+  color: var(--text-tertiary);
+}
+
+.chat-input textarea.command-mode {
+  border-color: var(--accent-color);
+  background: rgba(var(--accent-rgb), 0.05);
+  padding-left: 1.75rem;
+}
+
+.chat-input textarea.bash-mode {
+  border-color: var(--warning-color, #eab308);
+  background: rgba(234, 179, 8, 0.05);
+  padding-left: 1.75rem;
+  font-family: 'SF Mono', 'Consolas', monospace;
+}
+
+.input-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ctrlc-hint {
+  font-size: 0.6875rem;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.chat-input-button {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chat-input-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.chat-input-button.send {
+  background: var(--accent-color);
+  color: white;
+}
+
+.chat-input-button.send:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: scale(1.05);
+}
+
+.chat-input-button.stop {
+  background: var(--error-color, #ef4444);
+  color: white;
+  animation: pulse 1s infinite;
+}
+
+.chat-input-button.stop:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+/* Input Hints */
+.input-hints {
+  display: flex;
+  gap: 1rem;
+  padding-top: 0.5rem;
+  justify-content: center;
+}
+
+.hint {
+  font-size: 0.6875rem;
+  color: var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.hint kbd {
+  padding: 0.125rem 0.375rem;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  font-family: 'SF Mono', 'Consolas', monospace;
+  font-size: 0.625rem;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .chat-input-wrapper {
+    padding: 0 0.75rem 0.75rem;
+  }
+
+  .input-hints {
+    display: none;
+  }
+
+  .chat-input textarea {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+}

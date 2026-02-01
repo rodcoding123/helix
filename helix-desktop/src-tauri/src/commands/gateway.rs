@@ -1,0 +1,265 @@
+// Gateway management commands - spawns openclaw-helix gateway
+
+use std::process::{Child, Command, Stdio};
+use std::sync::Mutex;
+use tauri::{AppHandle, Emitter, Manager};
+use serde::Serialize;
+
+/// Default OpenClaw gateway port
+const DEFAULT_GATEWAY_PORT: u16 = 18789;
+
+pub struct GatewayProcess {
+    child: Option<Child>,
+    port: u16,
+    url: String,
+}
+
+impl GatewayProcess {
+    pub fn new() -> Self {
+        Self {
+            child: None,
+            port: DEFAULT_GATEWAY_PORT,
+            url: format!("ws://127.0.0.1:{}", DEFAULT_GATEWAY_PORT),
+        }
+    }
+}
+
+static GATEWAY: Mutex<Option<GatewayProcess>> = Mutex::new(None);
+
+pub fn init(_app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
+    let mut gateway = GATEWAY.lock().map_err(|e| e.to_string())?;
+    *gateway = Some(GatewayProcess::new());
+    Ok(())
+}
+
+#[derive(Serialize, Clone)]
+pub struct GatewayStatus {
+    pub running: bool,
+    pub port: Option<u16>,
+    pub pid: Option<u32>,
+    pub url: Option<String>,
+}
+
+#[derive(Serialize, Clone)]
+pub struct GatewayStarted {
+    pub port: u16,
+    pub url: String,
+}
+
+#[tauri::command]
+pub fn start_gateway(app: AppHandle) -> Result<GatewayStarted, String> {
+    let mut gateway_lock = GATEWAY.lock().map_err(|e| e.to_string())?;
+    let gateway = gateway_lock.as_mut().ok_or("Gateway not initialized")?;
+
+    if gateway.child.is_some() {
+        return Err("Gateway already running".to_string());
+    }
+
+    // Use default OpenClaw port or find available if taken
+    let port = if is_port_available(DEFAULT_GATEWAY_PORT) {
+        DEFAULT_GATEWAY_PORT
+    } else {
+        find_available_port().map_err(|e| e.to_string())?
+    };
+
+    // Get openclaw path
+    let openclaw_path = get_openclaw_path(&app)?;
+    let openclaw_dir = get_openclaw_directory()?;
+
+    log::info!("Starting OpenClaw gateway from: {:?}", openclaw_path);
+    log::info!("Working directory: {:?}", openclaw_dir);
+
+    // Spawn gateway process
+    // openclaw gateway --port PORT --bind loopback
+    let child = Command::new(&openclaw_path)
+        .args(["gateway", "--port", &port.to_string(), "--bind", "loopback"])
+        .current_dir(&openclaw_dir)
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(|e| format!("Failed to start gateway: {}. Make sure openclaw-helix is built.", e))?;
+
+    let url = format!("ws://127.0.0.1:{}", port);
+
+    gateway.child = Some(child);
+    gateway.port = port;
+    gateway.url = url.clone();
+
+    let result = GatewayStarted { port, url: url.clone() };
+
+    // Emit event to frontend
+    let _ = app.emit("gateway:started", result.clone());
+
+    Ok(result)
+}
+
+#[tauri::command]
+pub fn stop_gateway(app: AppHandle) -> Result<(), String> {
+    let mut gateway_lock = GATEWAY.lock().map_err(|e| e.to_string())?;
+    let gateway = gateway_lock.as_mut().ok_or("Gateway not initialized")?;
+
+    if let Some(mut child) = gateway.child.take() {
+        let _ = child.kill();
+        let _ = child.wait();
+    }
+
+    gateway.port = 0;
+    gateway.url = String::new();
+
+    let _ = app.emit("gateway:stopped", ());
+
+    Ok(())
+}
+
+#[tauri::command]
+pub fn gateway_status() -> Result<GatewayStatus, String> {
+    let gateway_lock = GATEWAY.lock().map_err(|e| e.to_string())?;
+
+    match gateway_lock.as_ref() {
+        Some(g) if g.child.is_some() => Ok(GatewayStatus {
+            running: true,
+            port: Some(g.port),
+            pid: g.child.as_ref().map(|c| c.id()),
+            url: Some(g.url.clone()),
+        }),
+        _ => Ok(GatewayStatus {
+            running: false,
+            port: None,
+            pid: None,
+            url: None,
+        }),
+    }
+}
+
+#[tauri::command]
+pub fn get_gateway_url() -> Result<String, String> {
+    let gateway_lock = GATEWAY.lock().map_err(|e| e.to_string())?;
+
+    match gateway_lock.as_ref() {
+        Some(g) if !g.url.is_empty() => Ok(g.url.clone()),
+        _ => Ok(format!("ws://127.0.0.1:{}", DEFAULT_GATEWAY_PORT)),
+    }
+}
+
+fn is_port_available(port: u16) -> bool {
+    std::net::TcpListener::bind(format!("127.0.0.1:{}", port)).is_ok()
+}
+
+fn find_available_port() -> std::io::Result<u16> {
+    let listener = std::net::TcpListener::bind("127.0.0.1:0")?;
+    Ok(listener.local_addr()?.port())
+}
+
+fn get_openclaw_path(app: &AppHandle) -> Result<std::path::PathBuf, String> {
+    // Try bundled openclaw first (for production)
+    if let Ok(resource_dir) = app.path().resource_dir() {
+        #[cfg(target_os = "windows")]
+        let openclaw_binary = "openclaw.cmd";
+        #[cfg(not(target_os = "windows"))]
+        let openclaw_binary = "openclaw";
+
+        let bundled_path = resource_dir.join("openclaw").join(openclaw_binary);
+        if bundled_path.exists() {
+            return Ok(bundled_path);
+        }
+    }
+
+    // Development: use pnpm/npm to run openclaw from openclaw-helix
+    // In dev mode, we run: pnpm --dir ../../../openclaw-helix start
+    // Or we can use the built CLI directly
+
+    let openclaw_dir = get_openclaw_directory()?;
+
+    #[cfg(target_os = "windows")]
+    {
+        // On Windows in dev, use npx or direct node
+        let npx_path = openclaw_dir.join("node_modules").join(".bin").join("openclaw.cmd");
+        if npx_path.exists() {
+            return Ok(npx_path);
+        }
+
+        // Try global openclaw
+        Ok(std::path::PathBuf::from("npx"))
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        // On Unix, try local bin first
+        let bin_path = openclaw_dir.join("node_modules").join(".bin").join("openclaw");
+        if bin_path.exists() {
+            return Ok(bin_path);
+        }
+
+        // Try global openclaw
+        Ok(std::path::PathBuf::from("npx"))
+    }
+}
+
+fn get_openclaw_directory() -> Result<std::path::PathBuf, String> {
+    // In development, openclaw-helix is a sibling directory
+    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
+        .unwrap_or_else(|_| ".".to_string());
+
+    let dev_path = std::path::PathBuf::from(&manifest_dir)
+        .join("..")
+        .join("..")
+        .join("openclaw-helix");
+
+    if dev_path.exists() {
+        return Ok(dev_path.canonicalize().map_err(|e| e.to_string())?);
+    }
+
+    // Production: openclaw-helix should be in resources or home directory
+    let home = dirs::home_dir()
+        .ok_or_else(|| "Could not find home directory".to_string())?;
+
+    // Try ~/.helix/openclaw-helix
+    let helix_openclaw = home.join(".helix").join("openclaw-helix");
+    if helix_openclaw.exists() {
+        return Ok(helix_openclaw);
+    }
+
+    // Try ~/.openclaw
+    let openclaw_home = home.join(".openclaw");
+    if openclaw_home.exists() {
+        return Ok(openclaw_home);
+    }
+
+    // Fallback to current directory
+    Ok(std::path::PathBuf::from("."))
+}
+
+/// Auto-start gateway on app launch (called from setup)
+pub fn auto_start_gateway(app: &AppHandle) -> Result<(), String> {
+    // Check if gateway is already running by probing the port
+    if !is_port_available(DEFAULT_GATEWAY_PORT) {
+        log::info!("Gateway already running on port {}", DEFAULT_GATEWAY_PORT);
+
+        let mut gateway_lock = GATEWAY.lock().map_err(|e| e.to_string())?;
+        if let Some(gateway) = gateway_lock.as_mut() {
+            gateway.port = DEFAULT_GATEWAY_PORT;
+            gateway.url = format!("ws://127.0.0.1:{}", DEFAULT_GATEWAY_PORT);
+        }
+
+        let _ = app.emit("gateway:started", GatewayStarted {
+            port: DEFAULT_GATEWAY_PORT,
+            url: format!("ws://127.0.0.1:{}", DEFAULT_GATEWAY_PORT),
+        });
+
+        return Ok(());
+    }
+
+    // Start gateway
+    match start_gateway(app.clone()) {
+        Ok(result) => {
+            log::info!("Gateway started successfully on port {}", result.port);
+            Ok(())
+        }
+        Err(e) => {
+            log::warn!("Failed to auto-start gateway: {}", e);
+            // Don't fail app startup if gateway fails
+            // User can start it manually
+            Ok(())
+        }
+    }
+}
