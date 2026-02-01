@@ -136,6 +136,51 @@ export type {
   TransformationData,
 } from './observatory-client.js';
 
+// Skill sandbox (secure skill execution)
+export {
+  validateSkill,
+  executeSkillSandboxed,
+  verifySkillSignature,
+  getSkillAuditLog,
+  clearSkillAuditLog,
+  createSandboxConfig,
+  DEFAULT_SKILL_SANDBOX_CONFIG,
+} from './skill-sandbox.js';
+
+export type {
+  SkillMetadata,
+  SkillPermission,
+  SkillSandboxConfig,
+  SkillValidationResult,
+  SkillExecutionContext,
+  SkillExecutionResult,
+  SkillAuditEntry,
+  SandboxPreset,
+} from './skill-sandbox.js';
+
+// MCP tool validation (tool poisoning prevention)
+export {
+  validateMCPToolCall,
+  validateAndExecute,
+  registerToolMetadata,
+  getToolMetadata,
+  assessToolRisk,
+  sanitizeParameters,
+  getMCPToolAuditLog,
+  clearMCPToolAuditLog,
+  clearRateLimitStore,
+  DEFAULT_VALIDATOR_CONFIG,
+} from './mcp-tool-validator.js';
+
+export type {
+  MCPToolMetadata,
+  MCPToolCapability,
+  MCPToolValidatorConfig,
+  MCPToolCall,
+  MCPToolValidationResult,
+  MCPToolAuditEntry,
+} from './mcp-tool-validator.js';
+
 /**
  * Helix initialization options
  */
