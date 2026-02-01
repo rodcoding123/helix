@@ -1,12 +1,31 @@
-import { getCurrentWindow } from '@tauri-apps/api/window';
+import { useEffect, useState } from 'react';
+import { isTauri, getTauriWindow } from '../../lib/tauri-compat';
 import './TitleBar.css';
 
-export function TitleBar() {
-  const appWindow = getCurrentWindow();
+interface WindowControls {
+  minimize: () => void;
+  toggleMaximize: () => void;
+  hide: () => void;
+}
 
-  const handleMinimize = () => appWindow.minimize();
-  const handleMaximize = () => appWindow.toggleMaximize();
-  const handleClose = () => appWindow.hide(); // Hide to tray
+export function TitleBar() {
+  const [windowControls, setWindowControls] = useState<WindowControls>({
+    minimize: () => console.log('[Browser] minimize'),
+    toggleMaximize: () => console.log('[Browser] toggleMaximize'),
+    hide: () => console.log('[Browser] hide'),
+  });
+
+  useEffect(() => {
+    if (isTauri) {
+      getTauriWindow().then((appWindow) => {
+        setWindowControls({
+          minimize: () => appWindow.minimize(),
+          toggleMaximize: () => appWindow.toggleMaximize(),
+          hide: () => appWindow.hide(),
+        });
+      });
+    }
+  }, []);
 
   return (
     <div className="title-bar" data-tauri-drag-region>
@@ -17,17 +36,17 @@ export function TitleBar() {
       </div>
       <span className="title-bar-title">Helix</span>
       <div className="title-bar-controls">
-        <button className="title-bar-button" onClick={handleMinimize}>
+        <button className="title-bar-button" onClick={windowControls.minimize}>
           <svg viewBox="0 0 12 12" width="12" height="12">
             <rect y="5" width="12" height="2" fill="currentColor"/>
           </svg>
         </button>
-        <button className="title-bar-button" onClick={handleMaximize}>
+        <button className="title-bar-button" onClick={windowControls.toggleMaximize}>
           <svg viewBox="0 0 12 12" width="12" height="12">
             <rect x="1" y="1" width="10" height="10" stroke="currentColor" strokeWidth="2" fill="none"/>
           </svg>
         </button>
-        <button className="title-bar-button close" onClick={handleClose}>
+        <button className="title-bar-button close" onClick={windowControls.hide}>
           <svg viewBox="0 0 12 12" width="12" height="12">
             <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" strokeWidth="2"/>
           </svg>

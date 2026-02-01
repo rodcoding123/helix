@@ -4,8 +4,8 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { invoke } from '@tauri-apps/api/core';
-import { listen, type UnlistenFn } from '@tauri-apps/api/event';
+import { invoke, listen } from '../lib/tauri-compat';
+import type { UnlistenFn } from '@tauri-apps/api/event';
 import {
   GatewayClient,
   createGatewayClient,

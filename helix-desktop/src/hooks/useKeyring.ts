@@ -3,7 +3,7 @@
  */
 
 import { useCallback } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from '../lib/tauri-compat';
 
 export const KEYRING_KEYS = {
   ANTHROPIC_API_KEY: 'anthropic_api_key',
