@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from '../../../lib/tauri-compat';
 import { useConfig } from '../../../hooks/useConfig';
 import type { OnboardingState } from '../Onboarding';
 import './Steps.css';

@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { invoke } from '@tauri-apps/api/core';
-import { save, open } from '@tauri-apps/plugin-dialog';
-import { writeTextFile, readTextFile } from '@tauri-apps/plugin-fs';
+import { invoke, save, open, writeTextFile, readTextFile } from '../../lib/tauri-compat';
 import { useConfigStore, type AdvancedConfig } from '../../stores/configStore';
 
 export function AdvancedSettings() {

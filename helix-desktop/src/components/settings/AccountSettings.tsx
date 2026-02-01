@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from '../../lib/tauri-compat';
 import { useConfigStore } from '../../stores/configStore';
 
 export function AccountSettings() {
