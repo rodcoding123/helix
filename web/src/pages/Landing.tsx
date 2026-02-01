@@ -66,7 +66,7 @@ function FloatingParticles({
 }
 
 // ============================================
-// Scroll-triggered Section Wrapper (Smoother)
+// Scroll-triggered Section Wrapper (Ultra-Smooth)
 // ============================================
 function RevealSection({
   children,
@@ -79,15 +79,21 @@ function RevealSection({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [hasEntered, setHasEntered] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => setIsVisible(true), delay);
+        // Start transition earlier with lower threshold
+        if (entry.isIntersecting && !hasEntered) {
+          setHasEntered(true);
+          // Use requestAnimationFrame for smoother timing
+          requestAnimationFrame(() => {
+            setTimeout(() => setIsVisible(true), delay);
+          });
         }
       },
-      { threshold: 0.15, rootMargin: '0px 0px -80px 0px' }
+      { threshold: 0.05, rootMargin: '0px 0px -40px 0px' }
     );
 
     if (ref.current) {
@@ -95,16 +101,18 @@ function RevealSection({
     }
 
     return () => observer.disconnect();
-  }, [delay]);
+  }, [delay, hasEntered]);
 
   return (
     <div
       ref={ref}
-      className={clsx(
-        'transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]',
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8',
-        className
-      )}
+      className={clsx(className)}
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transform: isVisible ? 'translateY(0)' : 'translateY(24px)',
+        transition: `opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms, transform 1.2s cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms`,
+        willChange: 'opacity, transform',
+      }}
     >
       {children}
     </div>
