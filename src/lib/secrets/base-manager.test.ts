@@ -73,10 +73,7 @@ describe('BaseSecretsManager', () => {
       SecretSourceType.USER_PROVIDED
     );
 
-    const rotationMetadata = await manager.rotateSecret(
-      SecretType.STRIPE_SECRET_KEY,
-      newValue
-    );
+    const rotationMetadata = await manager.rotateSecret(SecretType.STRIPE_SECRET_KEY, newValue);
 
     const retrieved = await manager.loadSecret(SecretType.STRIPE_SECRET_KEY);
 
@@ -164,9 +161,9 @@ describe('BaseSecretsManager', () => {
     });
 
     it('should throw when rotating non-existent secret', async () => {
-      await expect(
-        manager.rotateSecret(SecretType.STRIPE_SECRET_KEY, 'new-value')
-      ).rejects.toThrow('Cannot rotate secret');
+      await expect(manager.rotateSecret(SecretType.STRIPE_SECRET_KEY, 'new-value')).rejects.toThrow(
+        'Cannot rotate secret'
+      );
     });
   });
 });

@@ -1,9 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  encryptWithKey,
-  decryptWithKey,
-  generateNonce,
-} from '../symmetric.js';
+import { encryptWithKey, decryptWithKey, generateNonce } from '../symmetric.js';
 import { randomBytes } from 'crypto';
 
 describe('Symmetric Encryption (AES-256-GCM)', () => {

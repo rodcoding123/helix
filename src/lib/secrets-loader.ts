@@ -28,7 +28,10 @@ const SECRETS_CACHE = new Map<string, string>();
  * @returns The secret value
  * @throws Error if secret not found or 1Password CLI fails
  */
-export async function loadSecret(itemName: string, field: SecretField = 'password'): Promise<string> {
+export async function loadSecret(
+  itemName: string,
+  field: SecretField = 'password'
+): Promise<string> {
   // Check cache first
   const cacheKey = `${itemName}:${field}`;
   if (SECRETS_CACHE.has(cacheKey)) {
@@ -45,7 +48,10 @@ export async function loadSecret(itemName: string, field: SecretField = 'passwor
       return secret;
     } catch (error) {
       // Fall back to .env if 1Password fails
-      console.warn(`Warning: Could not load "${itemName}" from 1Password. Trying .env fallback.`, error);
+      console.warn(
+        `Warning: Could not load "${itemName}" from 1Password. Trying .env fallback.`,
+        error
+      );
       const secret = await loadSecretFromEnv(itemName);
       if (secret) {
         SECRETS_CACHE.set(cacheKey, secret);
@@ -154,19 +160,55 @@ export async function loadAllSecrets(): Promise<Record<string, string>> {
 
   const itemsToLoad = [
     { name: 'Supabase URL', envVar: 'VITE_SUPABASE_URL', field: 'url' as SecretField },
-    { name: 'Supabase Service Role', envVar: 'SUPABASE_SERVICE_ROLE_KEY', field: 'password' as SecretField },
-    { name: 'Supabase Anon Key', envVar: 'VITE_SUPABASE_ANON_KEY', field: 'password' as SecretField },
+    {
+      name: 'Supabase Service Role',
+      envVar: 'SUPABASE_SERVICE_ROLE_KEY',
+      field: 'password' as SecretField,
+    },
+    {
+      name: 'Supabase Anon Key',
+      envVar: 'VITE_SUPABASE_ANON_KEY',
+      field: 'password' as SecretField,
+    },
     { name: 'Stripe Secret Key', envVar: 'STRIPE_SECRET_KEY', field: 'password' as SecretField },
-    { name: 'Stripe Publishable Key', envVar: 'VITE_STRIPE_PUBLISHABLE_KEY', field: 'password' as SecretField },
+    {
+      name: 'Stripe Publishable Key',
+      envVar: 'VITE_STRIPE_PUBLISHABLE_KEY',
+      field: 'password' as SecretField,
+    },
     { name: 'DeepSeek API Key', envVar: 'DEEPSEEK_API_KEY', field: 'password' as SecretField },
     { name: 'Gemini API Key', envVar: 'GEMINI_API_KEY', field: 'password' as SecretField },
-    { name: 'Discord Webhook - Commands', envVar: 'DISCORD_WEBHOOK_COMMANDS', field: 'notes' as SecretField },
+    {
+      name: 'Discord Webhook - Commands',
+      envVar: 'DISCORD_WEBHOOK_COMMANDS',
+      field: 'notes' as SecretField,
+    },
     { name: 'Discord Webhook - API', envVar: 'DISCORD_WEBHOOK_API', field: 'notes' as SecretField },
-    { name: 'Discord Webhook - Heartbeat', envVar: 'DISCORD_WEBHOOK_HEARTBEAT', field: 'notes' as SecretField },
-    { name: 'Discord Webhook - Alerts', envVar: 'DISCORD_WEBHOOK_ALERTS', field: 'notes' as SecretField },
-    { name: 'Discord Webhook - Consciousness', envVar: 'DISCORD_WEBHOOK_CONSCIOUSNESS', field: 'notes' as SecretField },
-    { name: 'Discord Webhook - File Changes', envVar: 'DISCORD_WEBHOOK_FILE_CHANGES', field: 'notes' as SecretField },
-    { name: 'Discord Webhook - Hash Chain', envVar: 'DISCORD_WEBHOOK_HASH_CHAIN', field: 'notes' as SecretField },
+    {
+      name: 'Discord Webhook - Heartbeat',
+      envVar: 'DISCORD_WEBHOOK_HEARTBEAT',
+      field: 'notes' as SecretField,
+    },
+    {
+      name: 'Discord Webhook - Alerts',
+      envVar: 'DISCORD_WEBHOOK_ALERTS',
+      field: 'notes' as SecretField,
+    },
+    {
+      name: 'Discord Webhook - Consciousness',
+      envVar: 'DISCORD_WEBHOOK_CONSCIOUSNESS',
+      field: 'notes' as SecretField,
+    },
+    {
+      name: 'Discord Webhook - File Changes',
+      envVar: 'DISCORD_WEBHOOK_FILE_CHANGES',
+      field: 'notes' as SecretField,
+    },
+    {
+      name: 'Discord Webhook - Hash Chain',
+      envVar: 'DISCORD_WEBHOOK_HASH_CHAIN',
+      field: 'notes' as SecretField,
+    },
   ];
 
   for (const item of itemsToLoad) {
@@ -186,7 +228,10 @@ export async function loadAllSecrets(): Promise<Record<string, string>> {
 /**
  * Verify all required secrets are available
  */
-export async function verifySecrets(): Promise<{ status: 'ok' | 'warning' | 'error'; messages: string[] }> {
+export async function verifySecrets(): Promise<{
+  status: 'ok' | 'warning' | 'error';
+  messages: string[];
+}> {
   const messages: string[] = [];
   let status: 'ok' | 'warning' | 'error' = 'ok';
 

@@ -40,14 +40,9 @@ export interface SecretLoadOptions {
 }
 
 export interface SecretsManager {
-  loadSecret(
-    type: SecretType,
-    options?: SecretLoadOptions
-  ): Promise<string | null>;
+  loadSecret(type: SecretType, options?: SecretLoadOptions): Promise<string | null>;
 
-  loadAllSecrets(
-    options?: SecretLoadOptions
-  ): Promise<Map<SecretType, string>>;
+  loadAllSecrets(options?: SecretLoadOptions): Promise<Map<SecretType, string>>;
 
   storeSecret(
     type: SecretType,
@@ -58,11 +53,7 @@ export interface SecretsManager {
 
   deleteSecret(type: SecretType): Promise<void>;
 
-  rotateSecret(
-    type: SecretType,
-    newValue: string,
-    expiresAt?: Date
-  ): Promise<SecretMetadata>;
+  rotateSecret(type: SecretType, newValue: string, expiresAt?: Date): Promise<SecretMetadata>;
 
   getMetadata(type: SecretType): Promise<SecretMetadata | null>;
 

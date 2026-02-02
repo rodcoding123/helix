@@ -28,7 +28,8 @@ export class OnePasswordSessionManager {
 
   constructor(config: SessionConfig = {}) {
     this.sessionCacheDir =
-      config.sessionCacheDir || join(process.env.HOME || process.env.USERPROFILE || '', '.op-session');
+      config.sessionCacheDir ||
+      join(process.env.HOME || process.env.USERPROFILE || '', '.op-session');
 
     // Ensure cache directory exists
     if (!existsSync(this.sessionCacheDir)) {

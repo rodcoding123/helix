@@ -39,7 +39,10 @@ export async function initializeDiscordWebhooks(): Promise<void> {
     };
     console.log('[Helix] Discord webhooks initialized from 1Password');
   } catch (error) {
-    console.warn('[Helix] Failed to load webhooks from 1Password, using environment fallback:', error);
+    console.warn(
+      '[Helix] Failed to load webhooks from 1Password, using environment fallback:',
+      error
+    );
     // .env fallback is already loaded above
   }
 }

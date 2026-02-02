@@ -133,7 +133,9 @@ export function validateEnvironment(): ValidationResult {
     // Validate format based on key type
     if (requirement.envVar.includes('STRIPE')) {
       if (!value.match(/^(sk_live_|pk_live_)/)) {
-        errors.push(`${requirement.name} has invalid format (should start with sk_live_ or pk_live_)`);
+        errors.push(
+          `${requirement.name} has invalid format (should start with sk_live_ or pk_live_)`
+        );
       }
     } else if (requirement.envVar.includes('DEEPSEEK')) {
       if (!value.startsWith('sk-')) {
@@ -182,7 +184,9 @@ export function printValidationReport(result: ValidationResult): void {
   console.log('');
 
   if (result.valid) {
-    console.log(`${colors.green}✓ All required environment variables are set and valid${colors.reset}`);
+    console.log(
+      `${colors.green}✓ All required environment variables are set and valid${colors.reset}`
+    );
   } else {
     console.log(`${colors.red}✗ Environment validation failed:${colors.reset}`);
     console.log('');
@@ -205,23 +209,17 @@ export function printValidationReport(result: ValidationResult): void {
       console.log('');
 
       if (result.source.includes('1Password')) {
-        console.log(
-          `${colors.yellow}To load these from 1Password:${colors.reset}`
-        );
+        console.log(`${colors.yellow}To load these from 1Password:${colors.reset}`);
         console.log(`  1. Run: op account add`);
         console.log(`  2. Run: ./scripts/setup-1password-template.ps1 (Windows)`);
         console.log(`  3. Run: bash scripts/setup-1password-template.sh (macOS/Linux)`);
         console.log('');
       }
 
-      console.log(
-        `${colors.yellow}To load these from .env:${colors.reset}`
-      );
+      console.log(`${colors.yellow}To load these from .env:${colors.reset}`);
       console.log(`  1. Create a .env file in the project root`);
       console.log(`  2. Add all required variables`);
-      console.log(
-        `  3. Run: export HELIX_SECRETS_SOURCE=env && npm run dev`
-      );
+      console.log(`  3. Run: export HELIX_SECRETS_SOURCE=env && npm run dev`);
       console.log('');
     }
 

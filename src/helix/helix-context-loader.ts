@@ -37,11 +37,7 @@ const HELIX_LAYER_FILES: Record<number, { name: string; files: string[] }> = {
   },
   4: {
     name: 'Prospective Self',
-    files: [
-      'identity/goals.json',
-      'identity/feared_self.json',
-      'identity/possible_selves.json',
-    ],
+    files: ['identity/goals.json', 'identity/feared_self.json', 'identity/possible_selves.json'],
   },
   5: {
     name: 'Integration Rhythms',
@@ -53,11 +49,7 @@ const HELIX_LAYER_FILES: Record<number, { name: string; files: string[] }> = {
   },
   7: {
     name: 'Purpose Engine',
-    files: [
-      'purpose/ikigai.json',
-      'purpose/wellness.json',
-      'purpose/meaning_sources.json',
-    ],
+    files: ['purpose/ikigai.json', 'purpose/wellness.json', 'purpose/meaning_sources.json'],
   },
 };
 

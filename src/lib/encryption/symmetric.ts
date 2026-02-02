@@ -52,10 +52,7 @@ export async function encryptWithKey(
  * @returns Decrypted plaintext
  * @throws If authentication tag verification fails (tampering detected)
  */
-export async function decryptWithKey(
-  ciphertext: string,
-  key: Buffer
-): Promise<string> {
+export async function decryptWithKey(ciphertext: string, key: Buffer): Promise<string> {
   if (key.length !== 32) {
     throw new Error('Key must be 32 bytes (256 bits) for AES-256');
   }
