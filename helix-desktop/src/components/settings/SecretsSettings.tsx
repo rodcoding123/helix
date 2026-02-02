@@ -1,12 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { useSecretsData } from '../../hooks/useSecretsData';
-import { SecretsList } from '../secrets/SecretsList';
-import { CreateSecretModal } from '../secrets/modals/CreateSecretModal';
-import { RotateSecretModal } from '../secrets/modals/RotateSecretModal';
+import { SecretsList } from '../secrets';
+import { isFeatureEnabled } from '../../lib/feature-flags';
 import type { SecretType } from '../../types/secrets';
 import '../secrets/Secrets.css';
 
+// Lazy load modals for better performance
+const CreateSecretModal = lazy(() =>
+  import('../secrets/modals/CreateSecretModal').then(m => ({ default: m.CreateSecretModal }))
+);
+
+const RotateSecretModal = lazy(() =>
+  import('../secrets/modals/RotateSecretModal').then(m => ({ default: m.RotateSecretModal }))
+);
+
+/**
+ * Fallback component for lazy loaded modals
+ */
+const ModalFallback = () => <div className="modal-loading">Loading...</div>;
+
 export const SecretsSettings: React.FC = () => {
+  // Check if feature is enabled
+  const isSecretsEnabled = isFeatureEnabled('secrets.enabled');
+
+  if (!isSecretsEnabled) {
+    return (
+      <div className="secrets-settings">
+        <div className="settings-header">
+          <h1>Secrets Management</h1>
+          <p>This feature is currently unavailable. Thank you for your patience!</p>
+        </div>
+      </div>
+    );
+  }
+
   const {
     secrets,
     loading,
@@ -80,22 +107,26 @@ export const SecretsSettings: React.FC = () => {
         />
       </div>
 
-      <CreateSecretModal
-        isOpen={isCreateOpen}
-        onClose={() => setIsCreateOpen(false)}
-        onCreate={handleCreate}
-      />
+      <Suspense fallback={<ModalFallback />}>
+        <CreateSecretModal
+          isOpen={isCreateOpen}
+          onClose={() => setIsCreateOpen(false)}
+          onCreate={handleCreate}
+        />
+      </Suspense>
 
       {selectedSecret && (
-        <RotateSecretModal
-          isOpen={isRotateOpen}
-          secret={selectedSecret}
-          onClose={() => {
-            setIsRotateOpen(false);
-            setSelectedSecret(null);
-          }}
-          onConfirm={handleRotateConfirm}
-        />
+        <Suspense fallback={<ModalFallback />}>
+          <RotateSecretModal
+            isOpen={isRotateOpen}
+            secret={selectedSecret}
+            onClose={() => {
+              setIsRotateOpen(false);
+              setSelectedSecret(null);
+            }}
+            onConfirm={handleRotateConfirm}
+          />
+        </Suspense>
       )}
     </div>
   );
