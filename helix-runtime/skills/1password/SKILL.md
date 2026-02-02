@@ -4,18 +4,18 @@ description: Set up and use 1Password CLI (op). Use when installing the CLI, ena
 homepage: https://developer.1password.com/docs/cli/get-started/
 metadata:
   {
-    "openclaw":
+    'openclaw':
       {
-        "emoji": "🔐",
-        "requires": { "bins": ["op"] },
-        "install":
+        'emoji': '🔐',
+        'requires': { 'bins': ['op'] },
+        'install':
           [
             {
-              "id": "brew",
-              "kind": "brew",
-              "formula": "1password-cli",
-              "bins": ["op"],
-              "label": "Install 1Password CLI (brew)",
+              'id': 'brew',
+              'kind': 'brew',
+              'formula': '1password-cli',
+              'bins': ['op'],
+              'label': 'Install 1Password CLI (brew)',
             },
           ],
       },

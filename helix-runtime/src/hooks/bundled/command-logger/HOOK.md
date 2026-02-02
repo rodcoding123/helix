@@ -1,14 +1,14 @@
 ---
 name: command-logger
-description: "Log all command events to a centralized audit file"
+description: 'Log all command events to a centralized audit file'
 homepage: https://docs.openclaw.ai/hooks#command-logger
 metadata:
   {
-    "openclaw":
+    'openclaw':
       {
-        "emoji": "📝",
-        "events": ["command"],
-        "install": [{ "id": "bundled", "kind": "bundled", "label": "Bundled with OpenClaw" }],
+        'emoji': '📝',
+        'events': ['command'],
+        'install': [{ 'id': 'bundled', 'kind': 'bundled', 'label': 'Bundled with OpenClaw' }],
       },
   }
 ---

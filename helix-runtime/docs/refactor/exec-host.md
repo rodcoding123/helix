@@ -1,5 +1,5 @@
 ---
-summary: "Refactor plan: exec host routing, node approvals, and headless runner"
+summary: 'Refactor plan: exec host routing, node approvals, and headless runner'
 read_when:
   - Designing exec host routing or exec approvals
   - Implementing node runner + UI IPC

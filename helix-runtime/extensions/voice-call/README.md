@@ -36,24 +36,24 @@ Put under `plugins.entries.voice-call.config`:
 
 ```json5
 {
-  provider: "twilio", // or "telnyx" | "plivo" | "mock"
-  fromNumber: "+15550001234",
-  toNumber: "+15550005678",
+  provider: 'twilio', // or "telnyx" | "plivo" | "mock"
+  fromNumber: '+15550001234',
+  toNumber: '+15550005678',
 
   twilio: {
-    accountSid: "ACxxxxxxxx",
-    authToken: "your_token",
+    accountSid: 'ACxxxxxxxx',
+    authToken: 'your_token',
   },
 
   plivo: {
-    authId: "MAxxxxxxxxxxxxxxxxxxxx",
-    authToken: "your_token",
+    authId: 'MAxxxxxxxxxxxxxxxxxxxx',
+    authToken: 'your_token',
   },
 
   // Webhook server
   serve: {
     port: 3334,
-    path: "/voice/webhook",
+    path: '/voice/webhook',
   },
 
   // Public exposure (pick one):
@@ -62,12 +62,12 @@ Put under `plugins.entries.voice-call.config`:
   // tailscale: { mode: "funnel", path: "/voice/webhook" }
 
   outbound: {
-    defaultMode: "notify", // or "conversation"
+    defaultMode: 'notify', // or "conversation"
   },
 
   streaming: {
     enabled: true,
-    streamPath: "/voice/stream",
+    streamPath: '/voice/stream',
   },
 }
 ```
@@ -87,9 +87,9 @@ same shape — overrides deep-merge with `messages.tts`.
 ```json5
 {
   tts: {
-    provider: "openai",
+    provider: 'openai',
     openai: {
-      voice: "alloy",
+      voice: 'alloy',
     },
   },
 }

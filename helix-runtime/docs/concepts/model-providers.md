@@ -1,5 +1,5 @@
 ---
-summary: "Model provider overview with example configs + CLI flows"
+summary: 'Model provider overview with example configs + CLI flows'
 read_when:
   - You need a provider-by-provider model setup reference
   - You want example configs or CLI onboarding commands for model providers
@@ -30,7 +30,7 @@ OpenClaw ships with the pi‑ai catalog. These providers require **no**
 
 ```json5
 {
-  agents: { defaults: { model: { primary: "openai/gpt-5.2" } } },
+  agents: { defaults: { model: { primary: 'openai/gpt-5.2' } } },
 }
 ```
 
@@ -43,7 +43,7 @@ OpenClaw ships with the pi‑ai catalog. These providers require **no**
 
 ```json5
 {
-  agents: { defaults: { model: { primary: "anthropic/claude-opus-4-5" } } },
+  agents: { defaults: { model: { primary: 'anthropic/claude-opus-4-5' } } },
 }
 ```
 
@@ -56,7 +56,7 @@ OpenClaw ships with the pi‑ai catalog. These providers require **no**
 
 ```json5
 {
-  agents: { defaults: { model: { primary: "openai-codex/gpt-5.2" } } },
+  agents: { defaults: { model: { primary: 'openai-codex/gpt-5.2' } } },
 }
 ```
 
@@ -69,7 +69,7 @@ OpenClaw ships with the pi‑ai catalog. These providers require **no**
 
 ```json5
 {
-  agents: { defaults: { model: { primary: "opencode/claude-opus-4-5" } } },
+  agents: { defaults: { model: { primary: 'opencode/claude-opus-4-5' } } },
 }
 ```
 
@@ -144,16 +144,16 @@ Moonshot uses OpenAI-compatible endpoints, so configure it as a custom provider:
 ```json5
 {
   agents: {
-    defaults: { model: { primary: "moonshot/kimi-k2.5" } },
+    defaults: { model: { primary: 'moonshot/kimi-k2.5' } },
   },
   models: {
-    mode: "merge",
+    mode: 'merge',
     providers: {
       moonshot: {
-        baseUrl: "https://api.moonshot.ai/v1",
-        apiKey: "${MOONSHOT_API_KEY}",
-        api: "openai-completions",
-        models: [{ id: "kimi-k2.5", name: "Kimi K2.5" }],
+        baseUrl: 'https://api.moonshot.ai/v1',
+        apiKey: '${MOONSHOT_API_KEY}',
+        api: 'openai-completions',
+        models: [{ id: 'kimi-k2.5', name: 'Kimi K2.5' }],
       },
     },
   },
@@ -170,9 +170,9 @@ Kimi Coding uses Moonshot AI's Anthropic-compatible endpoint:
 
 ```json5
 {
-  env: { KIMI_API_KEY: "sk-..." },
+  env: { KIMI_API_KEY: 'sk-...' },
   agents: {
-    defaults: { model: { primary: "kimi-coding/k2p5" } },
+    defaults: { model: { primary: 'kimi-coding/k2p5' } },
   },
 }
 ```
@@ -206,16 +206,16 @@ Synthetic provides Anthropic-compatible models behind the `synthetic` provider:
 ```json5
 {
   agents: {
-    defaults: { model: { primary: "synthetic/hf:MiniMaxAI/MiniMax-M2.1" } },
+    defaults: { model: { primary: 'synthetic/hf:MiniMaxAI/MiniMax-M2.1' } },
   },
   models: {
-    mode: "merge",
+    mode: 'merge',
     providers: {
       synthetic: {
-        baseUrl: "https://api.synthetic.new/anthropic",
-        apiKey: "${SYNTHETIC_API_KEY}",
-        api: "anthropic-messages",
-        models: [{ id: "hf:MiniMaxAI/MiniMax-M2.1", name: "MiniMax M2.1" }],
+        baseUrl: 'https://api.synthetic.new/anthropic',
+        apiKey: '${SYNTHETIC_API_KEY}',
+        api: 'anthropic-messages',
+        models: [{ id: 'hf:MiniMaxAI/MiniMax-M2.1', name: 'MiniMax M2.1' }],
       },
     },
   },
@@ -248,7 +248,7 @@ ollama pull llama3.3
 ```json5
 {
   agents: {
-    defaults: { model: { primary: "ollama/llama3.3" } },
+    defaults: { model: { primary: 'ollama/llama3.3' } },
   },
 }
 ```
@@ -263,22 +263,22 @@ Example (OpenAI‑compatible):
 {
   agents: {
     defaults: {
-      model: { primary: "lmstudio/minimax-m2.1-gs32" },
-      models: { "lmstudio/minimax-m2.1-gs32": { alias: "Minimax" } },
+      model: { primary: 'lmstudio/minimax-m2.1-gs32' },
+      models: { 'lmstudio/minimax-m2.1-gs32': { alias: 'Minimax' } },
     },
   },
   models: {
     providers: {
       lmstudio: {
-        baseUrl: "http://localhost:1234/v1",
-        apiKey: "LMSTUDIO_KEY",
-        api: "openai-completions",
+        baseUrl: 'http://localhost:1234/v1',
+        apiKey: 'LMSTUDIO_KEY',
+        api: 'openai-completions',
         models: [
           {
-            id: "minimax-m2.1-gs32",
-            name: "MiniMax M2.1",
+            id: 'minimax-m2.1-gs32',
+            name: 'MiniMax M2.1',
             reasoning: false,
-            input: ["text"],
+            input: ['text'],
             cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
             contextWindow: 200000,
             maxTokens: 8192,

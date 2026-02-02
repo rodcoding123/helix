@@ -797,17 +797,17 @@ To execute a session, use the Task tool:
 ```typescript
 // Simple session
 Task({
-  description: "OpenProse session",
-  prompt: "The prompt from the session statement",
-  subagent_type: "general-purpose",
+  description: 'OpenProse session',
+  prompt: 'The prompt from the session statement',
+  subagent_type: 'general-purpose',
 });
 
 // Session with agent configuration
 Task({
-  description: "OpenProse session",
-  prompt: "The session prompt",
-  subagent_type: "general-purpose",
-  model: "opus", // From agent or override
+  description: 'OpenProse session',
+  prompt: 'The session prompt',
+  subagent_type: 'general-purpose',
+  model: 'opus', // From agent or override
 });
 ```
 

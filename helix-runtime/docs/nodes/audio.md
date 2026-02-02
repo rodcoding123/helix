@@ -1,5 +1,5 @@
 ---
-summary: "How inbound audio/voice notes are downloaded, transcribed, and injected into replies"
+summary: 'How inbound audio/voice notes are downloaded, transcribed, and injected into replies'
 read_when:
   - Changing audio transcription or media handling
 ---
@@ -45,11 +45,11 @@ Note: Binary detection is best-effort across macOS/Linux/Windows; ensure the CLI
         enabled: true,
         maxBytes: 20971520,
         models: [
-          { provider: "openai", model: "gpt-4o-mini-transcribe" },
+          { provider: 'openai', model: 'gpt-4o-mini-transcribe' },
           {
-            type: "cli",
-            command: "whisper",
-            args: ["--model", "base", "{{MediaPath}}"],
+            type: 'cli',
+            command: 'whisper',
+            args: ['--model', 'base', '{{MediaPath}}'],
             timeoutSeconds: 45,
           },
         ],
@@ -68,10 +68,10 @@ Note: Binary detection is best-effort across macOS/Linux/Windows; ensure the CLI
       audio: {
         enabled: true,
         scope: {
-          default: "allow",
-          rules: [{ action: "deny", match: { chatType: "group" } }],
+          default: 'allow',
+          rules: [{ action: 'deny', match: { chatType: 'group' } }],
         },
-        models: [{ provider: "openai", model: "gpt-4o-mini-transcribe" }],
+        models: [{ provider: 'openai', model: 'gpt-4o-mini-transcribe' }],
       },
     },
   },
@@ -86,7 +86,7 @@ Note: Binary detection is best-effort across macOS/Linux/Windows; ensure the CLI
     media: {
       audio: {
         enabled: true,
-        models: [{ provider: "deepgram", model: "nova-3" }],
+        models: [{ provider: 'deepgram', model: 'nova-3' }],
       },
     },
   },

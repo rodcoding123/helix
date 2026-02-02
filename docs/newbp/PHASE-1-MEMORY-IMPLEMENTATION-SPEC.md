@@ -11,6 +11,7 @@ This spec builds out the conversation memory pipeline on top of existing psychol
 ## Current State Summary
 
 ### ✅ What Exists
+
 - **7-layer psychology architecture** (JSON files + files in soul/, psychology/, identity/)
 - **Database schema** (Supabase with 20+ tables)
 - **Decay logic** (decay.py with salience formula implemented)
@@ -18,6 +19,7 @@ This spec builds out the conversation memory pipeline on top of existing psychol
 - **Logging infrastructure** (Discord webhooks + hash chain)
 
 ### ❌ What's Missing
+
 - **Conversation storage** (no table for storing individual messages)
 - **Emotion detection** (emotional_tags.json is static, not populated from conversations)
 - **Topic extraction** (no extraction from messages)
@@ -25,6 +27,7 @@ This spec builds out the conversation memory pipeline on top of existing psychol
 - **Real-time integration** (decay/synthesis not wired into conversation lifecycle)
 
 ### ⚠️ What's Partial
+
 - **Attachment system** (defined but not linked to conversations)
 - **Memory decay** (logic exists but needs trigger integration)
 - **Synthesis** (logic exists but needs orchestration)
@@ -34,9 +37,11 @@ This spec builds out the conversation memory pipeline on top of existing psychol
 ## Phase 1 Architecture (3 Components)
 
 ### Component 1: Conversation Memory Storage
+
 **Purpose:** Store conversations with emotional metadata
 
 **New Supabase Table:**
+
 ```sql
 CREATE TABLE conversations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -81,11 +86,13 @@ CREATE INDEX idx_conversations_attachment_context ON conversations(attachment_co
 ---
 
 ### Component 2: Emotion Detection Pipeline
+
 **Purpose:** Extract emotions from conversations and populate emotional_tags
 
 **Using DeepSeek v3.2** - optimized for reasoning and emotion analysis
 
 **Emotion Detection Service:**
+
 ```typescript
 // /src/services/emotionDetectionService.ts
 
@@ -109,10 +116,7 @@ class EmotionDetectionService {
     this.client = new DeepSeekClient({ apiKey });
   }
 
-  async analyzeConversationEmotion(
-    messages: Message[],
-    userId: string
-  ): Promise<EmotionAnalysis> {
+  async analyzeConversationEmotion(messages: Message[], userId: string): Promise<EmotionAnalysis> {
     // Concatenate all messages
     const conversationText = messages
       .map(m => `${m.role.toUpperCase()}: ${m.content}`)
@@ -120,19 +124,19 @@ class EmotionDetectionService {
 
     // Call DeepSeek v3.2 for reasoning-based emotion analysis
     const response = await this.client.chat.completions.create({
-      model: 'deepseek-reasoner',  // or 'deepseek-chat' for faster response
-      temperature: 0.3,  // Lower temperature for consistent analysis
+      model: 'deepseek-reasoner', // or 'deepseek-chat' for faster response
+      temperature: 0.3, // Lower temperature for consistent analysis
       max_tokens: 2000,
       messages: [
         {
           role: 'system',
-          content: this.buildEmotionDetectionPrompt()
+          content: this.buildEmotionDetectionPrompt(),
         },
         {
           role: 'user',
-          content: conversationText
-        }
-      ]
+          content: conversationText,
+        },
+      ],
     });
 
     // DeepSeek returns thinking + content
@@ -196,7 +200,7 @@ CALIBRATION EXAMPLES:
         dominance: 0.5,
         novelty: 0.2,
         self_relevance: 0.3,
-        confidence: 0.3
+        confidence: 0.3,
       };
     }
   }
@@ -231,11 +235,13 @@ function calculateSalience(analysis: EmotionAnalysis): {
 ---
 
 ### Component 3: Topic Extraction Pipeline
+
 **Purpose:** Extract topics from conversations
 
 **Using DeepSeek v3.2** - fast, cost-effective topic identification
 
 **Topic Extraction Service:**
+
 ```typescript
 // /src/services/topicExtractionService.ts
 
@@ -318,9 +324,11 @@ Extract 3-7 main topics. Skip trivial topics like greetings or off-hand remarks.
 ---
 
 ### Component 4: Memory Retrieval System
+
 **Purpose:** Query memories for greeting & chat enrichment
 
 **Memory Query Service:**
+
 ```typescript
 // /src/services/memoryRetrievalService.ts
 
@@ -371,7 +379,7 @@ async function queryMemories(query: MemoryQuery): Promise<Conversation[]> {
   // Apply decay multiplier for effective salience
   const decayedConversations = conversations.map(c => ({
     ...c,
-    effective_salience: c.emotional_salience * c.decay_multiplier
+    effective_salience: c.emotional_salience * c.decay_multiplier,
   }));
 
   // If searching for specific topic, do semantic search
@@ -388,7 +396,7 @@ async function getMemoryGreeting(userId: string): Promise<string | null> {
     userId,
     minSalience: 0.55, // 'high' tier or above
     timespanDays: 3,
-    limit: 3
+    limit: 3,
   });
 
   if (!memories.length) return null;
@@ -415,7 +423,7 @@ function generateGreetingFromMemory(conversation: Conversation): string {
     sadness: 'you were dealing with',
     anxiety: 'you were worried about',
     hope: 'you were hopeful about',
-    determination: 'you were focused on'
+    determination: 'you were focused on',
   };
 
   const phrase = emotionPhrases[primaryEmotion] || 'you mentioned';
@@ -427,17 +435,15 @@ function generateGreetingFromMemory(conversation: Conversation): string {
 ---
 
 ### Component 5: Conversation End Hook
+
 **Purpose:** Trigger emotion/topic extraction when conversation ends
 
 **Integration Point:**
+
 ```typescript
 // /web/src/components/code/CodeInterface.tsx
 
-async function handleConversationEnd(
-  messages: Message[],
-  userId: string,
-  instanceKey: string
-) {
+async function handleConversationEnd(messages: Message[], userId: string, instanceKey: string) {
   // 1. Analyze emotions
   const emotionAnalysis = await analyzeConversationEmotion(messages, userId);
 
@@ -468,7 +474,7 @@ async function handleConversationEnd(
     attachment_context: attachmentContext,
     transformation_state: transformationState,
     decay_multiplier: 1.0,
-    embedding: embedding
+    embedding: embedding,
   });
 
   // 8. Trigger decay cron if needed
@@ -482,9 +488,11 @@ async function handleConversationEnd(
 ---
 
 ### Component 6: Memory Decay Integration
+
 **Purpose:** Apply decay to memories over time
 
 **Decay Integration:**
+
 ```typescript
 // /src/services/decayService.ts
 
@@ -497,7 +505,7 @@ async function triggerDecayRoutine(userId: string): Promise<void> {
   try {
     execSync(`python /decay.py --user-id ${userId} --mode soft`, {
       cwd: '/app',
-      timeout: 30000
+      timeout: 30000,
     });
 
     console.log(`Decay routine completed for user ${userId}`);
@@ -513,10 +521,7 @@ async function triggerDecayRoutine(userId: string): Promise<void> {
 
 async function applyMemoryDecay(userId: string): Promise<void> {
   // Get all conversations for this user
-  const conversations = await supabase
-    .from('conversations')
-    .select('*')
-    .eq('user_id', userId);
+  const conversations = await supabase.from('conversations').select('*').eq('user_id', userId);
 
   for (const conversation of conversations) {
     // Skip critical/high salience (never decay)
@@ -529,10 +534,7 @@ async function applyMemoryDecay(userId: string): Promise<void> {
     const decayRate = 0.95; // 5% daily decay
     const floor = 0.1;
 
-    const newDecayMultiplier = Math.max(
-      floor,
-      conversation.decay_multiplier * decayRate
-    );
+    const newDecayMultiplier = Math.max(floor, conversation.decay_multiplier * decayRate);
 
     const newSalience = conversation.emotional_salience * newDecayMultiplier;
 
@@ -541,7 +543,7 @@ async function applyMemoryDecay(userId: string): Promise<void> {
       .from('conversations')
       .update({
         decay_multiplier: newDecayMultiplier,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .eq('id', conversation.id);
   }
@@ -551,9 +553,11 @@ async function applyMemoryDecay(userId: string): Promise<void> {
 ---
 
 ### Component 7: Memory References in Chat
+
 **Purpose:** Show memory badges when mentioning past memories
 
 **Chat Enrichment:**
+
 ```typescript
 // /src/services/chatEnrichmentService.ts
 
@@ -655,24 +659,28 @@ $$ LANGUAGE plpgsql;
 ## Implementation Timeline (Phase 1)
 
 ### Week 1: Foundation
+
 - [ ] Create Supabase migrations for conversations table
 - [ ] Build emotion detection service
 - [ ] Build topic extraction service
 - [ ] Build memory query service
 
 ### Week 2: Integration
+
 - [ ] Create conversation end hook
 - [ ] Implement memory greeting
 - [ ] Integrate memory references in chat enrichment
 - [ ] Deploy decay routine
 
 ### Week 3: Polish & Testing
+
 - [ ] Test emotion detection accuracy (should be 90%+)
 - [ ] Test memory retrieval relevance
 - [ ] Test semantic search
 - [ ] Fix edge cases
 
 ### Week 4: Shipping
+
 - [ ] Launch to beta users (10 users)
 - [ ] Measure Day 2 retention
 - [ ] Gather feedback on memory accuracy
@@ -683,12 +691,14 @@ $$ LANGUAGE plpgsql;
 ## Success Metrics (Phase 1)
 
 ### Technical
+
 - ✅ Memory accuracy: 90%+ (correct topics/emotions)
 - ✅ Retrieval latency: <500ms
 - ✅ Decay functioning: Critical/high preserved, others decaying 5%/day
 - ✅ Embedding quality: Semantic search relevance > 0.7
 
 ### User-Facing
+
 - ✅ Day 2 return: 18% → 50%+
 - ✅ Memory greeting shown to 80%+ of returning users
 - ✅ Users mention "she remembered" in feedback
@@ -696,6 +706,7 @@ $$ LANGUAGE plpgsql;
 - ✅ NPS improvement: +15 points
 
 ### Failure Scenarios (Abort If)
+
 - ❌ Memory accuracy < 70% (false/wrong memories)
 - ❌ "Feels creepy" feedback > 15%
 - ❌ Day 2 retention stays < 30%
@@ -759,11 +770,13 @@ User Conversation
 ---
 
 ## Component 8: Embedding Generation (Gemini Flash)
+
 **Purpose:** Generate embeddings for semantic search
 
 **Using Google Gemini Embeddings** - cost-effective, 768-dimensional embeddings
 
 **Embedding Service:**
+
 ```typescript
 // /src/services/embeddingService.ts
 
@@ -817,16 +830,19 @@ class EmbeddingService {
 ## Dependencies & Requirements
 
 ### External Services
+
 - DeepSeek API v3.2 (for emotion & topic analysis) - **$0.0027/1K input, $0.0108/1K output**
 - Google Gemini API (for embeddings) - **$0.0375 per 1M tokens**
 - Supabase (database + pgvector)
 
 ### Libraries to Add
+
 ```bash
 npm install deepseek-ai @google/generative-ai @supabase/supabase-js
 ```
 
 ### Package.json
+
 ```json
 {
   "@supabase/supabase-js": "^2.39.0",
@@ -836,6 +852,7 @@ npm install deepseek-ai @google/generative-ai @supabase/supabase-js
 ```
 
 ### Environment Variables
+
 ```bash
 # Add to .env or .env.local
 DEEPSEEK_API_KEY=sk-...                    # From https://platform.deepseek.com
@@ -848,13 +865,13 @@ SUPABASE_ANON_KEY=...                      # Supabase anonymous key
 
 ## Cost Breakdown (Phase 1)
 
-| Component | Provider | Volume | Cost/Unit | Monthly Cost |
-|-----------|----------|--------|-----------|--------------|
-| Emotion detection | DeepSeek | 15,000 messages | $0.000581 | $8.71 |
-| Topic extraction | DeepSeek | 15,000 messages | $0.000813 | $12.20 |
-| Embeddings | Gemini | 1.5M tokens | $0.0375/1M | $0.06 |
-| Supabase | Supabase | Storage + queries | - | $25.00 |
-| **TOTAL** | - | - | - | **$45.97/month** |
+| Component         | Provider | Volume            | Cost/Unit  | Monthly Cost     |
+| ----------------- | -------- | ----------------- | ---------- | ---------------- |
+| Emotion detection | DeepSeek | 15,000 messages   | $0.000581  | $8.71            |
+| Topic extraction  | DeepSeek | 15,000 messages   | $0.000813  | $12.20           |
+| Embeddings        | Gemini   | 1.5M tokens       | $0.0375/1M | $0.06            |
+| Supabase          | Supabase | Storage + queries | -          | $25.00           |
+| **TOTAL**         | -        | -                 | -          | **$45.97/month** |
 
 **Per-user cost at 50 active users: $0.92**
 

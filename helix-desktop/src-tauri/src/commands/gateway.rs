@@ -1,4 +1,4 @@
-// Gateway management commands - spawns openclaw-helix gateway
+// Gateway management commands - spawns helix-runtime gateway
 
 use std::process::{Child, Command, Stdio};
 use std::sync::Mutex;
@@ -119,7 +119,7 @@ pub fn start_gateway(app: AppHandle) -> Result<GatewayStarted, String> {
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()
-        .map_err(|e| format!("Failed to start gateway: {}. Make sure openclaw-helix is built.", e))?;
+        .map_err(|e| format!("Failed to start gateway: {}. Make sure helix-runtime is built.", e))?;
 
     let url = format!("ws://127.0.0.1:{}", port);
 
@@ -206,7 +206,7 @@ fn get_openclaw_path(app: &AppHandle) -> Result<std::path::PathBuf, String> {
         }
     }
 
-    // Development: openclaw-helix is the source, use node to run openclaw.mjs directly
+    // Development: helix-runtime is the source, use node to run openclaw.mjs directly
     let openclaw_dir = get_openclaw_directory()?;
     let openclaw_mjs = openclaw_dir.join("openclaw.mjs");
 
@@ -260,13 +260,13 @@ fn get_openclaw_path(app: &AppHandle) -> Result<std::path::PathBuf, String> {
 }
 
 fn get_openclaw_directory() -> Result<std::path::PathBuf, String> {
-    // Try to find openclaw-helix relative to the executable
+    // Try to find helix-runtime relative to the executable
     // Release binary is at: helix-desktop/src-tauri/target/release/helix-desktop.exe
-    // We need to go up to find: Helix/openclaw-helix
+    // We need to go up to find: Helix/helix-runtime
     if let Ok(exe_path) = std::env::current_exe() {
         // From exe: target/release/helix-desktop.exe
         // Go up 4 levels: release -> target -> src-tauri -> helix-desktop -> Helix
-        // Then look for openclaw-helix sibling
+        // Then look for helix-runtime sibling
         if let Some(exe_dir) = exe_path.parent() {
             // Try going up 4 levels (for release build structure)
             let helix_root = exe_dir
@@ -275,16 +275,16 @@ fn get_openclaw_directory() -> Result<std::path::PathBuf, String> {
                 .join("..")     // helix-desktop
                 .join("..");    // Helix (root)
 
-            let dev_path = helix_root.join("openclaw-helix");
+            let dev_path = helix_root.join("helix-runtime");
             if dev_path.exists() {
-                log::info!("Found openclaw-helix at (exe relative): {:?}", dev_path);
+                log::info!("Found helix-runtime at (exe relative): {:?}", dev_path);
                 return Ok(dev_path.canonicalize().map_err(|e| e.to_string())?);
             }
 
             // Also try from exe_dir directly (in case structure is different)
-            let alt_path = exe_dir.join("..").join("..").join("openclaw-helix");
+            let alt_path = exe_dir.join("..").join("..").join("helix-runtime");
             if alt_path.exists() {
-                log::info!("Found openclaw-helix at (alt): {:?}", alt_path);
+                log::info!("Found helix-runtime at (alt): {:?}", alt_path);
                 return Ok(alt_path.canonicalize().map_err(|e| e.to_string())?);
             }
         }
@@ -295,10 +295,10 @@ fn get_openclaw_directory() -> Result<std::path::PathBuf, String> {
         let dev_path = std::path::PathBuf::from(&manifest_dir)
             .join("..")
             .join("..")
-            .join("openclaw-helix");
+            .join("helix-runtime");
 
         if dev_path.exists() {
-            log::info!("Found openclaw-helix at (manifest): {:?}", dev_path);
+            log::info!("Found helix-runtime at (manifest): {:?}", dev_path);
             return Ok(dev_path.canonicalize().map_err(|e| e.to_string())?);
         }
     }
@@ -307,10 +307,10 @@ fn get_openclaw_directory() -> Result<std::path::PathBuf, String> {
     let home = dirs::home_dir()
         .ok_or_else(|| "Could not find home directory".to_string())?;
 
-    // Try ~/.helix/openclaw-helix
-    let helix_openclaw = home.join(".helix").join("openclaw-helix");
+    // Try ~/.helix/helix-runtime
+    let helix_openclaw = home.join(".helix").join("helix-runtime");
     if helix_openclaw.exists() {
-        log::info!("Found openclaw-helix at (home): {:?}", helix_openclaw);
+        log::info!("Found helix-runtime at (home): {:?}", helix_openclaw);
         return Ok(helix_openclaw);
     }
 
@@ -322,14 +322,14 @@ fn get_openclaw_directory() -> Result<std::path::PathBuf, String> {
     }
 
     // Hardcoded fallback for known development path
-    let known_dev_path = std::path::PathBuf::from("C:\\Users\\Specter\\Desktop\\Helix\\openclaw-helix");
+    let known_dev_path = std::path::PathBuf::from("C:\\Users\\Specter\\Desktop\\Helix\\helix-runtime");
     if known_dev_path.exists() {
-        log::info!("Found openclaw-helix at (hardcoded): {:?}", known_dev_path);
+        log::info!("Found helix-runtime at (hardcoded): {:?}", known_dev_path);
         return Ok(known_dev_path);
     }
 
-    log::warn!("Could not find openclaw-helix directory");
-    Err("Could not find openclaw-helix directory".to_string())
+    log::warn!("Could not find helix-runtime directory");
+    Err("Could not find helix-runtime directory".to_string())
 }
 
 /// Auto-start gateway on app launch (called from setup)

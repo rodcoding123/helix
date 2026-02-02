@@ -1,5 +1,5 @@
 ---
-summary: "Frequently asked questions about OpenClaw setup, configuration, and usage"
+summary: 'Frequently asked questions about OpenClaw setup, configuration, and usage'
 ---
 
 # FAQ
@@ -1099,7 +1099,7 @@ Keep the Gateway on Linux, but make the required CLI binaries resolve to SSH wra
    ---
    name: imsg
    description: iMessage/SMS CLI for listing chats, history, watch, and sending.
-   metadata: { "openclaw": { "os": ["darwin", "linux"], "requires": { "bins": ["imsg"] } } }
+   metadata: { 'openclaw': { 'os': ['darwin', 'linux'], 'requires': { 'bins': ['imsg'] } } }
    ---
    ```
 4. Start a new session so the skills snapshot refreshes.
@@ -1268,7 +1268,7 @@ Default workspace is `~/.openclaw/workspace`, configurable via:
 
 ```json5
 {
-  agents: { defaults: { workspace: "~/.openclaw/workspace" } },
+  agents: { defaults: { workspace: '~/.openclaw/workspace' } },
 }
 ```
 
@@ -1313,7 +1313,7 @@ Example (repo as default cwd):
 {
   agents: {
     defaults: {
-      workspace: "~/Projects/my-repo",
+      workspace: '~/Projects/my-repo',
     },
   },
 }
@@ -1342,10 +1342,10 @@ Non-loopback binds **require auth**. Configure `gateway.auth.mode` + `gateway.au
 ```json5
 {
   gateway: {
-    bind: "lan",
+    bind: 'lan',
     auth: {
-      mode: "token",
-      token: "replace-me",
+      mode: 'token',
+      token: 'replace-me',
     },
   },
 }
@@ -1382,7 +1382,7 @@ Gateway process.
     web: {
       search: {
         enabled: true,
-        apiKey: "BRAVE_API_KEY_HERE",
+        apiKey: 'BRAVE_API_KEY_HERE',
         maxResults: 5,
       },
       fetch: {
@@ -1590,8 +1590,8 @@ Docs: [Config](/cli/config), [Configure](/cli/configure), [Doctor](/gateway/doct
 
 ```json5
 {
-  agents: { defaults: { workspace: "~/.openclaw/workspace" } },
-  channels: { whatsapp: { allowFrom: ["+15555550123"] } },
+  agents: { defaults: { workspace: '~/.openclaw/workspace' } },
+  channels: { whatsapp: { allowFrom: ['+15555550123'] } },
 }
 ```
 
@@ -1655,8 +1655,8 @@ You can also define inline env vars in config (applied only if missing from the 
 ```json5
 {
   env: {
-    OPENROUTER_API_KEY: "sk-or-...",
-    vars: { GROQ_API_KEY: "gsk-..." },
+    OPENROUTER_API_KEY: 'sk-or-...',
+    vars: { GROQ_API_KEY: 'gsk-...' },
   },
 }
 ```
@@ -1822,7 +1822,7 @@ Heartbeats run every **30m** by default. Tune or disable them:
   agents: {
     defaults: {
       heartbeat: {
-        every: "2h", // or "0m" to disable
+        every: '2h', // or "0m" to disable
       },
     },
   },
@@ -1846,8 +1846,8 @@ If you want only **you** to be able to trigger group replies:
 {
   channels: {
     whatsapp: {
-      groupPolicy: "allowlist",
-      groupAllowFrom: ["+15551234567"],
+      groupPolicy: 'allowlist',
+      groupAllowFrom: ['+15551234567'],
     },
   },
 }
@@ -2079,13 +2079,13 @@ Fallbacks are for **errors**, not “hard tasks,” so use `/model` or a separat
 
 ```json5
 {
-  env: { MINIMAX_API_KEY: "sk-...", OPENAI_API_KEY: "sk-..." },
+  env: { MINIMAX_API_KEY: 'sk-...', OPENAI_API_KEY: 'sk-...' },
   agents: {
     defaults: {
-      model: { primary: "minimax/MiniMax-M2.1" },
+      model: { primary: 'minimax/MiniMax-M2.1' },
       models: {
-        "minimax/MiniMax-M2.1": { alias: "minimax" },
-        "openai/gpt-5.2": { alias: "gpt" },
+        'minimax/MiniMax-M2.1': { alias: 'minimax' },
+        'openai/gpt-5.2': { alias: 'gpt' },
       },
     },
   },
@@ -2127,11 +2127,11 @@ Aliases come from `agents.defaults.models.<modelId>.alias`. Example:
 {
   agents: {
     defaults: {
-      model: { primary: "anthropic/claude-opus-4-5" },
+      model: { primary: 'anthropic/claude-opus-4-5' },
       models: {
-        "anthropic/claude-opus-4-5": { alias: "opus" },
-        "anthropic/claude-sonnet-4-5": { alias: "sonnet" },
-        "anthropic/claude-haiku-4-5": { alias: "haiku" },
+        'anthropic/claude-opus-4-5': { alias: 'opus' },
+        'anthropic/claude-sonnet-4-5': { alias: 'sonnet' },
+        'anthropic/claude-haiku-4-5': { alias: 'haiku' },
       },
     },
   },
@@ -2148,11 +2148,11 @@ OpenRouter (pay‑per‑token; many models):
 {
   agents: {
     defaults: {
-      model: { primary: "openrouter/anthropic/claude-sonnet-4-5" },
-      models: { "openrouter/anthropic/claude-sonnet-4-5": {} },
+      model: { primary: 'openrouter/anthropic/claude-sonnet-4-5' },
+      models: { 'openrouter/anthropic/claude-sonnet-4-5': {} },
     },
   },
-  env: { OPENROUTER_API_KEY: "sk-or-..." },
+  env: { OPENROUTER_API_KEY: 'sk-or-...' },
 }
 ```
 
@@ -2162,11 +2162,11 @@ Z.AI (GLM models):
 {
   agents: {
     defaults: {
-      model: { primary: "zai/glm-4.7" },
-      models: { "zai/glm-4.7": {} },
+      model: { primary: 'zai/glm-4.7' },
+      models: { 'zai/glm-4.7': {} },
     },
   },
-  env: { ZAI_API_KEY: "..." },
+  env: { ZAI_API_KEY: '...' },
 }
 ```
 
@@ -2353,11 +2353,11 @@ Set `gateway.mode: "remote"` and point to a remote WebSocket URL, optionally wit
 ```json5
 {
   gateway: {
-    mode: "remote",
+    mode: 'remote',
     remote: {
-      url: "ws://gateway.tailnet:18789",
-      token: "your-token",
-      password: "your-password",
+      url: 'ws://gateway.tailnet:18789',
+      token: 'your-token',
+      password: 'your-password',
     },
   },
 }
@@ -2787,7 +2787,7 @@ Enable cross‑provider messaging for the agent:
         message: {
           crossContext: {
             allowAcrossProviders: true,
-            marker: { enabled: true, prefix: "[from {channel}] " },
+            marker: { enabled: true, prefix: '[from {channel}] ' },
           },
         },
       },

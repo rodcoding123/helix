@@ -41,19 +41,20 @@
 
 ## Cost Comparison
 
-| Component | Claude/OpenAI | DeepSeek/Gemini | Savings |
-|-----------|---|---|---|
-| Emotion detection | $50/mo | $9/mo | **82%** |
-| Topic extraction | $40/mo | $12/mo | **70%** |
-| Embeddings | $50/mo | $0.06/mo | **99.9%** |
-| Autonomy logic | $30/mo | $10/mo | **67%** |
-| **Total** | **$700/month** | **$55/month** | **92%** |
+| Component         | Claude/OpenAI  | DeepSeek/Gemini | Savings   |
+| ----------------- | -------------- | --------------- | --------- |
+| Emotion detection | $50/mo         | $9/mo           | **82%**   |
+| Topic extraction  | $40/mo         | $12/mo          | **70%**   |
+| Embeddings        | $50/mo         | $0.06/mo        | **99.9%** |
+| Autonomy logic    | $30/mo         | $10/mo          | **67%**   |
+| **Total**         | **$700/month** | **$55/month**   | **92%**   |
 
 ---
 
 ## Your Current Setup (Validated)
 
 ### ✅ Environment Variables Already Set
+
 ```bash
 DEEPSEEK_API_KEY=sk-30f245da...  ✅ Ready
 GEMINI_API_KEY=AIzaSyC6n0BY...   ✅ Ready
@@ -61,6 +62,7 @@ DISCORD_WEBHOOK_*=https://...    ✅ Ready
 ```
 
 ### ✅ Infrastructure Ready
+
 - Supabase account: ✅ Configured
 - Database schema: ✅ Migration framework ready
 - Authentication: ✅ RLS policies in place
@@ -74,6 +76,7 @@ DISCORD_WEBHOOK_*=https://...    ✅ Ready
 ### DeepSeek v3.2 Setup
 
 **1. Get API Key**
+
 ```bash
 # Visit https://platform.deepseek.com
 # Create API key
@@ -81,20 +84,23 @@ DISCORD_WEBHOOK_*=https://...    ✅ Ready
 ```
 
 **2. Install SDK**
+
 ```bash
 npm install deepseek-ai
 ```
 
 **3. Initialize Client** (Already in Phase 1 spec)
+
 ```typescript
 import { DeepSeekClient } from 'deepseek-ai';
 
 const client = new DeepSeekClient({
-  apiKey: process.env.DEEPSEEK_API_KEY
+  apiKey: process.env.DEEPSEEK_API_KEY,
 });
 ```
 
 **4. Use Cases**
+
 - Emotion detection: `deepseek-reasoner` (accuracy 90%)
 - Topic extraction: `deepseek-chat` (fast, 80% accuracy)
 - Autonomy validation: `deepseek-reasoner` (safety-critical)
@@ -104,6 +110,7 @@ const client = new DeepSeekClient({
 ### Google Gemini Setup
 
 **1. Get API Key**
+
 ```bash
 # Visit https://ai.google.dev
 # Create API key
@@ -111,11 +118,13 @@ const client = new DeepSeekClient({
 ```
 
 **2. Install SDK**
+
 ```bash
 npm install @google/generative-ai
 ```
 
 **3. Initialize Client** (Already in Phase 1 spec)
+
 ```typescript
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
@@ -123,6 +132,7 @@ const client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 ```
 
 **4. Use Cases**
+
 - Embeddings: `embedding-001` (768-dim, cheap)
 - Vision/context: `gemini-3-flash-preview` (fast, good quality)
 
@@ -130,12 +140,12 @@ const client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 ## Monthly Cost at Different User Counts
 
-| Month | Users | Conversations/Day | DeepSeek | Gemini | Supabase | **Total** | Revenue | Profit | Margin |
-|-------|-------|---|---|---|---|---|---|---|---|
-| 1 | 50 | 500 | $15 | $0.50 | $25 | **$40** | $1,450 | $1,410 | 97% |
-| 2 | 100 | 1,000 | $28 | $1.00 | $25 | **$54** | $2,900 | $2,846 | 98% |
-| 3 | 200 | 2,000 | $55 | $2.00 | $35 | **$92** | $5,800 | $5,708 | 98.4% |
-| 6 | 500 | 5,000 | $138 | $5.00 | $50 | **$193** | $14,500 | $14,307 | 98.7% |
+| Month | Users | Conversations/Day | DeepSeek | Gemini | Supabase | **Total** | Revenue | Profit  | Margin |
+| ----- | ----- | ----------------- | -------- | ------ | -------- | --------- | ------- | ------- | ------ |
+| 1     | 50    | 500               | $15      | $0.50  | $25      | **$40**   | $1,450  | $1,410  | 97%    |
+| 2     | 100   | 1,000             | $28      | $1.00  | $25      | **$54**   | $2,900  | $2,846  | 98%    |
+| 3     | 200   | 2,000             | $55      | $2.00  | $35      | **$92**   | $5,800  | $5,708  | 98.4%  |
+| 6     | 500   | 5,000             | $138     | $5.00  | $50      | **$193**  | $14,500 | $14,307 | 98.7%  |
 
 **Key insight**: You're profitable immediately. At 50 users, API costs are only $40/month while revenue is $1,450/month (97% margin).
 
@@ -144,6 +154,7 @@ const client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 ## What Gets Built (Phase 1-3)
 
 ### Phase 1: Memory System (Weeks 1-2)
+
 - ✅ Conversation storage
 - ✅ Emotion detection (DeepSeek reasoner)
 - ✅ Topic extraction (DeepSeek chat)
@@ -154,6 +165,7 @@ const client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 - **Impact**: Day 2 retention 18% → 50%+
 
 ### Phase 2: Agent System (Weeks 3-4)
+
 - ✅ 6 specialized agents (Atlas, Mercury, Vulcan, Juno, Ceres, Mars)
 - ✅ Agent selector UI
 - ✅ Agent memory tracking
@@ -162,6 +174,7 @@ const client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 - **Impact**: Upgrade rate 2% → 8%+
 
 ### Phase 3: Autonomy System (Weeks 5-6)
+
 - ✅ 5 autonomy levels (0-4)
 - ✅ Hard constraints (never break)
 - ✅ Action execution engine
@@ -177,6 +190,7 @@ const client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 ### GO ✅ - Proceed with Implementation
 
 **Choose GO if:**
+
 - ✅ You have 2-3 engineers available now (6-9 weeks)
 - ✅ $55/month for Phase 1 budget is acceptable (it is - highly profitable)
 - ✅ You want to proceed with all three phases
@@ -184,6 +198,7 @@ const client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 - ✅ You understand this is memory → agents → autonomy in sequence
 
 **What happens next:**
+
 1. Today: Confirm GO, assign engineers
 2. Week 1 Day 1: Database migrations, services begin
 3. Week 2: Integration with chat interface
@@ -196,6 +211,7 @@ const client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 ### MVP ⚙️ - Start with Phase 1 Only
 
 **Choose MVP if:**
+
 - You want to validate memory concept first (lower risk)
 - Timeline constraint: only 2-3 weeks available
 - Want to see real user data before committing to Phases 2-3
@@ -209,6 +225,7 @@ const client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 ### NO-GO ❌ - Pause for Adjustments
 
 **Choose NO-GO if:**
+
 - Engineers not available yet
 - Budget concerns (note: $55/month is extremely cheap)
 - Need more clarity on requirements
@@ -221,6 +238,7 @@ const client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 ## Pre-Implementation Checklist
 
 ### ✅ Already Done
+
 - [x] Strategic analysis complete
 - [x] Three detailed technical specs written (updated for DeepSeek/Gemini)
 - [x] Codebase validated
@@ -230,27 +248,32 @@ const client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 ### ⏳ Needs Confirmation from You
 
 **1. GO Decision** (YES or NO?)
+
 - Do you want to proceed with Phases 1-3?
 - Are you confident in the DeepSeek/Gemini strategy?
 - Are you ready for 6-9 week commitment?
 
 **2. Resource Confirmation**
+
 - [ ] Can you assign 2-3 engineers starting Week 1?
 - [ ] Are they available for 6-9 weeks uninterrupted?
 - [ ] Do they understand TypeScript/React/SQL?
 
 **3. Verify APIs Working**
+
 - [ ] DeepSeek API key confirmed working?
 - [ ] Gemini API key confirmed working?
 - [ ] Can you run a test call to each?
 
 **4. Team Kickoff** (30 minutes)
+
 - [ ] Schedule tech lead meeting
 - [ ] Review updated Phase 1 spec (with DeepSeek/Gemini code)
 - [ ] Assign specific engineers to Week 1 tasks
 - [ ] Set daily standup time
 
 ### After Confirmation: Week 1 Day 1 Begins
+
 - Create Supabase migrations
 - Build DeepSeek emotion detection service
 - Build Gemini embedding service
@@ -262,17 +285,20 @@ const client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 ## Success Criteria for Implementation
 
 ### Phase 1 Success (Week 2)
+
 - ✅ All services built and tested
 - ✅ Memory greeting showing on Day 2 return
 - ✅ Emotion accuracy 85%+ (manual validation)
 - ✅ Day 2 retention improves to 50%+
 
 ### Phase 2 Success (Week 4)
+
 - ✅ 6 agents working with different system prompts
 - ✅ Agent selector UI functional
 - ✅ Upgrade rate improves to 8%+
 
 ### Phase 3 Success (Week 6)
+
 - ✅ Autonomy levels 0-4 working
 - ✅ Action log transparent and trustworthy
 - ✅ Architect tier justified at $99/mo
@@ -282,18 +308,23 @@ const client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 ## Questions? Let Me Clarify
 
 ### Q: Will DeepSeek v3.2 be good enough for emotion detection?
+
 **A**: Yes. DeepSeek reasoning mode is specifically optimized for complex reasoning tasks. Emotion analysis is fundamentally a reasoning task (interpret context → detect emotions). Testing shows 85-90% accuracy, comparable to Claude.
 
 ### Q: What if DeepSeek API goes down?
+
 **A**: Graceful degradation - memories still store, emotion/topic extraction retried asynchronously. Chat experience never blocked.
 
 ### Q: Can we optimize costs further?
+
 **A**: Yes. Batch processing, selective analysis, local embeddings (Ollama) can reduce to $30-40/month. See COST-ANALYSIS-DEEPSEEK-GEMINI.md.
 
 ### Q: What if emotion/topic accuracy is low?
+
 **A**: You can A/B test prompts, fine-tune the formula, or add user feedback ("this memory helps/doesn't help"). Low-risk iteration.
 
 ### Q: Do we need Claude API at all?
+
 **A**: Not for Phase 1-3. DeepSeek covers all reasoning tasks needed. OpenClaw can use any LLM backend.
 
 ---
@@ -301,6 +332,7 @@ const client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 ## Next Steps
 
 ### Today/Tonight
+
 1. **Review these docs**:
    - PHASE-1-MEMORY-IMPLEMENTATION-SPEC.md (updated with DeepSeek/Gemini)
    - COST-ANALYSIS-DEEPSEEK-GEMINI.md (your actual costs)
@@ -312,6 +344,7 @@ const client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
    - If NO-GO: let me know what to adjust
 
 ### Week 1 Day 1 (If GO)
+
 - Database migrations
 - DeepSeek emotion service
 - Gemini embedding service
@@ -338,6 +371,7 @@ const client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 **Ready to decide?**
 
 Tell me:
+
 1. **GO** ✅ - Proceed with full 3-phase
 2. **MVP** ⚙️ - Start Phase 1 only
 3. **NO-GO** ❌ - Need to adjust something

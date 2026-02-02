@@ -4,18 +4,18 @@ description: Local speech-to-text with the Whisper CLI (no API key).
 homepage: https://openai.com/research/whisper
 metadata:
   {
-    "openclaw":
+    'openclaw':
       {
-        "emoji": "🎙️",
-        "requires": { "bins": ["whisper"] },
-        "install":
+        'emoji': '🎙️',
+        'requires': { 'bins': ['whisper'] },
+        'install':
           [
             {
-              "id": "brew",
-              "kind": "brew",
-              "formula": "openai-whisper",
-              "bins": ["whisper"],
-              "label": "Install OpenAI Whisper (brew)",
+              'id': 'brew',
+              'kind': 'brew',
+              'formula': 'openai-whisper',
+              'bins': ['whisper'],
+              'label': 'Install OpenAI Whisper (brew)',
             },
           ],
       },

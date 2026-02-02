@@ -1,5 +1,5 @@
 ---
-summary: "Quick troubleshooting guide for common OpenClaw failures"
+summary: 'Quick troubleshooting guide for common OpenClaw failures'
 read_when:
   - Investigating runtime issues or failures
 ---
@@ -491,8 +491,8 @@ Enable self-chat mode and allowlist your own number:
   channels: {
     whatsapp: {
       selfChatMode: true,
-      dmPolicy: "allowlist",
-      allowFrom: ["+15555550123"],
+      dmPolicy: 'allowlist',
+      allowFrom: ['+15555550123'],
     },
   },
 }

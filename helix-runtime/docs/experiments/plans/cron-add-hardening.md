@@ -1,8 +1,8 @@
 ---
-summary: "Harden cron.add input handling, align schemas, and improve cron UI/agent tooling"
-owner: "openclaw"
-status: "complete"
-last_updated: "2026-01-05"
+summary: 'Harden cron.add input handling, align schemas, and improve cron UI/agent tooling'
+owner: 'openclaw'
+status: 'complete'
+last_updated: '2026-01-05'
 ---
 
 # Cron Add Hardening & Schema Alignment

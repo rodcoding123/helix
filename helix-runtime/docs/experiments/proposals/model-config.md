@@ -1,5 +1,5 @@
 ---
-summary: "Exploration: model config, auth profiles, and fallback behavior"
+summary: 'Exploration: model config, auth profiles, and fallback behavior'
 read_when:
   - Exploring future model selection + auth profile ideas
 ---

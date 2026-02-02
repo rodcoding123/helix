@@ -1,5 +1,5 @@
 ---
-summary: "Behavior and config for WhatsApp group message handling (mentionPatterns are shared across surfaces)"
+summary: 'Behavior and config for WhatsApp group message handling (mentionPatterns are shared across surfaces)'
 read_when:
   - Changing group message rules or mentions
 ---
@@ -29,17 +29,17 @@ Add a `groupChat` block to `~/.openclaw/openclaw.json` so display-name pings wor
   channels: {
     whatsapp: {
       groups: {
-        "*": { requireMention: true },
+        '*': { requireMention: true },
       },
     },
   },
   agents: {
     list: [
       {
-        id: "main",
+        id: 'main',
         groupChat: {
           historyLimit: 50,
-          mentionPatterns: ["@?openclaw", "\\+?15555550123"],
+          mentionPatterns: ['@?openclaw', '\\+?15555550123'],
         },
       },
     ],

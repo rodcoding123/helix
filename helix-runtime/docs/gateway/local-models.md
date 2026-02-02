@@ -1,5 +1,5 @@
 ---
-summary: "Run OpenClaw on local LLMs (LM Studio, vLLM, LiteLLM, custom OpenAI endpoints)"
+summary: 'Run OpenClaw on local LLMs (LM Studio, vLLM, LiteLLM, custom OpenAI endpoints)'
 read_when:
   - You want to serve models from your own GPU box
   - You are wiring LM Studio or an OpenAI-compatible proxy
@@ -18,26 +18,26 @@ Best current local stack. Load MiniMax M2.1 in LM Studio, enable the local serve
 {
   agents: {
     defaults: {
-      model: { primary: "lmstudio/minimax-m2.1-gs32" },
+      model: { primary: 'lmstudio/minimax-m2.1-gs32' },
       models: {
-        "anthropic/claude-opus-4-5": { alias: "Opus" },
-        "lmstudio/minimax-m2.1-gs32": { alias: "Minimax" },
+        'anthropic/claude-opus-4-5': { alias: 'Opus' },
+        'lmstudio/minimax-m2.1-gs32': { alias: 'Minimax' },
       },
     },
   },
   models: {
-    mode: "merge",
+    mode: 'merge',
     providers: {
       lmstudio: {
-        baseUrl: "http://127.0.0.1:1234/v1",
-        apiKey: "lmstudio",
-        api: "openai-responses",
+        baseUrl: 'http://127.0.0.1:1234/v1',
+        apiKey: 'lmstudio',
+        api: 'openai-responses',
         models: [
           {
-            id: "minimax-m2.1-gs32",
-            name: "MiniMax M2.1 GS32",
+            id: 'minimax-m2.1-gs32',
+            name: 'MiniMax M2.1 GS32',
             reasoning: false,
-            input: ["text"],
+            input: ['text'],
             cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
             contextWindow: 196608,
             maxTokens: 8192,
@@ -66,29 +66,29 @@ Keep hosted models configured even when running local; use `models.mode: "merge"
   agents: {
     defaults: {
       model: {
-        primary: "anthropic/claude-sonnet-4-5",
-        fallbacks: ["lmstudio/minimax-m2.1-gs32", "anthropic/claude-opus-4-5"],
+        primary: 'anthropic/claude-sonnet-4-5',
+        fallbacks: ['lmstudio/minimax-m2.1-gs32', 'anthropic/claude-opus-4-5'],
       },
       models: {
-        "anthropic/claude-sonnet-4-5": { alias: "Sonnet" },
-        "lmstudio/minimax-m2.1-gs32": { alias: "MiniMax Local" },
-        "anthropic/claude-opus-4-5": { alias: "Opus" },
+        'anthropic/claude-sonnet-4-5': { alias: 'Sonnet' },
+        'lmstudio/minimax-m2.1-gs32': { alias: 'MiniMax Local' },
+        'anthropic/claude-opus-4-5': { alias: 'Opus' },
       },
     },
   },
   models: {
-    mode: "merge",
+    mode: 'merge',
     providers: {
       lmstudio: {
-        baseUrl: "http://127.0.0.1:1234/v1",
-        apiKey: "lmstudio",
-        api: "openai-responses",
+        baseUrl: 'http://127.0.0.1:1234/v1',
+        apiKey: 'lmstudio',
+        api: 'openai-responses',
         models: [
           {
-            id: "minimax-m2.1-gs32",
-            name: "MiniMax M2.1 GS32",
+            id: 'minimax-m2.1-gs32',
+            name: 'MiniMax M2.1 GS32',
             reasoning: false,
-            input: ["text"],
+            input: ['text'],
             cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
             contextWindow: 196608,
             maxTokens: 8192,
@@ -116,18 +116,18 @@ vLLM, LiteLLM, OAI-proxy, or custom gateways work if they expose an OpenAI-style
 ```json5
 {
   models: {
-    mode: "merge",
+    mode: 'merge',
     providers: {
       local: {
-        baseUrl: "http://127.0.0.1:8000/v1",
-        apiKey: "sk-local",
-        api: "openai-responses",
+        baseUrl: 'http://127.0.0.1:8000/v1',
+        apiKey: 'sk-local',
+        api: 'openai-responses',
         models: [
           {
-            id: "my-local-model",
-            name: "Local Model",
+            id: 'my-local-model',
+            name: 'Local Model',
             reasoning: false,
-            input: ["text"],
+            input: ['text'],
             cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
             contextWindow: 120000,
             maxTokens: 8192,

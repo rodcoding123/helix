@@ -1,5 +1,5 @@
 ---
-summary: "Plan: one clean plugin SDK + runtime for all messaging connectors"
+summary: 'Plan: one clean plugin SDK + runtime for all messaging connectors'
 read_when:
   - Defining or refactoring the plugin architecture
   - Migrating channel connectors to the plugin SDK/runtime
@@ -71,7 +71,7 @@ export type PluginRuntime = {
         cfg: unknown;
         channel: string;
         accountId: string;
-        peer: { kind: "dm" | "group" | "channel"; id: string };
+        peer: { kind: 'dm' | 'group' | 'channel'; id: string };
       }): { sessionKey: string; accountId: string };
     };
     pairing: {
@@ -88,8 +88,8 @@ export type PluginRuntime = {
       saveMediaBuffer(
         buffer: Uint8Array,
         contentType: string | undefined,
-        direction: "inbound" | "outbound",
-        maxBytes: number,
+        direction: 'inbound' | 'outbound',
+        maxBytes: number
       ): Promise<{ path: string; contentType?: string }>;
     };
     mentions: {
@@ -101,7 +101,7 @@ export type PluginRuntime = {
         cfg: OpenClawConfig,
         channel: string,
         accountId: string,
-        groupId: string,
+        groupId: string
       ): {
         allowlistEnabled: boolean;
         allowed: boolean;
@@ -113,7 +113,7 @@ export type PluginRuntime = {
         channel: string,
         accountId: string,
         groupId: string,
-        override?: boolean,
+        override?: boolean
       ): boolean;
     };
     debounce: {

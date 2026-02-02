@@ -1,5 +1,5 @@
 ---
-summary: "PeekabooBridge integration for macOS UI automation"
+summary: 'PeekabooBridge integration for macOS UI automation'
 read_when:
   - Hosting PeekabooBridge in OpenClaw.app
   - Integrating Peekaboo via Swift Package Manager

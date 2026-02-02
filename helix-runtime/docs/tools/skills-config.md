@@ -1,5 +1,5 @@
 ---
-summary: "Skills config schema and examples"
+summary: 'Skills config schema and examples'
 read_when:
   - Adding or modifying skills config
   - Adjusting bundled allowlist or install behavior
@@ -12,22 +12,22 @@ All skills-related configuration lives under `skills` in `~/.openclaw/openclaw.j
 ```json5
 {
   skills: {
-    allowBundled: ["gemini", "peekaboo"],
+    allowBundled: ['gemini', 'peekaboo'],
     load: {
-      extraDirs: ["~/Projects/agent-scripts/skills", "~/Projects/oss/some-skill-pack/skills"],
+      extraDirs: ['~/Projects/agent-scripts/skills', '~/Projects/oss/some-skill-pack/skills'],
       watch: true,
       watchDebounceMs: 250,
     },
     install: {
       preferBrew: true,
-      nodeManager: "npm", // npm | pnpm | yarn | bun (Gateway runtime still Node; bun not recommended)
+      nodeManager: 'npm', // npm | pnpm | yarn | bun (Gateway runtime still Node; bun not recommended)
     },
     entries: {
-      "nano-banana-pro": {
+      'nano-banana-pro': {
         enabled: true,
-        apiKey: "GEMINI_KEY_HERE",
+        apiKey: 'GEMINI_KEY_HERE',
         env: {
-          GEMINI_API_KEY: "GEMINI_KEY_HERE",
+          GEMINI_API_KEY: 'GEMINI_KEY_HERE',
         },
       },
       peekaboo: { enabled: true },

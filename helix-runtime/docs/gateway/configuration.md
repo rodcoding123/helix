@@ -1,5 +1,5 @@
 ---
-summary: "All configuration options for ~/.openclaw/openclaw.json with examples"
+summary: 'All configuration options for ~/.openclaw/openclaw.json with examples'
 read_when:
   - Adding or modifying config fields
 ---
@@ -107,8 +107,8 @@ openclaw gateway call config.patch --params '{
 
 ```json5
 {
-  agents: { defaults: { workspace: "~/.openclaw/workspace" } },
-  channels: { whatsapp: { allowFrom: ["+15555550123"] } },
+  agents: { defaults: { workspace: '~/.openclaw/workspace' } },
+  channels: { whatsapp: { allowFrom: ['+15555550123'] } },
 }
 ```
 
@@ -125,19 +125,19 @@ To prevent the bot from responding to WhatsApp @-mentions in groups (only respon
 ```json5
 {
   agents: {
-    defaults: { workspace: "~/.openclaw/workspace" },
+    defaults: { workspace: '~/.openclaw/workspace' },
     list: [
       {
-        id: "main",
-        groupChat: { mentionPatterns: ["@openclaw", "reisponde"] },
+        id: 'main',
+        groupChat: { mentionPatterns: ['@openclaw', 'reisponde'] },
       },
     ],
   },
   channels: {
     whatsapp: {
       // Allowlist is DMs only; including your own number enables self-chat mode.
-      allowFrom: ["+15555550123"],
-      groups: { "*": { requireMention: true } },
+      allowFrom: ['+15555550123'],
+      groups: { '*': { requireMention: true } },
     },
   },
 }
@@ -159,11 +159,11 @@ Split your config into multiple files using the `$include` directive. This is us
   gateway: { port: 18789 },
 
   // Include a single file (replaces the key's value)
-  agents: { $include: "./agents.json5" },
+  agents: { $include: './agents.json5' },
 
   // Include multiple files (deep-merged in order)
   broadcast: {
-    $include: ["./clients/mueller.json5", "./clients/schmidt.json5"],
+    $include: ['./clients/mueller.json5', './clients/schmidt.json5'],
   },
 }
 ```
@@ -171,8 +171,8 @@ Split your config into multiple files using the `$include` directive. This is us
 ```json5
 // ~/.openclaw/agents.json5
 {
-  defaults: { sandbox: { mode: "all", scope: "session" } },
-  list: [{ id: "main", workspace: "~/.openclaw/workspace" }],
+  defaults: { sandbox: { mode: 'all', scope: 'session' } },
+  list: [{ id: 'main', workspace: '~/.openclaw/workspace' }],
 }
 ```
 
@@ -186,7 +186,7 @@ Split your config into multiple files using the `$include` directive. This is us
 ```json5
 // Sibling keys override included values
 {
-  $include: "./base.json5", // { a: 1, b: 2 }
+  $include: './base.json5', // { a: 1, b: 2 }
   b: 99, // Result: { a: 1, b: 99 }
 }
 ```
@@ -198,8 +198,8 @@ Included files can themselves contain `$include` directives (up to 10 levels dee
 ```json5
 // clients/mueller.json5
 {
-  agents: { $include: "./mueller/agents.json5" },
-  broadcast: { $include: "./mueller/broadcast.json5" },
+  agents: { $include: './mueller/agents.json5' },
+  broadcast: { $include: './mueller/broadcast.json5' },
 }
 ```
 
@@ -226,38 +226,38 @@ Included files can themselves contain `$include` directives (up to 10 levels dee
 ```json5
 // ~/.openclaw/openclaw.json
 {
-  gateway: { port: 18789, auth: { token: "secret" } },
+  gateway: { port: 18789, auth: { token: 'secret' } },
 
   // Common agent defaults
   agents: {
     defaults: {
-      sandbox: { mode: "all", scope: "session" },
+      sandbox: { mode: 'all', scope: 'session' },
     },
     // Merge agent lists from all clients
-    list: { $include: ["./clients/mueller/agents.json5", "./clients/schmidt/agents.json5"] },
+    list: { $include: ['./clients/mueller/agents.json5', './clients/schmidt/agents.json5'] },
   },
 
   // Merge broadcast configs
   broadcast: {
-    $include: ["./clients/mueller/broadcast.json5", "./clients/schmidt/broadcast.json5"],
+    $include: ['./clients/mueller/broadcast.json5', './clients/schmidt/broadcast.json5'],
   },
 
-  channels: { whatsapp: { groupPolicy: "allowlist" } },
+  channels: { whatsapp: { groupPolicy: 'allowlist' } },
 }
 ```
 
 ```json5
 // ~/.openclaw/clients/mueller/agents.json5
 [
-  { id: "mueller-transcribe", workspace: "~/clients/mueller/transcribe" },
-  { id: "mueller-docs", workspace: "~/clients/mueller/docs" },
+  { id: 'mueller-transcribe', workspace: '~/clients/mueller/transcribe' },
+  { id: 'mueller-docs', workspace: '~/clients/mueller/docs' },
 ]
 ```
 
 ```json5
 // ~/.openclaw/clients/mueller/broadcast.json5
 {
-  "120363403215116621@g.us": ["mueller-transcribe", "mueller-docs"],
+  '120363403215116621@g.us': ['mueller-transcribe', 'mueller-docs'],
 }
 ```
 
@@ -280,9 +280,9 @@ process env is missing the key (same non-overriding rule):
 ```json5
 {
   env: {
-    OPENROUTER_API_KEY: "sk-or-...",
+    OPENROUTER_API_KEY: 'sk-or-...',
     vars: {
-      GROQ_API_KEY: "gsk-...",
+      GROQ_API_KEY: 'gsk-...',
     },
   },
 }
@@ -320,14 +320,14 @@ You can reference environment variables directly in any config string value usin
 {
   models: {
     providers: {
-      "vercel-gateway": {
-        apiKey: "${VERCEL_GATEWAY_API_KEY}",
+      'vercel-gateway': {
+        apiKey: '${VERCEL_GATEWAY_API_KEY}',
       },
     },
   },
   gateway: {
     auth: {
-      token: "${OPENCLAW_GATEWAY_TOKEN}",
+      token: '${OPENCLAW_GATEWAY_TOKEN}',
     },
   },
 }
@@ -347,7 +347,7 @@ You can reference environment variables directly in any config string value usin
   models: {
     providers: {
       custom: {
-        baseUrl: "${CUSTOM_API_BASE}/v1", // → "https://api.example.com/v1"
+        baseUrl: '${CUSTOM_API_BASE}/v1', // → "https://api.example.com/v1"
       },
     },
   },
@@ -391,11 +391,11 @@ rotation order used for failover.
 {
   auth: {
     profiles: {
-      "anthropic:me@example.com": { provider: "anthropic", mode: "oauth", email: "me@example.com" },
-      "anthropic:work": { provider: "anthropic", mode: "api_key" },
+      'anthropic:me@example.com': { provider: 'anthropic', mode: 'oauth', email: 'me@example.com' },
+      'anthropic:work': { provider: 'anthropic', mode: 'api_key' },
     },
     order: {
-      anthropic: ["anthropic:me@example.com", "anthropic:work"],
+      anthropic: ['anthropic:me@example.com', 'anthropic:work'],
     },
   },
 }
@@ -422,12 +422,12 @@ If set, OpenClaw derives defaults (only when you haven’t set them explicitly):
   agents: {
     list: [
       {
-        id: "main",
+        id: 'main',
         identity: {
-          name: "Samantha",
-          theme: "helpful sloth",
-          emoji: "🦥",
-          avatar: "avatars/samantha.png",
+          name: 'Samantha',
+          theme: 'helpful sloth',
+          emoji: '🦥',
+          avatar: 'avatars/samantha.png',
         },
       },
     ],
@@ -442,11 +442,11 @@ Metadata written by CLI wizards (`onboard`, `configure`, `doctor`).
 ```json5
 {
   wizard: {
-    lastRunAt: "2026-01-01T00:00:00.000Z",
-    lastRunVersion: "2026.1.4",
-    lastRunCommit: "abc1234",
-    lastRunCommand: "configure",
-    lastRunMode: "local",
+    lastRunAt: '2026-01-01T00:00:00.000Z',
+    lastRunVersion: '2026.1.4',
+    lastRunCommit: 'abc1234',
+    lastRunCommand: 'configure',
+    lastRunMode: 'local',
   },
 }
 ```
@@ -465,15 +465,15 @@ Metadata written by CLI wizards (`onboard`, `configure`, `doctor`).
 ```json5
 {
   logging: {
-    level: "info",
-    file: "/tmp/openclaw/openclaw.log",
-    consoleLevel: "info",
-    consoleStyle: "pretty",
-    redactSensitive: "tools",
+    level: 'info',
+    file: '/tmp/openclaw/openclaw.log',
+    consoleLevel: 'info',
+    consoleStyle: 'pretty',
+    redactSensitive: 'tools',
     redactPatterns: [
       // Example: override defaults with your own rules.
-      "\\bTOKEN\\b\\s*[=:]\\s*([\"']?)([^\\s\"']+)\\1",
-      "/\\bsk-[A-Za-z0-9_-]{8,}\\b/gi",
+      '\\bTOKEN\\b\\s*[=:]\\s*(["\']?)([^\\s"\']+)\\1',
+      '/\\bsk-[A-Za-z0-9_-]{8,}\\b/gi',
     ],
   },
 }
@@ -505,10 +505,10 @@ For groups, use `channels.whatsapp.groupPolicy` + `channels.whatsapp.groupAllowF
 {
   channels: {
     whatsapp: {
-      dmPolicy: "pairing", // pairing | allowlist | open | disabled
-      allowFrom: ["+15555550123", "+447700900123"],
+      dmPolicy: 'pairing', // pairing | allowlist | open | disabled
+      allowFrom: ['+15555550123', '+447700900123'],
       textChunkLimit: 4000, // optional outbound chunk size (chars)
-      chunkMode: "length", // optional chunking mode (length | newline)
+      chunkMode: 'length', // optional chunking mode (length | newline)
       mediaMaxMb: 50, // optional inbound media cap (MB)
     },
   },
@@ -567,12 +567,12 @@ Run multiple accounts per channel (each account has its own `accountId` and opti
     telegram: {
       accounts: {
         default: {
-          name: "Primary bot",
-          botToken: "123456:ABC...",
+          name: 'Primary bot',
+          botToken: '123456:ABC...',
         },
         alerts: {
-          name: "Alerts bot",
-          botToken: "987654:XYZ...",
+          name: 'Alerts bot',
+          botToken: '987654:XYZ...',
         },
       },
     },
@@ -603,7 +603,7 @@ Group messages default to **require mention** (either metadata mention or regex 
     groupChat: { historyLimit: 50 },
   },
   agents: {
-    list: [{ id: "main", groupChat: { mentionPatterns: ["@openclaw", "openclaw"] } }],
+    list: [{ id: 'main', groupChat: { mentionPatterns: ['@openclaw', 'openclaw'] } }],
   },
 }
 ```
@@ -620,7 +620,7 @@ DM conversations use session-based history managed by the agent. You can limit t
     telegram: {
       dmHistoryLimit: 30, // limit DM sessions to 30 user turns
       dms: {
-        "123456789": { historyLimit: 50 }, // per-user override (user ID)
+        '123456789': { historyLimit: 50 }, // per-user override (user ID)
       },
     },
   },
@@ -641,8 +641,8 @@ Per-agent override (takes precedence when set, even `[]`):
 {
   agents: {
     list: [
-      { id: "work", groupChat: { mentionPatterns: ["@workbot", "\\+15555550123"] } },
-      { id: "personal", groupChat: { mentionPatterns: ["@homebot", "\\+15555550999"] } },
+      { id: 'work', groupChat: { mentionPatterns: ['@workbot', '\\+15555550123'] } },
+      { id: 'personal', groupChat: { mentionPatterns: ['@homebot', '\\+15555550999'] } },
     ],
   },
 }
@@ -657,17 +657,17 @@ To respond **only** to specific text triggers (ignoring native @-mentions):
   channels: {
     whatsapp: {
       // Include your own number to enable self-chat mode (ignore native @-mentions).
-      allowFrom: ["+15555550123"],
-      groups: { "*": { requireMention: true } },
+      allowFrom: ['+15555550123'],
+      groups: { '*': { requireMention: true } },
     },
   },
   agents: {
     list: [
       {
-        id: "main",
+        id: 'main',
         groupChat: {
           // Only these text patterns will trigger responses
-          mentionPatterns: ["reisponde", "@openclaw"],
+          mentionPatterns: ['reisponde', '@openclaw'],
         },
       },
     ],
@@ -683,27 +683,27 @@ Use `channels.*.groupPolicy` to control whether group/room messages are accepted
 {
   channels: {
     whatsapp: {
-      groupPolicy: "allowlist",
-      groupAllowFrom: ["+15551234567"],
+      groupPolicy: 'allowlist',
+      groupAllowFrom: ['+15551234567'],
     },
     telegram: {
-      groupPolicy: "allowlist",
-      groupAllowFrom: ["tg:123456789", "@alice"],
+      groupPolicy: 'allowlist',
+      groupAllowFrom: ['tg:123456789', '@alice'],
     },
     signal: {
-      groupPolicy: "allowlist",
-      groupAllowFrom: ["+15551234567"],
+      groupPolicy: 'allowlist',
+      groupAllowFrom: ['+15551234567'],
     },
     imessage: {
-      groupPolicy: "allowlist",
-      groupAllowFrom: ["chat_id:123"],
+      groupPolicy: 'allowlist',
+      groupAllowFrom: ['chat_id:123'],
     },
     msteams: {
-      groupPolicy: "allowlist",
-      groupAllowFrom: ["user@org.com"],
+      groupPolicy: 'allowlist',
+      groupAllowFrom: ['user@org.com'],
     },
     discord: {
-      groupPolicy: "allowlist",
+      groupPolicy: 'allowlist',
       guilds: {
         GUILD_ID: {
           channels: { help: { allow: true } },
@@ -711,8 +711,8 @@ Use `channels.*.groupPolicy` to control whether group/room messages are accepted
       },
     },
     slack: {
-      groupPolicy: "allowlist",
-      channels: { "#general": { allow: true } },
+      groupPolicy: 'allowlist',
+      channels: { '#general': { allow: true } },
     },
   },
 }
@@ -797,9 +797,9 @@ Full access (no sandbox):
   agents: {
     list: [
       {
-        id: "personal",
-        workspace: "~/.openclaw/workspace-personal",
-        sandbox: { mode: "off" },
+        id: 'personal',
+        workspace: '~/.openclaw/workspace-personal',
+        sandbox: { mode: 'off' },
       },
     ],
   },
@@ -813,23 +813,23 @@ Read-only tools + read-only workspace:
   agents: {
     list: [
       {
-        id: "family",
-        workspace: "~/.openclaw/workspace-family",
+        id: 'family',
+        workspace: '~/.openclaw/workspace-family',
         sandbox: {
-          mode: "all",
-          scope: "agent",
-          workspaceAccess: "ro",
+          mode: 'all',
+          scope: 'agent',
+          workspaceAccess: 'ro',
         },
         tools: {
           allow: [
-            "read",
-            "sessions_list",
-            "sessions_history",
-            "sessions_send",
-            "sessions_spawn",
-            "session_status",
+            'read',
+            'sessions_list',
+            'sessions_history',
+            'sessions_send',
+            'sessions_spawn',
+            'session_status',
           ],
-          deny: ["write", "edit", "apply_patch", "exec", "process", "browser"],
+          deny: ['write', 'edit', 'apply_patch', 'exec', 'process', 'browser'],
         },
       },
     ],
@@ -844,39 +844,39 @@ No filesystem access (messaging/session tools enabled):
   agents: {
     list: [
       {
-        id: "public",
-        workspace: "~/.openclaw/workspace-public",
+        id: 'public',
+        workspace: '~/.openclaw/workspace-public',
         sandbox: {
-          mode: "all",
-          scope: "agent",
-          workspaceAccess: "none",
+          mode: 'all',
+          scope: 'agent',
+          workspaceAccess: 'none',
         },
         tools: {
           allow: [
-            "sessions_list",
-            "sessions_history",
-            "sessions_send",
-            "sessions_spawn",
-            "session_status",
-            "whatsapp",
-            "telegram",
-            "slack",
-            "discord",
-            "gateway",
+            'sessions_list',
+            'sessions_history',
+            'sessions_send',
+            'sessions_spawn',
+            'session_status',
+            'whatsapp',
+            'telegram',
+            'slack',
+            'discord',
+            'gateway',
           ],
           deny: [
-            "read",
-            "write",
-            "edit",
-            "apply_patch",
-            "exec",
-            "process",
-            "browser",
-            "canvas",
-            "nodes",
-            "cron",
-            "gateway",
-            "image",
+            'read',
+            'write',
+            'edit',
+            'apply_patch',
+            'exec',
+            'process',
+            'browser',
+            'canvas',
+            'nodes',
+            'cron',
+            'gateway',
+            'image',
           ],
         },
       },
@@ -891,13 +891,13 @@ Example: two WhatsApp accounts → two agents:
 {
   agents: {
     list: [
-      { id: "home", default: true, workspace: "~/.openclaw/workspace-home" },
-      { id: "work", workspace: "~/.openclaw/workspace-work" },
+      { id: 'home', default: true, workspace: '~/.openclaw/workspace-home' },
+      { id: 'work', workspace: '~/.openclaw/workspace-work' },
     ],
   },
   bindings: [
-    { agentId: "home", match: { channel: "whatsapp", accountId: "personal" } },
-    { agentId: "work", match: { channel: "whatsapp", accountId: "biz" } },
+    { agentId: 'home', match: { channel: 'whatsapp', accountId: 'personal' } },
+    { agentId: 'work', match: { channel: 'whatsapp', accountId: 'biz' } },
   ],
   channels: {
     whatsapp: {
@@ -919,7 +919,7 @@ Agent-to-agent messaging is opt-in:
   tools: {
     agentToAgent: {
       enabled: false,
-      allow: ["home", "work"],
+      allow: ['home', 'work'],
     },
   },
 }
@@ -933,16 +933,16 @@ Controls how inbound messages behave when an agent run is already active.
 {
   messages: {
     queue: {
-      mode: "collect", // steer | followup | collect | steer-backlog (steer+backlog ok) | interrupt (queue=steer legacy)
+      mode: 'collect', // steer | followup | collect | steer-backlog (steer+backlog ok) | interrupt (queue=steer legacy)
       debounceMs: 1000,
       cap: 20,
-      drop: "summarize", // old | new | summarize
+      drop: 'summarize', // old | new | summarize
       byChannel: {
-        whatsapp: "collect",
-        telegram: "collect",
-        discord: "collect",
-        imessage: "collect",
-        webchat: "collect",
+        whatsapp: 'collect',
+        telegram: 'collect',
+        discord: 'collect',
+        imessage: 'collect',
+        webchat: 'collect',
       },
     },
   },
@@ -982,7 +982,7 @@ Controls how chat commands are enabled across connectors.
 ```json5
 {
   commands: {
-    native: "auto", // register native commands when supported (auto)
+    native: 'auto', // register native commands when supported (auto)
     text: true, // parse slash commands in chat messages
     bash: false, // allow ! (alias: /bash) (host-only; requires tools.elevated allowlists)
     bashForegroundMs: 2000, // bash foreground window (0 backgrounds immediately)
@@ -1044,39 +1044,39 @@ Set `channels.telegram.configWrites: false` to block Telegram-initiated config w
   channels: {
     telegram: {
       enabled: true,
-      botToken: "your-bot-token",
-      dmPolicy: "pairing", // pairing | allowlist | open | disabled
-      allowFrom: ["tg:123456789"], // optional; "open" requires ["*"]
+      botToken: 'your-bot-token',
+      dmPolicy: 'pairing', // pairing | allowlist | open | disabled
+      allowFrom: ['tg:123456789'], // optional; "open" requires ["*"]
       groups: {
-        "*": { requireMention: true },
-        "-1001234567890": {
-          allowFrom: ["@admin"],
-          systemPrompt: "Keep answers brief.",
+        '*': { requireMention: true },
+        '-1001234567890': {
+          allowFrom: ['@admin'],
+          systemPrompt: 'Keep answers brief.',
           topics: {
-            "99": {
+            '99': {
               requireMention: false,
-              skills: ["search"],
-              systemPrompt: "Stay on topic.",
+              skills: ['search'],
+              systemPrompt: 'Stay on topic.',
             },
           },
         },
       },
       customCommands: [
-        { command: "backup", description: "Git backup" },
-        { command: "generate", description: "Create an image" },
+        { command: 'backup', description: 'Git backup' },
+        { command: 'generate', description: 'Create an image' },
       ],
       historyLimit: 50, // include last N group messages as context (0 disables)
-      replyToMode: "first", // off | first | all
+      replyToMode: 'first', // off | first | all
       linkPreview: true, // toggle outbound link previews
-      streamMode: "partial", // off | partial | block (draft streaming; separate from block streaming)
+      streamMode: 'partial', // off | partial | block (draft streaming; separate from block streaming)
       draftChunk: {
         // optional; only for streamMode=block
         minChars: 200,
         maxChars: 800,
-        breakPreference: "paragraph", // paragraph | newline | sentence
+        breakPreference: 'paragraph', // paragraph | newline | sentence
       },
       actions: { reactions: true, sendMessage: true }, // tool action gates (false disables)
-      reactionNotifications: "own", // off | own | all
+      reactionNotifications: 'own', // off | own | all
       mediaMaxMb: 5,
       retry: {
         // outbound retry policy
@@ -1089,10 +1089,10 @@ Set `channels.telegram.configWrites: false` to block Telegram-initiated config w
         // transport overrides
         autoSelectFamily: false,
       },
-      proxy: "socks5://localhost:9050",
-      webhookUrl: "https://example.com/telegram-webhook",
-      webhookSecret: "secret",
-      webhookPath: "/telegram-webhook",
+      proxy: 'socks5://localhost:9050',
+      webhookUrl: 'https://example.com/telegram-webhook',
+      webhookSecret: 'secret',
+      webhookPath: '/telegram-webhook',
     },
   },
 }
@@ -1115,7 +1115,7 @@ Multi-account support lives under `channels.discord.accounts` (see the multi-acc
   channels: {
     discord: {
       enabled: true,
-      token: "your-bot-token",
+      token: 'your-bot-token',
       mediaMaxMb: 8, // clamp inbound media size
       allowBots: false, // allow bot-authored messages
       actions: {
@@ -1136,36 +1136,36 @@ Multi-account support lives under `channels.discord.accounts` (see the multi-acc
         events: true,
         moderation: false,
       },
-      replyToMode: "off", // off | first | all
+      replyToMode: 'off', // off | first | all
       dm: {
         enabled: true, // disable all DMs when false
-        policy: "pairing", // pairing | allowlist | open | disabled
-        allowFrom: ["1234567890", "steipete"], // optional DM allowlist ("open" requires ["*"])
+        policy: 'pairing', // pairing | allowlist | open | disabled
+        allowFrom: ['1234567890', 'steipete'], // optional DM allowlist ("open" requires ["*"])
         groupEnabled: false, // enable group DMs
-        groupChannels: ["openclaw-dm"], // optional group DM allowlist
+        groupChannels: ['openclaw-dm'], // optional group DM allowlist
       },
       guilds: {
-        "123456789012345678": {
+        '123456789012345678': {
           // guild id (preferred) or slug
-          slug: "friends-of-openclaw",
+          slug: 'friends-of-openclaw',
           requireMention: false, // per-guild default
-          reactionNotifications: "own", // off | own | all | allowlist
-          users: ["987654321098765432"], // optional per-guild user allowlist
+          reactionNotifications: 'own', // off | own | all | allowlist
+          users: ['987654321098765432'], // optional per-guild user allowlist
           channels: {
             general: { allow: true },
             help: {
               allow: true,
               requireMention: true,
-              users: ["987654321098765432"],
-              skills: ["docs"],
-              systemPrompt: "Short answers only.",
+              users: ['987654321098765432'],
+              skills: ['docs'],
+              systemPrompt: 'Short answers only.',
             },
           },
         },
       },
       historyLimit: 20, // include last N guild messages as context
       textChunkLimit: 2000, // optional outbound text chunk size (chars)
-      chunkMode: "length", // optional chunking mode (length | newline)
+      chunkMode: 'length', // optional chunking mode (length | newline)
       maxLinesPerMessage: 17, // soft max lines per message (Discord UI clipping)
       retry: {
         // outbound retry policy
@@ -1201,22 +1201,22 @@ Multi-account support lives under `channels.googlechat.accounts` (see the multi-
   channels: {
     googlechat: {
       enabled: true,
-      serviceAccountFile: "/path/to/service-account.json",
-      audienceType: "app-url", // app-url | project-number
-      audience: "https://gateway.example.com/googlechat",
-      webhookPath: "/googlechat",
-      botUser: "users/1234567890", // optional; improves mention detection
+      serviceAccountFile: '/path/to/service-account.json',
+      audienceType: 'app-url', // app-url | project-number
+      audience: 'https://gateway.example.com/googlechat',
+      webhookPath: '/googlechat',
+      botUser: 'users/1234567890', // optional; improves mention detection
       dm: {
         enabled: true,
-        policy: "pairing", // pairing | allowlist | open | disabled
-        allowFrom: ["users/1234567890"], // optional; "open" requires ["*"]
+        policy: 'pairing', // pairing | allowlist | open | disabled
+        allowFrom: ['users/1234567890'], // optional; "open" requires ["*"]
       },
-      groupPolicy: "allowlist",
+      groupPolicy: 'allowlist',
       groups: {
-        "spaces/AAAA": { allow: true, requireMention: true },
+        'spaces/AAAA': { allow: true, requireMention: true },
       },
       actions: { reactions: true },
-      typingIndicator: "message",
+      typingIndicator: 'message',
       mediaMaxMb: 20,
     },
   },
@@ -1239,33 +1239,33 @@ Slack runs in Socket Mode and requires both a bot token and app token:
   channels: {
     slack: {
       enabled: true,
-      botToken: "xoxb-...",
-      appToken: "xapp-...",
+      botToken: 'xoxb-...',
+      appToken: 'xapp-...',
       dm: {
         enabled: true,
-        policy: "pairing", // pairing | allowlist | open | disabled
-        allowFrom: ["U123", "U456", "*"], // optional; "open" requires ["*"]
+        policy: 'pairing', // pairing | allowlist | open | disabled
+        allowFrom: ['U123', 'U456', '*'], // optional; "open" requires ["*"]
         groupEnabled: false,
-        groupChannels: ["G123"],
+        groupChannels: ['G123'],
       },
       channels: {
         C123: { allow: true, requireMention: true, allowBots: false },
-        "#general": {
+        '#general': {
           allow: true,
           requireMention: true,
           allowBots: false,
-          users: ["U123"],
-          skills: ["docs"],
-          systemPrompt: "Short answers only.",
+          users: ['U123'],
+          skills: ['docs'],
+          systemPrompt: 'Short answers only.',
         },
       },
       historyLimit: 50, // include last N channel/group messages as context (0 disables)
       allowBots: false,
-      reactionNotifications: "own", // off | own | all | allowlist
-      reactionAllowlist: ["U123"],
-      replyToMode: "off", // off | first | all
+      reactionNotifications: 'own', // off | own | all | allowlist
+      reactionAllowlist: ['U123'],
+      replyToMode: 'off', // off | first | all
       thread: {
-        historyScope: "thread", // thread | channel
+        historyScope: 'thread', // thread | channel
         inheritParent: false,
       },
       actions: {
@@ -1277,12 +1277,12 @@ Slack runs in Socket Mode and requires both a bot token and app token:
       },
       slashCommand: {
         enabled: true,
-        name: "openclaw",
-        sessionPrefix: "slack:slash",
+        name: 'openclaw',
+        sessionPrefix: 'slack:slash',
         ephemeral: true,
       },
       textChunkLimit: 4000,
-      chunkMode: "length",
+      chunkMode: 'length',
       mediaMaxMb: 20,
     },
   },
@@ -1329,13 +1329,13 @@ Mattermost requires a bot token plus the base URL for your server:
   channels: {
     mattermost: {
       enabled: true,
-      botToken: "mm-token",
-      baseUrl: "https://chat.example.com",
-      dmPolicy: "pairing",
-      chatmode: "oncall", // oncall | onmessage | onchar
-      oncharPrefixes: [">", "!"],
+      botToken: 'mm-token',
+      baseUrl: 'https://chat.example.com',
+      dmPolicy: 'pairing',
+      chatmode: 'oncall', // oncall | onmessage | onchar
+      oncharPrefixes: ['>', '!'],
       textChunkLimit: 4000,
-      chunkMode: "length",
+      chunkMode: 'length',
     },
   },
 }
@@ -1366,8 +1366,8 @@ Signal reactions can emit system events (shared reaction tooling):
 {
   channels: {
     signal: {
-      reactionNotifications: "own", // off | own | all | allowlist
-      reactionAllowlist: ["+15551234567", "uuid:123e4567-e89b-12d3-a456-426614174000"],
+      reactionNotifications: 'own', // off | own | all | allowlist
+      reactionAllowlist: ['+15551234567', 'uuid:123e4567-e89b-12d3-a456-426614174000'],
       historyLimit: 50, // include last N group messages as context (0 disables)
     },
   },
@@ -1390,16 +1390,16 @@ OpenClaw spawns `imsg rpc` (JSON-RPC over stdio). No daemon or port required.
   channels: {
     imessage: {
       enabled: true,
-      cliPath: "imsg",
-      dbPath: "~/Library/Messages/chat.db",
-      remoteHost: "user@gateway-host", // SCP for remote attachments when using SSH wrapper
-      dmPolicy: "pairing", // pairing | allowlist | open | disabled
-      allowFrom: ["+15555550123", "user@example.com", "chat_id:123"],
+      cliPath: 'imsg',
+      dbPath: '~/Library/Messages/chat.db',
+      remoteHost: 'user@gateway-host', // SCP for remote attachments when using SSH wrapper
+      dmPolicy: 'pairing', // pairing | allowlist | open | disabled
+      allowFrom: ['+15555550123', 'user@example.com', 'chat_id:123'],
       historyLimit: 50, // include last N group messages as context (0 disables)
       includeAttachments: false,
       mediaMaxMb: 16,
-      service: "auto",
-      region: "US",
+      service: 'auto',
+      region: 'US',
     },
   },
 }
@@ -1430,7 +1430,7 @@ Default: `~/.openclaw/workspace`.
 
 ```json5
 {
-  agents: { defaults: { workspace: "~/.openclaw/workspace" } },
+  agents: { defaults: { workspace: '~/.openclaw/workspace' } },
 }
 ```
 
@@ -1445,7 +1445,7 @@ working directory). The path must exist to be used.
 
 ```json5
 {
-  agents: { defaults: { repoRoot: "~/Projects/openclaw" } },
+  agents: { defaults: { repoRoot: '~/Projects/openclaw' } },
 }
 ```
 
@@ -1482,7 +1482,7 @@ message envelopes). If unset, OpenClaw uses the host timezone at runtime.
 
 ```json5
 {
-  agents: { defaults: { userTimezone: "America/Chicago" } },
+  agents: { defaults: { userTimezone: 'America/Chicago' } },
 }
 ```
 
@@ -1493,7 +1493,7 @@ Default: `auto` (OS preference).
 
 ```json5
 {
-  agents: { defaults: { timeFormat: "auto" } }, // auto | 12 | 24
+  agents: { defaults: { timeFormat: 'auto' } }, // auto | 12 | 24
 }
 ```
 
@@ -1505,9 +1505,9 @@ See [Messages](/concepts/messages) for queueing, sessions, and streaming context
 ```json5
 {
   messages: {
-    responsePrefix: "🦞", // or "auto"
-    ackReaction: "👀",
-    ackReactionScope: "group-mentions",
+    responsePrefix: '🦞', // or "auto"
+    ackReaction: '👀',
+    ackReactionScope: 'group-mentions',
     removeAckAfterReply: false,
   },
 }
@@ -1539,7 +1539,7 @@ Unresolved variables remain as literal text.
 ```json5
 {
   messages: {
-    responsePrefix: "[{model} | think:{thinkingLevel}]",
+    responsePrefix: '[{model} | think:{thinkingLevel}]',
   },
 }
 ```
@@ -1576,24 +1576,24 @@ voice notes; other channels send MP3 audio.
 {
   messages: {
     tts: {
-      auto: "always", // off | always | inbound | tagged
-      mode: "final", // final | all (include tool/block replies)
-      provider: "elevenlabs",
-      summaryModel: "openai/gpt-4.1-mini",
+      auto: 'always', // off | always | inbound | tagged
+      mode: 'final', // final | all (include tool/block replies)
+      provider: 'elevenlabs',
+      summaryModel: 'openai/gpt-4.1-mini',
       modelOverrides: {
         enabled: true,
       },
       maxTextLength: 4000,
       timeoutMs: 30000,
-      prefsPath: "~/.openclaw/settings/tts.json",
+      prefsPath: '~/.openclaw/settings/tts.json',
       elevenlabs: {
-        apiKey: "elevenlabs_api_key",
-        baseUrl: "https://api.elevenlabs.io",
-        voiceId: "voice_id",
-        modelId: "eleven_multilingual_v2",
+        apiKey: 'elevenlabs_api_key',
+        baseUrl: 'https://api.elevenlabs.io',
+        voiceId: 'voice_id',
+        modelId: 'eleven_multilingual_v2',
         seed: 42,
-        applyTextNormalization: "auto",
-        languageCode: "en",
+        applyTextNormalization: 'auto',
+        languageCode: 'en',
         voiceSettings: {
           stability: 0.5,
           similarityBoost: 0.75,
@@ -1603,9 +1603,9 @@ voice notes; other channels send MP3 audio.
         },
       },
       openai: {
-        apiKey: "openai_api_key",
-        model: "gpt-4o-mini-tts",
-        voice: "alloy",
+        apiKey: 'openai_api_key',
+        model: 'gpt-4o-mini-tts',
+        voice: 'alloy',
       },
     },
   },
@@ -1637,14 +1637,14 @@ Defaults for Talk mode (macOS/iOS/Android). Voice IDs fall back to `ELEVENLABS_V
 ```json5
 {
   talk: {
-    voiceId: "elevenlabs_voice_id",
+    voiceId: 'elevenlabs_voice_id',
     voiceAliases: {
-      Clawd: "EXAVITQu4vr4xnSDxMaL",
-      Roger: "CwhRBWXzGAHq8TQ4Fs17",
+      Clawd: 'EXAVITQu4vr4xnSDxMaL',
+      Roger: 'CwhRBWXzGAHq8TQ4Fs17',
     },
-    modelId: "eleven_v3",
-    outputFormat: "mp3_44100_128",
-    apiKey: "elevenlabs_api_key",
+    modelId: 'eleven_v3',
+    outputFormat: 'mp3_44100_128',
+    apiKey: 'elevenlabs_api_key',
     interruptOnSpeech: true,
   },
 }
@@ -1670,10 +1670,10 @@ Example:
   agents: {
     defaults: {
       models: {
-        "anthropic/claude-sonnet-4-5-20250929": {
+        'anthropic/claude-sonnet-4-5-20250929': {
           params: { temperature: 0.6 },
         },
-        "openai/gpt-5.2": {
+        'openai/gpt-5.2': {
           params: { maxTokens: 8192 },
         },
       },
@@ -1706,12 +1706,12 @@ Example: Opus 4.5 primary with MiniMax M2.1 fallback (hosted MiniMax):
   agents: {
     defaults: {
       models: {
-        "anthropic/claude-opus-4-5": { alias: "opus" },
-        "minimax/MiniMax-M2.1": { alias: "minimax" },
+        'anthropic/claude-opus-4-5': { alias: 'opus' },
+        'minimax/MiniMax-M2.1': { alias: 'minimax' },
       },
       model: {
-        primary: "anthropic/claude-opus-4-5",
-        fallbacks: ["minimax/MiniMax-M2.1"],
+        primary: 'anthropic/claude-opus-4-5',
+        fallbacks: ['minimax/MiniMax-M2.1'],
       },
     },
   },
@@ -1740,20 +1740,20 @@ Example:
   agents: {
     defaults: {
       cliBackends: {
-        "claude-cli": {
-          command: "/opt/homebrew/bin/claude",
+        'claude-cli': {
+          command: '/opt/homebrew/bin/claude',
         },
-        "my-cli": {
-          command: "my-cli",
-          args: ["--json"],
-          output: "json",
-          modelArg: "--model",
-          sessionArg: "--session",
-          sessionMode: "existing",
-          systemPromptArg: "--system",
-          systemPromptWhen: "first",
-          imageArg: "--image",
-          imageMode: "repeat",
+        'my-cli': {
+          command: 'my-cli',
+          args: ['--json'],
+          output: 'json',
+          modelArg: '--model',
+          sessionArg: '--session',
+          sessionMode: 'existing',
+          systemPromptArg: '--system',
+          systemPromptWhen: 'first',
+          imageArg: '--image',
+          imageMode: 'repeat',
         },
       },
     },
@@ -1766,42 +1766,42 @@ Example:
   agents: {
     defaults: {
       models: {
-        "anthropic/claude-opus-4-5": { alias: "Opus" },
-        "anthropic/claude-sonnet-4-1": { alias: "Sonnet" },
-        "openrouter/deepseek/deepseek-r1:free": {},
-        "zai/glm-4.7": {
-          alias: "GLM",
+        'anthropic/claude-opus-4-5': { alias: 'Opus' },
+        'anthropic/claude-sonnet-4-1': { alias: 'Sonnet' },
+        'openrouter/deepseek/deepseek-r1:free': {},
+        'zai/glm-4.7': {
+          alias: 'GLM',
           params: {
             thinking: {
-              type: "enabled",
+              type: 'enabled',
               clear_thinking: false,
             },
           },
         },
       },
       model: {
-        primary: "anthropic/claude-opus-4-5",
+        primary: 'anthropic/claude-opus-4-5',
         fallbacks: [
-          "openrouter/deepseek/deepseek-r1:free",
-          "openrouter/meta-llama/llama-3.3-70b-instruct:free",
+          'openrouter/deepseek/deepseek-r1:free',
+          'openrouter/meta-llama/llama-3.3-70b-instruct:free',
         ],
       },
       imageModel: {
-        primary: "openrouter/qwen/qwen-2.5-vl-72b-instruct:free",
-        fallbacks: ["openrouter/google/gemini-2.0-flash-vision:free"],
+        primary: 'openrouter/qwen/qwen-2.5-vl-72b-instruct:free',
+        fallbacks: ['openrouter/google/gemini-2.0-flash-vision:free'],
       },
-      thinkingDefault: "low",
-      verboseDefault: "off",
-      elevatedDefault: "on",
+      thinkingDefault: 'low',
+      verboseDefault: 'off',
+      elevatedDefault: 'on',
       timeoutSeconds: 600,
       mediaMaxMb: 5,
       heartbeat: {
-        every: "30m",
-        target: "last",
+        every: '30m',
+        target: 'last',
       },
       maxConcurrent: 3,
       subagents: {
-        model: "minimax/MiniMax-M2.1",
+        model: 'minimax/MiniMax-M2.1',
         maxConcurrent: 1,
         archiveAfterMinutes: 60,
       },
@@ -1854,7 +1854,7 @@ Default (adaptive):
 
 ```json5
 {
-  agents: { defaults: { contextPruning: { mode: "adaptive" } } },
+  agents: { defaults: { contextPruning: { mode: 'adaptive' } } },
 }
 ```
 
@@ -1862,7 +1862,7 @@ To disable:
 
 ```json5
 {
-  agents: { defaults: { contextPruning: { mode: "off" } } },
+  agents: { defaults: { contextPruning: { mode: 'off' } } },
 }
 ```
 
@@ -1879,7 +1879,7 @@ Example (aggressive, minimal):
 
 ```json5
 {
-  agents: { defaults: { contextPruning: { mode: "aggressive" } } },
+  agents: { defaults: { contextPruning: { mode: 'aggressive' } } },
 }
 ```
 
@@ -1890,15 +1890,15 @@ Example (adaptive tuned):
   agents: {
     defaults: {
       contextPruning: {
-        mode: "adaptive",
+        mode: 'adaptive',
         keepLastAssistants: 3,
         softTrimRatio: 0.3,
         hardClearRatio: 0.5,
         minPrunableToolChars: 50000,
         softTrim: { maxChars: 4000, headChars: 1500, tailChars: 1500 },
-        hardClear: { enabled: true, placeholder: "[Old tool result content cleared]" },
+        hardClear: { enabled: true, placeholder: '[Old tool result content cleared]' },
         // Optional: restrict pruning to specific tools (deny wins; supports "*" wildcards)
-        tools: { deny: ["browser", "canvas"] },
+        tools: { deny: ['browser', 'canvas'] },
       },
     },
   },
@@ -1934,13 +1934,13 @@ Example (tuned):
   agents: {
     defaults: {
       compaction: {
-        mode: "safeguard",
+        mode: 'safeguard',
         reserveTokensFloor: 24000,
         memoryFlush: {
           enabled: true,
           softThresholdTokens: 6000,
-          systemPrompt: "Session nearing compaction. Store durable memories now.",
-          prompt: "Write any lasting notes to memory/YYYY-MM-DD.md; reply with NO_REPLY if nothing to store.",
+          systemPrompt: 'Session nearing compaction. Store durable memories now.',
+          prompt: 'Write any lasting notes to memory/YYYY-MM-DD.md; reply with NO_REPLY if nothing to store.',
         },
       },
     },
@@ -1977,7 +1977,7 @@ Block streaming:
   Example:
   ```json5
   {
-    agents: { defaults: { humanDelay: { mode: "natural" } } },
+    agents: { defaults: { humanDelay: { mode: 'natural' } } },
   }
   ```
   See [/concepts/streaming](/concepts/streaming) for behavior + chunking details.
@@ -2088,18 +2088,18 @@ Example:
         enabled: true,
         maxBytes: 20971520,
         scope: {
-          default: "deny",
-          rules: [{ action: "allow", match: { chatType: "direct" } }],
+          default: 'deny',
+          rules: [{ action: 'allow', match: { chatType: 'direct' } }],
         },
         models: [
-          { provider: "openai", model: "gpt-4o-mini-transcribe" },
-          { type: "cli", command: "whisper", args: ["--model", "base", "{{MediaPath}}"] },
+          { provider: 'openai', model: 'gpt-4o-mini-transcribe' },
+          { type: 'cli', command: 'whisper', args: ['--model', 'base', '{{MediaPath}}'] },
         ],
       },
       video: {
         enabled: true,
         maxBytes: 52428800,
-        models: [{ provider: "google", model: "gemini-3-flash-preview" }],
+        models: [{ provider: 'google', model: 'gemini-3-flash-preview' }],
       },
     },
   },
@@ -2127,8 +2127,8 @@ Example (messaging-only by default, allow Slack + Discord tools too):
 ```json5
 {
   tools: {
-    profile: "messaging",
-    allow: ["slack", "discord"],
+    profile: 'messaging',
+    allow: ['slack', 'discord'],
   },
 }
 ```
@@ -2138,8 +2138,8 @@ Example (coding profile, but deny exec/process everywhere):
 ```json5
 {
   tools: {
-    profile: "coding",
-    deny: ["group:runtime"],
+    profile: 'coding',
+    deny: ['group:runtime'],
   },
 }
 ```
@@ -2156,9 +2156,9 @@ Example (keep global coding profile, but minimal tools for Google Antigravity):
 ```json5
 {
   tools: {
-    profile: "coding",
+    profile: 'coding',
     byProvider: {
-      "google-antigravity": { profile: "minimal" },
+      'google-antigravity': { profile: 'minimal' },
     },
   },
 }
@@ -2169,9 +2169,9 @@ Example (provider/model-specific allowlist):
 ```json5
 {
   tools: {
-    allow: ["group:fs", "group:runtime", "sessions_list"],
+    allow: ['group:fs', 'group:runtime', 'sessions_list'],
     byProvider: {
-      "openai/gpt-5.2": { allow: ["group:fs", "sessions_list"] },
+      'openai/gpt-5.2': { allow: ['group:fs', 'sessions_list'] },
     },
   },
 }
@@ -2185,7 +2185,7 @@ Example (disable browser/canvas everywhere):
 
 ```json5
 {
-  tools: { deny: ["browser", "canvas"] },
+  tools: { deny: ['browser', 'canvas'] },
 }
 ```
 
@@ -2221,8 +2221,8 @@ Example:
     elevated: {
       enabled: true,
       allowFrom: {
-        whatsapp: ["+15555550123"],
-        discord: ["steipete", "1234567890123"],
+        whatsapp: ['+15555550123'],
+        discord: ['steipete', '1234567890123'],
       },
     },
   },
@@ -2236,7 +2236,7 @@ Per-agent override (further restrict):
   agents: {
     list: [
       {
-        id: "family",
+        id: 'family',
         tools: {
           elevated: { enabled: false },
         },
@@ -2293,48 +2293,48 @@ For package installs, ensure network egress, a writable root FS, and a root user
   agents: {
     defaults: {
       sandbox: {
-        mode: "non-main", // off | non-main | all
-        scope: "agent", // session | agent | shared (agent is default)
-        workspaceAccess: "none", // none | ro | rw
-        workspaceRoot: "~/.openclaw/sandboxes",
+        mode: 'non-main', // off | non-main | all
+        scope: 'agent', // session | agent | shared (agent is default)
+        workspaceAccess: 'none', // none | ro | rw
+        workspaceRoot: '~/.openclaw/sandboxes',
         docker: {
-          image: "openclaw-sandbox:bookworm-slim",
-          containerPrefix: "openclaw-sbx-",
-          workdir: "/workspace",
+          image: 'openclaw-sandbox:bookworm-slim',
+          containerPrefix: 'openclaw-sbx-',
+          workdir: '/workspace',
           readOnlyRoot: true,
-          tmpfs: ["/tmp", "/var/tmp", "/run"],
-          network: "none",
-          user: "1000:1000",
-          capDrop: ["ALL"],
-          env: { LANG: "C.UTF-8" },
-          setupCommand: "apt-get update && apt-get install -y git curl jq",
+          tmpfs: ['/tmp', '/var/tmp', '/run'],
+          network: 'none',
+          user: '1000:1000',
+          capDrop: ['ALL'],
+          env: { LANG: 'C.UTF-8' },
+          setupCommand: 'apt-get update && apt-get install -y git curl jq',
           // Per-agent override (multi-agent): agents.list[].sandbox.docker.*
           pidsLimit: 256,
-          memory: "1g",
-          memorySwap: "2g",
+          memory: '1g',
+          memorySwap: '2g',
           cpus: 1,
           ulimits: {
             nofile: { soft: 1024, hard: 2048 },
             nproc: 256,
           },
-          seccompProfile: "/path/to/seccomp.json",
-          apparmorProfile: "openclaw-sandbox",
-          dns: ["1.1.1.1", "8.8.8.8"],
-          extraHosts: ["internal.service:10.0.0.5"],
-          binds: ["/var/run/docker.sock:/var/run/docker.sock", "/home/user/source:/source:rw"],
+          seccompProfile: '/path/to/seccomp.json',
+          apparmorProfile: 'openclaw-sandbox',
+          dns: ['1.1.1.1', '8.8.8.8'],
+          extraHosts: ['internal.service:10.0.0.5'],
+          binds: ['/var/run/docker.sock:/var/run/docker.sock', '/home/user/source:/source:rw'],
         },
         browser: {
           enabled: false,
-          image: "openclaw-sandbox-browser:bookworm-slim",
-          containerPrefix: "openclaw-sbx-browser-",
+          image: 'openclaw-sandbox-browser:bookworm-slim',
+          containerPrefix: 'openclaw-sbx-browser-',
           cdpPort: 9222,
           vncPort: 5900,
           noVncPort: 6080,
           headless: false,
           enableNoVnc: true,
           allowHostControl: false,
-          allowedControlUrls: ["http://10.0.0.42:18791"],
-          allowedControlHosts: ["browser.lab.local", "10.0.0.42"],
+          allowedControlUrls: ['http://10.0.0.42:18791'],
+          allowedControlHosts: ['browser.lab.local', '10.0.0.42'],
           allowedControlPorts: [18791],
           autoStart: true,
           autoStartTimeoutMs: 12000,
@@ -2350,19 +2350,19 @@ For package installs, ensure network egress, a writable root FS, and a root user
     sandbox: {
       tools: {
         allow: [
-          "exec",
-          "process",
-          "read",
-          "write",
-          "edit",
-          "apply_patch",
-          "sessions_list",
-          "sessions_history",
-          "sessions_send",
-          "sessions_spawn",
-          "session_status",
+          'exec',
+          'process',
+          'read',
+          'write',
+          'edit',
+          'apply_patch',
+          'sessions_list',
+          'sessions_history',
+          'sessions_send',
+          'sessions_spawn',
+          'session_status',
         ],
-        deny: ["browser", "canvas", "nodes", "cron", "discord", "gateway"],
+        deny: ['browser', 'canvas', 'nodes', 'cron', 'discord', 'gateway'],
       },
     },
   },
@@ -2426,25 +2426,25 @@ Select the model via `agents.defaults.model.primary` (provider/model).
 {
   agents: {
     defaults: {
-      model: { primary: "custom-proxy/llama-3.1-8b" },
+      model: { primary: 'custom-proxy/llama-3.1-8b' },
       models: {
-        "custom-proxy/llama-3.1-8b": {},
+        'custom-proxy/llama-3.1-8b': {},
       },
     },
   },
   models: {
-    mode: "merge",
+    mode: 'merge',
     providers: {
-      "custom-proxy": {
-        baseUrl: "http://localhost:4000/v1",
-        apiKey: "LITELLM_KEY",
-        api: "openai-completions",
+      'custom-proxy': {
+        baseUrl: 'http://localhost:4000/v1',
+        apiKey: 'LITELLM_KEY',
+        api: 'openai-completions',
         models: [
           {
-            id: "llama-3.1-8b",
-            name: "Llama 3.1 8B",
+            id: 'llama-3.1-8b',
+            name: 'Llama 3.1 8B',
             reasoning: false,
-            input: ["text"],
+            input: ['text'],
             cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
             contextWindow: 128000,
             maxTokens: 32000,
@@ -2472,8 +2472,8 @@ Notes:
 {
   agents: {
     defaults: {
-      model: { primary: "opencode/claude-opus-4-5" },
-      models: { "opencode/claude-opus-4-5": { alias: "Opus" } },
+      model: { primary: 'opencode/claude-opus-4-5' },
+      models: { 'opencode/claude-opus-4-5': { alias: 'Opus' } },
     },
   },
 }
@@ -2490,8 +2490,8 @@ Shortcut: `openclaw onboard --auth-choice zai-api-key`.
 {
   agents: {
     defaults: {
-      model: { primary: "zai/glm-4.7" },
-      models: { "zai/glm-4.7": {} },
+      model: { primary: 'zai/glm-4.7' },
+      models: { 'zai/glm-4.7': {} },
     },
   },
 }
@@ -2515,26 +2515,26 @@ Use Moonshot's OpenAI-compatible endpoint:
 
 ```json5
 {
-  env: { MOONSHOT_API_KEY: "sk-..." },
+  env: { MOONSHOT_API_KEY: 'sk-...' },
   agents: {
     defaults: {
-      model: { primary: "moonshot/kimi-k2.5" },
-      models: { "moonshot/kimi-k2.5": { alias: "Kimi K2.5" } },
+      model: { primary: 'moonshot/kimi-k2.5' },
+      models: { 'moonshot/kimi-k2.5': { alias: 'Kimi K2.5' } },
     },
   },
   models: {
-    mode: "merge",
+    mode: 'merge',
     providers: {
       moonshot: {
-        baseUrl: "https://api.moonshot.ai/v1",
-        apiKey: "${MOONSHOT_API_KEY}",
-        api: "openai-completions",
+        baseUrl: 'https://api.moonshot.ai/v1',
+        apiKey: '${MOONSHOT_API_KEY}',
+        api: 'openai-completions',
         models: [
           {
-            id: "kimi-k2.5",
-            name: "Kimi K2.5",
+            id: 'kimi-k2.5',
+            name: 'Kimi K2.5',
             reasoning: false,
-            input: ["text"],
+            input: ['text'],
             cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
             contextWindow: 256000,
             maxTokens: 8192,
@@ -2558,11 +2558,11 @@ Use Moonshot AI's Kimi Coding endpoint (Anthropic-compatible, built-in provider)
 
 ```json5
 {
-  env: { KIMI_API_KEY: "sk-..." },
+  env: { KIMI_API_KEY: 'sk-...' },
   agents: {
     defaults: {
-      model: { primary: "kimi-coding/k2p5" },
-      models: { "kimi-coding/k2p5": { alias: "Kimi K2.5" } },
+      model: { primary: 'kimi-coding/k2p5' },
+      models: { 'kimi-coding/k2p5': { alias: 'Kimi K2.5' } },
     },
   },
 }
@@ -2579,26 +2579,26 @@ Use Synthetic's Anthropic-compatible endpoint:
 
 ```json5
 {
-  env: { SYNTHETIC_API_KEY: "sk-..." },
+  env: { SYNTHETIC_API_KEY: 'sk-...' },
   agents: {
     defaults: {
-      model: { primary: "synthetic/hf:MiniMaxAI/MiniMax-M2.1" },
-      models: { "synthetic/hf:MiniMaxAI/MiniMax-M2.1": { alias: "MiniMax M2.1" } },
+      model: { primary: 'synthetic/hf:MiniMaxAI/MiniMax-M2.1' },
+      models: { 'synthetic/hf:MiniMaxAI/MiniMax-M2.1': { alias: 'MiniMax M2.1' } },
     },
   },
   models: {
-    mode: "merge",
+    mode: 'merge',
     providers: {
       synthetic: {
-        baseUrl: "https://api.synthetic.new/anthropic",
-        apiKey: "${SYNTHETIC_API_KEY}",
-        api: "anthropic-messages",
+        baseUrl: 'https://api.synthetic.new/anthropic',
+        apiKey: '${SYNTHETIC_API_KEY}',
+        api: 'anthropic-messages',
         models: [
           {
-            id: "hf:MiniMaxAI/MiniMax-M2.1",
-            name: "MiniMax M2.1",
+            id: 'hf:MiniMaxAI/MiniMax-M2.1',
+            name: 'MiniMax M2.1',
             reasoning: false,
-            input: ["text"],
+            input: ['text'],
             cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
             contextWindow: 192000,
             maxTokens: 65536,
@@ -2627,25 +2627,25 @@ Use MiniMax M2.1 directly without LM Studio:
 ```json5
 {
   agent: {
-    model: { primary: "minimax/MiniMax-M2.1" },
+    model: { primary: 'minimax/MiniMax-M2.1' },
     models: {
-      "anthropic/claude-opus-4-5": { alias: "Opus" },
-      "minimax/MiniMax-M2.1": { alias: "Minimax" },
+      'anthropic/claude-opus-4-5': { alias: 'Opus' },
+      'minimax/MiniMax-M2.1': { alias: 'Minimax' },
     },
   },
   models: {
-    mode: "merge",
+    mode: 'merge',
     providers: {
       minimax: {
-        baseUrl: "https://api.minimax.io/anthropic",
-        apiKey: "${MINIMAX_API_KEY}",
-        api: "anthropic-messages",
+        baseUrl: 'https://api.minimax.io/anthropic',
+        apiKey: '${MINIMAX_API_KEY}',
+        api: 'anthropic-messages',
         models: [
           {
-            id: "MiniMax-M2.1",
-            name: "MiniMax M2.1",
+            id: 'MiniMax-M2.1',
+            name: 'MiniMax M2.1',
             reasoning: false,
-            input: ["text"],
+            input: ['text'],
             // Pricing: update in models.json if you need exact cost tracking.
             cost: { input: 15, output: 60, cacheRead: 2, cacheWrite: 10 },
             contextWindow: 200000,
@@ -2670,29 +2670,29 @@ Use Cerebras via their OpenAI-compatible endpoint:
 
 ```json5
 {
-  env: { CEREBRAS_API_KEY: "sk-..." },
+  env: { CEREBRAS_API_KEY: 'sk-...' },
   agents: {
     defaults: {
       model: {
-        primary: "cerebras/zai-glm-4.7",
-        fallbacks: ["cerebras/zai-glm-4.6"],
+        primary: 'cerebras/zai-glm-4.7',
+        fallbacks: ['cerebras/zai-glm-4.6'],
       },
       models: {
-        "cerebras/zai-glm-4.7": { alias: "GLM 4.7 (Cerebras)" },
-        "cerebras/zai-glm-4.6": { alias: "GLM 4.6 (Cerebras)" },
+        'cerebras/zai-glm-4.7': { alias: 'GLM 4.7 (Cerebras)' },
+        'cerebras/zai-glm-4.6': { alias: 'GLM 4.6 (Cerebras)' },
       },
     },
   },
   models: {
-    mode: "merge",
+    mode: 'merge',
     providers: {
       cerebras: {
-        baseUrl: "https://api.cerebras.ai/v1",
-        apiKey: "${CEREBRAS_API_KEY}",
-        api: "openai-completions",
+        baseUrl: 'https://api.cerebras.ai/v1',
+        apiKey: '${CEREBRAS_API_KEY}',
+        api: 'openai-completions',
         models: [
-          { id: "zai-glm-4.7", name: "GLM 4.7 (Cerebras)" },
-          { id: "zai-glm-4.6", name: "GLM 4.6 (Cerebras)" },
+          { id: 'zai-glm-4.7', name: 'GLM 4.7 (Cerebras)' },
+          { id: 'zai-glm-4.6', name: 'GLM 4.6 (Cerebras)' },
         ],
       },
     },
@@ -2720,34 +2720,34 @@ Controls session scoping, reset policy, reset triggers, and where the session st
 ```json5
 {
   session: {
-    scope: "per-sender",
-    dmScope: "main",
+    scope: 'per-sender',
+    dmScope: 'main',
     identityLinks: {
-      alice: ["telegram:123456789", "discord:987654321012345678"],
+      alice: ['telegram:123456789', 'discord:987654321012345678'],
     },
     reset: {
-      mode: "daily",
+      mode: 'daily',
       atHour: 4,
       idleMinutes: 60,
     },
     resetByType: {
-      thread: { mode: "daily", atHour: 4 },
-      dm: { mode: "idle", idleMinutes: 240 },
-      group: { mode: "idle", idleMinutes: 120 },
+      thread: { mode: 'daily', atHour: 4 },
+      dm: { mode: 'idle', idleMinutes: 240 },
+      group: { mode: 'idle', idleMinutes: 120 },
     },
-    resetTriggers: ["/new", "/reset"],
+    resetTriggers: ['/new', '/reset'],
     // Default is already per-agent under ~/.openclaw/agents/<agentId>/sessions/sessions.json
     // You can override with {agentId} templating:
-    store: "~/.openclaw/agents/{agentId}/sessions/sessions.json",
+    store: '~/.openclaw/agents/{agentId}/sessions/sessions.json',
     // Direct chats collapse to agent:<agentId>:<mainKey> (default: "main").
-    mainKey: "main",
+    mainKey: 'main',
     agentToAgent: {
       // Max ping-pong reply turns between requester/target (0–5).
       maxPingPongTurns: 5,
     },
     sendPolicy: {
-      rules: [{ action: "deny", match: { channel: "discord", chatType: "group" } }],
-      default: "allow",
+      rules: [{ action: 'deny', match: { channel: 'discord', chatType: 'group' } }],
+      default: 'allow',
     },
   },
 }
@@ -2801,19 +2801,19 @@ Example:
 ```json5
 {
   skills: {
-    allowBundled: ["gemini", "peekaboo"],
+    allowBundled: ['gemini', 'peekaboo'],
     load: {
-      extraDirs: ["~/Projects/agent-scripts/skills", "~/Projects/oss/some-skill-pack/skills"],
+      extraDirs: ['~/Projects/agent-scripts/skills', '~/Projects/oss/some-skill-pack/skills'],
     },
     install: {
       preferBrew: true,
-      nodeManager: "npm",
+      nodeManager: 'npm',
     },
     entries: {
-      "nano-banana-pro": {
-        apiKey: "GEMINI_KEY_HERE",
+      'nano-banana-pro': {
+        apiKey: 'GEMINI_KEY_HERE',
         env: {
-          GEMINI_API_KEY: "GEMINI_KEY_HERE",
+          GEMINI_API_KEY: 'GEMINI_KEY_HERE',
         },
       },
       peekaboo: { enabled: true },
@@ -2846,15 +2846,15 @@ Example:
 {
   plugins: {
     enabled: true,
-    allow: ["voice-call"],
+    allow: ['voice-call'],
     load: {
-      paths: ["~/Projects/oss/voice-call-extension"],
+      paths: ['~/Projects/oss/voice-call-extension'],
     },
     entries: {
-      "voice-call": {
+      'voice-call': {
         enabled: true,
         config: {
-          provider: "twilio",
+          provider: 'twilio',
         },
       },
     },
@@ -2887,13 +2887,13 @@ Defaults:
     enabled: true,
     evaluateEnabled: true,
     // cdpUrl: "http://127.0.0.1:18792", // legacy single-profile override
-    defaultProfile: "chrome",
+    defaultProfile: 'chrome',
     profiles: {
-      openclaw: { cdpPort: 18800, color: "#FF4500" },
-      work: { cdpPort: 18801, color: "#0066CC" },
-      remote: { cdpUrl: "http://10.0.0.42:9222", color: "#00AA00" },
+      openclaw: { cdpPort: 18800, color: '#FF4500' },
+      work: { cdpPort: 18801, color: '#0066CC' },
+      remote: { cdpUrl: 'http://10.0.0.42:9222', color: '#00AA00' },
     },
-    color: "#FF4500",
+    color: '#FF4500',
     // Advanced:
     // headless: false,
     // noSandbox: false,
@@ -2912,12 +2912,12 @@ If unset, clients fall back to a muted light-blue.
 ```json5
 {
   ui: {
-    seamColor: "#FF4500", // hex (RRGGBB or #RRGGBB)
+    seamColor: '#FF4500', // hex (RRGGBB or #RRGGBB)
     // Optional: Control UI assistant identity override.
     // If unset, the Control UI uses the active agent identity (config or IDENTITY.md).
     assistant: {
-      name: "OpenClaw",
-      avatar: "CB", // emoji, short text, or image URL/data URI
+      name: 'OpenClaw',
+      avatar: 'CB', // emoji, short text, or image URL/data URI
     },
   },
 }
@@ -2936,9 +2936,9 @@ Defaults:
 ```json5
 {
   gateway: {
-    mode: "local", // or "remote"
+    mode: 'local', // or "remote"
     port: 18789, // WS + HTTP multiplex
-    bind: "loopback",
+    bind: 'loopback',
     // controlUi: { enabled: true, basePath: "/openclaw" }
     // auth: { mode: "token", token: "your-token" } // token gates WS + Control UI access
     // tailscale: { mode: "off" | "serve" | "funnel" }
@@ -3013,11 +3013,11 @@ macOS app behavior:
 ```json5
 {
   gateway: {
-    mode: "remote",
+    mode: 'remote',
     remote: {
-      url: "ws://gateway.tailnet:18789",
-      token: "your-token",
-      password: "your-password",
+      url: 'ws://gateway.tailnet:18789',
+      token: 'your-token',
+      password: 'your-password',
     },
   },
 }
@@ -3028,11 +3028,11 @@ Direct transport example (macOS app):
 ```json5
 {
   gateway: {
-    mode: "remote",
+    mode: 'remote',
     remote: {
-      transport: "direct",
-      url: "wss://gateway.example.ts.net",
-      token: "your-token",
+      transport: 'direct',
+      url: 'wss://gateway.example.ts.net',
+      token: 'your-token',
     },
   },
 }
@@ -3053,7 +3053,7 @@ Modes:
 {
   gateway: {
     reload: {
-      mode: "hybrid",
+      mode: 'hybrid',
       debounceMs: 300,
     },
   },
@@ -3124,21 +3124,21 @@ Defaults:
 {
   hooks: {
     enabled: true,
-    token: "shared-secret",
-    path: "/hooks",
-    presets: ["gmail"],
-    transformsDir: "~/.openclaw/hooks",
+    token: 'shared-secret',
+    path: '/hooks',
+    presets: ['gmail'],
+    transformsDir: '~/.openclaw/hooks',
     mappings: [
       {
-        match: { path: "gmail" },
-        action: "agent",
-        wakeMode: "now",
-        name: "Gmail",
-        sessionKey: "hook:gmail:{{messages[0].id}}",
-        messageTemplate: "From: {{messages[0].from}}\nSubject: {{messages[0].subject}}\n{{messages[0].snippet}}",
+        match: { path: 'gmail' },
+        action: 'agent',
+        wakeMode: 'now',
+        name: 'Gmail',
+        sessionKey: 'hook:gmail:{{messages[0].id}}',
+        messageTemplate: 'From: {{messages[0].from}}\nSubject: {{messages[0].subject}}\n{{messages[0].snippet}}',
         deliver: true,
-        channel: "last",
-        model: "openai/gpt-5.2-mini",
+        channel: 'last',
+        model: 'openai/gpt-5.2-mini',
       },
     ],
   },
@@ -3175,22 +3175,22 @@ Gmail helper config (used by `openclaw webhooks gmail setup` / `run`):
 {
   hooks: {
     gmail: {
-      account: "openclaw@gmail.com",
-      topic: "projects/<project-id>/topics/gog-gmail-watch",
-      subscription: "gog-gmail-watch-push",
-      pushToken: "shared-push-token",
-      hookUrl: "http://127.0.0.1:18789/hooks/gmail",
+      account: 'openclaw@gmail.com',
+      topic: 'projects/<project-id>/topics/gog-gmail-watch',
+      subscription: 'gog-gmail-watch-push',
+      pushToken: 'shared-push-token',
+      hookUrl: 'http://127.0.0.1:18789/hooks/gmail',
       includeBody: true,
       maxBytes: 20000,
       renewEveryMinutes: 720,
-      serve: { bind: "127.0.0.1", port: 8788, path: "/" },
-      tailscale: { mode: "funnel", path: "/gmail-pubsub" },
+      serve: { bind: '127.0.0.1', port: 8788, path: '/' },
+      tailscale: { mode: 'funnel', path: '/gmail-pubsub' },
 
       // Optional: use a cheaper model for Gmail hook processing
       // Falls back to agents.defaults.model.fallbacks, then primary, on auth/rate-limit/timeout
-      model: "openrouter/meta-llama/llama-3.3-70b-instruct:free",
+      model: 'openrouter/meta-llama/llama-3.3-70b-instruct:free',
       // Optional: default thinking level for Gmail hooks
-      thinking: "off",
+      thinking: 'off',
     },
   },
 }
@@ -3242,7 +3242,7 @@ Disable live reload (and file watching) if the directory is large or you hit `EM
 ```json5
 {
   canvasHost: {
-    root: "~/.openclaw/workspace/canvas",
+    root: '~/.openclaw/workspace/canvas',
     port: 18793,
     liveReload: true,
   },
@@ -3295,7 +3295,7 @@ Auto-generated certs require `openssl` on PATH; if generation fails, the bridge 
   bridge: {
     enabled: true,
     port: 18790,
-    bind: "tailnet",
+    bind: 'tailnet',
     tls: {
       enabled: true,
       // Uses ~/.openclaw/bridge/tls/bridge-{cert,key}.pem when omitted.
@@ -3317,7 +3317,7 @@ Controls LAN mDNS discovery broadcasts (`_openclaw-gw._tcp`).
 
 ```json5
 {
-  discovery: { mdns: { mode: "minimal" } },
+  discovery: { mdns: { mode: 'minimal' } },
 }
 ```
 

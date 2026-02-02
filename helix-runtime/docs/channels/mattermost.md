@@ -1,5 +1,5 @@
 ---
-summary: "Mattermost bot setup and OpenClaw config"
+summary: 'Mattermost bot setup and OpenClaw config'
 read_when:
   - Setting up Mattermost
   - Debugging Mattermost routing
@@ -46,9 +46,9 @@ Minimal config:
   channels: {
     mattermost: {
       enabled: true,
-      botToken: "mm-token",
-      baseUrl: "https://chat.example.com",
-      dmPolicy: "pairing",
+      botToken: 'mm-token',
+      baseUrl: 'https://chat.example.com',
+      dmPolicy: 'pairing',
     },
   },
 }
@@ -77,8 +77,8 @@ Config example:
 {
   channels: {
     mattermost: {
-      chatmode: "onchar",
-      oncharPrefixes: [">", "!"],
+      chatmode: 'onchar',
+      oncharPrefixes: ['>', '!'],
     },
   },
 }
@@ -122,8 +122,8 @@ Mattermost supports multiple accounts under `channels.mattermost.accounts`:
   channels: {
     mattermost: {
       accounts: {
-        default: { name: "Primary", botToken: "mm-token", baseUrl: "https://chat.example.com" },
-        alerts: { name: "Alerts", botToken: "mm-token-2", baseUrl: "https://alerts.example.com" },
+        default: { name: 'Primary', botToken: 'mm-token', baseUrl: 'https://chat.example.com' },
+        alerts: { name: 'Alerts', botToken: 'mm-token-2', baseUrl: 'https://alerts.example.com' },
       },
     },
   },

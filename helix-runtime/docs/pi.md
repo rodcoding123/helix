@@ -131,20 +131,20 @@ src/agents/
 The main entry point is `runEmbeddedPiAgent()` in `pi-embedded-runner/run.ts`:
 
 ```typescript
-import { runEmbeddedPiAgent } from "./agents/pi-embedded-runner.js";
+import { runEmbeddedPiAgent } from './agents/pi-embedded-runner.js';
 
 const result = await runEmbeddedPiAgent({
-  sessionId: "user-123",
-  sessionKey: "main:whatsapp:+1234567890",
-  sessionFile: "/path/to/session.jsonl",
-  workspaceDir: "/path/to/workspace",
+  sessionId: 'user-123',
+  sessionKey: 'main:whatsapp:+1234567890',
+  sessionFile: '/path/to/session.jsonl',
+  workspaceDir: '/path/to/workspace',
   config: openclawConfig,
-  prompt: "Hello, how are you?",
-  provider: "anthropic",
-  model: "claude-sonnet-4-20250514",
+  prompt: 'Hello, how are you?',
+  provider: 'anthropic',
+  model: 'claude-sonnet-4-20250514',
   timeoutMs: 120_000,
-  runId: "run-abc",
-  onBlockReply: async (payload) => {
+  runId: 'run-abc',
+  onBlockReply: async payload => {
     await sendToChannel(payload.text, payload.mediaUrls);
   },
 });
@@ -155,7 +155,7 @@ const result = await runEmbeddedPiAgent({
 Inside `runEmbeddedAttempt()` (called by `runEmbeddedPiAgent()`), the pi SDK is used:
 
 ```typescript
-import { createAgentSession, SessionManager, SettingsManager } from "@mariozechner/pi-coding-agent";
+import { createAgentSession, SessionManager, SettingsManager } from '@mariozechner/pi-coding-agent';
 
 const { session } = await createAgentSession({
   cwd: resolvedWorkspace,
@@ -230,10 +230,10 @@ pi-agent-core's `AgentTool` has a different `execute` signature than pi-coding-a
 
 ```typescript
 export function toToolDefinitions(tools: AnyAgentTool[]): ToolDefinition[] {
-  return tools.map((tool) => ({
+  return tools.map(tool => ({
     name: tool.name,
     label: tool.label ?? name,
-    description: tool.description ?? "",
+    description: tool.description ?? '',
     parameters: tool.parameters,
     execute: async (toolCallId, params, onUpdate, _ctx, signal) => {
       // pi-coding-agent signature differs from pi-agent-core
@@ -326,13 +326,13 @@ const rotated = await advanceAuthProfile();
 ### Model Resolution
 
 ```typescript
-import { resolveModel } from "./pi-embedded-runner/model.js";
+import { resolveModel } from './pi-embedded-runner/model.js';
 
 const { model, error, authStorage, modelRegistry } = resolveModel(
   provider,
   modelId,
   agentDir,
-  config,
+  config
 );
 
 // Uses pi's ModelRegistry and AuthStorage
@@ -346,7 +346,7 @@ authStorage.setRuntimeApiKey(model.provider, apiKeyInfo.apiKey);
 ```typescript
 if (fallbackConfigured && isFailoverErrorMessage(errorText)) {
   throw new FailoverError(errorText, {
-    reason: promptFailoverReason ?? "unknown",
+    reason: promptFailoverReason ?? 'unknown',
     provider,
     model: modelId,
     profileId,
@@ -364,9 +364,9 @@ OpenClaw loads custom pi extensions for specialized behavior:
 `pi-extensions/compaction-safeguard.ts` adds guardrails to compaction, including adaptive token budgeting plus tool failure and file operation summaries:
 
 ```typescript
-if (resolveCompactionMode(params.cfg) === "safeguard") {
+if (resolveCompactionMode(params.cfg) === 'safeguard') {
   setCompactionSafeguardRuntime(params.sessionManager, { maxHistoryShare });
-  paths.push(resolvePiExtensionPath("compaction-safeguard"));
+  paths.push(resolvePiExtensionPath('compaction-safeguard'));
 }
 ```
 
@@ -375,14 +375,14 @@ if (resolveCompactionMode(params.cfg) === "safeguard") {
 `pi-extensions/context-pruning.ts` implements cache-TTL based context pruning:
 
 ```typescript
-if (cfg?.agents?.defaults?.contextPruning?.mode === "cache-ttl") {
+if (cfg?.agents?.defaults?.contextPruning?.mode === 'cache-ttl') {
   setContextPruningRuntime(params.sessionManager, {
     settings,
     contextWindowTokens,
     isToolPrunable,
     lastCacheTouchAt,
   });
-  paths.push(resolvePiExtensionPath("context-pruning"));
+  paths.push(resolvePiExtensionPath('context-pruning'));
 }
 ```
 

@@ -99,6 +99,7 @@ This blueprint defines the complete system architecture for Helix as a standalon
 **Technology**: Rust + Tauri 2.0
 
 **Responsibilities**:
+
 - Window management (main window, system tray)
 - Process lifecycle (spawn/monitor Gateway)
 - Secure credential storage (system keyring)
@@ -109,6 +110,7 @@ This blueprint defines the complete system architecture for Helix as a standalon
 - System tray with status indicators
 
 **Key Rust Modules**:
+
 ```
 src-tauri/
 ├── src/
@@ -139,6 +141,7 @@ src-tauri/
 **Technology**: React 18 + TypeScript + Vite + Tailwind CSS
 
 **Code Reuse from web/**:
+
 - `hooks/useGatewayConnection.ts` → Direct port
 - `hooks/useStreaming.ts` → Direct port
 - `hooks/useSession.ts` → Adapt for local-first
@@ -148,6 +151,7 @@ src-tauri/
 - `components/code/*` → Adapt styling
 
 **New Desktop-Specific Components**:
+
 ```
 src/
 ├── components/
@@ -190,6 +194,7 @@ src/
 **Technology**: Node.js 22+ (bundled with app)
 
 **Changes from OpenClaw**:
+
 1. Remove CLI entry points (not needed)
 2. Keep Gateway server as primary interface
 3. Rebrand all user-facing strings
@@ -197,6 +202,7 @@ src/
 5. Add Helix-specific hooks and skills
 
 **Directory Structure** (post-integration):
+
 ```
 helix-engine/
 ├── src/
@@ -226,6 +232,7 @@ helix-engine/
 **Location**: `~/.helix/psychology/` (user data)
 
 **Structure**:
+
 ```
 ~/.helix/
 ├── config.json              # Main configuration
@@ -263,11 +270,13 @@ helix-engine/
 **Technology**: Supabase (existing infrastructure)
 
 **Connection Model**:
+
 - **Free tier**: Always connected, telemetry required
 - **Paid tiers**: Optional connection, can opt out of telemetry
 - **No account**: Pure local mode (limited features)
 
 **Sync Capabilities**:
+
 - Session continuity across devices
 - Psychology state synchronization
 - Memory index sync
@@ -334,12 +343,12 @@ helix-engine/
 
 ### Credential Storage
 
-| Secret Type | Storage Location | Access Method |
-|-------------|------------------|---------------|
-| Anthropic API Key | System Keyring | Tauri keyring plugin |
-| OAuth Tokens | System Keyring | Tauri keyring plugin |
-| Discord Webhooks | Encrypted config | App-level encryption |
-| Session Tokens | Memory only | Never persisted |
+| Secret Type       | Storage Location | Access Method        |
+| ----------------- | ---------------- | -------------------- |
+| Anthropic API Key | System Keyring   | Tauri keyring plugin |
+| OAuth Tokens      | System Keyring   | Tauri keyring plugin |
+| Discord Webhooks  | Encrypted config | App-level encryption |
+| Session Tokens    | Memory only      | Never persisted      |
 
 ### Sandbox Boundaries
 
@@ -383,45 +392,50 @@ helix-engine/
 
 ## Performance Targets
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Cold startup | < 3 seconds | App launch to usable |
+| Metric          | Target      | Measurement            |
+| --------------- | ----------- | ---------------------- |
+| Cold startup    | < 3 seconds | App launch to usable   |
 | Gateway startup | < 2 seconds | Process spawn to ready |
-| Message latency | < 100ms | Input to Gateway |
-| Memory (idle) | < 150MB | Rust + Node combined |
-| Memory (active) | < 500MB | During conversation |
-| Installer size | < 50MB | Compressed download |
-| Installed size | < 200MB | Including Node runtime |
+| Message latency | < 100ms     | Input to Gateway       |
+| Memory (idle)   | < 150MB     | Rust + Node combined   |
+| Memory (active) | < 500MB     | During conversation    |
+| Installer size  | < 50MB      | Compressed download    |
+| Installed size  | < 200MB     | Including Node runtime |
 
 ---
 
 ## Migration Path
 
 ### Phase 1: Foundation (Weeks 1-4)
+
 - Set up Tauri project structure
 - Port React components from web/
 - Implement Rust backend stubs
 - Gateway spawner (basic)
 
 ### Phase 2: Core Features (Weeks 5-8)
+
 - Complete chat interface
 - Settings panel
 - Onboarding wizard (basic)
 - Config system integration
 
 ### Phase 3: Integration (Weeks 9-12)
+
 - OpenClaw absorption
 - Psychological architecture integration
 - Discord logging
 - Hash chain
 
 ### Phase 4: Polish (Weeks 13-16)
+
 - Auto-updates
 - System tray
 - Advanced onboarding
 - Performance optimization
 
 ### Phase 5: Distribution (Weeks 17-20)
+
 - Code signing
 - Installer creation
 - Beta testing

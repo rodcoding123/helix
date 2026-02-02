@@ -1,5 +1,5 @@
 ---
-summary: "Windows (WSL2) support + companion app status"
+summary: 'Windows (WSL2) support + companion app status'
 read_when:
   - Installing OpenClaw on Windows
   - Looking for Windows companion app status

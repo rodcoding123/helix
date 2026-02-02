@@ -1,5 +1,5 @@
 ---
-summary: "Chrome extension: let OpenClaw drive your existing Chrome tab"
+summary: 'Chrome extension: let OpenClaw drive your existing Chrome tab'
 read_when:
   - You want the agent to drive an existing Chrome tab (toolbar button)
   - You need remote Gateway + local browser automation via Tailscale

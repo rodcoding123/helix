@@ -4,18 +4,18 @@ description: Gemini CLI for one-shot Q&A, summaries, and generation.
 homepage: https://ai.google.dev/
 metadata:
   {
-    "openclaw":
+    'openclaw':
       {
-        "emoji": "♊️",
-        "requires": { "bins": ["gemini"] },
-        "install":
+        'emoji': '♊️',
+        'requires': { 'bins': ['gemini'] },
+        'install':
           [
             {
-              "id": "brew",
-              "kind": "brew",
-              "formula": "gemini-cli",
-              "bins": ["gemini"],
-              "label": "Install Gemini CLI (brew)",
+              'id': 'brew',
+              'kind': 'brew',
+              'formula': 'gemini-cli',
+              'bins': ['gemini'],
+              'label': 'Install Gemini CLI (brew)',
             },
           ],
       },

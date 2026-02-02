@@ -1,5 +1,5 @@
 ---
-summary: "Image and media handling rules for send, gateway, and agent replies"
+summary: 'Image and media handling rules for send, gateway, and agent replies'
 read_when:
   - Modifying media pipeline or attachments
 ---

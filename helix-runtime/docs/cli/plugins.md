@@ -1,5 +1,5 @@
 ---
-summary: "CLI reference for `openclaw plugins` (list, install, enable/disable, doctor)"
+summary: 'CLI reference for `openclaw plugins` (list, install, enable/disable, doctor)'
 read_when:
   - You want to install or manage in-process Gateway plugins
   - You want to debug plugin load failures

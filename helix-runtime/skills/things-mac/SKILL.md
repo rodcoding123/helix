@@ -4,19 +4,19 @@ description: Manage Things 3 via the `things` CLI on macOS (add/update projects+
 homepage: https://github.com/ossianhempel/things3-cli
 metadata:
   {
-    "openclaw":
+    'openclaw':
       {
-        "emoji": "✅",
-        "os": ["darwin"],
-        "requires": { "bins": ["things"] },
-        "install":
+        'emoji': '✅',
+        'os': ['darwin'],
+        'requires': { 'bins': ['things'] },
+        'install':
           [
             {
-              "id": "go",
-              "kind": "go",
-              "module": "github.com/ossianhempel/things3-cli/cmd/things@latest",
-              "bins": ["things"],
-              "label": "Install things3-cli (go)",
+              'id': 'go',
+              'kind': 'go',
+              'module': 'github.com/ossianhempel/things3-cli/cmd/things@latest',
+              'bins': ['things'],
+              'label': 'Install things3-cli (go)',
             },
           ],
       },

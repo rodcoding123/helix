@@ -1,5 +1,5 @@
 ---
-summary: "LINE Messaging API plugin setup, config, and usage"
+summary: 'LINE Messaging API plugin setup, config, and usage'
 read_when:
   - You want to connect OpenClaw to LINE
   - You need LINE webhook + credential setup
@@ -56,9 +56,9 @@ Minimal config:
   channels: {
     line: {
       enabled: true,
-      channelAccessToken: "LINE_CHANNEL_ACCESS_TOKEN",
-      channelSecret: "LINE_CHANNEL_SECRET",
-      dmPolicy: "pairing",
+      channelAccessToken: 'LINE_CHANNEL_ACCESS_TOKEN',
+      channelSecret: 'LINE_CHANNEL_SECRET',
+      dmPolicy: 'pairing',
     },
   },
 }
@@ -75,8 +75,8 @@ Token/secret files:
 {
   channels: {
     line: {
-      tokenFile: "/path/to/line-token.txt",
-      secretFile: "/path/to/line-secret.txt",
+      tokenFile: '/path/to/line-token.txt',
+      secretFile: '/path/to/line-secret.txt',
     },
   },
 }
@@ -90,9 +90,9 @@ Multiple accounts:
     line: {
       accounts: {
         marketing: {
-          channelAccessToken: "...",
-          channelSecret: "...",
-          webhookPath: "/line/marketing",
+          channelAccessToken: '...',
+          channelSecret: '...',
+          webhookPath: '/line/marketing',
         },
       },
     },
@@ -140,29 +140,29 @@ messages.
 
 ```json5
 {
-  text: "Here you go",
+  text: 'Here you go',
   channelData: {
     line: {
-      quickReplies: ["Status", "Help"],
+      quickReplies: ['Status', 'Help'],
       location: {
-        title: "Office",
-        address: "123 Main St",
+        title: 'Office',
+        address: '123 Main St',
         latitude: 35.681236,
         longitude: 139.767125,
       },
       flexMessage: {
-        altText: "Status card",
+        altText: 'Status card',
         contents: {
           /* Flex payload */
         },
       },
       templateMessage: {
-        type: "confirm",
-        text: "Proceed?",
-        confirmLabel: "Yes",
-        confirmData: "yes",
-        cancelLabel: "No",
-        cancelData: "no",
+        type: 'confirm',
+        text: 'Proceed?',
+        confirmLabel: 'Yes',
+        confirmData: 'yes',
+        cancelLabel: 'No',
+        cancelData: 'no',
       },
     },
   },

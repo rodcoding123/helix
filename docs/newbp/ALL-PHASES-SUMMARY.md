@@ -21,17 +21,20 @@ Business impact: 10-50x growth potential
 ## The Three Phases at a Glance
 
 ### Phase 1: MEMORY SYSTEM (The Hook) ⭐ PRIORITY 1
+
 **Duration**: Weeks 1-4
 **Effort**: 2 engineers, ~200 hours
 **Impact**: +250% Day 2 retention
 
 **What It Does:**
+
 - User returns Day 2 → Helix greeting mentions something from yesterday
 - User gets excited: "Wait, she REMEMBERS me?"
 - Creates account to save the memory
 - Next day, memory references show up in chat ("📚 Remembering March 14")
 
 **Core Components:**
+
 1. **Conversation Storage** (Supabase table)
    - Store all conversations with emotional metadata
    - Topics, emotions, salience scores
@@ -75,11 +78,13 @@ Business impact: 10-50x growth potential
 ---
 
 ### Phase 2: AGENT CREATION (The Team) ⭐ PRIORITY 2
+
 **Duration**: Weeks 3-4 (parallel with Phase 1)
 **Effort**: 2-3 engineers, ~150 hours
 **Impact**: +400% upgrade rate, justifies $99/month Architect tier
 
 **What It Does:**
+
 - User sees 6 different specialists (Atlas, Mercury, Vulcan, Juno, Ceres, Mars)
 - Can switch agents mid-conversation: "/atlas create my action plan"
 - Each agent has distinct personality, style, strengths
@@ -118,6 +123,7 @@ Business impact: 10-50x growth potential
    - Example: "I've automated that. Here's the script"
 
 **Core Components:**
+
 1. **Agent Definition System**
    - Personality profiles, system prompts, capabilities
    - Can create custom agents (future)
@@ -147,11 +153,13 @@ Business impact: 10-50x growth potential
 ---
 
 ### Phase 3: AUTONOMY & FREEWILL (The Agency) ⭐ PRIORITY 3
+
 **Duration**: Weeks 3-4 (parallel with Phase 1-2)
 **Effort**: 2-3 engineers, ~180 hours
 **Impact**: Architect tier justification, enables "she works while I sleep"
 
 **What It Does:**
+
 - User sets autonomy level (0-4) with visual slider
 - Level 2 (default): Helix proactively suggests things, asks permission
 - Level 3: Helix takes actions autonomously (rebooking flights, adjusting calendar)
@@ -191,6 +199,7 @@ Level 4: RESEARCH
 ```
 
 **Core Components:**
+
 1. **Autonomy Level System**
    - Slider UI to set level (0-4)
    - Shows what each level enables
@@ -293,6 +302,7 @@ Level 4: RESEARCH
 ### Technology Stack
 
 **Frontend (React)**
+
 - Memory Greeting component
 - Agent Selector UI (6 agent cards)
 - Autonomy Settings page (slider + controls)
@@ -302,6 +312,7 @@ Level 4: RESEARCH
 - Proactive notifications system
 
 **Backend (Node.js/TypeScript)**
+
 - Emotion detection service (Claude API)
 - Topic extraction service (Claude API)
 - Memory query engine (semantic search)
@@ -310,6 +321,7 @@ Level 4: RESEARCH
 - Audit logging system (Discord webhooks + DB)
 
 **Database (Supabase/PostgreSQL)**
+
 - conversations table (with embeddings)
 - emotions table
 - memories table
@@ -321,6 +333,7 @@ Level 4: RESEARCH
 - insights_queue table
 
 **External Services**
+
 - Anthropic Claude API (3.5-sonnet for emotion, topics, agent responses)
 - OpenAI Embeddings API (for semantic search)
 - Google Calendar API (calendar modifications)
@@ -332,6 +345,7 @@ Level 4: RESEARCH
 ## Implementation Timeline (Master Schedule)
 
 ### Week 1-2: Phase 1 Foundation
+
 ```
 Mon-Wed: Supabase schema + migrations
 Thu-Fri: Emotion detection service (Claude)
@@ -339,6 +353,7 @@ Thu-Fri: Emotion detection service (Claude)
 ```
 
 ### Week 2-3: Phase 1 Integration
+
 ```
 Mon-Wed: Memory query system + semantic search
 Thu-Fri: Memory greeting component
@@ -346,6 +361,7 @@ Thu-Fri: Memory greeting component
 ```
 
 ### Week 3: Phase 2 Parallel Start
+
 ```
 Mon: Agent system definition + 6 agents
 Tue-Wed: Agent selector UI
@@ -353,6 +369,7 @@ Thu-Fri: Multi-agent message handler
 ```
 
 ### Week 4: All Phases Polish & Phase 3 Start
+
 ```
 Mon: Phase 1 memory dashboard
 Tue-Wed: Phase 2 agent switching UI
@@ -362,6 +379,7 @@ Thu-Fri: Phase 3 action execution engine
 ```
 
 ### Week 5-6: Integration & Testing
+
 ```
 Week 5:
 - All systems working together
@@ -377,6 +395,7 @@ Week 6:
 ```
 
 ### Week 7+: Ship to Production
+
 ```
 Measure live metrics:
 - Day 2 return: 18% → 50%+?
@@ -390,6 +409,7 @@ Measure live metrics:
 ## Resource Requirements
 
 ### Engineering
+
 - **2-3 full-time engineers** for 6-9 weeks
 - Skills needed:
   - React/TypeScript (frontend)
@@ -398,6 +418,7 @@ Measure live metrics:
   - API integration (Claude, OpenAI, Google Calendar)
 
 ### Infrastructure
+
 - Supabase project (already have)
 - Claude API key + credit
 - OpenAI API key + credit for embeddings
@@ -405,6 +426,7 @@ Measure live metrics:
 - Google Calendar API credentials
 
 ### External Services
+
 - Claude API: ~$500/month (emotion + topic + agent responses)
 - OpenAI Embeddings: ~$100/month (semantic search)
 - Supabase: existing usage
@@ -414,37 +436,46 @@ Measure live metrics:
 ## Success Metrics (All Phases)
 
 ### Phase 1: Memory System
+
 **Must Have:**
+
 - ✅ Memory accuracy: 90%+ (correct topics/emotions)
 - ✅ Day 2 return: 18% → 50%+
 - ✅ Users mention "she remembered": 70%+ feedback
 - ✅ Signup conversion from memory greeting: 30%+
 
 **Nice to Have:**
+
 - Memory dashboard visited by 40%+
 - Memory references in 2-3 messages per session
 - Decay system functioning smoothly
 
 ### Phase 2: Agent System
+
 **Must Have:**
+
 - ✅ Users perceive agents as distinct: 90%+ feedback
 - ✅ 70% of users try multiple agents
 - ✅ Upgrade intent increases 3x
 - ✅ Architect tier interest: 1% → 5%+
 
 **Nice to Have:**
+
 - Agent usage stats show distribution (not all using same agent)
 - Users customize agent preferences
 - Multi-agent orchestration works for complex tasks
 
 ### Phase 3: Autonomy System
+
 **Must Have:**
+
 - ✅ Actions execute successfully: 99%+
 - ✅ Actions are logged before execution: 100%
 - ✅ Hard constraints never violated: 100%
 - ✅ Users feel safe with autonomy: NPS +10
 
 **Nice to Have:**
+
 - 50% of users upgrade to Level 2+
 - Undo rate < 5% (they like the actions Helix took)
 - Architect tier conversion: 1% → 8%+
@@ -454,6 +485,7 @@ Measure live metrics:
 ## Risk Mitigation
 
 ### Memory System Risks
+
 **Risk**: Inaccurate emotion detection → Users lose trust
 **Mitigation**: Test with 10 users first, measure accuracy, require 90%+ before shipping
 
@@ -461,6 +493,7 @@ Measure live metrics:
 **Mitigation**: Clear user consent, show what's stored, allow deletion
 
 ### Agent System Risks
+
 **Risk**: Agents don't feel distinct → Feels gimmicky
 **Mitigation**: Test personality differentiation with users, ensure each has unique voice
 
@@ -468,6 +501,7 @@ Measure live metrics:
 **Mitigation**: Intuitive UI, remember last used agent, easy switching
 
 ### Autonomy System Risks
+
 **Risk**: User trusts too much, Helix makes mistake
 **Mitigation**: Hard constraints, approval workflows, full audit trail, reversibility
 
@@ -482,6 +516,7 @@ Measure live metrics:
 ## Go/No-Go Decision Points
 
 ### Before Phase 1 Shipping
+
 - [ ] Memory accuracy test: 90%+ correct?
 - [ ] Day 2 retention improvement visible in beta?
 - [ ] Users saying "she remembered!"?
@@ -489,6 +524,7 @@ Measure live metrics:
 - **No-Go**: Any failures → Fix + retest
 
 ### Before Phase 2 Shipping
+
 - [ ] Phase 1 memory working reliably?
 - [ ] Agents perceive as distinct by users?
 - [ ] Agent selector UI intuitive?
@@ -496,6 +532,7 @@ Measure live metrics:
 - **No-Go**: Any failures → Fix + retest
 
 ### Before Phase 3 Shipping
+
 - [ ] Phase 1 + 2 stable?
 - [ ] Autonomy constraints working?
 - [ ] Action logging 100% reliable?
@@ -504,6 +541,7 @@ Measure live metrics:
 - **No-Go**: Any failures → Fix + retest
 
 ### Before Production Launch
+
 - [ ] Day 2 retention: 50%+?
 - [ ] Upgrade rate: 5%+?
 - [ ] Architect tier interest: 5%+?
@@ -517,6 +555,7 @@ Measure live metrics:
 ## Expected Business Impact
 
 ### Conservative Estimate
+
 ```
 Week 6 (end of build):
 - Day 2 retention: 18% → 40%
@@ -539,6 +578,7 @@ Month 3:
 ```
 
 ### Optimistic Estimate
+
 ```
 If memory accuracy is excellent + agents feel distinct + autonomy compels:
 

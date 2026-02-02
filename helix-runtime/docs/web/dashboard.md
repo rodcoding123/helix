@@ -1,5 +1,5 @@
 ---
-summary: "Gateway dashboard (Control UI) access and auth"
+summary: 'Gateway dashboard (Control UI) access and auth'
 read_when:
   - Changing dashboard authentication or exposure modes
 ---

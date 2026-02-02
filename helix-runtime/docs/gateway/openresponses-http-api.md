@@ -1,5 +1,5 @@
 ---
-summary: "Expose an OpenResponses-compatible /v1/responses HTTP endpoint from the Gateway"
+summary: 'Expose an OpenResponses-compatible /v1/responses HTTP endpoint from the Gateway'
 read_when:
   - Integrating clients that speak the OpenResponses API
   - You want item-based inputs, client tool calls, or SSE events
@@ -202,12 +202,12 @@ Defaults can be tuned under `gateway.http.endpoints.responses`:
           files: {
             allowUrl: true,
             allowedMimes: [
-              "text/plain",
-              "text/markdown",
-              "text/html",
-              "text/csv",
-              "application/json",
-              "application/pdf",
+              'text/plain',
+              'text/markdown',
+              'text/html',
+              'text/csv',
+              'application/json',
+              'application/pdf',
             ],
             maxBytes: 5242880,
             maxChars: 200000,
@@ -221,7 +221,7 @@ Defaults can be tuned under `gateway.http.endpoints.responses`:
           },
           images: {
             allowUrl: true,
-            allowedMimes: ["image/jpeg", "image/png", "image/gif", "image/webp"],
+            allowedMimes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
             maxBytes: 10485760,
             maxRedirects: 3,
             timeoutMs: 10000,

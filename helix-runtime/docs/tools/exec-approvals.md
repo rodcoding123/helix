@@ -1,5 +1,5 @@
 ---
-summary: "Exec approvals, allowlists, and sandbox escape prompts"
+summary: 'Exec approvals, allowlists, and sandbox escape prompts'
 read_when:
   - Configuring exec approvals or allowlists
   - Implementing exec approval UX in the macOS app
@@ -180,12 +180,12 @@ Config:
   approvals: {
     exec: {
       enabled: true,
-      mode: "session", // "session" | "targets" | "both"
-      agentFilter: ["main"],
-      sessionFilter: ["discord"], // substring or regex
+      mode: 'session', // "session" | "targets" | "both"
+      agentFilter: ['main'],
+      sessionFilter: ['discord'], // substring or regex
       targets: [
-        { channel: "slack", to: "U12345678" },
-        { channel: "telegram", to: "123456789" },
+        { channel: 'slack', to: 'U12345678' },
+        { channel: 'telegram', to: '123456789' },
       ],
     },
   },

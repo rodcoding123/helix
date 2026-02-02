@@ -1,5 +1,5 @@
 ---
-summary: "Agent tool surface for OpenClaw (browser, canvas, nodes, message, cron) replacing legacy `openclaw-*` skills"
+summary: 'Agent tool surface for OpenClaw (browser, canvas, nodes, message, cron) replacing legacy `openclaw-*` skills'
 read_when:
   - Adding or modifying agent tools
   - Retiring or changing `openclaw-*` skills
@@ -18,7 +18,7 @@ You can globally allow/deny tools via `tools.allow` / `tools.deny` in `openclaw.
 
 ```json5
 {
-  tools: { deny: ["browser"] },
+  tools: { deny: ['browser'] },
 }
 ```
 
@@ -45,8 +45,8 @@ Example (messaging-only by default, allow Slack + Discord tools too):
 ```json5
 {
   tools: {
-    profile: "messaging",
-    allow: ["slack", "discord"],
+    profile: 'messaging',
+    allow: ['slack', 'discord'],
   },
 }
 ```
@@ -56,8 +56,8 @@ Example (coding profile, but deny exec/process everywhere):
 ```json5
 {
   tools: {
-    profile: "coding",
-    deny: ["group:runtime"],
+    profile: 'coding',
+    deny: ['group:runtime'],
   },
 }
 ```
@@ -66,12 +66,12 @@ Example (global coding profile, messaging-only support agent):
 
 ```json5
 {
-  tools: { profile: "coding" },
+  tools: { profile: 'coding' },
   agents: {
     list: [
       {
-        id: "support",
-        tools: { profile: "messaging", allow: ["slack"] },
+        id: 'support',
+        tools: { profile: 'messaging', allow: ['slack'] },
       },
     ],
   },
@@ -94,9 +94,9 @@ Example (keep global coding profile, but minimal tools for Google Antigravity):
 ```json5
 {
   tools: {
-    profile: "coding",
+    profile: 'coding',
     byProvider: {
-      "google-antigravity": { profile: "minimal" },
+      'google-antigravity': { profile: 'minimal' },
     },
   },
 }
@@ -107,9 +107,9 @@ Example (provider/model-specific allowlist for a flaky endpoint):
 ```json5
 {
   tools: {
-    allow: ["group:fs", "group:runtime", "sessions_list"],
+    allow: ['group:fs', 'group:runtime', 'sessions_list'],
     byProvider: {
-      "openai/gpt-5.2": { allow: ["group:fs", "sessions_list"] },
+      'openai/gpt-5.2': { allow: ['group:fs', 'sessions_list'] },
     },
   },
 }
@@ -122,10 +122,10 @@ Example (agent-specific override for a single provider):
   agents: {
     list: [
       {
-        id: "support",
+        id: 'support',
         tools: {
           byProvider: {
-            "google-antigravity": { allow: ["message", "sessions_list"] },
+            'google-antigravity': { allow: ['message', 'sessions_list'] },
           },
         },
       },
@@ -157,7 +157,7 @@ Example (allow only file tools + browser):
 ```json5
 {
   tools: {
-    allow: ["group:fs", "browser"],
+    allow: ['group:fs', 'browser'],
   },
 }
 ```

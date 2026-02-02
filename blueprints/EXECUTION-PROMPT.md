@@ -162,6 +162,7 @@ Task(subagent_type="general-purpose", description="Workstream D: Build Pipeline"
 ## WORKSTREAM DETAILS FOR PARALLEL AGENTS
 
 ### Agent A Prompt (Tauri Shell)
+
 ```
 You are implementing the Tauri 2.0 Rust backend for Helix Desktop.
 
@@ -189,6 +190,7 @@ Update memory with:
 ```
 
 ### Agent B Prompt (React UI)
+
 ```
 You are implementing the React frontend for Helix Desktop.
 
@@ -217,6 +219,7 @@ Update memory with component completion status.
 ```
 
 ### Agent C Prompt (Helix Engine)
+
 ```
 You are absorbing OpenClaw into the Helix Engine.
 
@@ -246,6 +249,7 @@ Update memory with integration decisions.
 ```
 
 ### Agent D Prompt (Build Pipeline)
+
 ```
 You are setting up the build and distribution pipeline.
 
@@ -296,26 +300,30 @@ Use this checklist and update Memory MCP as you go:
 ```javascript
 // After completing a milestone
 mcp__memory__add_observations({
-  observations: [{
-    entityName: "HelixImplementationStatus",
-    contents: [
-      "Workstream A: Tauri initialized, commands 50% complete",
-      "Blocker: keyring crate not compiling on Windows",
-      "Solution: Used keyring-rs with feature flags"
-    ]
-  }]
-})
+  observations: [
+    {
+      entityName: 'HelixImplementationStatus',
+      contents: [
+        'Workstream A: Tauri initialized, commands 50% complete',
+        'Blocker: keyring crate not compiling on Windows',
+        'Solution: Used keyring-rs with feature flags',
+      ],
+    },
+  ],
+});
 
 // After making an architectural decision
 mcp__memory__add_observations({
-  observations: [{
-    entityName: "HelixArchitectureDecisions",
-    contents: [
-      "Decision: Use tauri-plugin-store instead of custom config",
-      "Reason: Better cross-platform support, less code"
-    ]
-  }]
-})
+  observations: [
+    {
+      entityName: 'HelixArchitectureDecisions',
+      contents: [
+        'Decision: Use tauri-plugin-store instead of custom config',
+        'Reason: Better cross-platform support, less code',
+      ],
+    },
+  ],
+});
 ```
 
 ---
@@ -324,12 +332,12 @@ mcp__memory__add_observations({
 
 With 4 agents running simultaneously:
 
-| Workstream | Solo Time | Parallel Time | Dependencies |
-|------------|-----------|---------------|--------------|
-| A: Tauri   | 8 hours   | 8 hours       | None         |
+| Workstream | Solo Time | Parallel Time | Dependencies     |
+| ---------- | --------- | ------------- | ---------------- |
+| A: Tauri   | 8 hours   | 8 hours       | None             |
 | B: React   | 10 hours  | 10 hours      | None (initially) |
-| C: Engine  | 6 hours   | 6 hours       | None         |
-| D: Build   | 4 hours   | 4 hours       | A scaffold   |
+| C: Engine  | 6 hours   | 6 hours       | None             |
+| D: Build   | 4 hours   | 4 hours       | A scaffold       |
 
 **Total Sequential**: ~28 hours
 **Total Parallel**: ~10 hours (limited by longest workstream)

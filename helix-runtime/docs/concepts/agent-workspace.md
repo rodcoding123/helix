@@ -1,5 +1,5 @@
 ---
-summary: "Agent workspace: location, layout, and backup strategy"
+summary: 'Agent workspace: location, layout, and backup strategy'
 read_when:
   - You need to explain the agent workspace or its file layout
   - You want to back up or migrate an agent workspace
@@ -30,7 +30,7 @@ inside a sandbox workspace under `~/.openclaw/sandboxes`, not your host workspac
 ```json5
 {
   agent: {
-    workspace: "~/.openclaw/workspace",
+    workspace: '~/.openclaw/workspace',
   },
 }
 ```

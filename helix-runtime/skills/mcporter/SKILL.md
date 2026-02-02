@@ -4,18 +4,18 @@ description: Use the mcporter CLI to list, configure, auth, and call MCP servers
 homepage: http://mcporter.dev
 metadata:
   {
-    "openclaw":
+    'openclaw':
       {
-        "emoji": "📦",
-        "requires": { "bins": ["mcporter"] },
-        "install":
+        'emoji': '📦',
+        'requires': { 'bins': ['mcporter'] },
+        'install':
           [
             {
-              "id": "node",
-              "kind": "node",
-              "package": "mcporter",
-              "bins": ["mcporter"],
-              "label": "Install mcporter (node)",
+              'id': 'node',
+              'kind': 'node',
+              'package': 'mcporter',
+              'bins': ['mcporter'],
+              'label': 'Install mcporter (node)',
             },
           ],
       },

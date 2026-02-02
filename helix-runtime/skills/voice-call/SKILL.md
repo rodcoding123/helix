@@ -3,11 +3,11 @@ name: voice-call
 description: Start voice calls via the OpenClaw voice-call plugin.
 metadata:
   {
-    "openclaw":
+    'openclaw':
       {
-        "emoji": "📞",
-        "skillKey": "voice-call",
-        "requires": { "config": ["plugins.entries.voice-call.enabled"] },
+        'emoji': '📞',
+        'skillKey': 'voice-call',
+        'requires': { 'config': ['plugins.entries.voice-call.enabled'] },
       },
   }
 ---

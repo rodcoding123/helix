@@ -1,15 +1,15 @@
 ---
 name: soul-evil
-description: "Swap SOUL.md with SOUL_EVIL.md during a purge window or by random chance"
+description: 'Swap SOUL.md with SOUL_EVIL.md during a purge window or by random chance'
 homepage: https://docs.openclaw.ai/hooks/soul-evil
 metadata:
   {
-    "openclaw":
+    'openclaw':
       {
-        "emoji": "😈",
-        "events": ["agent:bootstrap"],
-        "requires": { "config": ["hooks.internal.entries.soul-evil.enabled"] },
-        "install": [{ "id": "bundled", "kind": "bundled", "label": "Bundled with OpenClaw" }],
+        'emoji': '😈',
+        'events': ['agent:bootstrap'],
+        'requires': { 'config': ['hooks.internal.entries.soul-evil.enabled'] },
+        'install': [{ 'id': 'bundled', 'kind': 'bundled', 'label': 'Bundled with OpenClaw' }],
       },
   }
 ---

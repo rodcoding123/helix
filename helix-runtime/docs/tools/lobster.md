@@ -1,6 +1,6 @@
 ---
 title: Lobster
-summary: "Typed workflow runtime for OpenClaw with resumable approval gates."
+summary: 'Typed workflow runtime for OpenClaw with resumable approval gates.'
 description: Typed workflow runtime for OpenClaw — composable pipelines with approval gates.
 read_when:
   - You want deterministic multi-step workflows with explicit approvals
@@ -129,7 +129,7 @@ Lobster can run YAML/JSON workflow files with `name`, `args`, `steps`, `env`, `c
 name: inbox-triage
 args:
   tag:
-    default: "family"
+    default: 'family'
 steps:
   - id: collect
     command: inbox list --json

@@ -1,5 +1,5 @@
 ---
-summary: "Command queue design that serializes inbound auto-reply runs"
+summary: 'Command queue design that serializes inbound auto-reply runs'
 read_when:
   - Changing auto-reply execution or concurrency
 ---
@@ -47,11 +47,11 @@ Configure globally or per channel via `messages.queue`:
 {
   messages: {
     queue: {
-      mode: "collect",
+      mode: 'collect',
       debounceMs: 1000,
       cap: 20,
-      drop: "summarize",
-      byChannel: { discord: "collect" },
+      drop: 'summarize',
+      byChannel: { discord: 'collect' },
     },
   },
 }

@@ -40,15 +40,15 @@ OpenClaw is a powerful but developer-oriented AI assistant gateway that connects
 
 ### File System Layout
 
-| Path | Purpose |
-|------|---------|
-| `~/.openclaw/workspace` | Skills, prompts, memories |
-| `~/.openclaw/openclaw.json` | Main configuration (JSON/JSON5) |
-| `~/.openclaw/credentials/` | API keys, OAuth tokens |
-| `~/.openclaw/agents/<id>/sessions/` | Session data |
-| `~/.openclaw/credentials/whatsapp/<id>/creds.json` | WhatsApp auth |
-| `~/.openclaw/devices/paired.json` | Paired devices |
-| `/tmp/openclaw/` | Logs |
+| Path                                               | Purpose                         |
+| -------------------------------------------------- | ------------------------------- |
+| `~/.openclaw/workspace`                            | Skills, prompts, memories       |
+| `~/.openclaw/openclaw.json`                        | Main configuration (JSON/JSON5) |
+| `~/.openclaw/credentials/`                         | API keys, OAuth tokens          |
+| `~/.openclaw/agents/<id>/sessions/`                | Session data                    |
+| `~/.openclaw/credentials/whatsapp/<id>/creds.json` | WhatsApp auth                   |
+| `~/.openclaw/devices/paired.json`                  | Paired devices                  |
+| `/tmp/openclaw/`                                   | Logs                            |
 
 ### Workspace Files (Auto-created)
 
@@ -65,16 +65,19 @@ OpenClaw is a powerful but developer-oriented AI assistant gateway that connects
 ## Installation Methods
 
 ### 1. Bash Installer (macOS/Linux)
+
 ```bash
 curl -fsSL https://openclaw.ai/install.sh | bash
 ```
 
 ### 2. PowerShell (Windows/WSL2)
+
 ```powershell
 iwr -useb https://openclaw.ai/install.ps1 | iex
 ```
 
 ### 3. NPM/pnpm
+
 ```bash
 npm install -g openclaw
 # or
@@ -82,6 +85,7 @@ pnpm add -g openclaw
 ```
 
 ### Prerequisites
+
 - Node.js ≥22
 - pnpm (optional but recommended)
 - Docker (optional)
@@ -94,12 +98,12 @@ pnpm add -g openclaw
 
 ### Command Entry Points
 
-| Command | Purpose |
-|---------|---------|
-| `openclaw onboard` | Initial setup |
-| `openclaw configure` | Reconfigure existing |
-| `openclaw dashboard` | Quick browser chat (no channels) |
-| `openclaw onboard --install-daemon` | Full setup + daemon |
+| Command                             | Purpose                          |
+| ----------------------------------- | -------------------------------- |
+| `openclaw onboard`                  | Initial setup                    |
+| `openclaw configure`                | Reconfigure existing             |
+| `openclaw dashboard`                | Quick browser chat (no channels) |
+| `openclaw onboard --install-daemon` | Full setup + daemon              |
 
 ### 9-Step Wizard Process
 
@@ -115,12 +119,13 @@ pnpm add -g openclaw
 
 ### Two Modes
 
-| Mode | Description |
-|------|-------------|
+| Mode           | Description                        |
+| -------------- | ---------------------------------- |
 | **QuickStart** | Preset defaults, minimal questions |
-| **Advanced** | Full control over all parameters |
+| **Advanced**   | Full control over all parameters   |
 
 ### QuickStart Defaults
+
 - Gateway: local loopback, port 18789
 - Auth: auto-generated token
 - Tailscale: disabled
@@ -132,16 +137,16 @@ pnpm add -g openclaw
 
 ### Supported Providers
 
-| Provider | Config Method |
-|----------|---------------|
+| Provider          | Config Method   |
+| ----------------- | --------------- |
 | Anthropic API Key | **Recommended** |
-| OAuth flows | Browser-based |
-| OpenAI | API key |
-| MiniMax | API key |
-| Moonshot | API key |
-| Synthetic | API key |
-| Vercel AI Gateway | Token |
-| OpenCode Zen | Token |
+| OAuth flows       | Browser-based   |
+| OpenAI            | API key         |
+| MiniMax           | API key         |
+| Moonshot          | API key         |
+| Synthetic         | API key         |
+| Vercel AI Gateway | Token           |
+| OpenCode Zen      | Token           |
 
 ### Credential Storage
 
@@ -159,16 +164,16 @@ pnpm add -g openclaw
 
 ### Supported Channels
 
-| Channel | Auth Method | Notes |
-|---------|-------------|-------|
-| WhatsApp | QR code scan | **Most popular**, requires `openclaw channels login` |
-| Telegram | Bot token | Create via @BotFather |
-| Discord | Bot token | Create in Discord Developer Portal |
-| Slack | Bot token | Workspace app |
-| iMessage | Local only | macOS only |
-| Signal | QR code | Self-hosted bridge required |
-| Google Chat | OAuth | Workspace integration |
-| Mattermost | Webhook | Self-hosted |
+| Channel     | Auth Method  | Notes                                                |
+| ----------- | ------------ | ---------------------------------------------------- |
+| WhatsApp    | QR code scan | **Most popular**, requires `openclaw channels login` |
+| Telegram    | Bot token    | Create via @BotFather                                |
+| Discord     | Bot token    | Create in Discord Developer Portal                   |
+| Slack       | Bot token    | Workspace app                                        |
+| iMessage    | Local only   | macOS only                                           |
+| Signal      | QR code      | Self-hosted bridge required                          |
+| Google Chat | OAuth        | Workspace integration                                |
+| Mattermost  | Webhook      | Self-hosted                                          |
 
 ### Channel Login
 
@@ -182,7 +187,7 @@ openclaw channels login  # Interactive QR for WhatsApp
 {
   "channels": {
     "whatsapp": {
-      "allowFrom": ["+1234567890"]  // CRITICAL: Whitelist numbers
+      "allowFrom": ["+1234567890"] // CRITICAL: Whitelist numbers
     }
   }
 }
@@ -199,12 +204,14 @@ openclaw channels login  # Interactive QR for WhatsApp
 When a channel uses "pairing" policy, unknown senders must be approved.
 
 **Pairing Code Specs:**
+
 - 8 characters, uppercase
 - Excludes ambiguous chars (0, O, 1, I)
 - Expires in 1 hour
 - Max 3 pending per channel
 
 **Commands:**
+
 ```bash
 openclaw pairing list telegram
 openclaw pairing approve telegram <CODE>
@@ -221,6 +228,7 @@ openclaw devices reject <requestId>
 ```
 
 **Storage:**
+
 - Pending: `~/.openclaw/devices/pending.json`
 - Paired: `~/.openclaw/devices/paired.json`
 
@@ -266,6 +274,7 @@ openclaw agents add <name>
 ```
 
 Each agent gets:
+
 - Separate workspace
 - Isolated sessions
 - Distinct auth profiles
@@ -279,7 +288,7 @@ Default: every 30 minutes
   "agents": {
     "defaults": {
       "heartbeat": {
-        "every": "30m"  // Set to "0m" to disable
+        "every": "30m" // Set to "0m" to disable
       }
     }
   }
@@ -300,6 +309,7 @@ Agent reads `HEARTBEAT.md` and replies `HEARTBEAT_OK` if no action needed.
 ### Inbound (Receiving)
 
 Template variables:
+
 - `{{MediaPath}}` - Local file path
 - `{{MediaUrl}}` - URL if available
 - `{{Transcript}}` - Voice transcription
@@ -358,16 +368,16 @@ pnpm gateway:watch  # Hot reload
 
 ## Quick Reference Commands
 
-| Command | Purpose |
-|---------|---------|
-| `openclaw onboard` | Initial setup |
-| `openclaw configure` | Reconfigure |
-| `openclaw dashboard` | Browser chat |
-| `openclaw gateway` | Start gateway |
-| `openclaw channels login` | WhatsApp QR |
-| `openclaw pairing list <ch>` | View pending |
-| `openclaw pairing approve <ch> <code>` | Approve user |
-| `openclaw devices list` | View devices |
-| `openclaw health` | Health check |
-| `openclaw status --all` | Full diagnosis |
-| `openclaw agents add <name>` | Add agent |
+| Command                                | Purpose        |
+| -------------------------------------- | -------------- |
+| `openclaw onboard`                     | Initial setup  |
+| `openclaw configure`                   | Reconfigure    |
+| `openclaw dashboard`                   | Browser chat   |
+| `openclaw gateway`                     | Start gateway  |
+| `openclaw channels login`              | WhatsApp QR    |
+| `openclaw pairing list <ch>`           | View pending   |
+| `openclaw pairing approve <ch> <code>` | Approve user   |
+| `openclaw devices list`                | View devices   |
+| `openclaw health`                      | Health check   |
+| `openclaw status --all`                | Full diagnosis |
+| `openclaw agents add <name>`           | Add agent      |

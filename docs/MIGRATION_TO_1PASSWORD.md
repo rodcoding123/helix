@@ -5,25 +5,28 @@ This guide explains how to migrate Helix from .env file secrets to secure 1Passw
 ## Overview
 
 **Old Way (Insecure):**
+
 ```typescript
 const WEBHOOKS = {
-  commands: process.env.DISCORD_WEBHOOK_COMMANDS,  // ❌ Exposed in .env
+  commands: process.env.DISCORD_WEBHOOK_COMMANDS, // ❌ Exposed in .env
 };
 ```
 
 **New Way (Secure):**
+
 ```typescript
 import { loadSecret } from '../lib/secrets-loader';
 
 // Loaded once at startup
 const WEBHOOKS = {
-  commands: await loadSecret('Discord Webhook - Commands', 'notes'),  // ✓ From 1Password
+  commands: await loadSecret('Discord Webhook - Commands', 'notes'), // ✓ From 1Password
 };
 ```
 
 ## Step 1: Install 1Password CLI
 
 **Windows (PowerShell):**
+
 ```powershell
 winget install 1Password.CLI
 ```
@@ -61,6 +64,7 @@ npx ts-node scripts/verify-1password.ts
 ```
 
 You should see:
+
 ```
 ✓ 1Password CLI: 2.x.x
 ✓ Authenticated as: your@email.com
@@ -77,6 +81,7 @@ You should see:
 ### Example 1: Logging Hooks Module
 
 **Before (logging-hooks.ts):**
+
 ```typescript
 // OLD - Exposes secrets in .env files
 const WEBHOOKS = {
@@ -87,6 +92,7 @@ const WEBHOOKS = {
 ```
 
 **After (logging-hooks.ts):**
+
 ```typescript
 import { loadSecret } from '../lib/secrets-loader.js';
 
@@ -111,14 +117,16 @@ export async function initializeWebhooks(): Promise<void> {
 ### Example 2: Web Application (Supabase Config)
 
 **Before (web/src/lib/supabase.ts):**
+
 ```typescript
 export const supabase = createClient(
-  process.env.VITE_SUPABASE_URL!,  // ❌ From .env
+  process.env.VITE_SUPABASE_URL!, // ❌ From .env
   process.env.VITE_SUPABASE_ANON_KEY!
 );
 ```
 
 **After:**
+
 ```typescript
 import { loadSecret } from '../lib/secrets-loader';
 
@@ -143,11 +151,13 @@ export function getSupabase() {
 ### Example 3: OpenClaw Gateway
 
 **Before (.env):**
+
 ```
 DISCORD_WEBHOOK_COMMANDS=https://discord.com/api/webhooks/...
 ```
 
 **After (gateway startup):**
+
 ```typescript
 import { loadSecret } from '../../lib/secrets-loader';
 
@@ -163,6 +173,7 @@ async function initializeGateway() {
 Keep .env files as documentation, but make them safe:
 
 **.env.local (SAFE - no secrets):**
+
 ```bash
 # Helix Web Application Configuration
 # Secrets are loaded from 1Password CLI, not from this file
@@ -178,6 +189,7 @@ VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...
 ```
 
 **.env (SAFE - no secrets):**
+
 ```bash
 # Helix Core Configuration
 # All secrets are loaded from 1Password via: await loadSecret('Name')
@@ -213,6 +225,7 @@ npm run dev
 ## Development vs Production
 
 ### Development
+
 - Use 1Password CLI (easier)
 - Or set `HELIX_SECRETS_SOURCE=env` to use .env as fallback
 - Run: `export HELIX_SECRETS_SOURCE=env` (Linux/Mac) or `$env:HELIX_SECRETS_SOURCE='env'` (Windows)
@@ -233,6 +246,7 @@ CMD ["npm", "start"]
 ## Troubleshooting
 
 ### "1Password CLI not found"
+
 ```bash
 # Install via package manager
 winget install 1Password.CLI
@@ -243,18 +257,21 @@ apt-get install 1password-cli
 ```
 
 ### "Not authenticated"
+
 ```bash
 op account add
 # Follow the browser authentication flow
 ```
 
 ### "Helix vault not found"
+
 ```bash
 # Re-run setup script
 .\scripts\setup-1password.ps1
 ```
 
 ### "Secret not found"
+
 ```bash
 # List all items in vault
 op item list --vault Helix
@@ -264,6 +281,7 @@ op item get "Discord Webhook - Commands" --vault Helix
 ```
 
 ### "Falls back to .env but .env is missing"
+
 ```bash
 # Either:
 # 1. Fix 1Password authentication

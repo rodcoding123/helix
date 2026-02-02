@@ -5,6 +5,7 @@ This guide explains how to deploy Helix in Docker with secure 1Password integrat
 ## Overview
 
 Instead of mounting .env files (insecure) or hardcoding secrets (insecure), we use:
+
 1. 1Password Service Account (machine authentication)
 2. 1Password Connect Server (local secret caching)
 3. Docker integration
@@ -44,7 +45,7 @@ services:
     volumes:
       - helix-data:/app/data
     ports:
-      - "3000:3000"
+      - '3000:3000'
     restart: unless-stopped
 
 volumes:
@@ -52,6 +53,7 @@ volumes:
 ```
 
 **To run:**
+
 ```bash
 export OP_SERVICE_ACCOUNT_TOKEN=ops_abcdef123456...
 docker-compose up -d
@@ -73,13 +75,13 @@ services:
   op-connect:
     image: 1password/connect-api:latest
     environment:
-      OP_BUS_PEERS: "op-connect-sync:8423"
+      OP_BUS_PEERS: 'op-connect-sync:8423'
     volumes:
       - op-connect-data:/home/opuser/.op/data
     ports:
-      - "8080:8080"
+      - '8080:8080'
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080/health']
       interval: 10s
       timeout: 5s
       retries: 3
@@ -89,13 +91,13 @@ services:
   op-connect-sync:
     image: 1password/connect-sync:latest
     environment:
-      OP_BUS_PEERS: "op-connect-api:8423"
+      OP_BUS_PEERS: 'op-connect-api:8423'
       OP_BUS_PORT: 8423
-      OP_SESSION: ${OP_SESSION}  # Credentials from 1Password
+      OP_SESSION: ${OP_SESSION} # Credentials from 1Password
     volumes:
       - op-connect-data:/home/opuser/.op/data
     ports:
-      - "8423:8423"
+      - '8423:8423'
     restart: unless-stopped
 
   # Helix Application
@@ -111,7 +113,7 @@ services:
     volumes:
       - helix-data:/app/data
     ports:
-      - "3000:3000"
+      - '3000:3000'
     restart: unless-stopped
 
 volumes:
@@ -140,10 +142,7 @@ Add Connect Server support to `src/lib/secrets-loader.ts`:
  * Load secret from 1Password Connect Server
  * (cached, no rate limits)
  */
-async function loadSecretFromConnectServer(
-  itemName: string,
-  field: SecretField
-): Promise<string> {
+async function loadSecretFromConnectServer(itemName: string, field: SecretField): Promise<string> {
   const connectHost = process.env.OP_CONNECT_HOST || 'http://localhost:8080';
   const connectToken = process.env.OP_CONNECT_TOKEN;
 
@@ -152,14 +151,11 @@ async function loadSecretFromConnectServer(
   }
 
   try {
-    const response = await fetch(
-      `${connectHost}/v1/vaults/Helix/items?filter=title:${itemName}`,
-      {
-        headers: {
-          Authorization: `Bearer ${connectToken}`,
-        },
-      }
-    );
+    const response = await fetch(`${connectHost}/v1/vaults/Helix/items?filter=title:${itemName}`, {
+      headers: {
+        Authorization: `Bearer ${connectToken}`,
+      },
+    });
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
@@ -265,23 +261,24 @@ spec:
   template:
     spec:
       containers:
-      - name: helix
-        image: helix-app:latest
-        env:
-        - name: OP_CONNECT_HOST
-          value: http://op-connect:8080
-        - name: OP_CONNECT_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: op-connect-token
-              key: token
-        - name: HELIX_ENVIRONMENT
-          value: production
+        - name: helix
+          image: helix-app:latest
+          env:
+            - name: OP_CONNECT_HOST
+              value: http://op-connect:8080
+            - name: OP_CONNECT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: op-connect-token
+                  key: token
+            - name: HELIX_ENVIRONMENT
+              value: production
 ```
 
 ## Security Best Practices
 
 ### Do's
+
 ✅ Store `OP_CONNECT_TOKEN` in Docker Secrets or Kubernetes Secret
 ✅ Use least privilege (Service Account with minimal vault access)
 ✅ Rotate tokens regularly
@@ -291,6 +288,7 @@ spec:
 ✅ Log secret access (1Password does this automatically)
 
 ### Don'ts
+
 ❌ Commit tokens to git
 ❌ Pass tokens as plaintext in docker run
 ❌ Use Connect Server password (use token instead)
@@ -301,6 +299,7 @@ spec:
 ## Troubleshooting
 
 ### Service Account Rate Limits
+
 ```
 Error: Rate limited (50,000/hour)
 ```
@@ -308,6 +307,7 @@ Error: Rate limited (50,000/hour)
 Solution: Use Connect Server instead (unlimited local access after initial fetch)
 
 ### Connect Server Not Responding
+
 ```bash
 # Check service health
 curl http://localhost:8080/health
@@ -320,6 +320,7 @@ echo $OP_SESSION
 ```
 
 ### Secret Not Found
+
 ```bash
 # Verify vault contains secret
 op item list --vault Helix
@@ -330,13 +331,14 @@ op item get "Discord Webhook - Commands" --vault Helix
 
 ## Performance
 
-| Method | Speed | Rate Limit | Best For |
-|--------|-------|-----------|----------|
-| CLI (op command) | Slow (300ms) | 50k/hour | Development |
-| Service Account | Medium (50ms) | 50k/hour | Single instances |
-| Connect Server | Fast (5ms) | Unlimited | Production, scaling |
+| Method           | Speed         | Rate Limit | Best For            |
+| ---------------- | ------------- | ---------- | ------------------- |
+| CLI (op command) | Slow (300ms)  | 50k/hour   | Development         |
+| Service Account  | Medium (50ms) | 50k/hour   | Single instances    |
+| Connect Server   | Fast (5ms)    | Unlimited  | Production, scaling |
 
 For Helix:
+
 - **Dev:** CLI or Service Account
 - **Prod:** Connect Server
 

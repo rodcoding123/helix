@@ -1,5 +1,5 @@
 ---
-summary: "GLM model family overview + how to use it in OpenClaw"
+summary: 'GLM model family overview + how to use it in OpenClaw'
 read_when:
   - You want GLM models in OpenClaw
   - You need the model naming convention and setup
@@ -20,8 +20,8 @@ openclaw onboard --auth-choice zai-api-key
 
 ```json5
 {
-  env: { ZAI_API_KEY: "sk-..." },
-  agents: { defaults: { model: { primary: "zai/glm-4.7" } } },
+  env: { ZAI_API_KEY: 'sk-...' },
+  agents: { defaults: { model: { primary: 'zai/glm-4.7' } } },
 }
 ```
 

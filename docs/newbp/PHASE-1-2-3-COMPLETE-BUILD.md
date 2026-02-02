@@ -11,22 +11,26 @@
 ## EXECUTION OVERVIEW
 
 ### Week 1-2: Phase 1 Foundation (Memory System)
+
 - Backend: Emotion detection, topic extraction, embeddings
 - Frontend: Memory greeting, memory references, memory dashboard
 - **Result**: Users see "she remembers me" on Day 2
 
 ### Week 3-4: Phase 2 + Phase 3 Parallel
+
 - **Phase 2 (Agents)**: Agent selector UI, multi-agent orchestration
 - **Phase 3 (Autonomy)**: Action execution, approval workflows
 - **Result**: Users see "she's a team" + "she acts"
 
 ### Week 5-6: Integration & Polish
+
 - All three phases working together
 - Beta testing with 10 users
 - Measure Day 2 retention, upgrade rate
 - Fix issues, optimize
 
 ### Week 7+: Scale & Community
+
 - Production launch
 - Agent marketplace
 - Advanced features
@@ -110,13 +114,13 @@ export class EmotionDetectionService {
       messages: [
         {
           role: 'system',
-          content: this.getPrompt()
+          content: this.getPrompt(),
         },
         {
           role: 'user',
-          content: conversationText
-        }
-      ]
+          content: conversationText,
+        },
+      ],
     });
 
     const content = response.choices[0].message.content;
@@ -152,9 +156,12 @@ Return ONLY valid JSON (no markdown):
   private parseResponse(content: string): EmotionAnalysis {
     try {
       const json = JSON.parse(content);
-      const salience = 0.3 * json.self_relevance + 0.25 * json.arousal +
-                      0.2 * json.novelty + 0.15 * Math.abs(json.valence) +
-                      0.1 * json.dominance;
+      const salience =
+        0.3 * json.self_relevance +
+        0.25 * json.arousal +
+        0.2 * json.novelty +
+        0.15 * Math.abs(json.valence) +
+        0.1 * json.dominance;
 
       let tier: 'critical' | 'high' | 'medium' | 'low';
       if (salience > 0.75) tier = 'critical';
@@ -170,21 +177,27 @@ Return ONLY valid JSON (no markdown):
           arousal: json.arousal,
           dominance: json.dominance,
           novelty: json.novelty,
-          self_relevance: json.self_relevance
+          self_relevance: json.self_relevance,
         },
         salience_score: Math.min(1, salience),
         salience_tier: tier,
-        confidence: json.confidence
+        confidence: json.confidence,
       };
     } catch (error) {
       console.error('Failed to parse emotion response:', error);
       return {
         primary_emotion: 'neutral',
         secondary_emotions: [],
-        dimensions: { valience: 0, arousal: 0.3, dominance: 0.5, novelty: 0.2, self_relevance: 0.3 },
+        dimensions: {
+          valience: 0,
+          arousal: 0.3,
+          dominance: 0.5,
+          novelty: 0.2,
+          self_relevance: 0.3,
+        },
         salience_score: 0.25,
         salience_tier: 'low',
-        confidence: 0.3
+        confidence: 0.3,
       };
     }
   }
@@ -218,13 +231,13 @@ export class TopicExtractionService {
       messages: [
         {
           role: 'system',
-          content: this.getPrompt()
+          content: this.getPrompt(),
         },
         {
           role: 'user',
-          content: conversationText
-        }
-      ]
+          content: conversationText,
+        },
+      ],
     });
 
     const content = response.choices[0].message.content;
@@ -322,12 +335,16 @@ export class MemoryRepository {
     return data || [];
   }
 
-  async semanticSearch(userId: string, embedding: number[], limit: number = 5): Promise<StoredConversation[]> {
+  async semanticSearch(
+    userId: string,
+    embedding: number[],
+    limit: number = 5
+  ): Promise<StoredConversation[]> {
     const { data, error } = await this.supabase.rpc('search_memories', {
       query_embedding: embedding,
       user_id_input: userId,
       limit_count: limit,
-      similarity_threshold: 0.7
+      similarity_threshold: 0.7,
     });
 
     if (error) throw error;
@@ -354,7 +371,7 @@ export class MemoryRepository {
         salience_tier: emotions.salience_tier,
         embedding,
         extracted_topics: topics,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .eq('id', conversationId);
 
@@ -501,7 +518,10 @@ export function useMemory(userId: string) {
         const topics = await topicService.extractTopics(messages);
 
         // 3. Generate embedding
-        const text = messages.map(m => m.content).join(' ').substring(0, 2000);
+        const text = messages
+          .map(m => m.content)
+          .join(' ')
+          .substring(0, 2000);
         const embedding = await embeddingService.generateEmbedding(text);
 
         // 4. Store conversation
@@ -520,7 +540,7 @@ export function useMemory(userId: string) {
           extracted_topics: topics.map(t => t.topic),
           embedding,
           decay_multiplier: 1.0,
-          user_marked_important: false
+          user_marked_important: false,
         });
 
         return conversation;
@@ -553,13 +573,15 @@ export function useMemory(userId: string) {
     const memories = await repo.getRecentMemories(userId, 50);
 
     return {
-      key_moments: memories.filter(m => m.salience_tier === 'critical' || m.salience_tier === 'high'),
+      key_moments: memories.filter(
+        m => m.salience_tier === 'critical' || m.salience_tier === 'high'
+      ),
       patterns: [...new Set(memories.flatMap(m => m.secondary_emotions || []))],
       topics: [...new Set(memories.flatMap(m => m.extracted_topics || []))],
       emotional_triggers: memories
         .filter(m => m.valence < -0.5)
         .flatMap(m => m.extracted_topics || []),
-      coping_strategies: ['Take a walk', 'Meditation', 'Talk it through']
+      coping_strategies: ['Take a walk', 'Meditation', 'Talk it through'],
     };
   }, [userId]);
 
@@ -567,7 +589,7 @@ export function useMemory(userId: string) {
     storeConversation,
     getGreeting,
     getSummary,
-    summary
+    summary,
   };
 }
 ```
@@ -705,9 +727,9 @@ export class AgentOrchestrationService {
         ...conversationHistory,
         {
           role: 'user',
-          content: userMessage
-        }
-      ]
+          content: userMessage,
+        },
+      ],
     });
 
     return response.choices[0].message.content;
@@ -721,13 +743,14 @@ export class AgentOrchestrationService {
       messages: [
         {
           role: 'system',
-          content: 'You are an agent router. Return only the agent name that best handles this request.'
+          content:
+            'You are an agent router. Return only the agent name that best handles this request.',
         },
         {
           role: 'user',
-          content: `Agents: ${agents.map(a => a.name).join(', ')}\nRequest: ${userMessage}\nBest agent:`
-        }
-      ]
+          content: `Agents: ${agents.map(a => a.name).join(', ')}\nRequest: ${userMessage}\nBest agent:`,
+        },
+      ],
     });
 
     return response.choices[0].message.content;
@@ -884,13 +907,13 @@ export class ActionExecutionService {
       messages: [
         {
           role: 'system',
-          content: 'You are a safety validator. Return only "APPROVED" or "REJECTED".'
+          content: 'You are a safety validator. Return only "APPROVED" or "REJECTED".',
         },
         {
           role: 'user',
-          content: `Action: ${action}\n\nIs this action safe to execute?`
-        }
-      ]
+          content: `Action: ${action}\n\nIs this action safe to execute?`,
+        },
+      ],
     });
 
     const approved = validation.choices[0].message.content.includes('APPROVED');
@@ -903,7 +926,7 @@ export class ActionExecutionService {
       autonomy_level: autonomyLevel,
       status: approved ? 'executed' : 'rejected',
       reasoning: 'Autonomy validation',
-      hash: this.generateHash(action)
+      hash: this.generateHash(action),
     });
 
     // 5. Post-execution logging
@@ -913,7 +936,7 @@ export class ActionExecutionService {
 
     return {
       approved,
-      result: approved ? `Action executed: ${action}` : 'Action rejected for safety'
+      result: approved ? `Action executed: ${action}` : 'Action rejected for safety',
     };
   }
 
@@ -929,7 +952,7 @@ export class ActionExecutionService {
     let hash = 0;
     for (let i = 0; i < data.length; i++) {
       const char = data.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash;
     }
     return hash.toString(16);
@@ -944,8 +967,8 @@ export class ActionExecutionService {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        content: `${message} (User: ${userId})`
-      })
+        content: `${message} (User: ${userId})`,
+      }),
     });
   }
 }
@@ -1009,12 +1032,14 @@ export function ActionLog() {
 # INTEGRATION TIMELINE
 
 ## Week 1-2: Phase 1 Backend (Memory)
+
 - [ ] Day 1: Database + types + skeletons
 - [ ] Days 2-3: Emotion detection service
 - [ ] Days 4-5: Topic extraction + embeddings
 - [ ] Day 6-7: Memory repository + React hook
 
 ## Week 2: Phase 1 Frontend (Memory)
+
 - [ ] Days 8-9: Memory greeting component
 - [ ] Days 10: Memory dashboard page
 - [ ] All components tested and working
@@ -1022,18 +1047,21 @@ export function ActionLog() {
 ## Week 3-4 (PARALLEL):
 
 ### Phase 2 (Agents) - Engineer 2
+
 - [ ] Days 11-12: Agent table setup
 - [ ] Days 13-14: Agent selector UI
 - [ ] Days 15-16: Agent orchestration service
 - [ ] Days 17-18: Agent memory tracking
 
 ### Phase 3 (Autonomy) - Engineer 3
+
 - [ ] Days 11-12: Autonomy tables
 - [ ] Days 13-14: Autonomy slider UI
 - [ ] Days 15-16: Action execution service
 - [ ] Days 17-18: Action log component
 
 ## Week 5-6: Integration & Testing
+
 - [ ] All three phases working together
 - [ ] End-to-end testing
 - [ ] Performance optimization
@@ -1045,22 +1073,26 @@ export function ActionLog() {
 # SUCCESS METRICS
 
 ### Phase 1 (Week 2)
+
 - ✅ Memory greeting shows on Day 2: 100%
 - ✅ Emotion accuracy: 85%+
 - ✅ Memory dashboard loads: <500ms
 - ✅ Day 2 retention improves: 18% → 50%+
 
 ### Phase 2 (Week 4)
+
 - ✅ 6 agents working: 100%
 - ✅ Agent selector functional: 100%
 - ✅ Upgrade interest increases: 2% → 8%
 
 ### Phase 3 (Week 6)
+
 - ✅ Autonomy levels 0-4 working: 100%
 - ✅ Action log transparent: 100%
 - ✅ Architect tier interest: 6%+
 
 ### Overall (Week 7+)
+
 - ✅ Ready for production launch
 - ✅ 10x-50x growth potential unlocked
 - ✅ Sustainable, profitable business model
@@ -1070,11 +1102,13 @@ export function ActionLog() {
 # TEAM COORDINATION
 
 ## Daily Standups (9:00 AM)
+
 - 15 minutes
 - Each person: Yesterday's progress, today's tasks, blockers
 - Post updates to Discord
 
 ## Git Workflow
+
 ```bash
 # Create branches
 git checkout -b feature/phase1-memory
@@ -1089,6 +1123,7 @@ git commit -m "feat(phase1): implement emotion detection"
 ```
 
 ## Blockers
+
 - Post immediately in #development
 - Don't wait for standup
 - I'm available for quick pairing
@@ -1097,12 +1132,12 @@ git commit -m "feat(phase1): implement emotion detection"
 
 # COST SUMMARY
 
-| Phase | DeepSeek | Gemini | Supabase | Total/Month |
-|-------|----------|--------|----------|---|
-| 1 (Memory) | $20 | $0.06 | $25 | $45 |
-| 2 (Agents) | $7 | $0 | - | $7 |
-| 3 (Autonomy) | $10 | $0.19 | - | $10 |
-| **Total** | **$37** | **$0.25** | **$25** | **$62** |
+| Phase        | DeepSeek | Gemini    | Supabase | Total/Month |
+| ------------ | -------- | --------- | -------- | ----------- |
+| 1 (Memory)   | $20      | $0.06     | $25      | $45         |
+| 2 (Agents)   | $7       | $0        | -        | $7          |
+| 3 (Autonomy) | $10      | $0.19     | -        | $10         |
+| **Total**    | **$37**  | **$0.25** | **$25**  | **$62**     |
 
 **Profit margin at 50 users: 97%** ✅
 

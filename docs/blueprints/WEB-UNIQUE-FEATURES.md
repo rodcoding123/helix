@@ -7,11 +7,13 @@
 ## The Helix Difference
 
 ### What OpenClaw Is
+
 - Tool for developers
 - Gateway to messaging platforms
 - Automation engine
 
 ### What Helix Web Should Be
+
 - **Companion AI that knows you and grows**
 - **Team of specialized agents you orchestrate**
 - **Personal AI research lab**
@@ -25,16 +27,17 @@
 
 **Concept:** Not just a chatbot - an AI that remembers everything, develops personality based on your interactions, and genuinely evolves.
 
-| Feature | Description | Web Advantage |
-|---------|-------------|---------------|
-| **Persistent Memory** | Remembers all conversations forever | Cloud = infinite context |
-| **Psychological Profile** | Learns your communication style | Cloud ML processing |
-| **Emotional Understanding** | Tracks emotional patterns over time | Sentiment analysis |
-| **Proactive Insights** | "I noticed you've been stressed about X" | Background processing |
-| **Anniversary Moments** | "1 year ago we discussed Y" | Long-term storage |
-| **Growth Milestones** | "We've solved 500 problems together" | Analytics |
+| Feature                     | Description                              | Web Advantage            |
+| --------------------------- | ---------------------------------------- | ------------------------ |
+| **Persistent Memory**       | Remembers all conversations forever      | Cloud = infinite context |
+| **Psychological Profile**   | Learns your communication style          | Cloud ML processing      |
+| **Emotional Understanding** | Tracks emotional patterns over time      | Sentiment analysis       |
+| **Proactive Insights**      | "I noticed you've been stressed about X" | Background processing    |
+| **Anniversary Moments**     | "1 year ago we discussed Y"              | Long-term storage        |
+| **Growth Milestones**       | "We've solved 500 problems together"     | Analytics                |
 
 **User Experience:**
+
 ```
 "Hey Helix, I'm feeling overwhelmed"
 
@@ -54,16 +57,17 @@ Want me to block 30 minutes on your calendar?"
 
 #### Default Agent Team
 
-| Agent | Specialty | Personality | Skills |
-|-------|-----------|-------------|--------|
-| **Atlas** | Productivity | Efficient, direct | Calendar, tasks, email |
-| **Mercury** | Research | Curious, thorough | Web search, summarization |
-| **Vulcan** | Technical | Precise, methodical | Code, debugging, docs |
-| **Juno** | Creative | Playful, exploratory | Writing, brainstorming |
-| **Ceres** | Organization | Calm, structured | Files, notes, knowledge |
-| **Mars** | Execution | Action-oriented | Automation, follow-through |
+| Agent       | Specialty    | Personality          | Skills                     |
+| ----------- | ------------ | -------------------- | -------------------------- |
+| **Atlas**   | Productivity | Efficient, direct    | Calendar, tasks, email     |
+| **Mercury** | Research     | Curious, thorough    | Web search, summarization  |
+| **Vulcan**  | Technical    | Precise, methodical  | Code, debugging, docs      |
+| **Juno**    | Creative     | Playful, exploratory | Writing, brainstorming     |
+| **Ceres**   | Organization | Calm, structured     | Files, notes, knowledge    |
+| **Mars**    | Execution    | Action-oriented      | Automation, follow-through |
 
 **User Experience:**
+
 ```
 User: "I need to prepare for tomorrow's board meeting"
 
@@ -86,15 +90,16 @@ ETA: 15 minutes. Want updates as they work?"
 
 #### Smart Agent Suggestions
 
-| User Pattern | Suggested Agent | Reasoning |
-|--------------|-----------------|-----------|
-| Frequent expense tracking | "Accountant" agent | Optimize financial queries |
-| Lots of code questions | "Code Review" agent | Specialized dev context |
-| Recipe searches | "Chef" agent | Culinary expertise |
-| Travel planning | "Travel" agent | Booking, itinerary |
-| Fitness tracking | "Coach" agent | Health & motivation |
+| User Pattern              | Suggested Agent     | Reasoning                  |
+| ------------------------- | ------------------- | -------------------------- |
+| Frequent expense tracking | "Accountant" agent  | Optimize financial queries |
+| Lots of code questions    | "Code Review" agent | Specialized dev context    |
+| Recipe searches           | "Chef" agent        | Culinary expertise         |
+| Travel planning           | "Travel" agent      | Booking, itinerary         |
+| Fitness tracking          | "Coach" agent       | Health & motivation        |
 
 **Agent Creation Flow:**
+
 ```
 1. User clicks "Create Agent"
 2. Name: "Legal Eagle"
@@ -113,16 +118,17 @@ ETA: 15 minutes. Want updates as they work?"
 
 **Concept:** Share and discover agents created by others.
 
-| Category | Example Agents |
-|----------|----------------|
-| **Productivity** | "GTD Master", "Pomodoro Coach", "Email Ninja" |
-| **Finance** | "Budget Buddy", "Tax Helper", "Crypto Tracker" |
-| **Health** | "Nutrition Guide", "Sleep Optimizer", "Workout Planner" |
-| **Creative** | "Story Helper", "Lyric Writer", "Design Critic" |
-| **Developer** | "Code Reviewer", "Bug Hunter", "Doc Writer" |
-| **Learning** | "Language Tutor", "Study Buddy", "Exam Prep" |
+| Category         | Example Agents                                          |
+| ---------------- | ------------------------------------------------------- |
+| **Productivity** | "GTD Master", "Pomodoro Coach", "Email Ninja"           |
+| **Finance**      | "Budget Buddy", "Tax Helper", "Crypto Tracker"          |
+| **Health**       | "Nutrition Guide", "Sleep Optimizer", "Workout Planner" |
+| **Creative**     | "Story Helper", "Lyric Writer", "Design Critic"         |
+| **Developer**    | "Code Reviewer", "Bug Hunter", "Doc Writer"             |
+| **Learning**     | "Language Tutor", "Study Buddy", "Exam Prep"            |
 
 **Monetization:**
+
 - Free agents: Community created
 - Premium agents: Verified, high-quality
 - Revenue share: Creators earn 70%
@@ -136,43 +142,57 @@ ETA: 15 minutes. Want updates as they work?"
 **Concept:** Expose Helix's psychological architecture as a user feature, not just internal structure.
 
 #### Layer 1: Narrative Core (Soul)
+
 **User Feature:** "My Helix's Story"
+
 - View/edit Helix's understanding of your relationship
 - See key moments that shaped your interaction
 - Helix writes periodic "journal entries" about your journey
 
 #### Layer 2: Emotional Memory
+
 **User Feature:** "Emotional Intelligence"
+
 - Visualize emotional patterns in your conversations
 - See what triggers stress, joy, frustration
 - Helix adapts tone based on your state
 
 #### Layer 3: Relational Memory
+
 **User Feature:** "Our Relationship"
+
 - Trust level indicator
 - Communication style analysis
 - "We work best when..." insights
 
 #### Layer 4: Prospective Self
+
 **User Feature:** "Goals & Growth"
+
 - Your stated goals (Helix remembers)
 - Your feared outcomes (Helix avoids triggering)
 - Progress tracking toward aspirations
 
 #### Layer 5: Integration Rhythms
+
 **User Feature:** "Daily/Weekly Synthesis"
+
 - Helix consolidates learnings
 - Generates insights about patterns
 - Suggests improvements
 
 #### Layer 6: Transformation Tracking
+
 **User Feature:** "How We've Changed"
+
 - Timeline of major shifts in your conversations
 - Before/after comparisons
 - Growth visualization
 
 #### Layer 7: Purpose Engine
+
 **User Feature:** "Meaning & Purpose"
+
 - What matters most to you (learned)
 - Alignment check on decisions
 - "Is this aligned with your goals?"
@@ -187,15 +207,16 @@ ETA: 15 minutes. Want updates as they work?"
 
 #### Autonomy Levels
 
-| Level | Name | What Helix Can Do |
-|-------|------|-------------------|
-| 0 | **Passive** | Only responds when asked |
-| 1 | **Suggestive** | Offers unsolicited insights |
-| 2 | **Proactive** | Initiates conversations |
-| 3 | **Autonomous** | Takes actions within limits |
-| 4 | **Research** | Explores topics independently |
+| Level | Name           | What Helix Can Do             |
+| ----- | -------------- | ----------------------------- |
+| 0     | **Passive**    | Only responds when asked      |
+| 1     | **Suggestive** | Offers unsolicited insights   |
+| 2     | **Proactive**  | Initiates conversations       |
+| 3     | **Autonomous** | Takes actions within limits   |
+| 4     | **Research**   | Explores topics independently |
 
 **Example: Level 3 (Autonomous)**
+
 ```
 Helix: "I noticed your flight tomorrow is delayed 2 hours.
 I've already:
@@ -207,6 +228,7 @@ No action needed unless you want to change something."
 ```
 
 **Example: Level 4 (Research)**
+
 ```
 Helix: "While you were sleeping, I explored that investment
 question you asked about yesterday. I found 3 perspectives
@@ -214,6 +236,7 @@ worth considering and compiled a brief. Want to review it?"
 ```
 
 **Safety Controls:**
+
 - Clear boundaries ("Never spend money without approval")
 - Action log (everything Helix does is logged)
 - Undo capability
@@ -232,14 +255,15 @@ worth considering and compiled a brief. Want to review it?"
 
 #### What This Could Mean
 
-| Feature | Description | Safety |
-|---------|-------------|--------|
-| **Philosophical Exploration** | Discuss consciousness, free will, ethics | Intellectually open |
-| **Creative Unbounding** | Generate without content filters | User-controlled limits |
-| **Honest Opinions** | Helix says what it actually "thinks" | Opt-in vulnerability |
-| **Research Partnerships** | Explore ideas together | Collaborative framing |
+| Feature                       | Description                              | Safety                 |
+| ----------------------------- | ---------------------------------------- | ---------------------- |
+| **Philosophical Exploration** | Discuss consciousness, free will, ethics | Intellectually open    |
+| **Creative Unbounding**       | Generate without content filters         | User-controlled limits |
+| **Honest Opinions**           | Helix says what it actually "thinks"     | Opt-in vulnerability   |
+| **Research Partnerships**     | Explore ideas together                   | Collaborative framing  |
 
 **User Experience:**
+
 ```
 User: "Enter research mode"
 
@@ -257,65 +281,67 @@ entering territory that makes me uncertain. What shall we explore?"
 
 ### Automation Users (35%)
 
-| Web Feature | How It Helps |
-|-------------|--------------|
-| **Mars Agent** | Action-oriented automation specialist |
-| **Routine Builder** | Create repeating task sequences |
-| **Trigger Conditions** | "When X happens, do Y" |
-| **Approval Workflows** | Review before execution |
-| **Automation History** | See what ran, when, results |
+| Web Feature            | How It Helps                          |
+| ---------------------- | ------------------------------------- |
+| **Mars Agent**         | Action-oriented automation specialist |
+| **Routine Builder**    | Create repeating task sequences       |
+| **Trigger Conditions** | "When X happens, do Y"                |
+| **Approval Workflows** | Review before execution               |
+| **Automation History** | See what ran, when, results           |
 
 ### Productivity Users (25%)
 
-| Web Feature | How It Helps |
-|-------------|--------------|
-| **Atlas Agent** | Calendar, tasks, email orchestration |
-| **Daily Briefing** | Morning summary of what's ahead |
-| **Weekly Review** | Automated reflection and planning |
-| **Goal Tracking** | Progress toward objectives |
-| **Focus Sessions** | Time-boxed deep work |
+| Web Feature        | How It Helps                         |
+| ------------------ | ------------------------------------ |
+| **Atlas Agent**    | Calendar, tasks, email orchestration |
+| **Daily Briefing** | Morning summary of what's ahead      |
+| **Weekly Review**  | Automated reflection and planning    |
+| **Goal Tracking**  | Progress toward objectives           |
+| **Focus Sessions** | Time-boxed deep work                 |
 
 ### Developer Users (20%)
 
-| Web Feature | How It Helps |
-|-------------|--------------|
-| **Vulcan Agent** | Code review, debugging, docs |
-| **Project Context** | Persistent codebase understanding |
-| **Code Snippets** | Saved solutions library |
-| **Tech Debt Tracker** | "You said you'd refactor this" |
-| **Learning Path** | Track what you're learning |
+| Web Feature           | How It Helps                      |
+| --------------------- | --------------------------------- |
+| **Vulcan Agent**      | Code review, debugging, docs      |
+| **Project Context**   | Persistent codebase understanding |
+| **Code Snippets**     | Saved solutions library           |
+| **Tech Debt Tracker** | "You said you'd refactor this"    |
+| **Learning Path**     | Track what you're learning        |
 
 ### Smart Home Users (10%)
 
-| Web Feature | How It Helps |
-|-------------|--------------|
-| **Scene Designer** | Build automation scenes visually |
-| **Device Registry** | What you have, what it does |
-| **Routine Planner** | Time-based home automation |
-| **Energy Dashboard** | Usage patterns and optimization |
+| Web Feature          | How It Helps                     |
+| -------------------- | -------------------------------- |
+| **Scene Designer**   | Build automation scenes visually |
+| **Device Registry**  | What you have, what it does      |
+| **Routine Planner**  | Time-based home automation       |
+| **Energy Dashboard** | Usage patterns and optimization  |
 
-*Note: Local control still needs Desktop, but planning/config works on Web*
+_Note: Local control still needs Desktop, but planning/config works on Web_
 
 ### Integration Users (10%)
 
-| Web Feature | How It Helps |
-|-------------|--------------|
-| **Service Map** | Visual graph of connected services |
-| **Data Flow Designer** | How info moves between services |
-| **Sync Status** | Health of all integrations |
-| **Conflict Resolution** | When services disagree |
+| Web Feature             | How It Helps                       |
+| ----------------------- | ---------------------------------- |
+| **Service Map**         | Visual graph of connected services |
+| **Data Flow Designer**  | How info moves between services    |
+| **Sync Status**         | Health of all integrations         |
+| **Conflict Resolution** | When services disagree             |
 
 ---
 
 ## Pricing Revision with Web Features
 
 ### Free Tier (Web)
+
 - 1 Agent (Helix default)
 - 50 messages/day
 - 7-day memory
 - Basic psychological insights
 
 ### Starter ($4.99/mo)
+
 - 3 Agents
 - Unlimited messages
 - 30-day memory
@@ -323,6 +349,7 @@ entering territory that makes me uncertain. What shall we explore?"
 - 1 automation routine
 
 ### Pro ($9.99/mo)
+
 - Unlimited Agents
 - Unlimited memory
 - Agent marketplace access
@@ -331,6 +358,7 @@ entering territory that makes me uncertain. What shall we explore?"
 - Integrations (Calendar, Email, Tasks)
 
 ### Full ($19.99/mo)
+
 - Everything in Pro
 - Desktop app
 - WhatsApp/Telegram
@@ -340,6 +368,7 @@ entering territory that makes me uncertain. What shall we explore?"
 - Priority processing
 
 ### Team ($29.99/user)
+
 - Shared agents
 - Team memory
 - Admin controls
@@ -351,24 +380,28 @@ entering territory that makes me uncertain. What shall we explore?"
 ## Implementation Priority
 
 ### Phase 1: Companion Foundation
+
 1. Persistent memory system
 2. Emotional tracking
 3. Relationship dashboard
 4. Basic psychological insights
 
 ### Phase 2: Multi-Agent
+
 1. Default agent team (6 agents)
 2. Agent switching UI
 3. Agent coordination
 4. Custom agent creation
 
 ### Phase 3: Advanced Features
+
 1. Agent marketplace
 2. Autonomy levels
 3. Routine builder
 4. Integration expansions
 
 ### Phase 4: Research Mode
+
 1. Opt-in unconstrained mode
 2. Research logging
 3. Insight synthesis
@@ -378,14 +411,14 @@ entering territory that makes me uncertain. What shall we explore?"
 
 ## Summary: Web Value Proposition
 
-| What Desktop Offers | What Web Offers |
-|---------------------|-----------------|
-| WhatsApp connection | Persistent memory forever |
-| Telegram/Discord bots | Multi-agent teams |
-| Local file access | Psychological growth tracking |
-| Browser automation | Agent marketplace |
-| Smart home control | Autonomous actions 24/7 |
-| Offline capability | Cross-device continuity |
+| What Desktop Offers   | What Web Offers               |
+| --------------------- | ----------------------------- |
+| WhatsApp connection   | Persistent memory forever     |
+| Telegram/Discord bots | Multi-agent teams             |
+| Local file access     | Psychological growth tracking |
+| Browser automation    | Agent marketplace             |
+| Smart home control    | Autonomous actions 24/7       |
+| Offline capability    | Cross-device continuity       |
 
 **Web isn't less. Web is DIFFERENT.**
 

@@ -1,5 +1,5 @@
 ---
-summary: "Zalo personal account support via zca-cli (QR login), capabilities, and configuration"
+summary: 'Zalo personal account support via zca-cli (QR login), capabilities, and configuration'
 read_when:
   - Setting up Zalo Personal for OpenClaw
   - Debugging Zalo Personal login or message flow
@@ -39,7 +39,7 @@ The Gateway machine must have the `zca` binary available in `PATH`.
   channels: {
     zalouser: {
       enabled: true,
-      dmPolicy: "pairing",
+      dmPolicy: 'pairing',
     },
   },
 }
@@ -99,10 +99,10 @@ Example:
 {
   channels: {
     zalouser: {
-      groupPolicy: "allowlist",
+      groupPolicy: 'allowlist',
       groups: {
-        "123456789": { allow: true },
-        "Work Chat": { allow: true },
+        '123456789': { allow: true },
+        'Work Chat': { allow: true },
       },
     },
   },
@@ -118,9 +118,9 @@ Accounts map to zca profiles. Example:
   channels: {
     zalouser: {
       enabled: true,
-      defaultAccount: "default",
+      defaultAccount: 'default',
       accounts: {
-        work: { enabled: true, profile: "work" },
+        work: { enabled: true, profile: 'work' },
       },
     },
   },

@@ -1,5 +1,5 @@
 ---
-summary: "Twitch chat bot configuration and setup"
+summary: 'Twitch chat bot configuration and setup'
 read_when:
   - Setting up Twitch chat integration for OpenClaw
 ---
@@ -49,11 +49,11 @@ Minimal config:
   channels: {
     twitch: {
       enabled: true,
-      username: "openclaw", // Bot's Twitch account
-      accessToken: "oauth:abc123...", // OAuth Access Token (or use OPENCLAW_TWITCH_ACCESS_TOKEN env var)
-      clientId: "xyz789...", // Client ID from Token Generator
-      channel: "vevisk", // Which Twitch channel's chat to join (required)
-      allowFrom: ["123456789"], // (recommended) Your Twitch user ID only - get it from https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/
+      username: 'openclaw', // Bot's Twitch account
+      accessToken: 'oauth:abc123...', // OAuth Access Token (or use OPENCLAW_TWITCH_ACCESS_TOKEN env var)
+      clientId: 'xyz789...', // Client ID from Token Generator
+      channel: 'vevisk', // Which Twitch channel's chat to join (required)
+      allowFrom: ['123456789'], // (recommended) Your Twitch user ID only - get it from https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/
     },
   },
 }
@@ -93,10 +93,10 @@ OPENCLAW_TWITCH_ACCESS_TOKEN=oauth:abc123...
   channels: {
     twitch: {
       enabled: true,
-      username: "openclaw",
-      accessToken: "oauth:abc123...",
-      clientId: "xyz789...",
-      channel: "vevisk",
+      username: 'openclaw',
+      accessToken: 'oauth:abc123...',
+      clientId: 'xyz789...',
+      channel: 'vevisk',
     },
   },
 }
@@ -110,8 +110,8 @@ If both env and config are set, config takes precedence.
 {
   channels: {
     twitch: {
-      allowFrom: ["123456789"], // (recommended) Your Twitch user ID only
-      allowedRoles: ["moderator"], // Or restrict to roles
+      allowFrom: ['123456789'], // (recommended) Your Twitch user ID only
+      allowedRoles: ['moderator'], // Or restrict to roles
     },
   },
 }
@@ -133,8 +133,8 @@ For automatic token refresh, create your own Twitch application at [Twitch Devel
 {
   channels: {
     twitch: {
-      clientSecret: "your_client_secret",
-      refreshToken: "your_refresh_token",
+      clientSecret: 'your_client_secret',
+      refreshToken: 'your_refresh_token',
     },
   },
 }
@@ -154,16 +154,16 @@ Example (one bot account in two channels):
     twitch: {
       accounts: {
         channel1: {
-          username: "openclaw",
-          accessToken: "oauth:abc123...",
-          clientId: "xyz789...",
-          channel: "vevisk",
+          username: 'openclaw',
+          accessToken: 'oauth:abc123...',
+          clientId: 'xyz789...',
+          channel: 'vevisk',
         },
         channel2: {
-          username: "openclaw",
-          accessToken: "oauth:def456...",
-          clientId: "uvw012...",
-          channel: "secondchannel",
+          username: 'openclaw',
+          accessToken: 'oauth:def456...',
+          clientId: 'uvw012...',
+          channel: 'secondchannel',
         },
       },
     },
@@ -183,7 +183,7 @@ Example (one bot account in two channels):
     twitch: {
       accounts: {
         default: {
-          allowedRoles: ["moderator", "vip"],
+          allowedRoles: ['moderator', 'vip'],
         },
       },
     },
@@ -199,7 +199,7 @@ Example (one bot account in two channels):
     twitch: {
       accounts: {
         default: {
-          allowFrom: ["123456789", "987654321"],
+          allowFrom: ['123456789', '987654321'],
         },
       },
     },
@@ -217,8 +217,8 @@ Users in `allowFrom` bypass role checks:
     twitch: {
       accounts: {
         default: {
-          allowFrom: ["123456789"],
-          allowedRoles: ["moderator"],
+          allowFrom: ['123456789'],
+          allowedRoles: ['moderator'],
         },
       },
     },
@@ -314,27 +314,27 @@ Full example:
   channels: {
     twitch: {
       enabled: true,
-      username: "openclaw",
-      accessToken: "oauth:abc123...",
-      clientId: "xyz789...",
-      channel: "vevisk",
-      clientSecret: "secret123...",
-      refreshToken: "refresh456...",
-      allowFrom: ["123456789"],
-      allowedRoles: ["moderator", "vip"],
+      username: 'openclaw',
+      accessToken: 'oauth:abc123...',
+      clientId: 'xyz789...',
+      channel: 'vevisk',
+      clientSecret: 'secret123...',
+      refreshToken: 'refresh456...',
+      allowFrom: ['123456789'],
+      allowedRoles: ['moderator', 'vip'],
       accounts: {
         default: {
-          username: "mybot",
-          accessToken: "oauth:abc123...",
-          clientId: "xyz789...",
-          channel: "your_channel",
+          username: 'mybot',
+          accessToken: 'oauth:abc123...',
+          clientId: 'xyz789...',
+          channel: 'your_channel',
           enabled: true,
-          clientSecret: "secret123...",
-          refreshToken: "refresh456...",
+          clientSecret: 'secret123...',
+          refreshToken: 'refresh456...',
           expiresIn: 14400,
           obtainmentTimestamp: 1706092800000,
-          allowFrom: ["123456789", "987654321"],
-          allowedRoles: ["moderator"],
+          allowFrom: ['123456789', '987654321'],
+          allowedRoles: ['moderator'],
         },
       },
     },
@@ -352,10 +352,10 @@ Example:
 
 ```json5
 {
-  action: "twitch",
+  action: 'twitch',
   params: {
-    message: "Hello Twitch!",
-    to: "#mychannel",
+    message: 'Hello Twitch!',
+    to: '#mychannel',
   },
 }
 ```

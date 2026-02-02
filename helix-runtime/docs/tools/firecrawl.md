@@ -1,5 +1,5 @@
 ---
-summary: "Firecrawl fallback for web_fetch (anti-bot + cached extraction)"
+summary: 'Firecrawl fallback for web_fetch (anti-bot + cached extraction)'
 read_when:
   - You want Firecrawl-backed web extraction
   - You need a Firecrawl API key
@@ -25,8 +25,8 @@ with JS-heavy sites or pages that block plain HTTP fetches.
     web: {
       fetch: {
         firecrawl: {
-          apiKey: "FIRECRAWL_API_KEY_HERE",
-          baseUrl: "https://api.firecrawl.dev",
+          apiKey: 'FIRECRAWL_API_KEY_HERE',
+          baseUrl: 'https://api.firecrawl.dev',
           onlyMainContent: true,
           maxAgeMs: 172800000,
           timeoutSeconds: 60,

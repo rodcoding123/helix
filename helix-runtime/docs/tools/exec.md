@@ -1,5 +1,5 @@
 ---
-summary: "Exec tool usage, stdin modes, and TTY support"
+summary: 'Exec tool usage, stdin modes, and TTY support'
 read_when:
   - Using or modifying the exec tool
   - Debugging stdin or TTY behavior
@@ -56,7 +56,7 @@ Example:
 {
   tools: {
     exec: {
-      pathPrepend: ["~/bin", "/opt/oss/bin"],
+      pathPrepend: ['~/bin', '/opt/oss/bin'],
     },
   },
 }
@@ -163,7 +163,7 @@ Enable it explicitly:
 {
   tools: {
     exec: {
-      applyPatch: { enabled: true, allowModels: ["gpt-5.2"] },
+      applyPatch: { enabled: true, allowModels: ['gpt-5.2'] },
     },
   },
 }

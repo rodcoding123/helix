@@ -1,5 +1,5 @@
 ---
-summary: "Timezone handling for agents, envelopes, and prompts"
+summary: 'Timezone handling for agents, envelopes, and prompts'
 read_when:
   - You need to understand how timestamps are normalized for the model
   - Configuring the user timezone for system prompts
@@ -25,9 +25,9 @@ You can override this with:
 {
   agents: {
     defaults: {
-      envelopeTimezone: "local", // "utc" | "local" | "user" | IANA timezone
-      envelopeTimestamp: "on", // "on" | "off"
-      envelopeElapsed: "on", // "on" | "off"
+      envelopeTimezone: 'local', // "utc" | "local" | "user" | IANA timezone
+      envelopeTimestamp: 'on', // "on" | "off"
+      envelopeElapsed: 'on', // "on" | "off"
     },
   },
 }
@@ -76,7 +76,7 @@ unset, OpenClaw resolves the **host timezone at runtime** (no config write).
 
 ```json5
 {
-  agents: { defaults: { userTimezone: "America/Chicago" } },
+  agents: { defaults: { userTimezone: 'America/Chicago' } },
 }
 ```
 

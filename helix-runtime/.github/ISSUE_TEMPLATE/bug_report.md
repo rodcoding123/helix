@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Report a problem or unexpected behavior in Clawdbot.
-title: "[Bug]: "
+title: '[Bug]: '
 labels: bug
 ---
 

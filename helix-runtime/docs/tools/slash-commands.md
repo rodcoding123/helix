@@ -1,5 +1,5 @@
 ---
-summary: "Slash commands: text vs native, config, and supported commands"
+summary: 'Slash commands: text vs native, config, and supported commands'
 read_when:
   - Using or configuring chat commands
   - Debugging command routing or permissions
@@ -28,8 +28,8 @@ They run immediately, are stripped before the model sees the message, and the re
 ```json5
 {
   commands: {
-    native: "auto",
-    nativeSkills: "auto",
+    native: 'auto',
+    nativeSkills: 'auto',
     text: true,
     bash: false,
     bashForegroundMs: 2000,

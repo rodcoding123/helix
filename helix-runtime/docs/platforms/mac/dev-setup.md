@@ -1,5 +1,5 @@
 ---
-summary: "Setup guide for developers working on the OpenClaw macOS app"
+summary: 'Setup guide for developers working on the OpenClaw macOS app'
 read_when:
   - Setting up the macOS development environment
 ---

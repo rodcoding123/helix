@@ -1,5 +1,5 @@
 ---
-summary: "Use Amazon Bedrock (Converse API) models with OpenClaw"
+summary: 'Use Amazon Bedrock (Converse API) models with OpenClaw'
 read_when:
   - You want to use Amazon Bedrock models with OpenClaw
   - You need AWS credential/region setup for model calls
@@ -31,8 +31,8 @@ Config options live under `models.bedrockDiscovery`:
   models: {
     bedrockDiscovery: {
       enabled: true,
-      region: "us-east-1",
-      providerFilter: ["anthropic", "amazon"],
+      region: 'us-east-1',
+      providerFilter: ['anthropic', 'amazon'],
       refreshInterval: 3600,
       defaultContextWindow: 32000,
       defaultMaxTokens: 4096,
@@ -71,16 +71,16 @@ export AWS_BEARER_TOKEN_BEDROCK="..."
 {
   models: {
     providers: {
-      "amazon-bedrock": {
-        baseUrl: "https://bedrock-runtime.us-east-1.amazonaws.com",
-        api: "bedrock-converse-stream",
-        auth: "aws-sdk",
+      'amazon-bedrock': {
+        baseUrl: 'https://bedrock-runtime.us-east-1.amazonaws.com',
+        api: 'bedrock-converse-stream',
+        auth: 'aws-sdk',
         models: [
           {
-            id: "anthropic.claude-opus-4-5-20251101-v1:0",
-            name: "Claude Opus 4.5 (Bedrock)",
+            id: 'anthropic.claude-opus-4-5-20251101-v1:0',
+            name: 'Claude Opus 4.5 (Bedrock)',
             reasoning: true,
-            input: ["text", "image"],
+            input: ['text', 'image'],
             cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
             contextWindow: 200000,
             maxTokens: 8192,
@@ -91,7 +91,7 @@ export AWS_BEARER_TOKEN_BEDROCK="..."
   },
   agents: {
     defaults: {
-      model: { primary: "amazon-bedrock/anthropic.claude-opus-4-5-20251101-v1:0" },
+      model: { primary: 'amazon-bedrock/anthropic.claude-opus-4-5-20251101-v1:0' },
     },
   },
 }

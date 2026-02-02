@@ -1,5 +1,5 @@
 ---
-summary: "Models CLI: list, set, aliases, fallbacks, scan, status"
+summary: 'Models CLI: list, set, aliases, fallbacks, scan, status'
 read_when:
   - Adding or modifying models CLI (models list/set/scan/aliases/fallbacks)
   - Changing model fallback behavior or selection UX
@@ -79,10 +79,10 @@ Example allowlist config:
 ```json5
 {
   agent: {
-    model: { primary: "anthropic/claude-sonnet-4-5" },
+    model: { primary: 'anthropic/claude-sonnet-4-5' },
     models: {
-      "anthropic/claude-sonnet-4-5": { alias: "Sonnet" },
-      "anthropic/claude-opus-4-5": { alias: "Opus" },
+      'anthropic/claude-sonnet-4-5': { alias: 'Sonnet' },
+      'anthropic/claude-opus-4-5': { alias: 'Opus' },
     },
   },
 }

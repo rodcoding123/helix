@@ -303,16 +303,20 @@ Create helix-desktop/BUILD.md:
 ## Running the Agents
 
 ### Option 1: Full Parallel (Fastest)
+
 Run all 4 simultaneously. Agent B will provide working chat when done.
 
 ### Option 2: Staged Parallel (Safer)
+
 1. First wave: Agent A + C + D (UI, onboarding, CI/CD)
 2. Second wave: Agent B (OpenClaw integration)
 3. Final: Integration testing
 
 ### Option 3: Sequential (Most Controlled)
+
 B → A → C → D
 (Gets working chat first, then enhances UI)
 
 ### Recommended: Option 1
+
 All agents can work on different files. Merge conflicts are unlikely.

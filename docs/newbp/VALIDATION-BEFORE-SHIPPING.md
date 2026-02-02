@@ -11,9 +11,11 @@ Before shipping Phase 1 (Memory) publicly, validate these assumptions with real 
 **Hypothesis**: Users will return Day 2 if Helix remembers something specific from Day 1.
 
 **How to Test** (This week):
+
 1. **With 10 beta testers:**
    - User chats with Helix Day 1 (normal chat)
    - Next day, show them this:
+
      ```
      Option A (Current):
      "Hi! What's on your mind?"
@@ -24,6 +26,7 @@ Before shipping Phase 1 (Memory) publicly, validate these assumptions with real 
      stressed about the Johnson project.
      How's that going?"
      ```
+
    - Ask: "Which feels more like a real relationship?"
    - Measure: % who prefer memory version
 
@@ -39,6 +42,7 @@ Before shipping Phase 1 (Memory) publicly, validate these assumptions with real 
 **Hypothesis**: Users will create accounts if they see Helix remembers them without logging in.
 
 **How to Test** (Week 1):
+
 1. **Show 20 new users:**
    - Chat Day 1 (no login required)
    - Day 2: Show memory greeting
@@ -56,6 +60,7 @@ Before shipping Phase 1 (Memory) publicly, validate these assumptions with real 
 **Hypothesis**: Users will perceive agents as distinct specialists, not just prompt variations.
 
 **How to Test** (Week 2):
+
 1. **Show 10 power users:**
    - Have them talk to 3 different agents
    - Atlas (productivity), Vulcan (technical), Juno (creative)
@@ -73,7 +78,9 @@ Before shipping Phase 1 (Memory) publicly, validate these assumptions with real 
 **Hypothesis**: "Autonomy Level 0-4" makes sense to regular users (not just tech).
 
 **How to Test** (Week 2):
+
 1. **Show 15 mixed users:**
+
    ```
    Level 0: I only respond when you ask
    Level 1: I offer unsolicited insights
@@ -81,6 +88,7 @@ Before shipping Phase 1 (Memory) publicly, validate these assumptions with real 
    Level 3: I take actions within limits
    Level 4: I explore independently
    ```
+
    - Ask: "Which level would you want?"
    - Ask: "Does this match your trust in AI?"
 
@@ -96,7 +104,9 @@ Before shipping Phase 1 (Memory) publicly, validate these assumptions with real 
 **Hypothesis**: Users care about seeing emotional patterns and psychological insights.
 
 **How to Test** (Week 3):
+
 1. **Show 10 users:**
+
    ```
    EMOTIONAL PATTERNS
 
@@ -112,6 +122,7 @@ Before shipping Phase 1 (Memory) publicly, validate these assumptions with real 
    Sunday 5pm before work weeks.
    Want me to check in then?"
    ```
+
    - Ask: "Is this helpful or creepy?"
    - Ask: "Would you pay for this?"
 
@@ -125,9 +136,11 @@ Before shipping Phase 1 (Memory) publicly, validate these assumptions with real 
 ## User Interview Script (20 mins each)
 
 ### Warm-up (2 min)
+
 "Thanks for chatting with me about Helix. I want to understand what would make this feel like a real relationship vs. just another AI tool."
 
 ### Memory (5 min)
+
 1. "Imagine you talked to Helix yesterday about being stressed about a project."
 2. "Today she says: 'Hey, good to see you. You mentioned the Johnson project was stressing you out. How's that going?'"
 3. "How would that feel compared to 'Hi, what's on your mind?'"
@@ -135,6 +148,7 @@ Before shipping Phase 1 (Memory) publicly, validate these assumptions with real 
 5. **Key question**: "Would that make you create an account?"
 
 ### Agents (4 min)
+
 1. "Imagine Helix could connect you to different specialists."
 2. "Atlas for productivity and planning, Vulcan for coding help, Juno for creative writing."
 3. "Would you use different agents for different tasks?"
@@ -142,6 +156,7 @@ Before shipping Phase 1 (Memory) publicly, validate these assumptions with real 
 5. **Key question**: "Would you upgrade if you got more agents?"
 
 ### Autonomy (4 min)
+
 1. "Imagine Helix could do things without you asking."
 2. "Like: 'I noticed your flight is delayed. I've rebooked your transfer and told your hotel.'"
 3. "How much autonomy would you want her to have?"
@@ -149,6 +164,7 @@ Before shipping Phase 1 (Memory) publicly, validate these assumptions with real 
 5. **Key question**: "Would you trust her with more freedom over time?"
 
 ### Close (2 min)
+
 "If Helix could remember you, have a team of specialists, and help autonomously, would that be worth paying for?"
 
 ---
@@ -156,26 +172,31 @@ Before shipping Phase 1 (Memory) publicly, validate these assumptions with real 
 ## Success Criteria Before Public Launch
 
 ### Memory Greeting
+
 - ✅ 90%+ prefer memory version over generic
 - ✅ 60%+ would create account to save memory
 - ✅ Day 2 return rate hits 50%+ in beta
 
 ### Agent Selector
+
 - ✅ 80%+ perceive agents as distinct
 - ✅ 70%+ try multiple agents
 - ✅ Positive correlation: more agents used = longer sessions
 
 ### Autonomy Controls
+
 - ✅ 70%+ understand the levels
 - ✅ 50%+ prefer Level 2-3 over Level 0
 - ✅ 30%+ interested in higher autonomy over time
 
 ### Psychological Insights
+
 - ✅ 65%+ find insights helpful (not creepy)
 - ✅ 40%+ say "worth upgrading for"
 - ✅ No complaints about privacy/tracking
 
 ### Overall Product
+
 - ✅ NPS 50+ from beta users
 - ✅ "Would recommend to friend" 70%+
 - ✅ Clear answer to: "How is this different from ChatGPT?"
@@ -185,6 +206,7 @@ Before shipping Phase 1 (Memory) publicly, validate these assumptions with real 
 ## Red Flags (Abort Immediately)
 
 ### If ANY of these happen:
+
 1. **Memory accuracy < 70%**
    - Users notice false/wrong memories
    - This destroys trust permanently
@@ -247,6 +269,7 @@ $9-29/month
 **Question**: "Which would you pay for?"
 
 **Expected**:
+
 - Option A: 30%
 - Option B: 60% ← This should happen
 - Option C: 10%
@@ -260,6 +283,7 @@ $9-29/month
 **Test with 10 users:**
 
 "Would you upgrade from Free to Pro ($9/mo) for:"
+
 - [ ] More agents (40% autonomy) - 60%+ yes
 - [ ] More memory (90 days vs 30) - 40% yes
 - [ ] Autonomy Level 2 (proactive) - 50% yes
@@ -272,21 +296,25 @@ If you don't hit 80% for combined, pricing tier is wrong.
 ## What to DO with Feedback
 
 ### Memory feedback
+
 - "She got it wrong" → Fix ML, not product
 - "I didn't want remembered" → Add "forget this" button
 - "Great, she remembered!" → SHIP THIS
 
 ### Agent feedback
+
 - "Feels like same person" → Increase personality diff
 - "Useful, tried all 6" → SHIP THIS
 - "Confusing, too many" → Start with 3, unlock more
 
 ### Autonomy feedback
+
 - "Scary, too much power" → Add approval workflows
 - "Perfect, can trust her" → SHIP THIS
 - "Boring, no autonomy" → Level 2 isn't engaging enough
 
 ### Pricing feedback
+
 - "Too expensive" → You're not demonstrating value
 - "Worth it, would upgrade" → SHIP THIS
 - "Confusing tiers" → Simplify positioning
@@ -298,18 +326,22 @@ If you don't hit 80% for combined, pricing tier is wrong.
 ### Who to recruit (25 total across phases)
 
 **Phase 1 (Memory)**: 10 users
+
 - 5 who tried OpenClaw (know what to expect)
 - 5 new to AI (fresh perspective)
 
 **Phase 2 (Agents)**: 10 new users
+
 - 5 technical (developers, power users)
 - 5 non-technical (see if interface is clear)
 
 **Phase 3 (Full)**: 5 mixed users
+
 - Across all skill levels
 - Cross-verify all features work together
 
 ### What they should do
+
 1. Use Helix 3-5 times over 1-2 weeks
 2. Answer 5-minute survey after each session
 3. Do 20-min video interview at end
@@ -320,21 +352,25 @@ If you don't hit 80% for combined, pricing tier is wrong.
 ## Timeline
 
 ### Week 1
+
 - Monday: Recruit 10 beta users
 - Tuesday-Wed: Set up memory greeting + basic version
 - Thu-Fri: User testing, gather feedback
 
 ### Week 2
+
 - Mon-Tue: Iterate memory based on feedback
 - Wed-Thu: Build agent selector UI
 - Fri: Test with 10 new users
 
 ### Week 3
+
 - Mon-Tue: Autonomy UI build
 - Wed-Thu: Test with 10 new users
 - Fri: Decide: Ship or iterate
 
 ### Week 4
+
 - Mon-Tue: Bug fixes + polish
 - Wed: Final QA
 - Thu: Ship to production
@@ -380,6 +416,7 @@ OVERALL
 ## Go/No-Go Decision
 
 ### SHIP If:
+
 - ✅ Memory accuracy > 85%
 - ✅ Day 2 return rate > 50%
 - ✅ NPS > 50
@@ -387,6 +424,7 @@ OVERALL
 - ✅ "This is different from ChatGPT" > 70%
 
 ### DON'T SHIP If:
+
 - ❌ Memory accuracy < 70%
 - ❌ "Feels creepy/invasive" > 15%
 - ❌ NPS < 40
@@ -394,6 +432,7 @@ OVERALL
 - ❌ Users still can't explain differentiation
 
 ### ITERATE If:
+
 - ✅ Most signals green
 - ❌ 1-2 signals yellow
 - → Fix specific issues, test again
@@ -416,6 +455,7 @@ This single question tells you everything.
 ## Don't Launch Without This
 
 Ask yourself:
+
 - Can users clearly see how Helix is different? (Yes/No)
 - Would they describe it to a friend? (Yes/No)
 - Would they pay for it? (Yes/No)

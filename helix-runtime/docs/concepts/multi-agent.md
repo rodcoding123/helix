@@ -1,7 +1,7 @@
 ---
-summary: "Multi-agent routing: isolated agents, channel accounts, and bindings"
+summary: 'Multi-agent routing: isolated agents, channel accounts, and bindings'
 title: Multi-Agent Routing
-read_when: "You want multiple isolated agents (workspaces + auth) in one gateway process."
+read_when: 'You want multiple isolated agents (workspaces + auth) in one gateway process.'
 status: active
 ---
 
@@ -92,18 +92,18 @@ Example:
 {
   agents: {
     list: [
-      { id: "alex", workspace: "~/.openclaw/workspace-alex" },
-      { id: "mia", workspace: "~/.openclaw/workspace-mia" },
+      { id: 'alex', workspace: '~/.openclaw/workspace-alex' },
+      { id: 'mia', workspace: '~/.openclaw/workspace-mia' },
     ],
   },
   bindings: [
-    { agentId: "alex", match: { channel: "whatsapp", peer: { kind: "dm", id: "+15551230001" } } },
-    { agentId: "mia", match: { channel: "whatsapp", peer: { kind: "dm", id: "+15551230002" } } },
+    { agentId: 'alex', match: { channel: 'whatsapp', peer: { kind: 'dm', id: '+15551230001' } } },
+    { agentId: 'mia', match: { channel: 'whatsapp', peer: { kind: 'dm', id: '+15551230002' } } },
   ],
   channels: {
     whatsapp: {
-      dmPolicy: "allowlist",
-      allowFrom: ["+15551230001", "+15551230002"],
+      dmPolicy: 'allowlist',
+      allowFrom: ['+15551230001', '+15551230002'],
     },
   },
 }
@@ -212,22 +212,22 @@ Split by channel: route WhatsApp to a fast everyday agent and Telegram to an Opu
   agents: {
     list: [
       {
-        id: "chat",
-        name: "Everyday",
-        workspace: "~/.openclaw/workspace-chat",
-        model: "anthropic/claude-sonnet-4-5",
+        id: 'chat',
+        name: 'Everyday',
+        workspace: '~/.openclaw/workspace-chat',
+        model: 'anthropic/claude-sonnet-4-5',
       },
       {
-        id: "opus",
-        name: "Deep Work",
-        workspace: "~/.openclaw/workspace-opus",
-        model: "anthropic/claude-opus-4-5",
+        id: 'opus',
+        name: 'Deep Work',
+        workspace: '~/.openclaw/workspace-opus',
+        model: 'anthropic/claude-opus-4-5',
       },
     ],
   },
   bindings: [
-    { agentId: "chat", match: { channel: "whatsapp" } },
-    { agentId: "opus", match: { channel: "telegram" } },
+    { agentId: 'chat', match: { channel: 'whatsapp' } },
+    { agentId: 'opus', match: { channel: 'telegram' } },
   ],
 }
 ```
@@ -246,22 +246,22 @@ Keep WhatsApp on the fast agent, but route one DM to Opus:
   agents: {
     list: [
       {
-        id: "chat",
-        name: "Everyday",
-        workspace: "~/.openclaw/workspace-chat",
-        model: "anthropic/claude-sonnet-4-5",
+        id: 'chat',
+        name: 'Everyday',
+        workspace: '~/.openclaw/workspace-chat',
+        model: 'anthropic/claude-sonnet-4-5',
       },
       {
-        id: "opus",
-        name: "Deep Work",
-        workspace: "~/.openclaw/workspace-opus",
-        model: "anthropic/claude-opus-4-5",
+        id: 'opus',
+        name: 'Deep Work',
+        workspace: '~/.openclaw/workspace-opus',
+        model: 'anthropic/claude-opus-4-5',
       },
     ],
   },
   bindings: [
-    { agentId: "opus", match: { channel: "whatsapp", peer: { kind: "dm", id: "+15551234567" } } },
-    { agentId: "chat", match: { channel: "whatsapp" } },
+    { agentId: 'opus', match: { channel: 'whatsapp', peer: { kind: 'dm', id: '+15551234567' } } },
+    { agentId: 'chat', match: { channel: 'whatsapp' } },
   ],
 }
 ```
@@ -278,38 +278,38 @@ and a tighter tool policy:
   agents: {
     list: [
       {
-        id: "family",
-        name: "Family",
-        workspace: "~/.openclaw/workspace-family",
-        identity: { name: "Family Bot" },
+        id: 'family',
+        name: 'Family',
+        workspace: '~/.openclaw/workspace-family',
+        identity: { name: 'Family Bot' },
         groupChat: {
-          mentionPatterns: ["@family", "@familybot", "@Family Bot"],
+          mentionPatterns: ['@family', '@familybot', '@Family Bot'],
         },
         sandbox: {
-          mode: "all",
-          scope: "agent",
+          mode: 'all',
+          scope: 'agent',
         },
         tools: {
           allow: [
-            "exec",
-            "read",
-            "sessions_list",
-            "sessions_history",
-            "sessions_send",
-            "sessions_spawn",
-            "session_status",
+            'exec',
+            'read',
+            'sessions_list',
+            'sessions_history',
+            'sessions_send',
+            'sessions_spawn',
+            'session_status',
           ],
-          deny: ["write", "edit", "apply_patch", "browser", "canvas", "nodes", "cron"],
+          deny: ['write', 'edit', 'apply_patch', 'browser', 'canvas', 'nodes', 'cron'],
         },
       },
     ],
   },
   bindings: [
     {
-      agentId: "family",
+      agentId: 'family',
       match: {
-        channel: "whatsapp",
-        peer: { kind: "group", id: "120363999999999999@g.us" },
+        channel: 'whatsapp',
+        peer: { kind: 'group', id: '120363999999999999@g.us' },
       },
     },
   ],

@@ -1,5 +1,5 @@
 ---
-summary: "CLI onboarding wizard: guided setup for gateway, workspace, channels, and skills"
+summary: 'CLI onboarding wizard: guided setup for gateway, workspace, channels, and skills'
 read_when:
   - Running or configuring the onboarding wizard
   - Setting up a new machine

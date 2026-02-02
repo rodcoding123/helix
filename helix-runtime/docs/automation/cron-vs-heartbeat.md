@@ -1,5 +1,5 @@
 ---
-summary: "Guidance for choosing between heartbeat and cron jobs for automation"
+summary: 'Guidance for choosing between heartbeat and cron jobs for automation'
 read_when:
   - Deciding how to schedule recurring tasks
   - Setting up background monitoring or notifications
@@ -60,9 +60,9 @@ The agent reads this on each heartbeat and handles all items in one turn.
   agents: {
     defaults: {
       heartbeat: {
-        every: "30m", // interval
-        target: "last", // where to deliver alerts
-        activeHours: { start: "08:00", end: "22:00" }, // optional
+        every: '30m', // interval
+        target: 'last', // where to deliver alerts
+        activeHours: { start: '08:00', end: '22:00' }, // optional
       },
     },
   },

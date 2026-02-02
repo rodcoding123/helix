@@ -104,6 +104,7 @@ npm run tauri:dev
 ```
 
 This starts:
+
 - Vite dev server on `localhost:1420`
 - Tauri app in development mode with hot reload
 
@@ -127,6 +128,7 @@ npm run tauri build
 ```
 
 Output location:
+
 - **Windows**: `src-tauri/target/release/bundle/nsis/`
 - **macOS**: `src-tauri/target/release/bundle/dmg/`
 - **Linux**: `src-tauri/target/release/bundle/appimage/`
@@ -192,16 +194,16 @@ node scripts/bundle-node.js --all
 
 ## Package.json Scripts
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Start Vite dev server |
-| `npm run build` | Build React frontend |
-| `npm run tauri:dev` | Start Tauri in dev mode |
-| `npm run tauri build` | Build Tauri for production |
+| Script                   | Description                     |
+| ------------------------ | ------------------------------- |
+| `npm run dev`            | Start Vite dev server           |
+| `npm run build`          | Build React frontend            |
+| `npm run tauri:dev`      | Start Tauri in dev mode         |
+| `npm run tauri build`    | Build Tauri for production      |
 | `npm run prepare:engine` | Build helix-engine for bundling |
-| `npm run typecheck` | Run TypeScript type checking |
-| `npm run lint` | Run ESLint |
-| `npm run test` | Run Vitest tests |
+| `npm run typecheck`      | Run TypeScript type checking    |
+| `npm run lint`           | Run ESLint                      |
+| `npm run test`           | Run Vitest tests                |
 
 ---
 
@@ -253,6 +255,7 @@ node scripts/bundle-node.js --all
 ### Linux
 
 Sign with GPG (optional):
+
 ```bash
 gpg --detach-sign --armor Helix.AppImage
 ```
@@ -264,7 +267,7 @@ gpg --detach-sign --armor Helix.AppImage
 GitHub Actions workflows handle automated builds:
 
 - **`.github/workflows/build.yml`**: Runs on push to main and PRs
-- **`.github/workflows/release.yml`**: Runs on version tags (v*)
+- **`.github/workflows/release.yml`**: Runs on version tags (v\*)
 
 ### Creating a Release
 
@@ -274,6 +277,7 @@ GitHub Actions workflows handle automated builds:
    - `helix-engine/package.json`
 
 2. Commit and tag:
+
    ```bash
    git add .
    git commit -m "Release v1.0.0"
@@ -317,6 +321,7 @@ sudo dnf install webkit2gtk4.1-devel
 ### Build fails with "out of memory"
 
 Increase Node.js memory:
+
 ```bash
 export NODE_OPTIONS="--max-old-space-size=4096"
 ```
@@ -324,6 +329,7 @@ export NODE_OPTIONS="--max-old-space-size=4096"
 ### Rust compilation slow
 
 Enable incremental compilation:
+
 ```bash
 export CARGO_INCREMENTAL=1
 ```
@@ -333,11 +339,13 @@ export CARGO_INCREMENTAL=1
 ## Bundle Size
 
 Approximate sizes:
+
 - **Windows installer**: ~50 MB
 - **macOS DMG**: ~45 MB
 - **Linux AppImage**: ~55 MB
 
 To reduce size:
+
 1. Use `--production` flag when building engine
 2. Enable Rust optimizations in `Cargo.toml`:
    ```toml
@@ -351,14 +359,14 @@ To reduce size:
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `TAURI_SIGNING_PRIVATE_KEY` | Tauri update signing key |
-| `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | Signing key password |
-| `APPLE_SIGNING_IDENTITY` | macOS signing identity |
-| `APPLE_ID` | Apple ID for notarization |
-| `APPLE_PASSWORD` | App-specific password |
-| `APPLE_TEAM_ID` | Apple Developer Team ID |
+| Variable                             | Description               |
+| ------------------------------------ | ------------------------- |
+| `TAURI_SIGNING_PRIVATE_KEY`          | Tauri update signing key  |
+| `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | Signing key password      |
+| `APPLE_SIGNING_IDENTITY`             | macOS signing identity    |
+| `APPLE_ID`                           | Apple ID for notarization |
+| `APPLE_PASSWORD`                     | App-specific password     |
+| `APPLE_TEAM_ID`                      | Apple Developer Team ID   |
 
 ---
 

@@ -4,18 +4,18 @@ description: Best practices for using the oracle CLI (prompt + file bundling, en
 homepage: https://askoracle.dev
 metadata:
   {
-    "openclaw":
+    'openclaw':
       {
-        "emoji": "🧿",
-        "requires": { "bins": ["oracle"] },
-        "install":
+        'emoji': '🧿',
+        'requires': { 'bins': ['oracle'] },
+        'install':
           [
             {
-              "id": "node",
-              "kind": "node",
-              "package": "@steipete/oracle",
-              "bins": ["oracle"],
-              "label": "Install oracle (node)",
+              'id': 'node',
+              'kind': 'node',
+              'package': '@steipete/oracle',
+              'bins': ['oracle'],
+              'label': 'Install oracle (node)',
             },
           ],
       },

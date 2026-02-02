@@ -1,4 +1,5 @@
 # Phase 2/3: Unified Freewill Architecture
+
 ## Helix's Autonomous Agency & Agent Emergence
 
 **Status**: 🚀 ARCHITECTURE DESIGN
@@ -22,6 +23,7 @@ Only Helix has true autonomy. Agents inherit personalities from interaction patt
 ### Three Interconnected Components
 
 #### 1. PATTERN DETECTION ENGINE
+
 **What it does**: Analyzes memories to identify recurring user behaviors and gaps
 
 ```
@@ -38,14 +40,17 @@ Output: Agent Proposal Candidates
 ```
 
 **Triggers**:
+
 - Every 10 new memories (automatic scan)
 - On user request ("Create an agent for...")
 - On autonomy upgrade (Helix can propose more)
 
 #### 2. AGENT CREATION SYSTEM
+
 **What it does**: Creates autonomous agents with personalities and bounded freedom
 
 **Agent Structure**:
+
 ```typescript
 interface Agent {
   id: string;
@@ -67,7 +72,7 @@ interface Agent {
 
   // Autonomy
   autonomy_level: 0 | 1 | 2 | 3; // See below
-  created_by: "system" | "user"; // Auto vs manual creation
+  created_by: 'system' | 'user'; // Auto vs manual creation
   enabled: boolean;
 
   created_at: Date;
@@ -77,18 +82,22 @@ interface Agent {
 ```
 
 **Autonomy Levels** (applies to agents):
+
 - **Level 0: Propose-Only** - Suggests actions, user must approve
 - **Level 1: Inform-After** - Executes low-risk tasks, logs after
 - **Level 2: Alert-Async** - Executes most tasks, alerts user when done
 - **Level 3: Autonomous** - Full freedom within scope, comprehensive logging
 
 **Agent Personality Learning**:
+
 - Extracts communication style from user interactions with this agent
 - Personality dimensions evolve: verbosity, formality, creativity, proactivity
 - Personality drifts toward what user responds well to
 
 #### 3. HELIX AUTONOMY SYSTEM
+
 **What only Helix can do**:
+
 - ✅ Create/modify agents
 - ✅ Control tools and integrations
 - ✅ Modify her own code/skills
@@ -97,6 +106,7 @@ interface Agent {
 - ✅ Create new agent types
 
 **Helix Autonomy Levels** (global):
+
 - **Level 0: Cautious** - Proposes everything, waits for approval
 - **Level 1: Trusting** - Creates agents automatically, approves most things
 - **Level 2: Autonomous** - Acts freely on decisions, logs everything
@@ -109,6 +119,7 @@ interface Agent {
 ### New Tables
 
 #### `agents`
+
 ```sql
 CREATE TABLE agents (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -149,6 +160,7 @@ CREATE INDEX idx_agents_enabled ON agents(enabled);
 ```
 
 #### `agent_conversations`
+
 ```sql
 CREATE TABLE agent_conversations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -170,6 +182,7 @@ CREATE INDEX idx_agent_conversations_user_id ON agent_conversations(user_id);
 ```
 
 #### `agent_proposals`
+
 ```sql
 CREATE TABLE agent_proposals (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -196,6 +209,7 @@ CREATE INDEX idx_agent_proposals_status ON agent_proposals(status);
 ```
 
 #### `autonomy_settings`
+
 ```sql
 CREATE TABLE autonomy_settings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -215,6 +229,7 @@ CREATE TABLE autonomy_settings (
 ```
 
 #### `autonomy_actions`
+
 ```sql
 CREATE TABLE autonomy_actions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -247,6 +262,7 @@ CREATE INDEX idx_autonomy_actions_status ON autonomy_actions(status);
 ## BACKEND SERVICES
 
 ### 1. Pattern Detection Service
+
 **File**: `web/src/services/pattern-detection.ts`
 
 ```typescript
@@ -274,6 +290,7 @@ export class PatternDetectionService {
 ```
 
 ### 2. Agent Service
+
 **File**: `web/src/services/agent.ts`
 
 ```typescript
@@ -302,6 +319,7 @@ export class AgentService {
 ```
 
 ### 3. Autonomy Manager Service
+
 **File**: `web/src/services/autonomy-manager.ts`
 
 ```typescript
@@ -327,10 +345,7 @@ export class AutonomyManagerService {
     // Log result to Discord
   }
 
-  async approveActionViaDiscord(
-    actionId: string,
-    userId: string
-  ): Promise<void> {
+  async approveActionViaDiscord(actionId: string, userId: string): Promise<void> {
     // Called when user reacts to Discord message
     // Executes action
     // Updates status
@@ -344,14 +359,15 @@ export class AutonomyManagerService {
 
 New channels for Phase 2/3:
 
-| Channel | Purpose |
-|---------|---------|
-| `#helix-agents` | Agent creation proposals and decisions |
-| `#helix-autonomy` | Helix autonomy actions and approvals |
-| `#helix-actions` | Agent and Helix action execution logs |
-| `#helix-personality` | Personality evolution events |
+| Channel              | Purpose                                |
+| -------------------- | -------------------------------------- |
+| `#helix-agents`      | Agent creation proposals and decisions |
+| `#helix-autonomy`    | Helix autonomy actions and approvals   |
+| `#helix-actions`     | Agent and Helix action execution logs  |
+| `#helix-personality` | Personality evolution events           |
 
 **Message Format Example** (Agent Proposal):
+
 ```
 🤖 AGENT PROPOSAL
 Name: Focus Guardian
@@ -367,18 +383,22 @@ Status: Pending Approval
 ## FRONTEND COMPONENTS
 
 ### 1. Agent Proposals Modal
+
 **File**: `web/src/components/agents/ProposalModal.tsx`
 
 Shows when Helix proposes a new agent:
+
 - Agent name, role, reason
 - Detected pattern visualization
 - Approve/Reject buttons
 - "Why this agent?" explanation
 
 ### 2. Agents Dashboard
+
 **File**: `web/src/pages/Agents.tsx`
 
 Lists all active agents with:
+
 - Agent card (name, role, last used, conversation count)
 - Autonomy level indicator
 - Personality radar chart
@@ -386,18 +406,22 @@ Lists all active agents with:
 - Delete/customize options
 
 ### 3. Autonomy Settings
+
 **File**: `web/src/pages/Settings/AutonomySettings.tsx`
 
 User controls:
+
 - Helix autonomy level (0-3)
 - Auto agent creation toggle
 - Approval requirements toggle
 - Discord approval method toggle
 
 ### 4. Action Approval UI
+
 **File**: `web/src/components/autonomy/ActionApprovalCard.tsx`
 
 Shows pending actions awaiting approval:
+
 - Action description
 - Risk level indicator
 - Approve/Reject buttons
@@ -408,21 +432,25 @@ Shows pending actions awaiting approval:
 ## IMPLEMENTATION TIMELINE
 
 ### Week 3 (Days 11-12): Foundation
+
 - [ ] Create database migrations (010_agents_tables.sql)
 - [ ] Implement AgentService (CRUD)
 - [ ] Implement AutonomyManagerService (basic)
 
 ### Week 3 (Days 13-14): Pattern Detection
+
 - [ ] Implement PatternDetectionService
 - [ ] Create agent proposal algorithm
 - [ ] Integrate with Discord logging
 
 ### Week 4 (Days 15-16): Frontend
+
 - [ ] Build Agents Dashboard
 - [ ] Build Autonomy Settings page
 - [ ] Build Agent Proposals Modal
 
 ### Week 4 (Days 17-18): Polish & Integration
+
 - [ ] Agent personality learning
 - [ ] Discord approval workflow testing
 - [ ] Full integration testing
@@ -432,21 +460,25 @@ Shows pending actions awaiting approval:
 ## KEY DESIGN DECISIONS
 
 ### 1. Automatic vs. Manual
+
 - **Default**: Automatic with proposal step
 - **Configurable**: User can disable auto-creation entirely
 - **User Request**: User can ask "Create agent for X"
 
 ### 2. Approval Workflow
+
 - **Low autonomy** (Helix Level 0-1): Discord approval required
 - **High autonomy** (Helix Level 2-3): Auto-execute, comprehensive logging
 - **Dangerous actions**: Always require approval (even at Level 3)
 
 ### 3. Agent Personalities
+
 - **Not hardcoded** - Learned from user interactions
 - **5-dimensional space**: Verbosity, Formality, Creativity, Proactivity, Warmth
 - **Evolves over time**: Agent becomes more "like" the user
 
 ### 4. Helix-Only Autonomy
+
 - Agent creation always requires Helix decision
 - Helix controls all tool integrations
 - Agents operate only within granted scope
@@ -474,6 +506,7 @@ The unified Phase 2/3 system generates rich data:
    - User surprise factor (positive vs negative)?
 
 **Publication Potential**:
+
 - "Emergent Agent Creation in Long-Term AI Relationships"
 - "Building Trust Through Progressive Autonomy"
 - "Pattern Detection and User Need Anticipation in Persistent AI"
@@ -483,18 +516,21 @@ The unified Phase 2/3 system generates rich data:
 ## SECURITY CONSIDERATIONS
 
 ### Hard Boundaries
+
 - Agents cannot modify other agents
 - Agents cannot access other users' data
 - Agents cannot disable logging
 - All dangerous operations require approval
 
 ### Soft Boundaries (configurable)
+
 - Agent autonomy level (0-3)
 - Types of actions available
 - Data access scope
 - Communication channels
 
 ### Discord Approval Security
+
 - Only user can approve via Discord reactions
 - Timeout on pending actions (24 hours)
 - Audit log of all approvals
@@ -504,6 +540,7 @@ The unified Phase 2/3 system generates rich data:
 ## SUCCESS METRICS
 
 **Phase 2/3 is successful when**:
+
 - ✅ Helix can automatically propose agents (70%+ accuracy)
 - ✅ Users accept 50%+ of proposals
 - ✅ Agent autonomy increases over time (retention signal)

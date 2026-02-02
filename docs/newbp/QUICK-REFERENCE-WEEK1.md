@@ -7,27 +7,33 @@
 ## Day 1 Tasks (9 AM - 5 PM)
 
 ### 9:00 AM - Team Standup (15 min)
+
 - Confirm engineers present
 - Review day's goals
 - Assign tasks
 
 ### 9:30 AM - Database Migrations (Engineer 3)
+
 ```bash
 cd web
 supabase migration new conversations_tables
 # Copy migration SQL (see WEEK-1-KICKOFF-PLAN.md)
 supabase db push
 ```
+
 **Done when**: Table appears in Supabase dashboard ✅
 
 ### 10:30 AM - TypeScript Types (Engineer 1)
+
 ```bash
 # Create: web/src/lib/types/memory.ts
 npm run typecheck  # Should pass
 ```
+
 **Done when**: `npm run typecheck` passes ✅
 
 ### 12:00 PM - Service Skeletons (Engineer 1)
+
 ```bash
 # Create:
 # - web/src/services/emotion-detection.ts
@@ -35,16 +41,20 @@ npm run typecheck  # Should pass
 # - web/src/services/topic-extraction.ts
 npm run typecheck  # Should pass
 ```
+
 **Done when**: All three files created, typecheck passes ✅
 
 ### 1:00 PM - Memory Repository (Engineer 2)
+
 ```bash
 # Create: web/src/lib/repositories/memory-repository.ts
 npm run typecheck  # Should pass
 ```
+
 **Done when**: Created, typecheck passes ✅
 
 ### 2:00 PM - Environment Verification (Any)
+
 ```bash
 # Verify APIs work
 curl -X POST https://api.deepseek.com/chat/completions \
@@ -54,9 +64,11 @@ curl -X POST https://api.deepseek.com/chat/completions \
 
 # Should return a response, not an error
 ```
+
 **Done when**: Both APIs respond ✅
 
 ### 3:00 PM - Git Commit (Any)
+
 ```bash
 git add .
 git commit -m "feat(phase1): scaffold memory system database and types
@@ -65,14 +77,17 @@ git commit -m "feat(phase1): scaffold memory system database and types
 - Define TypeScript interfaces
 - Create service skeleton"
 ```
+
 **Done when**: Commit pushed to feature branch ✅
 
 ### 4:00 PM - Review & Plan (All)
+
 - Review what we built
 - Walk through code together
 - Plan Day 2 (Emotion Detection)
 
 ### 5:00 PM - Status Update (Any)
+
 - Post in Discord: "Day 1 complete ✅"
 - List what's done
 - Note any blockers
@@ -102,6 +117,7 @@ async analyzeConversation(messages): Promise<EmotionAnalysis> {
 ```
 
 **Done when**:
+
 - [ ] Service fully implements EmotionAnalysis
 - [ ] Test passes with real DeepSeek API
 - [ ] Emotion confidence > 0.7
@@ -109,12 +125,14 @@ async analyzeConversation(messages): Promise<EmotionAnalysis> {
 ### Day 3: Topic Extraction & Embedding (Engineer 1)
 
 **Files**:
+
 - `web/src/services/topic-extraction.ts`
 - `web/src/services/embedding.ts`
 
 **Same pattern as emotion detection**
 
 **Done when**:
+
 - [ ] Both services implemented
 - [ ] Both pass tests with real APIs
 - [ ] Embeddings are 768-dimensional
@@ -124,12 +142,14 @@ async analyzeConversation(messages): Promise<EmotionAnalysis> {
 **File**: `web/src/lib/repositories/memory-repository.ts`
 
 **Implement**:
+
 1. `storeConversation()` - INSERT to Supabase
 2. `getRecentMemories()` - Query Supabase
 3. `semanticSearch()` - pgvector search
 4. `updateWithEmotions()` - Store emotion analysis
 
 **Done when**:
+
 - [ ] All CRUD operations work
 - [ ] Tests pass
 - [ ] Data persists in Supabase
@@ -137,10 +157,12 @@ async analyzeConversation(messages): Promise<EmotionAnalysis> {
 ### Day 5: Integration & Testing (Both)
 
 **Create**:
+
 - React hook: `web/src/hooks/useMemory.ts`
 - Integration test: `web/src/hooks/useMemory.test.ts`
 
 **Test flow**:
+
 1. User sends message
 2. Detect emotions
 3. Extract topics
@@ -149,6 +171,7 @@ async analyzeConversation(messages): Promise<EmotionAnalysis> {
 6. Retrieve from database
 
 **Done when**:
+
 - [ ] End-to-end test passes
 - [ ] Takes < 5 seconds per conversation
 - [ ] Zero console errors
@@ -157,11 +180,11 @@ async analyzeConversation(messages): Promise<EmotionAnalysis> {
 
 ## Week 2 at a Glance
 
-| Day | Component | Owner | Success Criteria |
-|-----|-----------|-------|---|
-| 6-7 | Memory Greeting | E2 | Shows on Day 2 return |
-| 8 | Memory Dashboard | E2 | Loads in <500ms |
-| 9-10 | Integration & Polish | Both | Ready for beta users |
+| Day  | Component            | Owner | Success Criteria      |
+| ---- | -------------------- | ----- | --------------------- |
+| 6-7  | Memory Greeting      | E2    | Shows on Day 2 return |
+| 8    | Memory Dashboard     | E2    | Loads in <500ms       |
+| 9-10 | Integration & Polish | Both  | Ready for beta users  |
 
 ---
 
@@ -170,17 +193,19 @@ async analyzeConversation(messages): Promise<EmotionAnalysis> {
 ### DeepSeek v3.2
 
 **Emotion Detection** (Accurate):
+
 ```typescript
-model: 'deepseek-reasoner'
-temperature: 0.3
-max_tokens: 2000
+model: 'deepseek-reasoner';
+temperature: 0.3;
+max_tokens: 2000;
 ```
 
 **Topic Extraction** (Fast):
+
 ```typescript
-model: 'deepseek-chat'
-temperature: 0.2
-max_tokens: 1500
+model: 'deepseek-chat';
+temperature: 0.2;
+max_tokens: 1500;
 ```
 
 **Pricing**: $0.0027 input, $0.0108 output per 1K tokens
@@ -188,8 +213,9 @@ max_tokens: 1500
 ### Google Gemini
 
 **Embeddings** (768-dimensional):
+
 ```typescript
-model: 'embedding-001'
+model: 'embedding-001';
 ```
 
 **Cost**: $0.0375 per 1M tokens (dirt cheap)
@@ -223,6 +249,7 @@ supabase db reset
 3. **Blockers**: Am I stuck on anything?
 
 **If blocked**:
+
 - Post in Discord #development
 - Don't wait for next day
 - Ask for help immediately
@@ -232,6 +259,7 @@ supabase db reset
 ## Code Review Checklist
 
 Before merging PR:
+
 - [ ] All tests passing
 - [ ] `npm run typecheck` passes
 - [ ] No console errors
@@ -272,6 +300,7 @@ git push origin feature/phase1-emotion-detection
 ## Emergency Contacts
 
 **If stuck**:
+
 1. Check WEEK-1-KICKOFF-PLAN.md for full context
 2. Check PHASE-1-MEMORY-IMPLEMENTATION-SPEC.md for code examples
 3. Post in Discord
@@ -282,6 +311,7 @@ git push origin feature/phase1-emotion-detection
 ## You've Got This! 🚀
 
 **Remember**:
+
 - One day at a time
 - Each task has clear success criteria
 - Tests confirm things work

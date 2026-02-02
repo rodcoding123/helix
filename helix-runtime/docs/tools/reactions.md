@@ -1,5 +1,5 @@
 ---
-summary: "Reaction semantics shared across channels"
+summary: 'Reaction semantics shared across channels'
 read_when:
   - Working on reactions in any channel
 ---

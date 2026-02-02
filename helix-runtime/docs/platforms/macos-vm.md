@@ -1,5 +1,5 @@
 ---
-summary: "Run OpenClaw in a sandboxed macOS VM (local or hosted) when you need isolation or iMessage"
+summary: 'Run OpenClaw in a sandboxed macOS VM (local or hosted) when you need isolation or iMessage'
 read_when:
   - You want OpenClaw isolated from your main macOS environment
   - You want iMessage integration (BlueBubbles) in a sandbox

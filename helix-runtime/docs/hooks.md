@@ -1,5 +1,5 @@
 ---
-summary: "Hooks: event-driven automation for commands and lifecycle events"
+summary: 'Hooks: event-driven automation for commands and lifecycle events'
 read_when:
   - You want event-driven automation for /new, /reset, /stop, and agent lifecycle events
   - You want to build, install, or debug hooks
@@ -126,10 +126,10 @@ The `HOOK.md` file contains metadata in YAML frontmatter plus Markdown documenta
 ```markdown
 ---
 name: my-hook
-description: "Short description of what this hook does"
+description: 'Short description of what this hook does'
 homepage: https://docs.openclaw.ai/hooks#my-hook
 metadata:
-  { "openclaw": { "emoji": "🔗", "events": ["command:new"], "requires": { "bins": ["node"] } } }
+  { 'openclaw': { 'emoji': '🔗', 'events': ['command:new'], 'requires': { 'bins': ['node'] } } }
 ---
 
 # My Hook
@@ -173,11 +173,11 @@ The `metadata.openclaw` object supports:
 The `handler.ts` file exports a `HookHandler` function:
 
 ```typescript
-import type { HookHandler } from "../../src/hooks/hooks.js";
+import type { HookHandler } from '../../src/hooks/hooks.js';
 
-const myHandler: HookHandler = async (event) => {
+const myHandler: HookHandler = async event => {
   // Only trigger on 'new' command
-  if (event.type !== "command" || event.action !== "new") {
+  if (event.type !== 'command' || event.action !== 'new') {
     return;
   }
 
@@ -188,7 +188,7 @@ const myHandler: HookHandler = async (event) => {
   // Your custom logic here
 
   // Optionally send message to user
-  event.messages.push("✨ My hook executed!");
+  event.messages.push('✨ My hook executed!');
 };
 
 export default myHandler;
@@ -274,8 +274,8 @@ cd ~/.openclaw/hooks/my-hook
 ```markdown
 ---
 name: my-hook
-description: "Does something useful"
-metadata: { "openclaw": { "emoji": "🎯", "events": ["command:new"] } }
+description: 'Does something useful'
+metadata: { 'openclaw': { 'emoji': '🎯', 'events': ['command:new'] } }
 ---
 
 # My Custom Hook
@@ -286,14 +286,14 @@ This hook does something useful when you issue `/new`.
 ### 4. Create handler.ts
 
 ```typescript
-import type { HookHandler } from "../../src/hooks/hooks.js";
+import type { HookHandler } from '../../src/hooks/hooks.js';
 
-const handler: HookHandler = async (event) => {
-  if (event.type !== "command" || event.action !== "new") {
+const handler: HookHandler = async event => {
+  if (event.type !== 'command' || event.action !== 'new') {
     return;
   }
 
-  console.log("[my-hook] Running!");
+  console.log('[my-hook] Running!');
   // Your logic here
 };
 
@@ -591,12 +591,12 @@ Hooks run during command processing. Keep them lightweight:
 
 ```typescript
 // ✓ Good - async work, returns immediately
-const handler: HookHandler = async (event) => {
+const handler: HookHandler = async event => {
   void processInBackground(event); // Fire and forget
 };
 
 // ✗ Bad - blocks command processing
-const handler: HookHandler = async (event) => {
+const handler: HookHandler = async event => {
   await slowDatabaseQuery(event);
   await evenSlowerAPICall(event);
 };
@@ -607,11 +607,11 @@ const handler: HookHandler = async (event) => {
 Always wrap risky operations:
 
 ```typescript
-const handler: HookHandler = async (event) => {
+const handler: HookHandler = async event => {
   try {
     await riskyOperation(event);
   } catch (err) {
-    console.error("[my-handler] Failed:", err instanceof Error ? err.message : String(err));
+    console.error('[my-handler] Failed:', err instanceof Error ? err.message : String(err));
     // Don't throw - let other handlers run
   }
 };
@@ -622,9 +622,9 @@ const handler: HookHandler = async (event) => {
 Return early if the event isn't relevant:
 
 ```typescript
-const handler: HookHandler = async (event) => {
+const handler: HookHandler = async event => {
   // Only handle 'new' commands
-  if (event.type !== "command" || event.action !== "new") {
+  if (event.type !== 'command' || event.action !== 'new') {
     return;
   }
 
@@ -637,13 +637,13 @@ const handler: HookHandler = async (event) => {
 Specify exact events in metadata when possible:
 
 ```yaml
-metadata: { "openclaw": { "events": ["command:new"] } } # Specific
+metadata: { 'openclaw': { 'events': ['command:new'] } } # Specific
 ```
 
 Rather than:
 
 ```yaml
-metadata: { "openclaw": { "events": ["command"] } } # General - more overhead
+metadata: { 'openclaw': { 'events': ['command'] } } # General - more overhead
 ```
 
 ## Debugging
@@ -671,8 +671,8 @@ openclaw hooks list --verbose
 In your handler, log when it's called:
 
 ```typescript
-const handler: HookHandler = async (event) => {
-  console.log("[my-handler] Triggered:", event.type, event.action);
+const handler: HookHandler = async event => {
+  console.log('[my-handler] Triggered:', event.type, event.action);
   // Your logic
 };
 ```
@@ -706,13 +706,13 @@ tail -f ~/.openclaw/gateway.log
 Test your handlers in isolation:
 
 ```typescript
-import { test } from "vitest";
-import { createHookEvent } from "./src/hooks/hooks.js";
-import myHandler from "./hooks/my-hook/handler.js";
+import { test } from 'vitest';
+import { createHookEvent } from './src/hooks/hooks.js';
+import myHandler from './hooks/my-hook/handler.js';
 
-test("my handler works", async () => {
-  const event = createHookEvent("command", "new", "test-session", {
-    foo: "bar",
+test('my handler works', async () => {
+  const event = createHookEvent('command', 'new', 'test-session', {
+    foo: 'bar',
   });
 
   await myHandler(event);
@@ -866,8 +866,8 @@ node -e "import('./path/to/handler.ts').then(console.log)"
    ```markdown
    ---
    name: my-hook
-   description: "My custom hook"
-   metadata: { "openclaw": { "emoji": "🎯", "events": ["command:new"] } }
+   description: 'My custom hook'
+   metadata: { 'openclaw': { 'emoji': '🎯', 'events': ['command:new'] } }
    ---
 
    # My Hook

@@ -4,19 +4,19 @@ description: Batch-generate images via OpenAI Images API. Random prompt sampler 
 homepage: https://platform.openai.com/docs/api-reference/images
 metadata:
   {
-    "openclaw":
+    'openclaw':
       {
-        "emoji": "🖼️",
-        "requires": { "bins": ["python3"], "env": ["OPENAI_API_KEY"] },
-        "primaryEnv": "OPENAI_API_KEY",
-        "install":
+        'emoji': '🖼️',
+        'requires': { 'bins': ['python3'], 'env': ['OPENAI_API_KEY'] },
+        'primaryEnv': 'OPENAI_API_KEY',
+        'install':
           [
             {
-              "id": "python-brew",
-              "kind": "brew",
-              "formula": "python",
-              "bins": ["python3"],
-              "label": "Install Python (brew)",
+              'id': 'python-brew',
+              'kind': 'brew',
+              'formula': 'python',
+              'bins': ['python3'],
+              'label': 'Install Python (brew)',
             },
           ],
       },

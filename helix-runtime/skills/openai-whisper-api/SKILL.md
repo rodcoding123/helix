@@ -4,11 +4,11 @@ description: Transcribe audio via OpenAI Audio Transcriptions API (Whisper).
 homepage: https://platform.openai.com/docs/guides/speech-to-text
 metadata:
   {
-    "openclaw":
+    'openclaw':
       {
-        "emoji": "☁️",
-        "requires": { "bins": ["curl"], "env": ["OPENAI_API_KEY"] },
-        "primaryEnv": "OPENAI_API_KEY",
+        'emoji': '☁️',
+        'requires': { 'bins': ['curl'], 'env': ['OPENAI_API_KEY'] },
+        'primaryEnv': 'OPENAI_API_KEY',
       },
   }
 ---
@@ -44,8 +44,8 @@ Set `OPENAI_API_KEY`, or configure it in `~/.openclaw/openclaw.json`:
 ```json5
 {
   skills: {
-    "openai-whisper-api": {
-      apiKey: "OPENAI_KEY_HERE",
+    'openai-whisper-api': {
+      apiKey: 'OPENAI_KEY_HERE',
     },
   },
 }

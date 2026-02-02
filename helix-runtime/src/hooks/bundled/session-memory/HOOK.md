@@ -1,15 +1,15 @@
 ---
 name: session-memory
-description: "Save session context to memory when /new command is issued"
+description: 'Save session context to memory when /new command is issued'
 homepage: https://docs.openclaw.ai/hooks#session-memory
 metadata:
   {
-    "openclaw":
+    'openclaw':
       {
-        "emoji": "💾",
-        "events": ["command:new"],
-        "requires": { "config": ["workspace.dir"] },
-        "install": [{ "id": "bundled", "kind": "bundled", "label": "Bundled with OpenClaw" }],
+        'emoji': '💾',
+        'events': ['command:new'],
+        'requires': { 'config': ['workspace.dir'] },
+        'install': [{ 'id': 'bundled', 'kind': 'bundled', 'label': 'Bundled with OpenClaw' }],
       },
   }
 ---

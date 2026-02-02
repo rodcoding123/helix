@@ -7,6 +7,7 @@
 **Architecture:** React component library using SvelteKit (matching existing web/ structure), with Supabase real-time subscriptions for live updates. Uses client-side encryption option (BYOK) for users who want zero-knowledge. Integrates with Phase 1-2 DatabaseSecretsManager API endpoints. TypeScript strict mode, Tailwind CSS for styling, Vitest for testing.
 
 **Tech Stack:**
+
 - Frontend: React 18, SvelteKit, TypeScript strict
 - Styling: Tailwind CSS
 - State Management: React hooks + Zustand (for global state)
@@ -22,6 +23,7 @@
 ### Task 1: Create SecretsContext and Zustand store
 
 **Files:**
+
 - Create: `web/src/lib/stores/secrets-store.ts`
 - Create: `web/src/lib/context/SecretsContext.tsx`
 - Create: `web/src/lib/stores/__tests__/secrets-store.test.ts`
@@ -64,7 +66,9 @@ describe('Secrets Store', () => {
 
   it('should remove secret from store', () => {
     const { addSecret, removeSecret } = useSecretsStore.getState();
-    addSecret('GEMINI_API_KEY', { /* ... */ });
+    addSecret('GEMINI_API_KEY', {
+      /* ... */
+    });
 
     removeSecret('GEMINI_API_KEY');
 
@@ -74,7 +78,9 @@ describe('Secrets Store', () => {
 
   it('should update secret metadata', () => {
     const { addSecret, updateSecret } = useSecretsStore.getState();
-    const secret = { /* ... */ };
+    const secret = {
+      /* ... */
+    };
     addSecret('DEEPSEEK_API_KEY', secret);
 
     const updated = { ...secret, lastRotatedAt: new Date().toISOString() };
@@ -128,24 +134,24 @@ interface SecretsState {
   reset: () => void;
 }
 
-export const useSecretsStore = create<SecretsState>((set) => ({
+export const useSecretsStore = create<SecretsState>(set => ({
   secrets: {},
   isLoading: false,
   error: null,
 
   addSecret: (type: SecretType, secret: UserApiKey) =>
-    set((state) => ({
+    set(state => ({
       secrets: { ...state.secrets, [type]: secret },
     })),
 
   removeSecret: (type: SecretType) =>
-    set((state) => {
+    set(state => {
       const { [type]: _, ...remaining } = state.secrets;
       return { secrets: remaining };
     }),
 
   updateSecret: (type: SecretType, secret: UserApiKey) =>
-    set((state) => ({
+    set(state => ({
       secrets: { ...state.secrets, [type]: secret },
     })),
 
@@ -254,6 +260,7 @@ git commit -m "feat(secrets-ui): add Zustand store and SecretsContext
 ### Task 2: Create SecretsList component
 
 **Files:**
+
 - Create: `web/src/lib/components/secrets/SecretsList.tsx`
 - Create: `web/src/lib/components/secrets/SecretListItem.tsx`
 - Create: `web/src/lib/components/__tests__/SecretsList.test.tsx`
@@ -483,6 +490,7 @@ git commit -m "feat(secrets-ui): add SecretsList and SecretListItem components
 ### Task 3: Create CreateSecretModal component
 
 **Files:**
+
 - Create: `web/src/lib/components/secrets/CreateSecretModal.tsx`
 - Create: `web/src/lib/components/__tests__/CreateSecretModal.test.tsx`
 
@@ -791,6 +799,7 @@ git commit -m "feat(secrets-ui): add CreateSecretModal with form validation
 ### Task 4: Create RotateSecretModal component
 
 **Files:**
+
 - Create: `web/src/lib/components/secrets/RotateSecretModal.tsx`
 - Create: `web/src/lib/components/__tests__/RotateSecretModal.test.tsx`
 
@@ -1018,6 +1027,7 @@ git commit -m "feat(secrets-ui): add RotateSecretModal with warnings
 ### Task 5: Create CopyButton with auto-clear
 
 **Files:**
+
 - Create: `web/src/lib/components/shared/CopyButton.tsx`
 - Create: `web/src/lib/utils/clipboard.ts`
 
@@ -1118,6 +1128,7 @@ git commit -m "feat(secrets-ui): add CopyButton with auto-clear clipboard
 ### Task 6: Add Real-time subscriptions
 
 **Files:**
+
 - Modify: `web/src/lib/context/SecretsContext.tsx`
 - Create: `web/src/lib/hooks/useSecretsSubscription.ts`
 
@@ -1141,7 +1152,7 @@ export function useSecretsSubscription() {
     // Subscribe to secret updates
     const subscription = supabase
       .from('user_api_keys')
-      .on('*', (payload) => {
+      .on('*', payload => {
         if (payload.eventType === 'UPDATE') {
           updateSecret(payload.new.secret_type, payload.new);
         } else if (payload.eventType === 'DELETE') {
@@ -1183,6 +1194,7 @@ git commit -m "feat(secrets-ui): add real-time subscription updates
 ### Task 7: Create secrets dashboard page
 
 **Files:**
+
 - Create: `web/src/routes/secrets/+page.svelte`
 - Create: `web/src/routes/secrets/+page.ts`
 
@@ -1268,6 +1280,7 @@ git commit -m "feat(secrets-ui): add secrets dashboard page
 ### Task 8: Add secrets to main navigation
 
 **Files:**
+
 - Modify: `web/src/lib/components/Navigation.tsx`
 
 **Step 1: Add secrets link**
@@ -1301,6 +1314,7 @@ git commit -m "feat(navigation): add secrets management link
 ### Task 9: Integration tests
 
 **Files:**
+
 - Create: `web/src/routes/secrets/__tests__/secrets.e2e.ts`
 
 ```typescript

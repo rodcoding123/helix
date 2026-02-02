@@ -1,5 +1,5 @@
 ---
-summary: "Security considerations and threat model for running an AI gateway with shell access"
+summary: 'Security considerations and threat model for running an AI gateway with shell access'
 read_when:
   - Adding features that widen access or automation
 ---
@@ -93,7 +93,7 @@ When the Gateway detects proxy headers (`X-Forwarded-For` or `X-Real-IP`) from a
 ```yaml
 gateway:
   trustedProxies:
-    - "127.0.0.1" # if your proxy runs on localhost
+    - '127.0.0.1' # if your proxy runs on localhost
   auth:
     mode: password
     password: ${OPENCLAW_GATEWAY_PASSWORD}
@@ -200,7 +200,7 @@ By default, OpenClaw routes **all DMs into the main session** so your assistant 
 
 ```json5
 {
-  session: { dmScope: "per-channel-peer" },
+  session: { dmScope: 'per-channel-peer' },
 }
 ```
 
@@ -361,7 +361,7 @@ The Gateway broadcasts its presence via mDNS (`_openclaw-gw._tcp` on port 5353) 
    ```json5
    {
      discovery: {
-       mdns: { mode: "minimal" },
+       mdns: { mode: 'minimal' },
      },
    }
    ```
@@ -371,7 +371,7 @@ The Gateway broadcasts its presence via mDNS (`_openclaw-gw._tcp` on port 5353) 
    ```json5
    {
      discovery: {
-       mdns: { mode: "off" },
+       mdns: { mode: 'off' },
      },
    }
    ```
@@ -381,7 +381,7 @@ The Gateway broadcasts its presence via mDNS (`_openclaw-gw._tcp` on port 5353) 
    ```json5
    {
      discovery: {
-       mdns: { mode: "full" },
+       mdns: { mode: 'full' },
      },
    }
    ```
@@ -403,7 +403,7 @@ Set a token so **all** WS clients must authenticate:
 ```json5
 {
   gateway: {
-    auth: { mode: "token", token: "your-token" },
+    auth: { mode: 'token', token: 'your-token' },
   },
 }
 ```
@@ -508,7 +508,7 @@ Details: [Logging](/gateway/logging)
 
 ```json5
 {
-  channels: { whatsapp: { dmPolicy: "pairing" } },
+  channels: { whatsapp: { dmPolicy: 'pairing' } },
 }
 ```
 
@@ -559,15 +559,15 @@ One “safe default” config that keeps the Gateway private, requires DM pairin
 ```json5
 {
   gateway: {
-    mode: "local",
-    bind: "loopback",
+    mode: 'local',
+    bind: 'loopback',
     port: 18789,
-    auth: { mode: "token", token: "your-long-random-token" },
+    auth: { mode: 'token', token: 'your-long-random-token' },
   },
   channels: {
     whatsapp: {
-      dmPolicy: "pairing",
-      groups: { "*": { requireMention: true } },
+      dmPolicy: 'pairing',
+      groups: { '*': { requireMention: true } },
     },
   },
 }
@@ -632,9 +632,9 @@ Common use cases:
   agents: {
     list: [
       {
-        id: "personal",
-        workspace: "~/.openclaw/workspace-personal",
-        sandbox: { mode: "off" },
+        id: 'personal',
+        workspace: '~/.openclaw/workspace-personal',
+        sandbox: { mode: 'off' },
       },
     ],
   },
@@ -648,16 +648,16 @@ Common use cases:
   agents: {
     list: [
       {
-        id: "family",
-        workspace: "~/.openclaw/workspace-family",
+        id: 'family',
+        workspace: '~/.openclaw/workspace-family',
         sandbox: {
-          mode: "all",
-          scope: "agent",
-          workspaceAccess: "ro",
+          mode: 'all',
+          scope: 'agent',
+          workspaceAccess: 'ro',
         },
         tools: {
-          allow: ["read"],
-          deny: ["write", "edit", "apply_patch", "exec", "process", "browser"],
+          allow: ['read'],
+          deny: ['write', 'edit', 'apply_patch', 'exec', 'process', 'browser'],
         },
       },
     ],
@@ -672,38 +672,38 @@ Common use cases:
   agents: {
     list: [
       {
-        id: "public",
-        workspace: "~/.openclaw/workspace-public",
+        id: 'public',
+        workspace: '~/.openclaw/workspace-public',
         sandbox: {
-          mode: "all",
-          scope: "agent",
-          workspaceAccess: "none",
+          mode: 'all',
+          scope: 'agent',
+          workspaceAccess: 'none',
         },
         tools: {
           allow: [
-            "sessions_list",
-            "sessions_history",
-            "sessions_send",
-            "sessions_spawn",
-            "session_status",
-            "whatsapp",
-            "telegram",
-            "slack",
-            "discord",
+            'sessions_list',
+            'sessions_history',
+            'sessions_send',
+            'sessions_spawn',
+            'session_status',
+            'whatsapp',
+            'telegram',
+            'slack',
+            'discord',
           ],
           deny: [
-            "read",
-            "write",
-            "edit",
-            "apply_patch",
-            "exec",
-            "process",
-            "browser",
-            "canvas",
-            "nodes",
-            "cron",
-            "gateway",
-            "image",
+            'read',
+            'write',
+            'edit',
+            'apply_patch',
+            'exec',
+            'process',
+            'browser',
+            'canvas',
+            'nodes',
+            'cron',
+            'gateway',
+            'image',
           ],
         },
       },

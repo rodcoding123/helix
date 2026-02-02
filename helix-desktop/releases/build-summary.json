@@ -2,10 +2,7 @@
   "timestamp": "2026-02-02T02:26:49.304Z",
   "version": "1.0.0",
   "resources": {
-    "found": [
-      "openclaw-helix (sibling project)",
-      "openclaw-helix/dist (built)"
-    ],
+    "found": ["helix-runtime (sibling project)", "helix-runtime/dist (built)"],
     "missing": []
   },
   "nodeRuntime": {

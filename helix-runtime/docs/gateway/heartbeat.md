@@ -1,5 +1,5 @@
 ---
-summary: "Heartbeat polling messages and notification rules"
+summary: 'Heartbeat polling messages and notification rules'
 read_when:
   - Adjusting heartbeat cadence or messaging
   - Deciding between heartbeat and cron for scheduled tasks
@@ -27,8 +27,8 @@ Example config:
   agents: {
     defaults: {
       heartbeat: {
-        every: "30m",
-        target: "last",
+        every: '30m',
+        target: 'last',
         // activeHours: { start: "08:00", end: "24:00" },
         // includeReasoning: true, // optional: send separate `Reasoning:` message too
       },
@@ -81,12 +81,12 @@ and logged; a message that is only `HEARTBEAT_OK` is dropped.
   agents: {
     defaults: {
       heartbeat: {
-        every: "30m", // default: 30m (0m disables)
-        model: "anthropic/claude-opus-4-5",
+        every: '30m', // default: 30m (0m disables)
+        model: 'anthropic/claude-opus-4-5',
         includeReasoning: false, // default: false (deliver separate Reasoning: message when available)
-        target: "last", // last | none | <channel id> (core or plugin, e.g. "bluebubbles")
-        to: "+15551234567", // optional channel-specific override
-        prompt: "Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
+        target: 'last', // last | none | <channel id> (core or plugin, e.g. "bluebubbles")
+        to: '+15551234567', // optional channel-specific override
+        prompt: 'Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.',
         ackMaxChars: 300, // max chars allowed after HEARTBEAT_OK
       },
     },
@@ -115,19 +115,19 @@ Example: two agents, only the second agent runs heartbeats.
   agents: {
     defaults: {
       heartbeat: {
-        every: "30m",
-        target: "last",
+        every: '30m',
+        target: 'last',
       },
     },
     list: [
-      { id: "main", default: true },
+      { id: 'main', default: true },
       {
-        id: "ops",
+        id: 'ops',
         heartbeat: {
-          every: "1h",
-          target: "whatsapp",
-          to: "+15551234567",
-          prompt: "Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
+          every: '1h',
+          target: 'whatsapp',
+          to: '+15551234567',
+          prompt: 'Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.',
         },
       },
     ],

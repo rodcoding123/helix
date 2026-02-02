@@ -1,5 +1,5 @@
 ---
-summary: "Zalo bot support status, capabilities, and configuration"
+summary: 'Zalo bot support status, capabilities, and configuration'
 read_when:
   - Working on Zalo features or webhooks
 ---
@@ -35,8 +35,8 @@ Minimal config:
   channels: {
     zalo: {
       enabled: true,
-      botToken: "12345689:abc-xyz",
-      dmPolicy: "pairing",
+      botToken: '12345689:abc-xyz',
+      dmPolicy: 'pairing',
     },
   },
 }
@@ -69,8 +69,8 @@ Example:
   channels: {
     zalo: {
       enabled: true,
-      botToken: "12345689:abc-xyz",
-      dmPolicy: "pairing",
+      botToken: '12345689:abc-xyz',
+      dmPolicy: 'pairing',
     },
   },
 }

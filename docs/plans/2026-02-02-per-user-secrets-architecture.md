@@ -7,6 +7,7 @@
 **Architecture:** Three-tier approach with client-side encryption for BYOK tier, server-side encryption with key derivation for managed tier, and transparent fallback to system keys for free tier. Uses PBKDF2 for key derivation, AES-256-GCM for encryption, and role-based access control with audit logging for all key access.
 
 **Tech Stack:**
+
 - Encryption: libsodium (via tweetsodium or TweetNaCl.js)
 - Key derivation: PBKDF2 (Node.js built-in crypto)
 - Database: Supabase PostgreSQL with RLS and audit triggers
@@ -22,6 +23,7 @@
 ### Task 1: Create encryption key derivation module
 
 **Files:**
+
 - Create: `src/lib/encryption/key-derivation.ts`
 - Create: `src/lib/encryption/__tests__/key-derivation.test.ts`
 - Create: `src/lib/encryption/types.ts`
@@ -31,11 +33,7 @@
 ```typescript
 // src/lib/encryption/__tests__/key-derivation.test.ts
 import { describe, it, expect } from 'vitest';
-import {
-  deriveEncryptionKey,
-  generateSalt,
-  verifyKeyDerivation,
-} from '../key-derivation';
+import { deriveEncryptionKey, generateSalt, verifyKeyDerivation } from '../key-derivation';
 
 describe('Key Derivation', () => {
   it('should derive same key from same password and salt', async () => {
@@ -131,10 +129,7 @@ export async function generateSalt(): Promise<Buffer> {
  * @param salt - Random salt (16 bytes)
  * @returns 32-byte key suitable for AES-256
  */
-export async function deriveEncryptionKey(
-  password: string,
-  salt: Buffer
-): Promise<Buffer> {
+export async function deriveEncryptionKey(password: string, salt: Buffer): Promise<Buffer> {
   const key = await pbkdf2Async(
     password,
     salt,
@@ -162,10 +157,7 @@ export async function verifyKeyDerivation(
   const attemptedKey = await deriveEncryptionKey(password, salt);
 
   // Timing-safe comparison (prevent timing attacks)
-  return (
-    attemptedKey.length === derivedKey.length &&
-    attemptedKey.equals(derivedKey)
-  );
+  return attemptedKey.length === derivedKey.length && attemptedKey.equals(derivedKey);
 }
 
 /**
@@ -202,6 +194,7 @@ git commit -m "feat(encryption): add PBKDF2 key derivation for per-user secrets
 ### Task 2: Create AES-256-GCM encryption/decryption module
 
 **Files:**
+
 - Create: `src/lib/encryption/symmetric.ts`
 - Create: `src/lib/encryption/__tests__/symmetric.test.ts`
 
@@ -210,11 +203,7 @@ git commit -m "feat(encryption): add PBKDF2 key derivation for per-user secrets
 ```typescript
 // src/lib/encryption/__tests__/symmetric.test.ts
 import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  encryptWithKey,
-  decryptWithKey,
-  generateNonce,
-} from '../symmetric';
+import { encryptWithKey, decryptWithKey, generateNonce } from '../symmetric';
 import { randomBytes } from 'crypto';
 
 describe('Symmetric Encryption (AES-256-GCM)', () => {
@@ -352,10 +341,7 @@ export async function encryptWithKey(
  * @returns Decrypted plaintext
  * @throws If authentication tag verification fails (tampering detected)
  */
-export async function decryptWithKey(
-  ciphertext: string,
-  key: Buffer
-): Promise<string> {
+export async function decryptWithKey(ciphertext: string, key: Buffer): Promise<string> {
   if (key.length !== 32) {
     throw new Error('Key must be 32 bytes (256 bits) for AES-256');
   }
@@ -419,6 +405,7 @@ git commit -m "feat(encryption): add AES-256-GCM symmetric encryption
 ### Task 3: Create base secrets manager interface
 
 **Files:**
+
 - Create: `src/lib/secrets/types.ts`
 - Create: `src/lib/secrets/base-manager.ts`
 - Create: `src/lib/secrets/__tests__/base-manager.test.ts`
@@ -471,14 +458,9 @@ export interface SecretLoadOptions {
 }
 
 export interface SecretsManager {
-  loadSecret(
-    type: SecretType,
-    options?: SecretLoadOptions
-  ): Promise<string | null>;
+  loadSecret(type: SecretType, options?: SecretLoadOptions): Promise<string | null>;
 
-  loadAllSecrets(
-    options?: SecretLoadOptions
-  ): Promise<Map<SecretType, string>>;
+  loadAllSecrets(options?: SecretLoadOptions): Promise<Map<SecretType, string>>;
 
   storeSecret(
     type: SecretType,
@@ -489,11 +471,7 @@ export interface SecretsManager {
 
   deleteSecret(type: SecretType): Promise<void>;
 
-  rotateSecret(
-    type: SecretType,
-    newValue: string,
-    expiresAt?: Date
-  ): Promise<SecretMetadata>;
+  rotateSecret(type: SecretType, newValue: string, expiresAt?: Date): Promise<SecretMetadata>;
 
   getMetadata(type: SecretType): Promise<SecretMetadata | null>;
 
@@ -578,10 +556,7 @@ describe('BaseSecretsManager', () => {
       SecretSourceType.USER_PROVIDED
     );
 
-    const rotationMetadata = await manager.rotateSecret(
-      SecretType.STRIPE_SECRET_KEY,
-      newValue
-    );
+    const rotationMetadata = await manager.rotateSecret(SecretType.STRIPE_SECRET_KEY, newValue);
 
     const retrieved = await manager.loadSecret(SecretType.STRIPE_SECRET_KEY);
 
@@ -672,10 +647,7 @@ export class BaseSecretsManager implements SecretsManager {
     this.userId = userId;
   }
 
-  async loadSecret(
-    type: SecretType,
-    options?: SecretLoadOptions
-  ): Promise<string | null> {
+  async loadSecret(type: SecretType, options?: SecretLoadOptions): Promise<string | null> {
     const stored = this.storage.get(type);
 
     if (!stored) {
@@ -813,6 +785,7 @@ git commit -m "feat(secrets): add base secrets manager with in-memory storage
 ### Task 4: Create database migration for user secrets tables
 
 **Files:**
+
 - Create: `web/supabase/migrations/010_user_api_keys.sql`
 - Create: `web/supabase/migrations/011_api_key_access_audit.sql`
 
@@ -1009,6 +982,7 @@ git commit -m "feat(db): add user API keys and audit logging tables
 ### Task 5: Create TypeScript types for database entities
 
 **Files:**
+
 - Create: `web/src/lib/types/secrets.ts`
 - Create: `web/src/lib/types/audit.ts`
 
@@ -1025,11 +999,7 @@ export type SecretType =
   | 'STRIPE_PUBLISHABLE_KEY'
   | 'DISCORD_WEBHOOK';
 
-export type SecretSourceType =
-  | 'user-provided'
-  | 'system-managed'
-  | 'user-local'
-  | 'one-password';
+export type SecretSourceType = 'user-provided' | 'system-managed' | 'user-local' | 'one-password';
 
 export type EncryptionMethod = 'aes-256-gcm' | 'plaintext';
 
@@ -1125,6 +1095,7 @@ git commit -m "feat(types): add TypeScript definitions for user secrets and audi
 ### Task 6: Create encrypted database secrets manager
 
 **Files:**
+
 - Create: `src/lib/secrets/database-manager.ts`
 - Create: `src/lib/secrets/__tests__/database-manager.test.ts`
 
@@ -1170,10 +1141,7 @@ describe('DatabaseSecretsManager', () => {
       }),
     };
 
-    manager = new DatabaseSecretsManager(
-      'user-456',
-      mockSupabase as SupabaseClient
-    );
+    manager = new DatabaseSecretsManager('user-456', mockSupabase as SupabaseClient);
   });
 
   it('should load encrypted secret from database', async () => {
@@ -1217,10 +1185,7 @@ describe('DatabaseSecretsManager', () => {
       }),
     };
 
-    manager = new DatabaseSecretsManager(
-      'user-456',
-      mockSupabase as SupabaseClient
-    );
+    manager = new DatabaseSecretsManager('user-456', mockSupabase as SupabaseClient);
 
     const secret = await manager.loadSecret(SecretType.GEMINI_API_KEY);
 
@@ -1243,12 +1208,7 @@ Expected: ALL FAIL - class not defined
 // src/lib/secrets/database-manager.ts
 import { SupabaseClient } from '@supabase/supabase-js';
 import { BaseSecretsManager } from './base-manager';
-import {
-  SecretType,
-  SecretSourceType,
-  SecretMetadata,
-  SecretLoadOptions,
-} from './types';
+import { SecretType, SecretSourceType, SecretMetadata, SecretLoadOptions } from './types';
 import { encryptWithKey, generateNonce, decryptWithKey } from '../encryption/symmetric';
 import { deriveEncryptionKey } from '../encryption/key-derivation';
 import type { UserApiKey } from '../types/secrets';
@@ -1267,10 +1227,7 @@ export class DatabaseSecretsManager extends BaseSecretsManager {
     super(userId);
   }
 
-  async loadSecret(
-    type: SecretType,
-    options?: SecretLoadOptions
-  ): Promise<string | null> {
+  async loadSecret(type: SecretType, options?: SecretLoadOptions): Promise<string | null> {
     try {
       // Query database for secret
       const { data: secret, error } = await this.supabase
@@ -1324,10 +1281,7 @@ export class DatabaseSecretsManager extends BaseSecretsManager {
     expiresAt?: Date
   ): Promise<SecretMetadata> {
     const nonce = await generateNonce();
-    const encryptionKey = await deriveEncryptionKey(
-      `${this.userId}:${type}`,
-      nonce
-    );
+    const encryptionKey = await deriveEncryptionKey(`${this.userId}:${type}`, nonce);
 
     const encryptedValue = await encryptWithKey(value, encryptionKey, nonce);
 
@@ -1375,10 +1329,7 @@ export class DatabaseSecretsManager extends BaseSecretsManager {
    * Salt is stored alongside encrypted data
    * Key is derived from: userId:secretType + salt
    */
-  private async decryptSecretValue(
-    encryptedValue: string,
-    saltHex: string
-  ): Promise<string> {
+  private async decryptSecretValue(encryptedValue: string, saltHex: string): Promise<string> {
     const salt = Buffer.from(saltHex, 'hex');
     const key = await deriveEncryptionKey(`${this.userId}`, salt);
     return await decryptWithKey(encryptedValue, key);
@@ -1439,6 +1390,7 @@ git commit -m "feat(secrets): add encrypted database secrets manager
 ### Task 7: Create backend API endpoints for secret management
 
 **Files:**
+
 - Create: `web/src/routes/api/secrets/+server.ts`
 - Create: `web/src/routes/api/secrets/[id]/+server.ts`
 - Create: `web/src/lib/api/secrets.test.ts`

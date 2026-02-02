@@ -1,5 +1,5 @@
 ---
-summary: "Remote access using SSH tunnels (Gateway WS) and tailnets"
+summary: 'Remote access using SSH tunnels (Gateway WS) and tailnets'
 read_when:
   - Running or troubleshooting remote gateway setups
 ---
@@ -87,10 +87,10 @@ You can persist a remote target so CLI commands use it by default:
 ```json5
 {
   gateway: {
-    mode: "remote",
+    mode: 'remote',
     remote: {
-      url: "ws://127.0.0.1:18789",
-      token: "your-token",
+      url: 'ws://127.0.0.1:18789',
+      token: 'your-token',
     },
   },
 }

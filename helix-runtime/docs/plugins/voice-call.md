@@ -1,5 +1,5 @@
 ---
-summary: "Voice Call plugin: outbound + inbound calls via Twilio/Telnyx/Plivo (plugin install + config + CLI)"
+summary: 'Voice Call plugin: outbound + inbound calls via Twilio/Telnyx/Plivo (plugin install + config + CLI)'
 read_when:
   - You want to place an outbound voice call from OpenClaw
   - You are configuring or developing the voice-call plugin
@@ -57,27 +57,27 @@ Set config under `plugins.entries.voice-call.config`:
 {
   plugins: {
     entries: {
-      "voice-call": {
+      'voice-call': {
         enabled: true,
         config: {
-          provider: "twilio", // or "telnyx" | "plivo" | "mock"
-          fromNumber: "+15550001234",
-          toNumber: "+15550005678",
+          provider: 'twilio', // or "telnyx" | "plivo" | "mock"
+          fromNumber: '+15550001234',
+          toNumber: '+15550005678',
 
           twilio: {
-            accountSid: "ACxxxxxxxx",
-            authToken: "...",
+            accountSid: 'ACxxxxxxxx',
+            authToken: '...',
           },
 
           plivo: {
-            authId: "MAxxxxxxxxxxxxxxxxxxxx",
-            authToken: "...",
+            authId: 'MAxxxxxxxxxxxxxxxxxxxx',
+            authToken: '...',
           },
 
           // Webhook server
           serve: {
             port: 3334,
-            path: "/voice/webhook",
+            path: '/voice/webhook',
           },
 
           // Public exposure (pick one)
@@ -86,12 +86,12 @@ Set config under `plugins.entries.voice-call.config`:
           // tailscale: { mode: "funnel", path: "/voice/webhook" }
 
           outbound: {
-            defaultMode: "notify", // notify | conversation
+            defaultMode: 'notify', // notify | conversation
           },
 
           streaming: {
             enabled: true,
-            streamPath: "/voice/stream",
+            streamPath: '/voice/stream',
           },
         },
       },
@@ -119,10 +119,10 @@ streaming speech on calls. You can override it under the plugin config with the
 ```json5
 {
   tts: {
-    provider: "elevenlabs",
+    provider: 'elevenlabs',
     elevenlabs: {
-      voiceId: "pMsXgVXv3BLzUgSXRplE",
-      modelId: "eleven_multilingual_v2",
+      voiceId: 'pMsXgVXv3BLzUgSXRplE',
+      modelId: 'eleven_multilingual_v2',
     },
   },
 }
@@ -141,8 +141,8 @@ Use core TTS only (no override):
 {
   messages: {
     tts: {
-      provider: "openai",
-      openai: { voice: "alloy" },
+      provider: 'openai',
+      openai: { voice: 'alloy' },
     },
   },
 }
@@ -154,14 +154,14 @@ Override to ElevenLabs just for calls (keep core default elsewhere):
 {
   plugins: {
     entries: {
-      "voice-call": {
+      'voice-call': {
         config: {
           tts: {
-            provider: "elevenlabs",
+            provider: 'elevenlabs',
             elevenlabs: {
-              apiKey: "elevenlabs_key",
-              voiceId: "pMsXgVXv3BLzUgSXRplE",
-              modelId: "eleven_multilingual_v2",
+              apiKey: 'elevenlabs_key',
+              voiceId: 'pMsXgVXv3BLzUgSXRplE',
+              modelId: 'eleven_multilingual_v2',
             },
           },
         },
@@ -177,12 +177,12 @@ Override only the OpenAI model for calls (deep‑merge example):
 {
   plugins: {
     entries: {
-      "voice-call": {
+      'voice-call': {
         config: {
           tts: {
             openai: {
-              model: "gpt-4o-mini-tts",
-              voice: "marin",
+              model: 'gpt-4o-mini-tts',
+              voice: 'marin',
             },
           },
         },
@@ -198,9 +198,9 @@ Inbound policy defaults to `disabled`. To enable inbound calls, set:
 
 ```json5
 {
-  inboundPolicy: "allowlist",
-  allowFrom: ["+15550001234"],
-  inboundGreeting: "Hello! How can I help?",
+  inboundPolicy: 'allowlist',
+  allowFrom: ['+15550001234'],
+  inboundGreeting: 'Hello! How can I help?',
 }
 ```
 

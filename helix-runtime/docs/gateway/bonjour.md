@@ -1,5 +1,5 @@
 ---
-summary: "Bonjour/mDNS discovery + debugging (Gateway beacons, clients, and common failure modes)"
+summary: 'Bonjour/mDNS discovery + debugging (Gateway beacons, clients, and common failure modes)'
 read_when:
   - Debugging Bonjour discovery issues on macOS/iOS
   - Changing mDNS service types, TXT records, or discovery UX
@@ -32,7 +32,7 @@ iOS/Android nodes browse both `local.` and your configured wide‑area domain.
 
 ```json5
 {
-  gateway: { bind: "tailnet" }, // tailnet-only (recommended)
+  gateway: { bind: 'tailnet' }, // tailnet-only (recommended)
   discovery: { wideArea: { enabled: true } }, // enables wide-area DNS-SD publishing
 }
 ```

@@ -1,5 +1,5 @@
 ---
-summary: "Agent-controlled Canvas panel embedded via WKWebView + custom URL scheme"
+summary: 'Agent-controlled Canvas panel embedded via WKWebView + custom URL scheme'
 read_when:
   - Implementing the macOS Canvas panel
   - Adding agent controls for visual workspace
@@ -112,7 +112,7 @@ Canvas can trigger new agent runs via deep links:
 Example (in JS):
 
 ```js
-window.location.href = "openclaw://agent?message=Review%20this%20design";
+window.location.href = 'openclaw://agent?message=Review%20this%20design';
 ```
 
 The app prompts for confirmation unless a valid key is provided.

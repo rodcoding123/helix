@@ -1,5 +1,5 @@
 ---
-summary: "Use Xiaomi MiMo (mimo-v2-flash) with OpenClaw"
+summary: 'Use Xiaomi MiMo (mimo-v2-flash) with OpenClaw'
 read_when:
   - You want Xiaomi MiMo models in OpenClaw
   - You need XIAOMI_API_KEY setup
@@ -30,21 +30,21 @@ openclaw onboard --auth-choice xiaomi-api-key --xiaomi-api-key "$XIAOMI_API_KEY"
 
 ```json5
 {
-  env: { XIAOMI_API_KEY: "your-key" },
-  agents: { defaults: { model: { primary: "xiaomi/mimo-v2-flash" } } },
+  env: { XIAOMI_API_KEY: 'your-key' },
+  agents: { defaults: { model: { primary: 'xiaomi/mimo-v2-flash' } } },
   models: {
-    mode: "merge",
+    mode: 'merge',
     providers: {
       xiaomi: {
-        baseUrl: "https://api.xiaomimimo.com/anthropic",
-        api: "anthropic-messages",
-        apiKey: "XIAOMI_API_KEY",
+        baseUrl: 'https://api.xiaomimimo.com/anthropic',
+        api: 'anthropic-messages',
+        apiKey: 'XIAOMI_API_KEY',
         models: [
           {
-            id: "mimo-v2-flash",
-            name: "Xiaomi MiMo V2 Flash",
+            id: 'mimo-v2-flash',
+            name: 'Xiaomi MiMo V2 Flash',
             reasoning: false,
-            input: ["text"],
+            input: ['text'],
             cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
             contextWindow: 262144,
             maxTokens: 8192,

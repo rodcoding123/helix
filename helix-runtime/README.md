@@ -316,7 +316,7 @@ Minimal `~/.openclaw/openclaw.json` (model + defaults):
 ```json5
 {
   agent: {
-    model: "anthropic/claude-opus-4-5",
+    model: 'anthropic/claude-opus-4-5',
   },
 }
 ```
@@ -346,7 +346,7 @@ Details: [Security guide](https://docs.openclaw.ai/gateway/security) · [Docker 
 {
   channels: {
     telegram: {
-      botToken: "123456:ABCDEF",
+      botToken: '123456:ABCDEF',
     },
   },
 }
@@ -365,7 +365,7 @@ Details: [Security guide](https://docs.openclaw.ai/gateway/security) · [Docker 
 {
   channels: {
     discord: {
-      token: "1234abcd",
+      token: '1234abcd',
     },
   },
 }
@@ -395,7 +395,7 @@ Browser control (optional):
 {
   browser: {
     enabled: true,
-    color: "#FF4500",
+    color: '#FF4500',
   },
 }
 ```

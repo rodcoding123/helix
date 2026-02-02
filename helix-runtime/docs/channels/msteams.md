@@ -1,5 +1,5 @@
 ---
-summary: "Microsoft Teams bot support status, capabilities, and configuration"
+summary: 'Microsoft Teams bot support status, capabilities, and configuration'
 read_when:
   - Working on MS Teams channel features
 ---
@@ -52,10 +52,10 @@ Minimal config:
   channels: {
     msteams: {
       enabled: true,
-      appId: "<APP_ID>",
-      appPassword: "<APP_PASSWORD>",
-      tenantId: "<TENANT_ID>",
-      webhook: { port: 3978, path: "/api/messages" },
+      appId: '<APP_ID>',
+      appPassword: '<APP_PASSWORD>',
+      tenantId: '<TENANT_ID>',
+      webhook: { port: 3978, path: '/api/messages' },
     },
   },
 }
@@ -101,8 +101,8 @@ Example:
 {
   channels: {
     msteams: {
-      groupPolicy: "allowlist",
-      groupAllowFrom: ["user@org.com"],
+      groupPolicy: 'allowlist',
+      groupAllowFrom: ['user@org.com'],
     },
   },
 }
@@ -123,9 +123,9 @@ Example:
 {
   channels: {
     msteams: {
-      groupPolicy: "allowlist",
+      groupPolicy: 'allowlist',
       teams: {
-        "My Team": {
+        'My Team': {
           channels: {
             General: { requireMention: true },
           },
@@ -560,7 +560,7 @@ Bots don't have a personal OneDrive drive (the `/me/drive` Graph API endpoint do
      channels: {
        msteams: {
          // ... other config ...
-         sharePointSiteId: "contoso.sharepoint.com,guid1,guid2",
+         sharePointSiteId: 'contoso.sharepoint.com,guid1,guid2',
        },
      },
    }

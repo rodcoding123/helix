@@ -1,5 +1,5 @@
 ---
-summary: "Uninstall OpenClaw completely (CLI, service, state, workspace)"
+summary: 'Uninstall OpenClaw completely (CLI, service, state, workspace)'
 read_when:
   - You want to remove OpenClaw from a machine
   - The gateway service is still running after uninstall

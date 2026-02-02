@@ -1,5 +1,5 @@
 ---
-summary: "Nextcloud Talk support status, capabilities, and configuration"
+summary: 'Nextcloud Talk support status, capabilities, and configuration'
 read_when:
   - Working on Nextcloud Talk channel features
 ---
@@ -47,11 +47,11 @@ Minimal config:
 ```json5
 {
   channels: {
-    "nextcloud-talk": {
+    'nextcloud-talk': {
       enabled: true,
-      baseUrl: "https://cloud.example.com",
-      botSecret: "shared-secret",
-      dmPolicy: "pairing",
+      baseUrl: 'https://cloud.example.com',
+      botSecret: 'shared-secret',
+      dmPolicy: 'pairing',
     },
   },
 }
@@ -80,9 +80,9 @@ Minimal config:
 ```json5
 {
   channels: {
-    "nextcloud-talk": {
+    'nextcloud-talk': {
       rooms: {
-        "room-token": { requireMention: true },
+        'room-token': { requireMention: true },
       },
     },
   },

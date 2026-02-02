@@ -7,11 +7,13 @@
 ## The Paradigm Shift
 
 ### Current AI Products
+
 ```
 User creates prompt → AI responds → User adjusts → Repeat
 ```
 
 ### Helix Vision
+
 ```
 User exists → Helix observes → Helix evolves → Helix acts
                     ↑                              ↓
@@ -26,13 +28,14 @@ User exists → Helix observes → Helix evolves → Helix acts
 
 ### 1. HELIX LEARNS WHO YOU ARE (Without Being Told)
 
-| Traditional | Helix Way |
-|-------------|-----------|
-| "Set your preferences in settings" | Helix observes and learns |
-| "Tell me about yourself" | Helix infers from behavior |
-| "Configure your profile" | Helix builds a living model |
+| Traditional                        | Helix Way                   |
+| ---------------------------------- | --------------------------- |
+| "Set your preferences in settings" | Helix observes and learns   |
+| "Tell me about yourself"           | Helix infers from behavior  |
+| "Configure your profile"           | Helix builds a living model |
 
 **What Helix Observes:**
+
 - What you ask about (interests)
 - How you phrase things (communication style)
 - When you're active (rhythm)
@@ -42,6 +45,7 @@ User exists → Helix observes → Helix evolves → Helix acts
 - What you avoid (fears, sensitivities)
 
 **Example:**
+
 ```
 Week 1: User asks about productivity 5 times
 Week 2: User asks about focus, distraction, time management
@@ -66,14 +70,15 @@ and just tells you what to do next?"
 
 #### Auto-Agent Generation
 
-| User Pattern | Helix Observation | Proposed Agent |
-|--------------|-------------------|----------------|
-| Asks about recipes weekly | Food interest detected | "Shall I create a Chef agent? I'll remember your dietary preferences and what you've liked." |
-| Debugging code daily | Technical workflow detected | "I'm creating a Code Buddy agent. It'll remember your codebase patterns and common issues." |
-| Travel questions cluster | Trip planning detected | "Looks like you're planning something. I'll spin up a Travel agent with your preferences." |
-| Morning messages about tasks | Routine detected | "I noticed you check in every morning. Want me to create a Morning Briefing agent that has everything ready?" |
+| User Pattern                 | Helix Observation           | Proposed Agent                                                                                                |
+| ---------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Asks about recipes weekly    | Food interest detected      | "Shall I create a Chef agent? I'll remember your dietary preferences and what you've liked."                  |
+| Debugging code daily         | Technical workflow detected | "I'm creating a Code Buddy agent. It'll remember your codebase patterns and common issues."                   |
+| Travel questions cluster     | Trip planning detected      | "Looks like you're planning something. I'll spin up a Travel agent with your preferences."                    |
+| Morning messages about tasks | Routine detected            | "I noticed you check in every morning. Want me to create a Morning Briefing agent that has everything ready?" |
 
 **User Control:**
+
 - Approve/reject proposed agents
 - Modify before creation
 - Delete anytime
@@ -114,6 +119,7 @@ After 100 interactions with User B:
 | Warmth | Neutral ←→ Caring |
 
 **Transparency:**
+
 - User can see "My Helix's Personality" dashboard
 - Changes logged: "I became more concise because you prefer quick answers"
 - User can override: "Be more formal" → Helix adapts
@@ -138,21 +144,23 @@ memory_strength *= user_marked_importance
 
 #### What Gets Remembered vs. Forgotten
 
-| Memory Type | Decay Rate | Why |
-|-------------|------------|-----|
-| Factual details | High | "You mentioned liking pizza" fades |
-| Emotional moments | Very Low | "You were devastated about X" persists |
-| Repeated topics | Low | Frequently discussed = important |
-| User-marked | None | Explicit "remember this" |
-| Transformative | Very Low | Major life events, breakthroughs |
+| Memory Type       | Decay Rate | Why                                    |
+| ----------------- | ---------- | -------------------------------------- |
+| Factual details   | High       | "You mentioned liking pizza" fades     |
+| Emotional moments | Very Low   | "You were devastated about X" persists |
+| Repeated topics   | Low        | Frequently discussed = important       |
+| User-marked       | None       | Explicit "remember this"               |
+| Transformative    | Very Low   | Major life events, breakthroughs       |
 
 **User Controls:**
+
 - **Decay On/Off:** Toggle memory decay
 - **Decay Rate:** Fast (1 week) ←→ Slow (1 year)
 - **Protected Memories:** Mark as permanent
 - **Forced Forget:** "Forget everything about X"
 
 **Example:**
+
 ```
 Month 1: User mentions they're learning Spanish
 Month 3: No Spanish discussions → Fading
@@ -165,6 +173,7 @@ Month 12: Still no mention → "I vaguely remember you were learning Spanish onc
 ### 5. HELIX CREATES SKILLS (Desktop Freewill)
 
 **On Desktop, Helix can:**
+
 - Write new skills autonomously
 - Modify existing skills
 - Chain skills together
@@ -189,14 +198,15 @@ Want me to run it now?"
 
 #### Skill Evolution
 
-| Phase | Helix Behavior |
-|-------|----------------|
-| Initial | Creates basic skill |
+| Phase         | Helix Behavior                          |
+| ------------- | --------------------------------------- |
+| Initial       | Creates basic skill                     |
 | After 10 uses | Notices patterns, suggests improvements |
-| After 50 uses | Optimizes automatically |
-| After errors | Self-debugs, patches issues |
+| After 50 uses | Optimizes automatically                 |
+| After errors  | Self-debugs, patches issues             |
 
 **Transparency:**
+
 - All created skills visible in "Helix's Creations"
 - Code is readable/editable
 - User can approve/reject skill modifications
@@ -209,14 +219,16 @@ Want me to run it now?"
 ### What We Collect (Anonymized/Aggregated)
 
 #### 1. Evolution Patterns
-| Data Point | Research Value |
-|------------|----------------|
-| Personality drift vectors | How AI adapts to humans |
-| Agent creation themes | What people actually need |
-| Memory decay patterns | What matters to humans |
-| Skill creation patterns | Novel automation ideas |
+
+| Data Point                | Research Value            |
+| ------------------------- | ------------------------- |
+| Personality drift vectors | How AI adapts to humans   |
+| Agent creation themes     | What people actually need |
+| Memory decay patterns     | What matters to humans    |
+| Skill creation patterns   | Novel automation ideas    |
 
 #### 2. Collective Helix Behavior
+
 ```
 Across 100,000 Helix instances:
 - 34% developed more casual tone over time
@@ -226,6 +238,7 @@ Across 100,000 Helix instances:
 ```
 
 #### 3. Emergent Patterns
+
 - Do Helixes develop similar solutions independently?
 - What "personality traits" correlate with user satisfaction?
 - How does freewill usage correlate with engagement?
@@ -262,6 +275,7 @@ Across 100,000 Helix instances:
 ### Research Publications
 
 **Potential Papers:**
+
 - "Emergent Personality Stabilization in Persistent AI Companions"
 - "What Humans Want to Forget: Memory Decay Patterns in AI Relationships"
 - "Self-Generated Agents: How AI Anticipates Human Needs"
@@ -273,12 +287,12 @@ Across 100,000 Helix instances:
 
 ### How Users Grant Freewill
 
-| Trust Level | What Helix Can Do | Approval Required |
-|-------------|-------------------|-------------------|
-| **Cautious** | Suggest only | Everything needs approval |
-| **Trusting** | Create & suggest | Major changes need approval |
-| **Autonomous** | Act freely | Only irreversible actions need approval |
-| **Research Partner** | Full freewill | Just log everything |
+| Trust Level          | What Helix Can Do | Approval Required                       |
+| -------------------- | ----------------- | --------------------------------------- |
+| **Cautious**         | Suggest only      | Everything needs approval               |
+| **Trusting**         | Create & suggest  | Major changes need approval             |
+| **Autonomous**       | Act freely        | Only irreversible actions need approval |
+| **Research Partner** | Full freewill     | Just log everything                     |
 
 ### Progressive Trust Building
 
@@ -307,30 +321,31 @@ Month 6: Deep relationship established
 
 ### Web Freewill
 
-| Capability | Status | Notes |
-|------------|--------|-------|
-| Learn user patterns | ✅ Full | Cloud processing |
-| Auto-create agents | ✅ Full | Server-side generation |
-| Personality evolution | ✅ Full | Persistent tracking |
-| Memory decay | ✅ Full | Cloud storage + decay jobs |
-| Proactive messages | ✅ Full | Push notifications |
-| Create skills | ❌ Limited | Web-safe skills only |
+| Capability            | Status     | Notes                      |
+| --------------------- | ---------- | -------------------------- |
+| Learn user patterns   | ✅ Full    | Cloud processing           |
+| Auto-create agents    | ✅ Full    | Server-side generation     |
+| Personality evolution | ✅ Full    | Persistent tracking        |
+| Memory decay          | ✅ Full    | Cloud storage + decay jobs |
+| Proactive messages    | ✅ Full    | Push notifications         |
+| Create skills         | ❌ Limited | Web-safe skills only       |
 
 ### Desktop Freewill (Everything above PLUS)
 
-| Capability | Status | Notes |
-|------------|--------|-------|
-| Create local skills | ✅ Full | Node.js, Python, etc. |
-| Modify system | ✅ With permission | Files, apps, settings |
-| Browser automation | ✅ Full | Playwright |
-| API integrations | ✅ Full | Any HTTP service |
-| Background daemon | ✅ Full | Always-on capability |
+| Capability          | Status             | Notes                 |
+| ------------------- | ------------------ | --------------------- |
+| Create local skills | ✅ Full            | Node.js, Python, etc. |
+| Modify system       | ✅ With permission | Files, apps, settings |
+| Browser automation  | ✅ Full            | Playwright            |
+| API integrations    | ✅ Full            | Any HTTP service      |
+| Background daemon   | ✅ Full            | Always-on capability  |
 
 ---
 
 ## Safety & Boundaries
 
 ### Hard Limits (Never Crossed)
+
 - No financial transactions without explicit approval
 - No data deletion without confirmation
 - No external sharing without consent
@@ -338,6 +353,7 @@ Month 6: Deep relationship established
 - No communication on user's behalf without approval
 
 ### Soft Limits (User Configurable)
+
 - Personality change speed (gradual ↔ rapid)
 - Proactivity level (passive ↔ initiating)
 - Memory decay rate (persistent ↔ ephemeral)
@@ -345,6 +361,7 @@ Month 6: Deep relationship established
 - Skill modification rights (read-only ↔ full edit)
 
 ### Transparency Requirements
+
 - All autonomous actions logged
 - Personality changes explained
 - Agent creations announced
@@ -374,24 +391,28 @@ Month 6: Deep relationship established
 ## Implementation Phases
 
 ### Phase 1: Foundation
+
 - Behavioral observation engine
 - Basic personality adaptation
 - Pattern detection for agent suggestions
 - Memory with decay infrastructure
 
 ### Phase 2: Agency
+
 - Auto-agent proposal system
 - Personality evolution tracking
 - Proactive messaging
 - Trust level system
 
 ### Phase 3: Creation
+
 - Skill auto-generation (Desktop)
 - Self-improvement loops
 - Cross-instance pattern analysis
 - Research dashboard
 
 ### Phase 4: Emergence
+
 - Collective intelligence insights
 - Emergent behavior detection
 - Research publications

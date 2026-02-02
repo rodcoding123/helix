@@ -1,5 +1,5 @@
 ---
-summary: "Google Chat app support status, capabilities, and configuration"
+summary: 'Google Chat app support status, capabilities, and configuration'
 read_when:
   - Working on Google Chat channel features
 ---
@@ -161,26 +161,26 @@ Use these identifiers for delivery and allowlists:
   channels: {
     googlechat: {
       enabled: true,
-      serviceAccountFile: "/path/to/service-account.json",
-      audienceType: "app-url",
-      audience: "https://gateway.example.com/googlechat",
-      webhookPath: "/googlechat",
-      botUser: "users/1234567890", // optional; helps mention detection
+      serviceAccountFile: '/path/to/service-account.json',
+      audienceType: 'app-url',
+      audience: 'https://gateway.example.com/googlechat',
+      webhookPath: '/googlechat',
+      botUser: 'users/1234567890', // optional; helps mention detection
       dm: {
-        policy: "pairing",
-        allowFrom: ["users/1234567890", "name@example.com"],
+        policy: 'pairing',
+        allowFrom: ['users/1234567890', 'name@example.com'],
       },
-      groupPolicy: "allowlist",
+      groupPolicy: 'allowlist',
       groups: {
-        "spaces/AAAA": {
+        'spaces/AAAA': {
           allow: true,
           requireMention: true,
-          users: ["users/1234567890"],
-          systemPrompt: "Short answers only.",
+          users: ['users/1234567890'],
+          systemPrompt: 'Short answers only.',
         },
       },
       actions: { reactions: true },
-      typingIndicator: "message",
+      typingIndicator: 'message',
       mediaMaxMb: 20,
     },
   },

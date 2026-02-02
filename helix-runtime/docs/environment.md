@@ -1,5 +1,5 @@
 ---
-summary: "Where OpenClaw loads environment variables and the precedence order"
+summary: 'Where OpenClaw loads environment variables and the precedence order'
 read_when:
   - You need to know which env vars are loaded, and in what order
   - You are debugging missing API keys in the Gateway
@@ -27,9 +27,9 @@ Two equivalent ways to set inline env vars (both are non-overriding):
 ```json5
 {
   env: {
-    OPENROUTER_API_KEY: "sk-or-...",
+    OPENROUTER_API_KEY: 'sk-or-...',
     vars: {
-      GROQ_API_KEY: "gsk-...",
+      GROQ_API_KEY: 'gsk-...',
     },
   },
 }
@@ -63,8 +63,8 @@ You can reference env vars directly in config string values using `${VAR_NAME}` 
 {
   models: {
     providers: {
-      "vercel-gateway": {
-        apiKey: "${VERCEL_GATEWAY_API_KEY}",
+      'vercel-gateway': {
+        apiKey: '${VERCEL_GATEWAY_API_KEY}',
       },
     },
   },

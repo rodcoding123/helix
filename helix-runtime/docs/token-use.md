@@ -1,5 +1,5 @@
 ---
-summary: "How OpenClaw builds prompt context and reports token usage + costs"
+summary: 'How OpenClaw builds prompt context and reports token usage + costs'
 read_when:
   - Explaining token usage, costs, or context windows
   - Debugging context growth or compaction behavior
@@ -92,13 +92,13 @@ https://docs.anthropic.com/docs/build-with-claude/prompt-caching
 agents:
   defaults:
     model:
-      primary: "anthropic/claude-opus-4-5"
+      primary: 'anthropic/claude-opus-4-5'
     models:
-      "anthropic/claude-opus-4-5":
+      'anthropic/claude-opus-4-5':
         params:
-          cacheControlTtl: "1h"
+          cacheControlTtl: '1h'
     heartbeat:
-      every: "55m"
+      every: '55m'
 ```
 
 ## Tips for reducing token pressure

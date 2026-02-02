@@ -1,5 +1,5 @@
 ---
-summary: "Discord bot support status, capabilities, and configuration"
+summary: 'Discord bot support status, capabilities, and configuration'
 read_when:
   - Working on Discord channel features
 ---
@@ -27,7 +27,7 @@ Minimal config:
   channels: {
     discord: {
       enabled: true,
-      token: "YOUR_BOT_TOKEN",
+      token: 'YOUR_BOT_TOKEN',
     },
   },
 }
@@ -149,7 +149,7 @@ Or via config:
   channels: {
     discord: {
       enabled: true,
-      token: "YOUR_BOT_TOKEN",
+      token: 'YOUR_BOT_TOKEN',
     },
   },
 }
@@ -169,7 +169,7 @@ Example “single server, only allow me, only allow #help”:
       dm: { enabled: false },
       guilds: {
         YOUR_GUILD_ID: {
-          users: ["YOUR_USER_ID"],
+          users: ['YOUR_USER_ID'],
           requireMention: true,
           channels: {
             help: { allow: true, requireMention: true },
@@ -243,10 +243,10 @@ Outbound Discord API calls retry on rate limits (429) using Discord `retry_after
   channels: {
     discord: {
       enabled: true,
-      token: "abc.123",
-      groupPolicy: "allowlist",
+      token: 'abc.123',
+      groupPolicy: 'allowlist',
       guilds: {
-        "*": {
+        '*': {
           channels: {
             general: { allow: true },
           },
@@ -273,29 +273,29 @@ Outbound Discord API calls retry on rate limits (429) using Discord `retry_after
         events: true,
         moderation: false,
       },
-      replyToMode: "off",
+      replyToMode: 'off',
       dm: {
         enabled: true,
-        policy: "pairing", // pairing | allowlist | open | disabled
-        allowFrom: ["123456789012345678", "steipete"],
+        policy: 'pairing', // pairing | allowlist | open | disabled
+        allowFrom: ['123456789012345678', 'steipete'],
         groupEnabled: false,
-        groupChannels: ["openclaw-dm"],
+        groupChannels: ['openclaw-dm'],
       },
       guilds: {
-        "*": { requireMention: true },
-        "123456789012345678": {
-          slug: "friends-of-openclaw",
+        '*': { requireMention: true },
+        '123456789012345678': {
+          slug: 'friends-of-openclaw',
           requireMention: false,
-          reactionNotifications: "own",
-          users: ["987654321098765432", "steipete"],
+          reactionNotifications: 'own',
+          users: ['987654321098765432', 'steipete'],
           channels: {
             general: { allow: true },
             help: {
               allow: true,
               requireMention: true,
-              users: ["987654321098765432"],
-              skills: ["search", "docs"],
-              systemPrompt: "Keep answers short.",
+              users: ['987654321098765432'],
+              skills: ['search', 'docs'],
+              systemPrompt: 'Keep answers short.',
             },
           },
         },

@@ -1,5 +1,5 @@
 ---
-summary: "CLI backends: text-only fallback via local AI CLIs"
+summary: 'CLI backends: text-only fallback via local AI CLIs'
 read_when:
   - You want a reliable fallback when API providers fail
   - You are running Claude Code CLI or other local AI CLIs and want to reuse them
@@ -41,8 +41,8 @@ command path:
   agents: {
     defaults: {
       cliBackends: {
-        "claude-cli": {
-          command: "/opt/homebrew/bin/claude",
+        'claude-cli': {
+          command: '/opt/homebrew/bin/claude',
         },
       },
     },
@@ -61,12 +61,12 @@ Add a CLI backend to your fallback list so it only runs when primary models fail
   agents: {
     defaults: {
       model: {
-        primary: "anthropic/claude-opus-4-5",
-        fallbacks: ["claude-cli/opus-4.5"],
+        primary: 'anthropic/claude-opus-4-5',
+        fallbacks: ['claude-cli/opus-4.5'],
       },
       models: {
-        "anthropic/claude-opus-4-5": { alias: "Opus" },
-        "claude-cli/opus-4.5": {},
+        'anthropic/claude-opus-4-5': { alias: 'Opus' },
+        'claude-cli/opus-4.5': {},
       },
     },
   },
@@ -101,26 +101,26 @@ The provider id becomes the left side of your model ref:
   agents: {
     defaults: {
       cliBackends: {
-        "claude-cli": {
-          command: "/opt/homebrew/bin/claude",
+        'claude-cli': {
+          command: '/opt/homebrew/bin/claude',
         },
-        "my-cli": {
-          command: "my-cli",
-          args: ["--json"],
-          output: "json",
-          input: "arg",
-          modelArg: "--model",
+        'my-cli': {
+          command: 'my-cli',
+          args: ['--json'],
+          output: 'json',
+          input: 'arg',
+          modelArg: '--model',
           modelAliases: {
-            "claude-opus-4-5": "opus",
-            "claude-sonnet-4-5": "sonnet",
+            'claude-opus-4-5': 'opus',
+            'claude-sonnet-4-5': 'sonnet',
           },
-          sessionArg: "--session",
-          sessionMode: "existing",
-          sessionIdFields: ["session_id", "conversation_id"],
-          systemPromptArg: "--system",
-          systemPromptWhen: "first",
-          imageArg: "--image",
-          imageMode: "repeat",
+          sessionArg: '--session',
+          sessionMode: 'existing',
+          sessionIdFields: ['session_id', 'conversation_id'],
+          systemPromptArg: '--system',
+          systemPromptWhen: 'first',
+          imageArg: '--image',
+          imageMode: 'repeat',
           serialize: true,
         },
       },

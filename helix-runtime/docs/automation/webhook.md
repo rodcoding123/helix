@@ -1,5 +1,5 @@
 ---
-summary: "Webhook ingress for wake and isolated agent runs"
+summary: 'Webhook ingress for wake and isolated agent runs'
 read_when:
   - Adding or changing webhook endpoints
   - Wiring external systems into OpenClaw
@@ -15,8 +15,8 @@ Gateway can expose a small HTTP webhook endpoint for external triggers.
 {
   hooks: {
     enabled: true,
-    token: "shared-secret",
-    path: "/hooks",
+    token: 'shared-secret',
+    path: '/hooks',
   },
 }
 ```

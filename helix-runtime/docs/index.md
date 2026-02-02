@@ -1,5 +1,5 @@
 ---
-summary: "Top-level overview of OpenClaw, features, and purpose"
+summary: 'Top-level overview of OpenClaw, features, and purpose'
 read_when:
   - Introducing OpenClaw to newcomers
 ---
@@ -173,11 +173,11 @@ Example:
 {
   channels: {
     whatsapp: {
-      allowFrom: ["+15555550123"],
-      groups: { "*": { requireMention: true } },
+      allowFrom: ['+15555550123'],
+      groups: { '*': { requireMention: true } },
     },
   },
-  messages: { groupChat: { mentionPatterns: ["@openclaw"] } },
+  messages: { groupChat: { mentionPatterns: ['@openclaw'] } },
 }
 ```
 

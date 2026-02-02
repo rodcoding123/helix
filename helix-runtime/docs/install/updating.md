@@ -1,5 +1,5 @@
 ---
-summary: "Updating OpenClaw safely (global install or source), plus rollback strategy"
+summary: 'Updating OpenClaw safely (global install or source), plus rollback strategy'
 read_when:
   - Updating OpenClaw
   - Something breaks after an update

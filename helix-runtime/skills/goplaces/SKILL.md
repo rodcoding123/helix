@@ -4,19 +4,19 @@ description: Query Google Places API (New) via the goplaces CLI for text search,
 homepage: https://github.com/steipete/goplaces
 metadata:
   {
-    "openclaw":
+    'openclaw':
       {
-        "emoji": "📍",
-        "requires": { "bins": ["goplaces"], "env": ["GOOGLE_PLACES_API_KEY"] },
-        "primaryEnv": "GOOGLE_PLACES_API_KEY",
-        "install":
+        'emoji': '📍',
+        'requires': { 'bins': ['goplaces'], 'env': ['GOOGLE_PLACES_API_KEY'] },
+        'primaryEnv': 'GOOGLE_PLACES_API_KEY',
+        'install':
           [
             {
-              "id": "brew",
-              "kind": "brew",
-              "formula": "steipete/tap/goplaces",
-              "bins": ["goplaces"],
-              "label": "Install goplaces (brew)",
+              'id': 'brew',
+              'kind': 'brew',
+              'formula': 'steipete/tap/goplaces',
+              'bins': ['goplaces'],
+              'label': 'Install goplaces (brew)',
             },
           ],
       },

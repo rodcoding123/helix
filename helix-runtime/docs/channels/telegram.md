@@ -1,5 +1,5 @@
 ---
-summary: "Telegram bot support status, capabilities, and configuration"
+summary: 'Telegram bot support status, capabilities, and configuration'
 read_when:
   - Working on Telegram features or webhooks
 ---
@@ -25,8 +25,8 @@ Minimal config:
   channels: {
     telegram: {
       enabled: true,
-      botToken: "123:abc",
-      dmPolicy: "pairing",
+      botToken: '123:abc',
+      dmPolicy: 'pairing',
     },
   },
 }
@@ -60,9 +60,9 @@ Example:
   channels: {
     telegram: {
       enabled: true,
-      botToken: "123:abc",
-      dmPolicy: "pairing",
-      groups: { "*": { requireMention: true } },
+      botToken: '123:abc',
+      dmPolicy: 'pairing',
+      groups: { '*': { requireMention: true } },
     },
   },
 }
@@ -126,8 +126,8 @@ You can add custom commands to the menu via config:
   channels: {
     telegram: {
       customCommands: [
-        { command: "backup", description: "Git backup" },
-        { command: "generate", description: "Create an image" },
+        { command: 'backup', description: 'Git backup' },
+        { command: 'generate', description: 'Create an image' },
       ],
     },
   },
@@ -168,7 +168,7 @@ By default, the bot only responds to mentions in groups (`@botname` or patterns 
   channels: {
     telegram: {
       groups: {
-        "-1001234567890": { requireMention: false }, // always respond in this group
+        '-1001234567890': { requireMention: false }, // always respond in this group
       },
     },
   },
@@ -185,7 +185,7 @@ To allow all groups with always-respond:
   channels: {
     telegram: {
       groups: {
-        "*": { requireMention: false }, // all groups, always respond
+        '*': { requireMention: false }, // all groups, always respond
       },
     },
   },
@@ -199,7 +199,7 @@ To keep mention-only for all groups (default behavior):
   channels: {
     telegram: {
       groups: {
-        "*": { requireMention: true }, // or omit groups entirely
+        '*': { requireMention: true }, // or omit groups entirely
       },
     },
   },
@@ -262,7 +262,7 @@ Telegram supports inline keyboards with callback buttons.
   channels: {
     telegram: {
       capabilities: {
-        inlineButtons: "allowlist",
+        inlineButtons: 'allowlist',
       },
     },
   },
@@ -278,7 +278,7 @@ For per-account configuration:
       accounts: {
         main: {
           capabilities: {
-            inlineButtons: "allowlist",
+            inlineButtons: 'allowlist',
           },
         },
       },
@@ -304,16 +304,16 @@ Use the message tool with the `buttons` parameter:
 
 ```json5
 {
-  action: "send",
-  channel: "telegram",
-  to: "123456789",
-  message: "Choose an option:",
+  action: 'send',
+  channel: 'telegram',
+  to: '123456789',
+  message: 'Choose an option:',
   buttons: [
     [
-      { text: "Yes", callback_data: "yes" },
-      { text: "No", callback_data: "no" },
+      { text: 'Yes', callback_data: 'yes' },
+      { text: 'No', callback_data: 'no' },
     ],
-    [{ text: "Cancel", callback_data: "cancel" }],
+    [{ text: 'Cancel', callback_data: 'cancel' }],
   ],
 }
 ```
@@ -413,10 +413,10 @@ For message tool sends, set `asVoice: true` with a voice-compatible audio `media
 
 ```json5
 {
-  action: "send",
-  channel: "telegram",
-  to: "123456789",
-  media: "https://example.com/voice.ogg",
+  action: 'send',
+  channel: 'telegram',
+  to: '123456789',
+  media: 'https://example.com/voice.ogg',
   asVoice: true,
 }
 ```
@@ -495,10 +495,10 @@ The agent can send and search stickers using the `sticker` and `sticker-search` 
 
 ```json5
 {
-  action: "sticker",
-  channel: "telegram",
-  to: "123456789",
-  fileId: "CAACAgIAAxkBAAI...",
+  action: 'sticker',
+  channel: 'telegram',
+  to: '123456789',
+  fileId: 'CAACAgIAAxkBAAI...',
 }
 ```
 
@@ -514,9 +514,9 @@ The agent can search cached stickers by description, emoji, or set name:
 
 ```json5
 {
-  action: "sticker-search",
-  channel: "telegram",
-  query: "cat waving",
+  action: 'sticker-search',
+  channel: 'telegram',
+  query: 'cat waving',
   limit: 5,
 }
 ```
@@ -529,10 +529,10 @@ Returns matching stickers from the cache:
   count: 2,
   stickers: [
     {
-      fileId: "CAACAgIAAxkBAAI...",
-      emoji: "👋",
-      description: "A cartoon cat waving enthusiastically",
-      setName: "CoolCats",
+      fileId: 'CAACAgIAAxkBAAI...',
+      emoji: '👋',
+      description: 'A cartoon cat waving enthusiastically',
+      setName: 'CoolCats',
     },
   ],
 }
@@ -544,10 +544,10 @@ The search uses fuzzy matching across description text, emoji characters, and se
 
 ```json5
 {
-  action: "sticker",
-  channel: "telegram",
-  to: "-1001234567890",
-  fileId: "CAACAgIAAxkBAAI...",
+  action: 'sticker',
+  channel: 'telegram',
+  to: '-1001234567890',
+  fileId: 'CAACAgIAAxkBAAI...',
   replyTo: 42,
   threadId: 123,
 }
@@ -631,8 +631,8 @@ The agent sees reactions as **system notifications** in the conversation history
 {
   channels: {
     telegram: {
-      reactionNotifications: "all", // See all reactions
-      reactionLevel: "minimal", // Agent can react sparingly
+      reactionNotifications: 'all', // See all reactions
+      reactionLevel: 'minimal', // Agent can react sparingly
     },
   },
 }

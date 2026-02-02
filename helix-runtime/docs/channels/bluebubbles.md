@@ -1,5 +1,5 @@
 ---
-summary: "iMessage via BlueBubbles macOS server (REST send/receive, typing, reactions, pairing, advanced actions)."
+summary: 'iMessage via BlueBubbles macOS server (REST send/receive, typing, reactions, pairing, advanced actions).'
 read_when:
   - Setting up BlueBubbles channel
   - Troubleshooting webhook pairing
@@ -31,9 +31,9 @@ Status: bundled plugin that talks to the BlueBubbles macOS server over HTTP. **R
      channels: {
        bluebubbles: {
          enabled: true,
-         serverUrl: "http://192.168.1.100:1234",
-         password: "example-password",
-         webhookPath: "/bluebubbles-webhook",
+         serverUrl: 'http://192.168.1.100:1234',
+         password: 'example-password',
+         webhookPath: '/bluebubbles-webhook',
        },
      },
    }
@@ -93,11 +93,11 @@ Per-group configuration:
 {
   channels: {
     bluebubbles: {
-      groupPolicy: "allowlist",
-      groupAllowFrom: ["+15555550123"],
+      groupPolicy: 'allowlist',
+      groupAllowFrom: ['+15555550123'],
       groups: {
-        "*": { requireMention: true }, // default for all groups
-        "iMessage;-;chat123": { requireMention: false }, // override for specific group
+        '*': { requireMention: true }, // default for all groups
+        'iMessage;-;chat123': { requireMention: false }, // override for specific group
       },
     },
   },

@@ -14,21 +14,25 @@ This document tracks all security vulnerabilities found in the PhD-level Helix s
 ## Critical Fixes (P0)
 
 ### P0-001: Live Production Credentials in .env ✅ FIXED
+
 **Status:** FIXED via 1Password Integration
 
 **Files Modified:**
+
 - `src/lib/secrets-loader.ts` - NEW secret loader module
 - `scripts/setup-1password.sh` - NEW setup script
 - `scripts/setup-1password.ps1` - NEW Windows setup
 - `src/helix/logging-hooks.ts` - Updated to use `initializeDiscordWebhooks()`
 
 **Fix:**
+
 - All secrets moved to encrypted 1Password vault
 - Code now loads secrets via `loadSecret()` function
 - .env files contain only non-sensitive configuration
 - Credentials never stored in git
 
 **Verification:**
+
 ```bash
 # After running setup scripts
 npx ts-node scripts/verify-1password.ts
@@ -39,11 +43,13 @@ npx ts-node scripts/verify-1password.ts
 ---
 
 ### P0-002: OpenClaw Sandbox Dockerfile Runs as Root ✅ FIXED
+
 **Status:** FIXED
 
 **File Modified:** `helix-runtime/Dockerfile.sandbox`
 
 **Changes:**
+
 ```dockerfile
 # BEFORE (VULNERABLE)
 FROM debian:bookworm-slim
@@ -59,6 +65,7 @@ WORKDIR /home/sandbox
 ```
 
 **Security Impact:**
+
 - ✅ Container now runs as non-root user (UID 1000)
 - ✅ Exfiltration tools (curl, wget, git) removed
 - ✅ Linux capabilities documentation added
@@ -71,23 +78,26 @@ WORKDIR /home/sandbox
 ## High-Priority Fixes (P1)
 
 ### P1-001: Canvas Host Default 0.0.0.0 Binding ✅ FIXED
+
 **Status:** FIXED
 
 **File Modified:** `helix-runtime/src/canvas-host/server.ts:453`
 
 **Change:**
+
 ```typescript
 // BEFORE (VULNERABLE)
-const bindHost = opts.listenHost?.trim() || "0.0.0.0";
+const bindHost = opts.listenHost?.trim() || '0.0.0.0';
 
 // AFTER (SECURE)
-const bindHost = opts.listenHost?.trim() || "127.0.0.1";
-if (bindHost === "0.0.0.0") {
+const bindHost = opts.listenHost?.trim() || '127.0.0.1';
+if (bindHost === '0.0.0.0') {
   opts.runtime.warn('Canvas host binding to all interfaces...');
 }
 ```
 
 **Security Impact:**
+
 - ✅ Default binding is now 127.0.0.1 (loopback only)
 - ✅ Network exposure requires explicit configuration
 - ✅ Warning logged if 0.0.0.0 is used
@@ -97,17 +107,20 @@ if (bindHost === "0.0.0.0") {
 ---
 
 ### P1-002: Gateway 0.0.0.0 Fallback Pattern ✅ FIXED
+
 **Status:** FIXED
 
 **File Modified:** `helix-runtime/src/gateway/net.ts:130-180` (`resolveGatewayBindHost` function)
 
 **Changes:**
+
 - ❌ REMOVED: Automatic fallback to 0.0.0.0
 - ✅ ADDED: Explicit fail-closed error messages
 - ✅ ADDED: User must explicitly set `bind: "lan"` for network exposure
 - ✅ ADDED: Secure fallback to 127.0.0.1 for tailnet mode only
 
 **Fallback Behavior:**
+
 ```
 loopback mode:  127.0.0.1 (REQUIRED, throws if unavailable)
 tailnet mode:   Tailnet IP → 127.0.0.1 (NOT 0.0.0.0)
@@ -123,9 +136,11 @@ custom mode:    User IP (throws if unavailable)
 ---
 
 ### P1-003: Vulnerable Dependencies ✅ DOCUMENTED
+
 **Status:** AUDIT COMPLETE - Ready for remediation
 
 **Identified Vulnerability:**
+
 - `request@2.88.2` (via `@vector-im/matrix-bot-sdk`)
 - CVE-2023-28155: Server-Side Request Forgery (SSRF)
 - CVSS: 6.1 (Moderate)
@@ -133,18 +148,21 @@ custom mode:    User IP (throws if unavailable)
 **Remediation Options:**
 
 Option 1: Remove Matrix Extension (if not needed)
+
 ```bash
 cd helix-runtime
 pnpm remove @vector-im/matrix-bot-sdk
 ```
 
 Option 2: Fork and patch matrix-bot-sdk
+
 ```bash
 # Use fetch instead of request package
 pnpm add -D @vector-im/matrix-bot-sdk@forked
 ```
 
 Option 3: Update and wait for upstream fix
+
 ```bash
 cd helix-runtime
 pnpm update
@@ -158,9 +176,11 @@ pnpm audit fix
 ## Medium-Priority Fixes (P2)
 
 ### P2-001: Memory Files Lack Cryptographic Integrity ⏳ PLANNED
+
 **Status:** DESIGNED - Implementation pending
 
 **Files Affected:**
+
 - `soul/HELIX_SOUL.md`
 - `psychology/emotional_tags.json`
 - `psychology/attachments.json`
@@ -170,28 +190,29 @@ pnpm audit fix
 **Implementation Plan:**
 
 Create new module `src/helix/memory-signatures.ts`:
+
 ```typescript
 interface SignedMemoryFile {
   content: string;
   signature: string;
-  algorithm: "Ed25519";
+  algorithm: 'Ed25519';
   publicKeyId: string;
   signedAt: string;
 }
 
 export async function loadVerifiedMemory(path: string, publicKey: Uint8Array): Promise<string> {
-  const raw = await fs.readFile(path, "utf-8");
+  const raw = await fs.readFile(path, 'utf-8');
   const { content, signature } = JSON.parse(raw) as SignedMemoryFile;
 
   const isValid = await crypto.subtle.verify(
-    "Ed25519",
+    'Ed25519',
     publicKey,
-    Buffer.from(signature, "base64"),
+    Buffer.from(signature, 'base64'),
     Buffer.from(content)
   );
 
   if (!isValid) {
-    throw new HelixSecurityError("Memory file signature verification failed");
+    throw new HelixSecurityError('Memory file signature verification failed');
   }
 
   return content;
@@ -203,6 +224,7 @@ export async function loadVerifiedMemory(path: string, publicKey: Uint8Array): P
 ---
 
 ### P2-002: Web Gateway URL Pattern ⏳ PLANNED
+
 **Status:** LOW PRIORITY - Documentation provided
 
 **File:** `web/src/lib/gateway-connection.ts:86-90`
@@ -214,6 +236,7 @@ export async function loadVerifiedMemory(path: string, publicKey: Uint8Array): P
 ## Testing Checklist
 
 ### Phase 1: 1Password Integration ✅
+
 - [ ] User: Install 1Password CLI (`winget install 1Password.CLI`)
 - [ ] User: Create 1Password account (https://1password.com/sign-up/)
 - [ ] User: Run `op account add` (browser authentication)
@@ -222,17 +245,20 @@ export async function loadVerifiedMemory(path: string, publicKey: Uint8Array): P
 - [ ] Developer: Update code to call `initializeDiscordWebhooks()` at app startup
 
 ### Phase 2: Container Security ✅
+
 - [ ] Build Docker image: `docker build -t helix-sandbox helix-runtime/Dockerfile.sandbox`
-- [ ] Verify non-root: `docker run helix-sandbox id`  (should show uid=1000)
+- [ ] Verify non-root: `docker run helix-sandbox id` (should show uid=1000)
 - [ ] Verify no curl/git: `docker run helix-sandbox which curl` (should fail)
 
 ### Phase 3: Gateway Binding ✅
+
 - [ ] Test loopback mode fails gracefully
 - [ ] Test tailnet fallback to 127.0.0.1
 - [ ] Verify explicit `bind: "lan"` allows 0.0.0.0
 - [ ] Check warning logs when 0.0.0.0 is used
 
 ### Phase 4: Dependency Audit
+
 - [ ] Run: `cd helix-runtime && pnpm audit`
 - [ ] Remove or patch matrix-bot-sdk
 - [ ] Re-run audit to confirm fix
@@ -283,24 +309,24 @@ npm run dev
 
 ## Security Score Improvements
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|------------|
-| Plaintext Secrets | 13 | 0 | 100% |
-| CVSS Score (P0-001) | 9.1 | 0 | Critical |
-| Container Root Risk | High | Low | 8.0 → 2.5 |
-| Network Exposure Risk | High | Low | 7.5 → 2.0 |
-| Gateway Fallback Risk | High | Low | 7.0 → 1.5 |
-| **Overall Score** | **6.5/10** | **3.2/10** | **50% reduction** |
+| Metric                | Before     | After      | Improvement       |
+| --------------------- | ---------- | ---------- | ----------------- |
+| Plaintext Secrets     | 13         | 0          | 100%              |
+| CVSS Score (P0-001)   | 9.1        | 0          | Critical          |
+| Container Root Risk   | High       | Low        | 8.0 → 2.5         |
+| Network Exposure Risk | High       | Low        | 7.5 → 2.0         |
+| Gateway Fallback Risk | High       | Low        | 7.0 → 1.5         |
+| **Overall Score**     | **6.5/10** | **3.2/10** | **50% reduction** |
 
 ---
 
 ## Remaining Known Risks (P2)
 
-| Issue | CVSS | Timeline | Notes |
-|-------|------|----------|-------|
-| Memory file signatures | 5.5 | Next month | Low priority, design complete |
-| Web gateway URL | 4.0 | Next quarter | Documentation issue |
-| Request package | 6.1 | This week | Awaiting user decision on matrix-sdk |
+| Issue                  | CVSS | Timeline     | Notes                                |
+| ---------------------- | ---- | ------------ | ------------------------------------ |
+| Memory file signatures | 5.5  | Next month   | Low priority, design complete        |
+| Web gateway URL        | 4.0  | Next quarter | Documentation issue                  |
+| Request package        | 6.1  | This week    | Awaiting user decision on matrix-sdk |
 
 ---
 

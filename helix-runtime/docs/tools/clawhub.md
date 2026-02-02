@@ -1,5 +1,5 @@
 ---
-summary: "ClawHub guide: public skills registry + CLI workflows"
+summary: 'ClawHub guide: public skills registry + CLI workflows'
 read_when:
   - Introducing ClawHub to new users
   - Installing, searching, or publishing skills

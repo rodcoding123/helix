@@ -51,12 +51,14 @@ npm run typecheck  # Verify no errors
 ### Day 1: Database Schema (8 hours)
 
 **Files to create**:
+
 - `web/supabase/migrations/008_conversations_tables.sql`
 - `web/supabase/migrations/009_memory_tables.sql`
 
 **What gets done**:
 
 1. **Create conversations table** (with emotions inline)
+
 ```sql
 CREATE TABLE conversations (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -91,6 +93,7 @@ CREATE INDEX idx_conversations_embedding ON conversations USING ivfflat (embeddi
 ```
 
 2. **Create memory_entries table** (aggregated memories)
+
 ```sql
 CREATE TABLE memory_entries (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -125,6 +128,7 @@ CREATE INDEX idx_memory_embedding ON memory_entries USING ivfflat (embedding vec
 ```
 
 3. **Create memory_patterns table** (detected patterns)
+
 ```sql
 CREATE TABLE memory_patterns (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -148,6 +152,7 @@ CREATE TABLE memory_patterns (
 ### Day 1-2: TypeScript Types (8 hours)
 
 **Files to create**:
+
 - `web/src/lib/types/memory.ts`
 - `web/src/lib/types/emotion.ts`
 - `web/src/lib/types/conversation.ts`
@@ -157,16 +162,16 @@ CREATE TABLE memory_patterns (
 ```typescript
 // web/src/lib/types/emotion.ts
 export interface EmotionalDimensions {
-  valence: number;           // -1 (negative) to 1 (positive)
-  arousal: number;           // 0 (calm) to 1 (intense)
-  dominance: number;         // 0 (controlled) to 1 (in control)
-  novelty: number;           // 0 (expected) to 1 (surprising)
-  self_relevance: number;    // 0 (irrelevant) to 1 (identity-defining)
+  valence: number; // -1 (negative) to 1 (positive)
+  arousal: number; // 0 (calm) to 1 (intense)
+  dominance: number; // 0 (controlled) to 1 (in control)
+  novelty: number; // 0 (expected) to 1 (surprising)
+  self_relevance: number; // 0 (irrelevant) to 1 (identity-defining)
 }
 
 export interface EmotionAnalysisResult {
   dimensions: EmotionalDimensions;
-  salience_score: number;    // Composite score (0-100)
+  salience_score: number; // Composite score (0-100)
   salience_tier: 'critical' | 'high' | 'medium' | 'low';
   reasoning: string;
 }
@@ -237,7 +242,11 @@ export class EmotionDetectionService {
     this.client = new Anthropic({ apiKey });
   }
 
-  async analyzeConversation(userMessage: string, assistantResponse: string, history: string): Promise<EmotionAnalysisResult> {
+  async analyzeConversation(
+    userMessage: string,
+    assistantResponse: string,
+    history: string
+  ): Promise<EmotionAnalysisResult> {
     // 1. Detect emotional dimensions using Claude
     const response = await this.client.messages.create({
       model: 'claude-opus-4-5-20251101',
@@ -253,10 +262,12 @@ export class EmotionDetectionService {
 
       Return ONLY valid JSON with these exact fields (no markdown).`,
 
-      messages: [{
-        role: 'user',
-        content: `User said: "${userMessage}"\n\nAssistant responded: "${assistantResponse}"\n\nContext: ${history}\n\nAnalyze the emotional dimensions.`
-      }]
+      messages: [
+        {
+          role: 'user',
+          content: `User said: "${userMessage}"\n\nAssistant responded: "${assistantResponse}"\n\nContext: ${history}\n\nAnalyze the emotional dimensions.`,
+        },
+      ],
     });
 
     // 2. Parse response
@@ -266,13 +277,13 @@ export class EmotionDetectionService {
     const dimensions = JSON.parse(content.text) as EmotionalDimensions;
 
     // 3. Calculate composite salience score
-    const salience = (
-      0.3 * dimensions.self_relevance +
-      0.25 * dimensions.arousal +
-      0.2 * dimensions.novelty +
-      0.15 * Math.abs(dimensions.valence) +
-      0.1 * dimensions.dominance
-    ) * 100;
+    const salience =
+      (0.3 * dimensions.self_relevance +
+        0.25 * dimensions.arousal +
+        0.2 * dimensions.novelty +
+        0.15 * Math.abs(dimensions.valence) +
+        0.1 * dimensions.dominance) *
+      100;
 
     // 4. Determine salience tier
     let tier: 'critical' | 'high' | 'medium' | 'low';
@@ -285,13 +296,14 @@ export class EmotionDetectionService {
       dimensions,
       salience_score: salience,
       salience_tier: tier,
-      reasoning: content.text
+      reasoning: content.text,
     };
   }
 }
 ```
 
 **Test file**: `web/src/services/emotion-detection.test.ts`
+
 - Test normal message (should get medium salience)
 - Test emotional message (should get high salience)
 - Test personal message (should get high self_relevance)
@@ -320,7 +332,10 @@ export class TopicExtractionService {
     this.client = new Anthropic({ apiKey });
   }
 
-  async extractTopics(userMessage: string, assistantResponse: string): Promise<TopicExtractionResult> {
+  async extractTopics(
+    userMessage: string,
+    assistantResponse: string
+  ): Promise<TopicExtractionResult> {
     const response = await this.client.messages.create({
       model: 'claude-opus-4-5-20251101',
       max_tokens: 500,
@@ -331,10 +346,12 @@ export class TopicExtractionService {
         "sentiment": "positive|negative|neutral"
       }`,
 
-      messages: [{
-        role: 'user',
-        content: `User: "${userMessage}"\n\nAssistant: "${assistantResponse}"\n\nExtract topics.`
-      }]
+      messages: [
+        {
+          role: 'user',
+          content: `User: "${userMessage}"\n\nAssistant: "${assistantResponse}"\n\nExtract topics.`,
+        },
+      ],
     });
 
     const content = response.content[0];
@@ -366,7 +383,7 @@ export class EmbeddingService {
     const response = await this.client.embeddings.create({
       model: 'text-embedding-3-small',
       input: text,
-      dimensions: 1536
+      dimensions: 1536,
     });
 
     if (!response.data[0]?.embedding) {
@@ -380,12 +397,10 @@ export class EmbeddingService {
     const response = await this.client.embeddings.create({
       model: 'text-embedding-3-small',
       input: texts,
-      dimensions: 1536
+      dimensions: 1536,
     });
 
-    return response.data
-      .sort((a, b) => a.index - b.index)
-      .map(item => item.embedding);
+    return response.data.sort((a, b) => a.index - b.index).map(item => item.embedding);
   }
 }
 ```
@@ -406,9 +421,7 @@ export class MemoryRepository {
 
   // Store conversation
   async storeConversation(conversation: Conversation): Promise<void> {
-    const { error } = await this.supabase
-      .from('conversations')
-      .insert([conversation]);
+    const { error } = await this.supabase.from('conversations').insert([conversation]);
 
     if (error) throw error;
   }
@@ -428,7 +441,7 @@ export class MemoryRepository {
         dominance: emotion.dimensions.dominance,
         novelty: emotion.dimensions.novelty,
         self_relevance: emotion.dimensions.self_relevance,
-        embedding
+        embedding,
       })
       .eq('id', conversationId);
 
@@ -446,7 +459,7 @@ export class MemoryRepository {
       query_embedding: embedding,
       instance_id: instanceId,
       similarity_threshold: 0.7,
-      match_count: limit
+      match_count: limit,
     });
 
     if (error) throw error;
@@ -533,43 +546,45 @@ export function useMemory(instanceId: string) {
   }, [instanceId]);
 
   // Analyze and store new conversation
-  const analyzeConversation = useCallback(async (
-    userMessage: string,
-    assistantResponse: string
-  ) => {
-    try {
-      // 1. Generate embedding
-      const embedding = await embeddingService.generateEmbedding(userMessage);
+  const analyzeConversation = useCallback(
+    async (userMessage: string, assistantResponse: string) => {
+      try {
+        // 1. Generate embedding
+        const embedding = await embeddingService.generateEmbedding(userMessage);
 
-      // 2. Analyze emotion
-      const emotion = await emotionService.analyzeConversation(
-        userMessage,
-        assistantResponse,
-        '' // TODO: get history
-      );
+        // 2. Analyze emotion
+        const emotion = await emotionService.analyzeConversation(
+          userMessage,
+          assistantResponse,
+          '' // TODO: get history
+        );
 
-      // 3. Extract topics
-      const topics = await topicService.extractTopics(userMessage, assistantResponse);
+        // 3. Extract topics
+        const topics = await topicService.extractTopics(userMessage, assistantResponse);
 
-      // 4. Store in Supabase
-      // Implementation continues...
-
-    } catch (error) {
-      console.error('Failed to analyze conversation:', error);
-    }
-  }, []);
+        // 4. Store in Supabase
+        // Implementation continues...
+      } catch (error) {
+        console.error('Failed to analyze conversation:', error);
+      }
+    },
+    []
+  );
 
   // Search memories
-  const searchMemories = useCallback(async (query: string) => {
-    try {
-      const embedding = await embeddingService.generateEmbedding(query);
-      const results = await repo.searchMemoriesBySemantic(instanceId, query, embedding);
-      return results;
-    } catch (error) {
-      console.error('Failed to search memories:', error);
-      return [];
-    }
-  }, [instanceId]);
+  const searchMemories = useCallback(
+    async (query: string) => {
+      try {
+        const embedding = await embeddingService.generateEmbedding(query);
+        const results = await repo.searchMemoriesBySemantic(instanceId, query, embedding);
+        return results;
+      } catch (error) {
+        console.error('Failed to search memories:', error);
+        return [];
+      }
+    },
+    [instanceId]
+  );
 
   return {
     memories,
@@ -577,7 +592,7 @@ export function useMemory(instanceId: string) {
     loading,
     loadMemories,
     analyzeConversation,
-    searchMemories
+    searchMemories,
   };
 }
 ```
@@ -590,6 +605,7 @@ export function useMemory(instanceId: string) {
 **File**: Modify `web/src/components/code/CodeInterface.tsx`
 
 Add hooks for memory tracking:
+
 ```typescript
 const { analyzeConversation } = useMemory(instanceKey);
 
@@ -619,6 +635,7 @@ onMessageComplete = (message: Message) => {
 - Test useMemory hook
 
 **Files**:
+
 - `web/src/services/emotion-detection.test.ts`
 - `web/src/services/topic-extraction.test.ts`
 - `web/src/services/embedding.test.ts`
@@ -647,6 +664,7 @@ onMessageComplete = (message: Message) => {
 **Time**: 8 hours
 
 **Week 1 Summary**:
+
 - ✅ Database schema ready
 - ✅ All backend services built
 - ✅ Memory integration with chat working
@@ -731,6 +749,7 @@ export function MemoryReference({
 ```
 
 Integrate into message rendering:
+
 - Detect when assistant mentions past context
 - Add reference badge with timestamp
 - Make clickable to show original conversation
@@ -798,18 +817,21 @@ export function Memories() {
 ### Day 8-9: Testing & Refinement (16 hours)
 
 #### Component Tests
+
 - Test MemoryGreeting with new/returning users
 - Test MemoryReference badge rendering
 - Test Memory Dashboard data loading
 - Test edit/delete functionality
 
 #### Performance Testing
+
 - Memory retrieval: < 100ms
 - Dashboard load: < 500ms
 - Search performance: < 200ms
 - Embedding generation: < 5s
 
 #### Manual QA
+
 - Test on desktop + mobile
 - Test with 0, 10, 100+ memories
 - Test privacy controls
@@ -823,18 +845,21 @@ export function Memories() {
 ### Day 9-10: Integration & Polish (16 hours)
 
 #### Integration
+
 - Connect Memory Greeting to Code page
 - Add Memory Dashboard tab to navigation
 - Add Memory settings to Settings page
 - Connect privacy controls to API
 
 #### Polish
+
 - Animations for emotion visualizations
 - Loading states for all components
 - Error handling + fallbacks
 - Empty state messaging
 
 #### Documentation
+
 - Inline code comments
 - TSDoc for all services
 - User guide for Memory features
@@ -849,11 +874,13 @@ export function Memories() {
 ## Parallel Work Strategy
 
 ### Option 1: Sequential (Safe, 10 days)
+
 - Days 1-2: All engineers on database + types
 - Days 2-5: Engineers 1+2 on services, Engineer 3 on testing
 - Days 6-10: Engineer 2 on components, Engineer 3 on testing
 
 ### Option 2: Parallel (Faster, 6 days)
+
 - Days 1: Engineer 3 on database while Engineers 1+2 start services
 - Days 2-4: All three in parallel
   - Engineer 1: Services → tests
@@ -868,29 +895,34 @@ export function Memories() {
 ## Success Checkpoints
 
 ### Checkpoint 1: Day 2 End
+
 - [ ] Database migrations pushed successfully
 - [ ] TypeScript types defined, no compilation errors
 - [ ] Environment variables verified
 
 ### Checkpoint 2: Day 4 End
+
 - [ ] All services built and unit tested
 - [ ] Memory repository working with real database
 - [ ] Integration with chat working end-to-end
 - [ ] One manual conversation stored successfully
 
 ### Checkpoint 3: Day 6 End
+
 - [ ] Memory Greeting showing correct message
 - [ ] Memory References rendering in chat
 - [ ] Memory Dashboard loading data
 - [ ] No console errors
 
 ### Checkpoint 4: Day 8 End
+
 - [ ] All components responsive and accessible
 - [ ] Performance benchmarks met
 - [ ] No memory leaks
 - [ ] Ready for beta testing
 
 ### Final Checkpoint: Day 10 End
+
 - [ ] Feature complete
 - [ ] All tests passing (>90% coverage)
 - [ ] Documentation complete
@@ -900,15 +932,16 @@ export function Memories() {
 
 ## Blockers & Contingencies
 
-| Blocker | Probability | Solution | Time Impact |
-|---------|-------------|----------|-------------|
-| Claude API quota exceeded | Low | Request increase, batch requests | +1 day if needed |
-| OpenAI embedding errors | Low | Fallback to simpler algorithm | +0.5 days |
-| Supabase pgvector issues | Very Low | Contact support, use RDS vector | +2 days |
-| React component complexity | Medium | Use existing patterns, don't over-engineer | +1 day |
-| Type safety issues | Medium | Incremental typing, use unknown not any | +0.5 days |
+| Blocker                    | Probability | Solution                                   | Time Impact      |
+| -------------------------- | ----------- | ------------------------------------------ | ---------------- |
+| Claude API quota exceeded  | Low         | Request increase, batch requests           | +1 day if needed |
+| OpenAI embedding errors    | Low         | Fallback to simpler algorithm              | +0.5 days        |
+| Supabase pgvector issues   | Very Low    | Contact support, use RDS vector            | +2 days          |
+| React component complexity | Medium      | Use existing patterns, don't over-engineer | +1 day           |
+| Type safety issues         | Medium      | Incremental typing, use unknown not any    | +0.5 days        |
 
 **Contingency Plan**:
+
 - If Day 4 end slips, compress Days 5-6 into long day
 - If components slip, reduce features to MVP (just greeting + dashboard)
 - If blocked on infrastructure, pivot to mock data while waiting
@@ -918,6 +951,7 @@ export function Memories() {
 ## Definition of Done
 
 ### Code Quality
+
 - ✅ TypeScript strict mode (no `any`)
 - ✅ All functions have return types
 - ✅ No unused imports
@@ -925,6 +959,7 @@ export function Memories() {
 - ✅ Prettier formatting applied
 
 ### Testing
+
 - ✅ >90% code coverage
 - ✅ All happy path tests passing
 - ✅ Error cases handled
@@ -932,6 +967,7 @@ export function Memories() {
 - ✅ Manual QA sign-off
 
 ### Performance
+
 - ✅ Memory retrieval < 100ms
 - ✅ Dashboard load < 500ms
 - ✅ Search < 200ms
@@ -939,6 +975,7 @@ export function Memories() {
 - ✅ No memory leaks
 
 ### User Experience
+
 - ✅ Responsive (mobile + desktop)
 - ✅ Accessible (keyboard nav, screen reader)
 - ✅ Clear error messages
@@ -946,6 +983,7 @@ export function Memories() {
 - ✅ Intuitive controls
 
 ### Documentation
+
 - ✅ Inline code comments
 - ✅ TSDoc on all functions
 - ✅ README for memory features
@@ -957,16 +995,19 @@ export function Memories() {
 ## Metrics to Track
 
 ### Week 1 Goals
+
 - Services: 100% unit test coverage
 - Integration: 1 real conversation → emotion → storage in < 2 seconds
 - Quality: 0 TypeScript errors, ESLint warnings < 5
 
 ### Week 2 Goals
+
 - Components: 90% test coverage
 - Performance: Dashboard loads in < 500ms
 - UX: All components responsive + accessible
 
 ### Phase 1 Final Goals
+
 - Day 2 retention: 50%+ (from 18%)
 - Memory accuracy: 85%+ (manual validation)
 - Dashboard visits: 40%+ of users
@@ -978,6 +1019,7 @@ export function Memories() {
 ## Next Steps After Phase 1
 
 Once Phase 1 ships successfully:
+
 1. **Week 3**: Begin Phase 2 (agent selector UI + orchestration)
 2. **Week 4**: Parallel Phase 2 + Phase 3 prep
 3. **Week 5**: Phase 3 implementation (autonomy levels + action log)
@@ -989,6 +1031,7 @@ Once Phase 1 ships successfully:
 ## Questions Before Starting?
 
 Review the spec and implementation plan above. If anything is unclear:
+
 1. Phase 1 Memory Spec: [PHASE-1-MEMORY-IMPLEMENTATION-SPEC.md](PHASE-1-MEMORY-IMPLEMENTATION-SPEC.md)
 2. Technical Details: [TECHNICAL-READINESS-ASSESSMENT.md](TECHNICAL-READINESS-ASSESSMENT.md)
 3. Full Architecture: [ALL-PHASES-SUMMARY.md](ALL-PHASES-SUMMARY.md)
@@ -996,6 +1039,7 @@ Review the spec and implementation plan above. If anything is unclear:
 **Ready to kick off Week 1 on Day 1?**
 
 Confirm:
+
 1. ✅ OpenAI API key added to `.env`
 2. ✅ pgvector extension enabled in Supabase
 3. ✅ Team members assigned and ready

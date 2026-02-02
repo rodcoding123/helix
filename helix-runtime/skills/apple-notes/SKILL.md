@@ -4,19 +4,19 @@ description: Manage Apple Notes via the `memo` CLI on macOS (create, view, edit,
 homepage: https://github.com/antoniorodr/memo
 metadata:
   {
-    "openclaw":
+    'openclaw':
       {
-        "emoji": "📝",
-        "os": ["darwin"],
-        "requires": { "bins": ["memo"] },
-        "install":
+        'emoji': '📝',
+        'os': ['darwin'],
+        'requires': { 'bins': ['memo'] },
+        'install':
           [
             {
-              "id": "brew",
-              "kind": "brew",
-              "formula": "antoniorodr/memo/memo",
-              "bins": ["memo"],
-              "label": "Install memo via Homebrew",
+              'id': 'brew',
+              'kind': 'brew',
+              'formula': 'antoniorodr/memo/memo',
+              'bins': ['memo'],
+              'label': 'Install memo via Homebrew',
             },
           ],
       },

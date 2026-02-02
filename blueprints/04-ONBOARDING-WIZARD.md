@@ -8,7 +8,7 @@
 2. **Progressive Disclosure**: Start simple, reveal complexity when needed
 3. **No Dead Ends**: Every step has a way forward, even if skipped
 4. **Immediate Value**: Show Helix working as soon as possible
-5. **Educational**: Explain *why* things matter, not just *what*
+5. **Educational**: Explain _why_ things matter, not just _what_
 
 ---
 
@@ -47,6 +47,7 @@
 **Purpose**: Introduce Helix, set expectations
 
 **UI Layout**:
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                                                                      │
@@ -77,6 +78,7 @@
 ```
 
 **Actions**:
+
 - "Get Started" → Next step
 - "Learn More" → Opens project-helix.org in browser
 
@@ -91,6 +93,7 @@
 **Smart Default**: Skip (local-only mode)
 
 **UI Layout**:
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                                                                      │
@@ -126,10 +129,12 @@
 ```
 
 **Actions**:
+
 - Sign in → OAuth flow (Supabase)
 - "Skip for now" → Local-only mode
 
 **Data Collected**:
+
 - Account type (none, email, github, google)
 - User ID (if signed in)
 
@@ -142,6 +147,7 @@
 **Smart Default**: Anthropic with user's API key
 
 **UI Layout**:
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                                                                      │
@@ -180,6 +186,7 @@
 ```
 
 **Advanced Section (Collapsed by Default)**:
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │  ▼ Advanced: Other providers                                        │
@@ -208,11 +215,13 @@
 ```
 
 **Validation**:
+
 - Test API key with a simple completion
 - Show success/error feedback
 - Allow proceeding only with valid key
 
 **Data Collected**:
+
 - Provider (anthropic, openai, google, bedrock, local)
 - API key (stored in system keyring)
 - Model preference
@@ -226,6 +235,7 @@
 **Smart Default**: Skip (can set up later)
 
 **UI Layout**:
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                                                                      │
@@ -264,6 +274,7 @@
 ```
 
 **Discord Setup Sub-flow** (if clicked):
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                                                                      │
@@ -343,6 +354,7 @@
 ```
 
 **Data Collected**:
+
 - Discord webhook URLs (encrypted in config)
 - Logging enabled flag
 
@@ -355,6 +367,7 @@
 **Smart Default**: Generate from interaction style preferences
 
 **UI Layout**:
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                                                                      │
@@ -404,6 +417,7 @@
 ```
 
 **Advanced Personality (Collapsed)**:
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │  ▼ Advanced: Deep personality configuration                         │
@@ -436,6 +450,7 @@
 ```
 
 **Data Collected**:
+
 - Communication style sliders
 - Interaction preferences
 - Primary use cases
@@ -450,6 +465,7 @@
 **Smart Default**: Based on account status
 
 **UI Layout**:
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                                                                      │
@@ -496,6 +512,7 @@
 ```
 
 **Data Collected**:
+
 - Telemetry consent (boolean)
 - Subscription tier preference
 
@@ -506,6 +523,7 @@
 **Purpose**: Demonstrate Helix working, build connection
 
 **UI Layout**:
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                                                                      │
@@ -545,12 +563,14 @@
 ```
 
 **Conversation Flow**:
+
 1. Helix introduces herself
 2. User responds
 3. Helix acknowledges, asks follow-up
 4. After 2-3 exchanges, offer to continue in main app
 
 **Data Collected**:
+
 - First conversation (stored locally)
 - Initial relationship baseline
 
@@ -561,6 +581,7 @@
 **Purpose**: Confirm setup, transition to main app
 
 **UI Layout**:
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                                                                      │
@@ -751,10 +772,10 @@ interface OnboardingState {
 
   // Channels
   channels: {
-    whatsapp: { configured: boolean; };
-    discord: { configured: boolean; serverId?: string; };
-    slack: { configured: boolean; workspaceId?: string; };
-    telegram: { configured: boolean; botToken?: string; };
+    whatsapp: { configured: boolean };
+    discord: { configured: boolean; serverId?: string };
+    slack: { configured: boolean; workspaceId?: string };
+    telegram: { configured: boolean; botToken?: string };
   };
 
   // First Chat
@@ -999,16 +1020,16 @@ export function WizardContainer() {
 
 ## Validation Rules
 
-| Step | Required Fields | Validation |
-|------|-----------------|------------|
-| Welcome | None | Always valid |
-| Account | None (optional) | OAuth flow must complete if started |
-| API Key | provider, apiKey | Must pass API test call |
-| Discord | webhooks (if enabled) | Each webhook must respond to test |
-| Personality | communicationStyle | All sliders must have values |
-| Privacy | telemetryEnabled | Must make explicit choice |
-| First Chat | None (optional) | None |
-| Completion | None | All required steps completed |
+| Step        | Required Fields       | Validation                          |
+| ----------- | --------------------- | ----------------------------------- |
+| Welcome     | None                  | Always valid                        |
+| Account     | None (optional)       | OAuth flow must complete if started |
+| API Key     | provider, apiKey      | Must pass API test call             |
+| Discord     | webhooks (if enabled) | Each webhook must respond to test   |
+| Personality | communicationStyle    | All sliders must have values        |
+| Privacy     | telemetryEnabled      | Must make explicit choice           |
+| First Chat  | None (optional)       | None                                |
+| Completion  | None                  | All required steps completed        |
 
 ---
 

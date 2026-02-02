@@ -1,5 +1,5 @@
 ---
-summary: "Tlon/Urbit support status, capabilities, and configuration"
+summary: 'Tlon/Urbit support status, capabilities, and configuration'
 read_when:
   - Working on Tlon/Urbit channel features
 ---
@@ -46,9 +46,9 @@ Minimal config (single account):
   channels: {
     tlon: {
       enabled: true,
-      ship: "~sampel-palnet",
-      url: "https://your-ship-host",
-      code: "lidlut-tabwed-pillex-ridrup",
+      ship: '~sampel-palnet',
+      url: 'https://your-ship-host',
+      code: 'lidlut-tabwed-pillex-ridrup',
     },
   },
 }
@@ -62,7 +62,7 @@ Auto-discovery is enabled by default. You can also pin channels manually:
 {
   channels: {
     tlon: {
-      groupChannels: ["chat/~host-ship/general", "chat/~host-ship/support"],
+      groupChannels: ['chat/~host-ship/general', 'chat/~host-ship/support'],
     },
   },
 }
@@ -88,7 +88,7 @@ DM allowlist (empty = allow all):
 {
   channels: {
     tlon: {
-      dmAllowlist: ["~zod", "~nec"],
+      dmAllowlist: ['~zod', '~nec'],
     },
   },
 }
@@ -100,15 +100,15 @@ Group authorization (restricted by default):
 {
   channels: {
     tlon: {
-      defaultAuthorizedShips: ["~zod"],
+      defaultAuthorizedShips: ['~zod'],
       authorization: {
         channelRules: {
-          "chat/~host-ship/general": {
-            mode: "restricted",
-            allowedShips: ["~zod", "~nec"],
+          'chat/~host-ship/general': {
+            mode: 'restricted',
+            allowedShips: ['~zod', '~nec'],
           },
-          "chat/~host-ship/announcements": {
-            mode: "open",
+          'chat/~host-ship/announcements': {
+            mode: 'open',
           },
         },
       },

@@ -1,5 +1,5 @@
 ---
-summary: "Session management rules, keys, and persistence for chats"
+summary: 'Session management rules, keys, and persistence for chats'
 read_when:
   - Modifying session handling or storage
 ---
@@ -84,10 +84,10 @@ Block delivery for specific session types without listing individual ids.
   session: {
     sendPolicy: {
       rules: [
-        { action: "deny", match: { channel: "discord", chatType: "group" } },
-        { action: "deny", match: { keyPrefix: "cron:" } },
+        { action: 'deny', match: { channel: 'discord', chatType: 'group' } },
+        { action: 'deny', match: { keyPrefix: 'cron:' } },
       ],
-      default: "allow",
+      default: 'allow',
     },
   },
 }
@@ -106,29 +106,29 @@ Runtime override (owner only):
 // ~/.openclaw/openclaw.json
 {
   session: {
-    scope: "per-sender", // keep group keys separate
-    dmScope: "main", // DM continuity (set per-channel-peer/per-account-channel-peer for shared inboxes)
+    scope: 'per-sender', // keep group keys separate
+    dmScope: 'main', // DM continuity (set per-channel-peer/per-account-channel-peer for shared inboxes)
     identityLinks: {
-      alice: ["telegram:123456789", "discord:987654321012345678"],
+      alice: ['telegram:123456789', 'discord:987654321012345678'],
     },
     reset: {
       // Defaults: mode=daily, atHour=4 (gateway host local time).
       // If you also set idleMinutes, whichever expires first wins.
-      mode: "daily",
+      mode: 'daily',
       atHour: 4,
       idleMinutes: 120,
     },
     resetByType: {
-      thread: { mode: "daily", atHour: 4 },
-      dm: { mode: "idle", idleMinutes: 240 },
-      group: { mode: "idle", idleMinutes: 120 },
+      thread: { mode: 'daily', atHour: 4 },
+      dm: { mode: 'idle', idleMinutes: 240 },
+      group: { mode: 'idle', idleMinutes: 120 },
     },
     resetByChannel: {
-      discord: { mode: "idle", idleMinutes: 10080 },
+      discord: { mode: 'idle', idleMinutes: 10080 },
     },
-    resetTriggers: ["/new", "/reset"],
-    store: "~/.openclaw/agents/{agentId}/sessions/sessions.json",
-    mainKey: "main",
+    resetTriggers: ['/new', '/reset'],
+    store: '~/.openclaw/agents/{agentId}/sessions/sessions.json',
+    mainKey: 'main',
   },
 }
 ```

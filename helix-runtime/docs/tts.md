@@ -1,5 +1,5 @@
 ---
-summary: "Text-to-speech (TTS) for outbound replies"
+summary: 'Text-to-speech (TTS) for outbound replies'
 read_when:
   - Enabling text-to-speech for replies
   - Configuring TTS providers or limits
@@ -71,8 +71,8 @@ Full schema is in [Gateway configuration](/gateway/configuration).
 {
   messages: {
     tts: {
-      auto: "always",
-      provider: "elevenlabs",
+      auto: 'always',
+      provider: 'elevenlabs',
     },
   },
 }
@@ -84,25 +84,25 @@ Full schema is in [Gateway configuration](/gateway/configuration).
 {
   messages: {
     tts: {
-      auto: "always",
-      provider: "openai",
-      summaryModel: "openai/gpt-4.1-mini",
+      auto: 'always',
+      provider: 'openai',
+      summaryModel: 'openai/gpt-4.1-mini',
       modelOverrides: {
         enabled: true,
       },
       openai: {
-        apiKey: "openai_api_key",
-        model: "gpt-4o-mini-tts",
-        voice: "alloy",
+        apiKey: 'openai_api_key',
+        model: 'gpt-4o-mini-tts',
+        voice: 'alloy',
       },
       elevenlabs: {
-        apiKey: "elevenlabs_api_key",
-        baseUrl: "https://api.elevenlabs.io",
-        voiceId: "voice_id",
-        modelId: "eleven_multilingual_v2",
+        apiKey: 'elevenlabs_api_key',
+        baseUrl: 'https://api.elevenlabs.io',
+        voiceId: 'voice_id',
+        modelId: 'eleven_multilingual_v2',
         seed: 42,
-        applyTextNormalization: "auto",
-        languageCode: "en",
+        applyTextNormalization: 'auto',
+        languageCode: 'en',
         voiceSettings: {
           stability: 0.5,
           similarityBoost: 0.75,
@@ -122,15 +122,15 @@ Full schema is in [Gateway configuration](/gateway/configuration).
 {
   messages: {
     tts: {
-      auto: "always",
-      provider: "edge",
+      auto: 'always',
+      provider: 'edge',
       edge: {
         enabled: true,
-        voice: "en-US-MichelleNeural",
-        lang: "en-US",
-        outputFormat: "audio-24khz-48kbitrate-mono-mp3",
-        rate: "+10%",
-        pitch: "-5%",
+        voice: 'en-US-MichelleNeural',
+        lang: 'en-US',
+        outputFormat: 'audio-24khz-48kbitrate-mono-mp3',
+        rate: '+10%',
+        pitch: '-5%',
       },
     },
   },
@@ -157,10 +157,10 @@ Full schema is in [Gateway configuration](/gateway/configuration).
 {
   messages: {
     tts: {
-      auto: "always",
+      auto: 'always',
       maxTextLength: 4000,
       timeoutMs: 30000,
-      prefsPath: "~/.openclaw/settings/tts.json",
+      prefsPath: '~/.openclaw/settings/tts.json',
     },
   },
 }
@@ -172,7 +172,7 @@ Full schema is in [Gateway configuration](/gateway/configuration).
 {
   messages: {
     tts: {
-      auto: "inbound",
+      auto: 'inbound',
     },
   },
 }
@@ -184,7 +184,7 @@ Full schema is in [Gateway configuration](/gateway/configuration).
 {
   messages: {
     tts: {
-      auto: "always",
+      auto: 'always',
     },
   },
 }

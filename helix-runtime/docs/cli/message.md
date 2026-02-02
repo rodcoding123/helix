@@ -1,5 +1,5 @@
 ---
-summary: "CLI reference for `openclaw message` (send + channel actions)"
+summary: 'CLI reference for `openclaw message` (send + channel actions)'
 read_when:
   - Adding or modifying message CLI actions
   - Changing outbound channel behavior

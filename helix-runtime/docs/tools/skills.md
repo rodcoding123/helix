@@ -1,5 +1,5 @@
 ---
-summary: "Skills: managed vs workspace, gating rules, and config/env wiring"
+summary: 'Skills: managed vs workspace, gating rules, and config/env wiring'
 read_when:
   - Adding or modifying skills
   - Changing skill gating or load rules
@@ -111,10 +111,10 @@ name: nano-banana-pro
 description: Generate or edit images via Gemini 3 Pro Image
 metadata:
   {
-    "openclaw":
+    'openclaw':
       {
-        "requires": { "bins": ["uv"], "env": ["GEMINI_API_KEY"], "config": ["browser.enabled"] },
-        "primaryEnv": "GEMINI_API_KEY",
+        'requires': { 'bins': ['uv'], 'env': ['GEMINI_API_KEY'], 'config': ['browser.enabled'] },
+        'primaryEnv': 'GEMINI_API_KEY',
       },
   }
 ---
@@ -151,18 +151,18 @@ name: gemini
 description: Use Gemini CLI for coding assistance and Google search lookups.
 metadata:
   {
-    "openclaw":
+    'openclaw':
       {
-        "emoji": "♊️",
-        "requires": { "bins": ["gemini"] },
-        "install":
+        'emoji': '♊️',
+        'requires': { 'bins': ['gemini'] },
+        'install':
           [
             {
-              "id": "brew",
-              "kind": "brew",
-              "formula": "gemini-cli",
-              "bins": ["gemini"],
-              "label": "Install Gemini CLI (brew)",
+              'id': 'brew',
+              'kind': 'brew',
+              'formula': 'gemini-cli',
+              'bins': ['gemini'],
+              'label': 'Install Gemini CLI (brew)',
             },
           ],
       },
@@ -192,15 +192,15 @@ Bundled/managed skills can be toggled and supplied with env values:
 {
   skills: {
     entries: {
-      "nano-banana-pro": {
+      'nano-banana-pro': {
         enabled: true,
-        apiKey: "GEMINI_KEY_HERE",
+        apiKey: 'GEMINI_KEY_HERE',
         env: {
-          GEMINI_API_KEY: "GEMINI_KEY_HERE",
+          GEMINI_API_KEY: 'GEMINI_KEY_HERE',
         },
         config: {
-          endpoint: "https://example.invalid",
-          model: "nano-pro",
+          endpoint: 'https://example.invalid',
+          model: 'nano-pro',
         },
       },
       peekaboo: { enabled: true },

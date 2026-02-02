@@ -1,5 +1,5 @@
 ---
-summary: "Move (migrate) a OpenClaw install from one machine to another"
+summary: 'Move (migrate) a OpenClaw install from one machine to another'
 read_when:
   - You are moving OpenClaw to a new laptop/server
   - You want to preserve sessions, auth, and channel logins (WhatsApp, etc.)

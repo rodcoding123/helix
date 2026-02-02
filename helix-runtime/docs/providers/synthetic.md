@@ -29,26 +29,26 @@ synthetic/hf:MiniMaxAI/MiniMax-M2.1
 
 ```json5
 {
-  env: { SYNTHETIC_API_KEY: "sk-..." },
+  env: { SYNTHETIC_API_KEY: 'sk-...' },
   agents: {
     defaults: {
-      model: { primary: "synthetic/hf:MiniMaxAI/MiniMax-M2.1" },
-      models: { "synthetic/hf:MiniMaxAI/MiniMax-M2.1": { alias: "MiniMax M2.1" } },
+      model: { primary: 'synthetic/hf:MiniMaxAI/MiniMax-M2.1' },
+      models: { 'synthetic/hf:MiniMaxAI/MiniMax-M2.1': { alias: 'MiniMax M2.1' } },
     },
   },
   models: {
-    mode: "merge",
+    mode: 'merge',
     providers: {
       synthetic: {
-        baseUrl: "https://api.synthetic.new/anthropic",
-        apiKey: "${SYNTHETIC_API_KEY}",
-        api: "anthropic-messages",
+        baseUrl: 'https://api.synthetic.new/anthropic',
+        apiKey: '${SYNTHETIC_API_KEY}',
+        api: 'anthropic-messages',
         models: [
           {
-            id: "hf:MiniMaxAI/MiniMax-M2.1",
-            name: "MiniMax M2.1",
+            id: 'hf:MiniMaxAI/MiniMax-M2.1',
+            name: 'MiniMax M2.1',
             reasoning: false,
-            input: ["text"],
+            input: ['text'],
             cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
             contextWindow: 192000,
             maxTokens: 65536,

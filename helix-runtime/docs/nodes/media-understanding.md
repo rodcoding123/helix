@@ -1,5 +1,5 @@
 ---
-summary: "Inbound image/audio/video understanding (optional) with provider + CLI fallbacks"
+summary: 'Inbound image/audio/video understanding (optional) with provider + CLI fallbacks'
 read_when:
   - Designing or refactoring media understanding
   - Tuning inbound audio/video/image preprocessing
@@ -71,34 +71,34 @@ Each `models[]` entry can be **provider** or **CLI**:
 
 ```json5
 {
-  type: "provider", // default if omitted
-  provider: "openai",
-  model: "gpt-5.2",
-  prompt: "Describe the image in <= 500 chars.",
+  type: 'provider', // default if omitted
+  provider: 'openai',
+  model: 'gpt-5.2',
+  prompt: 'Describe the image in <= 500 chars.',
   maxChars: 500,
   maxBytes: 10485760,
   timeoutSeconds: 60,
-  capabilities: ["image"], // optional, used for multi‑modal entries
-  profile: "vision-profile",
-  preferredProfile: "vision-fallback",
+  capabilities: ['image'], // optional, used for multi‑modal entries
+  profile: 'vision-profile',
+  preferredProfile: 'vision-fallback',
 }
 ```
 
 ```json5
 {
-  type: "cli",
-  command: "gemini",
+  type: 'cli',
+  command: 'gemini',
   args: [
-    "-m",
-    "gemini-3-flash",
-    "--allowed-tools",
-    "read_file",
-    "Read the media at {{MediaPath}} and describe it in <= {{MaxChars}} characters.",
+    '-m',
+    'gemini-3-flash',
+    '--allowed-tools',
+    'read_file',
+    'Read the media at {{MediaPath}} and describe it in <= {{MaxChars}} characters.',
   ],
   maxChars: 500,
   maxBytes: 52428800,
   timeoutSeconds: 120,
-  capabilities: ["video", "image"],
+  capabilities: ['video', 'image'],
 }
 ```
 
@@ -217,27 +217,27 @@ When `mode: "all"`, outputs are labeled `[Image 1/2]`, `[Audio 2/2]`, etc.
   tools: {
     media: {
       models: [
-        { provider: "openai", model: "gpt-5.2", capabilities: ["image"] },
+        { provider: 'openai', model: 'gpt-5.2', capabilities: ['image'] },
         {
-          provider: "google",
-          model: "gemini-3-flash-preview",
-          capabilities: ["image", "audio", "video"],
+          provider: 'google',
+          model: 'gemini-3-flash-preview',
+          capabilities: ['image', 'audio', 'video'],
         },
         {
-          type: "cli",
-          command: "gemini",
+          type: 'cli',
+          command: 'gemini',
           args: [
-            "-m",
-            "gemini-3-flash",
-            "--allowed-tools",
-            "read_file",
-            "Read the media at {{MediaPath}} and describe it in <= {{MaxChars}} characters.",
+            '-m',
+            'gemini-3-flash',
+            '--allowed-tools',
+            'read_file',
+            'Read the media at {{MediaPath}} and describe it in <= {{MaxChars}} characters.',
           ],
-          capabilities: ["image", "video"],
+          capabilities: ['image', 'video'],
         },
       ],
       audio: {
-        attachments: { mode: "all", maxAttachments: 2 },
+        attachments: { mode: 'all', maxAttachments: 2 },
       },
       video: {
         maxChars: 500,
@@ -256,11 +256,11 @@ When `mode: "all"`, outputs are labeled `[Image 1/2]`, `[Audio 2/2]`, etc.
       audio: {
         enabled: true,
         models: [
-          { provider: "openai", model: "gpt-4o-mini-transcribe" },
+          { provider: 'openai', model: 'gpt-4o-mini-transcribe' },
           {
-            type: "cli",
-            command: "whisper",
-            args: ["--model", "base", "{{MediaPath}}"],
+            type: 'cli',
+            command: 'whisper',
+            args: ['--model', 'base', '{{MediaPath}}'],
           },
         ],
       },
@@ -268,16 +268,16 @@ When `mode: "all"`, outputs are labeled `[Image 1/2]`, `[Audio 2/2]`, etc.
         enabled: true,
         maxChars: 500,
         models: [
-          { provider: "google", model: "gemini-3-flash-preview" },
+          { provider: 'google', model: 'gemini-3-flash-preview' },
           {
-            type: "cli",
-            command: "gemini",
+            type: 'cli',
+            command: 'gemini',
             args: [
-              "-m",
-              "gemini-3-flash",
-              "--allowed-tools",
-              "read_file",
-              "Read the media at {{MediaPath}} and describe it in <= {{MaxChars}} characters.",
+              '-m',
+              'gemini-3-flash',
+              '--allowed-tools',
+              'read_file',
+              'Read the media at {{MediaPath}} and describe it in <= {{MaxChars}} characters.',
             ],
           },
         ],
@@ -298,17 +298,17 @@ When `mode: "all"`, outputs are labeled `[Image 1/2]`, `[Audio 2/2]`, etc.
         maxBytes: 10485760,
         maxChars: 500,
         models: [
-          { provider: "openai", model: "gpt-5.2" },
-          { provider: "anthropic", model: "claude-opus-4-5" },
+          { provider: 'openai', model: 'gpt-5.2' },
+          { provider: 'anthropic', model: 'claude-opus-4-5' },
           {
-            type: "cli",
-            command: "gemini",
+            type: 'cli',
+            command: 'gemini',
             args: [
-              "-m",
-              "gemini-3-flash",
-              "--allowed-tools",
-              "read_file",
-              "Read the media at {{MediaPath}} and describe it in <= {{MaxChars}} characters.",
+              '-m',
+              'gemini-3-flash',
+              '--allowed-tools',
+              'read_file',
+              'Read the media at {{MediaPath}} and describe it in <= {{MaxChars}} characters.',
             ],
           },
         ],
@@ -327,27 +327,27 @@ When `mode: "all"`, outputs are labeled `[Image 1/2]`, `[Audio 2/2]`, etc.
       image: {
         models: [
           {
-            provider: "google",
-            model: "gemini-3-pro-preview",
-            capabilities: ["image", "video", "audio"],
+            provider: 'google',
+            model: 'gemini-3-pro-preview',
+            capabilities: ['image', 'video', 'audio'],
           },
         ],
       },
       audio: {
         models: [
           {
-            provider: "google",
-            model: "gemini-3-pro-preview",
-            capabilities: ["image", "video", "audio"],
+            provider: 'google',
+            model: 'gemini-3-pro-preview',
+            capabilities: ['image', 'video', 'audio'],
           },
         ],
       },
       video: {
         models: [
           {
-            provider: "google",
-            model: "gemini-3-pro-preview",
-            capabilities: ["image", "video", "audio"],
+            provider: 'google',
+            model: 'gemini-3-pro-preview',
+            capabilities: ['image', 'video', 'audio'],
           },
         ],
       },

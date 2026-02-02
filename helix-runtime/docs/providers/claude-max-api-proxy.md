@@ -1,5 +1,5 @@
 ---
-summary: "Use Claude Max/Pro subscription as an OpenAI-compatible API endpoint"
+summary: 'Use Claude Max/Pro subscription as an OpenAI-compatible API endpoint'
 read_when:
   - You want to use Claude Max subscription with OpenAI-compatible tools
   - You want a local API server that wraps Claude Code CLI
@@ -76,12 +76,12 @@ You can point OpenClaw at the proxy as a custom OpenAI-compatible endpoint:
 ```json5
 {
   env: {
-    OPENAI_API_KEY: "not-needed",
-    OPENAI_BASE_URL: "http://localhost:3456/v1",
+    OPENAI_API_KEY: 'not-needed',
+    OPENAI_BASE_URL: 'http://localhost:3456/v1',
   },
   agents: {
     defaults: {
-      model: { primary: "openai/claude-opus-4" },
+      model: { primary: 'openai/claude-opus-4' },
     },
   },
 }

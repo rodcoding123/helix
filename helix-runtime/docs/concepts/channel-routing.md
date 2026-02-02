@@ -1,5 +1,5 @@
 ---
-summary: "Routing rules per channel (WhatsApp, Telegram, Discord, Slack) and shared context"
+summary: 'Routing rules per channel (WhatsApp, Telegram, Discord, Slack) and shared context'
 read_when:
   - Changing channel routing or inbox behavior
 ---
@@ -60,9 +60,9 @@ Config:
 ```json5
 {
   broadcast: {
-    strategy: "parallel",
-    "120363403215116621@g.us": ["alfred", "baerbel"],
-    "+15555550123": ["support", "logger"],
+    strategy: 'parallel',
+    '120363403215116621@g.us': ['alfred', 'baerbel'],
+    '+15555550123': ['support', 'logger'],
   },
 }
 ```
@@ -79,11 +79,11 @@ Example:
 ```json5
 {
   agents: {
-    list: [{ id: "support", name: "Support", workspace: "~/.openclaw/workspace-support" }],
+    list: [{ id: 'support', name: 'Support', workspace: '~/.openclaw/workspace-support' }],
   },
   bindings: [
-    { match: { channel: "slack", teamId: "T123" }, agentId: "support" },
-    { match: { channel: "telegram", peer: { kind: "group", id: "-100123" } }, agentId: "support" },
+    { match: { channel: 'slack', teamId: 'T123' }, agentId: 'support' },
+    { match: { channel: 'telegram', peer: { kind: 'group', id: '-100123' } }, agentId: 'support' },
   ],
 }
 ```

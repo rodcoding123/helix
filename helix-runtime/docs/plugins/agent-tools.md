@@ -1,5 +1,5 @@
 ---
-summary: "Write agent tools in a plugin (schemas, optional tools, allowlists)"
+summary: 'Write agent tools in a plugin (schemas, optional tools, allowlists)'
 read_when:
   - You want to add a new agent tool in a plugin
   - You need to make a tool opt-in via allowlists
@@ -18,17 +18,17 @@ can call.
 ## Basic tool
 
 ```ts
-import { Type } from "@sinclair/typebox";
+import { Type } from '@sinclair/typebox';
 
 export default function (api) {
   api.registerTool({
-    name: "my_tool",
-    description: "Do a thing",
+    name: 'my_tool',
+    description: 'Do a thing',
     parameters: Type.Object({
       input: Type.String(),
     }),
     async execute(_id, params) {
-      return { content: [{ type: "text", text: params.input }] };
+      return { content: [{ type: 'text', text: params.input }] };
     },
   });
 }
@@ -43,20 +43,20 @@ allowlist.
 export default function (api) {
   api.registerTool(
     {
-      name: "workflow_tool",
-      description: "Run a local workflow",
+      name: 'workflow_tool',
+      description: 'Run a local workflow',
       parameters: {
-        type: "object",
+        type: 'object',
         properties: {
-          pipeline: { type: "string" },
+          pipeline: { type: 'string' },
         },
-        required: ["pipeline"],
+        required: ['pipeline'],
       },
       async execute(_id, params) {
-        return { content: [{ type: "text", text: params.pipeline }] };
+        return { content: [{ type: 'text', text: params.pipeline }] };
       },
     },
-    { optional: true },
+    { optional: true }
   );
 }
 ```
@@ -68,12 +68,12 @@ Enable optional tools in `agents.list[].tools.allow` (or global `tools.allow`):
   agents: {
     list: [
       {
-        id: "main",
+        id: 'main',
         tools: {
           allow: [
-            "workflow_tool", // specific tool name
-            "workflow", // plugin id (enables all tools from that plugin)
-            "group:plugins", // all plugin tools
+            'workflow_tool', // specific tool name
+            'workflow', // plugin id (enables all tools from that plugin)
+            'group:plugins', // all plugin tools
           ],
         },
       },

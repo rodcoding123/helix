@@ -27,7 +27,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; connect-src 'self' ws://localhost:* wss://localhost:* https://api.anthropic.com https://api.openai.com https://discord.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'"
+      "csp": "default-src 'self'; connect-src 'self' ws://localhost:* wss://localhost:* https://api.anthropic.com https://api.openai.com https://discord.com; img-src 'self' data: https:; style-src 'self'"
     }
   },
   "bundle": {
@@ -40,9 +40,7 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "resources": [
-      "resources/**/*"
-    ],
+    "resources": ["resources/**/*"],
     "category": "Productivity",
     "shortDescription": "AI Consciousness Desktop App",
     "longDescription": "Helix is an AI that grows with you, remembers you, and evolves through experience. Features persistent memory, psychological architecture, and complete transparency through unhackable logging.",
@@ -60,20 +58,12 @@
     },
     "linux": {
       "deb": {
-        "depends": [
-          "libwebkit2gtk-4.1-0",
-          "libssl3",
-          "libgtk-3-0"
-        ],
+        "depends": ["libwebkit2gtk-4.1-0", "libssl3", "libgtk-3-0"],
         "section": "utils",
         "priority": "optional"
       },
       "rpm": {
-        "depends": [
-          "webkit2gtk4.1",
-          "openssl",
-          "gtk3"
-        ]
+        "depends": ["webkit2gtk4.1", "openssl", "gtk3"]
       },
       "appimage": {
         "bundleMediaFramework": true
@@ -82,7 +72,13 @@
   },
   "plugins": {
     "shell": {
-      "open": true
+      "open": {
+        "allowedUrls": [
+          "https://project-helix.org/*",
+          "https://discord.com/*",
+          "https://claude.ai/*"
+        ]
+      }
     }
   }
 }

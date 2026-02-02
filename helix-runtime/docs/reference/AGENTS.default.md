@@ -1,5 +1,5 @@
 ---
-summary: "Default OpenClaw agent instructions and skills roster for the personal assistant setup"
+summary: 'Default OpenClaw agent instructions and skills roster for the personal assistant setup'
 read_when:
   - Starting a new OpenClaw agent session
   - Enabling or auditing default skills
@@ -35,7 +35,7 @@ cp docs/reference/AGENTS.default.md ~/.openclaw/workspace/AGENTS.md
 
 ```json5
 {
-  agents: { defaults: { workspace: "~/.openclaw/workspace" } },
+  agents: { defaults: { workspace: '~/.openclaw/workspace' } },
 }
 ```
 

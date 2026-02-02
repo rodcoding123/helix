@@ -462,7 +462,6 @@ async function executeAutonomousAction(
   autonomyLevel: AutonomyLevel,
   action: AutonomousAction
 ): Promise<AutonomousAction> {
-
   // 1. Validate action against autonomy config
   const config = AUTONOMY_DEFAULTS[autonomyLevel];
 
@@ -477,7 +476,7 @@ async function executeAutonomousAction(
     action.status = 'failed';
     action.result = {
       success: false,
-      message: `Cannot execute: ${violations[0]}`
+      message: `Cannot execute: ${violations[0]}`,
     };
     return action;
   }
@@ -510,7 +509,7 @@ async function executeAutonomousAction(
     action.status = 'failed';
     action.result = {
       success: false,
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: error instanceof Error ? error.message : 'Unknown error',
     };
 
     // 7. Log failure
@@ -520,7 +519,9 @@ async function executeAutonomousAction(
   }
 }
 
-async function executeActionByType(action: AutonomousAction): Promise<{ success: boolean; message: string; externalId?: string }> {
+async function executeActionByType(
+  action: AutonomousAction
+): Promise<{ success: boolean; message: string; externalId?: string }> {
   switch (action.type) {
     case 'calendar_modification':
       return await modifyCalendar(action.actionPayload);
@@ -556,7 +557,7 @@ async function logAction(
     status: phase,
     payload: action.actionPayload,
     timestamp: new Date().toISOString(),
-    phase: phase // For audit trail
+    phase: phase, // For audit trail
   });
 
   // Also log to Discord webhook (pre-execution principle)
@@ -565,7 +566,7 @@ async function logAction(
     message: `[${phase.toUpperCase()}] ${action.description}`,
     userId,
     actionId: action.id,
-    actionType: action.type
+    actionType: action.type,
   });
 }
 
@@ -612,12 +613,11 @@ async function modifyCalendar(payload: {
   title?: string;
   reason: string; // "Your flight is delayed"
 }): Promise<{ success: boolean; message: string; externalId?: string }> {
-
   try {
     // 1. Fetch event from calendar
     const event = await googleCalendar.events.get({
       calendarId: 'primary',
-      eventId: payload.eventId
+      eventId: payload.eventId,
     });
 
     // 2. Update event
@@ -625,25 +625,25 @@ async function modifyCalendar(payload: {
       ...event,
       start: payload.startTime ? { dateTime: payload.startTime } : event.start,
       end: payload.endTime ? { dateTime: payload.endTime } : event.end,
-      description: `${event.description}\n\n[Auto-rescheduled: ${payload.reason}]`
+      description: `${event.description}\n\n[Auto-rescheduled: ${payload.reason}]`,
     };
 
     // 3. Save updated event
     const result = await googleCalendar.events.update({
       calendarId: 'primary',
       eventId: payload.eventId,
-      resource: updatedEvent
+      resource: updatedEvent,
     });
 
     return {
       success: true,
       message: `Rescheduled "${event.summary}" from ${event.start.dateTime} to ${updatedEvent.start.dateTime}`,
-      externalId: result.id
+      externalId: result.id,
     };
   } catch (error) {
     return {
       success: false,
-      message: `Failed to modify calendar: ${error instanceof Error ? error.message : 'Unknown error'}`
+      message: `Failed to modify calendar: ${error instanceof Error ? error.message : 'Unknown error'}`,
     };
   }
 }
@@ -815,7 +815,6 @@ async function createAuditLogEntry(
   action: AutonomousAction,
   phase: 'pre-execution' | 'execution' | 'post-execution' | 'undo'
 ): Promise<AuditLogEntry> {
-
   const entry: AuditLogEntry = {
     id: crypto.randomUUID(),
     userId,
@@ -828,7 +827,7 @@ async function createAuditLogEntry(
     phase,
     loggedToDiscord: true,
     reversible: action.reversible,
-    result: action.result
+    result: action.result,
   };
 
   // Store in database
@@ -837,14 +836,11 @@ async function createAuditLogEntry(
   // Log to Discord (pre-execution principle)
   const discordMsg = await logToDiscord({
     channel: '#helix-autonomy',
-    embed: formatAuditLogForDiscord(entry)
+    embed: formatAuditLogForDiscord(entry),
   });
 
   if (discordMsg) {
-    await supabase
-      .from('audit_log')
-      .update({ discordMessageId: discordMsg.id })
-      .eq('id', entry.id);
+    await supabase.from('audit_log').update({ discordMessageId: discordMsg.id }).eq('id', entry.id);
   }
 
   return entry;
@@ -856,11 +852,11 @@ function formatAuditLogForDiscord(entry: AuditLogEntry): {
   fields: Array<{ name: string; value: string }>;
 } {
   const colors = {
-    pending: 0xFFAA00,
-    approved: 0x00AA00,
-    executed: 0x0088FF,
-    failed: 0xFF0000,
-    undone: 0x888888
+    pending: 0xffaa00,
+    approved: 0x00aa00,
+    executed: 0x0088ff,
+    failed: 0xff0000,
+    undone: 0x888888,
   };
 
   return {
@@ -872,10 +868,10 @@ function formatAuditLogForDiscord(entry: AuditLogEntry): {
       { name: 'Action Type', value: entry.actionType },
       { name: 'Phase', value: entry.phase },
       { name: 'Timestamp', value: entry.timestamp },
-      ...(entry.result ? [
-        { name: 'Result', value: entry.result.success ? '✅ Success' : '❌ Failed' }
-      ] : [])
-    ]
+      ...(entry.result
+        ? [{ name: 'Result', value: entry.result.success ? '✅ Success' : '❌ Failed' }]
+        : []),
+    ],
   };
 }
 ```
@@ -969,12 +965,14 @@ CREATE TABLE insights_queue (
 ## Implementation Timeline (Phase 3)
 
 ### Week 3: Foundation
+
 - [ ] Design autonomy level system
 - [ ] Build autonomy settings UI
 - [ ] Implement action execution engine
 - [ ] Build action logging & audit trail
 
 ### Week 4: Integration & Polish
+
 - [ ] Build approval workflow (Level 2)
 - [ ] Implement proactive insights system
 - [ ] Build action log visualization
@@ -986,12 +984,14 @@ CREATE TABLE insights_queue (
 ## Success Metrics (Phase 3)
 
 ### Technical
+
 - ✅ Action execution success rate: 99%+
 - ✅ Action reversibility: 100% (no permanent changes without approval)
 - ✅ Audit trail completeness: Every action logged
 - ✅ Discord logging: All autonomy actions pre-logged before execution
 
 ### User-Facing
+
 - ✅ Users feel safe with autonomy (NPS +10)
 - ✅ 50% of users upgrade to Level 2+ (from default)
 - ✅ Autonomous actions are actually used (not just visible)
@@ -999,6 +999,7 @@ CREATE TABLE insights_queue (
 - ✅ Architect tier conversion: 1% → 8%+
 
 ### Safety (Critical)
+
 - ✅ Zero money spent without approval
 - ✅ Zero data deleted without confirmation
 - ✅ Zero unauthorized external contact

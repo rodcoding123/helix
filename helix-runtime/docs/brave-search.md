@@ -1,5 +1,5 @@
 ---
-summary: "Brave Search API setup for web_search"
+summary: 'Brave Search API setup for web_search'
 read_when:
   - You want to use Brave Search for web_search
   - You need a BRAVE_API_KEY or plan details
@@ -22,8 +22,8 @@ OpenClaw uses Brave Search as the default provider for `web_search`.
   tools: {
     web: {
       search: {
-        provider: "brave",
-        apiKey: "BRAVE_API_KEY_HERE",
+        provider: 'brave',
+        apiKey: 'BRAVE_API_KEY_HERE',
         maxResults: 5,
         timeoutSeconds: 30,
       },

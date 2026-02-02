@@ -23,13 +23,13 @@ Audits **both systems** comprehensively:
 
 ### System Scope
 
-| Component                        | Files  | Lines    | Description              |
-| -------------------------------- | ------ | -------- | ------------------------ |
-| Helix Core (`src/helix/`)        | ~15    | ~2,500   | Logging infrastructure   |
+| Component                       | Files  | Lines    | Description              |
+| ------------------------------- | ------ | -------- | ------------------------ |
+| Helix Core (`src/helix/`)       | ~15    | ~2,500   | Logging infrastructure   |
 | OpenClaw (`helix-runtime/src/`) | ~2,522 | ~307,000 | Agent framework          |
-| Python (`helix_logging/`)        | ~3     | ~900     | Python logging           |
-| Psychology (JSON)                | 14     | ~1,000   | Seven-layer architecture |
-| Native Apps                      | ~500   | -        | iOS/macOS/Android        |
+| Python (`helix_logging/`)       | ~3     | ~900     | Python logging           |
+| Psychology (JSON)               | 14     | ~1,000   | Seven-layer architecture |
+| Native Apps                     | ~500   | -        | iOS/macOS/Android        |
 
 ### Phase 1: Architecture Overview
 

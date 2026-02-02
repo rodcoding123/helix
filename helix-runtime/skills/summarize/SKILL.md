@@ -4,18 +4,18 @@ description: Summarize or extract text/transcripts from URLs, podcasts, and loca
 homepage: https://summarize.sh
 metadata:
   {
-    "openclaw":
+    'openclaw':
       {
-        "emoji": "🧾",
-        "requires": { "bins": ["summarize"] },
-        "install":
+        'emoji': '🧾',
+        'requires': { 'bins': ['summarize'] },
+        'install':
           [
             {
-              "id": "brew",
-              "kind": "brew",
-              "formula": "steipete/tap/summarize",
-              "bins": ["summarize"],
-              "label": "Install summarize (brew)",
+              'id': 'brew',
+              'kind': 'brew',
+              'formula': 'steipete/tap/summarize',
+              'bins': ['summarize'],
+              'label': 'Install summarize (brew)',
             },
           ],
       },

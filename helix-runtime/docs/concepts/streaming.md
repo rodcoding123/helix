@@ -1,5 +1,5 @@
 ---
-summary: "Streaming + chunking behavior (block replies, draft streaming, limits)"
+summary: 'Streaming + chunking behavior (block replies, draft streaming, limits)'
 read_when:
   - Explaining how streaming or chunking works on channels
   - Changing block streaming or channel chunking behavior

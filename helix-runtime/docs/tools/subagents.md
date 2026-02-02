@@ -1,5 +1,5 @@
 ---
-summary: "Sub-agents: spawning isolated agent runs that announce results back to the requester chat"
+summary: 'Sub-agents: spawning isolated agent runs that announce results back to the requester chat'
 read_when:
   - You want background/parallel work via the agent
   - You are changing sessions_spawn or sub-agent tool policy
@@ -121,7 +121,7 @@ Override via config:
     subagents: {
       tools: {
         // deny wins
-        deny: ["gateway", "cron"],
+        deny: ['gateway', 'cron'],
         // if allow is set, it becomes allow-only (deny still wins)
         // allow: ["read", "exec", "process"]
       },

@@ -1,5 +1,5 @@
 ---
-summary: "Matrix support status, capabilities, and configuration"
+summary: 'Matrix support status, capabilities, and configuration'
 read_when:
   - Working on Matrix channel features
 ---
@@ -83,9 +83,9 @@ Minimal config (access token, user ID auto-fetched):
   channels: {
     matrix: {
       enabled: true,
-      homeserver: "https://matrix.example.org",
-      accessToken: "syt_***",
-      dm: { policy: "pairing" },
+      homeserver: 'https://matrix.example.org',
+      accessToken: 'syt_***',
+      dm: { policy: 'pairing' },
     },
   },
 }
@@ -98,10 +98,10 @@ E2EE config (end to end encryption enabled):
   channels: {
     matrix: {
       enabled: true,
-      homeserver: "https://matrix.example.org",
-      accessToken: "syt_***",
+      homeserver: 'https://matrix.example.org',
+      accessToken: 'syt_***',
       encryption: true,
-      dm: { policy: "pairing" },
+      dm: { policy: 'pairing' },
     },
   },
 }
@@ -158,12 +158,12 @@ Once verified, the bot can decrypt messages in encrypted rooms.
 {
   channels: {
     matrix: {
-      groupPolicy: "allowlist",
+      groupPolicy: 'allowlist',
       groups: {
-        "!roomId:example.org": { allow: true },
-        "#alias:example.org": { allow: true },
+        '!roomId:example.org': { allow: true },
+        '#alias:example.org': { allow: true },
       },
-      groupAllowFrom: ["@owner:example.org"],
+      groupAllowFrom: ['@owner:example.org'],
     },
   },
 }

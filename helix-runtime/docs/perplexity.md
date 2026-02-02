@@ -1,5 +1,5 @@
 ---
-summary: "Perplexity Sonar setup for web_search"
+summary: 'Perplexity Sonar setup for web_search'
 read_when:
   - You want to use Perplexity Sonar for web search
   - You need PERPLEXITY_API_KEY or OpenRouter setup
@@ -30,11 +30,11 @@ through Perplexity’s direct API or via OpenRouter.
   tools: {
     web: {
       search: {
-        provider: "perplexity",
+        provider: 'perplexity',
         perplexity: {
-          apiKey: "pplx-...",
-          baseUrl: "https://api.perplexity.ai",
-          model: "perplexity/sonar-pro",
+          apiKey: 'pplx-...',
+          baseUrl: 'https://api.perplexity.ai',
+          model: 'perplexity/sonar-pro',
         },
       },
     },
@@ -49,10 +49,10 @@ through Perplexity’s direct API or via OpenRouter.
   tools: {
     web: {
       search: {
-        provider: "perplexity",
+        provider: 'perplexity',
         perplexity: {
-          apiKey: "pplx-...",
-          baseUrl: "https://api.perplexity.ai",
+          apiKey: 'pplx-...',
+          baseUrl: 'https://api.perplexity.ai',
         },
       },
     },

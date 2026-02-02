@@ -4,19 +4,19 @@ description: ElevenLabs text-to-speech with mac-style say UX.
 homepage: https://sag.sh
 metadata:
   {
-    "openclaw":
+    'openclaw':
       {
-        "emoji": "🗣️",
-        "requires": { "bins": ["sag"], "env": ["ELEVENLABS_API_KEY"] },
-        "primaryEnv": "ELEVENLABS_API_KEY",
-        "install":
+        'emoji': '🗣️',
+        'requires': { 'bins': ['sag'], 'env': ['ELEVENLABS_API_KEY'] },
+        'primaryEnv': 'ELEVENLABS_API_KEY',
+        'install':
           [
             {
-              "id": "brew",
-              "kind": "brew",
-              "formula": "steipete/tap/sag",
-              "bins": ["sag"],
-              "label": "Install sag (brew)",
+              'id': 'brew',
+              'kind': 'brew',
+              'formula': 'steipete/tap/sag',
+              'bins': ['sag'],
+              'label': 'Install sag (brew)',
             },
           ],
       },

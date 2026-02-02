@@ -1,5 +1,5 @@
 ---
-summary: "When OpenClaw shows typing indicators and how to tune them"
+summary: 'When OpenClaw shows typing indicators and how to tune them'
 read_when:
   - Changing typing indicator behavior or defaults
 ---
@@ -39,7 +39,7 @@ Order of “how early it fires”:
 ```json5
 {
   agent: {
-    typingMode: "thinking",
+    typingMode: 'thinking',
     typingIntervalSeconds: 6,
   },
 }
@@ -50,7 +50,7 @@ You can override mode or cadence per session:
 ```json5
 {
   session: {
-    typingMode: "message",
+    typingMode: 'message',
     typingIntervalSeconds: 4,
   },
 }

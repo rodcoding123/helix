@@ -1,5 +1,5 @@
 ---
-summary: "Testing kit: unit/e2e/live suites, Docker runners, and what each test covers"
+summary: 'Testing kit: unit/e2e/live suites, Docker runners, and what each test covers'
 read_when:
   - Running tests locally or in CI
   - Adding regressions for model/provider bugs

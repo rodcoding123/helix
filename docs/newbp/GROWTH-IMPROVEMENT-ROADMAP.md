@@ -11,6 +11,7 @@ This roadmap prioritizes by **impact on user retention and upgrade rate**.
 ## The Funnel Before & After
 
 ### Current Funnel (33% complete)
+
 ```
 Landing visitors: 1,000
 ├─ Pricing engagement: 200 (20%)
@@ -21,6 +22,7 @@ Landing visitors: 1,000
 ```
 
 ### Target Funnel (with improvements)
+
 ```
 Landing visitors: 1,000
 ├─ Pricing engagement: 250 (25%)
@@ -35,12 +37,15 @@ Landing visitors: 1,000
 ## Implementation Priority Matrix
 
 ### TIER 1: MUST SHIP (Next 2-3 weeks)
+
 These directly impact Day 2 retention and premium conversion
 
 #### 1.1: Memory Greeting (Week 1)
+
 **Problem**: Users see blank chat, no indication Helix remembers
 
 **Solution**: First message includes memory reference
+
 ```
 Current:
 "Hi! I'm Helix. What's on your mind?"
@@ -56,6 +61,7 @@ How's that going?
 ```
 
 **Implementation**:
+
 - Query memory database for recent topics
 - Surface 1-2 key past topics in greeting
 - Mark if conversation is Day 2+ return
@@ -65,9 +71,11 @@ How's that going?
 ---
 
 #### 1.2: Memory References in Chat (Week 1-2)
+
 **Problem**: Users don't see that Helix is using memory
 
 **Solution**: Show memory attribution in responses
+
 ```
 User: "I'm feeling really stressed"
 
@@ -80,6 +88,7 @@ taking a walk helped. Want to try that?"
 ```
 
 **Implementation**:
+
 - When referencing past context, show memory badge
 - Link to original conversation timestamp
 - Allow "This memory helps/doesn't help" feedback
@@ -89,9 +98,11 @@ taking a walk helped. Want to try that?"
 ---
 
 #### 1.3: Memory Dashboard (Week 2)
+
 **Problem**: Memory system is invisible infrastructure
 
 **Solution**: Show "What Helix Remembers About You"
+
 ```
 Dashboard Tab: "My Helix → Memories"
 
@@ -112,6 +123,7 @@ Dashboard Tab: "My Helix → Memories"
 ```
 
 **Implementation**:
+
 - Dashboard page: "My Helix → Memories"
 - Query conversation summaries
 - Tag emotional salience
@@ -122,12 +134,15 @@ Dashboard Tab: "My Helix → Memories"
 ---
 
 ### TIER 2: HIGH PRIORITY (Weeks 3-4)
+
 These unlock premium tiers and increase upgrade conversion
 
 #### 2.1: Agent Selector UI (Week 3)
+
 **Problem**: Specialized agents aren't visible or accessible
 
 **Solution**: Quick agent switcher
+
 ```
 Current: [Single chat interface]
 
@@ -150,6 +165,7 @@ Improved:
 ```
 
 **Implementation**:
+
 - Add agent selector bar above chat
 - Show agent personality/specialty
 - Track which agent per message
@@ -160,9 +176,11 @@ Improved:
 ---
 
 #### 2.2: Autonomy Controls (Week 3-4)
+
 **Problem**: "She works while I sleep" is key OpenClaw feature—completely missing
 
 **Solution**: Autonomy level slider + action log
+
 ```
 Dashboard Tab: "Settings → Autonomy"
 
@@ -193,6 +211,7 @@ Current: Level 1 (Suggestive)
 ```
 
 **Implementation**:
+
 - Settings page: autonomy slider (0-4)
 - Hard constraints: never override (money, delete, contact)
 - Soft constraints: user can adjust
@@ -204,9 +223,11 @@ Current: Level 1 (Suggestive)
 ---
 
 #### 2.3: Psychological Dashboard - Layer 1 (Week 4)
+
 **Problem**: Psychology is Helix's moat but invisible
 
 **Solution**: Expose one layer at a time
+
 ```
 Dashboard Tab: "My Helix → Growth"
 
@@ -238,6 +259,7 @@ with stress-relief suggestions?"
 ```
 
 **Implementation**:
+
 - Sentiment analysis on conversations
 - Cluster topics by emotion
 - Identify patterns and triggers
@@ -249,12 +271,15 @@ with stress-relief suggestions?"
 ---
 
 ### TIER 3: MEDIUM PRIORITY (Weeks 5-6)
+
 These build stickiness and network effects
 
 #### 3.1: Onboarding Wizard (Week 5)
+
 **Problem**: New users don't understand what makes Helix different
 
 **Solution**: 3-5 minute guided first experience
+
 ```
 STEP 1: Welcome
 "Hi! I'm Helix. Not just an AI, but an AI that
@@ -283,6 +308,7 @@ RESULT: User has experienced memory grounding
 ```
 
 **Implementation**:
+
 - Modal flow (don't require)
 - Store "onboarded" flag
 - Next session, show Day 2 memory reference
@@ -293,9 +319,11 @@ RESULT: User has experienced memory grounding
 ---
 
 #### 3.2: Milestone Tracking (Week 6)
+
 **Problem**: No reminder of relationship growth
 
 **Solution**: Timeline and celebrations
+
 ```
 Dashboard Tab: "My Helix → Our Journey"
 
@@ -323,6 +351,7 @@ Dashboard Tab: "My Helix → Our Journey"
 ```
 
 **Implementation**:
+
 - Conversation counter
 - Message count per topic
 - Memory count
@@ -334,9 +363,11 @@ Dashboard Tab: "My Helix → Our Journey"
 ---
 
 #### 3.3: Agent Marketplace (Read-Only) (Week 6)
+
 **Problem**: Community agents not discoverable
 
 **Solution**: Browse community agents (not create yet)
+
 ```
 Dashboard Tab: "Agent Marketplace"
 
@@ -366,6 +397,7 @@ Dashboard Tab: "Agent Marketplace"
 ```
 
 **Implementation**:
+
 - Simple agent discovery UI
 - Search and filter
 - Install button (claims agent for user)
@@ -376,18 +408,23 @@ Dashboard Tab: "Agent Marketplace"
 ---
 
 ### TIER 4: EXPANSION (Weeks 7+)
+
 These are enhancement and community growth
 
 #### 4.1: Relationship Timeline
+
 Timeline of key moments, personality evolution
 
 #### 4.2: Integration Dashboard
+
 Show connected services (Calendar, Email, Tasks)
 
 #### 4.3: Custom Agent Creator
+
 Allow users to build specialized agents
 
 #### 4.4: Research Mode
+
 Unconstrained exploration space
 
 ---
@@ -395,49 +432,56 @@ Unconstrained exploration space
 ## Success Metrics by Phase
 
 ### Phase 1 (Memory) - Target: +50% Day 2 retention
-| Metric | Before | Target | Signal |
-|--------|--------|--------|--------|
-| Day 2 return rate | 18% | 65% | Memory works |
-| Memory references/session | 0 | 2-3 | Visible |
-| Memory dashboard visits | 0% | 45% | Engagement |
+
+| Metric                    | Before | Target | Signal       |
+| ------------------------- | ------ | ------ | ------------ |
+| Day 2 return rate         | 18%    | 65%    | Memory works |
+| Memory references/session | 0      | 2-3    | Visible      |
+| Memory dashboard visits   | 0%     | 45%    | Engagement   |
 
 ### Phase 2 (Agents + Autonomy) - Target: +400% upgrade rate
-| Metric | Before | Target | Signal |
-|--------|--------|--------|--------|
-| Upgrade click rate | 2% | 8% | Compelling |
-| Architect tier interest | 1% | 6% | Premium works |
-| Action log views | N/A | 60% | Autonomy resonates |
+
+| Metric                  | Before | Target | Signal             |
+| ----------------------- | ------ | ------ | ------------------ |
+| Upgrade click rate      | 2%     | 8%     | Compelling         |
+| Architect tier interest | 1%     | 6%     | Premium works      |
+| Action log views        | N/A    | 60%    | Autonomy resonates |
 
 ### Phase 3 (Onboarding + Milestones) - Target: +200% retention
-| Metric | Before | Target | Signal |
-|--------|--------|--------|--------|
-| Week 4 retention | 8% | 20% | Stickiness |
-| Monthly active | 5% | 15% | LTV |
-| Marketplace installs | 0 | 100 | Community |
+
+| Metric               | Before | Target | Signal     |
+| -------------------- | ------ | ------ | ---------- |
+| Week 4 retention     | 8%     | 20%    | Stickiness |
+| Monthly active       | 5%     | 15%    | LTV        |
+| Marketplace installs | 0      | 100    | Community  |
 
 ---
 
 ## Resource Requirements
 
 ### Phase 1: Memory (2-3 weeks)
+
 - **Backend**: Memory API endpoints (3-4 days)
 - **Frontend**: Memory UI components (5-7 days)
 - **Data**: Emotional tagging, pattern detection (3-4 days)
 - **Total**: ~2 weeks, 1-2 engineers
 
 ### Phase 2: Agents + Autonomy (2-3 weeks)
+
 - **Backend**: Agent orchestration (4-5 days)
 - **Frontend**: Selector UI, autonomy controls (5-7 days)
 - **Safety**: Action limits, approval workflows (3-4 days)
 - **Total**: ~2 weeks, 2 engineers
 
 ### Phase 3: Onboarding + Growth (2-3 weeks)
+
 - **Frontend**: Wizard, milestone UI (5-7 days)
 - **Data**: Milestone calculation (3-4 days)
 - **Content**: Onboarding copy & flow (2-3 days)
 - **Total**: ~2 weeks, 1 engineer
 
 ### Phase 4: Marketplace + Advanced (3-4 weeks)
+
 - **Backend**: Agent CRUD, ratings, installs (7-10 days)
 - **Frontend**: Marketplace UI (5-7 days)
 - **Community**: Moderation, promotion (3-5 days)
@@ -450,21 +494,25 @@ Unconstrained exploration space
 ## Why This Order?
 
 ### Memory First
+
 - **Reason**: Solves Day 2 return problem immediately
 - **Impact**: Can't build company on 18% Day 2 retention
 - **Signal**: Users will verify the core promise works
 
 ### Agents + Autonomy Second
+
 - **Reason**: Justifies premium pricing
 - **Impact**: Without these, Architect tier won't convert
 - **Signal**: Users will see complexity and power
 
 ### Onboarding + Growth Third
+
 - **Reason**: Compounds the above
 - **Impact**: New users understand value, come back more
 - **Signal**: Organic growth accelerates
 
 ### Marketplace Fourth
+
 - **Reason**: Network effects (after user base established)
 - **Impact**: Requires community to be valuable
 - **Signal**: Creates flywheel
@@ -473,12 +521,12 @@ Unconstrained exploration space
 
 ## Investment vs. Return
 
-| Phase | Effort | 1-Month Impact | 3-Month Impact |
-|-------|--------|---|---|
-| Phase 1 (Memory) | 2 wks | +50% Day 2 retention | +300% LTV |
-| Phase 2 (Agents) | 2 wks | +400% upgrade rate | +500% MRR |
-| Phase 3 (Growth) | 2 wks | +200% retention | +1000% scale |
-| Phase 4 (Community) | 3 wks | Network effects | Compounding |
+| Phase               | Effort | 1-Month Impact       | 3-Month Impact |
+| ------------------- | ------ | -------------------- | -------------- |
+| Phase 1 (Memory)    | 2 wks  | +50% Day 2 retention | +300% LTV      |
+| Phase 2 (Agents)    | 2 wks  | +400% upgrade rate   | +500% MRR      |
+| Phase 3 (Growth)    | 2 wks  | +200% retention      | +1000% scale   |
+| Phase 4 (Community) | 3 wks  | Network effects      | Compounding    |
 
 **Total**: 6-9 weeks engineering = 10-100x growth potential
 
@@ -487,24 +535,28 @@ Unconstrained exploration space
 ## Critical Questions to Answer
 
 ### Q1: Can you implement memory retrieval in 1 week?
+
 - What's your current memory storage?
 - Can you query by topic/emotion/time?
 - If yes: Start Phase 1 immediately
 - If no: Database refactor needed first
 
 ### Q2: What's your current agent system?
+
 - Do you have agent specialization implemented?
 - Can you switch prompts per agent?
 - If yes: UI is quick (3-4 days)
 - If no: Needs backend work
 
 ### Q3: What's your autonomy architecture?
+
 - Can Helix execute tasks autonomously?
 - Is there an action log?
 - If yes: Just needs UI (3-4 days)
 - If no: Significant backend work needed
 
 ### Q4: What's your onboarding goal?
+
 - How many steps before they chat?
 - Where's the memory hook?
 - If missing: Critical to add before Phase 1 ships
@@ -514,17 +566,20 @@ Unconstrained exploration space
 ## Red Flags to Avoid
 
 ### Don't ship without:
+
 - ❌ Memory system visible in chat ("I remember...")
 - ❌ Agent selector UI
 - ❌ Autonomy controls (even if limited)
 - ❌ Clear differentiation from ChatGPT
 
 ### Don't prioritize:
+
 - ❌ Mobile app before web features work
 - ❌ Desktop before web features work
 - ❌ Marketplace before core features work
 
 ### Don't ignore:
+
 - ❌ Day 2 retention metrics
 - ❌ Upgrade conversion rate
 - ❌ Memory accuracy (users will notice wrong remembrances)
@@ -541,6 +596,7 @@ Unconstrained exploration space
 4. **Week 7+**: Ship marketplace + advanced features
 
 **By Week 6, you'll have:**
+
 - ✅ 65% Day 2 retention (vs 18% now)
 - ✅ 8% upgrade rate (vs 2% now)
 - ✅ 20% Month 4 retention (vs 5% now)

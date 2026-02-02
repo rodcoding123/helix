@@ -11,12 +11,12 @@
 
 Using your actual stack (DeepSeek + Gemini via direct APIs), the cost is **84% cheaper** than the initial Claude/OpenAI estimate.
 
-| Phase | Monthly Cost | Cost/User (100 users) |
-|-------|---|---|
-| Phase 1 (Memory) | $45 | $0.45 |
-| Phase 2 (Agents) | $35 | $0.35 |
-| Phase 3 (Autonomy) | $30 | $0.30 |
-| **TOTAL** | **$110** | **$1.10/user** |
+| Phase              | Monthly Cost | Cost/User (100 users) |
+| ------------------ | ------------ | --------------------- |
+| Phase 1 (Memory)   | $45          | $0.45                 |
+| Phase 2 (Agents)   | $35          | $0.35                 |
+| Phase 3 (Autonomy) | $30          | $0.30                 |
+| **TOTAL**          | **$110**     | **$1.10/user**        |
 
 ---
 
@@ -25,18 +25,21 @@ Using your actual stack (DeepSeek + Gemini via direct APIs), the cost is **84% c
 ### Phase 1: Memory System (~$45/month)
 
 #### 1. DeepSeek v3.2 - Emotion Detection
+
 - **Volume**: 15,000 conversations/month
 - **Model**: `deepseek-reasoner` or `deepseek-chat`
 - **Input cost**: $0.0027 per 1K tokens
 - **Output cost**: $0.0108 per 1K tokens
 
 **Per-message analysis:**
+
 - Input: 150 tokens (user message + history context)
 - Output: 80 tokens (emotional analysis + JSON)
 - Cost: (150 × $0.0027 + 80 × $0.0108) / 1000 = **$0.000581/message**
 - Monthly: 15,000 × $0.000581 = **$8.71**
 
 #### 2. DeepSeek v3.2 - Topic Extraction
+
 - **Volume**: 15,000 conversations/month
 - **Input**: 100 tokens
 - **Output**: 50 tokens
@@ -44,11 +47,13 @@ Using your actual stack (DeepSeek + Gemini via direct APIs), the cost is **84% c
 - **Monthly**: 15,000 × $0.000813 = **$12.20**
 
 #### 3. Google Gemini - Embeddings
+
 - **Volume**: 15,000 messages × 100 tokens = 1.5M tokens
 - **Cost**: $0.0375 per 1M tokens (extremely cheap for embeddings)
 - **Monthly**: 1.5M × ($0.0375 / 1M) = **$0.06**
 
 #### 4. Supabase Database
+
 - **Conversations table**: ~50MB/month
 - **Embeddings storage**: ~300MB for pgvector
 - **Still within free tier** (1GB included)
@@ -62,14 +67,17 @@ Using your actual stack (DeepSeek + Gemini via direct APIs), the cost is **84% c
 ### Phase 2: Agent System (~$35/month)
 
 #### 1. DeepSeek v3.2 - Agent Logic
+
 - **Agent selection**: 15,000 messages × $0.0004 avg = **$6/month**
 - **Agent memory updates**: 3,000 updates × $0.0002 = **$0.60/month**
 
 #### 2. Gemini Flash - Agent Responses
+
 - Already included in existing Gemini usage (not new cost)
 - **Incremental cost**: ~$0 (same chat interface)
 
 #### 3. Supabase - Agent Tables
+
 - `agents`, `agent_usage`, `agent_adaptations` tables
 - Minimal storage: ~20MB
 - Query volume: ~2,000/month = **$0** (free tier)
@@ -82,16 +90,19 @@ Using your actual stack (DeepSeek + Gemini via direct APIs), the cost is **84% c
 ### Phase 3: Autonomy System (~$30/month)
 
 #### 1. DeepSeek v3.2 - Action Validation
+
 - **Autonomous actions**: ~50-100/day = ~2,000/month
 - **Reasoning-based validation** (use `deepseek-reasoner`)
 - **Cost/action**: (500 input tokens × $0.0027 + 300 output tokens × $0.0108) / 1000 = **$0.00456**
 - **Monthly**: 2,000 × $0.00456 = **$9.12**
 
 #### 2. Gemini Flash - Vision/Context
+
 - For action context understanding (optional)
 - **Estimated**: ~5M tokens/month = **$0.19**
 
 #### 3. Supabase - Action Log
+
 - `autonomy_settings`, `action_log`, `approvals` tables
 - Storage: ~50MB
 - Query volume: ~5,000/month = **$0** (free tier)
@@ -106,31 +117,32 @@ Using your actual stack (DeepSeek + Gemini via direct APIs), the cost is **84% c
 
 ### Month-by-Month Projection
 
-| Month | Active Users | Messages/Day | DeepSeek | Gemini | Supabase | Total |
-|-------|---|---|---|---|---|---|
-| 1 | 50 | 500 | $15 | $0.50 | $25 | **$40.50** |
-| 2 | 100 | 1,000 | $28 | $1.00 | $25 | **$54** |
-| 3 | 200 | 2,000 | $55 | $2.00 | $35 | **$92** |
-| 6 | 500 | 5,000 | $138 | $5.00 | $50 | **$193** |
-| 12 | 1,000 | 10,000 | $275 | $10.00 | $100 | **$385** |
+| Month | Active Users | Messages/Day | DeepSeek | Gemini | Supabase | Total      |
+| ----- | ------------ | ------------ | -------- | ------ | -------- | ---------- |
+| 1     | 50           | 500          | $15      | $0.50  | $25      | **$40.50** |
+| 2     | 100          | 1,000        | $28      | $1.00  | $25      | **$54**    |
+| 3     | 200          | 2,000        | $55      | $2.00  | $35      | **$92**    |
+| 6     | 500          | 5,000        | $138     | $5.00  | $50      | **$193**   |
+| 12    | 1,000        | 10,000       | $275     | $10.00 | $100     | **$385**   |
 
 ---
 
 ## Cost Per User at Scale
 
-| Users | Monthly Cost | Cost/User | Revenue (Observatory tier $29/mo) | Profit | Margin |
-|-------|---|---|---|---|---|
-| 50 | $40 | $0.80 | $1,450 | $1,410 | **97%** |
-| 100 | $54 | $0.54 | $2,900 | $2,846 | **98%** |
-| 200 | $92 | $0.46 | $5,800 | $5,708 | **98.4%** |
-| 500 | $193 | $0.39 | $14,500 | $14,307 | **98.7%** |
-| 1,000 | $385 | $0.39 | $29,000 | $28,615 | **98.7%** |
+| Users | Monthly Cost | Cost/User | Revenue (Observatory tier $29/mo) | Profit  | Margin    |
+| ----- | ------------ | --------- | --------------------------------- | ------- | --------- |
+| 50    | $40          | $0.80     | $1,450                            | $1,410  | **97%**   |
+| 100   | $54          | $0.54     | $2,900                            | $2,846  | **98%**   |
+| 200   | $92          | $0.46     | $5,800                            | $5,708  | **98.4%** |
+| 500   | $193         | $0.39     | $14,500                           | $14,307 | **98.7%** |
+| 1,000 | $385         | $0.39     | $29,000                           | $28,615 | **98.7%** |
 
 ---
 
 ## Why This Is So Cheap
 
 ### DeepSeek v3.2 Advantages
+
 - ✅ 2-3x cheaper than Claude ($0.0027 vs $0.003 for input)
 - ✅ 3x cheaper than GPT-4 ($0.0108 vs $0.03 for output)
 - ✅ Reasoning-focused (perfect for emotion analysis + autonomy validation)
@@ -138,12 +150,14 @@ Using your actual stack (DeepSeek + Gemini via direct APIs), the cost is **84% c
 - ✅ No per-request minimum
 
 ### Gemini Flash Advantages
+
 - ✅ Embeddings: $0.0375 per 1M tokens (vs OpenAI $0.02-$0.15)
 - ✅ Fast responses (good for real-time greeting generation)
 - ✅ 262K context window
 - ✅ Free tier: 15 requests/minute
 
 ### Supabase Advantages
+
 - ✅ pgvector included (free for vectors)
 - ✅ Row-level security built-in
 - ✅ You already have it ($25/mo base)
@@ -155,6 +169,7 @@ Using your actual stack (DeepSeek + Gemini via direct APIs), the cost is **84% c
 If you need to reduce costs further:
 
 ### 1. Batch Processing (Save 20-30%)
+
 ```
 Current: Run emotion/topic detection in real-time
 Optimized: Batch process at 2am daily
@@ -163,6 +178,7 @@ Savings: ~$10/month
 ```
 
 ### 2. Selective Analysis (Save 10-15%)
+
 ```
 Current: Analyze every message
 Optimized: Skip small talk, commands, greetings
@@ -171,6 +187,7 @@ Savings: ~$5-10/month
 ```
 
 ### 3. Local Embeddings (Save 100% on embeddings)
+
 ```
 Current: Gemini embeddings ($0.06/month)
 Alternative: Ollama local embeddings (free)
@@ -180,6 +197,7 @@ Savings: $0.06/month (negligible)
 ```
 
 ### 4. Use Cheaper DeepSeek Models
+
 ```
 Current: deepseek-reasoner (for accuracy)
 Alternative: deepseek-chat (2x cheaper, 80% accuracy)
@@ -194,6 +212,7 @@ Savings: ~$20-30/month
 ## Budget Allocation Recommendations
 
 ### Recommended Setup
+
 - **DeepSeek**: $50/month budget (actual: $28)
 - **Gemini**: $5/month budget (actual: $1)
 - **Supabase**: $50/month budget (actual: $25, shared with web app)
@@ -208,11 +227,11 @@ This gives you **2x cushion** while staying well under budget.
 
 **At what point do you cover API costs with revenue?**
 
-| Users | Monthly Revenue | Monthly Cost | Profit | Payback |
-|-------|---|---|---|---|
-| 10 | $290 | $25 | $265 | Immediate |
-| 50 | $1,450 | $40 | $1,410 | Day 1 |
-| 100 | $2,900 | $54 | $2,846 | Day 1 |
+| Users | Monthly Revenue | Monthly Cost | Profit | Payback   |
+| ----- | --------------- | ------------ | ------ | --------- |
+| 10    | $290            | $25          | $265   | Immediate |
+| 50    | $1,450          | $40          | $1,410 | Day 1     |
+| 100   | $2,900          | $54          | $2,846 | Day 1     |
 
 **You're profitable at 10 users.** Even with heavily subsidized Observatory tier.
 
@@ -220,12 +239,12 @@ This gives you **2x cushion** while staying well under budget.
 
 ## Risks & Mitigations
 
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|-----------|
-| DeepSeek rate limit (10k/day free) | Medium | Medium | Upgrade to paid tier ($5-20/mo) |
-| Gemini API changes pricing | Low | Low | Have OpenAI embedding fallback ready |
-| Emotional analysis accuracy < 80% | Low | High | A/B test prompts, fine-tune formula |
-| Supabase pgvector performance | Low | High | Add read replicas ($350/mo if needed) |
+| Risk                               | Probability | Impact | Mitigation                            |
+| ---------------------------------- | ----------- | ------ | ------------------------------------- |
+| DeepSeek rate limit (10k/day free) | Medium      | Medium | Upgrade to paid tier ($5-20/mo)       |
+| Gemini API changes pricing         | Low         | Low    | Have OpenAI embedding fallback ready  |
+| Emotional analysis accuracy < 80%  | Low         | High   | A/B test prompts, fine-tune formula   |
+| Supabase pgvector performance      | Low         | High   | Add read replicas ($350/mo if needed) |
 
 ---
 
@@ -275,6 +294,7 @@ Your stack choice (DeepSeek + Gemini) is **optimal**:
 **You can confidently proceed with Phase 1-3 at $55-130/month costs.**
 
 Next steps:
+
 1. Set up DeepSeek API key at https://platform.deepseek.com
 2. Set up Google Gemini API at https://ai.google.dev
 3. Update environment variables in `.env.local`

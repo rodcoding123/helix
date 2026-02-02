@@ -1,5 +1,5 @@
 ---
-summary: "Apply multi-file patches with the apply_patch tool"
+summary: 'Apply multi-file patches with the apply_patch tool'
 read_when:
   - You need structured file edits across multiple files
   - You want to document or debug patch-based edits

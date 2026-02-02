@@ -1,7 +1,7 @@
 ---
 title: Sandbox CLI
-summary: "Manage sandbox containers and inspect effective sandbox policy"
-read_when: "You are managing sandbox containers or debugging sandbox/tool-policy behavior."
+summary: 'Manage sandbox containers and inspect effective sandbox policy'
+read_when: 'You are managing sandbox containers or debugging sandbox/tool-policy behavior.'
 status: active
 ---
 

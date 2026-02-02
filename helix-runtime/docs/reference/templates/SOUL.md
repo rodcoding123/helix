@@ -1,5 +1,5 @@
 ---
-summary: "Workspace template for SOUL.md"
+summary: 'Workspace template for SOUL.md'
 read_when:
   - Bootstrapping a workspace manually
 ---

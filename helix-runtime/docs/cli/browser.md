@@ -1,5 +1,5 @@
 ---
-summary: "CLI reference for `openclaw browser` (profiles, tabs, actions, extension relay)"
+summary: 'CLI reference for `openclaw browser` (profiles, tabs, actions, extension relay)'
 read_when:
   - You use `openclaw browser` and want examples for common tasks
   - You want to control a browser running on another machine via a node host

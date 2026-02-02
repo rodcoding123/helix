@@ -1,5 +1,5 @@
 ---
-summary: "Zalo Personal plugin: QR login + messaging via zca-cli (plugin install + channel config + CLI + tool)"
+summary: 'Zalo Personal plugin: QR login + messaging via zca-cli (plugin install + channel config + CLI + tool)'
 read_when:
   - You want Zalo Personal (unofficial) support in OpenClaw
   - You are configuring or developing the zalouser plugin
@@ -57,7 +57,7 @@ Channel config lives under `channels.zalouser` (not `plugins.entries.*`):
   channels: {
     zalouser: {
       enabled: true,
-      dmPolicy: "pairing",
+      dmPolicy: 'pairing',
     },
   },
 }

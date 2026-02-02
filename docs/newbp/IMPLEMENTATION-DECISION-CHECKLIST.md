@@ -20,6 +20,7 @@ Use this checklist to make sure you're ready to commit to the 6-9 week build.
 ## RESOURCE CHECKLIST
 
 ### Engineering Team
+
 - [ ] Do you have 2-3 full-time engineers available?
 - [ ] Are they comfortable with TypeScript/React (frontend)?
 - [ ] Are they comfortable with Node.js (backend)?
@@ -28,6 +29,7 @@ Use this checklist to make sure you're ready to commit to the 6-9 week build.
 - [ ] Can they commit for 6-9 weeks without interruption?
 
 ### Infrastructure
+
 - [ ] Supabase account set up? ✓ (you have this)
 - [ ] Claude API key and credit? (need to set up)
 - [ ] OpenAI API key for embeddings? (need to set up)
@@ -35,6 +37,7 @@ Use this checklist to make sure you're ready to commit to the 6-9 week build.
 - [ ] Google Calendar API credentials? (for Phase 3)
 
 ### Budget
+
 - [ ] Claude API: ~$500/month (emotion, topics, agent responses)
 - [ ] OpenAI Embeddings: ~$100/month (semantic search)
 - [ ] Supabase: ~$100/month (existing, scale up)
@@ -47,6 +50,7 @@ Use this checklist to make sure you're ready to commit to the 6-9 week build.
 ## TECHNICAL VALIDATION CHECKLIST
 
 ### Phase 1: Memory System
+
 - [ ] Can you query Supabase conversations efficiently (with indexes)?
 - [ ] Have you tested Claude API for emotion analysis?
 - [ ] Have you tested Claude API for topic extraction?
@@ -57,6 +61,7 @@ Use this checklist to make sure you're ready to commit to the 6-9 week build.
 - [ ] Can you build memory dashboard page?
 
 ### Phase 2: Agent System
+
 - [ ] Can you define agent personalities programmatically?
 - [ ] Can you generate different system prompts per agent?
 - [ ] Can you route messages to different agents?
@@ -65,6 +70,7 @@ Use this checklist to make sure you're ready to commit to the 6-9 week build.
 - [ ] Can you differentiate agent voices in responses?
 
 ### Phase 3: Autonomy System
+
 - [ ] Can you implement hard constraints that NEVER break?
 - [ ] Can you log actions BEFORE execution?
 - [ ] Can you integrate with Google Calendar API?
@@ -78,18 +84,21 @@ Use this checklist to make sure you're ready to commit to the 6-9 week build.
 ## BUSINESS VALIDATION CHECKLIST
 
 ### Success Criteria Alignment
+
 - [ ] Is 50%+ Day 2 retention an acceptable target? (vs 18% today)
 - [ ] Is 8%+ upgrade rate an acceptable target? (vs 2% today)
 - [ ] Is 8%+ Architect tier adoption acceptable? (vs 1% today)
 - [ ] Is +15 NPS improvement acceptable?
 
 ### Revenue Impact
+
 - [ ] Does $2-5k MRR by Month 2 excite you?
 - [ ] Does $20-50k MRR by Month 3 excite you?
 - [ ] Are you comfortable with the conservative estimates as a baseline?
 - [ ] Do you understand this is organic growth (not paid)?
 
 ### Risk Tolerance
+
 - [ ] Are you comfortable shipping features that might need iteration?
 - [ ] Are you OK with going to beta users first (10 power users)?
 - [ ] Are you OK if Day 2 retention only improves to 40% initially?
@@ -100,24 +109,28 @@ Use this checklist to make sure you're ready to commit to the 6-9 week build.
 ## DECISION CHECKPOINTS
 
 ### Before Phase 1 Coding Starts
+
 - [ ] Is memory the right priority? (yes / no)
 - [ ] Do you have 2 engineers to start immediately? (yes / no)
 - [ ] Are you ready to commit to 4 weeks on memory? (yes / no)
 - [ ] Have you set up Claude + OpenAI APIs? (yes / no)
 
 ### Before Phase 2 Coding Starts
+
 - [ ] Is Phase 1 working and stable? (yes / no)
 - [ ] Do you have memory accuracy at 85%+? (yes / no)
 - [ ] Are agents the next priority? (yes / no)
 - [ ] Can you assign 2-3 engineers to Phase 2? (yes / no)
 
 ### Before Phase 3 Coding Starts
+
 - [ ] Are Phases 1 + 2 working? (yes / no)
 - [ ] Is autonomy the final priority? (yes / no)
 - [ ] Are hard constraints clearly defined? (yes / no)
 - [ ] Do you understand pre-execution logging principle? (yes / no)
 
 ### Before Production Launch
+
 - [ ] Day 2 retention: 50%+? (yes / no)
 - [ ] Upgrade rate: 5%+? (yes / no)
 - [ ] Memory accuracy: 90%+? (yes / no)
@@ -129,7 +142,9 @@ Use this checklist to make sure you're ready to commit to the 6-9 week build.
 ## GO / NO-GO DECISION
 
 ### GO ✅ (Proceed with Implementation)
+
 You answer YES to:
+
 - [ ] All resources available (engineers, APIs, budget)
 - [ ] All technical foundations in place
 - [ ] Business metrics aligned with goals
@@ -139,7 +154,9 @@ You answer YES to:
 **Action**: Assign engineers to Phase 1 immediately
 
 ### NO-GO ❌ (Iterate on Plan)
+
 You answer NO to any of:
+
 - [ ] Don't have engineers available yet
 - [ ] Success metrics don't match your business model
 - [ ] Risk tolerance is too low for iterative approach
@@ -155,18 +172,21 @@ You answer NO to any of:
 Before you say GO, make sure you understand these deeply:
 
 ### 1. Memory is the Hook
+
 - Without visible memory, Day 2 retention stays ~18%
 - Memory greeting is the conversion moment
 - First-time users can't experience differentiation without memory
 - **Priority**: Must ship first
 
 ### 2. Agents Show Power
+
 - Agents alone don't drive conversions (agents aren't visible in Phase 2)
 - But agents + memory = "Helix is a team, not just one AI"
 - Agents justify "get more agents" upsell
 - **Importance**: High, but depends on Phase 1
 
 ### 3. Autonomy Justifies Premium
+
 - Architect tier ($99/month) needs differentiation
 - "She works while I sleep" = autonomy
 - Autonomy at Level 0-2 is just notification system
@@ -174,12 +194,14 @@ Before you say GO, make sure you understand these deeply:
 - **Importance**: Critical for Architect adoption
 
 ### 4. All Three Are Needed
+
 - Memory alone = high Day 2 retention but low upgrade
 - Memory + Agents = high Day 2 + medium upgrade
 - Memory + Agents + Autonomy = high Day 2 + high upgrade + high Architect
 - **You need all three for 10x growth**
 
 ### 5. Build Order Matters
+
 - Can't do agents without memory (agents need context)
 - Can't do autonomy without agents (need agent orchestration)
 - Sequential is fine (Week 1-2-3) or parallel (Week 1-3-4 simultaneously)
@@ -218,6 +240,7 @@ Before you say GO, make sure you understand these deeply:
 Here's what happens next:
 
 ### Immediately (Today/Tomorrow)
+
 - [ ] Confirm 2-3 engineers available
 - [ ] Set up Claude API key + credit
 - [ ] Set up OpenAI API key + credit
@@ -225,22 +248,26 @@ Here's what happens next:
 - [ ] Assign tech lead to Phase 1
 
 ### Week 1
+
 - [ ] Start Phase 1 infrastructure (Supabase tables)
 - [ ] Build emotion detection service
 - [ ] Build topic extraction service
 - [ ] Start memory query engine
 
 ### Week 2
+
 - [ ] Complete Phase 1 backend
 - [ ] Start React components (memory greeting, dashboard)
 - [ ] Begin Phase 2 agent system design
 
 ### Week 3
+
 - [ ] Phase 1 integrated into chat
 - [ ] Phase 2 agent selector UI
 - [ ] Phase 3 autonomy levels system
 
 ### Week 4+
+
 - [ ] Beta testing with 10 users
 - [ ] Measure metrics
 - [ ] Bug fixes and polish
@@ -291,5 +318,6 @@ If no → What needs to change?
 **Ready to decide?**
 
 Let me know:
+
 - GO ✅ → I'll help you set up Phase 1
 - NO-GO ❌ → Tell me what needs to change

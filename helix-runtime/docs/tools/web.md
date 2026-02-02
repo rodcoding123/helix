@@ -1,5 +1,5 @@
 ---
-summary: "Web search + fetch tools (Brave Search API, Perplexity direct/OpenRouter)"
+summary: 'Web search + fetch tools (Brave Search API, Perplexity direct/OpenRouter)'
 read_when:
   - You want to enable web_search or web_fetch
   - You need Brave Search API key setup
@@ -42,7 +42,7 @@ Set the provider in config:
   tools: {
     web: {
       search: {
-        provider: "brave", // or "perplexity"
+        provider: 'brave', // or "perplexity"
       },
     },
   },
@@ -56,11 +56,11 @@ Example: switch to Perplexity Sonar (direct API):
   tools: {
     web: {
       search: {
-        provider: "perplexity",
+        provider: 'perplexity',
         perplexity: {
-          apiKey: "pplx-...",
-          baseUrl: "https://api.perplexity.ai",
-          model: "perplexity/sonar-pro",
+          apiKey: 'pplx-...',
+          baseUrl: 'https://api.perplexity.ai',
+          model: 'perplexity/sonar-pro',
         },
       },
     },
@@ -106,14 +106,14 @@ crypto/prepaid).
     web: {
       search: {
         enabled: true,
-        provider: "perplexity",
+        provider: 'perplexity',
         perplexity: {
           // API key (optional if OPENROUTER_API_KEY or PERPLEXITY_API_KEY is set)
-          apiKey: "sk-or-v1-...",
+          apiKey: 'sk-or-v1-...',
           // Base URL (key-aware default if omitted)
-          baseUrl: "https://openrouter.ai/api/v1",
+          baseUrl: 'https://openrouter.ai/api/v1',
           // Model (defaults to perplexity/sonar-pro)
-          model: "perplexity/sonar-pro",
+          model: 'perplexity/sonar-pro',
         },
       },
     },
@@ -157,7 +157,7 @@ Search the web using your configured provider.
     web: {
       search: {
         enabled: true,
-        apiKey: "BRAVE_API_KEY_HERE", // optional if BRAVE_API_KEY is set
+        apiKey: 'BRAVE_API_KEY_HERE', // optional if BRAVE_API_KEY is set
         maxResults: 5,
         timeoutSeconds: 30,
         cacheTtlMinutes: 15,
@@ -181,24 +181,24 @@ Search the web using your configured provider.
 ```javascript
 // German-specific search
 await web_search({
-  query: "TV online schauen",
+  query: 'TV online schauen',
   count: 10,
-  country: "DE",
-  search_lang: "de",
+  country: 'DE',
+  search_lang: 'de',
 });
 
 // French search with French UI
 await web_search({
-  query: "actualités",
-  country: "FR",
-  search_lang: "fr",
-  ui_lang: "fr",
+  query: 'actualités',
+  country: 'FR',
+  search_lang: 'fr',
+  ui_lang: 'fr',
 });
 
 // Recent results (past week)
 await web_search({
-  query: "TMBG interview",
-  freshness: "pw",
+  query: 'TMBG interview',
+  freshness: 'pw',
 });
 ```
 
@@ -223,12 +223,12 @@ Fetch a URL and extract readable content.
         timeoutSeconds: 30,
         cacheTtlMinutes: 15,
         maxRedirects: 3,
-        userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_7_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_7_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
         readability: true,
         firecrawl: {
           enabled: true,
-          apiKey: "FIRECRAWL_API_KEY_HERE", // optional if FIRECRAWL_API_KEY is set
-          baseUrl: "https://api.firecrawl.dev",
+          apiKey: 'FIRECRAWL_API_KEY_HERE', // optional if FIRECRAWL_API_KEY is set
+          baseUrl: 'https://api.firecrawl.dev',
           onlyMainContent: true,
           maxAgeMs: 86400000, // ms (1 day)
           timeoutSeconds: 60,

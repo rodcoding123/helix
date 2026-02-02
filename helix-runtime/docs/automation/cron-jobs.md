@@ -1,5 +1,5 @@
 ---
-summary: "Cron jobs + wakeups for the Gateway scheduler"
+summary: 'Cron jobs + wakeups for the Gateway scheduler'
 read_when:
   - Scheduling background jobs or wakeups
   - Wiring automation that should run with or alongside heartbeats
@@ -304,7 +304,7 @@ Notes:
 {
   cron: {
     enabled: true, // default true
-    store: "~/.openclaw/cron/jobs.json",
+    store: '~/.openclaw/cron/jobs.json',
     maxConcurrentRuns: 1, // default 1
   },
 }

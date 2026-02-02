@@ -1,5 +1,5 @@
 ---
-summary: "iMessage support via imsg (JSON-RPC over stdio), setup, and chat_id routing"
+summary: 'iMessage support via imsg (JSON-RPC over stdio), setup, and chat_id routing'
 read_when:
   - Setting up iMessage support
   - Debugging iMessage send/receive
@@ -24,8 +24,8 @@ Minimal config:
   channels: {
     imessage: {
       enabled: true,
-      cliPath: "/usr/local/bin/imsg",
-      dbPath: "/Users/<you>/Library/Messages/chat.db",
+      cliPath: '/usr/local/bin/imsg',
+      dbPath: '/Users/<you>/Library/Messages/chat.db',
     },
   },
 }
@@ -99,10 +99,10 @@ Example config:
       enabled: true,
       accounts: {
         bot: {
-          name: "Bot",
+          name: 'Bot',
           enabled: true,
-          cliPath: "/path/to/imsg-bot",
-          dbPath: "/Users/<bot-macos-user>/Library/Messages/chat.db",
+          cliPath: '/path/to/imsg-bot',
+          dbPath: '/Users/<bot-macos-user>/Library/Messages/chat.db',
         },
       },
     },
@@ -129,8 +129,8 @@ exec ssh -T gateway-host imsg "$@"
 {
   channels: {
     imessage: {
-      cliPath: "~/imsg-ssh", // SSH wrapper to remote Mac
-      remoteHost: "user@gateway-host", // for SCP file transfer
+      cliPath: '~/imsg-ssh', // SSH wrapper to remote Mac
+      remoteHost: 'user@gateway-host', // for SCP file transfer
       includeAttachments: true,
     },
   },
@@ -164,10 +164,10 @@ Concrete config example (Tailscale hostname):
   channels: {
     imessage: {
       enabled: true,
-      cliPath: "~/.openclaw/scripts/imsg-ssh",
-      remoteHost: "bot@mac-mini.tailnet-1234.ts.net",
+      cliPath: '~/.openclaw/scripts/imsg-ssh',
+      remoteHost: 'bot@mac-mini.tailnet-1234.ts.net',
       includeAttachments: true,
-      dbPath: "/Users/bot/Library/Messages/chat.db",
+      dbPath: '/Users/bot/Library/Messages/chat.db',
     },
   },
 }
@@ -226,10 +226,10 @@ Example:
 {
   channels: {
     imessage: {
-      groupPolicy: "allowlist",
-      groupAllowFrom: ["+15555550123"],
+      groupPolicy: 'allowlist',
+      groupAllowFrom: ['+15555550123'],
       groups: {
-        "42": { requireMention: false },
+        '42': { requireMention: false },
       },
     },
   },

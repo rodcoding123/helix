@@ -11,6 +11,7 @@
 ## Services Updated with 1Password Integration
 
 ### 1. EmotionDetectionService ✓
+
 - **Status**: Production ready
 - **Secret Loading**: Uses `loadSecret('DeepSeek API Key')`
 - **Caching**: API key cached in-memory after first use
@@ -19,6 +20,7 @@
 - **Methods**: `analyzeConversation(messages): Promise<EmotionAnalysis>`
 
 ### 2. TopicExtractionService ✓
+
 - **Status**: Production ready
 - **Secret Loading**: Uses `loadSecret('DeepSeek API Key')`
 - **Caching**: Same caching strategy as EmotionDetectionService
@@ -26,6 +28,7 @@
 - **Methods**: `extractTopics(messages): Promise<ExtractedTopic[]>`
 
 ### 3. EmbeddingService ✓
+
 - **Status**: Production ready
 - **Secret Loading**: Uses `loadSecret('Gemini API Key')`
 - **Caching**: Client cached for performance
@@ -36,6 +39,7 @@
   - `calculateMagnitude(embedding): number`
 
 ### 4. MemoryRepository ✓
+
 - **Status**: Production ready
 - **Secret Loading**:
   - Uses `loadSecret('Supabase URL')`
@@ -48,9 +52,11 @@
 ## Test Results
 
 ### New Integration Test File
+
 **Location**: `web/src/services/__tests__/services-with-1password.test.ts`
 
 **Test Statistics**:
+
 - Total Test Cases: **45**
 - Passing: **45** ✓✓✓
 - Failing: **0**
@@ -60,6 +66,7 @@
 **Test Coverage**:
 
 #### Secret Loading Infrastructure (4 tests)
+
 ```
 ✓ loadSecret function available
 ✓ verifySecrets function available
@@ -68,6 +75,7 @@
 ```
 
 #### Secret Retrieval with Fallback (5 tests)
+
 ```
 ✓ DeepSeek API Key loads from 1Password or .env
 ✓ Gemini API Key loads from 1Password or .env
@@ -77,6 +85,7 @@
 ```
 
 #### Discord Webhook Secrets (3 tests)
+
 ```
 ✓ Discord Webhook - Commands loads
 ✓ Discord Webhook - API loads
@@ -84,6 +93,7 @@
 ```
 
 #### Service Initialization Tests (12 tests)
+
 ```
 ✓ EmotionDetectionService initializes
 ✓ TopicExtractionService initializes
@@ -94,6 +104,7 @@
 ```
 
 #### Caching Strategy Tests (4 tests)
+
 ```
 ✓ DeepSeek API Key cached in memory
 ✓ Gemini API Key reused across calls
@@ -102,6 +113,7 @@
 ```
 
 #### Error Handling Tests (3 tests)
+
 ```
 ✓ Helpful error messages for missing secrets
 ✓ API errors handled gracefully
@@ -109,6 +121,7 @@
 ```
 
 #### Full Integration Pipeline Tests (8 tests)
+
 ```
 ✓ All services initialize without errors
 ✓ All required methods available
@@ -124,21 +137,21 @@
 
 All 13 secrets verified as accessible through loadSecret():
 
-| Secret Name | Type | Status |
-|------------|------|--------|
-| DeepSeek API Key | password | ✓ Loaded |
-| Gemini API Key | password | ✓ Loaded |
-| Supabase Service Role | password | ✓ Accessible |
-| Supabase Anon Key | password | ✓ Loaded |
-| Stripe Secret Key | password | ✓ Accessible |
-| Stripe Publishable Key | password | ✓ Accessible |
-| Discord Webhook - Commands | notes | ✓ Loaded |
-| Discord Webhook - API | notes | ✓ Loaded |
-| Discord Webhook - Heartbeat | notes | ✓ Accessible |
-| Discord Webhook - Alerts | notes | ✓ Accessible |
-| Discord Webhook - Consciousness | notes | ✓ Accessible |
-| Discord Webhook - File Changes | notes | ✓ Accessible |
-| Discord Webhook - Hash Chain | notes | ✓ Accessible |
+| Secret Name                     | Type     | Status       |
+| ------------------------------- | -------- | ------------ |
+| DeepSeek API Key                | password | ✓ Loaded     |
+| Gemini API Key                  | password | ✓ Loaded     |
+| Supabase Service Role           | password | ✓ Accessible |
+| Supabase Anon Key               | password | ✓ Loaded     |
+| Stripe Secret Key               | password | ✓ Accessible |
+| Stripe Publishable Key          | password | ✓ Accessible |
+| Discord Webhook - Commands      | notes    | ✓ Loaded     |
+| Discord Webhook - API           | notes    | ✓ Loaded     |
+| Discord Webhook - Heartbeat     | notes    | ✓ Accessible |
+| Discord Webhook - Alerts        | notes    | ✓ Accessible |
+| Discord Webhook - Consciousness | notes    | ✓ Accessible |
+| Discord Webhook - File Changes  | notes    | ✓ Accessible |
+| Discord Webhook - Hash Chain    | notes    | ✓ Accessible |
 
 ## Security Architecture
 
@@ -203,26 +216,32 @@ All 13 secrets verified as accessible through loadSecret():
 ### Security Features
 
 ✓ **No API Keys in Code**
+
 - All keys loaded at runtime via loadSecret()
 - No hardcoded secrets anywhere
 
 ✓ **No Keys in Git**
+
 - .env files .gitignore'd
 - 1Password vault is remote source of truth
 
 ✓ **Error Safety**
+
 - Error messages never expose secret values
 - API errors show generic messages
 
 ✓ **Single Source of Truth**
+
 - 1Password vault is authoritative
 - .env is development-only fallback
 
 ✓ **Test Isolation**
+
 - clearCache() prevents test interference
 - Each test starts with clean cache
 
 ✓ **Performance**
+
 - In-memory caching prevents repeated 1Password calls
 - Minimal startup overhead
 
@@ -335,7 +354,7 @@ export type SecretField = 'password' | 'notes' | 'username' | 'email' | 'url';
 export async function loadSecret(
   itemName: string,
   field: SecretField = 'password'
-): Promise<string>
+): Promise<string>;
 
 // Service usage
 const apiKey = await loadSecret('DeepSeek API Key', 'password');
@@ -346,11 +365,13 @@ const apiKey = await loadSecret('DeepSeek API Key', 'password');
 ### Local Development Setup
 
 1. **Copy .env template**
+
    ```bash
    cp .env.example .env.local
    ```
 
 2. **Add your secrets to .env.local**
+
    ```bash
    DEEPSEEK_API_KEY=sk_...
    GEMINI_API_KEY=...
@@ -368,6 +389,7 @@ const apiKey = await loadSecret('DeepSeek API Key', 'password');
 1. **Create Helix vault in 1Password**
 2. **Add all 13 secrets to vault**
 3. **Authenticate locally**
+
    ```bash
    op account add
    ```
@@ -409,17 +431,20 @@ If you already have .env files:
 ## Next Steps
 
 ### Week 1 Days 4-5: Memory UI Implementation
+
 - Build the Helix Observatory interface
 - Implement real-time message streaming
 - Create memory visualization components
 
 ### Week 1 Day 5: End-to-End Testing
+
 - Test full memory pipeline
 - Verify emotion analysis
 - Test embedding storage
 - Validate retrieval
 
 ### Week 1 Days 6+: Phase 2 Preparation
+
 - Agent creation system
 - OpenClaw integration
 - Autonomy framework

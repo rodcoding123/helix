@@ -81,10 +81,10 @@ session-memory/
 ```yaml
 ---
 name: my-hook
-description: "Short description"
+description: 'Short description'
 homepage: https://docs.openclaw.ai/hooks#my-hook
 metadata:
-  { "openclaw": { "emoji": "🔗", "events": ["command:new"], "requires": { "bins": ["node"] } } }
+  { 'openclaw': { 'emoji': '🔗', 'events': ['command:new'], 'requires': { 'bins': ['node'] } } }
 ---
 # Hook Title
 
@@ -180,7 +180,7 @@ Hook handlers receive an `InternalHookEvent` object:
 
 ```typescript
 interface InternalHookEvent {
-  type: "command" | "session" | "agent" | "gateway";
+  type: 'command' | 'session' | 'agent' | 'gateway';
   action: string; // e.g., 'new', 'reset', 'stop'
   sessionKey: string;
   context: Record<string, unknown>;
@@ -192,18 +192,18 @@ interface InternalHookEvent {
 Example handler:
 
 ```typescript
-import type { HookHandler } from "../../src/hooks/hooks.js";
+import type { HookHandler } from '../../src/hooks/hooks.js';
 
-const myHandler: HookHandler = async (event) => {
-  if (event.type !== "command" || event.action !== "new") {
+const myHandler: HookHandler = async event => {
+  if (event.type !== 'command' || event.action !== 'new') {
     return;
   }
 
   // Your logic here
-  console.log("New command triggered!");
+  console.log('New command triggered!');
 
   // Optionally send message to user
-  event.messages.push("✨ Hook executed!");
+  event.messages.push('✨ Hook executed!');
 };
 
 export default myHandler;

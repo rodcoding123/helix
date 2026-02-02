@@ -1,5 +1,5 @@
 ---
-summary: "Session pruning: tool-result trimming to reduce context bloat"
+summary: 'Session pruning: tool-result trimming to reduce context bloat'
 read_when:
   - You want to reduce LLM context growth from tool outputs
   - You are tuning agents.defaults.contextPruning
@@ -90,7 +90,7 @@ Default (off):
 ```json5
 {
   agent: {
-    contextPruning: { mode: "off" },
+    contextPruning: { mode: 'off' },
   },
 }
 ```
@@ -100,7 +100,7 @@ Enable TTL-aware pruning:
 ```json5
 {
   agent: {
-    contextPruning: { mode: "cache-ttl", ttl: "5m" },
+    contextPruning: { mode: 'cache-ttl', ttl: '5m' },
   },
 }
 ```
@@ -111,8 +111,8 @@ Restrict pruning to specific tools:
 {
   agent: {
     contextPruning: {
-      mode: "cache-ttl",
-      tools: { allow: ["exec", "read"], deny: ["*image*"] },
+      mode: 'cache-ttl',
+      tools: { allow: ['exec', 'read'], deny: ['*image*'] },
     },
   },
 }

@@ -1,5 +1,5 @@
 ---
-summary: "Run OpenClaw with Ollama (local LLM runtime)"
+summary: 'Run OpenClaw with Ollama (local LLM runtime)'
 read_when:
   - You want to run OpenClaw with local models via Ollama
   - You need Ollama setup and configuration guidance
@@ -39,7 +39,7 @@ openclaw config set models.providers.ollama.apiKey "ollama-local"
 {
   agents: {
     defaults: {
-      model: { primary: "ollama/llama3.3" },
+      model: { primary: 'ollama/llama3.3' },
     },
   },
 }
@@ -130,8 +130,8 @@ If Ollama is running on a different host or port (explicit config disables auto-
   models: {
     providers: {
       ollama: {
-        apiKey: "ollama-local",
-        baseUrl: "http://ollama-host:11434/v1",
+        apiKey: 'ollama-local',
+        baseUrl: 'http://ollama-host:11434/v1',
       },
     },
   },
@@ -147,8 +147,8 @@ Once configured, all your Ollama models are available:
   agents: {
     defaults: {
       model: {
-        primary: "ollama/llama3.3",
-        fallback: ["ollama/qwen2.5-coder:32b"],
+        primary: 'ollama/llama3.3',
+        fallback: ['ollama/qwen2.5-coder:32b'],
       },
     },
   },

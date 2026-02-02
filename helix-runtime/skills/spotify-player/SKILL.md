@@ -4,26 +4,26 @@ description: Terminal Spotify playback/search via spogo (preferred) or spotify_p
 homepage: https://www.spotify.com
 metadata:
   {
-    "openclaw":
+    'openclaw':
       {
-        "emoji": "🎵",
-        "requires": { "anyBins": ["spogo", "spotify_player"] },
-        "install":
+        'emoji': '🎵',
+        'requires': { 'anyBins': ['spogo', 'spotify_player'] },
+        'install':
           [
             {
-              "id": "brew",
-              "kind": "brew",
-              "formula": "spogo",
-              "tap": "steipete/tap",
-              "bins": ["spogo"],
-              "label": "Install spogo (brew)",
+              'id': 'brew',
+              'kind': 'brew',
+              'formula': 'spogo',
+              'tap': 'steipete/tap',
+              'bins': ['spogo'],
+              'label': 'Install spogo (brew)',
             },
             {
-              "id": "brew",
-              "kind": "brew",
-              "formula": "spotify_player",
-              "bins": ["spotify_player"],
-              "label": "Install spotify_player (brew)",
+              'id': 'brew',
+              'kind': 'brew',
+              'formula': 'spotify_player',
+              'bins': ['spotify_player'],
+              'label': 'Install spotify_player (brew)',
             },
           ],
       },

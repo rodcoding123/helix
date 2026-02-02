@@ -1,5 +1,5 @@
 ---
-summary: "Signal support via signal-cli (JSON-RPC + SSE), setup, and number model"
+summary: 'Signal support via signal-cli (JSON-RPC + SSE), setup, and number model'
 read_when:
   - Setting up Signal support
   - Debugging Signal send/receive
@@ -24,10 +24,10 @@ Minimal config:
   channels: {
     signal: {
       enabled: true,
-      account: "+15551234567",
-      cliPath: "signal-cli",
-      dmPolicy: "pairing",
-      allowFrom: ["+15557654321"],
+      account: '+15551234567',
+      cliPath: 'signal-cli',
+      dmPolicy: 'pairing',
+      allowFrom: ['+15557654321'],
     },
   },
 }
@@ -71,10 +71,10 @@ Example:
   channels: {
     signal: {
       enabled: true,
-      account: "+15551234567",
-      cliPath: "signal-cli",
-      dmPolicy: "pairing",
-      allowFrom: ["+15557654321"],
+      account: '+15551234567',
+      cliPath: 'signal-cli',
+      dmPolicy: 'pairing',
+      allowFrom: ['+15557654321'],
     },
   },
 }
@@ -90,7 +90,7 @@ If you want to manage `signal-cli` yourself (slow JVM cold starts, container ini
 {
   channels: {
     signal: {
-      httpUrl: "http://127.0.0.1:8080",
+      httpUrl: 'http://127.0.0.1:8080',
       autoStart: false,
     },
   },

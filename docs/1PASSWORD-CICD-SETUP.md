@@ -6,11 +6,11 @@ Complete guide for setting up Helix with 1Password in automated environments (Gi
 
 Helix supports three modes of secret management:
 
-| Mode | Location | Security | Best For |
-|------|----------|----------|----------|
-| **1Password** | 1Password Helix vault | ⭐⭐⭐ Excellent | Production, CI/CD |
-| **Service Account** | 1Password via token | ⭐⭐⭐ Excellent | Automated deployments |
-| **.env Fallback** | Local file | ⭐⭐ Good | Development only |
+| Mode                | Location              | Security         | Best For              |
+| ------------------- | --------------------- | ---------------- | --------------------- |
+| **1Password**       | 1Password Helix vault | ⭐⭐⭐ Excellent | Production, CI/CD     |
+| **Service Account** | 1Password via token   | ⭐⭐⭐ Excellent | Automated deployments |
+| **.env Fallback**   | Local file            | ⭐⭐ Good        | Development only      |
 
 ## Prerequisites
 
@@ -115,7 +115,7 @@ stages:
   - deploy
 
 variables:
-  HELIX_SECRETS_SOURCE: "1password"
+  HELIX_SECRETS_SOURCE: '1password'
 
 before_script:
   # Install 1Password CLI
@@ -228,24 +228,24 @@ spec:
         app: helix
     spec:
       containers:
-      - name: helix
-        image: helix:latest
-        env:
-        - name: OP_SERVICE_ACCOUNT_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: helix-1password
-              key: OP_SERVICE_ACCOUNT_TOKEN
-        - name: HELIX_SECRETS_SOURCE
-          value: "1password"
-        ports:
-        - containerPort: 3000
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 3000
-          initialDelaySeconds: 30
-          periodSeconds: 10
+        - name: helix
+          image: helix:latest
+          env:
+            - name: OP_SERVICE_ACCOUNT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: helix-1password
+                  key: OP_SERVICE_ACCOUNT_TOKEN
+            - name: HELIX_SECRETS_SOURCE
+              value: '1password'
+          ports:
+            - containerPort: 3000
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
 ```
 
 ## Step 6: Environment Variables per Platform
@@ -255,7 +255,7 @@ spec:
 ```yaml
 env:
   OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-  HELIX_SECRETS_SOURCE: "1password"
+  HELIX_SECRETS_SOURCE: '1password'
 ```
 
 ### GitLab CI:
@@ -263,7 +263,7 @@ env:
 ```yaml
 variables:
   OP_SERVICE_ACCOUNT_TOKEN: $OP_SERVICE_ACCOUNT_TOKEN
-  HELIX_SECRETS_SOURCE: "1password"
+  HELIX_SECRETS_SOURCE: '1password'
 ```
 
 ### CircleCI:
@@ -273,7 +273,7 @@ jobs:
   test:
     environment:
       OP_SERVICE_ACCOUNT_TOKEN: ${OP_SERVICE_ACCOUNT_TOKEN}
-      HELIX_SECRETS_SOURCE: "1password"
+      HELIX_SECRETS_SOURCE: '1password'
 ```
 
 ### Jenkins:

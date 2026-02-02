@@ -20,6 +20,7 @@ const result = await service.analyzeConversation(messages);
 ```
 
 **Problems:**
+
 - API keys exposed in constructor calls
 - Requires explicit env var management before instantiation
 - No automatic fallback mechanism
@@ -35,6 +36,7 @@ const result = await service.analyzeConversation(messages);
 ```
 
 **Benefits:**
+
 - No API keys exposed in code
 - Automatic loading from 1Password CLI or .env fallback
 - In-memory caching for performance
@@ -50,12 +52,14 @@ const result = await service.analyzeConversation(messages);
 **File:** `web/src/services/emotion-detection.ts`
 
 **Changes:**
+
 - Removed constructor parameter `apiKey: string`
 - Added private `apiKey: string | null` property
 - Added private async method `getApiKey(): Promise<string>` for lazy loading
 - Updated `analyzeConversation()` to call `await this.getApiKey()` before API calls
 
 **Implementation:**
+
 ```typescript
 import { loadSecret } from '@/lib/secrets-loader';
 
@@ -70,9 +74,7 @@ export class EmotionDetectionService {
     return this.apiKey;
   }
 
-  async analyzeConversation(
-    messages: ConversationMessage[]
-  ): Promise<EmotionAnalysis> {
+  async analyzeConversation(messages: ConversationMessage[]): Promise<EmotionAnalysis> {
     const apiKey = await this.getApiKey();
 
     const response = await fetch('https://api.deepseek.com/chat/completions', {
@@ -92,12 +94,14 @@ export class EmotionDetectionService {
 **File:** `web/src/services/topic-extraction.ts`
 
 **Changes:**
+
 - Removed constructor parameter `apiKey: string`
 - Added private `apiKey: string | null` property
 - Added private async method `getApiKey(): Promise<string>` for lazy loading
 - Updated `extractTopics()` to call `await this.getApiKey()` before API calls
 
 **Implementation:**
+
 ```typescript
 import { loadSecret } from '@/lib/secrets-loader';
 
@@ -112,9 +116,7 @@ export class TopicExtractionService {
     return this.apiKey;
   }
 
-  async extractTopics(
-    messages: ConversationMessage[]
-  ): Promise<ExtractedTopic[]> {
+  async extractTopics(messages: ConversationMessage[]): Promise<ExtractedTopic[]> {
     const apiKey = await this.getApiKey();
 
     const response = await fetch('https://api.deepseek.com/chat/completions', {
@@ -142,6 +144,7 @@ Already follows this pattern and supports legacy constructor for backward compat
 All test files have been updated to remove hardcoded API key parameters:
 
 ### Integration Tests
+
 **File:** `web/src/services/__tests__/integration.test.ts`
 
 ```typescript
@@ -159,6 +162,7 @@ beforeAll(() => {
 ```
 
 ### E2E Memory Flow Tests
+
 **File:** `web/src/services/__tests__/e2e-memory-flow.test.ts`
 
 ```typescript
@@ -180,16 +184,19 @@ embeddingService = new EmbeddingService();
 The `loadSecret()` function (from `src/lib/secrets-loader.ts`) provides:
 
 ### 1. Primary: 1Password CLI
+
 - Requires 1Password CLI installed and authenticated (`op account add`)
 - Uses `op item get` to fetch from Helix vault
 - **Mapping:** `"DeepSeek API Key"` → `DEEPSEEK_API_KEY`
 
 ### 2. Fallback: Environment Variables
+
 - Checked if 1Password unavailable
 - Searches `.env.local`, `.env` files
 - **Mapping:** `"DeepSeek API Key"` → `DEEPSEEK_API_KEY`
 
 ### 3. Caching
+
 - In-memory cache prevents repeated loads
 - Cleared only on application restart
 - Performance: ~0ms for cached secrets vs ~100-500ms for 1Password
@@ -201,6 +208,7 @@ The `loadSecret()` function (from `src/lib/secrets-loader.ts`) provides:
 ### For Development
 
 1. **Option A: Use 1Password CLI (Recommended)**
+
    ```bash
    # Install 1Password CLI (if not already installed)
    brew install 1password-cli  # macOS
@@ -231,10 +239,12 @@ The `loadSecret()` function (from `src/lib/secrets-loader.ts`) provides:
 ## List of Services Updated
 
 ### Primary Services
+
 - [x] EmotionDetectionService
 - [x] TopicExtractionService
 
 ### Already Using Pattern
+
 - [x] EmbeddingService
 - [ ] Other services to follow in subsequent phases
 
@@ -243,14 +253,17 @@ The `loadSecret()` function (from `src/lib/secrets-loader.ts`) provides:
 ## Performance Impact
 
 ### Latency
+
 - **First call:** +100-500ms (1Password CLI roundtrip)
 - **Subsequent calls:** ~0ms (in-memory cache)
 
 ### Network
+
 - No network calls (uses local 1Password CLI)
 - Cache size: negligible (single API key string)
 
 ### Reliability
+
 - Automatic .env fallback if 1Password unavailable
 - Error messages provide guidance on setup
 
@@ -261,6 +274,7 @@ The `loadSecret()` function (from `src/lib/secrets-loader.ts`) provides:
 To migrate additional services to this pattern:
 
 1. **Remove constructor parameter:**
+
    ```typescript
    // OLD
    constructor(apiKey: string) { this.apiKey = apiKey; }
@@ -270,6 +284,7 @@ To migrate additional services to this pattern:
    ```
 
 2. **Add lazy-loading method:**
+
    ```typescript
    private async getApiKey(): Promise<string> {
      if (this.apiKey) return this.apiKey;
@@ -279,6 +294,7 @@ To migrate additional services to this pattern:
    ```
 
 3. **Update all API calls:**
+
    ```typescript
    const apiKey = await this.getApiKey();
    // Use apiKey in fetch/request headers
@@ -327,17 +343,20 @@ npm run test:watch
 ## Troubleshooting
 
 ### Error: "1Password CLI not authenticated"
+
 ```bash
 op account add  # Authenticate with 1Password account
 op whoami       # Verify connection
 ```
 
 ### Error: "Secret 'DeepSeek API Key' not found"
+
 1. Verify secret exists in 1Password Helix vault
 2. Check .env file has `DEEPSEEK_API_KEY=...` as fallback
 3. Ensure .env is in correct location (project root or web/)
 
 ### Slow Tests
+
 - First test call: ~500ms (normal, 1Password roundtrip)
 - Subsequent calls: <1ms (cached)
 - Cache persists for test suite duration
@@ -355,6 +374,7 @@ op whoami       # Verify connection
 ## Future Work
 
 Phase 2-3 services to migrate:
+
 - EmbeddingService (already done, optional legacy support removed)
 - DatabaseService
 - StripeService
@@ -366,6 +386,7 @@ Phase 2-3 services to migrate:
 ## Contact
 
 For questions about 1Password integration:
+
 - See CLAUDE.md for full tech stack overview
 - Review src/lib/secrets-loader.ts for implementation details
 - Check .env.example for configuration template

@@ -1,5 +1,5 @@
 ---
-summary: "Use MiniMax M2.1 in OpenClaw"
+summary: 'Use MiniMax M2.1 in OpenClaw'
 read_when:
   - You want MiniMax models in OpenClaw
   - You need MiniMax setup guidance
@@ -67,21 +67,21 @@ Configure via CLI:
 
 ```json5
 {
-  env: { MINIMAX_API_KEY: "sk-..." },
-  agents: { defaults: { model: { primary: "minimax/MiniMax-M2.1" } } },
+  env: { MINIMAX_API_KEY: 'sk-...' },
+  agents: { defaults: { model: { primary: 'minimax/MiniMax-M2.1' } } },
   models: {
-    mode: "merge",
+    mode: 'merge',
     providers: {
       minimax: {
-        baseUrl: "https://api.minimax.io/anthropic",
-        apiKey: "${MINIMAX_API_KEY}",
-        api: "anthropic-messages",
+        baseUrl: 'https://api.minimax.io/anthropic',
+        apiKey: '${MINIMAX_API_KEY}',
+        api: 'anthropic-messages',
         models: [
           {
-            id: "MiniMax-M2.1",
-            name: "MiniMax M2.1",
+            id: 'MiniMax-M2.1',
+            name: 'MiniMax M2.1',
             reasoning: false,
-            input: ["text"],
+            input: ['text'],
             cost: { input: 15, output: 60, cacheRead: 2, cacheWrite: 10 },
             contextWindow: 200000,
             maxTokens: 8192,
@@ -99,16 +99,16 @@ Configure via CLI:
 
 ```json5
 {
-  env: { MINIMAX_API_KEY: "sk-..." },
+  env: { MINIMAX_API_KEY: 'sk-...' },
   agents: {
     defaults: {
       models: {
-        "anthropic/claude-opus-4-5": { alias: "opus" },
-        "minimax/MiniMax-M2.1": { alias: "minimax" },
+        'anthropic/claude-opus-4-5': { alias: 'opus' },
+        'minimax/MiniMax-M2.1': { alias: 'minimax' },
       },
       model: {
-        primary: "anthropic/claude-opus-4-5",
-        fallbacks: ["minimax/MiniMax-M2.1"],
+        primary: 'anthropic/claude-opus-4-5',
+        fallbacks: ['minimax/MiniMax-M2.1'],
       },
     },
   },
@@ -127,23 +127,23 @@ Configure manually via `openclaw.json`:
 {
   agents: {
     defaults: {
-      model: { primary: "lmstudio/minimax-m2.1-gs32" },
-      models: { "lmstudio/minimax-m2.1-gs32": { alias: "Minimax" } },
+      model: { primary: 'lmstudio/minimax-m2.1-gs32' },
+      models: { 'lmstudio/minimax-m2.1-gs32': { alias: 'Minimax' } },
     },
   },
   models: {
-    mode: "merge",
+    mode: 'merge',
     providers: {
       lmstudio: {
-        baseUrl: "http://127.0.0.1:1234/v1",
-        apiKey: "lmstudio",
-        api: "openai-responses",
+        baseUrl: 'http://127.0.0.1:1234/v1',
+        apiKey: 'lmstudio',
+        api: 'openai-responses',
         models: [
           {
-            id: "minimax-m2.1-gs32",
-            name: "MiniMax M2.1 GS32",
+            id: 'minimax-m2.1-gs32',
+            name: 'MiniMax M2.1 GS32',
             reasoning: false,
-            input: ["text"],
+            input: ['text'],
             cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
             contextWindow: 196608,
             maxTokens: 8192,

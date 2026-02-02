@@ -4,18 +4,18 @@ description: Monitor blogs and RSS/Atom feeds for updates using the blogwatcher 
 homepage: https://github.com/Hyaxia/blogwatcher
 metadata:
   {
-    "openclaw":
+    'openclaw':
       {
-        "emoji": "📰",
-        "requires": { "bins": ["blogwatcher"] },
-        "install":
+        'emoji': '📰',
+        'requires': { 'bins': ['blogwatcher'] },
+        'install':
           [
             {
-              "id": "go",
-              "kind": "go",
-              "module": "github.com/Hyaxia/blogwatcher/cmd/blogwatcher@latest",
-              "bins": ["blogwatcher"],
-              "label": "Install blogwatcher (go)",
+              'id': 'go',
+              'kind': 'go',
+              'module': 'github.com/Hyaxia/blogwatcher/cmd/blogwatcher@latest',
+              'bins': ['blogwatcher'],
+              'label': 'Install blogwatcher (go)',
             },
           ],
       },

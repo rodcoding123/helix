@@ -1,5 +1,5 @@
 ---
-summary: "Manual logins for browser automation + X/Twitter posting"
+summary: 'Manual logins for browser automation + X/Twitter posting'
 read_when:
   - You need to log into sites for browser automation
   - You want to post updates to X/Twitter
@@ -48,7 +48,7 @@ If the agent is sandboxed, the browser tool defaults to the sandbox. To allow ho
   agents: {
     defaults: {
       sandbox: {
-        mode: "non-main",
+        mode: 'non-main',
         browser: {
           allowHostControl: true,
         },

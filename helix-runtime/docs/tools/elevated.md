@@ -1,5 +1,5 @@
 ---
-summary: "Elevated exec mode and /elevated directives"
+summary: 'Elevated exec mode and /elevated directives'
 read_when:
   - Adjusting elevated mode defaults, allowlists, or slash command behavior
 ---

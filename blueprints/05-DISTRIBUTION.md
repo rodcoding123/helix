@@ -858,93 +858,81 @@ jobs:
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Download Helix</title>
-</head>
-<body>
+  </head>
+  <body>
     <main>
-        <h1>Download Helix</h1>
-        <p class="version">Version 1.0.0</p>
+      <h1>Download Helix</h1>
+      <p class="version">Version 1.0.0</p>
 
-        <div class="platforms">
-            <!-- Windows -->
-            <div class="platform" id="windows">
-                <img src="/icons/windows.svg" alt="Windows">
-                <h3>Windows</h3>
-                <p>Windows 10 or later</p>
-                <a href="/download/windows" class="download-btn primary">
-                    Download for Windows
-                </a>
-                <p class="size">~45 MB</p>
-            </div>
-
-            <!-- macOS -->
-            <div class="platform" id="macos">
-                <img src="/icons/apple.svg" alt="macOS">
-                <h3>macOS</h3>
-                <p>macOS 12 (Monterey) or later</p>
-                <div class="download-group">
-                    <a href="/download/macos-arm64" class="download-btn primary">
-                        Apple Silicon
-                    </a>
-                    <a href="/download/macos-x64" class="download-btn secondary">
-                        Intel
-                    </a>
-                </div>
-                <p class="size">~40 MB</p>
-            </div>
-
-            <!-- Linux -->
-            <div class="platform" id="linux">
-                <img src="/icons/linux.svg" alt="Linux">
-                <h3>Linux</h3>
-                <p>Ubuntu 22.04+, Fedora 38+, or equivalent</p>
-                <div class="download-group">
-                    <a href="/download/linux-appimage" class="download-btn primary">
-                        AppImage
-                    </a>
-                    <a href="/download/linux-deb" class="download-btn secondary">
-                        .deb
-                    </a>
-                    <a href="/download/linux-rpm" class="download-btn secondary">
-                        .rpm
-                    </a>
-                </div>
-                <p class="size">~50 MB</p>
-            </div>
+      <div class="platforms">
+        <!-- Windows -->
+        <div class="platform" id="windows">
+          <img src="/icons/windows.svg" alt="Windows" />
+          <h3>Windows</h3>
+          <p>Windows 10 or later</p>
+          <a href="/download/windows" class="download-btn primary"> Download for Windows </a>
+          <p class="size">~45 MB</p>
         </div>
 
-        <section class="requirements">
-            <h2>System Requirements</h2>
-            <ul>
-                <li>4 GB RAM minimum (8 GB recommended)</li>
-                <li>500 MB disk space</li>
-                <li>Internet connection (for AI features)</li>
-                <li>Anthropic API key (get one at anthropic.com)</li>
-            </ul>
-        </section>
+        <!-- macOS -->
+        <div class="platform" id="macos">
+          <img src="/icons/apple.svg" alt="macOS" />
+          <h3>macOS</h3>
+          <p>macOS 12 (Monterey) or later</p>
+          <div class="download-group">
+            <a href="/download/macos-arm64" class="download-btn primary"> Apple Silicon </a>
+            <a href="/download/macos-x64" class="download-btn secondary"> Intel </a>
+          </div>
+          <p class="size">~40 MB</p>
+        </div>
 
-        <section class="verification">
-            <h2>Verify Your Download</h2>
-            <p>All Helix downloads are signed. Verify the integrity:</p>
-            <pre><code>SHA256: abc123... (shown after download)</code></pre>
-        </section>
+        <!-- Linux -->
+        <div class="platform" id="linux">
+          <img src="/icons/linux.svg" alt="Linux" />
+          <h3>Linux</h3>
+          <p>Ubuntu 22.04+, Fedora 38+, or equivalent</p>
+          <div class="download-group">
+            <a href="/download/linux-appimage" class="download-btn primary"> AppImage </a>
+            <a href="/download/linux-deb" class="download-btn secondary"> .deb </a>
+            <a href="/download/linux-rpm" class="download-btn secondary"> .rpm </a>
+          </div>
+          <p class="size">~50 MB</p>
+        </div>
+      </div>
+
+      <section class="requirements">
+        <h2>System Requirements</h2>
+        <ul>
+          <li>4 GB RAM minimum (8 GB recommended)</li>
+          <li>500 MB disk space</li>
+          <li>Internet connection (for AI features)</li>
+          <li>Anthropic API key (get one at anthropic.com)</li>
+        </ul>
+      </section>
+
+      <section class="verification">
+        <h2>Verify Your Download</h2>
+        <p>All Helix downloads are signed. Verify the integrity:</p>
+        <pre><code>SHA256: abc123... (shown after download)</code></pre>
+      </section>
     </main>
 
     <script>
-        // Auto-detect platform and highlight
-        const platform = navigator.platform.toLowerCase();
-        if (platform.includes('win')) {
-            document.getElementById('windows').classList.add('detected');
-        } else if (platform.includes('mac')) {
-            document.getElementById('macos').classList.add('detected');
-        } else if (platform.includes('linux')) {
-            document.getElementById('linux').classList.add('detected');
-        }
+      // Auto-detect platform and highlight
+      const platform = navigator.platform.toLowerCase();
+      if (platform.includes('win')) {
+        document.getElementById('windows').classList.add('detected');
+      } else if (platform.includes('mac')) {
+        document.getElementById('macos').classList.add('detected');
+      } else if (platform.includes('linux')) {
+        document.getElementById('linux').classList.add('detected');
+      }
     </script>
-</body>
+  </body>
 </html>
 ```
 
@@ -954,11 +942,11 @@ jobs:
 
 ### Code Signing
 
-| Platform | Certificate Type | Provider | Renewal |
-|----------|------------------|----------|---------|
-| Windows | Authenticode EV | DigiCert / Sectigo | Annual |
-| macOS | Developer ID | Apple | Annual |
-| Linux | GPG | Self-managed | As needed |
+| Platform | Certificate Type | Provider           | Renewal   |
+| -------- | ---------------- | ------------------ | --------- |
+| Windows  | Authenticode EV  | DigiCert / Sectigo | Annual    |
+| macOS    | Developer ID     | Apple              | Annual    |
+| Linux    | GPG              | Self-managed       | As needed |
 
 ### Binary Verification
 
@@ -1027,6 +1015,7 @@ fn setup_crash_reporting() {
 
 ```markdown
 ## Pre-Release
+
 - [ ] All tests passing
 - [ ] Version bumped in package.json and tauri.conf.json
 - [ ] CHANGELOG.md updated
@@ -1034,6 +1023,7 @@ fn setup_crash_reporting() {
 - [ ] Security audit completed
 
 ## Build
+
 - [ ] Windows build successful
 - [ ] macOS x64 build successful
 - [ ] macOS arm64 build successful
@@ -1041,6 +1031,7 @@ fn setup_crash_reporting() {
 - [ ] All builds signed
 
 ## Test
+
 - [ ] Fresh install tested (Windows)
 - [ ] Fresh install tested (macOS Intel)
 - [ ] Fresh install tested (macOS Apple Silicon)
@@ -1049,6 +1040,7 @@ fn setup_crash_reporting() {
 - [ ] Auto-update mechanism tested
 
 ## Release
+
 - [ ] Upload to release server
 - [ ] Update latest.json manifests
 - [ ] Update website download links
@@ -1057,6 +1049,7 @@ fn setup_crash_reporting() {
 - [ ] Tweet/post announcement
 
 ## Post-Release
+
 - [ ] Monitor crash reports
 - [ ] Monitor download analytics
 - [ ] Respond to issues

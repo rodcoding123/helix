@@ -1,6 +1,6 @@
 ---
-summary: "Slack setup for socket or HTTP webhook mode"
-read_when: "Setting up Slack or debugging Slack socket/HTTP mode"
+summary: 'Slack setup for socket or HTTP webhook mode'
+read_when: 'Setting up Slack or debugging Slack socket/HTTP mode'
 ---
 
 # Slack
@@ -20,8 +20,8 @@ Minimal config:
   channels: {
     slack: {
       enabled: true,
-      appToken: "xapp-...",
-      botToken: "xoxb-...",
+      appToken: 'xapp-...',
+      botToken: 'xoxb-...',
     },
   },
 }
@@ -62,8 +62,8 @@ Or via config:
   channels: {
     slack: {
       enabled: true,
-      appToken: "xapp-...",
-      botToken: "xoxb-...",
+      appToken: 'xapp-...',
+      botToken: 'xoxb-...',
     },
   },
 }
@@ -87,9 +87,9 @@ Example with bot + app + user tokens:
   channels: {
     slack: {
       enabled: true,
-      appToken: "xapp-...",
-      botToken: "xoxb-...",
-      userToken: "xoxp-...",
+      appToken: 'xapp-...',
+      botToken: 'xoxb-...',
+      userToken: 'xoxp-...',
     },
   },
 }
@@ -102,9 +102,9 @@ Example with userTokenReadOnly explicitly set (allow user token writes):
   channels: {
     slack: {
       enabled: true,
-      appToken: "xapp-...",
-      botToken: "xoxb-...",
-      userToken: "xoxp-...",
+      appToken: 'xapp-...',
+      botToken: 'xoxb-...',
+      userToken: 'xoxp-...',
       userTokenReadOnly: false,
     },
   },
@@ -148,10 +148,10 @@ Example request URL:
   channels: {
     slack: {
       enabled: true,
-      mode: "http",
-      botToken: "xoxb-...",
-      signingSecret: "your-signing-secret",
-      webhookPath: "/slack/events",
+      mode: 'http',
+      botToken: 'xoxb-...',
+      signingSecret: 'your-signing-secret',
+      webhookPath: '/slack/events',
     },
   },
 }
@@ -392,10 +392,10 @@ You can configure different threading behavior per chat type by setting `channel
 {
   channels: {
     slack: {
-      replyToMode: "off", // default for channels
+      replyToMode: 'off', // default for channels
       replyToModeByChatType: {
-        direct: "all", // DMs always thread
-        group: "first", // group DMs/MPIM thread first reply
+        direct: 'all', // DMs always thread
+        group: 'first', // group DMs/MPIM thread first reply
       },
     },
   },
@@ -424,8 +424,8 @@ Thread DMs only:
 {
   channels: {
     slack: {
-      replyToMode: "off",
-      replyToModeByChatType: { direct: "all" },
+      replyToMode: 'off',
+      replyToModeByChatType: { direct: 'all' },
     },
   },
 }
@@ -437,8 +437,8 @@ Thread group DMs but keep channels in the root:
 {
   channels: {
     slack: {
-      replyToMode: "off",
-      replyToModeByChatType: { group: "first" },
+      replyToMode: 'off',
+      replyToModeByChatType: { group: 'first' },
     },
   },
 }
@@ -450,8 +450,8 @@ Make channels thread, keep DMs in the root:
 {
   channels: {
     slack: {
-      replyToMode: "first",
-      replyToModeByChatType: { direct: "off", group: "off" },
+      replyToMode: 'first',
+      replyToModeByChatType: { direct: 'off', group: 'off' },
     },
   },
 }

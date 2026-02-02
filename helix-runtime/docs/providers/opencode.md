@@ -1,5 +1,5 @@
 ---
-summary: "Use OpenCode Zen (curated models) with OpenClaw"
+summary: 'Use OpenCode Zen (curated models) with OpenClaw'
 read_when:
   - You want OpenCode Zen for model access
   - You want a curated list of coding-friendly models
@@ -23,8 +23,8 @@ openclaw onboard --opencode-zen-api-key "$OPENCODE_API_KEY"
 
 ```json5
 {
-  env: { OPENCODE_API_KEY: "sk-..." },
-  agents: { defaults: { model: { primary: "opencode/claude-opus-4-5" } } },
+  env: { OPENCODE_API_KEY: 'sk-...' },
+  agents: { defaults: { model: { primary: 'opencode/claude-opus-4-5' } } },
 }
 ```
 

@@ -1,5 +1,5 @@
 ---
-summary: "Install OpenClaw (recommended installer, global install, or from source)"
+summary: 'Install OpenClaw (recommended installer, global install, or from source)'
 read_when:
   - Installing OpenClaw
   - You want to install from GitHub

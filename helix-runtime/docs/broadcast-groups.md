@@ -1,5 +1,5 @@
 ---
-summary: "Broadcast a WhatsApp message to multiple agents"
+summary: 'Broadcast a WhatsApp message to multiple agents'
 read_when:
   - Configuring broadcast groups
   - Debugging multi-agent replies in WhatsApp
@@ -404,7 +404,7 @@ tail -f ~/.openclaw/logs/gateway.log | grep broadcast
 ```typescript
 interface OpenClawConfig {
   broadcast?: {
-    strategy?: "parallel" | "sequential";
+    strategy?: 'parallel' | 'sequential';
     [peerId: string]: string[];
   };
 }

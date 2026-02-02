@@ -1,7 +1,7 @@
 ---
-summary: "How OpenClaw sandboxing works: modes, scopes, workspace access, and images"
+summary: 'How OpenClaw sandboxing works: modes, scopes, workspace access, and images'
 title: Sandboxing
-read_when: "You want a dedicated explanation of sandboxing or need to tune agents.defaults.sandbox."
+read_when: 'You want a dedicated explanation of sandboxing or need to tune agents.defaults.sandbox.'
 status: active
 ---
 
@@ -79,16 +79,16 @@ Example (read-only source + docker socket):
     defaults: {
       sandbox: {
         docker: {
-          binds: ["/home/user/source:/source:ro", "/var/run/docker.sock:/var/run/docker.sock"],
+          binds: ['/home/user/source:/source:ro', '/var/run/docker.sock:/var/run/docker.sock'],
         },
       },
     },
     list: [
       {
-        id: "build",
+        id: 'build',
         sandbox: {
           docker: {
-            binds: ["/mnt/cache:/cache:rw"],
+            binds: ['/mnt/cache:/cache:rw'],
           },
         },
       },
@@ -177,9 +177,9 @@ See [Multi-Agent Sandbox & Tools](/multi-agent-sandbox-tools) for precedence.
   agents: {
     defaults: {
       sandbox: {
-        mode: "non-main",
-        scope: "session",
-        workspaceAccess: "none",
+        mode: 'non-main',
+        scope: 'session',
+        workspaceAccess: 'none',
       },
     },
   },

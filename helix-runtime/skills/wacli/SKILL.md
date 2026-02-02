@@ -4,25 +4,25 @@ description: Send WhatsApp messages to other people or search/sync WhatsApp hist
 homepage: https://wacli.sh
 metadata:
   {
-    "openclaw":
+    'openclaw':
       {
-        "emoji": "📱",
-        "requires": { "bins": ["wacli"] },
-        "install":
+        'emoji': '📱',
+        'requires': { 'bins': ['wacli'] },
+        'install':
           [
             {
-              "id": "brew",
-              "kind": "brew",
-              "formula": "steipete/tap/wacli",
-              "bins": ["wacli"],
-              "label": "Install wacli (brew)",
+              'id': 'brew',
+              'kind': 'brew',
+              'formula': 'steipete/tap/wacli',
+              'bins': ['wacli'],
+              'label': 'Install wacli (brew)',
             },
             {
-              "id": "go",
-              "kind": "go",
-              "module": "github.com/steipete/wacli/cmd/wacli@latest",
-              "bins": ["wacli"],
-              "label": "Install wacli (go)",
+              'id': 'go',
+              'kind': 'go',
+              'module': 'github.com/steipete/wacli/cmd/wacli@latest',
+              'bins': ['wacli'],
+              'label': 'Install wacli (go)',
             },
           ],
       },

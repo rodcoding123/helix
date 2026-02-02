@@ -1,5 +1,5 @@
 ---
-summary: "Group chat behavior across surfaces (WhatsApp/Telegram/Discord/Slack/Signal/iMessage/Microsoft Teams)"
+summary: 'Group chat behavior across surfaces (WhatsApp/Telegram/Discord/Slack/Signal/iMessage/Microsoft Teams)'
 read_when:
   - Changing group chat behavior or mention gating
 ---
@@ -72,9 +72,9 @@ Example (DMs on host, groups sandboxed + messaging-only tools):
   agents: {
     defaults: {
       sandbox: {
-        mode: "non-main", // groups/channels are non-main -> sandboxed
-        scope: "session", // strongest isolation (one container per group/channel)
-        workspaceAccess: "none",
+        mode: 'non-main', // groups/channels are non-main -> sandboxed
+        scope: 'session', // strongest isolation (one container per group/channel)
+        workspaceAccess: 'none',
       },
     },
   },
@@ -82,8 +82,8 @@ Example (DMs on host, groups sandboxed + messaging-only tools):
     sandbox: {
       tools: {
         // If allow is non-empty, everything else is blocked (deny still wins).
-        allow: ["group:messaging", "group:sessions"],
-        deny: ["group:runtime", "group:fs", "group:ui", "nodes", "cron", "gateway"],
+        allow: ['group:messaging', 'group:sessions'],
+        deny: ['group:runtime', 'group:fs', 'group:ui', 'nodes', 'cron', 'gateway'],
       },
     },
   },
@@ -97,13 +97,13 @@ Want “groups can only see folder X” instead of “no host access”? Keep `w
   agents: {
     defaults: {
       sandbox: {
-        mode: "non-main",
-        scope: "session",
-        workspaceAccess: "none",
+        mode: 'non-main',
+        scope: 'session',
+        workspaceAccess: 'none',
         docker: {
           binds: [
             // hostPath:containerPath:mode
-            "~/FriendsShared:/data:ro",
+            '~/FriendsShared:/data:ro',
           ],
         },
       },
@@ -131,41 +131,41 @@ Control how group/room messages are handled per channel:
 {
   channels: {
     whatsapp: {
-      groupPolicy: "disabled", // "open" | "disabled" | "allowlist"
-      groupAllowFrom: ["+15551234567"],
+      groupPolicy: 'disabled', // "open" | "disabled" | "allowlist"
+      groupAllowFrom: ['+15551234567'],
     },
     telegram: {
-      groupPolicy: "disabled",
-      groupAllowFrom: ["123456789", "@username"],
+      groupPolicy: 'disabled',
+      groupAllowFrom: ['123456789', '@username'],
     },
     signal: {
-      groupPolicy: "disabled",
-      groupAllowFrom: ["+15551234567"],
+      groupPolicy: 'disabled',
+      groupAllowFrom: ['+15551234567'],
     },
     imessage: {
-      groupPolicy: "disabled",
-      groupAllowFrom: ["chat_id:123"],
+      groupPolicy: 'disabled',
+      groupAllowFrom: ['chat_id:123'],
     },
     msteams: {
-      groupPolicy: "disabled",
-      groupAllowFrom: ["user@org.com"],
+      groupPolicy: 'disabled',
+      groupAllowFrom: ['user@org.com'],
     },
     discord: {
-      groupPolicy: "allowlist",
+      groupPolicy: 'allowlist',
       guilds: {
         GUILD_ID: { channels: { help: { allow: true } } },
       },
     },
     slack: {
-      groupPolicy: "allowlist",
-      channels: { "#general": { allow: true } },
+      groupPolicy: 'allowlist',
+      channels: { '#general': { allow: true } },
     },
     matrix: {
-      groupPolicy: "allowlist",
-      groupAllowFrom: ["@owner:example.org"],
+      groupPolicy: 'allowlist',
+      groupAllowFrom: ['@owner:example.org'],
       groups: {
-        "!roomId:example.org": { allow: true },
-        "#alias:example.org": { allow: true },
+        '!roomId:example.org': { allow: true },
+        '#alias:example.org': { allow: true },
       },
     },
   },
@@ -206,29 +206,29 @@ Replying to a bot message counts as an implicit mention (when the channel suppor
   channels: {
     whatsapp: {
       groups: {
-        "*": { requireMention: true },
-        "123@g.us": { requireMention: false },
+        '*': { requireMention: true },
+        '123@g.us': { requireMention: false },
       },
     },
     telegram: {
       groups: {
-        "*": { requireMention: true },
-        "123456789": { requireMention: false },
+        '*': { requireMention: true },
+        '123456789': { requireMention: false },
       },
     },
     imessage: {
       groups: {
-        "*": { requireMention: true },
-        "123": { requireMention: false },
+        '*': { requireMention: true },
+        '123': { requireMention: false },
       },
     },
   },
   agents: {
     list: [
       {
-        id: "main",
+        id: 'main',
         groupChat: {
-          mentionPatterns: ["@openclaw", "openclaw", "\\+15555550123"],
+          mentionPatterns: ['@openclaw', 'openclaw', '\\+15555550123'],
           historyLimit: 50,
         },
       },
@@ -267,11 +267,11 @@ Example (Telegram):
   channels: {
     telegram: {
       groups: {
-        "*": { tools: { deny: ["exec"] } },
-        "-1001234567890": {
-          tools: { deny: ["exec", "read", "write"] },
+        '*': { tools: { deny: ['exec'] } },
+        '-1001234567890': {
+          tools: { deny: ['exec', 'read', 'write'] },
           toolsBySender: {
-            "123456789": { alsoAllow: ["exec"] },
+            '123456789': { alsoAllow: ['exec'] },
           },
         },
       },
@@ -295,7 +295,7 @@ Common intents (copy/paste):
 
 ```json5
 {
-  channels: { whatsapp: { groupPolicy: "disabled" } },
+  channels: { whatsapp: { groupPolicy: 'disabled' } },
 }
 ```
 
@@ -306,8 +306,8 @@ Common intents (copy/paste):
   channels: {
     whatsapp: {
       groups: {
-        "123@g.us": { requireMention: true },
-        "456@g.us": { requireMention: false },
+        '123@g.us': { requireMention: true },
+        '456@g.us': { requireMention: false },
       },
     },
   },
@@ -320,7 +320,7 @@ Common intents (copy/paste):
 {
   channels: {
     whatsapp: {
-      groups: { "*": { requireMention: true } },
+      groups: { '*': { requireMention: true } },
     },
   },
 }
@@ -332,9 +332,9 @@ Common intents (copy/paste):
 {
   channels: {
     whatsapp: {
-      groupPolicy: "allowlist",
-      groupAllowFrom: ["+15551234567"],
-      groups: { "*": { requireMention: true } },
+      groupPolicy: 'allowlist',
+      groupAllowFrom: ['+15551234567'],
+      groups: { '*': { requireMention: true } },
     },
   },
 }

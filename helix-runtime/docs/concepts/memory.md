@@ -1,5 +1,5 @@
 ---
-summary: "How OpenClaw memory works (workspace files + automatic memory flush)"
+summary: 'How OpenClaw memory works (workspace files + automatic memory flush)'
 read_when:
   - You want the memory file layout and workflow
   - You want to tune the automatic pre-compaction memory flush
@@ -53,8 +53,8 @@ This is controlled by `agents.defaults.compaction.memoryFlush`:
         memoryFlush: {
           enabled: true,
           softThresholdTokens: 4000,
-          systemPrompt: "Session nearing compaction. Store durable memories now.",
-          prompt: "Write any lasting notes to memory/YYYY-MM-DD.md; reply with NO_REPLY if nothing to store.",
+          systemPrompt: 'Session nearing compaction. Store durable memories now.',
+          prompt: 'Write any lasting notes to memory/YYYY-MM-DD.md; reply with NO_REPLY if nothing to store.',
         },
       },
     },

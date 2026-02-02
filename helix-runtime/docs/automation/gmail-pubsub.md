@@ -1,5 +1,5 @@
 ---
-summary: "Gmail Pub/Sub push wired into OpenClaw webhooks via gogcli"
+summary: 'Gmail Pub/Sub push wired into OpenClaw webhooks via gogcli'
 read_when:
   - Wiring Gmail inbox triggers to OpenClaw
   - Setting up Pub/Sub push for agent wake
@@ -24,9 +24,9 @@ Example hook config (enable Gmail preset mapping):
 {
   hooks: {
     enabled: true,
-    token: "OPENCLAW_HOOK_TOKEN",
-    path: "/hooks",
-    presets: ["gmail"],
+    token: 'OPENCLAW_HOOK_TOKEN',
+    path: '/hooks',
+    presets: ['gmail'],
   },
 }
 ```
@@ -38,19 +38,19 @@ that sets `deliver` + optional `channel`/`to`:
 {
   hooks: {
     enabled: true,
-    token: "OPENCLAW_HOOK_TOKEN",
-    presets: ["gmail"],
+    token: 'OPENCLAW_HOOK_TOKEN',
+    presets: ['gmail'],
     mappings: [
       {
-        match: { path: "gmail" },
-        action: "agent",
-        wakeMode: "now",
-        name: "Gmail",
-        sessionKey: "hook:gmail:{{messages[0].id}}",
-        messageTemplate: "New email from {{messages[0].from}}\nSubject: {{messages[0].subject}}\n{{messages[0].snippet}}\n{{messages[0].body}}",
-        model: "openai/gpt-5.2-mini",
+        match: { path: 'gmail' },
+        action: 'agent',
+        wakeMode: 'now',
+        name: 'Gmail',
+        sessionKey: 'hook:gmail:{{messages[0].id}}',
+        messageTemplate: 'New email from {{messages[0].from}}\nSubject: {{messages[0].subject}}\n{{messages[0].snippet}}\n{{messages[0].body}}',
+        model: 'openai/gpt-5.2-mini',
         deliver: true,
-        channel: "last",
+        channel: 'last',
         // to: "+15551234567"
       },
     ],
@@ -71,8 +71,8 @@ To set a default model and thinking level specifically for Gmail hooks, add
 {
   hooks: {
     gmail: {
-      model: "openrouter/meta-llama/llama-3.3-70b-instruct:free",
-      thinking: "off",
+      model: 'openrouter/meta-llama/llama-3.3-70b-instruct:free',
+      thinking: 'off',
     },
   },
 }

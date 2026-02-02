@@ -8,30 +8,34 @@ These blueprints define the complete transformation of Helix into a standalone d
 
 ## Quick Summary
 
-| Aspect | Current State | Target State |
-|--------|---------------|--------------|
+| Aspect       | Current State                                      | Target State                     |
+| ------------ | -------------------------------------------------- | -------------------------------- |
 | Installation | `iwr -useb https://openclaw.ai/install.ps1 \| iex` | Download .exe/.dmg, double-click |
-| Interface | CLI + TUI | Native GUI (Tauri + React) |
-| Onboarding | CLI commands | Visual wizard |
-| Branding | OpenClaw visible | Pure "Helix" |
-| Target Users | Developers | Everyone |
-| Distribution | npm/script | Website + auto-updates |
+| Interface    | CLI + TUI                                          | Native GUI (Tauri + React)       |
+| Onboarding   | CLI commands                                       | Visual wizard                    |
+| Branding     | OpenClaw visible                                   | Pure "Helix"                     |
+| Target Users | Developers                                         | Everyone                         |
+| Distribution | npm/script                                         | Website + auto-updates           |
 
 ## Blueprints
 
 ### [01 - Master Architecture](./01-MASTER-ARCHITECTURE.md)
+
 The complete system design showing how all components fit together.
 
 **Key decisions:**
+
 - Tauri 2.0 for desktop shell (Rust backend, React frontend)
 - Node.js bundled for Helix Engine
 - Gateway WebSocket as primary interface
 - Optional cloud sync via Supabase
 
 ### [02 - Desktop App](./02-DESKTOP-APP.md)
+
 Technical specification for the Tauri-based desktop application.
 
 **Covers:**
+
 - Project structure
 - Rust backend implementation
 - React frontend components
@@ -39,9 +43,11 @@ Technical specification for the Tauri-based desktop application.
 - Platform-specific notes
 
 ### [03 - OpenClaw Integration](./03-OPENCLAW-INTEGRATION.md)
+
 Strategy for absorbing OpenClaw as the internal "Helix Engine."
 
 **Key points:**
+
 - Remove CLI components
 - Keep Gateway as primary interface
 - Create programmatic API
@@ -49,9 +55,11 @@ Strategy for absorbing OpenClaw as the internal "Helix Engine."
 - Full Helix branding
 
 ### [04 - Onboarding Wizard](./04-ONBOARDING-WIZARD.md)
+
 First-run experience design for new users.
 
 **Flow:**
+
 1. Welcome
 2. Account (optional)
 3. AI Provider (API key)
@@ -62,18 +70,22 @@ First-run experience design for new users.
 8. Completion
 
 **Modes:**
+
 - Fast path (~3-5 minutes) - smart defaults
 - Advanced path (~8-12 minutes) - full control
 
 ### [05 - Distribution](./05-DISTRIBUTION.md)
+
 Packaging, signing, and delivering Helix to users.
 
 **Platforms:**
+
 - Windows: NSIS installer (.exe)
 - macOS: DMG with notarization
 - Linux: AppImage, .deb, .rpm
 
 **Features:**
+
 - Code signing on all platforms
 - Auto-updates via Tauri Updater
 - Download page at project-helix.org
@@ -83,6 +95,7 @@ Packaging, signing, and delivering Helix to users.
 ## Implementation Phases
 
 ### Phase 1: Foundation (Weeks 1-4)
+
 - [ ] Initialize Tauri project
 - [ ] Set up build pipeline
 - [ ] Port React components from web/
@@ -90,6 +103,7 @@ Packaging, signing, and delivering Helix to users.
 - [ ] Basic Gateway spawner
 
 ### Phase 2: Core Features (Weeks 5-8)
+
 - [ ] Complete chat interface
 - [ ] Settings panel
 - [ ] Basic onboarding wizard
@@ -97,6 +111,7 @@ Packaging, signing, and delivering Helix to users.
 - [ ] System tray
 
 ### Phase 3: Integration (Weeks 9-12)
+
 - [ ] Create helix-engine package
 - [ ] Remove OpenClaw CLI
 - [ ] Integrate psychological architecture
@@ -104,6 +119,7 @@ Packaging, signing, and delivering Helix to users.
 - [ ] Hash chain integrity
 
 ### Phase 4: Polish (Weeks 13-16)
+
 - [ ] Advanced onboarding features
 - [ ] Psychology visualization
 - [ ] Memory browser
@@ -111,6 +127,7 @@ Packaging, signing, and delivering Helix to users.
 - [ ] Accessibility audit
 
 ### Phase 5: Distribution (Weeks 17-20)
+
 - [ ] Code signing setup
 - [ ] Installer creation
 - [ ] Auto-update testing
@@ -143,12 +160,12 @@ Packaging, signing, and delivering Helix to users.
 
 ### Why Tauri over Electron?
 
-| Factor | Electron | Tauri |
-|--------|----------|-------|
-| Bundle size | ~150MB+ | ~15-50MB |
-| Memory usage | Higher | Lower |
-| Security | Node.js surface | Rust sandbox |
-| Self-modification | ✅ Runtime | ❌ Binary |
+| Factor            | Electron        | Tauri        |
+| ----------------- | --------------- | ------------ |
+| Bundle size       | ~150MB+         | ~15-50MB     |
+| Memory usage      | Higher          | Lower        |
+| Security          | Node.js surface | Rust sandbox |
+| Self-modification | ✅ Runtime      | ❌ Binary    |
 
 **Decision**: Tauri. Helix's self-modification happens at the filesystem level (configs, psychology, skills), not the app shell. Smaller bundles are critical for "normie" adoption.
 

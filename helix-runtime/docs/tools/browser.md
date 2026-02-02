@@ -1,5 +1,5 @@
 ---
-summary: "Integrated browser control service + action commands"
+summary: 'Integrated browser control service + action commands'
 read_when:
   - Adding agent-controlled browser automation
   - Debugging why openclaw is interfering with your own Chrome
@@ -61,16 +61,16 @@ Browser settings live in `~/.openclaw/openclaw.json`.
     // cdpUrl: "http://127.0.0.1:18792", // legacy single-profile override
     remoteCdpTimeoutMs: 1500, // remote CDP HTTP timeout (ms)
     remoteCdpHandshakeTimeoutMs: 3000, // remote CDP WebSocket handshake timeout (ms)
-    defaultProfile: "chrome",
-    color: "#FF4500",
+    defaultProfile: 'chrome',
+    color: '#FF4500',
     headless: false,
     noSandbox: false,
     attachOnly: false,
-    executablePath: "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+    executablePath: '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser',
     profiles: {
-      openclaw: { cdpPort: 18800, color: "#FF4500" },
-      work: { cdpPort: 18801, color: "#0066CC" },
-      remote: { cdpUrl: "http://10.0.0.42:9222", color: "#00AA00" },
+      openclaw: { cdpPort: 18800, color: '#FF4500' },
+      work: { cdpPort: 18801, color: '#0066CC' },
+      remote: { cdpUrl: 'http://10.0.0.42:9222', color: '#00AA00' },
     },
   },
 }
@@ -168,13 +168,13 @@ Example:
 {
   browser: {
     enabled: true,
-    defaultProfile: "browserless",
+    defaultProfile: 'browserless',
     remoteCdpTimeoutMs: 2000,
     remoteCdpHandshakeTimeoutMs: 4000,
     profiles: {
       browserless: {
-        cdpUrl: "https://production-sfo.browserless.io?token=<BROWSERLESS_API_KEY>",
-        color: "#00AA00",
+        cdpUrl: 'https://production-sfo.browserless.io?token=<BROWSERLESS_API_KEY>',
+        color: '#00AA00',
       },
     },
   },

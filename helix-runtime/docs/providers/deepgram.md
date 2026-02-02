@@ -1,5 +1,5 @@
 ---
-summary: "Deepgram transcription for inbound voice notes"
+summary: 'Deepgram transcription for inbound voice notes'
 read_when:
   - You want Deepgram speech-to-text for audio attachments
   - You need a quick Deepgram config example
@@ -33,7 +33,7 @@ DEEPGRAM_API_KEY=dg_...
     media: {
       audio: {
         enabled: true,
-        models: [{ provider: "deepgram", model: "nova-3" }],
+        models: [{ provider: 'deepgram', model: 'nova-3' }],
       },
     },
   },
@@ -56,7 +56,7 @@ Example with language:
     media: {
       audio: {
         enabled: true,
-        models: [{ provider: "deepgram", model: "nova-3", language: "en" }],
+        models: [{ provider: 'deepgram', model: 'nova-3', language: 'en' }],
       },
     },
   },
@@ -78,7 +78,7 @@ Example with Deepgram options:
             smart_format: true,
           },
         },
-        models: [{ provider: "deepgram", model: "nova-3" }],
+        models: [{ provider: 'deepgram', model: 'nova-3' }],
       },
     },
   },

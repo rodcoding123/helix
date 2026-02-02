@@ -1,5 +1,5 @@
 ---
-summary: "WhatsApp (web channel) integration: login, inbox, replies, media, and ops"
+summary: 'WhatsApp (web channel) integration: login, inbox, replies, media, and ops'
 read_when:
   - Working on WhatsApp/web channel behavior or inbox routing
 ---
@@ -21,8 +21,8 @@ Minimal config:
 {
   channels: {
     whatsapp: {
-      dmPolicy: "allowlist",
-      allowFrom: ["+15551234567"],
+      dmPolicy: 'allowlist',
+      allowFrom: ['+15551234567'],
     },
   },
 }
@@ -68,8 +68,8 @@ Use a **separate phone number** for OpenClaw. Best UX, clean routing, no self-ch
 {
   channels: {
     whatsapp: {
-      dmPolicy: "allowlist",
-      allowFrom: ["+15551234567"],
+      dmPolicy: 'allowlist',
+      allowFrom: ['+15551234567'],
     },
   },
 }

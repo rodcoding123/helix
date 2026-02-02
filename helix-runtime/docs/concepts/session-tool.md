@@ -1,5 +1,5 @@
 ---
-summary: "Agent session tools for listing sessions, fetching history, and sending cross-session messages"
+summary: 'Agent session tools for listing sessions, fetching history, and sending cross-session messages'
 read_when:
   - Adding or modifying session tools
 ---
@@ -184,7 +184,7 @@ Config:
     defaults: {
       sandbox: {
         // default: "spawned"
-        sessionToolsVisibility: "spawned", // or "all"
+        sessionToolsVisibility: 'spawned', // or "all"
       },
     },
   },

@@ -4,26 +4,26 @@ description: X/Twitter CLI for reading, searching, posting, and engagement via c
 homepage: https://bird.fast
 metadata:
   {
-    "openclaw":
+    'openclaw':
       {
-        "emoji": "🐦",
-        "requires": { "bins": ["bird"] },
-        "install":
+        'emoji': '🐦',
+        'requires': { 'bins': ['bird'] },
+        'install':
           [
             {
-              "id": "brew",
-              "kind": "brew",
-              "formula": "steipete/tap/bird",
-              "bins": ["bird"],
-              "label": "Install bird (brew)",
-              "os": ["darwin"],
+              'id': 'brew',
+              'kind': 'brew',
+              'formula': 'steipete/tap/bird',
+              'bins': ['bird'],
+              'label': 'Install bird (brew)',
+              'os': ['darwin'],
             },
             {
-              "id": "npm",
-              "kind": "node",
-              "package": "@steipete/bird",
-              "bins": ["bird"],
-              "label": "Install bird (npm)",
+              'id': 'npm',
+              'kind': 'node',
+              'package': '@steipete/bird',
+              'bins': ['bird'],
+              'label': 'Install bird (npm)',
             },
           ],
       },
@@ -196,8 +196,8 @@ bird replies <id> --all --delay 1000    # Delay between pages (ms)
 
 ```json5
 {
-  cookieSource: ["chrome"],
-  chromeProfileDir: "/path/to/Arc/Profile",
+  cookieSource: ['chrome'],
+  chromeProfileDir: '/path/to/Arc/Profile',
   timeoutMs: 20000,
   quoteDepth: 1,
 }

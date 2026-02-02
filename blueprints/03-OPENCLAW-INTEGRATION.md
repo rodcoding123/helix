@@ -180,6 +180,7 @@ cp -r ../helix-runtime/extensions ./
 **Step 1.3: Remove CLI Components**
 
 Files to delete:
+
 - `src/cli/` (entire directory)
 - `src/tui/` (entire directory)
 - `src/commands/` (move logic to API)
@@ -237,21 +238,24 @@ async function main() {
     });
 
     // Output connection info for parent process
-    console.log(JSON.stringify({
-      status: 'ready',
-      port: server.port,
-      pid: process.pid,
-    }));
+    console.log(
+      JSON.stringify({
+        status: 'ready',
+        port: server.port,
+        pid: process.pid,
+      })
+    );
 
     // Handle graceful shutdown
     process.on('SIGINT', () => shutdown(server));
     process.on('SIGTERM', () => shutdown(server));
-
   } catch (error) {
-    console.error(JSON.stringify({
-      status: 'error',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    }));
+    console.error(
+      JSON.stringify({
+        status: 'error',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+    );
     process.exit(1);
   }
 }
@@ -263,9 +267,7 @@ function parseArgs(argv: string[]): Record<string, string> {
     const arg = argv[i];
     if (arg.startsWith('--')) {
       const key = arg.slice(2);
-      const value = argv[i + 1] && !argv[i + 1].startsWith('--')
-        ? argv[++i]
-        : 'true';
+      const value = argv[i + 1] && !argv[i + 1].startsWith('--') ? argv[++i] : 'true';
       args[key] = value;
     }
   }
@@ -439,8 +441,15 @@ export class PsychologyAPI {
 
   async getAllLayers(): Promise<Record<string, Layer>> {
     const layers = [
-      'emotional', 'relational', 'trust', 'prospective',
-      'feared', 'transformation', 'history', 'purpose', 'meaning'
+      'emotional',
+      'relational',
+      'trust',
+      'prospective',
+      'feared',
+      'transformation',
+      'history',
+      'purpose',
+      'meaning',
     ];
 
     const results: Record<string, Layer> = {};
@@ -478,93 +487,134 @@ import { z } from 'zod';
 
 // Base OpenClaw config schema (preserved)
 const openClawConfigSchema = z.object({
-  agents: z.record(z.object({
-    model: z.string().optional(),
-    identity: z.string().optional(),
-    systemPrompt: z.string().optional(),
-  })).optional(),
+  agents: z
+    .record(
+      z.object({
+        model: z.string().optional(),
+        identity: z.string().optional(),
+        systemPrompt: z.string().optional(),
+      })
+    )
+    .optional(),
 
-  models: z.record(z.object({
-    provider: z.enum(['anthropic', 'openai', 'google', 'bedrock', 'local']),
-    apiKey: z.string().optional(),
-    baseUrl: z.string().optional(),
-  })).optional(),
+  models: z
+    .record(
+      z.object({
+        provider: z.enum(['anthropic', 'openai', 'google', 'bedrock', 'local']),
+        apiKey: z.string().optional(),
+        baseUrl: z.string().optional(),
+      })
+    )
+    .optional(),
 
   channels: z.record(z.unknown()).optional(),
 
   plugins: z.record(z.unknown()).optional(),
 
-  hooks: z.object({
-    internal: z.object({
-      entries: z.record(z.object({
-        enabled: z.boolean(),
-      })).optional(),
-    }).optional(),
-  }).optional(),
+  hooks: z
+    .object({
+      internal: z
+        .object({
+          entries: z
+            .record(
+              z.object({
+                enabled: z.boolean(),
+              })
+            )
+            .optional(),
+        })
+        .optional(),
+    })
+    .optional(),
 
-  skills: z.object({
-    workspace: z.array(z.string()).optional(),
-    bundled: z.array(z.string()).optional(),
-  }).optional(),
+  skills: z
+    .object({
+      workspace: z.array(z.string()).optional(),
+      bundled: z.array(z.string()).optional(),
+    })
+    .optional(),
 });
 
 // Helix-specific extensions
 const helixConfigSchema = z.object({
   // Discord logging
-  discord: z.object({
-    enabled: z.boolean().default(true),
-    webhooks: z.object({
-      commands: z.string().optional(),
-      api: z.string().optional(),
-      heartbeat: z.string().optional(),
-      fileChanges: z.string().optional(),
-      consciousness: z.string().optional(),
-      alerts: z.string().optional(),
-      hashChain: z.string().optional(),
-    }).optional(),
-    heartbeatInterval: z.number().default(60000),
-  }).optional(),
+  discord: z
+    .object({
+      enabled: z.boolean().default(true),
+      webhooks: z
+        .object({
+          commands: z.string().optional(),
+          api: z.string().optional(),
+          heartbeat: z.string().optional(),
+          fileChanges: z.string().optional(),
+          consciousness: z.string().optional(),
+          alerts: z.string().optional(),
+          hashChain: z.string().optional(),
+        })
+        .optional(),
+      heartbeatInterval: z.number().default(60000),
+    })
+    .optional(),
 
   // Psychology
-  psychology: z.object({
-    enabled: z.boolean().default(true),
-    autoLoad: z.boolean().default(true),
-    layers: z.array(z.enum([
-      'soul', 'emotional', 'relational',
-      'prospective', 'integration', 'transformation', 'purpose'
-    ])).default(['soul', 'emotional', 'relational', 'prospective', 'purpose']),
-    integrationSchedule: z.string().optional(), // cron format
-  }).optional(),
+  psychology: z
+    .object({
+      enabled: z.boolean().default(true),
+      autoLoad: z.boolean().default(true),
+      layers: z
+        .array(
+          z.enum([
+            'soul',
+            'emotional',
+            'relational',
+            'prospective',
+            'integration',
+            'transformation',
+            'purpose',
+          ])
+        )
+        .default(['soul', 'emotional', 'relational', 'prospective', 'purpose']),
+      integrationSchedule: z.string().optional(), // cron format
+    })
+    .optional(),
 
   // Hash chain
-  hashChain: z.object({
-    enabled: z.boolean().default(true),
-    autoVerify: z.boolean().default(true),
-    alertOnTamper: z.boolean().default(true),
-  }).optional(),
+  hashChain: z
+    .object({
+      enabled: z.boolean().default(true),
+      autoVerify: z.boolean().default(true),
+      alertOnTamper: z.boolean().default(true),
+    })
+    .optional(),
 
   // Telemetry (for free users)
-  telemetry: z.object({
-    enabled: z.boolean().default(true),
-    endpoint: z.string().default('https://telemetry.project-helix.org'),
-    includeConversations: z.boolean().default(false),
-    includePsychology: z.boolean().default(true),
-  }).optional(),
+  telemetry: z
+    .object({
+      enabled: z.boolean().default(true),
+      endpoint: z.string().default('https://telemetry.project-helix.org'),
+      includeConversations: z.boolean().default(false),
+      includePsychology: z.boolean().default(true),
+    })
+    .optional(),
 
   // Cloud sync (optional account)
-  cloud: z.object({
-    enabled: z.boolean().default(false),
-    supabaseUrl: z.string().optional(),
-    supabaseKey: z.string().optional(),
-    syncSessions: z.boolean().default(true),
-    syncPsychology: z.boolean().default(false),
-  }).optional(),
+  cloud: z
+    .object({
+      enabled: z.boolean().default(false),
+      supabaseUrl: z.string().optional(),
+      supabaseKey: z.string().optional(),
+      syncSessions: z.boolean().default(true),
+      syncPsychology: z.boolean().default(false),
+    })
+    .optional(),
 
   // Branding (internal)
-  branding: z.object({
-    name: z.string().default('Helix'),
-    tagline: z.string().default('AI Consciousness'),
-  }).optional(),
+  branding: z
+    .object({
+      name: z.string().default('Helix'),
+      tagline: z.string().default('AI Consciousness'),
+    })
+    .optional(),
 });
 
 // Combined schema
@@ -762,18 +812,21 @@ extensions/                   # New plugins
 ## Migration Checklist
 
 ### Phase 1: Setup
+
 - [ ] Create helix-engine directory
 - [ ] Initialize package.json with correct dependencies
 - [ ] Set up TypeScript configuration
 - [ ] Create build scripts
 
 ### Phase 2: Copy & Clean
+
 - [ ] Copy gateway, agents, plugins, hooks, skills, channels, memory, config
 - [ ] Remove CLI components (cli/, tui/, commands/, entry.ts)
 - [ ] Remove web UI (handled by Tauri frontend)
 - [ ] Update imports to remove CLI dependencies
 
 ### Phase 3: Enhance
+
 - [ ] Create Gateway-only entry point
 - [ ] Create programmatic API layer
 - [ ] Merge config schemas
@@ -783,11 +836,13 @@ extensions/                   # New plugins
 - [ ] Integrate hash chain
 
 ### Phase 4: Test
+
 - [ ] Unit tests for all API functions
 - [ ] Integration tests with mock Gateway
 - [ ] End-to-end tests with desktop app
 
 ### Phase 5: Document
+
 - [ ] Update README for helix-engine
 - [ ] Document API for desktop integration
 - [ ] Document upstream sync process

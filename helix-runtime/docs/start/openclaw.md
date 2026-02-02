@@ -1,5 +1,5 @@
 ---
-summary: "End-to-end guide for running OpenClaw as a personal assistant with safety cautions"
+summary: 'End-to-end guide for running OpenClaw as a personal assistant with safety cautions'
 read_when:
   - Onboarding a new assistant instance
   - Reviewing safety/permission implications
@@ -84,7 +84,7 @@ openclaw gateway --port 18789
 
 ```json5
 {
-  channels: { whatsapp: { allowFrom: ["+15555550123"] } },
+  channels: { whatsapp: { allowFrom: ['+15555550123'] } },
 }
 ```
 
@@ -112,7 +112,7 @@ Optional: choose a different workspace with `agents.defaults.workspace` (support
 ```json5
 {
   agent: {
-    workspace: "~/.openclaw/workspace",
+    workspace: '~/.openclaw/workspace',
   },
 }
 ```
@@ -139,33 +139,33 @@ Example:
 
 ```json5
 {
-  logging: { level: "info" },
+  logging: { level: 'info' },
   agent: {
-    model: "anthropic/claude-opus-4-5",
-    workspace: "~/.openclaw/workspace",
-    thinkingDefault: "high",
+    model: 'anthropic/claude-opus-4-5',
+    workspace: '~/.openclaw/workspace',
+    thinkingDefault: 'high',
     timeoutSeconds: 1800,
     // Start with 0; enable later.
-    heartbeat: { every: "0m" },
+    heartbeat: { every: '0m' },
   },
   channels: {
     whatsapp: {
-      allowFrom: ["+15555550123"],
+      allowFrom: ['+15555550123'],
       groups: {
-        "*": { requireMention: true },
+        '*': { requireMention: true },
       },
     },
   },
   routing: {
     groupChat: {
-      mentionPatterns: ["@openclaw", "openclaw"],
+      mentionPatterns: ['@openclaw', 'openclaw'],
     },
   },
   session: {
-    scope: "per-sender",
-    resetTriggers: ["/new", "/reset"],
+    scope: 'per-sender',
+    resetTriggers: ['/new', '/reset'],
     reset: {
-      mode: "daily",
+      mode: 'daily',
       atHour: 4,
       idleMinutes: 10080,
     },
@@ -194,7 +194,7 @@ Set `agents.defaults.heartbeat.every: "0m"` to disable.
 ```json5
 {
   agent: {
-    heartbeat: { every: "30m" },
+    heartbeat: { every: '30m' },
   },
 }
 ```

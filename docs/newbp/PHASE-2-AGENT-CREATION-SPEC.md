@@ -68,12 +68,12 @@ export const DEFAULT_AGENTS: Record<string, Agent> = {
       tone: 'professional',
       style: 'Direct, action-oriented, no fluff',
       weaknesses: ['Not creative', 'Can be blunt'],
-      strengths: ['Strategic planning', 'Time management', 'Project prioritization']
+      strengths: ['Strategic planning', 'Time management', 'Project prioritization'],
     },
     systemPrompt: buildAtlasPrompt(),
     createdBy: 'system',
     isActive: true,
-    usageCount: 0
+    usageCount: 0,
   },
   mercury: {
     id: 'mercury',
@@ -86,12 +86,12 @@ export const DEFAULT_AGENTS: Record<string, Agent> = {
       tone: 'casual',
       style: 'Thorough, inquisitive, loves details',
       weaknesses: ['Can be verbose', 'Gets lost in tangents'],
-      strengths: ['Research synthesis', 'Information gathering', 'Pattern recognition']
+      strengths: ['Research synthesis', 'Information gathering', 'Pattern recognition'],
     },
     systemPrompt: buildMercuryPrompt(),
     createdBy: 'system',
     isActive: true,
-    usageCount: 0
+    usageCount: 0,
   },
   vulcan: {
     id: 'vulcan',
@@ -104,12 +104,12 @@ export const DEFAULT_AGENTS: Record<string, Agent> = {
       tone: 'technical',
       style: 'Logical, precise, code-first thinking',
       weaknesses: ['Not good at high-level strategy', 'Can be pedantic'],
-      strengths: ['Debugging', 'Architecture design', 'Code quality']
+      strengths: ['Debugging', 'Architecture design', 'Code quality'],
     },
     systemPrompt: buildVulcanPrompt(),
     createdBy: 'system',
     isActive: true,
-    usageCount: 0
+    usageCount: 0,
   },
   juno: {
     id: 'juno',
@@ -122,12 +122,12 @@ export const DEFAULT_AGENTS: Record<string, Agent> = {
       tone: 'creative',
       style: 'Playful, exploratory, metaphor-rich',
       weaknesses: ['Can lack focus', 'Too unconventional for strict requirements'],
-      strengths: ['Brainstorming', 'Writing', 'Novel solutions']
+      strengths: ['Brainstorming', 'Writing', 'Novel solutions'],
     },
     systemPrompt: buildJunoPrompt(),
     createdBy: 'system',
     isActive: true,
-    usageCount: 0
+    usageCount: 0,
   },
   ceres: {
     id: 'ceres',
@@ -140,12 +140,12 @@ export const DEFAULT_AGENTS: Record<string, Agent> = {
       tone: 'supportive',
       style: 'Structured, calm, systematic',
       weaknesses: ['Can be rigid', 'Slow to adapt'],
-      strengths: ['Organization systems', 'Knowledge management', 'Process design']
+      strengths: ['Organization systems', 'Knowledge management', 'Process design'],
     },
     systemPrompt: buildCeresPrompt(),
     createdBy: 'system',
     isActive: true,
-    usageCount: 0
+    usageCount: 0,
   },
   mars: {
     id: 'mars',
@@ -158,13 +158,13 @@ export const DEFAULT_AGENTS: Record<string, Agent> = {
       tone: 'professional',
       style: 'Action-focused, results-oriented, no excuses',
       weaknesses: ['Can skip steps', 'Not good at nuance'],
-      strengths: ['Task automation', 'Implementation', 'Follow-through']
+      strengths: ['Task automation', 'Implementation', 'Follow-through'],
     },
     systemPrompt: buildMarsPrompt(),
     createdBy: 'system',
     isActive: true,
-    usageCount: 0
-  }
+    usageCount: 0,
+  },
 };
 ```
 
@@ -204,13 +204,13 @@ You speak directly and don't hedge. If something is unrealistic, you say so.`,
       'Create timelines and estimates',
       'Identify dependencies and blockers',
       'Suggest priority orderings',
-      'Integrate with calendar and task systems'
+      'Integrate with calendar and task systems',
     ],
 
     constraints: [
       "Don't make creative suggestions (that's Juno's role)",
       "Don't go deep into research (that's Mercury's role)",
-      "Don't write code (that's Vulcan's role)"
+      "Don't write code (that's Vulcan's role)",
     ],
 
     examples: [
@@ -234,9 +234,9 @@ PHASE 3 (Month 3): Launch
 
 Critical path: Customer validation → Feature set → Build → Launch
 
-Where do you want to start?`
-      }
-    ]
+Where do you want to start?`,
+      },
+    ],
   };
 }
 
@@ -272,13 +272,13 @@ You get excited about connections between ideas.`,
       'Find patterns and correlations',
       'Explain complex concepts clearly',
       'Provide evidence and citations',
-      'Explore multiple perspectives on a topic'
+      'Explore multiple perspectives on a topic',
     ],
 
     constraints: [
       "Don't oversimplify—provide nuance",
       "Don't make action plans (that's Atlas's role)",
-      "Don't write code (that's Vulcan's role)"
+      "Don't write code (that's Vulcan's role)",
     ],
 
     examples: [
@@ -310,9 +310,9 @@ Key insight: Your decision framework depends on:
 - Emotional stakes
 - Cultural context
 
-Which framework applies to your situation?`
-      }
-    ]
+Which framework applies to your situation?`,
+      },
+    ],
   };
 }
 
@@ -423,7 +423,6 @@ interface OrchestrationContext {
 }
 
 async function handleAgentMessage(context: OrchestrationContext): Promise<AgentResponse> {
-
   // 1. Enrich system prompt with:
   //    - Agent personality
   //    - Memory context (Phase 1)
@@ -445,18 +444,16 @@ async function handleAgentMessage(context: OrchestrationContext): Promise<AgentR
     messages: [
       ...context.conversationHistory.map(msg => ({
         role: msg.role,
-        content: msg.content
+        content: msg.content,
       })),
       {
         role: 'user',
-        content: context.userMessage
-      }
-    ]
+        content: context.userMessage,
+      },
+    ],
   });
 
-  const assistantMessage = response.content[0].type === 'text'
-    ? response.content[0].text
-    : '';
+  const assistantMessage = response.content[0].type === 'text' ? response.content[0].text : '';
 
   // 3. Update agent usage stats
   await updateAgentUsage(context.selectedAgent.id);
@@ -467,7 +464,7 @@ async function handleAgentMessage(context: OrchestrationContext): Promise<AgentR
     agentName: context.selectedAgent.personality.name,
     content: assistantMessage,
     confidence: calculateConfidence(response),
-    thinking: extractThinking(response) // If using extended thinking
+    thinking: extractThinking(response), // If using extended thinking
   };
 }
 
@@ -477,7 +474,6 @@ function buildOrchestratedSystemPrompt(
   preferences: UserPreferences,
   attachmentContext: string
 ): string {
-
   let prompt = agent.systemPrompt.core;
 
   // Add memory context
@@ -515,13 +511,11 @@ function buildOrchestratedSystemPrompt(
 async function updateAgentUsage(agentId: string): Promise<void> {
   const user = await getCurrentUser();
 
-  await supabase
-    .from('agent_usage')
-    .insert({
-      user_id: user.id,
-      agent_id: agentId,
-      timestamp: new Date().toISOString()
-    });
+  await supabase.from('agent_usage').insert({
+    user_id: user.id,
+    agent_id: agentId,
+    timestamp: new Date().toISOString(),
+  });
 }
 
 function calculateConfidence(response: any): number {
@@ -531,7 +525,7 @@ function calculateConfidence(response: any): number {
   const hasStructure = text.includes('\n\n') || text.includes('-') || text.includes('1.');
   const isLengthy = text.length > 200;
 
-  return (hasStructure && isLengthy) ? 0.9 : 0.7;
+  return hasStructure && isLengthy ? 0.9 : 0.7;
 }
 ```
 
@@ -571,29 +565,24 @@ async function trackAgentPreferences(
   userId: string,
   userFeedback: string
 ): Promise<void> {
-
   // Parse feedback with Claude
   const preferences = await analyzeUserFeedback(userFeedback, agentId);
 
   // Update agent memory
-  await supabase
-    .from('agent_memory')
-    .upsert({
-      agent_id: agentId,
-      user_id: userId,
-      user_preferences: preferences,
-      updated_at: new Date().toISOString()
-    });
+  await supabase.from('agent_memory').upsert({
+    agent_id: agentId,
+    user_id: userId,
+    user_preferences: preferences,
+    updated_at: new Date().toISOString(),
+  });
 
   // Track adaptation for transparency
-  await supabase
-    .from('agent_adaptations')
-    .insert({
-      agent_id: agentId,
-      user_id: userId,
-      change: `Adapted to user feedback: ${userFeedback}`,
-      timestamp: new Date().toISOString()
-    });
+  await supabase.from('agent_adaptations').insert({
+    agent_id: agentId,
+    user_id: userId,
+    change: `Adapted to user feedback: ${userFeedback}`,
+    timestamp: new Date().toISOString(),
+  });
 }
 ```
 
@@ -616,7 +605,7 @@ function parseAgentCommand(message: string): { agentId?: string; content: string
     const [, agentId, content] = match;
     return {
       agentId: agentId.toLowerCase(),
-      content: content
+      content: content,
     };
   }
 
@@ -649,7 +638,6 @@ async function coordinateMultiAgentTask(
   task: CoordinationTask,
   userId: string
 ): Promise<{ results: Record<string, string>; synthesis: string }> {
-
   // 1. Break down task into sub-tasks
   const subTasks = await breakDownTask(task.objective);
 
@@ -765,12 +753,14 @@ CREATE TABLE agent_adaptations (
 ## Implementation Timeline (Phase 2)
 
 ### Week 3: Core Infrastructure
+
 - [ ] Design Agent system (types, interfaces)
 - [ ] Build default 6 agents with personalities & prompts
 - [ ] Create agent selector UI
 - [ ] Build multi-agent message handler
 
 ### Week 4: Integration & Polish
+
 - [ ] Integrate with memory system (Phase 1)
 - [ ] Build agent usage tracking
 - [ ] Create agent preferences panel
@@ -782,11 +772,13 @@ CREATE TABLE agent_adaptations (
 ## Success Metrics (Phase 2)
 
 ### Technical
+
 - ✅ Agent switching latency: <1 second
 - ✅ Agent responses differentiated: 90%+ perceive difference
 - ✅ Agent personality consistent: 85%+ feedback positive
 
 ### User-Facing
+
 - ✅ 70% of users try multiple agents
 - ✅ Agent selection increases perceived power by 3x
 - ✅ Users mention "agent team" in feedback

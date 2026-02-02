@@ -281,9 +281,7 @@ helix-desktop/
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "resources": [
-      "resources/**/*"
-    ],
+    "resources": ["resources/**/*"],
     "externalBin": [],
     "windows": {
       "certificateThumbprint": null,
@@ -316,9 +314,7 @@ helix-desktop/
   },
   "plugins": {
     "updater": {
-      "endpoints": [
-        "https://releases.project-helix.org/{{target}}/{{arch}}/{{current_version}}"
-      ],
+      "endpoints": ["https://releases.project-helix.org/{{target}}/{{arch}}/{{current_version}}"],
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk...",
       "windows": {
         "installMode": "passive"
@@ -330,15 +326,8 @@ helix-desktop/
     },
     "fs": {
       "scope": {
-        "allow": [
-          "$HOME/.helix/**",
-          "$APPDATA/helix/**",
-          "$CONFIG/helix/**"
-        ],
-        "deny": [
-          "$HOME/.ssh/**",
-          "$HOME/.gnupg/**"
-        ]
+        "allow": ["$HOME/.helix/**", "$APPDATA/helix/**", "$CONFIG/helix/**"],
+        "deny": ["$HOME/.ssh/**", "$HOME/.gnupg/**"]
       }
     },
     "http": {
@@ -706,45 +695,48 @@ export function useGateway() {
   }, []);
 
   // Connect to WebSocket
-  const connect = useCallback((port: number) => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      return;
-    }
-
-    const ws = new WebSocket(`ws://localhost:${port}/gateway`);
-
-    ws.onopen = () => {
-      setConnected(true);
-      console.log('Gateway WebSocket connected');
-    };
-
-    ws.onmessage = (event) => {
-      try {
-        const message = JSON.parse(event.data) as GatewayMessage;
-        setMessages((prev) => [...prev, message]);
-      } catch (error) {
-        console.error('Failed to parse gateway message:', error);
+  const connect = useCallback(
+    (port: number) => {
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        return;
       }
-    };
 
-    ws.onclose = () => {
-      setConnected(false);
-      console.log('Gateway WebSocket disconnected');
+      const ws = new WebSocket(`ws://localhost:${port}/gateway`);
 
-      // Auto-reconnect after 2 seconds
-      if (status.running) {
-        reconnectTimeoutRef.current = window.setTimeout(() => {
-          connect(port);
-        }, 2000);
-      }
-    };
+      ws.onopen = () => {
+        setConnected(true);
+        console.log('Gateway WebSocket connected');
+      };
 
-    ws.onerror = (error) => {
-      console.error('Gateway WebSocket error:', error);
-    };
+      ws.onmessage = event => {
+        try {
+          const message = JSON.parse(event.data) as GatewayMessage;
+          setMessages(prev => [...prev, message]);
+        } catch (error) {
+          console.error('Failed to parse gateway message:', error);
+        }
+      };
 
-    wsRef.current = ws;
-  }, [status.running]);
+      ws.onclose = () => {
+        setConnected(false);
+        console.log('Gateway WebSocket disconnected');
+
+        // Auto-reconnect after 2 seconds
+        if (status.running) {
+          reconnectTimeoutRef.current = window.setTimeout(() => {
+            connect(port);
+          }, 2000);
+        }
+      };
+
+      ws.onerror = error => {
+        console.error('Gateway WebSocket error:', error);
+      };
+
+      wsRef.current = ws;
+    },
+    [status.running]
+  );
 
   // Disconnect WebSocket
   const disconnect = useCallback(() => {
@@ -791,8 +783,8 @@ export function useGateway() {
     let unlisten: UnlistenFn;
 
     (async () => {
-      unlisten = await listen<number>('gateway:started', (event) => {
-        setStatus((prev) => ({ ...prev, running: true, port: event.payload }));
+      unlisten = await listen<number>('gateway:started', event => {
+        setStatus(prev => ({ ...prev, running: true, port: event.payload }));
         connect(event.payload);
       });
     })();
@@ -804,7 +796,7 @@ export function useGateway() {
 
   // Initial status check
   useEffect(() => {
-    checkStatus().then((result) => {
+    checkStatus().then(result => {
       if (result.running && result.port) {
         connect(result.port);
       }
@@ -1058,6 +1050,7 @@ export default defineConfig({
 ## Platform-Specific Notes
 
 ### Windows
+
 - Uses NSIS installer (optional WiX for MSI)
 - Code signing via Windows Authenticode
 - Auto-update via NSIS silent install
@@ -1065,6 +1058,7 @@ export default defineConfig({
 - Credential Manager for secrets
 
 ### macOS
+
 - Universal binary (x64 + arm64)
 - Code signing + notarization required
 - DMG with app drag-to-Applications
@@ -1073,6 +1067,7 @@ export default defineConfig({
 - Hardened runtime entitlements
 
 ### Linux
+
 - AppImage (primary), .deb, .rpm
 - No code signing (AppImage signature optional)
 - Auto-update via AppImage replace
@@ -1084,18 +1079,21 @@ export default defineConfig({
 ## Testing Strategy
 
 ### Unit Tests (Vitest)
+
 - All hooks
 - Store logic
 - Utility functions
 - Component rendering
 
 ### Integration Tests (Playwright + Tauri)
+
 - Full user flows
 - Gateway communication
 - File system operations
 - Platform-specific features
 
 ### E2E Tests
+
 - Onboarding flow
 - Chat conversation
 - Settings persistence
@@ -1106,16 +1104,19 @@ export default defineConfig({
 ## Performance Optimization
 
 ### Bundle Splitting
+
 - Vendor chunk (React ecosystem)
 - UI chunk (Radix components)
 - Route-based code splitting
 
 ### Lazy Loading
+
 - Route components
 - Heavy visualizations
 - Optional features
 
 ### Caching
+
 - Config in memory
 - Psychology files cached
 - WebSocket message buffering
@@ -1125,16 +1126,19 @@ export default defineConfig({
 ## Security Considerations
 
 ### Content Security Policy
+
 - Strict CSP in Tauri config
 - No eval() or inline scripts
 - Allowlisted external domains only
 
 ### IPC Security
+
 - All commands require validation
 - File operations sandboxed
 - No arbitrary code execution
 
 ### Credential Protection
+
 - System keyring only (no file storage)
 - Memory-only session tokens
 - Encrypted config for webhooks

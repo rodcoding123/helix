@@ -1,5 +1,5 @@
 ---
-summary: "CLI reference for `openclaw agents` (list/add/delete/set identity)"
+summary: 'CLI reference for `openclaw agents` (list/add/delete/set identity)'
 read_when:
   - You want multiple isolated agents (workspaces + routing + auth)
 ---
@@ -60,12 +60,12 @@ Config sample:
   agents: {
     list: [
       {
-        id: "main",
+        id: 'main',
         identity: {
-          name: "OpenClaw",
-          theme: "space lobster",
-          emoji: "🦞",
-          avatar: "avatars/openclaw.png",
+          name: 'OpenClaw',
+          theme: 'space lobster',
+          emoji: '🦞',
+          avatar: 'avatars/openclaw.png',
         },
       },
     ],

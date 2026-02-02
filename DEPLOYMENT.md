@@ -144,6 +144,7 @@ supabase migration push
 ```
 
 Migrations required:
+
 - `001_initial_memory_tables.sql` - Conversations, embeddings
 - `010_agents_and_autonomy_tables.sql` - Agents, agent conversations, autonomy settings
 - `012_code_modification_proposals.sql` - Code modification tracking
@@ -322,17 +323,20 @@ Enable automated backups in Supabase dashboard:
 ### 7.4 Troubleshooting
 
 **Build fails:**
+
 ```bash
 # Clear cache and rebuild
 vercel --prod --skip-build-cache
 ```
 
 **API endpoints 404:**
+
 - Verify Edge Function files in `web/api/` directory
 - Check function names match route paths
 - Ensure environment variables are set
 
 **Supabase connection fails:**
+
 - Verify `VITE_SUPABASE_URL` is correct
 - Check `VITE_SUPABASE_ANON_KEY` matches project
 - Ensure RLS policies allow access

@@ -1,5 +1,5 @@
 ---
-summary: "CLI reference for `openclaw logs` (tail gateway logs via RPC)"
+summary: 'CLI reference for `openclaw logs` (tail gateway logs via RPC)'
 read_when:
   - You need to tail Gateway logs remotely (without SSH)
   - You want JSON log lines for tooling

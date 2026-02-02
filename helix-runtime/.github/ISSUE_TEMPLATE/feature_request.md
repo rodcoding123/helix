@@ -1,7 +1,7 @@
 ---
 name: Feature request
 about: Suggest an idea or improvement for Clawdbot.
-title: "[Feature]: "
+title: '[Feature]: '
 labels: enhancement
 ---
 

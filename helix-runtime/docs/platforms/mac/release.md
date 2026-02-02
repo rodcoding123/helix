@@ -1,5 +1,5 @@
 ---
-summary: "OpenClaw macOS release checklist (Sparkle feed, packaging, signing)"
+summary: 'OpenClaw macOS release checklist (Sparkle feed, packaging, signing)'
 read_when:
   - Cutting or validating a OpenClaw macOS release
   - Updating the Sparkle appcast or feed assets

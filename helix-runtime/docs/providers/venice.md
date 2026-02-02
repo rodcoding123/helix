@@ -1,5 +1,5 @@
 ---
-summary: "Use Venice AI privacy-focused models in OpenClaw"
+summary: 'Use Venice AI privacy-focused models in OpenClaw'
 read_when:
   - You want privacy-focused inference in OpenClaw
   - You want Venice AI setup guidance
@@ -232,21 +232,21 @@ Venice API is at `https://api.venice.ai/api/v1`. Ensure your network allows HTTP
 
 ```json5
 {
-  env: { VENICE_API_KEY: "vapi_..." },
-  agents: { defaults: { model: { primary: "venice/llama-3.3-70b" } } },
+  env: { VENICE_API_KEY: 'vapi_...' },
+  agents: { defaults: { model: { primary: 'venice/llama-3.3-70b' } } },
   models: {
-    mode: "merge",
+    mode: 'merge',
     providers: {
       venice: {
-        baseUrl: "https://api.venice.ai/api/v1",
-        apiKey: "${VENICE_API_KEY}",
-        api: "openai-completions",
+        baseUrl: 'https://api.venice.ai/api/v1',
+        apiKey: '${VENICE_API_KEY}',
+        api: 'openai-completions',
         models: [
           {
-            id: "llama-3.3-70b",
-            name: "Llama 3.3 70B",
+            id: 'llama-3.3-70b',
+            name: 'Llama 3.3 70B',
             reasoning: false,
-            input: ["text"],
+            input: ['text'],
             cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
             contextWindow: 131072,
             maxTokens: 8192,

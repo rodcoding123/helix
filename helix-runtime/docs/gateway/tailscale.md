@@ -1,5 +1,5 @@
 ---
-summary: "Integrated Tailscale Serve/Funnel for the Gateway dashboard"
+summary: 'Integrated Tailscale Serve/Funnel for the Gateway dashboard'
 read_when:
   - Exposing the Gateway Control UI outside localhost
   - Automating tailnet or public dashboard access
@@ -42,8 +42,8 @@ force `gateway.auth.mode: "password"`.
 ```json5
 {
   gateway: {
-    bind: "loopback",
-    tailscale: { mode: "serve" },
+    bind: 'loopback',
+    tailscale: { mode: 'serve' },
   },
 }
 ```
@@ -57,8 +57,8 @@ Use this when you want the Gateway to listen directly on the Tailnet IP (no Serv
 ```json5
 {
   gateway: {
-    bind: "tailnet",
-    auth: { mode: "token", token: "your-token" },
+    bind: 'tailnet',
+    auth: { mode: 'token', token: 'your-token' },
   },
 }
 ```
@@ -75,9 +75,9 @@ Note: loopback (`http://127.0.0.1:18789`) will **not** work in this mode.
 ```json5
 {
   gateway: {
-    bind: "loopback",
-    tailscale: { mode: "funnel" },
-    auth: { mode: "password", password: "replace-me" },
+    bind: 'loopback',
+    tailscale: { mode: 'funnel' },
+    auth: { mode: 'password', password: 'replace-me' },
   },
 }
 ```

@@ -1,6 +1,6 @@
 ---
-title: "Vercel AI Gateway"
-summary: "Vercel AI Gateway setup (auth + model selection)"
+title: 'Vercel AI Gateway'
+summary: 'Vercel AI Gateway setup (auth + model selection)'
 read_when:
   - You want to use Vercel AI Gateway with OpenClaw
   - You need the API key env var or CLI auth choice
@@ -28,7 +28,7 @@ openclaw onboard --auth-choice ai-gateway-api-key
 {
   agents: {
     defaults: {
-      model: { primary: "vercel-ai-gateway/anthropic/claude-opus-4.5" },
+      model: { primary: 'vercel-ai-gateway/anthropic/claude-opus-4.5' },
     },
   },
 }

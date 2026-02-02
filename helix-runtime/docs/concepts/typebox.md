@@ -1,5 +1,5 @@
 ---
-summary: "TypeBox schemas as the single source of truth for the gateway protocol"
+summary: 'TypeBox schemas as the single source of truth for the gateway protocol'
 read_when:
   - Updating protocol schemas or codegen
 ---
@@ -147,38 +147,38 @@ Event:
 Smallest useful flow: connect + health.
 
 ```ts
-import { WebSocket } from "ws";
+import { WebSocket } from 'ws';
 
-const ws = new WebSocket("ws://127.0.0.1:18789");
+const ws = new WebSocket('ws://127.0.0.1:18789');
 
-ws.on("open", () => {
+ws.on('open', () => {
   ws.send(
     JSON.stringify({
-      type: "req",
-      id: "c1",
-      method: "connect",
+      type: 'req',
+      id: 'c1',
+      method: 'connect',
       params: {
         minProtocol: 3,
         maxProtocol: 3,
         client: {
-          id: "cli",
-          displayName: "example",
-          version: "dev",
-          platform: "node",
-          mode: "cli",
+          id: 'cli',
+          displayName: 'example',
+          version: 'dev',
+          platform: 'node',
+          mode: 'cli',
         },
       },
-    }),
+    })
   );
 });
 
-ws.on("message", (data) => {
+ws.on('message', data => {
   const msg = JSON.parse(String(data));
-  if (msg.type === "res" && msg.id === "c1" && msg.ok) {
-    ws.send(JSON.stringify({ type: "req", id: "h1", method: "health" }));
+  if (msg.type === 'res' && msg.id === 'c1' && msg.ok) {
+    ws.send(JSON.stringify({ type: 'req', id: 'h1', method: 'health' }));
   }
-  if (msg.type === "res" && msg.id === "h1") {
-    console.log("health:", msg.payload);
+  if (msg.type === 'res' && msg.id === 'h1') {
+    console.log('health:', msg.payload);
     ws.close();
   }
 });
@@ -195,12 +195,12 @@ Add to `src/gateway/protocol/schema.ts`:
 ```ts
 export const SystemEchoParamsSchema = Type.Object(
   { text: NonEmptyString },
-  { additionalProperties: false },
+  { additionalProperties: false }
 );
 
 export const SystemEchoResultSchema = Type.Object(
   { ok: Type.Boolean(), text: NonEmptyString },
-  { additionalProperties: false },
+  { additionalProperties: false }
 );
 ```
 
@@ -230,8 +230,8 @@ Add a handler in `src/gateway/server-methods/system.ts`:
 
 ```ts
 export const systemHandlers: GatewayRequestHandlers = {
-  "system.echo": ({ params, respond }) => {
-    const text = String(params.text ?? "");
+  'system.echo': ({ params, respond }) => {
+    const text = String(params.text ?? '');
     respond(true, { ok: true, text });
   },
 };

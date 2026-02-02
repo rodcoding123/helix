@@ -1,5 +1,5 @@
 ---
-summary: "Use Anthropic Claude via API keys or setup-token in OpenClaw"
+summary: 'Use Anthropic Claude via API keys or setup-token in OpenClaw'
 read_when:
   - You want to use Anthropic models in OpenClaw
   - You want setup-token instead of API keys
@@ -29,8 +29,8 @@ openclaw onboard --anthropic-api-key "$ANTHROPIC_API_KEY"
 
 ```json5
 {
-  env: { ANTHROPIC_API_KEY: "sk-ant-..." },
-  agents: { defaults: { model: { primary: "anthropic/claude-opus-4-5" } } },
+  env: { ANTHROPIC_API_KEY: 'sk-ant-...' },
+  agents: { defaults: { model: { primary: 'anthropic/claude-opus-4-5' } } },
 }
 ```
 
@@ -46,8 +46,8 @@ To set the TTL per model, use `cacheControlTtl` in the model `params`:
   agents: {
     defaults: {
       models: {
-        "anthropic/claude-opus-4-5": {
-          params: { cacheControlTtl: "5m" }, // or "1h"
+        'anthropic/claude-opus-4-5': {
+          params: { cacheControlTtl: '5m' }, // or "1h"
         },
       },
     },
@@ -93,7 +93,7 @@ openclaw onboard --auth-choice setup-token
 
 ```json5
 {
-  agents: { defaults: { model: { primary: "anthropic/claude-opus-4-5" } } },
+  agents: { defaults: { model: { primary: 'anthropic/claude-opus-4-5' } } },
 }
 ```
 

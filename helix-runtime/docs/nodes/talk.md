@@ -1,5 +1,5 @@
 ---
-summary: "Talk mode: continuous speech conversations with ElevenLabs TTS"
+summary: 'Talk mode: continuous speech conversations with ElevenLabs TTS'
 read_when:
   - Implementing Talk mode on macOS/iOS/Android
   - Changing voice/TTS/interrupt behavior
@@ -51,10 +51,10 @@ Supported keys:
 ```json5
 {
   talk: {
-    voiceId: "elevenlabs_voice_id",
-    modelId: "eleven_v3",
-    outputFormat: "mp3_44100_128",
-    apiKey: "elevenlabs_api_key",
+    voiceId: 'elevenlabs_voice_id',
+    modelId: 'eleven_v3',
+    outputFormat: 'mp3_44100_128',
+    apiKey: 'elevenlabs_api_key',
     interruptOnSpeech: true,
   },
 }

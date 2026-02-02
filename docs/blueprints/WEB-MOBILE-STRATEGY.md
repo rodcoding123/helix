@@ -6,26 +6,26 @@
 
 ## The Problem with Desktop-Only
 
-| Issue | Impact |
-|-------|--------|
-| Code signing | $400-500/year or scary warnings |
-| Download friction | Users hesitate to install unknown apps |
-| Platform fragmentation | 3 platforms to maintain |
-| Update distribution | Manual or complex auto-update |
-| Onboarding drop-off | Many users never complete setup |
+| Issue                  | Impact                                 |
+| ---------------------- | -------------------------------------- |
+| Code signing           | $400-500/year or scary warnings        |
+| Download friction      | Users hesitate to install unknown apps |
+| Platform fragmentation | 3 platforms to maintain                |
+| Update distribution    | Manual or complex auto-update          |
+| Onboarding drop-off    | Many users never complete setup        |
 
 ---
 
 ## Web-First Advantages
 
-| Advantage | Impact |
-|-----------|--------|
-| Zero installation | Instant access |
-| No signing costs | $0 |
-| Single codebase | Faster iteration |
-| Auto-updates | Users always on latest |
-| Cross-device | Works everywhere |
-| Lower trust barrier | "Just a website" |
+| Advantage           | Impact                 |
+| ------------------- | ---------------------- |
+| Zero installation   | Instant access         |
+| No signing costs    | $0                     |
+| Single codebase     | Faster iteration       |
+| Auto-updates        | Users always on latest |
+| Cross-device        | Works everywhere       |
+| Lower trust barrier | "Just a website"       |
 
 ---
 
@@ -33,40 +33,40 @@
 
 ### ✅ Full Functionality
 
-| Feature | Web Viability | Notes |
-|---------|---------------|-------|
-| Chat interface | ✅ Perfect | Core experience |
-| Claude API calls | ✅ Perfect | Server-side |
-| Session history | ✅ Perfect | Database storage |
-| User authentication | ✅ Perfect | Standard OAuth |
-| Settings management | ✅ Perfect | Forms |
-| Usage analytics | ✅ Perfect | Server tracking |
-| Payment/subscription | ✅ Perfect | Stripe |
-| Calendar integration | ✅ Good | OAuth-based |
-| Email integration | ✅ Good | OAuth-based |
-| Task management | ✅ Good | API-based (Todoist, Linear) |
-| Note sync | ✅ Good | API-based (Notion) |
+| Feature              | Web Viability | Notes                       |
+| -------------------- | ------------- | --------------------------- |
+| Chat interface       | ✅ Perfect    | Core experience             |
+| Claude API calls     | ✅ Perfect    | Server-side                 |
+| Session history      | ✅ Perfect    | Database storage            |
+| User authentication  | ✅ Perfect    | Standard OAuth              |
+| Settings management  | ✅ Perfect    | Forms                       |
+| Usage analytics      | ✅ Perfect    | Server tracking             |
+| Payment/subscription | ✅ Perfect    | Stripe                      |
+| Calendar integration | ✅ Good       | OAuth-based                 |
+| Email integration    | ✅ Good       | OAuth-based                 |
+| Task management      | ✅ Good       | API-based (Todoist, Linear) |
+| Note sync            | ✅ Good       | API-based (Notion)          |
 
 ### ⚠️ Partial Functionality
 
-| Feature | Web Limitation | Workaround |
-|---------|----------------|------------|
-| Voice input | Need permission | Browser API works |
-| File uploads | Limited types | Standard web upload |
-| Notifications | Requires permission | Web push notifications |
-| Background tasks | Tab must be open | Service worker (limited) |
+| Feature          | Web Limitation      | Workaround               |
+| ---------------- | ------------------- | ------------------------ |
+| Voice input      | Need permission     | Browser API works        |
+| File uploads     | Limited types       | Standard web upload      |
+| Notifications    | Requires permission | Web push notifications   |
+| Background tasks | Tab must be open    | Service worker (limited) |
 
 ### ❌ Cannot Work on Web
 
-| Feature | Why Not | Desktop Required |
-|---------|---------|------------------|
-| WhatsApp connection | QR + local session | Yes |
-| Telegram bot hosting | Needs long-running process | Yes |
-| Local file access | Browser sandbox | Yes |
-| MCP servers | Local processes | Yes |
-| System keychain | Browser isolation | Yes |
-| Browser automation | Playwright needs Node | Yes |
-| Smart home (local) | Network access | Yes |
+| Feature              | Why Not                    | Desktop Required |
+| -------------------- | -------------------------- | ---------------- |
+| WhatsApp connection  | QR + local session         | Yes              |
+| Telegram bot hosting | Needs long-running process | Yes              |
+| Local file access    | Browser sandbox            | Yes              |
+| MCP servers          | Local processes            | Yes              |
+| System keychain      | Browser isolation          | Yes              |
+| Browser automation   | Playwright needs Node      | Yes              |
+| Smart home (local)   | Network access             | Yes              |
 
 ---
 
@@ -122,17 +122,19 @@
 ## Product Tiers
 
 ### Tier 1: Helix Web (Free)
+
 **Target:** Casual users, trial users
 
-| Feature | Included |
-|---------|----------|
-| Chat with Claude | ✅ |
-| 50 messages/day | ✅ |
-| Session history (7 days) | ✅ |
-| Basic file upload | ✅ |
-| Web notifications | ✅ |
+| Feature                  | Included |
+| ------------------------ | -------- |
+| Chat with Claude         | ✅       |
+| 50 messages/day          | ✅       |
+| Session history (7 days) | ✅       |
+| Basic file upload        | ✅       |
+| Web notifications        | ✅       |
 
 **Limitations:**
+
 - No messaging platform integration
 - No automation
 - No calendar/email/tasks
@@ -140,20 +142,22 @@
 ---
 
 ### Tier 2: Helix Pro (Web) - $9.99/mo
+
 **Target:** Productivity users
 
-| Feature | Included |
-|---------|----------|
-| Unlimited messages | ✅ |
-| Unlimited session history | ✅ |
-| Google Calendar | ✅ |
-| Gmail integration | ✅ |
-| Todoist/Linear | ✅ |
-| Notion sync | ✅ |
-| Voice input | ✅ |
-| Priority support | ✅ |
+| Feature                   | Included |
+| ------------------------- | -------- |
+| Unlimited messages        | ✅       |
+| Unlimited session history | ✅       |
+| Google Calendar           | ✅       |
+| Gmail integration         | ✅       |
+| Todoist/Linear            | ✅       |
+| Notion sync               | ✅       |
+| Voice input               | ✅       |
+| Priority support          | ✅       |
 
 **Limitations:**
+
 - No WhatsApp/Telegram (needs desktop)
 - No local file access
 - No browser automation
@@ -161,19 +165,20 @@
 ---
 
 ### Tier 3: Helix Full (Desktop + Web) - $19.99/mo
+
 **Target:** Power users
 
-| Feature | Included |
-|---------|----------|
-| Everything in Pro | ✅ |
-| WhatsApp connection | ✅ |
-| Telegram bot | ✅ |
-| Discord bot | ✅ |
-| Local file access | ✅ |
-| Browser automation | ✅ |
-| MCP servers | ✅ |
-| Smart home | ✅ |
-| Cloud sync | ✅ |
+| Feature             | Included |
+| ------------------- | -------- |
+| Everything in Pro   | ✅       |
+| WhatsApp connection | ✅       |
+| Telegram bot        | ✅       |
+| Discord bot         | ✅       |
+| Local file access   | ✅       |
+| Browser automation  | ✅       |
+| MCP servers         | ✅       |
+| Smart home          | ✅       |
+| Cloud sync          | ✅       |
 
 ---
 
@@ -182,12 +187,14 @@
 ### Option A: React Native App
 
 **Pros:**
+
 - Native feel
 - Push notifications
 - Background execution (limited)
 - One codebase (web + mobile)
 
 **Cons:**
+
 - App store review
 - $99/year Apple fee
 - Google Play $25 one-time
@@ -196,12 +203,14 @@
 ### Option B: PWA (Progressive Web App)
 
 **Pros:**
+
 - No app store
 - Instant updates
 - Same codebase as web
 - "Add to home screen"
 
 **Cons:**
+
 - iOS limitations (no background, limited notifications)
 - Less "native" feel
 - Browser must support features
@@ -209,12 +218,14 @@
 ### Option C: Companion App Only
 
 **Pros:**
+
 - Minimal functionality = fast development
 - Control desktop remotely
 - Approve pairings
 - View notifications
 
 **Cons:**
+
 - Limited value standalone
 - Still needs app store approval
 
@@ -225,12 +236,14 @@
 ## Web Tech Stack
 
 ### Frontend
+
 - **React 19** (same as desktop)
 - **Tailwind CSS** (same as desktop)
 - **Tanstack Query** (data fetching)
 - **Zustand** (state management)
 
 ### Backend
+
 - **Cloudflare Workers** (serverless)
 - **D1** (SQLite database)
 - **R2** (file storage)
@@ -238,6 +251,7 @@
 - **Durable Objects** (WebSocket)
 
 ### Why Cloudflare?
+
 - Edge deployment (fast globally)
 - Generous free tier
 - No cold starts
@@ -245,6 +259,7 @@
 - Built-in DDoS protection
 
 ### Alternative: Supabase
+
 - Already integrated for Helix Observatory
 - PostgreSQL (more powerful)
 - Built-in auth
@@ -256,6 +271,7 @@
 ## Migration Path
 
 ### Phase 1: Web MVP (Month 1)
+
 ```
 Goal: Basic chat experience in browser
 
@@ -273,6 +289,7 @@ Tech:
 ```
 
 ### Phase 2: Integrations (Month 2)
+
 ```
 Goal: Add value beyond basic chat
 
@@ -290,6 +307,7 @@ Tech:
 ```
 
 ### Phase 3: Desktop Bridge (Month 3)
+
 ```
 Goal: Connect web to local capabilities
 
@@ -306,6 +324,7 @@ Tech:
 ```
 
 ### Phase 4: Mobile (Month 4)
+
 ```
 Goal: Mobile companion experience
 
@@ -347,12 +366,12 @@ helix.app/download          # Desktop app download
 
 ### Web-First Competitors
 
-| Product | Model | Strength | Weakness |
-|---------|-------|----------|----------|
-| ChatGPT | Web + App | Polish, brand | No integrations |
-| Claude.ai | Web + App | Intelligence | No integrations |
-| Poe | Web + App | Multi-model | No automation |
-| Perplexity | Web + App | Search | No automation |
+| Product    | Model     | Strength      | Weakness        |
+| ---------- | --------- | ------------- | --------------- |
+| ChatGPT    | Web + App | Polish, brand | No integrations |
+| Claude.ai  | Web + App | Intelligence  | No integrations |
+| Poe        | Web + App | Multi-model   | No automation   |
+| Perplexity | Web + App | Search        | No automation   |
 
 ### Helix Web Differentiation
 
@@ -367,32 +386,32 @@ helix.app/download          # Desktop app download
 
 ### Why Subscription?
 
-| Model | Pros | Cons |
-|-------|------|------|
-| One-time purchase | Simple, no recurring | No ongoing revenue |
-| Subscription | Predictable revenue | Higher friction |
-| Usage-based | Fair, scales | Unpredictable bills |
-| Freemium | Low barrier | Conversion challenge |
+| Model             | Pros                 | Cons                 |
+| ----------------- | -------------------- | -------------------- |
+| One-time purchase | Simple, no recurring | No ongoing revenue   |
+| Subscription      | Predictable revenue  | Higher friction      |
+| Usage-based       | Fair, scales         | Unpredictable bills  |
+| Freemium          | Low barrier          | Conversion challenge |
 
 **Recommendation:** Freemium + Subscription hybrid
 
 ### Pricing Tiers
 
-| Tier | Price | Target | Features |
-|------|-------|--------|----------|
-| Free | $0 | Trial/Casual | 50 msg/day, 7-day history |
-| Pro | $9.99/mo | Productivity | Unlimited + integrations |
-| Full | $19.99/mo | Power users | + Desktop + WhatsApp |
-| Team | $29.99/user/mo | Teams | + Shared memory + Admin |
+| Tier | Price          | Target       | Features                  |
+| ---- | -------------- | ------------ | ------------------------- |
+| Free | $0             | Trial/Casual | 50 msg/day, 7-day history |
+| Pro  | $9.99/mo       | Productivity | Unlimited + integrations  |
+| Full | $19.99/mo      | Power users  | + Desktop + WhatsApp      |
+| Team | $29.99/user/mo | Teams        | + Shared memory + Admin   |
 
 ### Comparison
 
-| Competitor | Price | Notes |
-|------------|-------|-------|
-| ChatGPT Plus | $20/mo | Just chat |
-| Claude Pro | $20/mo | Just chat |
-| Notion AI | $10/mo | Addon to Notion |
-| Todoist Pro | $5/mo | Just tasks |
+| Competitor   | Price  | Notes           |
+| ------------ | ------ | --------------- |
+| ChatGPT Plus | $20/mo | Just chat       |
+| Claude Pro   | $20/mo | Just chat       |
+| Notion AI    | $10/mo | Addon to Notion |
+| Todoist Pro  | $5/mo  | Just tasks      |
 
 **Helix Pro at $9.99** = cheaper than ChatGPT, more features
 
@@ -401,23 +420,27 @@ helix.app/download          # Desktop app download
 ## Success Metrics
 
 ### Week 1
+
 - [ ] 1,000 signups
 - [ ] 100 daily active users
 - [ ] 50% complete onboarding
 
 ### Month 1
+
 - [ ] 10,000 signups
 - [ ] 1,000 daily active users
 - [ ] 100 paid subscribers
 - [ ] 5% free→paid conversion
 
 ### Month 3
+
 - [ ] 50,000 signups
 - [ ] 5,000 daily active users
 - [ ] 1,000 paid subscribers
 - [ ] $10K MRR
 
 ### Month 6
+
 - [ ] 200,000 signups
 - [ ] 20,000 daily active users
 - [ ] 5,000 paid subscribers
