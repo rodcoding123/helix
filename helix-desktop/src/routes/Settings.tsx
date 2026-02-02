@@ -10,6 +10,7 @@ import { AutomationSettings } from '../components/settings/AutomationSettings';
 import { AgentsSettings } from '../components/settings/AgentsSettings';
 import { PrivacySettings } from '../components/settings/PrivacySettings';
 import { PsychologySettings } from '../components/settings/PsychologySettings';
+import { SecretsSettings } from '../components/settings/SecretsSettings';
 
 type SettingsSection =
   | 'general'
@@ -21,7 +22,8 @@ type SettingsSection =
   | 'automation'
   | 'agents'
   | 'privacy'
-  | 'psychology';
+  | 'psychology'
+  | 'secrets';
 
 const SETTINGS_COMPONENTS: Record<SettingsSection, React.ComponentType> = {
   general: GeneralSettings,
@@ -34,6 +36,7 @@ const SETTINGS_COMPONENTS: Record<SettingsSection, React.ComponentType> = {
   agents: AgentsSettings,
   privacy: PrivacySettings,
   psychology: PsychologySettings,
+  secrets: SecretsSettings,
 };
 
 /**

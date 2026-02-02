@@ -48,6 +48,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { id: 'psychology', label: 'Psychology', icon: '🧠', path: ROUTES.SETTINGS_PSYCHOLOGY },
       { id: 'privacy', label: 'Privacy & Security', icon: '🔒', path: ROUTES.SETTINGS_PRIVACY },
+      { id: 'secrets', label: 'Secrets', icon: '🔑', path: ROUTES.SETTINGS_SECRETS },
     ],
   },
 ];
