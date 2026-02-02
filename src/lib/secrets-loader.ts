@@ -20,7 +20,6 @@ export type SecretField = 'password' | 'notes' | 'username' | 'email' | 'url';
 
 const VAULT_NAME = 'Helix';
 const SECRETS_CACHE = new Map<string, string>();
-let cache_initialized = false;
 
 /**
  * Load a secret from 1Password
@@ -123,10 +122,12 @@ async function loadSecretFromEnv(itemName: string): Promise<string | null> {
     return null;
   }
 
-  // Try to load from .env files
+  // Try to load from .env files (check multiple locations)
   const envFiles = [
     path.resolve(process.cwd(), '.env.local'),
     path.resolve(process.cwd(), '.env'),
+    path.resolve(process.cwd(), 'web', '.env.local'),
+    path.resolve(process.cwd(), 'web', '.env'),
     path.resolve(process.cwd(), 'openclaw-helix', '.env'),
   ];
 
@@ -213,5 +214,4 @@ export async function verifySecrets(): Promise<{ status: 'ok' | 'warning' | 'err
  */
 export function clearCache(): void {
   SECRETS_CACHE.clear();
-  cache_initialized = false;
 }

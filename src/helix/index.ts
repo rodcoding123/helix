@@ -335,19 +335,28 @@ export async function initializeHelix(options: HelixInitOptions = {}): Promise<v
   const { installPreExecutionLogger } = await import('./logging-hooks.js');
   installPreExecutionLogger();
 
-  // 3. Start file watcher (if enabled)
+  // 2.5. Initialize Discord webhooks from 1Password (or .env fallback)
+  try {
+    const { initializeDiscordWebhooks } = await import('./logging-hooks.js');
+    await initializeDiscordWebhooks();
+  } catch (error) {
+    console.warn('[Helix] Failed to initialize Discord webhooks:', error);
+    console.warn('[Helix] Webhooks must be loaded before pre-execution logging');
+  }
+
+  // 4. Start file watcher (if enabled)
   if (enableFileWatcher) {
     const { startFileWatcher } = await import('./file-watcher.js');
     startFileWatcher();
   }
 
-  // 4. Start hash chain scheduler (if not skipped)
+  // 5. Start hash chain scheduler (if not skipped)
   if (!skipHashChain) {
     const { startHashChainScheduler } = await import('./hash-chain.js');
     startHashChainScheduler(hashChainInterval);
   }
 
-  // 5. Start heartbeat (proof of life every 60 seconds)
+  // 6. Start heartbeat (proof of life every 60 seconds)
   if (enableHeartbeat) {
     startHeartbeat();
   }

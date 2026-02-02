@@ -83,9 +83,13 @@ CREATE INDEX idx_conversations_attachment_context ON conversations(attachment_co
 ### Component 2: Emotion Detection Pipeline
 **Purpose:** Extract emotions from conversations and populate emotional_tags
 
+**Using DeepSeek v3.2** - optimized for reasoning and emotion analysis
+
 **Emotion Detection Service:**
 ```typescript
 // /src/services/emotionDetectionService.ts
+
+import { DeepSeekClient } from 'deepseek-ai';
 
 interface EmotionAnalysis {
   primary_emotion: string; // stress, joy, sadness, anxiety, hope, etc.
@@ -98,57 +102,104 @@ interface EmotionAnalysis {
   confidence: number; // 0-1 (how confident in this analysis)
 }
 
-async function analyzeConversationEmotion(
-  messages: Message[],
-  userId: string
-): Promise<EmotionAnalysis> {
+class EmotionDetectionService {
+  private client: DeepSeekClient;
 
-  // Concatenate all messages
-  const conversationText = messages
-    .map(m => `${m.role.toUpperCase()}: ${m.content}`)
-    .join('\n\n');
+  constructor(apiKey: string) {
+    this.client = new DeepSeekClient({ apiKey });
+  }
 
-  // Call Claude to analyze emotions
-  const response = await anthropic.messages.create({
-    model: 'claude-3-5-sonnet-20241022',
-    max_tokens: 1024,
-    system: buildEmotionDetectionPrompt(),
-    messages: [{
-      role: 'user',
-      content: conversationText
-    }]
-  });
+  async analyzeConversationEmotion(
+    messages: Message[],
+    userId: string
+  ): Promise<EmotionAnalysis> {
+    // Concatenate all messages
+    const conversationText = messages
+      .map(m => `${m.role.toUpperCase()}: ${m.content}`)
+      .join('\n\n');
 
-  // Parse response into EmotionAnalysis
-  const analysis = parseEmotionResponse(response.content[0].text);
+    // Call DeepSeek v3.2 for reasoning-based emotion analysis
+    const response = await this.client.chat.completions.create({
+      model: 'deepseek-reasoner',  // or 'deepseek-chat' for faster response
+      temperature: 0.3,  // Lower temperature for consistent analysis
+      max_tokens: 2000,
+      messages: [
+        {
+          role: 'system',
+          content: this.buildEmotionDetectionPrompt()
+        },
+        {
+          role: 'user',
+          content: conversationText
+        }
+      ]
+    });
 
-  return analysis;
+    // DeepSeek returns thinking + content
+    const content = response.choices[0].message.content;
+
+    // Parse response into EmotionAnalysis
+    const analysis = this.parseEmotionResponse(content);
+    return analysis;
+  }
+
+  private buildEmotionDetectionPrompt(): string {
+    return `You are an expert psychologist specializing in emotional intelligence and affective neuroscience.
+
+Your task: Analyze the conversation for emotional content and dimensional characteristics.
+
+ANALYZE FOR:
+1. PRIMARY EMOTION: The dominant/most prevalent emotion throughout the conversation
+2. SECONDARY EMOTIONS: Supporting or underlying emotions (2-3 most prominent)
+3. DIMENSIONAL ANALYSIS using these 5 dimensions:
+   - Valence: Range from -1 (very negative) to 1 (very positive). Assess overall emotional tone.
+   - Arousal: Range from 0 (calm, low energy) to 1 (intense, high energy/activation)
+   - Dominance: Range from 0 (feeling powerless, controlled) to 1 (feeling empowered, in control)
+   - Novelty: Range from 0 (routine, expected) to 1 (surprising, novel, unexpected)
+   - Self-relevance: Range from 0 (external, impersonal) to 1 (deeply personal, identity-defining)
+
+RETURN ONLY VALID JSON (no markdown, no extra text):
+{
+  "primary_emotion": "string (e.g., stress, joy, sadness, anxiety, hope, anger, contentment)",
+  "secondary_emotions": ["string", "string"],
+  "valence": number between -1 and 1,
+  "arousal": number between 0 and 1,
+  "dominance": number between 0 and 1,
+  "novelty": number between 0 and 1,
+  "self_relevance": number between 0 and 1,
+  "confidence": number between 0 and 1,
+  "reasoning": "brief explanation of your analysis"
 }
 
-function buildEmotionDetectionPrompt(): string {
-  return `You are an expert psychologist analyzing human emotions.
+CALIBRATION EXAMPLES:
+- User stressed about work deadline: valence=-0.6, arousal=0.8, dominance=0.2, novelty=0.3, self_relevance=0.9
+- User excited about opportunity: valence=0.7, arousal=0.6, dominance=0.7, novelty=0.8, self_relevance=0.8
+- User discussing routine meeting: valence=0.0, arousal=0.3, dominance=0.5, novelty=0.1, self_relevance=0.3`;
+  }
 
-Analyze the conversation for:
-1. PRIMARY EMOTION (dominant feeling throughout)
-2. SECONDARY EMOTIONS (supporting feelings)
-3. DIMENSIONAL ANALYSIS:
-   - Valence (-1 to 1): negative to positive
-   - Arousal (0-1): calm to excited
-   - Dominance (0-1): powerless to empowered
-   - Novelty (0-1): routine to surprising
-   - Self-relevance (0-1): external to deeply personal
-
-Output JSON:
-{
-  "primary_emotion": "stress",
-  "secondary_emotions": ["anxiety", "determination"],
-  "valence": -0.3,
-  "arousal": 0.7,
-  "dominance": 0.4,
-  "novelty": 0.6,
-  "self_relevance": 0.9,
-  "confidence": 0.85
-}`;
+  private parseEmotionResponse(content: string): EmotionAnalysis {
+    try {
+      // Extract JSON from response (may be wrapped in thinking tags)
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('No JSON found in response');
+      }
+      return JSON.parse(jsonMatch[0]);
+    } catch (error) {
+      console.error('Failed to parse emotion response:', error);
+      // Return neutral analysis as fallback
+      return {
+        primary_emotion: 'neutral',
+        secondary_emotions: [],
+        valence: 0,
+        arousal: 0.3,
+        dominance: 0.5,
+        novelty: 0.2,
+        self_relevance: 0.3,
+        confidence: 0.3
+      };
+    }
+  }
 }
 
 // Calculate salience using Helix's formula
@@ -182,9 +233,13 @@ function calculateSalience(analysis: EmotionAnalysis): {
 ### Component 3: Topic Extraction Pipeline
 **Purpose:** Extract topics from conversations
 
+**Using DeepSeek v3.2** - fast, cost-effective topic identification
+
 **Topic Extraction Service:**
 ```typescript
 // /src/services/topicExtractionService.ts
+
+import { DeepSeekClient } from 'deepseek-ai';
 
 interface ExtractedTopic {
   topic: string; // "Johnson project", "Q4 deadline"
@@ -194,49 +249,69 @@ interface ExtractedTopic {
   sentiment: 'positive' | 'neutral' | 'negative';
 }
 
-async function extractTopics(
-  messages: Message[]
-): Promise<ExtractedTopic[]> {
+class TopicExtractionService {
+  private client: DeepSeekClient;
 
-  const conversationText = messages
-    .map(m => m.content)
-    .join('\n\n');
+  constructor(apiKey: string) {
+    this.client = new DeepSeekClient({ apiKey });
+  }
 
-  const response = await anthropic.messages.create({
-    model: 'claude-3-5-sonnet-20241022',
-    max_tokens: 1024,
-    system: buildTopicExtractionPrompt(),
-    messages: [{
-      role: 'user',
-      content: conversationText
-    }]
-  });
+  async extractTopics(messages: Message[]): Promise<ExtractedTopic[]> {
+    const conversationText = messages
+      .map(m => `${m.role.toUpperCase()}: ${m.content}`)
+      .join('\n\n');
 
-  const topics = parseTopicsResponse(response.content[0].text);
-  return topics;
-}
+    // Use DeepSeek Chat for fast topic extraction
+    const response = await this.client.chat.completions.create({
+      model: 'deepseek-chat',  // Faster than reasoner for this task
+      temperature: 0.2,
+      max_tokens: 1500,
+      messages: [
+        {
+          role: 'system',
+          content: this.buildTopicExtractionPrompt()
+        },
+        {
+          role: 'user',
+          content: conversationText
+        }
+      ]
+    });
 
-function buildTopicExtractionPrompt(): string {
-  return `Extract the main topics discussed in this conversation.
+    const content = response.choices[0].message.content;
+    const topics = this.parseTopicsResponse(content);
+    return topics;
+  }
 
-For each topic, provide:
-- TOPIC: Specific name (e.g., "Johnson project", "learning Spanish")
-- CATEGORY: work/personal/health/learning/relationship/finance/other
-- MENTIONS: Count how many times it was discussed
-- CONTEXT: One sentence description
-- SENTIMENT: positive/neutral/negative
+  private buildTopicExtractionPrompt(): string {
+    return `You are an expert at extracting and categorizing conversation topics.
 
-Output JSON array:
+TASK: Extract the main topics discussed in the provided conversation.
+
+For each topic, identify:
+- TOPIC: Specific name or subject (e.g., "Johnson project", "learning Spanish", "car purchase")
+- CATEGORY: One of: work, personal, health, learning, relationship, finance, creative, technical, other
+- MENTIONS: Approximate count of how many times this topic appeared in the conversation
+- CONTEXT: 1-2 sentence description of what was discussed about this topic
+- SENTIMENT: overall feeling towards this topic (positive, neutral, or negative)
+
+RETURN ONLY VALID JSON ARRAY (no markdown, no extra text):
 [
   {
-    "topic": "Johnson project deadline",
-    "category": "work",
-    "mentions": 5,
-    "context": "Q4 deadline causing stress; discussed timeline and resources",
-    "sentiment": "negative"
-  },
-  ...
-]`;
+    "topic": "string",
+    "category": "string",
+    "mentions": number,
+    "context": "string",
+    "sentiment": "positive" | "neutral" | "negative"
+  }
+]
+
+EXAMPLES:
+- "Johnson project deadline" → category: work, sentiment: negative (if discussing stress/concerns)
+- "Planning vacation" → category: personal, sentiment: positive (if excited)
+- "Meditation practice" → category: health, sentiment: neutral (if routine discussion)
+
+Extract 3-7 main topics. Skip trivial topics like greetings or off-hand remarks.`;
 }
 ```
 
