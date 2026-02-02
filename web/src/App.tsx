@@ -13,6 +13,8 @@ import { Code } from '@/pages/Code';
 import { Research } from '@/pages/Research';
 import { Settings } from '@/pages/Settings';
 import { Docs } from '@/pages/Docs';
+import { CheckoutSuccess } from '@/pages/CheckoutSuccess';
+import { CheckoutCancel } from '@/pages/CheckoutCancel';
 
 export function App() {
   return (
@@ -26,6 +28,8 @@ export function App() {
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/checkout/success" element={<CheckoutSuccess />} />
+              <Route path="/checkout/cancel" element={<CheckoutCancel />} />
               <Route path="/observatory" element={<Observatory />} />
               <Route
                 path="/dashboard"

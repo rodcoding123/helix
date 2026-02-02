@@ -16,6 +16,7 @@ import {
 import { LiveCounter } from '@/components/observatory/LiveCounter';
 import { PricingCard } from '@/components/common/PricingCard';
 import { LivingArchitecture } from '@/components/hero/LivingArchitecture';
+import { ExitIntentModal } from '@/components/marketing/ExitIntentModal';
 import { PRICING_TIERS } from '@/lib/types';
 import clsx from 'clsx';
 
@@ -224,17 +225,17 @@ export function Landing() {
                     style={{ background: 'linear-gradient(135deg, #0686D4 0%, #7234ED 100%)' }}
                   >
                     <span className="relative z-10 flex items-center gap-2 text-white font-semibold">
-                      Meet Her
+                      Start Free — No Card Required
                       <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                     </span>
                     <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                   </Link>
 
                   <a
-                    href="#psychology"
+                    href="#pricing"
                     className="btn btn-secondary btn-lg gap-2 text-text-secondary hover:text-white"
                   >
-                    Explore Architecture
+                    See Pricing
                     <ChevronDown className="h-4 w-4" />
                   </a>
                 </div>
@@ -273,6 +274,45 @@ export function Landing() {
           <div className="flex flex-col items-center gap-2 text-text-tertiary animate-bounce-slow">
             <span className="text-xs uppercase tracking-[0.2em] font-mono">Scroll</span>
             <ChevronDown className="h-5 w-5" />
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          SOCIAL PROOF SECTION
+          ============================================ */}
+      <section className="relative py-8 border-t border-white/5 bg-gradient-to-b from-bg-primary/50 to-transparent">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12">
+            {/* Trust Badges */}
+            <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
+                <span className="text-lg">🔓</span>
+                <span className="text-sm font-medium text-text-secondary">Open Source</span>
+              </div>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
+                <span className="text-lg">🔒</span>
+                <span className="text-sm font-medium text-text-secondary">Your Data, Your Control</span>
+              </div>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
+                <span className="text-lg">🧠</span>
+                <span className="text-sm font-medium text-text-secondary">7-Layer Psychology</span>
+              </div>
+            </div>
+
+            {/* Live Counter */}
+            <div className="flex items-center gap-3 px-5 py-3 rounded-xl bg-helix-500/10 border border-helix-500/20">
+              <div className="relative">
+                <div className="absolute inset-0 bg-helix-500 rounded-full animate-ping opacity-30" />
+                <div className="relative w-3 h-3 rounded-full bg-helix-500" />
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <span className="font-semibold text-helix-400">
+                  <LiveCounter inline />
+                </span>
+                <span className="text-text-secondary">instances alive now</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -767,6 +807,9 @@ export function Landing() {
           </RevealSection>
         </div>
       </section>
+
+      {/* Exit Intent Modal - triggers when user moves to leave */}
+      <ExitIntentModal allowedPaths={['/']} initialDelay={5000} />
     </div>
   );
 }

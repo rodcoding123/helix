@@ -1,6 +1,7 @@
 // Stripe Integration for Helix Observatory
 
 import type { SubscriptionTier } from './types';
+import { trackCheckoutStart } from './analytics';
 
 const STRIPE_PRICE_IDS: Record<Exclude<SubscriptionTier, 'core'>, string> = {
   phantom: import.meta.env.VITE_STRIPE_PRICE_PHANTOM || 'price_phantom',
@@ -8,10 +9,17 @@ const STRIPE_PRICE_IDS: Record<Exclude<SubscriptionTier, 'core'>, string> = {
   architect: import.meta.env.VITE_STRIPE_PRICE_ARCHITECT || 'price_architect',
 };
 
+// Checkout URLs
+const SUCCESS_URL = `${typeof window !== 'undefined' ? window.location.origin : ''}/checkout/success?session_id={CHECKOUT_SESSION_ID}`;
+const CANCEL_URL = `${typeof window !== 'undefined' ? window.location.origin : ''}/checkout/cancel`;
+
 export async function createCheckoutSession(tier: SubscriptionTier): Promise<string> {
   if (tier === 'core') {
     throw new Error('Cannot create checkout for free tier');
   }
+
+  // Track checkout start
+  trackCheckoutStart(tier);
 
   const response = await fetch('/api/stripe/create-checkout', {
     method: 'POST',
@@ -21,6 +29,8 @@ export async function createCheckoutSession(tier: SubscriptionTier): Promise<str
     body: JSON.stringify({
       priceId: STRIPE_PRICE_IDS[tier],
       tier,
+      successUrl: SUCCESS_URL,
+      cancelUrl: CANCEL_URL,
     }),
   });
 
