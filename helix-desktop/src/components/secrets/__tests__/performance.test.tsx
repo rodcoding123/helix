@@ -25,7 +25,7 @@ describe('Performance Optimization - Lazy Loading', () => {
       </Suspense>
     );
 
-    expect(screen.getByText('Secrets')).toBeInTheDocument();
+    expect(screen.getByText('Secrets')).toBeTruthy();
   });
 
   it('should provide loading fallback for lazy components', async () => {
@@ -35,6 +35,6 @@ describe('Performance Optimization - Lazy Loading', () => {
       </Suspense>
     );
 
-    expect(screen.getByText('Manage your API keys and secrets securely')).toBeInTheDocument();
+    expect(screen.getByText('Manage your API keys and secrets securely')).toBeTruthy();
   });
 });

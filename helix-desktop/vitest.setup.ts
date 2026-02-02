@@ -1,9 +1,9 @@
-/// <reference types="@testing-library/jest-dom" />
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
+  configurable: true,
   value: (query: string) => ({
     matches: false,
     media: query,
@@ -16,18 +16,47 @@ Object.defineProperty(window, 'matchMedia', {
   }),
 });
 
+// Create a proper localStorage mock class
+class LocalStorageMock implements Storage {
+  private store: Record<string, string> = {};
+
+  get length(): number {
+    return Object.keys(this.store).length;
+  }
+
+  clear(): void {
+    this.store = {};
+  }
+
+  getItem(key: string): string | null {
+    return this.store[key] || null;
+  }
+
+  key(index: number): string | null {
+    return Object.keys(this.store)[index] || null;
+  }
+
+  removeItem(key: string): void {
+    delete this.store[key];
+  }
+
+  setItem(key: string, value: string): void {
+    this.store[key] = value;
+  }
+}
+
 // Mock localStorage and sessionStorage
-const localStorageMock = {
-  getItem: () => null,
-  setItem: () => {},
-  removeItem: () => {},
-  clear: () => {},
-};
+const localStorageMock = new LocalStorageMock();
+const sessionStorageMock = new LocalStorageMock();
 
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
+  writable: true,
+  configurable: true,
 });
 
 Object.defineProperty(window, 'sessionStorage', {
-  value: localStorageMock,
+  value: sessionStorageMock,
+  writable: true,
+  configurable: true,
 });

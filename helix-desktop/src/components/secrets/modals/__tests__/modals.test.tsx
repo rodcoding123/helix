@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CreateSecretModal } from '../CreateSecretModal';
@@ -9,18 +9,22 @@ describe('CreateSecretModal', () => {
   const mockOnCreate = vi.fn();
   const mockOnClose = vi.fn();
 
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('should render form when open', () => {
     render(
       <CreateSecretModal isOpen={true} onClose={mockOnClose} onCreate={mockOnCreate} />
     );
-    expect(screen.getByLabelText(/secret name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/secret name/i)).toBeTruthy();
   });
 
   it('should not render when closed', () => {
     const { container } = render(
       <CreateSecretModal isOpen={false} onClose={mockOnClose} onCreate={mockOnCreate} />
     );
-    expect(container.querySelector('dialog')).not.toBeInTheDocument();
+    expect(container.querySelector('dialog')).toBeNull();
   });
 
   it('should call onCreate with form data', async () => {
@@ -43,7 +47,7 @@ describe('CreateSecretModal', () => {
 
     await user.click(screen.getByRole('button', { name: /create/i }));
 
-    expect(screen.getByText(/name is required/i)).toBeInTheDocument();
+    expect(screen.getByText(/name is required/i)).toBeTruthy();
   });
 
   it('should call onClose when cancelled', async () => {
@@ -75,6 +79,10 @@ describe('RotateSecretModal', () => {
   const mockOnConfirm = vi.fn();
   const mockOnClose = vi.fn();
 
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('should display version information', () => {
     render(
       <RotateSecretModal
@@ -84,10 +92,10 @@ describe('RotateSecretModal', () => {
         onClose={mockOnClose}
       />
     );
-    expect(screen.getByText(/current version:/i)).toBeInTheDocument();
-    expect(screen.getByText('5')).toBeInTheDocument();
-    expect(screen.getByText(/new version:/i)).toBeInTheDocument();
-    expect(screen.getByText('6')).toBeInTheDocument();
+    expect(screen.getByText(/current version:/i)).toBeTruthy();
+    expect(screen.getByText('5')).toBeTruthy();
+    expect(screen.getByText(/new version:/i)).toBeTruthy();
+    expect(screen.getByText('6')).toBeTruthy();
   });
 
   it('should call onConfirm when confirmed', async () => {
@@ -115,6 +123,6 @@ describe('RotateSecretModal', () => {
         onClose={mockOnClose}
       />
     );
-    expect(screen.getByText(/generate a new version/i)).toBeInTheDocument();
+    expect(screen.getByText(/generate a new version/i)).toBeTruthy();
   });
 });

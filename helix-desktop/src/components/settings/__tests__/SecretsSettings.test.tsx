@@ -19,17 +19,18 @@ vi.mock('../../../hooks/useSecretsData', () => ({
 describe('SecretsSettings Component', () => {
   it('should render page heading', () => {
     render(<SecretsSettings />);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/secrets/i);
+    const heading = screen.getByRole('heading', { level: 1 });
+    expect(heading.textContent).toMatch(/secrets/i);
   });
 
   it('should render create button', () => {
     render(<SecretsSettings />);
-    expect(screen.getByRole('button', { name: /create/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /create/i })).toBeTruthy();
   });
 
   it('should display statistics cards', () => {
     render(<SecretsSettings />);
-    expect(screen.getByText(/total secrets/i)).toBeInTheDocument();
-    expect(screen.getByText(/active/i)).toBeInTheDocument();
+    expect(screen.getByText(/total secrets/i)).toBeTruthy();
+    expect(screen.getByText(/active/i)).toBeTruthy();
   });
 });

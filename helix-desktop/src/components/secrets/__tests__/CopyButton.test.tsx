@@ -1,12 +1,16 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CopyButton } from '../CopyButton';
 
 describe('CopyButton Component', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('should render copy button', () => {
     render(<CopyButton secretName="API Key" value="secret123" />);
-    expect(screen.getByRole('button')).toBeInTheDocument();
+    expect(screen.getByRole('button')).toBeTruthy();
   });
 
   it('should show copied feedback on successful copy', async () => {
@@ -17,7 +21,7 @@ describe('CopyButton Component', () => {
     await user.click(screen.getByRole('button'));
 
     await waitFor(() => {
-      expect(screen.getByText(/copied/i)).toBeInTheDocument();
+      expect(screen.getByText(/copied/i)).toBeTruthy();
     });
   });
 
@@ -28,11 +32,11 @@ describe('CopyButton Component', () => {
     render(<CopyButton secretName="API Key" value="secret123" />);
     const button = screen.getByRole('button');
 
-    expect(button).toHaveTextContent(/copy/i);
+    expect(button.textContent).toMatch(/copy/i);
     await user.click(button);
 
     await waitFor(() => {
-      expect(screen.getByText(/copied/i)).toBeInTheDocument();
+      expect(screen.getByText(/copied/i)).toBeTruthy();
     });
   });
 
@@ -46,7 +50,7 @@ describe('CopyButton Component', () => {
     await user.click(screen.getByRole('button'));
 
     await waitFor(() => {
-      expect(screen.getByText(/failed/i)).toBeInTheDocument();
+      expect(screen.getByText(/failed/i)).toBeTruthy();
     }, { timeout: 2000 });
   });
 });

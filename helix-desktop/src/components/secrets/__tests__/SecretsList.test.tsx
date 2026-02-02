@@ -19,22 +19,22 @@ describe('SecretsList Component', () => {
 
   it('should render empty state when no secrets', () => {
     render(<SecretsList secrets={[]} onRotate={() => {}} onDelete={() => {}} />);
-    expect(screen.getByText(/no secrets/i)).toBeInTheDocument();
+    expect(screen.getByText(/no secrets/i)).toBeTruthy();
   });
 
   it('should display secrets in list', () => {
     render(<SecretsList secrets={[mockSecret]} onRotate={() => {}} onDelete={() => {}} />);
-    expect(screen.getByText('Stripe Key')).toBeInTheDocument();
+    expect(screen.getByText('Stripe Key')).toBeTruthy();
   });
 
   it('should show status badges', () => {
     render(<SecretsList secrets={[mockSecret]} onRotate={() => {}} onDelete={() => {}} />);
-    expect(screen.getByText(/active/i)).toBeInTheDocument();
+    expect(screen.getByText(/active/i)).toBeTruthy();
   });
 
   it('should display action buttons', () => {
     render(<SecretsList secrets={[mockSecret]} onRotate={() => {}} onDelete={() => {}} />);
-    expect(screen.getByRole('button', { name: /rotate/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /rotate/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /delete/i })).toBeTruthy();
   });
 });

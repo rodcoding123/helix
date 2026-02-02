@@ -25,7 +25,7 @@ describe('Accessibility Tests', () => {
       render(<SecretsList secrets={[mockSecret]} onRotate={() => {}} onDelete={() => {}} />);
 
       const rotateButton = screen.getByRole('button', { name: /rotate/i });
-      expect(rotateButton).toHaveAttribute('aria-label');
+      expect(rotateButton.getAttribute('aria-label')).toBeTruthy();
     });
 
     it('should be keyboard navigable', () => {
@@ -47,8 +47,8 @@ describe('Accessibility Tests', () => {
         />
       );
 
-      expect(screen.getByLabelText(/secret name/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/secret type/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/secret name/i)).toBeTruthy();
+      expect(screen.getByLabelText(/secret type/i)).toBeTruthy();
     });
 
     it('should close on Escape key', async () => {
@@ -85,7 +85,7 @@ describe('Accessibility Tests', () => {
       render(<CopyButton secretName="API Key" value="secret123" />);
 
       const button = screen.getByRole('button');
-      expect(button).toHaveAttribute('aria-label', 'Copy API Key');
+      expect(button.getAttribute('aria-label')).toBe('Copy API Key');
     });
 
     it('should announce copy status to screen readers', async () => {
@@ -95,7 +95,7 @@ describe('Accessibility Tests', () => {
       const button = screen.getByRole('button');
       await user.click(button);
 
-      expect(button).toHaveAttribute('aria-live', 'polite');
+      expect(button.getAttribute('aria-live')).toBe('polite');
     });
   });
 });
