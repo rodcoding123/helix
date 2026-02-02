@@ -81,7 +81,7 @@ export async function decryptWithKey(
   const decipher = createDecipheriv(ALGORITHM, key, nonce);
   decipher.setAuthTag(authTag);
 
-  let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+  let decrypted = decipher.update(encryptedData, undefined, 'utf8');
 
   try {
     decrypted += decipher.final('utf8');

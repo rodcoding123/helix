@@ -3,7 +3,7 @@ import {
   encryptWithKey,
   decryptWithKey,
   generateNonce,
-} from '../symmetric';
+} from '../symmetric.js';
 import { randomBytes } from 'crypto';
 
 describe('Symmetric Encryption (AES-256-GCM)', () => {
@@ -53,10 +53,12 @@ describe('Symmetric Encryption (AES-256-GCM)', () => {
 
     let encrypted = await encryptWithKey(plaintext, encryptionKey, nonce);
 
-    // Tamper with ciphertext
-    const buffer = Buffer.from(encrypted, 'hex');
-    buffer[10] = buffer[10] ^ 0xff; // Flip bits
-    encrypted = buffer.toString('hex');
+    // Tamper with ciphertext component specifically
+    const parts = encrypted.split(':');
+    const ciphertextBuffer = Buffer.from(parts[1], 'hex');
+    ciphertextBuffer[0] = ciphertextBuffer[0] ^ 0xff; // Flip bits in ciphertext
+    parts[1] = ciphertextBuffer.toString('hex');
+    encrypted = parts.join(':');
 
     await expect(async () => {
       await decryptWithKey(encrypted, encryptionKey);
@@ -71,5 +73,45 @@ describe('Symmetric Encryption (AES-256-GCM)', () => {
     expect(nonce1).not.toEqual(nonce2);
     expect(nonce2).not.toEqual(nonce3);
     expect(nonce1).not.toEqual(nonce3);
+  });
+});
+
+describe('Input Validation', () => {
+  it('should throw for invalid key length', async () => {
+    const shortKey = randomBytes(16); // 128-bit, not 256-bit
+    const nonce = await generateNonce();
+    const plaintext = 'test';
+
+    await expect(async () => {
+      await encryptWithKey(plaintext, shortKey, nonce);
+    }).rejects.toThrow('Key must be 32 bytes');
+  });
+
+  it('should throw for invalid nonce length', async () => {
+    const invalidNonce = randomBytes(8); // 64-bit, not 96-bit
+    const key = randomBytes(32);
+
+    await expect(async () => {
+      await encryptWithKey('test', key, invalidNonce);
+    }).rejects.toThrow('Nonce must be 12 bytes');
+  });
+
+  it('should throw for invalid ciphertext format', async () => {
+    const key = randomBytes(32);
+
+    await expect(async () => {
+      await decryptWithKey('invalid:format', key);
+    }).rejects.toThrow('Invalid');
+  });
+
+  it('should encrypt and decrypt empty string', async () => {
+    const plaintext = '';
+    const nonce = await generateNonce();
+    const encryptionKey = randomBytes(32);
+
+    const encrypted = await encryptWithKey(plaintext, encryptionKey, nonce);
+    const decrypted = await decryptWithKey(encrypted, encryptionKey);
+
+    expect(decrypted).toBe('');
   });
 });
