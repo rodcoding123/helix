@@ -5,7 +5,7 @@
  */
 
 import { execSync } from 'child_process';
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { existsSync, writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 
 interface SessionConfig {
@@ -25,10 +25,8 @@ interface SessionStatus {
 
 export class OnePasswordSessionManager {
   private sessionCacheDir: string;
-  private config: SessionConfig;
 
   constructor(config: SessionConfig = {}) {
-    this.config = config;
     this.sessionCacheDir =
       config.sessionCacheDir || join(process.env.HOME || process.env.USERPROFILE || '', '.op-session');
 

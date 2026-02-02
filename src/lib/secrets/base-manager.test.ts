@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { BaseSecretsManager } from './base-manager';
-import { SecretType, SecretSourceType } from './types';
+import { BaseSecretsManager } from './base-manager.js';
+import { SecretType, SecretSourceType } from './types.js';
 
 describe('BaseSecretsManager', () => {
   let manager: BaseSecretsManager;
@@ -130,5 +130,43 @@ describe('BaseSecretsManager', () => {
     const retrieved = await manager.loadSecret(SecretType.GEMINI_API_KEY);
 
     expect(retrieved).toBeNull();
+  });
+
+  describe('validateSecret', () => {
+    it('should return false for non-existent secret', async () => {
+      const isValid = await manager.validateSecret(SecretType.STRIPE_SECRET_KEY);
+      expect(isValid).toBe(false);
+    });
+
+    it('should return true for active, non-expired secret', async () => {
+      await manager.storeSecret(
+        SecretType.STRIPE_SECRET_KEY,
+        'sk_live_123',
+        SecretSourceType.USER_PROVIDED
+      );
+
+      const isValid = await manager.validateSecret(SecretType.STRIPE_SECRET_KEY);
+      expect(isValid).toBe(true);
+    });
+
+    it('should return false for expired secret', async () => {
+      const pastDate = new Date(Date.now() - 1000); // 1 second ago
+
+      await manager.storeSecret(
+        SecretType.STRIPE_SECRET_KEY,
+        'sk_live_123',
+        SecretSourceType.USER_PROVIDED,
+        pastDate
+      );
+
+      const isValid = await manager.validateSecret(SecretType.STRIPE_SECRET_KEY);
+      expect(isValid).toBe(false);
+    });
+
+    it('should throw when rotating non-existent secret', async () => {
+      expect(async () => {
+        await manager.rotateSecret(SecretType.STRIPE_SECRET_KEY, 'new-value');
+      }).rejects.toThrow('Cannot rotate secret');
+    });
   });
 });

@@ -5,11 +5,17 @@ import {
   StoredSecretData,
   SecretsManager,
   SecretLoadOptions,
-} from './types';
+} from './types.js';
 
 /**
- * In-memory secrets manager for testing and base implementation
- * Production will extend this with database backend
+ * In-memory secrets manager for testing and base implementation.
+ *
+ * WARNING: Does NOT encrypt secrets - stores plaintext in memory.
+ * Production implementations MUST extend this with proper encryption.
+ *
+ * @example
+ * const manager = new BaseSecretsManager('user-123');
+ * await manager.storeSecret(SecretType.STRIPE_SECRET_KEY, 'sk_live_...', SecretSourceType.USER_PROVIDED);
  */
 export class BaseSecretsManager implements SecretsManager {
   private userId: string;
@@ -21,7 +27,7 @@ export class BaseSecretsManager implements SecretsManager {
 
   async loadSecret(
     type: SecretType,
-    options?: SecretLoadOptions
+    _options?: SecretLoadOptions
   ): Promise<string | null> {
     const stored = this.storage.get(type);
 
@@ -37,10 +43,10 @@ export class BaseSecretsManager implements SecretsManager {
     return stored.encryptedValue;
   }
 
-  async loadAllSecrets(options?: SecretLoadOptions): Promise<Map<SecretType, string>> {
+  async loadAllSecrets(_options?: SecretLoadOptions): Promise<Map<SecretType, string>> {
     const result = new Map<SecretType, string>();
 
-    this.storage.forEach((data, type) => {
+    this.storage.forEach((_data, type) => {
       const stored = this.storage.get(type);
       if (stored) {
         // Update last accessed time
@@ -93,7 +99,7 @@ export class BaseSecretsManager implements SecretsManager {
     const existing = this.storage.get(type);
 
     if (!existing) {
-      throw new Error(`Secret ${type} does not exist`);
+      throw new Error(`Cannot rotate secret: ${type} does not exist. Store the secret first using storeSecret().`);
     }
 
     const metadata: SecretMetadata = {
