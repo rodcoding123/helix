@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import crypto from 'crypto';
+import { createHmac } from 'crypto';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -40,8 +40,7 @@ function verifyDiscordSignature(
   const message = timestamp + body;
   const isValid =
     signature ===
-    crypto
-      .createHmac('sha256', publicKey)
+    createHmac('sha256', publicKey)
       .update(message)
       .digest('hex');
 
