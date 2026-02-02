@@ -88,4 +88,20 @@ describe('SecretsList Component', () => {
     );
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
   });
+
+  it('should show error message when error is set', () => {
+    useSecretsStore.setState({
+      secrets: [],
+      loading: false,
+      error: 'Failed to load secrets',
+    });
+
+    render(
+      <SecretsProvider>
+        <SecretsList />
+      </SecretsProvider>
+    );
+    expect(screen.getByText(/error loading secrets/i)).toBeInTheDocument();
+    expect(screen.getByText('Failed to load secrets')).toBeInTheDocument();
+  });
 });

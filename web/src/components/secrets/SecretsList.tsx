@@ -54,7 +54,13 @@ export const SecretsList: React.FC = () => {
   return (
     <div className="space-y-3">
       {secrets.map((secret) => (
-        <SecretListItem key={secret.id} secret={secret} />
+        <SecretListItem
+          key={secret.id}
+          secret={secret}
+          onCopy={() => console.log('Copy:', secret.id)}
+          onRotate={() => console.log('Rotate:', secret.id)}
+          onDelete={() => console.log('Delete:', secret.id)}
+        />
       ))}
     </div>
   );
