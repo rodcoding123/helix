@@ -29,6 +29,7 @@ export type ExtractedTopic = string;
 export interface Conversation {
   id: string;
   user_id: string;
+  instance_key?: string; // Optional session/instance identifier
   messages: ConversationMessage[];
   primary_emotion: string;
   secondary_emotions: string[];
