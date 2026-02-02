@@ -72,7 +72,7 @@ export const RotateSecretModal: React.FC<RotateSecretModalProps> = ({
           <div className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
             <div>
               <p className="text-sm font-medium text-gray-700">Secret Name</p>
-              <p className="mt-1 text-sm text-gray-900">{secret.name}</p>
+              <p className="mt-1 text-sm text-gray-900">{secret.key_name}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

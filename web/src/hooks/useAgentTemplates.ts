@@ -4,7 +4,6 @@ import type {
   AgentTemplateCategory,
   EnrichedAgentTemplate,
   TemplateInstantiationConfig,
-  PersonalityProfile,
 } from '@/lib/types/agent-templates';
 import { AgentTemplateService } from '@/services/agent-template';
 

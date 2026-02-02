@@ -156,7 +156,7 @@ export function useMemorySynthesis() {
         setMemoryPatterns((prev) =>
           prev.map((p) =>
             p.id === patternId
-              ? { ...p, user_confirmed: confirmation.confirmed, user_notes: confirmation.notes }
+              ? { ...p, user_confirmed: confirmation.confirmed, user_notes: confirmation.notes ?? null }
               : p
           )
         );

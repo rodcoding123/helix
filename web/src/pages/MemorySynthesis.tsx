@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import { Play, Loader, CheckCircle, AlertCircle, Clock, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useMemorySynthesis } from '@/hooks/useMemorySynthesis';
-import type { MemoryPattern, SynthesisType } from '@/lib/types/memory-synthesis';
+import type { SynthesisType } from '@/lib/types/memory-synthesis';
 
 /**
  * Memory Synthesis Page: Automated psychological layer analysis
@@ -14,7 +14,6 @@ export const MemorySynthesisPage: FC = () => {
     synthesisJobs,
     memoryPatterns,
     recommendations,
-    currentJob,
     isLoading,
     error,
     createSynthesisJob,
@@ -313,13 +312,13 @@ export const MemorySynthesisPage: FC = () => {
                     {!pattern.user_confirmed && pattern.user_confirmed !== false && (
                       <div className="flex gap-2">
                         <button
-                          onClick={() => confirmPattern(pattern.id, { confirmed: true })}
+                          onClick={() => confirmPattern(pattern.id, { confirmed: true, pattern_id: pattern.id })}
                           className="text-xs px-2 py-1 bg-green-500/20 text-green-300 hover:bg-green-500/30 rounded"
                         >
                           Confirm
                         </button>
                         <button
-                          onClick={() => confirmPattern(pattern.id, { confirmed: false })}
+                          onClick={() => confirmPattern(pattern.id, { confirmed: false, pattern_id: pattern.id })}
                           className="text-xs px-2 py-1 bg-red-500/20 text-red-300 hover:bg-red-500/30 rounded"
                         >
                           Not Relevant

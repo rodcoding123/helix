@@ -2,7 +2,7 @@
  * Authentication context for Helix Desktop
  */
 
-import React, { useCallback, useContext, createContext, ReactNode, useState, useEffect } from 'react';
+import { useCallback, useContext, createContext, ReactNode, useState, useEffect } from 'react';
 
 export interface AuthUser {
   id: string;

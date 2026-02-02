@@ -1,4 +1,3 @@
-import React from 'react';
 import { Search, ChevronDown } from 'lucide-react';
 import type { AgentTemplateCategory } from '@/lib/types/agent-templates';
 

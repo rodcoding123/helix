@@ -22,13 +22,13 @@ export const CompositeSkillsPage: FC = () => {
     loadCompositeSkills,
     createCompositeSkill,
     executeSkill,
-    loadSkill,
     loadExecutionHistory,
     deleteSkill,
   } = useCompositeSkills();
 
   const [showBuilder, setShowBuilder] = useState(false);
   const [showExecutor, setShowExecutor] = useState(false);
+  const [selectedSkill, setSelectedSkill] = useState<CompositeSkill | null>(null);
 
   // Builder form state
   const [skillName, setSkillName] = useState('');
@@ -127,17 +127,17 @@ export const CompositeSkillsPage: FC = () => {
   const handleExecuteSkill = async (skill: CompositeSkill) => {
     if (!user?.id) return;
 
-    setCurrentSkill(skill);
+    setSelectedSkill(skill);
     setShowExecutor(true);
     loadExecutionHistory(skill.id);
   };
 
   const handleRunExecution = async () => {
-    if (!user?.id || !currentSkill) return;
+    if (!user?.id || !selectedSkill) return;
 
     setIsExecuting(true);
     try {
-      await executeSkill(currentSkill, user.id, executionInput);
+      await executeSkill(selectedSkill, user.id, executionInput);
       setExecutionInput({});
     } catch (err) {
       alert(`Execution failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
@@ -420,7 +420,7 @@ export const CompositeSkillsPage: FC = () => {
                 <button
                   onClick={() => {
                     setShowExecutor(false);
-                    setCurrentSkill(null);
+                    setSelectedSkill(null);
                   }}
                   className="flex-1 px-4 py-2 rounded border border-slate-700 text-slate-300"
                 >

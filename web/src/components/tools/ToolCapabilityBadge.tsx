@@ -1,4 +1,3 @@
-import React from 'react';
 import type { ToolCapability } from '@/lib/types/custom-tools';
 
 interface ToolCapabilityBadgeProps {

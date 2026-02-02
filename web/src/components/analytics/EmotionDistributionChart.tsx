@@ -1,4 +1,3 @@
-import React from 'react';
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface EmotionDistributionChartProps {

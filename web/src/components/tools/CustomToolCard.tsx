@@ -1,4 +1,3 @@
-import React from 'react';
 import { Copy, Trash2, Edit2, Play } from 'lucide-react';
 import type { CustomTool } from '@/lib/types/custom-tools';
 

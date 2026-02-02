@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { SecretsList } from '../components/secrets/SecretsList';
 import { CreateSecretModal } from '../components/secrets/modals/CreateSecretModal';
 import { RotateSecretModal } from '../components/secrets/modals/RotateSecretModal';
@@ -10,7 +10,7 @@ export const SecretsPage: React.FC = () => {
   const [isRotateModalOpen, setIsRotateModalOpen] = useState(false);
   const [selectedSecret, setSelectedSecret] = useState<UserApiKey | null>(null);
 
-  const { addSecret, updateSecret, removeSecret } = useSecrets();
+  const { addSecret, updateSecret } = useSecrets();
 
   const handleCreateClick = () => {
     setIsCreateModalOpen(true);
@@ -58,20 +58,6 @@ export const SecretsPage: React.FC = () => {
       setSelectedSecret(null);
     } catch (err) {
       console.error('Error rotating secret:', err);
-    }
-  };
-
-  const handleDeleteSecret = async (secretId: string) => {
-    try {
-      const response = await fetch(`/api/secrets/${secretId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) throw new Error('Failed to delete secret');
-
-      removeSecret(secretId);
-    } catch (err) {
-      console.error('Error deleting secret:', err);
     }
   };
 

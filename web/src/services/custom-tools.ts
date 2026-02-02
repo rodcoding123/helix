@@ -363,7 +363,7 @@ export class CustomToolsService {
       }
 
       if (options?.tags && options.tags.length > 0) {
-        query = query.cs('tags', options.tags);
+        query = query.contains('tags', options.tags);
       }
 
       const limit = options?.limit || 20;

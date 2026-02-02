@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import { Plus, Search, Zap, Loader } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCustomTools } from '@/hooks/useCustomTools';
-import type { CustomTool, CustomToolDefinition, ToolParameter } from '@/lib/types/custom-tools';
+import type { CustomToolDefinition, ToolParameter } from '@/lib/types/custom-tools';
 import { CustomToolCard } from '@/components/tools/CustomToolCard';
 import { ToolCapabilityBadge } from '@/components/tools/ToolCapabilityBadge';
 

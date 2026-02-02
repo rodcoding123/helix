@@ -373,6 +373,8 @@ export class MemorySynthesisService {
           first_detected: pattern.first_detected,
           last_observed: pattern.last_observed,
           observation_count: pattern.observation_count,
+          user_confirmed: pattern.user_confirmed,
+          user_notes: pattern.user_notes,
         });
       }
 
@@ -394,6 +396,7 @@ export class MemorySynthesisService {
       console.error('Failed to synthesize memory patterns:', error);
 
       // Mark job as failed
+      const supabase = this.getSupabaseClient();
       await supabase
         .from('memory_synthesis_jobs')
         .update({

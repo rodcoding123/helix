@@ -15,7 +15,7 @@ import { ActionStatusCard } from '@/components/analytics/ActionStatusCard';
  */
 export const AnalyticsPage: FC = () => {
   const { user, loading: authLoading } = useAuth();
-  const { analyticsData, isLoading, fetchAnalytics, changeTimeRange, timeRange } = useAnalytics();
+  const { analyticsData, isLoading, fetchAnalytics } = useAnalytics();
 
   const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRange>('7d');
 

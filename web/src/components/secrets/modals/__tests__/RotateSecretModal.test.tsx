@@ -2,20 +2,27 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RotateSecretModal } from '../RotateSecretModal';
-import type { UserApiKey } from '../../../lib/types/secrets';
+import type { UserApiKey } from '@/lib/types/secrets';
 
 describe('RotateSecretModal Component', () => {
   const mockSecret: UserApiKey = {
     id: 'secret-1',
     user_id: 'user-123',
-    name: 'Production API Key',
+    key_name: 'Production API Key',
     secret_type: 'STRIPE_SECRET_KEY' as const,
-    source_type: 'manual' as const,
-    created_at: new Date('2025-01-01'),
-    expires_at: new Date('2026-01-01'),
+    source_type: 'user-provided' as const,
+    created_at: '2025-01-01',
+    last_accessed_at: null,
+    last_rotated_at: null,
+    expires_at: '2026-01-01',
     is_active: true,
     key_version: 5,
     encryption_method: 'aes-256-gcm' as const,
+    encrypted_value: 'encrypted-value',
+    derivation_salt: null,
+    created_by: null,
+    updated_by: null,
+    updated_at: '2025-01-01',
   };
 
   const mockOnClose = vi.fn();

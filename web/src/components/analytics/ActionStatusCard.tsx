@@ -1,4 +1,3 @@
-import React from 'react';
 import type { AutonomyMetrics } from '@/lib/types/analytics';
 
 interface ActionStatusCardProps {

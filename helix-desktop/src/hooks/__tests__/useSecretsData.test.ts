@@ -7,19 +7,6 @@ vi.mock('../../lib/auth-context');
 vi.mock('../../lib/api/secrets-client');
 
 describe('useSecretsData Hook', () => {
-  const mockSecret = {
-    id: 'secret-1',
-    user_id: 'user-123',
-    name: 'API Key',
-    secret_type: 'STRIPE_SECRET_KEY' as const,
-    source_type: 'manual' as const,
-    created_at: new Date(),
-    expires_at: null,
-    is_active: true,
-    key_version: 1,
-    encryption_method: 'aes-256-gcm' as const,
-  };
-
   beforeEach(() => {
     vi.mocked(authModule.useAuth).mockReturnValue({
       token: 'test-token',

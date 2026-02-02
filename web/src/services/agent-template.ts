@@ -3,11 +3,8 @@ import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import type {
   AgentTemplate,
   AgentTemplateCategory,
-  UserAgentTemplate,
-  TemplateUsageLog,
   TemplateInstantiationConfig,
   EnrichedAgentTemplate,
-  PersonalityProfile,
 } from '@/lib/types/agent-templates';
 
 /**
