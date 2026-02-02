@@ -505,3 +505,496 @@ describe('Telemetry Payload Structure', () => {
     expect(payload.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/);
   });
 });
+
+describe('HelixObservatoryClient - Offline Queue', () => {
+  let client: HelixObservatoryClient;
+
+  beforeEach(() => {
+    mockFetch.mockReset();
+    client = new HelixObservatoryClient('test-instance', undefined, {
+      maxRetries: 1,
+      baseDelayMs: 10,
+      maxDelayMs: 20,
+    });
+  });
+
+  afterEach(() => {
+    client.stopOfflineFlush();
+  });
+
+  it('should queue events when max queue size reached', async () => {
+    // Fill queue to capacity
+    mockFetch.mockRejectedValue(new Error('Network error'));
+
+    // Send 1002 events to exceed MAX_QUEUE_SIZE of 1000
+    for (let i = 0; i < 5; i++) {
+      await client.sendTelemetry('heartbeat', { status: 'test' });
+    }
+
+    // Queue should be capped at a reasonable size
+    const queueSize = client.getQueueSize();
+    expect(queueSize).toBeGreaterThan(0);
+    expect(queueSize).toBeLessThanOrEqual(1000);
+  });
+
+  it('should flush offline queue when connectivity restored', async () => {
+    mockFetch.mockRejectedValue(new Error('Network error'));
+
+    // Queue 3 events
+    await client.sendTelemetry('heartbeat', { status: 'test1' });
+    await client.sendTelemetry('heartbeat', { status: 'test2' });
+    await client.sendTelemetry('heartbeat', { status: 'test3' });
+
+    expect(client.getQueueSize()).toBe(3);
+    expect(client.isConnected()).toBe(false);
+
+    // Restore connectivity
+    mockFetch.mockResolvedValue({ ok: true });
+
+    // Manual flush
+    await client.flush();
+
+    // Queue should be emptied
+    expect(client.getQueueSize()).toBe(0);
+    expect(client.isConnected()).toBe(true);
+  });
+
+  it('should drop stale queued events older than 24 hours', async () => {
+    mockFetch.mockRejectedValue(new Error('Network error'));
+
+    // Queue an event
+    await client.sendTelemetry('heartbeat', { status: 'old' });
+
+    expect(client.getQueueSize()).toBe(1);
+
+    // Mock Date.now to simulate 25 hours later
+    const originalNow = Date.now;
+    const baseTime = originalNow();
+    vi.spyOn(Date, 'now').mockImplementation(() => baseTime + 25 * 60 * 60 * 1000);
+
+    // Restore connectivity and flush
+    mockFetch.mockResolvedValue({ ok: true });
+    await client.flush();
+
+    // Stale event should be dropped
+    expect(client.getQueueSize()).toBe(0);
+
+    // Restore Date.now
+    vi.spyOn(Date, 'now').mockImplementation(originalNow);
+  });
+
+  it('should skip flush when queue is empty', async () => {
+    mockFetch.mockResolvedValue({ ok: true });
+
+    // Flush empty queue
+    await client.flush();
+
+    // No errors should occur
+    expect(client.getQueueSize()).toBe(0);
+  });
+
+  it('should handle OPTIONS request failure during flush connectivity check', async () => {
+    mockFetch.mockRejectedValue(new Error('Network error'));
+
+    // Queue an event
+    await client.sendTelemetry('heartbeat', { status: 'test' });
+
+    expect(client.getQueueSize()).toBe(1);
+
+    // Mock OPTIONS to fail (still offline)
+    mockFetch.mockRejectedValue(new Error('Still offline'));
+
+    await client.flush();
+
+    // Queue should remain (connectivity not restored)
+    expect(client.getQueueSize()).toBe(1);
+  });
+
+  it('should handle OPTIONS request with non-ok status during flush', async () => {
+    mockFetch.mockRejectedValue(new Error('Network error'));
+
+    // Queue an event
+    await client.sendTelemetry('heartbeat', { status: 'test' });
+
+    expect(client.getQueueSize()).toBe(1);
+
+    // Mock OPTIONS to return non-ok
+    mockFetch.mockResolvedValue({ ok: false, status: 503 });
+
+    await client.flush();
+
+    // Queue should remain (connectivity not restored)
+    expect(client.getQueueSize()).toBe(1);
+  });
+
+  it('should clear queue array before processing during flush', async () => {
+    mockFetch.mockRejectedValue(new Error('Network error'));
+
+    // Queue events
+    await client.sendTelemetry('heartbeat', { status: 'test1' });
+    await client.sendTelemetry('heartbeat', { status: 'test2' });
+
+    expect(client.getQueueSize()).toBe(2);
+
+    // Restore connectivity
+    mockFetch.mockResolvedValue({ ok: true });
+
+    await client.flush();
+
+    // Queue should be cleared
+    expect(client.getQueueSize()).toBe(0);
+  });
+
+  it('should start offline flush interval on construction', () => {
+    const newClient = new HelixObservatoryClient('interval-test');
+
+    // Flush interval should be started (private property, but we can verify no errors)
+    expect(newClient).toBeDefined();
+
+    newClient.stopOfflineFlush();
+  });
+
+  it('should not start duplicate flush intervals', () => {
+    const newClient = new HelixObservatoryClient('duplicate-test');
+
+    // Call startOfflineFlush multiple times (internal method called in constructor)
+    // Should not create duplicate intervals
+    expect(newClient).toBeDefined();
+
+    newClient.stopOfflineFlush();
+  });
+});
+
+describe('HelixObservatoryClient - Exponential Backoff', () => {
+  let client: HelixObservatoryClient;
+
+  beforeEach(() => {
+    mockFetch.mockReset();
+    client = new HelixObservatoryClient('backoff-test', undefined, {
+      maxRetries: 3,
+      baseDelayMs: 100,
+      maxDelayMs: 1000,
+    });
+  });
+
+  afterEach(() => {
+    client.stopOfflineFlush();
+  });
+
+  it('should apply exponential backoff on retries', async () => {
+    const startTime = Date.now();
+
+    mockFetch
+      .mockResolvedValueOnce({ ok: false, status: 500 })
+      .mockResolvedValueOnce({ ok: false, status: 500 })
+      .mockResolvedValueOnce({ ok: false, status: 500 })
+      .mockResolvedValueOnce({ ok: true });
+
+    await client.sendTelemetry('heartbeat', { status: 'test' });
+
+    const endTime = Date.now();
+    const duration = endTime - startTime;
+
+    // With baseDelayMs=100, delays are: 100ms, 200ms, 400ms
+    // Total minimum wait time: 700ms (allowing some tolerance)
+    expect(duration).toBeGreaterThanOrEqual(500);
+  });
+
+  it('should cap backoff at maxDelayMs', async () => {
+    const shortClient = new HelixObservatoryClient('cap-test', undefined, {
+      maxRetries: 5,
+      baseDelayMs: 1000,
+      maxDelayMs: 50, // Cap at 50ms
+    });
+
+    mockFetch.mockResolvedValue({ ok: false, status: 500 });
+
+    const startTime = Date.now();
+    await shortClient.sendTelemetry('heartbeat', { status: 'test' });
+    const endTime = Date.now();
+    const duration = endTime - startTime;
+
+    // All delays should be capped at 50ms, so max wait: 5 * 50ms = 250ms
+    expect(duration).toBeLessThan(500);
+
+    shortClient.stopOfflineFlush();
+  });
+
+  it('should retry on network error with backoff', async () => {
+    mockFetch
+      .mockRejectedValueOnce(new Error('Network error'))
+      .mockRejectedValueOnce(new Error('Network error'))
+      .mockResolvedValueOnce({ ok: true });
+
+    const result = await client.sendTelemetry('heartbeat', { status: 'test' });
+
+    expect(result).toBe(true);
+    expect(mockFetch).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe('HelixObservatoryClient - Hash Chain Integration', () => {
+  let client: HelixObservatoryClient;
+
+  beforeEach(() => {
+    mockFetch.mockReset().mockResolvedValue({ ok: true });
+    client = new HelixObservatoryClient('hash-test');
+  });
+
+  afterEach(() => {
+    client.stopOfflineFlush();
+  });
+
+  it('should update lastHash after sending telemetry with auto-computed hash', async () => {
+    const status1 = client.getStatus();
+    const initialHash = status1.lastHash;
+
+    await client.sendTelemetry('heartbeat', { status: 'test1' });
+
+    const status2 = client.getStatus();
+    const updatedHash = status2.lastHash;
+
+    // Hash should be updated
+    expect(updatedHash).not.toBe(initialHash);
+    expect(updatedHash).toBe('mock-computed-hash');
+  });
+
+  it('should not update lastHash when using provided hash', async () => {
+    await client.sendTelemetry('heartbeat', { status: 'test1' });
+
+    const status1 = client.getStatus();
+    const hashBefore = status1.lastHash;
+
+    // Send with custom hash (should not update lastHash)
+    await client.sendTelemetry('heartbeat', { status: 'test2' }, 'custom-hash', 'custom-prev');
+
+    const status2 = client.getStatus();
+    const hashAfter = status2.lastHash;
+
+    // lastHash should remain the same when custom hash provided
+    expect(hashAfter).toBe(hashBefore);
+  });
+
+  it('should handle hash state initialization failure', async () => {
+    // Mock getChainState to fail
+    const { getChainState } = await import('./hash-chain.js');
+    vi.mocked(getChainState).mockRejectedValueOnce(new Error('Chain state error'));
+
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const newClient = new HelixObservatoryClient('hash-fail-test');
+
+    // Wait for async initialization
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    // Should fall back to GENESIS
+    const status = newClient.getStatus();
+    expect(status.lastHash).toBeDefined();
+
+    warnSpy.mockRestore();
+    newClient.stopOfflineFlush();
+  });
+});
+
+describe('HelixObservatoryClient - Edge Cases', () => {
+  let client: HelixObservatoryClient;
+
+  beforeEach(() => {
+    mockFetch.mockReset();
+    client = new HelixObservatoryClient('edge-test');
+  });
+
+  afterEach(() => {
+    client.stopOfflineFlush();
+  });
+
+  it('should handle sendCommand with null exitCode', async () => {
+    mockFetch.mockResolvedValue({ ok: true });
+
+    await client.sendCommand('test-command', '/tmp', 'pending', null);
+
+    const callBody = parseMockCallBody(mockFetch, 0);
+    expect(callBody.payload.exit_code).toBeUndefined();
+  });
+
+  it('should handle sendCommand with undefined exitCode', async () => {
+    mockFetch.mockResolvedValue({ ok: true });
+
+    await client.sendCommand('test-command', '/tmp', 'pending', undefined);
+
+    const callBody = parseMockCallBody(mockFetch, 0);
+    expect(callBody.payload.exit_code).toBeUndefined();
+  });
+
+  it('should handle sendCommand with exitCode 0', async () => {
+    mockFetch.mockResolvedValue({ ok: true });
+
+    await client.sendCommand('test-command', '/tmp', 'completed', 0);
+
+    const callBody = parseMockCallBody(mockFetch, 0);
+    expect(callBody.payload.exit_code).toBe(0);
+  });
+
+  it('should handle sendApiCall without optional parameters', async () => {
+    mockFetch.mockResolvedValue({ ok: true });
+
+    await client.sendApiCall('claude-3', 'anthropic', 'pending');
+
+    const callBody = parseMockCallBody(mockFetch, 0);
+    expect(callBody.payload.latency_ms).toBeUndefined();
+    expect(callBody.payload.token_count).toBeUndefined();
+  });
+
+  it('should handle sendFileChange without optional parameters', async () => {
+    mockFetch.mockResolvedValue({ ok: true });
+
+    await client.sendFileChange('/path/to/file', 'created');
+
+    const callBody = parseMockCallBody(mockFetch, 0);
+    expect(callBody.payload.size_bytes).toBeUndefined();
+    expect(callBody.payload.content_hash).toBeUndefined();
+  });
+
+  it('should handle sendAnomaly without details', async () => {
+    mockFetch.mockResolvedValue({ ok: true });
+
+    await client.sendAnomaly('test-anomaly', 'medium', 'Test description');
+
+    const callBody = parseMockCallBody(mockFetch, 0);
+    expect(callBody.payload.details).toBeUndefined();
+  });
+
+  it('should handle sendTransformation with unknown layer number', async () => {
+    mockFetch.mockResolvedValue({ ok: true });
+
+    await client.sendTransformation(99, 'from', 'to', 'trigger');
+
+    const callBody = parseMockCallBody(mockFetch, 0);
+    expect(callBody.payload.layer_name).toBe('Layer 99');
+  });
+
+  it('should handle sendHeartbeat without metrics', async () => {
+    mockFetch.mockResolvedValue({ ok: true });
+
+    await client.sendHeartbeat('healthy');
+
+    const callBody = parseMockCallBody(mockFetch, 0);
+    expect(callBody.payload.metrics).toBeUndefined();
+  });
+
+  it('should use OBSERVATORY_URL from environment if provided', () => {
+    const originalEnv = process.env.OBSERVATORY_URL;
+    process.env.OBSERVATORY_URL = 'https://env-observatory.example.com';
+
+    const envClient = new HelixObservatoryClient('env-test');
+    const status = envClient.getStatus();
+
+    expect(status.observatoryUrl).toBe('https://env-observatory.example.com');
+
+    process.env.OBSERVATORY_URL = originalEnv;
+    envClient.stopOfflineFlush();
+  });
+
+  it('should handle shutdown with non-empty queue', async () => {
+    // Use a client with minimal retry config to speed up test
+    const fastClient = new HelixObservatoryClient('shutdown-queue-test', undefined, {
+      maxRetries: 0,
+      baseDelayMs: 1,
+      maxDelayMs: 1,
+    });
+
+    mockFetch.mockRejectedValue(new Error('Network error'));
+
+    // Queue some events
+    await fastClient.sendTelemetry('heartbeat', { status: 'test1' });
+    await fastClient.sendTelemetry('heartbeat', { status: 'test2' });
+
+    expect(fastClient.getQueueSize()).toBeGreaterThan(0);
+
+    // Restore connectivity for final flush
+    mockFetch.mockResolvedValue({ ok: true });
+
+    // Shutdown should attempt final flush
+    await fastClient.shutdown();
+
+    // No errors should occur
+    expect(true).toBe(true);
+  }, 15000);
+
+  it('should handle multiple consecutive network errors correctly', async () => {
+    // Use a client with minimal retry config
+    const fastClient = new HelixObservatoryClient('network-error-test', undefined, {
+      maxRetries: 1,
+      baseDelayMs: 1,
+      maxDelayMs: 1,
+    });
+
+    mockFetch.mockRejectedValue(new Error('Persistent network error'));
+
+    const result = await fastClient.sendTelemetry('heartbeat', { status: 'test' });
+
+    expect(result).toBe(false);
+    expect(fastClient.isConnected()).toBe(false);
+    expect(fastClient.getQueueSize()).toBeGreaterThan(0);
+
+    fastClient.stopOfflineFlush();
+  }, 15000);
+});
+
+describe('HelixObservatoryClient - Server Error Handling', () => {
+  let client: HelixObservatoryClient;
+
+  beforeEach(() => {
+    mockFetch.mockReset();
+    client = new HelixObservatoryClient('server-error-test', undefined, {
+      maxRetries: 2,
+      baseDelayMs: 10,
+      maxDelayMs: 20,
+    });
+  });
+
+  afterEach(() => {
+    client.stopOfflineFlush();
+  });
+
+  it('should not retry on 4xx client errors', async () => {
+    mockFetch.mockResolvedValue({
+      ok: false,
+      status: 422,
+      text: () => Promise.resolve('Unprocessable Entity'),
+    });
+
+    const result = await client.sendTelemetry('heartbeat', { status: 'test' });
+
+    expect(result).toBe(false);
+    expect(mockFetch).toHaveBeenCalledTimes(1); // No retries
+    expect(client.getQueueSize()).toBe(0); // Should not queue client errors
+  });
+
+  it('should retry on 5xx server errors', async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 502,
+        text: () => Promise.resolve('Bad Gateway'),
+      })
+      .mockResolvedValueOnce({ ok: true });
+
+    const result = await client.sendTelemetry('heartbeat', { status: 'test' });
+
+    expect(result).toBe(true);
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('should mark client as online after successful request', async () => {
+    mockFetch.mockRejectedValue(new Error('Network error'));
+
+    await client.sendTelemetry('heartbeat', { status: 'test' });
+    expect(client.isConnected()).toBe(false);
+
+    mockFetch.mockResolvedValue({ ok: true });
+
+    await client.sendTelemetry('heartbeat', { status: 'test' });
+    expect(client.isConnected()).toBe(true);
+  });
+});

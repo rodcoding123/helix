@@ -246,3 +246,11 @@ export function createLoggedExecutor<T>(
     }
   };
 }
+
+/**
+ * Clear pending commands state (testing utility only)
+ * Should only be used in test suites to reset state between tests
+ */
+export function __resetPendingCommandsForTesting(): void {
+  state.pending.clear();
+}

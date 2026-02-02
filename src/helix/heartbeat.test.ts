@@ -2,10 +2,332 @@
  * Tests for Helix heartbeat module
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import {
+  announceStartup,
+  startHeartbeat,
+  stopHeartbeat,
+  announceShutdown,
+  getHeartbeatStats,
+  sendStatusUpdate,
+} from './heartbeat.js';
+
+// Mock fetch globally
+const mockFetch = vi.fn();
+vi.stubGlobal('fetch', mockFetch);
+
+describe('Heartbeat - Startup Announcement', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+  });
+
+  it('should announce startup to Discord', async () => {
+    const result = await announceStartup();
+
+    expect(result).toBe(true);
+    expect(mockFetch).toHaveBeenCalledOnce();
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+    );
+  });
+
+  it('should include system information', async () => {
+    await announceStartup();
+
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const embed = callBody.embeds[0];
+
+    expect(embed.title).toContain('HELIX ONLINE');
+    expect(embed.color).toBe(0x00ff00); // Green
+    expect(embed.fields.some((f: { name: string }) => f.name === 'PID')).toBe(true);
+    expect(embed.fields.some((f: { name: string }) => f.name === 'Host')).toBe(true);
+    expect(embed.fields.some((f: { name: string }) => f.name === 'Platform')).toBe(true);
+  });
+
+  it('should return false on webhook failure', async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 500 });
+
+    const result = await announceStartup();
+
+    expect(result).toBe(false);
+  });
+
+  it('should handle network errors', async () => {
+    mockFetch.mockRejectedValue(new Error('Network error'));
+
+    const result = await announceStartup();
+
+    expect(result).toBe(false);
+  });
+});
+
+describe('Heartbeat - Periodic Heartbeats', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+  });
+
+  afterEach(() => {
+    stopHeartbeat();
+    vi.useRealTimers();
+  });
+
+  it('should start heartbeat and send immediately', async () => {
+    startHeartbeat();
+
+    // Wait for immediate heartbeat
+    await vi.advanceTimersByTimeAsync(100);
+
+    expect(mockFetch).toHaveBeenCalled();
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(callBody.embeds[0].title).toContain('Heartbeat');
+  });
+
+  it('should send heartbeats at 60 second intervals', async () => {
+    startHeartbeat();
+
+    await vi.advanceTimersByTimeAsync(100); // Initial
+    const initialCalls = mockFetch.mock.calls.length;
+
+    await vi.advanceTimersByTimeAsync(60000); // First interval
+    expect(mockFetch.mock.calls.length).toBeGreaterThan(initialCalls);
+
+    await vi.advanceTimersByTimeAsync(60000); // Second interval
+    expect(mockFetch.mock.calls.length).toBeGreaterThan(initialCalls + 1);
+  });
+
+  it('should increment beat counter', async () => {
+    startHeartbeat();
+
+    await vi.advanceTimersByTimeAsync(100);
+    const firstBeat = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const beatNumber1 = firstBeat.embeds[0].fields.find(
+      (f: { name: string }) => f.name === 'Beat #'
+    )?.value;
+
+    await vi.advanceTimersByTimeAsync(60000);
+    const secondBeat = JSON.parse(mockFetch.mock.calls[1][1].body);
+    const beatNumber2 = secondBeat.embeds[0].fields.find(
+      (f: { name: string }) => f.name === 'Beat #'
+    )?.value;
+
+    expect(parseInt(beatNumber2)).toBeGreaterThan(parseInt(beatNumber1));
+  });
+
+  it('should include system metrics', async () => {
+    startHeartbeat();
+
+    await vi.advanceTimersByTimeAsync(100);
+
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const embed = callBody.embeds[0];
+
+    expect(embed.fields.some((f: { name: string }) => f.name === 'Memory')).toBe(true);
+    expect(embed.fields.some((f: { name: string }) => f.name === 'Load')).toBe(true);
+    expect(embed.fields.some((f: { name: string }) => f.name === 'Helix Uptime')).toBe(true);
+  });
+
+  it('should stop heartbeats when stopped', async () => {
+    startHeartbeat();
+    await vi.advanceTimersByTimeAsync(100);
+
+    mockFetch.mockClear();
+    stopHeartbeat();
+
+    await vi.advanceTimersByTimeAsync(300000); // 5 minutes
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it('should not start multiple heartbeats', () => {
+    startHeartbeat();
+    startHeartbeat(); // Should be ignored
+
+    const stats1 = getHeartbeatStats();
+    expect(stats1.running).toBe(true);
+  });
+
+  it('should handle webhook failures gracefully', async () => {
+    mockFetch.mockRejectedValue(new Error('Network error'));
+
+    // Should not throw
+    startHeartbeat();
+    await vi.advanceTimersByTimeAsync(100);
+
+    expect(mockFetch).toHaveBeenCalled();
+  });
+});
+
+describe('Heartbeat - Shutdown Announcement', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+  });
+
+  it('should announce shutdown to Discord', async () => {
+    const result = await announceShutdown('graceful');
+
+    expect(result).toBe(true);
+    expect(mockFetch).toHaveBeenCalledOnce();
+  });
+
+  it('should include shutdown reason', async () => {
+    await announceShutdown('user requested');
+
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const embed = callBody.embeds[0];
+
+    expect(embed.title).toContain('OFFLINE');
+    expect(embed.color).toBe(0xff0000); // Red
+    const reasonField = embed.fields.find((f: { name: string }) => f.name === 'Reason');
+    expect(reasonField?.value).toBe('user requested');
+  });
+
+  it('should default to graceful shutdown', async () => {
+    await announceShutdown();
+
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const embed = callBody.embeds[0];
+    const reasonField = embed.fields.find((f: { name: string }) => f.name === 'Reason');
+    expect(reasonField?.value).toBe('graceful');
+  });
+
+  it('should include uptime statistics', async () => {
+    // Start to establish uptime
+    await announceStartup();
+
+    await announceShutdown('test');
+
+    const callBody = JSON.parse(mockFetch.mock.calls[1][1].body);
+    const embed = callBody.embeds[0];
+    expect(embed.fields.some((f: { name: string }) => f.name === 'Total Uptime')).toBe(true);
+    expect(embed.fields.some((f: { name: string }) => f.name === 'Heartbeats Sent')).toBe(true);
+  });
+
+  it('should return false on webhook failure', async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 500 });
+
+    const result = await announceShutdown();
+
+    expect(result).toBe(false);
+  });
+});
+
+describe('Heartbeat - Statistics', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+  });
+
+  afterEach(() => {
+    stopHeartbeat();
+    vi.useRealTimers();
+  });
+
+  it('should return initial stats', () => {
+    const stats = getHeartbeatStats();
+
+    expect(stats.running).toBe(false);
+    expect(stats.count).toBeDefined();
+    expect(typeof stats.count).toBe('number');
+    expect(stats.uptime).toBeDefined();
+  });
+
+  it('should update stats when heartbeat running', async () => {
+    startHeartbeat();
+    await vi.advanceTimersByTimeAsync(100);
+
+    const stats = getHeartbeatStats();
+
+    expect(stats.running).toBe(true);
+    expect(stats.startTime).toBeDefined();
+  });
+
+  it('should track heartbeat count', async () => {
+    startHeartbeat();
+
+    await vi.advanceTimersByTimeAsync(100);
+    const stats1 = getHeartbeatStats();
+
+    await vi.advanceTimersByTimeAsync(60000);
+    const stats2 = getHeartbeatStats();
+
+    expect(stats2.count).toBeGreaterThan(stats1.count);
+  });
+
+  it('should show running as false after stop', async () => {
+    startHeartbeat();
+    await vi.advanceTimersByTimeAsync(100);
+
+    stopHeartbeat();
+
+    const stats = getHeartbeatStats();
+    expect(stats.running).toBe(false);
+  });
+});
+
+describe('Heartbeat - Status Updates', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+  });
+
+  it('should send custom status update', async () => {
+    const result = await sendStatusUpdate('Task Complete', 'Processing finished');
+
+    expect(result).toBe(true);
+    expect(mockFetch).toHaveBeenCalledOnce();
+  });
+
+  it('should include custom details', async () => {
+    await sendStatusUpdate('Backup Complete', 'All files backed up', {
+      Files: '1234',
+      Size: '5.6 GB',
+      Duration: '2m 30s',
+    });
+
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const embed = callBody.embeds[0];
+
+    expect(embed.title).toContain('Backup Complete');
+    expect(embed.color).toBe(0xf1c40f); // Yellow
+    expect(embed.fields.some((f: { name: string }) => f.name === 'Files')).toBe(true);
+    expect(embed.fields.some((f: { name: string }) => f.name === 'Size')).toBe(true);
+  });
+
+  it('should work without custom details', async () => {
+    const result = await sendStatusUpdate('Simple Status', 'Just a status');
+
+    expect(result).toBe(true);
+  });
+
+  it('should include uptime in status', async () => {
+    await announceStartup(); // Establish start time
+
+    await sendStatusUpdate('Status', 'Test');
+
+    const callBody = JSON.parse(mockFetch.mock.calls[1][1].body);
+    const embed = callBody.embeds[0];
+    expect(embed.fields.some((f: { name: string }) => f.name === 'Uptime')).toBe(true);
+  });
+
+  it('should return false on webhook failure', async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 500 });
+
+    const result = await sendStatusUpdate('Test', 'Test');
+
+    expect(result).toBe(false);
+  });
+});
 
 describe('Heartbeat - Uptime Calculation', () => {
-  // Recreate the uptime function for testing
+  // Recreate the uptime function for unit testing
   const getHelixUptime = (startTime: Date | null): string => {
     if (!startTime) return 'unknown';
 
@@ -24,7 +346,15 @@ describe('Heartbeat - Uptime Calculation', () => {
     }
   };
 
-  it('should return "unknown" for null start time', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('should return unknown for null start time', () => {
     expect(getHelixUptime(null)).toBe('unknown');
   });
 
@@ -33,7 +363,6 @@ describe('Heartbeat - Uptime Calculation', () => {
     vi.setSystemTime(now);
     const startTime = new Date(now - 45 * 1000); // 45 seconds ago
     expect(getHelixUptime(startTime)).toBe('0m 45s');
-    vi.useRealTimers();
   });
 
   it('should format minutes correctly', () => {
@@ -41,7 +370,6 @@ describe('Heartbeat - Uptime Calculation', () => {
     vi.setSystemTime(now);
     const startTime = new Date(now - 5 * 60 * 1000); // 5 minutes ago
     expect(getHelixUptime(startTime)).toBe('5m 0s');
-    vi.useRealTimers();
   });
 
   it('should format hours correctly', () => {
@@ -49,7 +377,6 @@ describe('Heartbeat - Uptime Calculation', () => {
     vi.setSystemTime(now);
     const startTime = new Date(now - 2 * 60 * 60 * 1000 - 30 * 60 * 1000); // 2h 30m ago
     expect(getHelixUptime(startTime)).toBe('2h 30m');
-    vi.useRealTimers();
   });
 
   it('should format days correctly', () => {
@@ -57,76 +384,25 @@ describe('Heartbeat - Uptime Calculation', () => {
     vi.setSystemTime(now);
     const startTime = new Date(now - 3 * 24 * 60 * 60 * 1000 - 5 * 60 * 60 * 1000); // 3d 5h ago
     expect(getHelixUptime(startTime)).toBe('3d 5h 0m');
-    vi.useRealTimers();
+  });
+
+  it('should handle very long uptimes', () => {
+    const now = Date.now();
+    vi.setSystemTime(now);
+    const startTime = new Date(now - 30 * 24 * 60 * 60 * 1000); // 30 days ago
+    const uptime = getHelixUptime(startTime);
+    expect(uptime).toContain('30d');
+  });
+
+  it('should handle zero uptime', () => {
+    const now = Date.now();
+    vi.setSystemTime(now);
+    const startTime = new Date(now);
+    expect(getHelixUptime(startTime)).toBe('0m 0s');
   });
 });
 
-describe('Heartbeat - Stats Structure', () => {
-  it('should return correct stats format', () => {
-    const getHeartbeatStats = (state: {
-      running: boolean;
-      count: number;
-      startTime: Date | null;
-    }): {
-      running: boolean;
-      count: number;
-      startTime: Date | null;
-      uptime: string;
-    } => {
-      const getUptime = (st: Date | null): string => {
-        if (!st) return 'unknown';
-        const ms = Date.now() - st.getTime();
-        const minutes = Math.floor(ms / 60000);
-        return `${minutes}m`;
-      };
-
-      return {
-        running: state.running,
-        count: state.count,
-        startTime: state.startTime,
-        uptime: getUptime(state.startTime),
-      };
-    };
-
-    const startTime = new Date();
-    const stats = getHeartbeatStats({
-      running: true,
-      count: 42,
-      startTime,
-    });
-
-    expect(stats.running).toBe(true);
-    expect(stats.count).toBe(42);
-    expect(stats.startTime).toBe(startTime);
-    expect(typeof stats.uptime).toBe('string');
-  });
-});
-
-describe('Heartbeat - System Info', () => {
-  it('should gather system information', () => {
-    // Test the system info structure
-    const sysInfo = {
-      hostname: 'test-host',
-      platform: 'linux 5.15.0',
-      arch: 'x64',
-      cpus: 8,
-      memoryGB: '16.0',
-      nodeVersion: 'v22.0.0',
-      uptime: '24h 30m',
-      pid: 12345,
-    };
-
-    expect(sysInfo.hostname).toBeDefined();
-    expect(sysInfo.platform).toBeDefined();
-    expect(sysInfo.arch).toBeDefined();
-    expect(typeof sysInfo.cpus).toBe('number');
-    expect(sysInfo.memoryGB).toMatch(/^\d+\.\d+$/);
-    expect(sysInfo.nodeVersion).toMatch(/^v\d+/);
-    expect(typeof sysInfo.pid).toBe('number');
-  });
-});
-
-describe('Heartbeat - Discord Embeds', () => {
+describe('Heartbeat - Discord Embed Structure', () => {
   it('should create valid startup embed', () => {
     const embed = {
       title: '🟢 HELIX ONLINE',
@@ -135,17 +411,14 @@ describe('Heartbeat - Discord Embeds', () => {
         { name: 'Status', value: '**LOGGING ACTIVE**', inline: true },
         { name: 'Boot Time', value: '2024-01-15T10:00:00.000Z', inline: true },
         { name: 'PID', value: '12345', inline: true },
-        { name: 'Host', value: 'test-host', inline: true },
-        { name: 'Platform', value: 'linux 5.15', inline: true },
-        { name: 'Architecture', value: 'x64', inline: true },
       ],
       timestamp: '2024-01-15T10:00:00.000Z',
       footer: { text: 'Helix autonomous system initialized' },
     };
 
     expect(embed.title).toContain('ONLINE');
-    expect(embed.color).toBe(0x00ff00); // Bright green
-    expect(embed.fields.length).toBeGreaterThanOrEqual(6);
+    expect(embed.color).toBe(0x00ff00);
+    expect(embed.footer.text).toContain('initialized');
   });
 
   it('should create valid heartbeat embed', () => {
@@ -155,10 +428,7 @@ describe('Heartbeat - Discord Embeds', () => {
       fields: [
         { name: 'Beat #', value: '42', inline: true },
         { name: 'Helix Uptime', value: '1h 30m', inline: true },
-        { name: 'Time', value: '2024-01-15T11:30:00.000Z', inline: true },
         { name: 'Memory', value: '128.5/256.0 MB', inline: true },
-        { name: 'Load', value: '0.75', inline: true },
-        { name: 'PID', value: '12345', inline: true },
       ],
       timestamp: '2024-01-15T11:30:00.000Z',
       footer: { text: 'Proof of life - every 60 seconds' },
@@ -176,9 +446,7 @@ describe('Heartbeat - Discord Embeds', () => {
       fields: [
         { name: 'Status', value: '**SHUTTING DOWN**', inline: true },
         { name: 'Reason', value: 'graceful', inline: true },
-        { name: 'Shutdown Time', value: '2024-01-15T12:00:00.000Z', inline: true },
         { name: 'Total Uptime', value: '2h 0m', inline: true },
-        { name: 'Heartbeats Sent', value: '120', inline: true },
       ],
       timestamp: '2024-01-15T12:00:00.000Z',
       footer: { text: 'Graceful shutdown - logging will resume on next boot' },
@@ -190,66 +458,66 @@ describe('Heartbeat - Discord Embeds', () => {
   });
 });
 
-describe('Heartbeat - Interval Management', () => {
-  it('should track heartbeat interval state', () => {
-    // Simulate interval management
-    let heartbeatInterval: ReturnType<typeof setInterval> | null = null;
+describe('Heartbeat - Edge Cases', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+  });
 
-    // Start heartbeat
-    const startHeartbeat = (): void => {
-      if (heartbeatInterval) return; // Already running
-      heartbeatInterval = setInterval(() => {
-        // Heartbeat tick (count would increment here)
-      }, 100); // Short interval for testing
-    };
-
-    // Stop heartbeat
-    const stopHeartbeat = (): void => {
-      if (heartbeatInterval) {
-        clearInterval(heartbeatInterval);
-        heartbeatInterval = null;
-      }
-    };
-
-    // Test
-    expect(heartbeatInterval).toBeNull();
-
-    startHeartbeat();
-    expect(heartbeatInterval).not.toBeNull();
-
-    // Starting again should not create new interval
-    const savedInterval = heartbeatInterval;
-    startHeartbeat();
-    expect(heartbeatInterval).toBe(savedInterval);
-
-    // Stop should clear interval
+  afterEach(() => {
     stopHeartbeat();
-    expect(heartbeatInterval).toBeNull();
   });
 
-  it('should use 60 second interval constant', () => {
-    const HEARTBEAT_INTERVAL = 60 * 1000;
-    expect(HEARTBEAT_INTERVAL).toBe(60000);
+  it('should handle missing webhook URL', async () => {
+    // Mock no webhook configured
+    mockFetch.mockResolvedValue({ ok: false, status: 404 });
+
+    const result = await announceStartup();
+
+    expect(result).toBe(false);
   });
-});
 
-describe('Heartbeat - Status Update', () => {
-  it('should create valid status update embed', () => {
-    const embed = {
-      title: '📊 Custom Status',
-      color: 0xf1c40f,
-      fields: [
-        { name: 'Status', value: 'Processing complete', inline: true },
-        { name: 'Time', value: '2024-01-15T10:30:00.000Z', inline: true },
-        { name: 'Uptime', value: '30m 0s', inline: true },
-        { name: 'Files Processed', value: '42', inline: true },
-        { name: 'Errors', value: '0', inline: true },
-      ],
-      timestamp: '2024-01-15T10:30:00.000Z',
-      footer: { text: 'Helix status update' },
-    };
+  it('should handle network timeout', async () => {
+    mockFetch.mockImplementation(
+      () => new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 100))
+    );
 
-    expect(embed.title).toContain('Status');
-    expect(embed.color).toBe(0xf1c40f); // Yellow
+    const result = await announceStartup();
+
+    expect(result).toBe(false);
+  });
+
+  it('should handle Discord rate limiting', async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 429 });
+
+    const result = await sendStatusUpdate('Test', 'Test');
+
+    expect(result).toBe(false);
+  });
+
+  it('should stop cleanly when not running', () => {
+    // Should not throw
+    expect(() => stopHeartbeat()).not.toThrow();
+  });
+
+  it('should handle very long status titles', async () => {
+    const longTitle = 'x'.repeat(500);
+
+    await expect(sendStatusUpdate(longTitle, 'Test')).resolves.toBeDefined();
+  });
+
+  it('should handle empty details object', async () => {
+    const result = await sendStatusUpdate('Test', 'Test', {});
+
+    expect(result).toBe(true);
+  });
+
+  it('should handle special characters in status', async () => {
+    const result = await sendStatusUpdate(
+      'Test 🚀',
+      'Status with emoji 💓 and special chars !@#$%'
+    );
+
+    expect(result).toBe(true);
   });
 });
