@@ -12,13 +12,13 @@ export interface CreateSecretModalProps {
 }
 
 const SECRET_TYPES: { value: SecretType; label: string }[] = [
-  { value: 'api_key', label: 'API Key' },
-  { value: 'stripe_key', label: 'Stripe Key' },
-  { value: 'gemini_api_key', label: 'Gemini API Key' },
-  { value: 'deepseek_api_key', label: 'DeepSeek API Key' },
-  { value: 'database_url', label: 'Database URL' },
-  { value: 'webhook_secret', label: 'Webhook Secret' },
-  { value: 'oauth_token', label: 'OAuth Token' },
+  { value: 'SUPABASE_ANON_KEY', label: 'Supabase Anon Key' },
+  { value: 'SUPABASE_SERVICE_ROLE', label: 'Supabase Service Role' },
+  { value: 'DEEPSEEK_API_KEY', label: 'DeepSeek API Key' },
+  { value: 'GEMINI_API_KEY', label: 'Gemini API Key' },
+  { value: 'STRIPE_SECRET_KEY', label: 'Stripe Secret Key' },
+  { value: 'STRIPE_PUBLISHABLE_KEY', label: 'Stripe Publishable Key' },
+  { value: 'DISCORD_WEBHOOK', label: 'Discord Webhook' },
 ];
 
 export const CreateSecretModal: React.FC<CreateSecretModalProps> = ({
@@ -27,7 +27,7 @@ export const CreateSecretModal: React.FC<CreateSecretModalProps> = ({
   onCreate,
 }) => {
   const [name, setName] = useState('');
-  const [secretType, setSecretType] = useState<SecretType>('api_key');
+  const [secretType, setSecretType] = useState<SecretType>('SUPABASE_ANON_KEY');
   const [expiresAt, setExpiresAt] = useState<string>('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -71,7 +71,7 @@ export const CreateSecretModal: React.FC<CreateSecretModalProps> = ({
 
       // Reset form after successful creation
       setName('');
-      setSecretType('api_key');
+      setSecretType('SUPABASE_ANON_KEY');
       setExpiresAt('');
       setErrors({});
     } finally {

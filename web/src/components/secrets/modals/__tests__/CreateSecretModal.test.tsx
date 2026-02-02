@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CreateSecretModal } from '../CreateSecretModal';
 
@@ -88,7 +88,7 @@ describe('CreateSecretModal Component', () => {
     const typeSelect = screen.getByLabelText(/secret type/i);
 
     await user.type(nameInput, 'My API Key');
-    await user.selectOptions(typeSelect, 'stripe_key');
+    await user.selectOptions(typeSelect, 'STRIPE_SECRET_KEY');
 
     // Submit
     const createButton = screen.getByRole('button', { name: /create/i });
@@ -99,7 +99,7 @@ describe('CreateSecretModal Component', () => {
       expect(mockOnCreate).toHaveBeenCalledWith(
         expect.objectContaining({
           name: 'My API Key',
-          secret_type: 'stripe_key',
+          secret_type: 'STRIPE_SECRET_KEY',
         })
       );
     });
@@ -120,7 +120,7 @@ describe('CreateSecretModal Component', () => {
     const typeSelect = screen.getByLabelText(/secret type/i) as HTMLSelectElement;
 
     await user.type(nameInput, 'My API Key');
-    await user.selectOptions(typeSelect, 'stripe_key');
+    await user.selectOptions(typeSelect, 'STRIPE_SECRET_KEY');
 
     const createButton = screen.getByRole('button', { name: /create/i });
     await user.click(createButton);
@@ -158,7 +158,7 @@ describe('CreateSecretModal Component', () => {
     const expiresInput = screen.getByLabelText(/expiration date/i);
 
     await user.type(nameInput, 'My API Key');
-    await user.selectOptions(typeSelect, 'api_key');
+    await user.selectOptions(typeSelect, 'DEEPSEEK_API_KEY');
     await user.type(expiresInput, '2026-12-31');
 
     // Submit
