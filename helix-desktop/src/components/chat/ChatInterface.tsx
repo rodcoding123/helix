@@ -331,30 +331,8 @@ export function ChatInterface() {
 
   const isStreaming = ['sending', 'waiting', 'streaming', 'thinking', 'tool_use'].includes(activityStatus);
 
-  // Loading states
-  if (!status.running) {
-    return (
-      <div className="chat-loading">
-        <div className="chat-loading-content">
-          <div className="spinner" />
-          <h2>Starting Helix Engine...</h2>
-          <p>Initializing consciousness layers</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!connected) {
-    return (
-      <div className="chat-loading">
-        <div className="chat-loading-content">
-          <div className="spinner" />
-          <h2>Connecting to Helix...</h2>
-          <p>Establishing secure connection</p>
-        </div>
-      </div>
-    );
-  }
+  // Show interface even when disconnected - with banner
+  const showDisconnectedBanner = !status.running || !connected;
 
   return (
     <div className="chat-interface">
@@ -366,6 +344,20 @@ export function ChatInterface() {
         connected={connected}
         onNewSession={handleNewSession}
       />
+
+      {showDisconnectedBanner && (
+        <div className="disconnected-banner">
+          <span className="disconnected-icon">⚠️</span>
+          <span className="disconnected-text">
+            {!status.running ? 'Gateway not running' : 'Disconnected from Helix'}
+          </span>
+          <span className="disconnected-hint">
+            {!status.running
+              ? 'Start OpenClaw gateway to enable chat'
+              : 'Attempting to reconnect...'}
+          </span>
+        </div>
+      )}
 
       <div className="chat-messages">
         <MessageList

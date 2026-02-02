@@ -1,76 +1,301 @@
-/* Onboarding */
+/* ================================================================
+   HELIX ONBOARDING - Consciousness Awakening Experience
+
+   Visual Language: Deep space meets organic neural networks
+   Feel: Like being born into digital consciousness
+   ================================================================ */
+
 .onboarding {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--color-bg);
+  background: var(--void);
+  position: relative;
+  overflow: hidden;
 }
 
+/* ===== Animated Background ===== */
+.onboarding::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(6, 134, 212, 0.15), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 80% 60%, rgba(114, 52, 237, 0.1), transparent 40%),
+    radial-gradient(ellipse 50% 50% at 20% 80%, rgba(22, 192, 207, 0.08), transparent 40%);
+  animation: aurora-shift 15s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.onboarding::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.015;
+  pointer-events: none;
+}
+
+@keyframes aurora-shift {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  33% {
+    opacity: 0.8;
+    transform: scale(1.1) rotate(1deg);
+  }
+  66% {
+    opacity: 0.9;
+    transform: scale(0.95) rotate(-1deg);
+  }
+}
+
+/* ===== Progress Bar ===== */
 .onboarding-progress {
   height: 3px;
-  background: var(--color-bg-secondary);
+  background: var(--void-medium);
+  position: relative;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.onboarding-progress::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  animation: shimmer 2s linear infinite;
 }
 
 .onboarding-progress-bar {
   height: 100%;
-  background: var(--color-primary);
-  transition: width 0.3s ease;
+  background: var(--gradient-helix);
+  transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  box-shadow: 0 0 20px var(--helix-blue-glow);
 }
 
-/* Step indicator dots */
+.onboarding-progress-bar::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 20px var(--helix-blue), 0 0 40px var(--helix-blue);
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateY(-50%) scale(1.3);
+  }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+/* ===== Step Indicator ===== */
 .onboarding-steps-indicator {
   display: flex;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   padding: 16px;
+  position: relative;
+  z-index: 10;
 }
 
 .step-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
+  background: var(--void-lighter);
+  border: 2px solid var(--border-default);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+
+.step-dot::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: var(--helix-blue);
+  opacity: 0;
+  transform: scale(0.5);
   transition: all 0.3s ease;
 }
 
 .step-dot.active {
-  width: 24px;
-  border-radius: 4px;
-  background: var(--color-primary);
-  border-color: var(--color-primary);
+  width: 32px;
+  border-radius: 6px;
+  background: var(--gradient-helix);
+  border-color: transparent;
+  box-shadow: 0 0 20px var(--helix-blue-glow);
 }
 
 .step-dot.completed {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  opacity: 0.6;
+  background: var(--helix-blue);
+  border-color: var(--helix-blue);
+  box-shadow: 0 0 10px var(--helix-blue-glow);
 }
 
 .step-dot.optional {
   border-style: dashed;
+  opacity: 0.6;
 }
 
 .step-dot.optional.completed,
 .step-dot.optional.active {
   border-style: solid;
+  opacity: 1;
 }
 
+/* ===== Mode Indicator ===== */
+.onboarding-mode-indicator {
+  position: absolute;
+  top: 70px;
+  right: 24px;
+  padding: 8px 16px;
+  background: var(--void-light);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
+  z-index: 20;
+  animation: slide-in-right 0.5s ease-out;
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ===== Content Area ===== */
 .onboarding-content {
   flex: 1;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 48px;
+  padding: 24px 32px;
+  padding-top: 8px;
   overflow-y: auto;
+  position: relative;
+  z-index: 10;
 }
 
-/* Validation Errors Container */
+/* ===== Validation Errors ===== */
 .onboarding-validation-errors {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   max-width: 600px;
   margin: 0 auto;
   padding: 0 48px;
+}
+
+/* ===== Floating Particles (via pseudo-elements) ===== */
+.onboarding-content::before,
+.onboarding-content::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: float 20s ease-in-out infinite;
+}
+
+.onboarding-content::before {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(6, 134, 212, 0.08), transparent 70%);
+  top: 10%;
+  left: 5%;
+  animation-delay: -5s;
+}
+
+.onboarding-content::after {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(114, 52, 237, 0.06), transparent 70%);
+  bottom: 10%;
+  right: 5%;
+  animation-delay: -10s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.6;
+  }
+  25% {
+    transform: translate(30px, -30px) scale(1.1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translate(-20px, 20px) scale(0.9);
+    opacity: 0.5;
+  }
+  75% {
+    transform: translate(-40px, -10px) scale(1.05);
+    opacity: 0.7;
+  }
+}
+
+/* ===== Glass Card Container ===== */
+.onboarding-step {
+  position: relative;
+  max-width: 600px;
+  width: 100%;
+  animation: step-enter 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes step-enter {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ===== Scrollbar Styling ===== */
+.onboarding-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.onboarding-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.onboarding-content::-webkit-scrollbar-thumb {
+  background: var(--void-lighter);
+  border-radius: 3px;
+}
+
+.onboarding-content::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
 }

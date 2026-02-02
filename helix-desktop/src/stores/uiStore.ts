@@ -74,7 +74,7 @@ export const useUiStore = create<UiState>()(
       activeSidebarSection: 'sessions',
       activePanel: null,
       panelWidth: 400,
-      theme: 'system',
+      theme: 'dark',
       resolvedTheme: 'dark',
       isCompactMode: false,
       showStatusBar: true,

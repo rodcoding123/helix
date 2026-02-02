@@ -1,13 +1,12 @@
 {
-  "timestamp": "2026-02-01T21:59:53.897Z",
+  "timestamp": "2026-02-02T02:26:49.304Z",
   "version": "1.0.0",
   "resources": {
     "found": [
-      "openclaw-helix (sibling project)"
+      "openclaw-helix (sibling project)",
+      "openclaw-helix/dist (built)"
     ],
-    "missing": [
-      "openclaw-helix/dist (run: cd ../openclaw-helix && pnpm build)"
-    ]
+    "missing": []
   },
   "nodeRuntime": {
     "found": false,
@@ -15,7 +14,6 @@
   },
   "installers": {},
   "warnings": [
-    "Missing: openclaw-helix/dist (run: cd ../openclaw-helix && pnpm build)",
     "Node.js runtime not bundled",
     "Bundle directory not found (run npm run tauri:build)"
   ],

@@ -13,6 +13,9 @@ import {
   type GatewayHelloOk,
 } from '../lib/gateway-client';
 
+// Local development token - must match Rust backend
+const LOCAL_GATEWAY_TOKEN = 'helix-desktop-local';
+
 interface GatewayStatus {
   running: boolean;
   port: number | null;
@@ -229,7 +232,7 @@ export function useGateway() {
       unlisten = await listen<GatewayStartedPayload>('gateway:started', (event) => {
         const { port, url } = event.payload;
         setStatus((prev) => ({ ...prev, running: true, port, url }));
-        connect(url);
+        connect(url, LOCAL_GATEWAY_TOKEN);
       });
     })();
 
@@ -258,7 +261,7 @@ export function useGateway() {
   useEffect(() => {
     checkStatus().then((result) => {
       if (result.running && result.url) {
-        connect(result.url);
+        connect(result.url, LOCAL_GATEWAY_TOKEN);
       }
     });
 

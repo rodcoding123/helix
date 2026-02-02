@@ -15,12 +15,32 @@ function App() {
   // Initialize theme
   useTheme();
 
+  // Dev mode: Check for ?onboarding=true in URL or Ctrl+Shift+O shortcut
+  useEffect(() => {
+    // URL parameter check
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('onboarding') === 'true') {
+      setShowOnboarding(true);
+      return;
+    }
+
+    // Keyboard shortcut: Ctrl+Shift+O to toggle onboarding
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'O') {
+        e.preventDefault();
+        setShowOnboarding(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // Determine if we should show onboarding
   useEffect(() => {
-    if (isFirstRun !== null) {
+    if (isFirstRun !== null && !showOnboarding) {
       setShowOnboarding(isFirstRun);
     }
-  }, [isFirstRun]);
+  }, [isFirstRun, showOnboarding]);
 
   // Auto-start gateway when not in onboarding
   useEffect(() => {

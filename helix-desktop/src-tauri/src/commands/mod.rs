@@ -1,5 +1,6 @@
 // Helix Desktop Commands
 
+pub mod auth;
 pub mod gateway;
 pub mod config;
 pub mod keyring;

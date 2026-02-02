@@ -1,17 +1,37 @@
 /**
- * Chat Status Bar Styles
+ * Chat Status Bar - Subtle Consciousness Indicators
+ *
+ * Minimal status display with elegant activity indicators,
+ * thinking level controls, and real-time session info.
  */
 
 .chat-status-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.5rem 1rem;
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--border-color);
-  font-size: 0.75rem;
-  gap: 1rem;
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--void-soft);
+  border-top: 1px solid var(--border-subtle);
+  font-size: 0.6875rem;
+  gap: var(--space-lg);
   flex-shrink: 0;
+  position: relative;
+}
+
+/* Subtle gradient top border */
+.chat-status-bar::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(6, 134, 212, 0.15) 30%,
+    rgba(114, 52, 237, 0.15) 70%,
+    transparent
+  );
 }
 
 .status-left,
@@ -19,7 +39,7 @@
 .status-right {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-sm);
 }
 
 .status-center {
@@ -27,136 +47,222 @@
   justify-content: center;
 }
 
-/* Activity Status */
+/* ================================================================
+   ACTIVITY STATUS
+   ================================================================ */
+
 .activity-status {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
-  padding: 0.25rem 0.5rem;
-  background: var(--bg-tertiary);
-  border: none;
-  border-radius: 4px;
+  gap: 6px;
+  padding: 4px 10px;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
   cursor: pointer;
-  color: var(--text-secondary);
-  transition: all 0.15s ease;
+  color: var(--text-tertiary);
+  transition: all var(--transition-fast);
 }
 
 .activity-status:hover {
-  background: var(--bg-hover);
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--border-default);
 }
 
+/* Idle State */
 .activity-status.idle .activity-text {
   color: var(--text-tertiary);
 }
 
+/* Connected State */
 .activity-status.connected .activity-text {
-  color: var(--success-color, #22c55e);
+  color: var(--success);
 }
 
+/* Disconnected State */
 .activity-status.disconnected .activity-text {
-  color: var(--error-color, #ef4444);
+  color: var(--error);
+}
+
+/* Error State */
+.activity-status.error {
+  border-color: var(--error);
+  background: rgba(239, 68, 68, 0.05);
 }
 
 .activity-status.error .activity-text {
-  color: var(--error-color, #ef4444);
+  color: var(--error);
 }
 
+/* Active States (streaming, thinking, tool_use) */
+.activity-status.streaming,
+.activity-status.thinking,
+.activity-status.tool_use,
+.activity-status.sending,
+.activity-status.waiting {
+  border-color: rgba(6, 134, 212, 0.3);
+  background: rgba(6, 134, 212, 0.05);
+}
+
+/* Activity Spinner */
 .activity-spinner {
   width: 10px;
   height: 10px;
-  border: 2px solid transparent;
-  border-top-color: var(--accent-color);
+  border: 1.5px solid transparent;
+  border-top-color: var(--helix-blue);
+  border-right-color: var(--accent-purple);
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: statusSpin 0.8s linear infinite;
 }
 
-@keyframes spin {
+@keyframes statusSpin {
   to { transform: rotate(360deg); }
 }
 
 .activity-text {
-  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .activity-elapsed {
-  font-family: 'SF Mono', 'Consolas', monospace;
-  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--text-muted);
+  padding-left: 6px;
+  border-left: 1px solid var(--border-subtle);
+  margin-left: 2px;
 }
 
-/* Model Name */
+/* ================================================================
+   MODEL NAME
+   ================================================================ */
+
 .model-name {
-  font-size: 0.6875rem;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
   font-weight: 500;
-  color: var(--text-tertiary);
-  padding: 0.125rem 0.5rem;
-  background: var(--bg-tertiary);
-  border-radius: 4px;
+  color: var(--text-muted);
+  padding: 3px 10px;
+  background: var(--void-light);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  letter-spacing: 0.02em;
 }
 
-/* Thinking Selector */
+/* ================================================================
+   THINKING SELECTOR
+   ================================================================ */
+
 .thinking-selector {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
+  gap: 6px;
 }
 
 .selector-label {
-  color: var(--text-tertiary);
-  font-size: 0.6875rem;
+  color: var(--text-muted);
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .thinking-select {
-  padding: 0.125rem 0.375rem;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  font-size: 0.6875rem;
-  color: var(--text-primary);
+  padding: 3px 8px;
+  background: var(--void-light);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--text-secondary);
   cursor: pointer;
+  transition: all var(--transition-fast);
+  appearance: none;
+  padding-right: 20px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%236b6b80' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+}
+
+.thinking-select:hover {
+  border-color: var(--border-default);
+  background-color: var(--void-lighter);
 }
 
 .thinking-select:focus {
   outline: none;
-  border-color: var(--accent-color);
+  border-color: var(--helix-blue);
+  box-shadow: 0 0 0 2px rgba(6, 134, 212, 0.1);
 }
 
-/* Token Usage */
+/* ================================================================
+   TOKEN USAGE
+   ================================================================ */
+
 .token-usage {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.125rem 0.375rem;
-  background: var(--bg-tertiary);
-  border-radius: 4px;
+  gap: 4px;
+  padding: 3px 10px;
+  background: var(--void-light);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
 }
 
 .token-icon {
   font-size: 0.75rem;
+  opacity: 0.7;
 }
 
 .token-count {
-  font-family: 'SF Mono', 'Consolas', monospace;
-  font-size: 0.6875rem;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
   color: var(--text-secondary);
 }
 
 .tokens-in {
-  color: var(--info-color, #3b82f6);
+  color: var(--helix-blue);
 }
 
 .tokens-out {
-  color: var(--success-color, #22c55e);
+  color: var(--success);
 }
 
-/* Busy state */
+/* ================================================================
+   BUSY STATE
+   ================================================================ */
+
 .chat-status-bar.busy {
-  background: rgba(var(--accent-rgb), 0.05);
+  background: linear-gradient(135deg,
+    rgba(6, 134, 212, 0.03),
+    rgba(114, 52, 237, 0.03)
+  );
 }
 
-/* Responsive */
-@media (max-width: 600px) {
+.chat-status-bar.busy::before {
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(6, 134, 212, 0.3) 30%,
+    rgba(114, 52, 237, 0.3) 70%,
+    transparent
+  );
+  animation: busyGlow 2s ease-in-out infinite;
+}
+
+@keyframes busyGlow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+
+@media (max-width: 640px) {
   .chat-status-bar {
-    padding: 0.375rem 0.75rem;
+    padding: var(--space-xs) var(--space-md);
+    gap: var(--space-sm);
     flex-wrap: wrap;
   }
 
@@ -164,10 +270,28 @@
     order: -1;
     width: 100%;
     justify-content: flex-start;
-    margin-bottom: 0.25rem;
+    margin-bottom: 4px;
   }
 
   .selector-label {
+    display: none;
+  }
+
+  .activity-elapsed {
+    display: none;
+  }
+
+  .token-usage {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .model-name {
+    display: none;
+  }
+
+  .status-center {
     display: none;
   }
 }

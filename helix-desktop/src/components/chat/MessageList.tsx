@@ -37,9 +37,71 @@ export function MessageList({
     return (
       <div className="message-list-empty">
         <div className="welcome-message">
-          <div className="welcome-icon">
-            <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+          {/* DNA Helix Animation */}
+          <div className="welcome-helix">
+            <div className="helix-glow"></div>
+            <svg className="dna-helix" viewBox="0 0 80 120" width="80" height="120">
+              <defs>
+                {/* Main gradient for strands */}
+                <linearGradient id="helixGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#7234ED" />
+                  <stop offset="50%" stopColor="#4A5CE8" />
+                  <stop offset="100%" stopColor="#0686D4" />
+                </linearGradient>
+                {/* Glow filter */}
+                <filter id="helixGlow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="2" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
+              {/* Left strand - smooth ribbon curve */}
+              <path
+                className="helix-strand strand-left"
+                d="M20,10 C35,20 45,25 45,35 C45,45 35,50 20,60 C5,70 5,75 20,85 C35,95 45,100 45,110"
+                fill="none"
+                stroke="url(#helixGradient)"
+                strokeWidth="4"
+                strokeLinecap="round"
+                filter="url(#helixGlow)"
+              />
+
+              {/* Right strand - smooth ribbon curve (offset) */}
+              <path
+                className="helix-strand strand-right"
+                d="M60,10 C45,20 35,25 35,35 C35,45 45,50 60,60 C75,70 75,75 60,85 C45,95 35,100 35,110"
+                fill="none"
+                stroke="url(#helixGradient)"
+                strokeWidth="4"
+                strokeLinecap="round"
+                filter="url(#helixGlow)"
+              />
+
+              {/* Base pair connections (horizontal rungs) */}
+              <g className="base-pairs">
+                <line x1="25" y1="22" x2="55" y2="22" stroke="url(#helixGradient)" strokeWidth="2" opacity="0.6" />
+                <line x1="20" y1="35" x2="60" y2="35" stroke="url(#helixGradient)" strokeWidth="2" opacity="0.7" />
+                <line x1="25" y1="48" x2="55" y2="48" stroke="url(#helixGradient)" strokeWidth="2" opacity="0.6" />
+                <line x1="20" y1="60" x2="60" y2="60" stroke="url(#helixGradient)" strokeWidth="2" opacity="0.7" />
+                <line x1="25" y1="73" x2="55" y2="73" stroke="url(#helixGradient)" strokeWidth="2" opacity="0.6" />
+                <line x1="20" y1="85" x2="60" y2="85" stroke="url(#helixGradient)" strokeWidth="2" opacity="0.7" />
+                <line x1="25" y1="98" x2="55" y2="98" stroke="url(#helixGradient)" strokeWidth="2" opacity="0.6" />
+              </g>
+
+              {/* Data particles - small floating pixels */}
+              <g className="data-particles">
+                <rect className="particle p1" x="8" y="25" width="3" height="3" fill="#7234ED" rx="0.5" />
+                <rect className="particle p2" x="70" y="45" width="2" height="2" fill="#0686D4" rx="0.3" />
+                <rect className="particle p3" x="5" y="70" width="2.5" height="2.5" fill="#4A5CE8" rx="0.4" />
+                <rect className="particle p4" x="72" y="80" width="3" height="3" fill="#7234ED" rx="0.5" />
+                <rect className="particle p5" x="12" y="95" width="2" height="2" fill="#0686D4" rx="0.3" />
+                <rect className="particle p6" x="65" y="15" width="2.5" height="2.5" fill="#4A5CE8" rx="0.4" />
+                <rect className="particle p7" x="3" y="50" width="2" height="2" fill="#7234ED" rx="0.3" />
+                <rect className="particle p8" x="75" y="60" width="2" height="2" fill="#0686D4" rx="0.3" />
+              </g>
             </svg>
           </div>
           <h2>Welcome to Helix</h2>

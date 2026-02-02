@@ -1,0 +1,49 @@
+/* ================================================================
+   HELIX DNA ANIMATION - True Double Helix
+
+   Canvas-based intertwining strands animation adapted from
+   the GenesisSpiral web component. Shows actual DNA structure.
+   ================================================================ */
+
+.dna-helix-container {
+  position: relative;
+  width: 100px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+/* Radial glow background */
+.helix-glow-bg {
+  position: absolute;
+  inset: -15px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(6, 134, 212, 0.2) 0%,
+    rgba(114, 52, 237, 0.12) 30%,
+    rgba(22, 192, 207, 0.08) 50%,
+    transparent 70%
+  );
+  filter: blur(12px);
+  animation: glowPulse 4s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+/* Canvas element */
+.helix-canvas {
+  position: relative;
+  z-index: 1;
+}

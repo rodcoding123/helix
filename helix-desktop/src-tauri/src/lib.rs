@@ -101,6 +101,10 @@ pub fn run() {
             commands::system::is_first_run,
             commands::system::mark_onboarded,
 
+            // Auth commands (Claude Code CLI detection)
+            commands::auth::detect_claude_code,
+            commands::auth::run_claude_code,
+
             // Discord logging
             commands::discord::send_webhook,
             commands::discord::test_webhook,

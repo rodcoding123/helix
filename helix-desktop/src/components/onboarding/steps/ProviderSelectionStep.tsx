@@ -48,7 +48,8 @@ interface ProviderGroup {
   recommended?: boolean;
 }
 
-// Provider groups matching OpenClaw's auth-choice-options.ts
+// Provider groups - Only GitHub Copilot has real OAuth
+// Most providers require API keys (we open their key page in browser)
 const PROVIDER_GROUPS: ProviderGroup[] = [
   {
     id: 'anthropic',
@@ -57,8 +58,7 @@ const PROVIDER_GROUPS: ProviderGroup[] = [
     icon: '🧠',
     recommended: true,
     options: [
-      { value: 'token', label: 'Login with Claude', hint: 'Recommended - Use your Claude subscription', isOAuth: true },
-      { value: 'apiKey', label: 'API Key', hint: 'For developers with API access' },
+      { value: 'token', label: 'Claude Code / API Key', hint: 'Use Claude Code CLI or API key' },
     ],
   },
   {
@@ -67,8 +67,7 @@ const PROVIDER_GROUPS: ProviderGroup[] = [
     hint: 'GPT-4 and Codex models',
     icon: '🤖',
     options: [
-      { value: 'openai-codex', label: 'Login with ChatGPT', hint: 'Use your ChatGPT subscription', isOAuth: true },
-      { value: 'openai-api-key', label: 'API Key', hint: 'For developers with API access' },
+      { value: 'openai-codex', label: 'OpenAI API Key', hint: 'Get from platform.openai.com' },
     ],
   },
   {
@@ -77,9 +76,7 @@ const PROVIDER_GROUPS: ProviderGroup[] = [
     hint: 'Gemini models',
     icon: '🔷',
     options: [
-      { value: 'google-gemini-cli', label: 'Login with Google (Gemini CLI)', hint: 'OAuth via Gemini CLI', isOAuth: true },
-      { value: 'google-antigravity', label: 'Login with Google (Antigravity)', hint: 'OAuth via Antigravity', isOAuth: true },
-      { value: 'gemini-api-key', label: 'Gemini API Key', hint: 'For developers with API access' },
+      { value: 'google-gemini-cli', label: 'Gemini API Key', hint: 'Get from Google AI Studio' },
     ],
   },
   {
@@ -88,7 +85,7 @@ const PROVIDER_GROUPS: ProviderGroup[] = [
     hint: 'Use your Copilot subscription',
     icon: '🐙',
     options: [
-      { value: 'github-copilot', label: 'Login with GitHub', hint: 'Device flow authentication', isOAuth: true },
+      { value: 'github-copilot', label: 'Login with GitHub', hint: 'Device code authentication', isOAuth: true },
       { value: 'copilot-proxy', label: 'Copilot Proxy', hint: 'Local proxy for VS Code' },
     ],
   },
@@ -98,8 +95,7 @@ const PROVIDER_GROUPS: ProviderGroup[] = [
     hint: 'M2.1 models - Fast and capable',
     icon: '⚡',
     options: [
-      { value: 'minimax-portal', label: 'Login with MiniMax', hint: '3-day free trial for new users!', isOAuth: true },
-      { value: 'minimax-api', label: 'M2.1 API Key' },
+      { value: 'minimax-portal', label: 'MiniMax API Key', hint: '3-day free trial for new users!' },
       { value: 'minimax-api-lightning', label: 'M2.1 Lightning', hint: 'Faster, higher output cost' },
     ],
   },
@@ -109,7 +105,7 @@ const PROVIDER_GROUPS: ProviderGroup[] = [
     hint: 'Alibaba\'s Qwen models',
     icon: '🌐',
     options: [
-      { value: 'qwen-portal', label: 'Login with Qwen', isOAuth: true },
+      { value: 'qwen-portal', label: 'Qwen API Key', hint: 'Get from Dashscope console' },
     ],
   },
   {

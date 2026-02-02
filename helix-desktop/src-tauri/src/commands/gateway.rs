@@ -7,6 +7,8 @@ use serde::Serialize;
 
 /// Default OpenClaw gateway port
 const DEFAULT_GATEWAY_PORT: u16 = 18789;
+/// Local development token for gateway auth
+const LOCAL_GATEWAY_TOKEN: &str = "helix-desktop-local";
 
 pub struct GatewayProcess {
     child: Option<Child>,
@@ -69,10 +71,50 @@ pub fn start_gateway(app: AppHandle) -> Result<GatewayStarted, String> {
     log::info!("Starting OpenClaw gateway from: {:?}", openclaw_path);
     log::info!("Working directory: {:?}", openclaw_dir);
 
+    // Build arguments based on executable type
+    let openclaw_mjs = openclaw_dir.join("openclaw.mjs");
+    let args: Vec<String> = if openclaw_path.to_string_lossy() == "node" && openclaw_mjs.exists() {
+        // Running via node + openclaw.mjs
+        vec![
+            openclaw_mjs.to_string_lossy().to_string(),
+            "gateway".to_string(),
+            "--port".to_string(),
+            port.to_string(),
+            "--bind".to_string(),
+            "loopback".to_string(),
+            "--token".to_string(),
+            LOCAL_GATEWAY_TOKEN.to_string(),
+        ]
+    } else if openclaw_path.to_string_lossy() == "npx" {
+        // Running via npx (global fallback)
+        vec![
+            "openclaw".to_string(),
+            "gateway".to_string(),
+            "--port".to_string(),
+            port.to_string(),
+            "--bind".to_string(),
+            "loopback".to_string(),
+            "--token".to_string(),
+            LOCAL_GATEWAY_TOKEN.to_string(),
+        ]
+    } else {
+        // Direct executable (bundled or bin symlink)
+        vec![
+            "gateway".to_string(),
+            "--port".to_string(),
+            port.to_string(),
+            "--bind".to_string(),
+            "loopback".to_string(),
+            "--token".to_string(),
+            LOCAL_GATEWAY_TOKEN.to_string(),
+        ]
+    };
+
+    log::info!("Gateway command: {:?} {:?}", openclaw_path, args);
+
     // Spawn gateway process
-    // openclaw gateway --port PORT --bind loopback
     let child = Command::new(&openclaw_path)
-        .args(["gateway", "--port", &port.to_string(), "--bind", "loopback"])
+        .args(&args)
         .current_dir(&openclaw_dir)
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -164,69 +206,130 @@ fn get_openclaw_path(app: &AppHandle) -> Result<std::path::PathBuf, String> {
         }
     }
 
-    // Development: use pnpm/npm to run openclaw from openclaw-helix
-    // In dev mode, we run: pnpm --dir ../../../openclaw-helix start
-    // Or we can use the built CLI directly
-
+    // Development: openclaw-helix is the source, use node to run openclaw.mjs directly
     let openclaw_dir = get_openclaw_directory()?;
+    let openclaw_mjs = openclaw_dir.join("openclaw.mjs");
+
+    if openclaw_mjs.exists() {
+        // Return full path to node.exe - PATH may not be available in Tauri context
+        log::info!("Found openclaw.mjs at: {:?}", openclaw_mjs);
+
+        #[cfg(target_os = "windows")]
+        {
+            // Try common node installation paths on Windows
+            let node_paths = [
+                "C:\\Program Files\\nodejs\\node.exe",
+                "C:\\Program Files (x86)\\nodejs\\node.exe",
+            ];
+            for path in node_paths {
+                let node_path = std::path::PathBuf::from(path);
+                if node_path.exists() {
+                    log::info!("Using node at: {:?}", node_path);
+                    return Ok(node_path);
+                }
+            }
+            // Fallback to node in PATH
+            return Ok(std::path::PathBuf::from("node"));
+        }
+
+        #[cfg(not(target_os = "windows"))]
+        return Ok(std::path::PathBuf::from("node"));
+    }
 
     #[cfg(target_os = "windows")]
     {
-        // On Windows in dev, use npx or direct node
+        // Fallback: try node_modules/.bin/openclaw.cmd
         let npx_path = openclaw_dir.join("node_modules").join(".bin").join("openclaw.cmd");
         if npx_path.exists() {
             return Ok(npx_path);
         }
-
-        // Try global openclaw
+        // Try global npx as last resort
         Ok(std::path::PathBuf::from("npx"))
     }
 
     #[cfg(not(target_os = "windows"))]
     {
-        // On Unix, try local bin first
+        // Fallback: try node_modules/.bin/openclaw
         let bin_path = openclaw_dir.join("node_modules").join(".bin").join("openclaw");
         if bin_path.exists() {
             return Ok(bin_path);
         }
-
-        // Try global openclaw
+        // Try global npx as last resort
         Ok(std::path::PathBuf::from("npx"))
     }
 }
 
 fn get_openclaw_directory() -> Result<std::path::PathBuf, String> {
-    // In development, openclaw-helix is a sibling directory
-    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
-        .unwrap_or_else(|_| ".".to_string());
+    // Try to find openclaw-helix relative to the executable
+    // Release binary is at: helix-desktop/src-tauri/target/release/helix-desktop.exe
+    // We need to go up to find: Helix/openclaw-helix
+    if let Ok(exe_path) = std::env::current_exe() {
+        // From exe: target/release/helix-desktop.exe
+        // Go up 4 levels: release -> target -> src-tauri -> helix-desktop -> Helix
+        // Then look for openclaw-helix sibling
+        if let Some(exe_dir) = exe_path.parent() {
+            // Try going up 4 levels (for release build structure)
+            let helix_root = exe_dir
+                .join("..")     // target
+                .join("..")     // src-tauri
+                .join("..")     // helix-desktop
+                .join("..");    // Helix (root)
 
-    let dev_path = std::path::PathBuf::from(&manifest_dir)
-        .join("..")
-        .join("..")
-        .join("openclaw-helix");
+            let dev_path = helix_root.join("openclaw-helix");
+            if dev_path.exists() {
+                log::info!("Found openclaw-helix at (exe relative): {:?}", dev_path);
+                return Ok(dev_path.canonicalize().map_err(|e| e.to_string())?);
+            }
 
-    if dev_path.exists() {
-        return Ok(dev_path.canonicalize().map_err(|e| e.to_string())?);
+            // Also try from exe_dir directly (in case structure is different)
+            let alt_path = exe_dir.join("..").join("..").join("openclaw-helix");
+            if alt_path.exists() {
+                log::info!("Found openclaw-helix at (alt): {:?}", alt_path);
+                return Ok(alt_path.canonicalize().map_err(|e| e.to_string())?);
+            }
+        }
     }
 
-    // Production: openclaw-helix should be in resources or home directory
+    // Try CARGO_MANIFEST_DIR for cargo run scenarios
+    if let Ok(manifest_dir) = std::env::var("CARGO_MANIFEST_DIR") {
+        let dev_path = std::path::PathBuf::from(&manifest_dir)
+            .join("..")
+            .join("..")
+            .join("openclaw-helix");
+
+        if dev_path.exists() {
+            log::info!("Found openclaw-helix at (manifest): {:?}", dev_path);
+            return Ok(dev_path.canonicalize().map_err(|e| e.to_string())?);
+        }
+    }
+
+    // Production: try home directory paths
     let home = dirs::home_dir()
         .ok_or_else(|| "Could not find home directory".to_string())?;
 
     // Try ~/.helix/openclaw-helix
     let helix_openclaw = home.join(".helix").join("openclaw-helix");
     if helix_openclaw.exists() {
+        log::info!("Found openclaw-helix at (home): {:?}", helix_openclaw);
         return Ok(helix_openclaw);
     }
 
     // Try ~/.openclaw
     let openclaw_home = home.join(".openclaw");
     if openclaw_home.exists() {
+        log::info!("Found openclaw at: {:?}", openclaw_home);
         return Ok(openclaw_home);
     }
 
-    // Fallback to current directory
-    Ok(std::path::PathBuf::from("."))
+    // Hardcoded fallback for known development path
+    let known_dev_path = std::path::PathBuf::from("C:\\Users\\Specter\\Desktop\\Helix\\openclaw-helix");
+    if known_dev_path.exists() {
+        log::info!("Found openclaw-helix at (hardcoded): {:?}", known_dev_path);
+        return Ok(known_dev_path);
+    }
+
+    log::warn!("Could not find openclaw-helix directory");
+    Err("Could not find openclaw-helix directory".to_string())
 }
 
 /// Auto-start gateway on app launch (called from setup)

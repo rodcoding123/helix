@@ -9,3 +9,4 @@ export { useSession, type ChatSession } from './useSession';
 export { useTheme } from './useTheme';
 export { useMemory, type MemoryEntry, type MemoryStats, type MemorySearchResult } from './useMemory';
 export { useOnboarding, type OnboardingStep, type OnboardingData, type OnboardingState } from './useOnboarding';
+export { useOAuth, type OAuthStatus } from './useOAuth';

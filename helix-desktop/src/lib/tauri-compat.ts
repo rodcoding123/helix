@@ -99,6 +99,17 @@ const mockInvokeHandlers: Record<string, InvokeHandler> = {
     return mockKeyring.has(key);
   },
 
+  // Auth (Claude Code CLI detection)
+  detect_claude_code: () => ({
+    cliAvailable: false,
+    cliPath: null,
+    installed: false,
+    authenticated: false,
+    subscriptionType: null,
+    expiresAt: null,
+  }),
+  run_claude_code: () => Promise.reject('Claude Code CLI not available in browser mode'),
+
   // Psychology
   load_psychology_layer: () => ({}),
   get_psychology_state: () => ({ layers: {} }),
@@ -261,4 +272,14 @@ export async function readTextFile(path: string): Promise<string> {
   }
   console.log('[Tauri Mock] fs.readTextFile', path);
   return '{}'; // Return empty JSON for browser mode
+}
+
+// URL opener (different from dialog.open)
+export async function openUrl(url: string): Promise<void> {
+  if (isTauri) {
+    const { openUrl: tauriOpenUrl } = await import('@tauri-apps/plugin-opener');
+    return tauriOpenUrl(url);
+  }
+  // Browser fallback
+  window.open(url, '_blank');
 }
