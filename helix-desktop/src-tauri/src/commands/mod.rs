@@ -8,3 +8,7 @@ pub mod files;
 pub mod system;
 pub mod discord;
 pub mod psychology;
+
+// Phase C: Desktop Features
+pub mod clipboard;
+pub mod directories;

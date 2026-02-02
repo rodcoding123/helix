@@ -24,7 +24,7 @@ let failClosedMode = true;
  * @internal
  * @throws Error if attempting to disable in production
  */
-function setHashChainFailClosedMode(enabled: boolean): void {
+export function setHashChainFailClosedMode(enabled: boolean): void {
   // Production security: fail-closed mode CANNOT be disabled
   if (process.env.NODE_ENV === 'production' && !enabled) {
     throw new Error(

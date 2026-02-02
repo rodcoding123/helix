@@ -809,7 +809,7 @@ describe('LoggingHooks', () => {
       setFailClosedMode(false);
 
       expect(warnSpy).toHaveBeenCalledWith(
-        '[Helix] WARNING: Disabling fail-closed mode compromises security!'
+        '[Helix] WARNING: Disabling fail-closed mode compromises security! (TEST MODE ONLY)'
       );
 
       warnSpy.mockRestore();

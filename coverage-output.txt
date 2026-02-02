@@ -1,0 +1,666 @@
+
+> helix@1.0.0 test:coverage
+> vitest run --coverage
+
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90mC:/Users/Specter/Desktop/Helix[39m
+      [2mCoverage enabled with [22m[33mv8[39m
+
+ [31m❯[39m src/helix/skill-sandbox.test.ts [2m([22m[2m0 test[22m[2m)[22m
+ [32m✓[39m src/helix/command-logger.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mgetWatchedDirectories[2m > [22m[2mreturns filtered list of directories
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mgetWatchedDirectories[2m > [22m[2mreturns filtered list of directories
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mgetWatchedDirectories[2m > [22m[2mfilters out undefined/null values
+[22m[39m[Helix] File watchers stopped
+
+ [32m✓[39m src/helix/hash-chain.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/helix/heartbeat.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mgetWatchedDirectories[2m > [22m[2mfilters out undefined/null values
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mgetHashCacheSize[2m > [22m[2mreturns number
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mgetHashCacheSize[2m > [22m[2mreturns number
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mgetHashCacheSize[2m > [22m[2mreturns 0 after stop
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mgetHashCacheSize[2m > [22m[2mreturns 0 after stop
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mgetHashCacheSize[2m > [22m[2mreturns 0 after stop
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstopFileWatcher[2m > [22m[2mclears hash cache
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstopFileWatcher[2m > [22m[2mclears hash cache
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstopFileWatcher[2m > [22m[2mclears hash cache
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstopFileWatcher[2m > [22m[2mcan be called multiple times safely
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstopFileWatcher[2m > [22m[2mcan be called multiple times safely
+[22m[39m[Helix] File watchers stopped
+[Helix] File watchers stopped
+[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstopFileWatcher[2m > [22m[2mcan be called multiple times safely
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mmanualLogFileChange[2m > [22m[2mhandles created file change
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mmanualLogFileChange[2m > [22m[2mhandles created file change
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mmanualLogFileChange[2m > [22m[2mhandles modified file change
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mmanualLogFileChange[2m > [22m[2mhandles modified file change
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mmanualLogFileChange[2m > [22m[2mhandles deleted file change
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mmanualLogFileChange[2m > [22m[2mhandles deleted file change
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mmanualLogFileChange[2m > [22m[2mhandles file read errors gracefully
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mmanualLogFileChange[2m > [22m[2mhandles file read errors gracefully
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mmanualLogFileChange[2m > [22m[2mhandles stat errors gracefully
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mmanualLogFileChange[2m > [22m[2mhandles stat errors gracefully
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mignore patterns[2m > [22m[2mshould have common ignore patterns defined
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mignore patterns[2m > [22m[2mshould have common ignore patterns defined
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mcritical file detection[2m > [22m[2mdefines critical files for enhanced logging
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mcritical file detection[2m > [22m[2mdefines critical files for enhanced logging
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mhash computation[2m > [22m[2muses MD5 for file hashing
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mhash computation[2m > [22m[2muses MD5 for file hashing
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2membed formatting[2m > [22m[2muses correct emojis for change types
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2membed formatting[2m > [22m[2muses correct emojis for change types
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2membed formatting[2m > [22m[2muses correct colors for change types
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2membed formatting[2m > [22m[2muses correct colors for change types
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2msize formatting[2m > [22m[2mformats sizes correctly
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2msize formatting[2m > [22m[2mformats sizes correctly
+[22m[39m[Helix] File watchers stopped
+
+ [32m✓[39m src/lib/secrets/base-manager.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [31m❯[39m src/helix/helix-context-loader.test.ts [2m([22m[2m52 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 28[2mms[22m[39m
+       [32m✓[39m should define all 7 layers[32m 2[2mms[22m[39m
+       [32m✓[39m should have names for all layers[32m 1[2mms[22m[39m
+       [32m✓[39m should define layer 1 as Narrative Core[32m 0[2mms[22m[39m
+       [32m✓[39m should define layer 2 as Emotional Memory[32m 0[2mms[22m[39m
+       [32m✓[39m should define layer 3 as Relational Memory[32m 0[2mms[22m[39m
+       [32m✓[39m should define layer 4 as Prospective Self[32m 0[2mms[22m[39m
+       [32m✓[39m should define layer 7 as Purpose Engine[32m 0[2mms[22m[39m
+       [32m✓[39m should have files array for each layer[32m 0[2mms[22m[39m
+       [32m✓[39m should load all existing files[32m 1[2mms[22m[39m
+       [32m✓[39m should skip missing files silently[32m 1[2mms[22m[39m
+       [32m✓[39m should enhance JSON files with layer metadata[32m 0[2mms[22m[39m
+       [32m✓[39m should handle invalid JSON gracefully[32m 0[2mms[22m[39m
+       [32m✓[39m should construct correct file paths[32m 1[2mms[22m[39m
+       [32m✓[39m should return empty array when all files missing[32m 0[2mms[22m[39m
+       [32m✓[39m should load files from all layers[32m 0[2mms[22m[39m
+       [32m✓[39m should return detailed context file objects[32m 0[2mms[22m[39m
+       [32m✓[39m should include layer number in results[32m 0[2mms[22m[39m
+       [32m✓[39m should include descriptions[32m 0[2mms[22m[39m
+       [32m✓[39m should skip missing files[32m 0[2mms[22m[39m
+       [32m✓[39m should not modify original content[32m 0[2mms[22m[39m
+       [32m✓[39m should return status for all configured files[32m 0[2mms[22m[39m
+       [32m✓[39m should mark existing files as present[32m 0[2mms[22m[39m
+       [32m✓[39m should mark missing files as missing[32m 0[2mms[22m[39m
+       [32m✓[39m should include layer information[32m 0[2mms[22m[39m
+       [32m✓[39m should include file sizes[32m 0[2mms[22m[39m
+       [32m✓[39m should handle mixed present and missing files[32m 0[2mms[22m[39m
+       [32m✓[39m should return markdown formatted summary[32m 0[2mms[22m[39m
+       [32m✓[39m should include layer names[32m 0[2mms[22m[39m
+       [32m✓[39m should show file counts[32m 0[2mms[22m[39m
+       [32m✓[39m should use checkmarks for present files[32m 0[2mms[22m[39m
+       [32m✓[39m should use X for missing files[32m 0[2mms[22m[39m
+       [32m✓[39m should include file sizes for present files[32m 0[2mms[22m[39m
+       [32m✓[39m should group files by layer[32m 0[2mms[22m[39m
+       [32m✓[39m should create all required directories[32m 0[2mms[22m[39m
+       [32m✓[39m should create soul directory[32m 2[2mms[22m[39m
+       [32m✓[39m should create psychology directory[32m 0[2mms[22m[39m
+       [32m✓[39m should create identity directory[32m 0[2mms[22m[39m
+       [32m✓[39m should create purpose directory[32m 0[2mms[22m[39m
+       [32m✓[39m should use recursive option[32m 0[2mms[22m[39m
+       [32m✓[39m should handle existing directories gracefully[32m 1[2mms[22m[39m
+       [32m✓[39m should create all 7 required directories[32m 0[2mms[22m[39m
+       [32m✓[39m should validate file with all required fields[32m 0[2mms[22m[39m
+       [32m✓[39m should reject file missing required fields[32m 0[2mms[22m[39m
+       [32m✓[39m should allow optional fields to be missing[32m 0[2mms[22m[39m
+       [32m✓[39m should reject invalid JSON[32m 0[2mms[22m[39m
+[31m       [31m×[31m should reject non-object JSON[39m[32m 7[2mms[22m[39m
+       [32m✓[39m should handle null JSON[32m 0[2mms[22m[39m
+       [32m✓[39m should validate file with extra fields[32m 0[2mms[22m[39m
+       [32m✓[39m should list all missing required fields[32m 0[2mms[22m[39m
+       [32m✓[39m should handle empty schema[32m 0[2mms[22m[39m
+       [32m✓[39m should load and validate context files together[32m 0[2mms[22m[39m
+       [32m✓[39m should handle complete workflow[32m 0[2mms[22m[39m
+ [32m✓[39m src/lib/encryption/__tests__/symmetric.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/helix/file-watcher.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - sendTelemetry[2m > [22m[2mshould queue events after max retries
+[22m[39m[Helix Observatory] Event queued for later (queue size: 1)
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2minstallPreExecutionLogger[2m > [22m[2minstalls hooks without throwing
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2minstallPreExecutionLogger[2m > [22m[2mcan be called multiple times safely
+[22m[39m[Helix] Pre-execution logging hooks installed
+[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mtriggerHelixHooks[2m > [22m[2mtriggers command hooks
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mtriggerHelixHooks[2m > [22m[2mtriggers session:start hooks
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mtriggerHelixHooks[2m > [22m[2mtriggers session:end hooks
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mtriggerHelixHooks[2m > [22m[2mtriggers agent:bootstrap hooks
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mtriggerHelixHooks[2m > [22m[2mhandles events with missing sessionKey
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mtriggerHelixHooks[2m > [22m[2mhandles events with missing context
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mpre-execution guarantee[2m > [22m[2mprocesses hooks synchronously before returning
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+ [32m✓[39m src/helix/threat-detection.test.ts [2m([22m[2m89 tests[22m[2m | [22m[33m1 skipped[39m[2m)[22m[32m 24[2mms[22m[39m
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mpre-execution guarantee[2m > [22m[2mthrows HelixSecurityError in fail-closed mode when webhook unavailable
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+ [31m❯[39m src/helix/mcp-tool-validator.test.ts [2m([22m[2m56 tests[22m[2m | [22m[31m2 failed[39m[2m | [22m[33m1 skipped[39m[2m)[22m[32m 30[2mms[22m[39m
+       [32m✓[39m should register tool metadata[32m 2[2mms[22m[39m
+       [32m✓[39m should return undefined for unregistered tool[32m 0[2mms[22m[39m
+       [32m✓[39m should overwrite existing metadata on re-register[32m 0[2mms[22m[39m
+       [32m✓[39m should assess low risk for safe capabilities[32m 0[2mms[22m[39m
+       [32m✓[39m should assess medium risk for read operations[32m 0[2mms[22m[39m
+       [32m✓[39m should assess high risk for write operations[32m 0[2mms[22m[39m
+       [32m✓[39m should assess critical risk for process spawn[32m 0[2mms[22m[39m
+       [32m✓[39m should assess critical risk for credential access[32m 0[2mms[22m[39m
+       [32m✓[39m should assess critical risk for executable capabilities[32m 0[2mms[22m[39m
+       [32m✓[39m should assess high risk for dangerous tool names[32m 0[2mms[22m[39m
+       [32m✓[39m should assess high risk for shell-like names[32m 0[2mms[22m[39m
+       [32m✓[39m should prioritize capability-based risk over name-based[32m 0[2mms[22m[39m
+       [32m✓[39m should pass clean parameters unchanged[32m 1[2mms[22m[39m
+[31m       [31m×[31m should block __proto__ key[39m[32m 9[2mms[22m[39m
+       [32m✓[39m should block constructor key[32m 0[2mms[22m[39m
+       [32m✓[39m should block prototype key[32m 0[2mms[22m[39m
+       [32m✓[39m should truncate oversized string parameters[32m 0[2mms[22m[39m
+       [32m✓[39m should detect command injection patterns[32m 0[2mms[22m[39m
+       [32m✓[39m should detect command substitution[32m 0[2mms[22m[39m
+       [32m✓[39m should detect backtick substitution[32m 0[2mms[22m[39m
+       [32m✓[39m should detect shell piping[32m 0[2mms[22m[39m
+[31m       [31m×[31m should recursively sanitize nested objects[39m[32m 1[2mms[22m[39m
+       [32m✓[39m should sanitize array elements[32m 0[2mms[22m[39m
+       [32m✓[39m should preserve non-string primitive types[32m 0[2mms[22m[39m
+       [32m✓[39m should validate clean tool call[32m 1[2mms[22m[39m
+       [32m✓[39m should block explicitly blocked tools[32m 0[2mms[22m[39m
+       [32m✓[39m should block tools matching blocked patterns[32m 0[2mms[22m[39m
+       [2m[90m↓[39m[22m should warn on missing metadata when required
+       [32m✓[39m should block tools from disallowed sources[32m 0[2mms[22m[39m
+       [32m✓[39m should block critical risk tools when configured[32m 0[2mms[22m[39m
+       [32m✓[39m should block high risk tools when configured[32m 0[2mms[22m[39m
+       [32m✓[39m should enforce rate limits[32m 0[2mms[22m[39m
+       [32m✓[39m should sanitize parameters and return sanitized version[32m 0[2mms[22m[39m
+       [32m✓[39m should create audit log entry when enabled[32m 0[2mms[22m[39m
+       [32m✓[39m should not create audit log when disabled[32m 0[2mms[22m[39m
+       [32m✓[39m should include risk assessment in result[32m 0[2mms[22m[39m
+       [32m✓[39m should filter audit log by session key[32m 0[2mms[22m[39m
+       [32m✓[39m should filter audit log by tool name[32m 0[2mms[22m[39m
+       [32m✓[39m should filter audit log by action[32m 1[2mms[22m[39m
+       [32m✓[39m should limit audit log results[32m 0[2mms[22m[39m
+       [32m✓[39m should clear audit log[32m 0[2mms[22m[39m
+       [32m✓[39m should include parameter hash in audit entry[32m 0[2mms[22m[39m
+       [32m✓[39m should allow calls within rate limit[32m 0[2mms[22m[39m
+       [32m✓[39m should block calls exceeding rate limit[32m 0[2mms[22m[39m
+       [32m✓[39m should track rate limits per session and tool[32m 0[2mms[22m[39m
+       [32m✓[39m should clear rate limit store[32m 0[2mms[22m[39m
+       [32m✓[39m should execute function on valid call[32m 2[2mms[22m[39m
+       [32m✓[39m should throw on blocked call[32m 1[2mms[22m[39m
+       [32m✓[39m should pass sanitized parameters to executor[32m 0[2mms[22m[39m
+       [32m✓[39m should throw with security context on validation failure[32m 0[2mms[22m[39m
+       [32m✓[39m should have secure defaults[32m 0[2mms[22m[39m
+       [32m✓[39m should allow high-risk tools by default[32m 0[2mms[22m[39m
+       [32m✓[39m should allow builtin and plugin sources[32m 0[2mms[22m[39m
+       [32m✓[39m should block dangerous tool patterns[32m 0[2mms[22m[39m
+       [32m✓[39m should have reasonable rate limit[32m 0[2mms[22m[39m
+       [32m✓[39m should have reasonable parameter size limit[32m 0[2mms[22m[39m
+ [32m✓[39m src/helix/logging-hooks.test.ts [2m([22m[2m35 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould initialize with default options
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould initialize with default options
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould initialize with default options
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould initialize with default options
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould validate environment before proceeding
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould validate environment before proceeding
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould validate environment before proceeding
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould validate environment before proceeding
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould set fail-closed mode when enabled
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould set fail-closed mode when enabled
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould set fail-closed mode when enabled
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould set fail-closed mode when enabled
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould disable fail-closed mode when requested
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould disable fail-closed mode when requested
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould disable fail-closed mode when requested
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould disable fail-closed mode when requested
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould validate security configuration
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould validate security configuration
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould validate security configuration
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould validate security configuration
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould skip security validation when requested
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould skip security validation when requested
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould announce startup first
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould announce startup first
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould announce startup first
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould announce startup first
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould ensure directory structure
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould ensure directory structure
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould ensure directory structure
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould ensure directory structure
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould install pre-execution logger
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould install pre-execution logger
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould install pre-execution logger
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould install pre-execution logger
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould initialize Discord webhooks
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould initialize Discord webhooks
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould initialize Discord webhooks
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould initialize Discord webhooks
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start file watcher when enabled
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start file watcher when enabled
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start file watcher when enabled
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start file watcher when enabled
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould not start file watcher when disabled
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould not start file watcher when disabled
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould not start file watcher when disabled
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould not start file watcher when disabled
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start hash chain scheduler with default interval
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start hash chain scheduler with default interval
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start hash chain scheduler with default interval
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start hash chain scheduler with default interval
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start hash chain scheduler with custom interval
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start hash chain scheduler with custom interval
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start hash chain scheduler with custom interval
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start hash chain scheduler with custom interval
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould skip hash chain when requested
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould skip hash chain when requested
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould skip hash chain when requested
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould skip hash chain when requested
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start heartbeat when enabled
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start heartbeat when enabled
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start heartbeat when enabled
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start heartbeat when enabled
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould not start heartbeat when disabled
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould not start heartbeat when disabled
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould not start heartbeat when disabled
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould not start heartbeat when disabled
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould use custom workspace directory
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould use custom workspace directory
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould use custom workspace directory
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould use custom workspace directory
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould use environment variable workspace when not specified
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould use environment variable workspace when not specified
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould use environment variable workspace when not specified
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould use environment variable workspace when not specified
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould handle security validation failure in fail-closed mode
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould handle security validation failure in fail-closed mode
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould handle security validation failure in fail-closed mode
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould handle Discord webhook initialization failure
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould handle Discord webhook initialization failure
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould handle Discord webhook initialization failure
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould handle environment validation failure
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould handle environment validation failure
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould handle environment validation failure
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould shutdown with default reason
+[22m[39m[Helix] Shutting down logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould shutdown with default reason
+[22m[39m[Helix] Logging system shut down
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould shutdown with custom reason
+[22m[39m[Helix] Shutting down logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould shutdown with custom reason
+[22m[39m[Helix] Logging system shut down
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould stop heartbeat first
+[22m[39m[Helix] Shutting down logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould stop heartbeat first
+[22m[39m[Helix] Logging system shut down
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould stop file watcher
+[22m[39m[Helix] Shutting down logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould stop file watcher
+[22m[39m[Helix] Logging system shut down
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould stop hash chain scheduler
+[22m[39m[Helix] Shutting down logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould stop hash chain scheduler
+[22m[39m[Helix] Logging system shut down
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould create final hash chain entry
+[22m[39m[Helix] Shutting down logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould create final hash chain entry
+[22m[39m[Helix] Logging system shut down
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould announce shutdown last
+[22m[39m[Helix] Shutting down logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould announce shutdown last
+[22m[39m[Helix] Logging system shut down
+
+ [32m✓[39m src/helix/api-logger.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould execute shutdown steps in correct order
+[22m[39m[Helix] Shutting down logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould execute shutdown steps in correct order
+[22m[39m[Helix] Logging system shut down
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Retry Logic[2m > [22m[2mshould queue after all retries exhausted
+[22m[39m[Helix Observatory] Event queued for later (queue size: 1)
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Singleton[2m > [22m[2mshould create singleton client
+[22m[39m[Helix Observatory] Client shutdown complete
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Singleton[2m > [22m[2mshould shutdown singleton client
+[22m[39m[Helix Observatory] Client shutdown complete
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Shutdown[2m > [22m[2mshould stop offline flush on shutdown
+[22m[39m[Helix Observatory] Client shutdown complete
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mIntegration[2m > [22m[2mshould initialize and shutdown cleanly
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mIntegration[2m > [22m[2mshould handle full lifecycle with custom options
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mIntegration[2m > [22m[2mshould handle multiple initialize calls safely
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mIntegration[2m > [22m[2mshould get status after initialization
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mError Handling[2m > [22m[2mshould handle heartbeat startup failure
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mError Handling[2m > [22m[2mshould handle directory creation failure
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mError Handling[2m > [22m[2mshould handle hash chain entry creation failure on shutdown
+[22m[39m[Helix] Shutting down logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mError Handling[2m > [22m[2mshould handle shutdown announcement failure
+[22m[39m[Helix] Shutting down logging system...
+
+ [32m✓[39m src/helix/observatory-client.test.ts [2m([22m[2m26 tests[22m[2m)[22m[32m 91[2mms[22m[39m
+ [31m❯[39m src/helix/index.test.ts [2m([22m[2m47 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[32m 38[2mms[22m[39m
+       [32m✓[39m should initialize with default options[32m 8[2mms[22m[39m
+       [32m✓[39m should validate environment before proceeding[32m 1[2mms[22m[39m
+       [32m✓[39m should set fail-closed mode when enabled[32m 2[2mms[22m[39m
+       [32m✓[39m should disable fail-closed mode when requested[32m 1[2mms[22m[39m
+       [32m✓[39m should validate security configuration[32m 0[2mms[22m[39m
+       [32m✓[39m should skip security validation when requested[32m 1[2mms[22m[39m
+       [32m✓[39m should announce startup first[32m 1[2mms[22m[39m
+       [32m✓[39m should ensure directory structure[32m 1[2mms[22m[39m
+       [32m✓[39m should install pre-execution logger[32m 1[2mms[22m[39m
+       [32m✓[39m should initialize Discord webhooks[32m 0[2mms[22m[39m
+       [32m✓[39m should start file watcher when enabled[32m 0[2mms[22m[39m
+       [32m✓[39m should not start file watcher when disabled[32m 0[2mms[22m[39m
+       [32m✓[39m should start hash chain scheduler with default interval[32m 1[2mms[22m[39m
+       [32m✓[39m should start hash chain scheduler with custom interval[32m 1[2mms[22m[39m
+       [32m✓[39m should skip hash chain when requested[32m 1[2mms[22m[39m
+       [32m✓[39m should start heartbeat when enabled[32m 0[2mms[22m[39m
+       [32m✓[39m should not start heartbeat when disabled[32m 0[2mms[22m[39m
+       [32m✓[39m should use custom workspace directory[32m 1[2mms[22m[39m
+       [32m✓[39m should use environment variable workspace when not specified[32m 1[2mms[22m[39m
+       [32m✓[39m should handle security validation failure in fail-closed mode[32m 1[2mms[22m[39m
+       [32m✓[39m should handle Discord webhook initialization failure[32m 5[2mms[22m[39m
+       [32m✓[39m should handle environment validation failure[32m 1[2mms[22m[39m
+       [32m✓[39m should shutdown with default reason[32m 0[2mms[22m[39m
+       [32m✓[39m should shutdown with custom reason[32m 0[2mms[22m[39m
+       [32m✓[39m should stop heartbeat first[32m 0[2mms[22m[39m
+       [32m✓[39m should stop file watcher[32m 0[2mms[22m[39m
+       [32m✓[39m should stop hash chain scheduler[32m 0[2mms[22m[39m
+       [32m✓[39m should create final hash chain entry[32m 0[2mms[22m[39m
+       [32m✓[39m should announce shutdown last[32m 0[2mms[22m[39m
+       [32m✓[39m should execute shutdown steps in correct order[32m 1[2mms[22m[39m
+       [32m✓[39m should return initialized status[32m 0[2mms[22m[39m
+       [32m✓[39m should return watched directories[32m 0[2mms[22m[39m
+       [32m✓[39m should return hash cache size[32m 0[2mms[22m[39m
+       [32m✓[39m should return chain state[32m 0[2mms[22m[39m
+       [32m✓[39m should return API stats[32m 0[2mms[22m[39m
+       [32m✓[39m should return heartbeat info[32m 0[2mms[22m[39m
+       [32m✓[39m should return context status[32m 0[2mms[22m[39m
+       [32m✓[39m should resolve workspace directory with ~[32m 0[2mms[22m[39m
+       [32m✓[39m should handle Windows USERPROFILE[32m 1[2mms[22m[39m
+[31m       [31m×[31m should initialize and shutdown cleanly[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m should handle full lifecycle with custom options[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m should handle multiple initialize calls safely[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m should get status after initialization[39m[32m 0[2mms[22m[39m
+       [32m✓[39m should handle heartbeat startup failure[32m 1[2mms[22m[39m
+       [32m✓[39m should handle directory creation failure[32m 0[2mms[22m[39m
+       [32m✓[39m should handle hash chain entry creation failure on shutdown[32m 0[2mms[22m[39m
+       [32m✓[39m should handle shutdown announcement failure[32m 0[2mms[22m[39m
+ [32m✓[39m src/helix/types.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/lib/secrets/__tests__/database-manager.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 257[2mms[22m[39m
+ [32m✓[39m src/lib/encryption/__tests__/key-derivation.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 707[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m13 passed[39m[22m[90m (17)[39m
+[2m      Tests [22m [1m[31m7 failed[39m[22m[2m | [22m[1m[32m410 passed[39m[22m[2m | [22m[33m2 skipped[39m[90m (419)[39m
+[2m   Start at [22m 16:48:22
+[2m   Duration [22m 1.17s[2m (transform 1.40s, setup 0ms, import 2.04s, tests 1.25s, environment 2ms)[22m
+

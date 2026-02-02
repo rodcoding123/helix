@@ -82,6 +82,19 @@ const BASE_METHODS = [
   "chat.history",
   "chat.abort",
   "chat.send",
+  // Phase 3 Custom Tools
+  "tools.execute_custom",
+  "tools.get_metadata",
+  "tools.list",
+  // Phase 3 Composite Skills
+  "skills.execute_composite",
+  "skills.validate_composite",
+  "skills.get_metadata",
+  "skills.list_composite",
+  // Phase 3 Memory Synthesis
+  "memory.synthesize",
+  "memory.synthesis_status",
+  "memory.list_patterns",
 ];
 
 export function listGatewayMethods(): string[] {

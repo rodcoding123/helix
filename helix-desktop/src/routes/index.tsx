@@ -8,6 +8,11 @@ const Settings = lazy(() => import('./Settings'));
 const Psychology = lazy(() => import('./Psychology'));
 const Memory = lazy(() => import('./Memory'));
 
+// Phase 3: Custom Tools, Composite Skills, Memory Synthesis
+const CustomTools = lazy(() => import('./CustomTools'));
+const CompositeSkills = lazy(() => import('./CompositeSkills'));
+const MemorySynthesis = lazy(() => import('./MemorySynthesis'));
+
 // Loading fallback component
 function RouteLoader() {
   return (
@@ -80,6 +85,30 @@ export const router = createBrowserRouter([
           </LazyRoute>
         ),
       },
+      {
+        path: 'tools',
+        element: (
+          <LazyRoute>
+            <CustomTools />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'skills',
+        element: (
+          <LazyRoute>
+            <CompositeSkills />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'synthesis',
+        element: (
+          <LazyRoute>
+            <MemorySynthesis />
+          </LazyRoute>
+        ),
+      },
     ],
   },
 ]);
@@ -102,4 +131,8 @@ export const ROUTES = {
   PSYCHOLOGY: '/psychology',
   PSYCHOLOGY_LAYER: (layer: string) => `/psychology/${layer}`,
   MEMORY: '/memory',
+  // Phase 3: Custom Tools, Composite Skills, Memory Synthesis
+  CUSTOM_TOOLS: '/tools',
+  COMPOSITE_SKILLS: '/skills',
+  MEMORY_SYNTHESIS: '/synthesis',
 } as const;

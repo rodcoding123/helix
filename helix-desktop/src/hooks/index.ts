@@ -11,3 +11,11 @@ export { useMemory, type MemoryEntry, type MemoryStats, type MemorySearchResult 
 export { useOnboarding, type OnboardingStep, type OnboardingData, type OnboardingState } from './useOnboarding';
 export { useOAuth, type OAuthStatus } from './useOAuth';
 export { useSecretsData, type SecretsDataResult } from './useSecretsData';
+
+// Phase 3: Custom Tools, Composite Skills, Memory Synthesis
+export { useCustomTools } from './useCustomTools';
+export { useCompositeSkills } from './useCompositeSkills';
+export { useMemorySynthesis } from './useMemorySynthesis';
+
+// Phase C: Tauri Desktop Features
+export { useTauriFileOps } from './useTauriFileOps';

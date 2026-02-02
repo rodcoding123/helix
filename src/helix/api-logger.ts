@@ -290,4 +290,14 @@ export function createApiLoggerWrapper<T extends (...args: unknown[]) => unknown
   return wrapped as T;
 }
 
+/**
+ * Clear API state for testing (INTERNAL ONLY)
+ * @internal
+ */
+export function __clearApiStateForTesting(): void {
+  state.pending.clear();
+  state.requestCount = 0;
+  state.tokenCount = 0;
+}
+
 export { extractPromptPreview };

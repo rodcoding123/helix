@@ -125,6 +125,16 @@ pub fn run() {
             config::watcher::stop_config_watcher,
             config::watcher::is_config_watcher_active,
 
+            // Phase C: Clipboard operations
+            commands::clipboard::copy_to_clipboard,
+            commands::clipboard::paste_from_clipboard,
+
+            // Phase C: Directory operations
+            commands::directories::get_cache_dir,
+            commands::directories::get_data_dir,
+            commands::directories::get_app_dir,
+            commands::directories::get_config_dir,
+
             // Updater commands (disabled until signing keys are configured)
             // updater::check_for_update,
             // updater::install_update,

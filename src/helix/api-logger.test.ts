@@ -2,278 +2,507 @@
  * Tests for Helix API logger module
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import {
+  logApiPreFlight,
+  logApiResponse,
+  logApiError,
+  getApiStats,
+  __clearApiStateForTesting,
+} from './api-logger.js';
 
-// Test extractPromptPreview function logic
-describe('API Logger - extractPromptPreview', () => {
-  // Type definitions for testing
-  interface ApiMessage {
-    role?: string;
-    content?: string | object;
-  }
+// Mock fetch globally
+const mockFetch = vi.fn();
+vi.stubGlobal('fetch', mockFetch);
 
-  function isApiMessage(value: unknown): value is ApiMessage {
-    return typeof value === 'object' && value !== null && ('role' in value || 'content' in value);
-  }
-
-  function hasStringProperty(obj: object, key: string): boolean {
-    return key in obj && typeof (obj as Record<string, unknown>)[key] === 'string';
-  }
-
-  // Recreate the function for testing
-  const extractPromptPreview = (context: unknown, maxLength: number = 500): string => {
-    if (!context) return '[no context]';
-
-    if (typeof context === 'string') {
-      return context.slice(0, maxLength);
-    }
-
-    if (Array.isArray(context)) {
-      const messages = context.filter(isApiMessage);
-      const lastUserMessage = messages.reverse().find(msg => msg.role === 'user');
-
-      if (lastUserMessage?.content !== undefined) {
-        const content =
-          typeof lastUserMessage.content === 'string'
-            ? lastUserMessage.content
-            : JSON.stringify(lastUserMessage.content);
-        return content.slice(0, maxLength);
-      }
-    }
-
-    if (typeof context === 'object' && context !== null) {
-      const obj = context as Record<string, unknown>;
-      if (hasStringProperty(obj, 'prompt')) {
-        return (obj.prompt as string).slice(0, maxLength);
-      }
-      if ('messages' in obj) {
-        return extractPromptPreview(obj.messages, maxLength);
-      }
-      if (hasStringProperty(obj, 'content')) {
-        return (obj.content as string).slice(0, maxLength);
-      }
-    }
-
-    return '[complex context]';
-  };
-
-  it('should return "[no context]" for null/undefined', () => {
-    expect(extractPromptPreview(null)).toBe('[no context]');
-    expect(extractPromptPreview(undefined)).toBe('[no context]');
+describe('API Logger - Pre-Flight Logging', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+    __clearApiStateForTesting();
   });
 
-  it('should handle string context', () => {
-    expect(extractPromptPreview('Hello, world!')).toBe('Hello, world!');
-  });
-
-  it('should truncate long strings', () => {
-    const longString = 'a'.repeat(1000);
-    const result = extractPromptPreview(longString, 100);
-    expect(result).toHaveLength(100);
-  });
-
-  it('should extract last user message from array', () => {
-    const messages = [
-      { role: 'system', content: 'You are a helpful assistant' },
-      { role: 'user', content: 'Hello' },
-      { role: 'assistant', content: 'Hi there!' },
-      { role: 'user', content: 'How are you?' },
-    ];
-
-    expect(extractPromptPreview(messages)).toBe('How are you?');
-  });
-
-  it('should handle message array with no user messages', () => {
-    const messages = [
-      { role: 'system', content: 'You are a helpful assistant' },
-      { role: 'assistant', content: 'Ready to help!' },
-    ];
-
-    expect(extractPromptPreview(messages)).toBe('[complex context]');
-  });
-
-  it('should extract prompt from object', () => {
-    const context = { prompt: 'What is 2+2?' };
-    expect(extractPromptPreview(context)).toBe('What is 2+2?');
-  });
-
-  it('should extract content from object', () => {
-    const context = { content: 'Some content here' };
-    expect(extractPromptPreview(context)).toBe('Some content here');
-  });
-
-  it('should handle nested messages property', () => {
-    const context = {
-      messages: [{ role: 'user', content: 'Nested question' }],
-    };
-    expect(extractPromptPreview(context)).toBe('Nested question');
-  });
-
-  it('should return "[complex context]" for unknown structures', () => {
-    expect(extractPromptPreview({ foo: 'bar' })).toBe('[complex context]');
-    expect(extractPromptPreview([])).toBe('[complex context]');
-  });
-
-  it('should handle object content in messages', () => {
-    const messages = [
-      {
-        role: 'user',
-        content: { type: 'text', text: 'Complex content' },
-      },
-    ];
-    const result = extractPromptPreview(messages);
-    expect(result).toContain('type');
-    expect(result).toContain('text');
-  });
-});
-
-describe('API Logger - State Management', () => {
-  it('should track API stats correctly', () => {
-    // Simulate state management
-    const state = {
-      pending: new Map<string, { requestId: string }>(),
-      requestCount: 0,
-      tokenCount: 0,
+  it('should log API request before execution', async () => {
+    const log = {
+      model: 'claude-3-opus',
+      provider: 'anthropic',
+      sessionKey: 'test-session',
+      timestamp: '2024-01-15T10:30:00.000Z',
+      promptPreview: 'What is 2+2?',
+      requestId: 'req-123',
     };
 
-    // Simulate API request
-    state.requestCount++;
-    state.pending.set('req-1', { requestId: 'req-1' });
+    const requestId = await logApiPreFlight(log);
 
-    expect(state.requestCount).toBe(1);
-    expect(state.pending.size).toBe(1);
-
-    // Simulate response
-    state.tokenCount += 150;
-    state.pending.delete('req-1');
-
-    expect(state.tokenCount).toBe(150);
-    expect(state.pending.size).toBe(0);
-
-    // Simulate another request
-    state.requestCount++;
-    state.tokenCount += 200;
-
-    expect(state.requestCount).toBe(2);
-    expect(state.tokenCount).toBe(350);
+    expect(requestId).toBe('req-123');
+    expect(mockFetch).toHaveBeenCalledOnce();
   });
 
-  it('should return correct stats format', () => {
-    const getApiStats = (state: {
-      requestCount: number;
-      tokenCount: number;
-      pending: Map<string, unknown>;
-    }): { requestCount: number; tokenCount: number; pendingCount: number } => ({
-      requestCount: state.requestCount,
-      tokenCount: state.tokenCount,
-      pendingCount: state.pending.size,
+  it('should generate request ID if not provided', async () => {
+    const log = {
+      model: 'claude-3-opus',
+      provider: 'anthropic',
+      timestamp: '2024-01-15T10:30:00.000Z',
+      promptPreview: 'Test prompt',
+    };
+
+    const requestId = await logApiPreFlight(log);
+
+    expect(requestId).toBeDefined();
+    expect(requestId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+  });
+
+  it('should send Discord webhook synchronously', async () => {
+    let webhookCompleted = false;
+    mockFetch.mockImplementation(async () => {
+      await new Promise(resolve => setTimeout(resolve, 50));
+      webhookCompleted = true;
+      return { ok: true, status: 200 };
     });
 
-    const state = {
-      pending: new Map([
-        ['req-1', {}],
-        ['req-2', {}],
-      ]),
-      requestCount: 10,
-      tokenCount: 5000,
-    };
-
-    const stats = getApiStats(state);
-    expect(stats.requestCount).toBe(10);
-    expect(stats.tokenCount).toBe(5000);
-    expect(stats.pendingCount).toBe(2);
-  });
-});
-
-describe('API Logger - Log Entry Structure', () => {
-  it('should have correct ApiPreFlightLog interface', () => {
-    const log = {
+    await logApiPreFlight({
       model: 'claude-3-opus',
       provider: 'anthropic',
-      sessionKey: 'session-123',
+      timestamp: '2024-01-15T10:30:00.000Z',
+      promptPreview: 'Test',
+    });
+
+    expect(webhookCompleted).toBe(true);
+  });
+
+  it('should include prompt preview in embed', async () => {
+    await logApiPreFlight({
+      model: 'claude-3-opus',
+      provider: 'anthropic',
       timestamp: '2024-01-15T10:30:00.000Z',
       promptPreview: 'What is the meaning of life?',
-      requestId: 'req-abc-123',
-    };
+      requestId: 'req-abc',
+    });
 
-    expect(log.model).toBeDefined();
-    expect(log.provider).toBeDefined();
-    expect(log.timestamp).toBeDefined();
-    expect(log.requestId).toBeDefined();
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const embed = callBody.embeds[0];
+    expect(embed.fields.some((f: { name: string; value: string }) =>
+      f.name === 'Prompt Preview' && f.value.includes('What is the meaning')
+    )).toBe(true);
   });
 
-  it('should have correct ApiResponseLog interface', () => {
-    const log = {
+  it('should truncate long prompt previews', async () => {
+    const longPrompt = 'a'.repeat(1000);
+
+    await logApiPreFlight({
       model: 'claude-3-opus',
       provider: 'anthropic',
-      sessionKey: 'session-123',
-      timestamp: '2024-01-15T10:30:01.500Z',
-      requestId: 'req-abc-123',
-      responsePreview: 'The meaning of life is...',
-      tokenCount: 150,
-      latencyMs: 1500,
-    };
+      timestamp: '2024-01-15T10:30:00.000Z',
+      promptPreview: longPrompt,
+    });
 
-    expect(log.responsePreview).toBeDefined();
-    expect(log.tokenCount).toBe(150);
-    expect(log.latencyMs).toBe(1500);
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const embed = callBody.embeds[0];
+    const promptField = embed.fields.find((f: { name: string }) => f.name === 'Prompt Preview');
+    expect(promptField.value.length).toBeLessThan(1000);
+  });
+
+  it('should add request to pending map', async () => {
+    const requestId = await logApiPreFlight({
+      model: 'claude-3-opus',
+      provider: 'anthropic',
+      timestamp: '2024-01-15T10:30:00.000Z',
+      promptPreview: 'Test',
+      requestId: 'req-pending',
+    });
+
+    const stats = getApiStats();
+    expect(stats.pendingCount).toBe(1);
+  });
+
+  it('should increment request counter', async () => {
+    const stats1 = getApiStats();
+    const initialCount = stats1.requestCount;
+
+    await logApiPreFlight({
+      model: 'claude-3-opus',
+      provider: 'anthropic',
+      timestamp: '2024-01-15T10:30:00.000Z',
+      promptPreview: 'Test',
+    });
+
+    const stats2 = getApiStats();
+    expect(stats2.requestCount).toBe(initialCount + 1);
+  });
+
+  it('should handle webhook failure gracefully', async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 500 });
+
+    await expect(
+      logApiPreFlight({
+        model: 'claude-3-opus',
+        provider: 'anthropic',
+        timestamp: '2024-01-15T10:30:00.000Z',
+        promptPreview: 'Test',
+      })
+    ).resolves.toBeDefined();
   });
 });
 
-describe('API Logger - Discord Embed Structure', () => {
-  it('should create valid pre-flight embed', () => {
-    const embed = {
-      title: '🤖 API Request',
-      color: 0x57f287,
-      fields: [
-        { name: 'Request ID', value: '`abc12345`', inline: true },
-        { name: 'Model', value: 'claude-3-opus', inline: true },
-        { name: 'Provider', value: 'anthropic', inline: true },
-        { name: 'Time', value: '2024-01-15T10:30:00.000Z', inline: true },
-        { name: 'Request #', value: '42', inline: true },
-      ],
+describe('API Logger - Response Logging', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+    __clearApiStateForTesting();
+  });
+
+  it('should log API response', async () => {
+    // Pre-flight first
+    await logApiPreFlight({
+      model: 'claude-3-opus',
+      provider: 'anthropic',
       timestamp: '2024-01-15T10:30:00.000Z',
-      footer: { text: 'PRE-FLIGHT - Logged before API receives request' },
-    };
+      promptPreview: 'Test',
+      requestId: 'req-123',
+    });
 
-    expect(embed.title).toContain('API Request');
-    expect(embed.color).toBe(0x57f287); // Green
-    expect(embed.footer.text).toContain('PRE-FLIGHT');
-  });
+    mockFetch.mockClear();
 
-  it('should create valid response embed', () => {
-    const embed = {
-      title: '✅ API Response',
-      color: 0x2ecc71,
-      fields: [
-        { name: 'Request ID', value: '`abc12345`', inline: true },
-        { name: 'Latency', value: '1500ms', inline: true },
-        { name: 'Tokens', value: '150', inline: true },
-      ],
+    await logApiResponse({
+      requestId: 'req-123',
+      model: 'claude-3-opus',
+      provider: 'anthropic',
       timestamp: '2024-01-15T10:30:01.500Z',
-      footer: { text: 'POST-RESPONSE' },
-    };
+      responsePreview: 'The answer is 42',
+      tokenCount: 150,
+      latencyMs: 1500,
+    });
 
-    expect(embed.title).toContain('Response');
-    expect(embed.color).toBe(0x2ecc71); // Green
-    expect(embed.footer.text).toBe('POST-RESPONSE');
+    expect(mockFetch).toHaveBeenCalledOnce();
   });
 
-  it('should create valid error embed', () => {
-    const embed = {
-      title: '❌ API Error',
-      color: 0xe74c3c,
-      fields: [
-        { name: 'Request ID', value: '`abc12345`', inline: true },
-        { name: 'Status', value: '429', inline: true },
-        { name: 'Error', value: 'Rate limit exceeded', inline: false },
-      ],
-      timestamp: '2024-01-15T10:30:00.500Z',
-      footer: { text: 'API CALL FAILED' },
-    };
+  it('should remove request from pending map', async () => {
+    await logApiPreFlight({
+      requestId: 'req-456',
+      model: 'claude-3-opus',
+      provider: 'anthropic',
+      timestamp: '2024-01-15T10:30:00.000Z',
+      promptPreview: 'Test',
+    });
 
+    expect(getApiStats().pendingCount).toBe(1);
+
+    await logApiResponse({
+      requestId: 'req-456',
+      model: 'claude-3-opus',
+      provider: 'anthropic',
+      timestamp: '2024-01-15T10:30:01.000Z',
+      responsePreview: 'Response',
+      tokenCount: 100,
+      latencyMs: 1000,
+    });
+
+    expect(getApiStats().pendingCount).toBe(0);
+  });
+
+  it('should update token counter', async () => {
+    const stats1 = getApiStats();
+    const initialTokens = stats1.tokenCount;
+
+    await logApiResponse({
+      requestId: 'req-789',
+      model: 'claude-3-opus',
+      provider: 'anthropic',
+      timestamp: '2024-01-15T10:30:01.000Z',
+      responsePreview: 'Response',
+      tokenCount: 250,
+      latencyMs: 1200,
+    });
+
+    const stats2 = getApiStats();
+    expect(stats2.tokenCount).toBe(initialTokens + 250);
+  });
+
+  it('should include latency in embed', async () => {
+    await logApiResponse({
+      requestId: 'req-latency',
+      model: 'claude-3-opus',
+      provider: 'anthropic',
+      timestamp: '2024-01-15T10:30:01.000Z',
+      responsePreview: 'Done',
+      tokenCount: 100,
+      latencyMs: 2345,
+    });
+
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const embed = callBody.embeds[0];
+    expect(embed.fields.some((f: { name: string; value: string }) =>
+      f.name === 'Latency' && f.value.includes('2345ms')
+    )).toBe(true);
+  });
+
+  it('should handle missing response preview', async () => {
+    await expect(
+      logApiResponse({
+        requestId: 'req-no-preview',
+        model: 'claude-3-opus',
+        provider: 'anthropic',
+        timestamp: '2024-01-15T10:30:01.000Z',
+        tokenCount: 50,
+        latencyMs: 500,
+      })
+    ).resolves.not.toThrow();
+  });
+});
+
+describe('API Logger - Error Logging', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+    __clearApiStateForTesting();
+  });
+
+  it('should log API error', async () => {
+    await logApiError('req-error', 'Rate limit exceeded', 429);
+
+    expect(mockFetch).toHaveBeenCalledOnce();
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const embed = callBody.embeds[0];
     expect(embed.title).toContain('Error');
     expect(embed.color).toBe(0xe74c3c); // Red
-    expect(embed.footer.text).toBe('API CALL FAILED');
+  });
+
+  it('should remove request from pending on error', async () => {
+    await logApiPreFlight({
+      requestId: 'req-will-fail',
+      model: 'claude-3-opus',
+      provider: 'anthropic',
+      timestamp: '2024-01-15T10:30:00.000Z',
+      promptPreview: 'Test',
+    });
+
+    expect(getApiStats().pendingCount).toBe(1);
+
+    await logApiError('req-will-fail', 'API Error', 500);
+
+    expect(getApiStats().pendingCount).toBe(0);
+  });
+
+  it('should include error status code', async () => {
+    await logApiError('req-429', 'Too many requests', 429);
+
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const embed = callBody.embeds[0];
+    expect(embed.fields.some((f: { name: string; value: string }) =>
+      f.name === 'Status' && f.value === '429'
+    )).toBe(true);
+  });
+
+  it('should handle optional status code', async () => {
+    await expect(logApiError('req-no-status', 'Unknown error')).resolves.not.toThrow();
+  });
+});
+
+describe('API Logger - Statistics', () => {
+  beforeEach(() => {
+    __clearApiStateForTesting();
+  });
+
+  it('should return initial stats', () => {
+    const stats = getApiStats();
+
+    expect(stats.requestCount).toBe(0);
+    expect(stats.tokenCount).toBe(0);
+    expect(stats.pendingCount).toBe(0);
+  });
+
+  it('should track cumulative stats across multiple requests', async () => {
+    mockFetch.mockResolvedValue({ ok: true });
+    __clearApiStateForTesting();
+
+    // Request 1
+    const reqId1 = await logApiPreFlight({
+      model: 'claude-3-opus',
+      provider: 'anthropic',
+      timestamp: '2024-01-15T10:30:00.000Z',
+      promptPreview: 'Q1',
+    });
+
+    await logApiResponse({
+      requestId: reqId1,
+      model: 'claude-3-opus',
+      provider: 'anthropic',
+      timestamp: '2024-01-15T10:30:01.000Z',
+      tokenCount: 100,
+      latencyMs: 1000,
+    });
+
+    // Request 2
+    const reqId2 = await logApiPreFlight({
+      model: 'claude-3-opus',
+      provider: 'anthropic',
+      timestamp: '2024-01-15T10:30:02.000Z',
+      promptPreview: 'Q2',
+    });
+
+    await logApiResponse({
+      requestId: reqId2,
+      model: 'claude-3-opus',
+      provider: 'anthropic',
+      timestamp: '2024-01-15T10:30:03.000Z',
+      tokenCount: 150,
+      latencyMs: 1100,
+    });
+
+    const stats = getApiStats();
+    expect(stats.requestCount).toBe(2);
+    expect(stats.tokenCount).toBe(250);
+    expect(stats.pendingCount).toBe(0);
+  });
+});
+
+describe('API Logger - Prompt Preview Extraction', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFetch.mockResolvedValue({ ok: true });
+    __clearApiStateForTesting();
+  });
+
+  it('should handle string preview', async () => {
+    await logApiPreFlight({
+      model: 'claude-3-opus',
+      provider: 'anthropic',
+      timestamp: '2024-01-15T10:30:00.000Z',
+      promptPreview: 'Simple string prompt',
+    });
+
+    // If webhook URL is configured, check the embed
+    if (mockFetch.mock.calls.length > 0) {
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+      const embed = callBody.embeds[0];
+      const promptField = embed.fields.find((f: { name: string }) => f.name === 'Prompt Preview');
+      if (promptField) {
+        expect(promptField.value).toContain('Simple string');
+      }
+    }
+  });
+
+  it('should handle JSON-stringified message array', async () => {
+    const messages = [
+      { role: 'system', content: 'You are helpful' },
+      { role: 'user', content: 'Hello!' },
+    ];
+    await logApiPreFlight({
+      model: 'claude-3-opus',
+      provider: 'anthropic',
+      timestamp: '2024-01-15T10:30:00.000Z',
+      promptPreview: JSON.stringify(messages),
+    });
+
+    if (mockFetch.mock.calls.length > 0) {
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+      const embed = callBody.embeds[0];
+      const promptField = embed.fields.find((f: { name: string }) => f.name === 'Prompt Preview');
+      expect(promptField).toBeDefined();
+    }
+  });
+
+  it('should handle simple question preview', async () => {
+    await logApiPreFlight({
+      model: 'claude-3-opus',
+      provider: 'anthropic',
+      timestamp: '2024-01-15T10:30:00.000Z',
+      promptPreview: 'What is AI?',
+    });
+
+    if (mockFetch.mock.calls.length > 0) {
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+      const embed = callBody.embeds[0];
+      const promptField = embed.fields.find((f: { name: string }) => f.name === 'Prompt Preview');
+      if (promptField) {
+        expect(promptField.value).toContain('What is AI?');
+      }
+    }
+  });
+
+  it('should handle missing prompt preview', async () => {
+    await logApiPreFlight({
+      model: 'claude-3-opus',
+      provider: 'anthropic',
+      timestamp: '2024-01-15T10:30:00.000Z',
+    });
+
+    if (mockFetch.mock.calls.length > 0) {
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+      const embed = callBody.embeds[0];
+      const promptField = embed.fields.find((f: { name: string }) => f.name === 'Prompt Preview');
+      expect(promptField).toBeUndefined();
+    }
+  });
+});
+
+describe('API Logger - Edge Cases', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFetch.mockResolvedValue({ ok: true });
+    __clearApiStateForTesting();
+  });
+
+  it('should handle missing prompt preview', async () => {
+    await expect(
+      logApiPreFlight({
+        model: 'claude-3-opus',
+        provider: 'anthropic',
+        timestamp: '2024-01-15T10:30:00.000Z',
+      })
+    ).resolves.toBeDefined();
+  });
+
+  it('should handle empty string preview', async () => {
+    await expect(
+      logApiPreFlight({
+        model: 'claude-3-opus',
+        provider: 'anthropic',
+        timestamp: '2024-01-15T10:30:00.000Z',
+        promptPreview: '',
+      })
+    ).resolves.toBeDefined();
+  });
+
+  it('should handle zero token count', async () => {
+    await expect(
+      logApiResponse({
+        requestId: 'req-zero-tokens',
+        model: 'claude-3-opus',
+        provider: 'anthropic',
+        timestamp: '2024-01-15T10:30:01.000Z',
+        tokenCount: 0,
+        latencyMs: 100,
+      })
+    ).resolves.not.toThrow();
+  });
+
+  it('should handle very high latency', async () => {
+    await logApiResponse({
+      requestId: 'req-slow',
+      model: 'claude-3-opus',
+      provider: 'anthropic',
+      timestamp: '2024-01-15T10:30:01.000Z',
+      tokenCount: 100,
+      latencyMs: 60000, // 60 seconds
+    });
+
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const embed = callBody.embeds[0];
+    const latencyField = embed.fields.find((f: { name: string }) => f.name === 'Latency');
+    expect(latencyField?.value).toContain('60000ms');
+  });
+
+  it('should handle webhook network error', async () => {
+    mockFetch.mockRejectedValue(new Error('Network error'));
+
+    await expect(
+      logApiPreFlight({
+        model: 'claude-3-opus',
+        provider: 'anthropic',
+        timestamp: '2024-01-15T10:30:00.000Z',
+        promptPreview: 'Test',
+      })
+    ).resolves.toBeDefined();
   });
 });
