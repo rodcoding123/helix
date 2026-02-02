@@ -108,19 +108,32 @@ export function validateCompositeSkill(skill: CompositeSkill): { valid: boolean;
 }
 
 /**
+ * Function signature for tool execution
+ * Can be implemented to call mock tools, gateway RPC, or other execution backends
+ */
+export interface ToolExecutor {
+  (toolName: string, params: Record<string, unknown>): Promise<unknown>;
+}
+
+/**
  * Executes a composite skill with multi-step workflow
  *
  * @param skill - Composite skill definition
  * @param input - Initial input data
+ * @param toolExecutor - Function to execute individual tools (supports both mock and real execution)
  * @returns Execution result with all step outputs and final output
  */
 export async function executeCompositeSkill(
   skill: CompositeSkill,
   input: Record<string, unknown> = {},
+  toolExecutor?: ToolExecutor,
 ): Promise<CompositeSkillExecutionResult> {
   const startTime = Date.now();
   const executionContext: Record<string, unknown> = { input };
   const stepResults: StepResult[] = [];
+
+  // Use provided executor or fall back to mock
+  const executor = toolExecutor || executeTool;
 
   // Validate skill before execution
   const validation = validateCompositeSkill(skill);
@@ -150,8 +163,8 @@ export async function executeCompositeSkill(
       // 2. Resolve input parameters using JSONPath
       const resolvedParams = resolveInputMapping(step.inputMapping || {}, executionContext);
 
-      // 3. Execute tool (mock for now - would call gateway in real implementation)
-      const toolResult = await executeTool(step.toolName, resolvedParams);
+      // 3. Execute tool via provided executor or mock
+      const toolResult = await executor(step.toolName, resolvedParams);
 
       // 4. Extract output if outputMapping is defined
       let stepOutput = toolResult;

@@ -1,5 +1,56 @@
-import { executeCompositeSkill, validateCompositeSkill, type CompositeSkill } from '../../helix/skill-chaining.js';
-import type { GatewayRequestHandlers } from './types.js';
+import { executeCompositeSkill, validateCompositeSkill, type CompositeSkill, type ToolExecutor } from '../../helix/skill-chaining.js';
+import { executeSkillSandboxed, DEFAULT_SKILL_SANDBOX_CONFIG, type SkillMetadata } from '../../helix/skill-sandbox.js';
+import type { GatewayRequestHandlers, GatewayRequestContext } from './types.js';
+
+/**
+ * Creates a real tool executor that fetches and executes custom tools from the database
+ */
+function createRealToolExecutor(context: GatewayRequestContext, userId: string): ToolExecutor {
+  return async (toolName: string, params: Record<string, unknown>): Promise<unknown> => {
+    const db = context.db;
+
+    // Try to fetch the custom tool from database
+    try {
+      const result = await db.query(
+        `SELECT id, code, name, capabilities FROM custom_tools
+         WHERE (name = $1 OR id = $1) AND user_id = $2`,
+        [toolName, userId]
+      );
+
+      if (!result.rows || result.rows.length === 0) {
+        throw new Error(`Custom tool not found: ${toolName}`);
+      }
+
+      const tool = result.rows[0];
+
+      // Execute the custom tool using the sandbox
+      const metadata: SkillMetadata = {
+        name: tool.name || toolName,
+        version: '1.0.0',
+        author: 'composite-skill',
+        permissions: tool.capabilities || [],
+      };
+
+      const sandboxResult = await executeSkillSandboxed(
+        tool.code,
+        metadata,
+        params,
+        `step-${toolName}`,
+        DEFAULT_SKILL_SANDBOX_CONFIG
+      );
+
+      if (!sandboxResult.success) {
+        throw new Error(sandboxResult.error || `Tool execution failed: ${toolName}`);
+      }
+
+      return sandboxResult.output;
+    } catch (error) {
+      throw new Error(
+        `Failed to execute tool '${toolName}': ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  };
+}
 
 /**
  * Composite Skills Gateway RPC Methods
@@ -53,18 +104,60 @@ export const compositeSkillHandlers: GatewayRequestHandlers = {
         return;
       }
 
-      // TODO: Load skill from database if skillId is provided
-      // For now, use provided skill
-      if (!providedSkill) {
+      // Load skill from database if skillId is provided
+      let skillToExecute = providedSkill;
+      if (skillId && !providedSkill) {
+        const userId = client?.connect?.userId;
+        if (!userId) {
+          respond(false, undefined, {
+            code: 'UNAUTHORIZED',
+            message: 'Authentication required',
+          });
+          return;
+        }
+
+        try {
+          const db = context.db;
+          const result = await db.query(
+            `SELECT id, name, description, steps, version FROM composite_skills
+             WHERE id = $1 AND user_id = $2`,
+            [skillId, userId]
+          );
+
+          if (!result.rows || result.rows.length === 0) {
+            respond(false, undefined, {
+              code: 'NOT_FOUND',
+              message: `Skill not found: ${skillId}`,
+            });
+            return;
+          }
+
+          skillToExecute = {
+            id: result.rows[0].id,
+            name: result.rows[0].name,
+            description: result.rows[0].description,
+            steps: result.rows[0].steps,
+            version: result.rows[0].version || '1.0.0',
+          } as CompositeSkill;
+        } catch (dbError) {
+          respond(false, undefined, {
+            code: 'DATABASE_ERROR',
+            message: dbError instanceof Error ? dbError.message : 'Database lookup failed',
+          });
+          return;
+        }
+      }
+
+      if (!skillToExecute) {
         respond(false, undefined, {
-          code: 'NOT_FOUND',
-          message: 'Database lookups not yet implemented',
+          code: 'INVALID_REQUEST',
+          message: 'No skill definition provided or found',
         });
         return;
       }
 
       // Validate skill
-      const validation = validateCompositeSkill(providedSkill);
+      const validation = validateCompositeSkill(skillToExecute);
       if (!validation.valid) {
         respond(false, undefined, {
           code: 'INVALID_SKILL',
@@ -73,21 +166,67 @@ export const compositeSkillHandlers: GatewayRequestHandlers = {
         return;
       }
 
+      const executionId = crypto.randomUUID();
+      const startTime = Date.now();
+
       // Log execution start
-      context.logGateway.info?.(`Executing composite skill: ${providedSkill.name}`, {
-        skillId: providedSkill.id,
+      context.logGateway.info?.(`Executing composite skill: ${skillToExecute.name}`, {
+        executionId,
+        skillId: skillToExecute.id,
         userId: client?.connect?.userId,
-        stepsCount: providedSkill.steps.length,
+        stepsCount: skillToExecute.steps.length,
       });
 
-      // Execute skill
-      const result = await executeCompositeSkill(providedSkill, input || {});
+      // Create real tool executor that fetches and executes custom tools
+      const toolExecutor = createRealToolExecutor(context, userId);
+
+      // Execute skill with real tool executor
+      const result = await executeCompositeSkill(skillToExecute, input || {}, toolExecutor);
+
+      const executionTimeMs = Date.now() - startTime;
+
+      // Store execution record if we have a skill ID
+      if (skillId && client?.connect?.userId) {
+        try {
+          const db = context.db;
+          await db.query(
+            `INSERT INTO composite_skill_executions
+             (id, composite_skill_id, user_id, input_params, steps_executed, final_output, status, execution_time_ms, steps_completed, total_steps, created_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())`,
+            [
+              executionId,
+              skillId,
+              client.connect.userId,
+              JSON.stringify(input || {}),
+              JSON.stringify(result.stepResults || []),
+              JSON.stringify(result.finalOutput),
+              result.success ? 'completed' : 'failed',
+              executionTimeMs,
+              result.stepsCompleted || 0,
+              skillToExecute.steps.length,
+            ]
+          );
+
+          // Update skill execution count
+          await db.query(
+            `UPDATE composite_skills SET execution_count = execution_count + 1, last_executed = NOW() WHERE id = $1`,
+            [skillId]
+          );
+        } catch (dbError) {
+          context.logGateway.error?.('COMPOSITE_SKILL_STORAGE_ERROR', {
+            executionId,
+            error: dbError instanceof Error ? dbError.message : String(dbError),
+            userId: client?.connect?.userId,
+          });
+        }
+      }
 
       // Log execution completion
-      context.logGateway.info?.(`Composite skill execution completed: ${providedSkill.name}`, {
-        skillId: providedSkill.id,
+      context.logGateway.info?.(`Composite skill execution completed: ${skillToExecute.name}`, {
+        executionId,
+        skillId: skillToExecute.id,
         success: result.success,
-        executionTimeMs: result.executionTimeMs,
+        executionTimeMs,
         stepsCompleted: result.stepsCompleted,
         userId: client?.connect?.userId,
       });
