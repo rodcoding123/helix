@@ -1,4 +1,4 @@
-import { expect, afterEach, vi, beforeAll } from 'vitest';
+import { afterEach, vi, beforeAll } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
@@ -9,10 +9,13 @@ afterEach(() => {
 
 // Mock environment variables for testing
 beforeAll(() => {
-  vi.stubEnv('VITE_SUPABASE_URL', 'http://localhost:54321');
-  vi.stubEnv('VITE_SUPABASE_KEY', 'test-anon-key');
-  vi.stubEnv('DEEPSEEK_API_KEY', 'test-deepseek-key');
-  vi.stubEnv('GEMINI_API_KEY', 'test-gemini-key');
+  // Supabase (VITE variables for client-side)
+  vi.stubEnv('VITE_SUPABASE_URL', process.env.VITE_SUPABASE_URL || 'http://localhost:54321');
+  vi.stubEnv('VITE_SUPABASE_KEY', process.env.VITE_SUPABASE_KEY || 'test-anon-key');
+
+  // API Keys (non-VITE variables, load from .env if available)
+  vi.stubEnv('DEEPSEEK_API_KEY', process.env.DEEPSEEK_API_KEY || 'test-deepseek-key');
+  vi.stubEnv('GEMINI_API_KEY', process.env.GEMINI_API_KEY || 'test-gemini-key');
 });
 
 // Mock window.matchMedia for responsive tests

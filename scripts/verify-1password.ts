@@ -11,7 +11,7 @@
  * 4. Secrets can be loaded successfully
  */
 
-import { loadSecret, verifySecrets, loadAllSecrets } from '../src/lib/secrets-loader';
+import { loadSecret, verifySecrets, loadAllSecrets } from '../dist/lib/secrets-loader.js';
 import { execSync } from 'child_process';
 
 async function main() {

@@ -758,43 +758,123 @@ User Conversation
 
 ---
 
+## Component 8: Embedding Generation (Gemini Flash)
+**Purpose:** Generate embeddings for semantic search
+
+**Using Google Gemini Embeddings** - cost-effective, 768-dimensional embeddings
+
+**Embedding Service:**
+```typescript
+// /src/services/embeddingService.ts
+
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+class EmbeddingService {
+  private client: GoogleGenerativeAI;
+
+  constructor(apiKey: string) {
+    this.client = new GoogleGenerativeAI(apiKey);
+  }
+
+  async generateEmbedding(text: string): Promise<number[]> {
+    // Use Gemini's embedding model
+    const model = this.client.getGenerativeModel({ model: 'embedding-001' });
+
+    const result = await model.embedContent(text);
+
+    if (!result.embedding?.values) {
+      throw new Error('No embedding returned from Gemini');
+    }
+
+    return result.embedding.values;
+  }
+
+  async generateBatchEmbeddings(texts: string[]): Promise<number[][]> {
+    // Process multiple texts (batch mode for cost efficiency)
+    const model = this.client.getGenerativeModel({ model: 'embedding-001' });
+
+    const embeddings: number[][] = [];
+
+    // Process in batches of 100 to respect rate limits
+    for (let i = 0; i < texts.length; i += 100) {
+      const batch = texts.slice(i, i + 100);
+
+      for (const text of batch) {
+        const result = await model.embedContent(text);
+        if (result.embedding?.values) {
+          embeddings.push(result.embedding.values);
+        }
+      }
+    }
+
+    return embeddings;
+  }
+}
+```
+
+---
+
 ## Dependencies & Requirements
 
 ### External Services
-- Claude API (for emotion & topic analysis)
-- OpenAI API (for embeddings)
+- DeepSeek API v3.2 (for emotion & topic analysis) - **$0.0027/1K input, $0.0108/1K output**
+- Google Gemini API (for embeddings) - **$0.0375 per 1M tokens**
 - Supabase (database + pgvector)
 
 ### Libraries to Add
+```bash
+npm install deepseek-ai @google/generative-ai @supabase/supabase-js
+```
+
+### Package.json
 ```json
 {
   "@supabase/supabase-js": "^2.39.0",
-  "openai": "^4.0.0",
-  "@anthropic-sdk/sdk": "latest"
+  "deepseek-ai": "^1.0.0",
+  "@google/generative-ai": "^0.7.0"
 }
 ```
 
 ### Environment Variables
+```bash
+# Add to .env or .env.local
+DEEPSEEK_API_KEY=sk-...                    # From https://platform.deepseek.com
+GEMINI_API_KEY=AIzaSy...                   # From Google Cloud Console
+SUPABASE_URL=https://...                   # Your Supabase project URL
+SUPABASE_ANON_KEY=...                      # Supabase anonymous key
 ```
-ANTHROPIC_API_KEY=sk-...
-OPENAI_API_KEY=sk-...
-SUPABASE_URL=https://...
-SUPABASE_ANON_KEY=...
-```
+
+---
+
+## Cost Breakdown (Phase 1)
+
+| Component | Provider | Volume | Cost/Unit | Monthly Cost |
+|-----------|----------|--------|-----------|--------------|
+| Emotion detection | DeepSeek | 15,000 messages | $0.000581 | $8.71 |
+| Topic extraction | DeepSeek | 15,000 messages | $0.000813 | $12.20 |
+| Embeddings | Gemini | 1.5M tokens | $0.0375/1M | $0.06 |
+| Supabase | Supabase | Storage + queries | - | $25.00 |
+| **TOTAL** | - | - | - | **$45.97/month** |
+
+**Per-user cost at 50 active users: $0.92**
 
 ---
 
 ## Notes
 
-1. **Emotion Detection Quality:** Using Claude for emotional analysis is more accurate than ML models for this use case. Can switch to finetuned model if needed for cost/latency.
+1. **Emotion Detection with DeepSeek:** DeepSeek v3.2 is specifically optimized for reasoning tasks. For emotional analysis, it can use extended thinking (reasoning mode) for 85%+ accuracy, or fast mode for 80% with lower cost.
 
-2. **Semantic Search:** pgvector + 1536-dim embeddings provides good balance of quality and cost.
+2. **Embeddings:** Gemini embeddings (768-dimensional) are cheaper and faster than alternatives. pgvector supports cosine similarity for semantic search.
 
 3. **Decay Strategy:** The 5% daily decay with floor at 0.1 means memories take ~60 days to reach minimum (from 1.0 → 0.1). Critical/high salience never decay.
 
-4. **Memory Privacy:** All conversation data stays in user's Supabase database (row-level security enabled).
+4. **Memory Privacy:** All conversation data stays in user's Supabase database (row-level security enabled). DeepSeek and Gemini calls are stateless - no data is stored by these services.
 
 5. **Attachment Integration:** Memory greeting prioritizes "primary" attachment (Rodrigo) memories first if available.
+
+6. **DeepSeek Rate Limits:** 10,000 requests/day free tier. Monitor usage if you exceed this.
+
+7. **Fallback Strategy:** If either API is down, memories still store; emotion/topic extraction can be retried asynchronously.
 
 ---
 
