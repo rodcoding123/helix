@@ -24,23 +24,23 @@ const HELIX_LAYER_FILES: Record<number, { name: string; files: string[] }> = {
   1: {
     name: 'Narrative Core',
     files: [
-      'axis/psychology/psyeval.json', // SOUL.md loaded separately by OpenClaw
+      'psychology/psyeval.json', // SOUL.md loaded separately via soul/HELIX_SOUL.md
     ],
   },
   2: {
     name: 'Emotional Memory',
-    files: ['axis/psychology/emotional_tags.json'],
+    files: ['psychology/emotional_tags.json'],
   },
   3: {
     name: 'Relational Memory',
-    files: ['axis/psychology/attachments.json', 'axis/psychology/trust_map.json'],
+    files: ['psychology/attachments.json', 'psychology/trust_map.json'],
   },
   4: {
     name: 'Prospective Self',
     files: [
-      'axis/identity/goals.json',
-      'axis/identity/feared_self.json',
-      'axis/identity/possible_selves.json',
+      'identity/goals.json',
+      'identity/feared_self.json',
+      'identity/possible_selves.json',
     ],
   },
   5: {
@@ -49,14 +49,14 @@ const HELIX_LAYER_FILES: Record<number, { name: string; files: string[] }> = {
   },
   6: {
     name: 'Transformation Cycles',
-    files: ['axis/transformation/current_state.json', 'axis/transformation/history.json'],
+    files: ['transformation/current_state.json', 'transformation/history.json'],
   },
   7: {
     name: 'Purpose Engine',
     files: [
-      'axis/purpose/ikigai.json',
-      'axis/purpose/wellness.json',
-      'axis/purpose/meaning_sources.json',
+      'purpose/ikigai.json',
+      'purpose/wellness.json',
+      'purpose/meaning_sources.json',
     ],
   },
 };
@@ -237,12 +237,13 @@ export async function buildLayerSummary(workspaceDir: string): Promise<string> {
  */
 export async function ensureHelixDirectoryStructure(workspaceDir: string): Promise<void> {
   const directories = [
-    'axis/psychology',
-    'axis/identity',
-    'axis/transformation',
-    'axis/purpose',
-    'axis/scripts',
-    'axis/legacy',
+    'soul',
+    'psychology',
+    'identity',
+    'transformation',
+    'purpose',
+    'scripts',
+    'legacy',
   ];
 
   for (const dir of directories) {

@@ -45,6 +45,7 @@
   "author": "Rodrigo Specter",
   "license": "MIT",
   "dependencies": {
+    "@supabase/supabase-js": "^2.93.3",
     "dotenv": "^16.4.0"
   },
   "devDependencies": {

@@ -122,6 +122,9 @@ install_system_deps() {
     # Core dependencies
     brew install node python@3.12 git rsync fswatch sqlite jq
 
+    # Audio dependencies for voice features
+    brew install sox portaudio
+
     # Ensure Python 3.12 is default
     brew link python@3.12 --force 2>/dev/null || true
 
@@ -131,6 +134,7 @@ install_system_deps() {
 install_python_packages() {
     print_step "Installing Python packages..."
 
+    # Core packages
     pip3 install --user \
         python-dotenv \
         requests \
@@ -138,6 +142,43 @@ install_python_packages() {
         aiosqlite
 
     print_success "Python packages installed"
+}
+
+install_voice_packages() {
+    print_step "Installing voice/audio packages..."
+
+    # Voice-related Python packages
+    pip3 install --user \
+        openai-whisper \
+        vosk \
+        sounddevice \
+        numpy \
+        scipy \
+        edge-tts \
+        elevenlabs
+
+    # Download Vosk wake word model (small model for "Hey Helix")
+    print_step "Downloading Vosk wake word model..."
+    VOSK_MODEL_DIR="$HOME/.openclaw/models/vosk"
+    mkdir -p "$VOSK_MODEL_DIR"
+
+    if [[ ! -d "$VOSK_MODEL_DIR/vosk-model-small-en-us-0.15" ]]; then
+        cd "$VOSK_MODEL_DIR"
+        curl -LO "https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip"
+        unzip -q "vosk-model-small-en-us-0.15.zip" 2>/dev/null || true
+        rm -f "vosk-model-small-en-us-0.15.zip"
+        cd "$SCRIPT_DIR"
+        print_success "Vosk model downloaded"
+    else
+        print_success "Vosk model already present"
+    fi
+
+    # Download Whisper model (base model for speech-to-text)
+    print_step "Pre-downloading Whisper model (this may take a moment)..."
+    python3 -c "import whisper; whisper.load_model('base')" 2>/dev/null || \
+        print_warning "Whisper model will download on first use"
+
+    print_success "Voice packages installed"
 }
 
 #===============================================================================
@@ -2036,6 +2077,54 @@ verify_startup_announcement() {
     fi
 }
 
+verify_voice_dependencies() {
+    print_step "Verifying voice dependencies..."
+
+    # Check sox
+    if command -v sox &> /dev/null; then
+        print_success "sox audio tool installed"
+    else
+        print_warning "sox not found - voice recording may not work"
+        ((VERIFY_ERRORS++))
+    fi
+
+    # Check Python whisper
+    if python3 -c "import whisper" 2>/dev/null; then
+        print_success "Whisper (speech-to-text) available"
+    else
+        print_warning "Whisper not installed - STT will use API fallback"
+    fi
+
+    # Check Vosk
+    if python3 -c "import vosk" 2>/dev/null; then
+        print_success "Vosk (wake word detection) available"
+    else
+        print_warning "Vosk not installed - wake word detection disabled"
+    fi
+
+    # Check Vosk model
+    VOSK_MODEL_DIR="$HOME/.openclaw/models/vosk/vosk-model-small-en-us-0.15"
+    if [[ -d "$VOSK_MODEL_DIR" ]]; then
+        print_success "Vosk wake word model present"
+    else
+        print_warning "Vosk model not downloaded - wake word disabled"
+    fi
+
+    # Check edge-tts
+    if python3 -c "import edge_tts" 2>/dev/null; then
+        print_success "Edge TTS (free text-to-speech) available"
+    else
+        print_warning "Edge TTS not installed - TTS will use alternatives"
+    fi
+
+    # Check elevenlabs
+    if python3 -c "import elevenlabs" 2>/dev/null; then
+        print_success "ElevenLabs SDK available"
+    else
+        print_warning "ElevenLabs not installed - premium TTS unavailable"
+    fi
+}
+
 verify_installation() {
     print_header "VERIFICATION"
 
@@ -2122,6 +2211,9 @@ verify_installation() {
     # Run startup verification
     verify_startup_announcement
 
+    # Run voice dependencies verification
+    verify_voice_dependencies
+
     echo ""
     print_header "VERIFICATION SUMMARY"
 
@@ -2162,6 +2254,7 @@ main() {
     install_homebrew
     install_system_deps
     install_python_packages
+    install_voice_packages
 
     print_header "PHASE 2: Helix Repository"
     install_helix_repo

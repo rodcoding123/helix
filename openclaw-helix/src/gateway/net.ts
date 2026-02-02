@@ -116,16 +116,20 @@ export function isLocalGatewayAddress(ip: string | undefined): boolean {
 }
 
 /**
- * Resolves gateway bind host with fallback strategy.
+ * Resolves gateway bind host with SECURE fallback strategy.
+ *
+ * SECURITY FIX (CVE-2025-59951 pattern): Fail-closed binding
+ * No automatic fallback to 0.0.0.0 when intended binding fails.
  *
  * Modes:
- * - loopback: 127.0.0.1 (rarely fails, but handled gracefully)
- * - lan: always 0.0.0.0 (no fallback)
- * - tailnet: Tailnet IPv4 if available, else loopback
- * - auto: Loopback if available, else 0.0.0.0
- * - custom: User-specified IP, fallback to 0.0.0.0 if unavailable
+ * - loopback: 127.0.0.1 (REQUIRED - fails if unavailable)
+ * - lan: 0.0.0.0 (EXPLICIT - user requested network exposure)
+ * - tailnet: Tailnet IPv4, fallback to 127.0.0.1 (NOT 0.0.0.0)
+ * - auto: 127.0.0.1, then 0.0.0.0 ONLY if explicitly enabled
+ * - custom: User-specified IP (FAILS if unavailable)
  *
  * @returns The bind address to use (never null)
+ * @throws Error if binding mode cannot be satisfied
  */
 export async function resolveGatewayBindHost(
   bind: import("../config/config.js").GatewayBindMode | undefined,
@@ -134,11 +138,15 @@ export async function resolveGatewayBindHost(
   const mode = bind ?? "loopback";
 
   if (mode === "loopback") {
-    // 127.0.0.1 rarely fails, but handle gracefully
+    // SECURITY: Loopback must succeed - fail closed if not available
     if (await canBindToHost("127.0.0.1")) {
       return "127.0.0.1";
     }
-    return "0.0.0.0"; // extreme fallback
+    throw new Error(
+      'SECURITY_ERROR: Cannot bind to loopback (127.0.0.1). ' +
+      'This is required for secure operation. ' +
+      'If you need network exposure, explicitly set bind: "lan" in config.'
+    );
   }
 
   if (mode === "tailnet") {
@@ -146,37 +154,65 @@ export async function resolveGatewayBindHost(
     if (tailnetIP && (await canBindToHost(tailnetIP))) {
       return tailnetIP;
     }
+    // SECURITY FIX: Don't fall back to 0.0.0.0, use loopback instead
     if (await canBindToHost("127.0.0.1")) {
+      console.warn(
+        '[Gateway] Tailnet IP unavailable, falling back to loopback (127.0.0.1). ' +
+        'Gateway will only be accessible locally.'
+      );
       return "127.0.0.1";
     }
-    return "0.0.0.0";
+    throw new Error(
+      'SECURITY_ERROR: Cannot bind to tailnet IP or loopback. ' +
+      'Check your network configuration.'
+    );
   }
 
   if (mode === "lan") {
+    // SECURITY: Explicit network exposure - user requested this
     return "0.0.0.0";
   }
 
   if (mode === "custom") {
     const host = customHost?.trim();
     if (!host) {
-      return "0.0.0.0";
-    } // invalid config → fall back to all
+      throw new Error(
+        'SECURITY_ERROR: Custom bind mode requires customHost to be set. ' +
+        'Refusing to fall back to 0.0.0.0 for safety.'
+      );
+    }
 
-    if (isValidIPv4(host) && (await canBindToHost(host))) {
+    if (!isValidIPv4(host)) {
+      throw new Error(
+        `SECURITY_ERROR: Custom bind host "${host}" is not a valid IPv4 address.`
+      );
+    }
+
+    if (await canBindToHost(host)) {
       return host;
     }
-    // Custom IP failed → fall back to LAN
-    return "0.0.0.0";
+
+    throw new Error(
+      `SECURITY_ERROR: Cannot bind to custom host "${host}". ` +
+      'Check that the IP address is correct and available on this system.'
+    );
   }
 
   if (mode === "auto") {
+    // SECURITY: Try loopback first (secure), only use 0.0.0.0 if explicitly configured
     if (await canBindToHost("127.0.0.1")) {
       return "127.0.0.1";
     }
-    return "0.0.0.0";
+
+    // SECURITY FIX: Don't silently expose to network
+    // User must explicitly set bind: "lan" if they want 0.0.0.0
+    throw new Error(
+      'SECURITY_ERROR: Auto mode tried loopback but it is unavailable. ' +
+      'To bind to all interfaces, explicitly set bind: "lan" in config.'
+    );
   }
 
-  return "0.0.0.0";
+  throw new Error(`SECURITY_ERROR: Unknown bind mode: ${mode}`);
 }
 
 /**

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 export function Login() {
@@ -36,105 +36,138 @@ export function Login() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12">
+    <div className="relative min-h-screen flex items-center justify-center px-4 py-12">
+      {/* Background */}
+      <div className="absolute inset-0 -z-10">
+        <div className="gradient-orb gradient-orb-blue w-[500px] h-[500px] -top-40 -right-40 opacity-30" />
+        <div className="gradient-orb gradient-orb-purple w-[400px] h-[400px] -bottom-40 -left-40 opacity-30" />
+      </div>
+
+      {/* Back to home */}
+      <Link
+        to="/"
+        className="absolute top-8 left-8 flex items-center gap-2 text-sm text-text-secondary hover:text-white transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to home
+      </Link>
+
       <div className="w-full max-w-md">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-white">Welcome Back</h1>
-          <p className="mt-2 text-slate-400">
-            Sign in to access your Helix dashboard
-          </p>
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-flex items-center gap-3">
+            <img src="/logos/helix-icon.svg" alt="Helix" className="h-10 w-auto" />
+            <span className="text-2xl font-display font-bold text-white">Helix</span>
+          </Link>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          {error && (
-            <div className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-              <AlertCircle className="h-4 w-4 shrink-0" />
-              {error}
-            </div>
-          )}
+        {/* Card */}
+        <div className="card-glass p-8">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-display font-bold text-white">Welcome Back</h1>
+            <p className="mt-2 text-text-secondary">Sign in to access your Helix dashboard</p>
+          </div>
 
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-300">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-                className="mt-1 block w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 text-white placeholder-slate-500 focus:border-helix-500 focus:outline-none focus:ring-1 focus:ring-helix-500"
-                placeholder="you@example.com"
-              />
-            </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="flex items-center gap-2 rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                {error}
+              </div>
+            )}
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-300">
-                Password
-              </label>
-              <div className="relative mt-1">
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="email" className="label">
+                  Email
+                </label>
                 <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
                   required
-                  autoComplete="current-password"
-                  className="block w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 pr-12 text-white placeholder-slate-500 focus:border-helix-500 focus:outline-none focus:ring-1 focus:ring-helix-500"
-                  placeholder="••••••••"
+                  autoComplete="email"
+                  className="input"
+                  placeholder="you@example.com"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
-                </button>
+              </div>
+
+              <div>
+                <label htmlFor="password" className="label">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    required
+                    autoComplete="current-password"
+                    className="input pr-12"
+                    placeholder="Enter your password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-white transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                className="h-4 w-4 rounded border-slate-700 bg-slate-900 text-helix-500 focus:ring-helix-500"
-              />
-              <span className="text-sm text-slate-400">Remember me</span>
-            </label>
-            <Link
-              to="/forgot-password"
-              className="text-sm text-helix-400 hover:text-helix-300"
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 rounded border-white/20 bg-bg-tertiary text-helix-500 focus:ring-helix-500/50"
+                />
+                <span className="text-sm text-text-secondary">Remember me</span>
+              </label>
+              <Link
+                to="/forgot-password"
+                className="text-sm text-helix-400 hover:text-helix-300 transition-colors"
+              >
+                Forgot password?
+              </Link>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="btn btn-cta btn-cta-shimmer w-full justify-center py-3 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Forgot password?
-            </Link>
-          </div>
+              {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Sign In'}
+            </button>
+          </form>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="btn btn-primary w-full justify-center py-3 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isLoading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              'Sign In'
-            )}
-          </button>
+          <div className="divider-gradient my-6" />
 
-          <p className="text-center text-sm text-slate-400">
+          <p className="text-center text-sm text-text-secondary">
             Don't have an account?{' '}
-            <Link to="/signup" className="text-helix-400 hover:text-helix-300">
+            <Link
+              to="/signup"
+              className="text-helix-400 hover:text-helix-300 font-medium transition-colors"
+            >
               Sign up free
             </Link>
           </p>
-        </form>
+        </div>
+
+        {/* Footer text */}
+        <p className="mt-8 text-center text-xs text-text-tertiary">
+          By signing in, you agree to our{' '}
+          <Link to="/terms" className="text-text-secondary hover:text-white transition-colors">
+            Terms of Service
+          </Link>{' '}
+          and{' '}
+          <Link to="/privacy" className="text-text-secondary hover:text-white transition-colors">
+            Privacy Policy
+          </Link>
+        </p>
       </div>
     </div>
   );

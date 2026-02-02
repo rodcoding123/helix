@@ -1,0 +1,137 @@
+.emotional-map {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.emotional-map-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.emotional-map-header p {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.emotional-map-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.emotional-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  background: var(--color-bg-tertiary);
+  border-radius: 8px;
+}
+
+.emotional-stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.emotional-stat-value.positive {
+  color: var(--color-success);
+}
+
+.emotional-stat-value.negative {
+  color: var(--color-error);
+}
+
+.emotional-stat-label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+.emotional-map-visualization {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 24px;
+  background: var(--color-bg);
+  border-radius: 8px;
+  min-height: 150px;
+  align-items: center;
+  justify-content: center;
+}
+
+.emotional-tag {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: var(--tag-size, 60px);
+  height: var(--tag-size, 60px);
+  background: transparent;
+  border: 2px solid var(--tag-color, var(--color-border));
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.emotional-tag:hover {
+  background: var(--tag-color, var(--color-border));
+  transform: scale(1.1);
+}
+
+.emotional-tag:hover .emotional-tag-label {
+  color: white;
+}
+
+.emotional-tag-icon {
+  font-size: 18px;
+}
+
+.emotional-tag-label {
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--tag-color, var(--color-text-secondary));
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-top: 2px;
+}
+
+.emotional-map-legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.legend-dot.positive {
+  background: var(--color-success);
+}
+
+.legend-dot.neutral {
+  background: var(--color-text-secondary);
+}
+
+.legend-dot.negative {
+  background: var(--color-error);
+}

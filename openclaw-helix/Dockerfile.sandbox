@@ -2,15 +2,37 @@ FROM debian:bookworm-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# SECURITY: Install minimal dependencies, remove exfiltration tools (curl, git)
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
     bash \
     ca-certificates \
-    curl \
-    git \
     jq \
     python3 \
     ripgrep \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/* \
+  && rm -f /usr/bin/curl /usr/bin/wget /usr/bin/git
+
+# SECURITY: Create non-root user with minimal privileges
+RUN groupadd -r sandbox && \
+    useradd -r -g sandbox -m -s /sbin/nologin -u 1000 sandbox && \
+    mkdir -p /home/sandbox && \
+    chown -R sandbox:sandbox /home/sandbox
+
+# SECURITY: Drop Linux capabilities that can be exploited
+# Keep only minimal set: CHOWN, DAC_OVERRIDE (for reading files), SETFCAP, SETGID, SETUID, SYS_CHROOT
+RUN setcap -r /usr/bin/python3* 2>/dev/null || true
+
+USER sandbox
+WORKDIR /home/sandbox
+
+# SECURITY: Document required runtime flags for sandboxing
+# When running this container, use:
+# docker run --cap-drop=ALL --security-opt=no-new-privileges:true \
+#   --read-only --tmpfs /tmp:rw,noexec,nosuid,size=64m \
+#   --tmpfs /home/sandbox:rw,noexec,nosuid,size=256m \
+#   --network=none --memory=256m --pids-limit=50 \
+#   --user 1000:1000 \
+#   helix-sandbox:latest
 
 CMD ["sleep", "infinity"]

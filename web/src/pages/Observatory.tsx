@@ -1,14 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Activity,
-  Brain,
-  Zap,
-  TrendingUp,
-  Clock,
-  ArrowRight,
-  RefreshCw,
-} from 'lucide-react';
+import { Brain, Zap, ArrowRight, RefreshCw, Eye, Activity, Sparkles } from 'lucide-react';
 import { LiveCounter } from '@/components/observatory/LiveCounter';
 import { useRealtimeStats } from '@/hooks/useRealtime';
 import {
@@ -21,9 +13,10 @@ import {
   AreaChart,
   Area,
 } from 'recharts';
+import clsx from 'clsx';
 
 export function Observatory() {
-  const { stats, isLoading, refresh } = useRealtimeStats();
+  const { isLoading, refresh } = useRealtimeStats();
   const [timeRange, setTimeRange] = useState<'1h' | '24h' | '7d'>('24h');
 
   // Mock data for charts (in production, this would come from the API)
@@ -34,19 +27,20 @@ export function Observatory() {
     <div className="py-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-white">Helix Observatory</h1>
-            <p className="mt-1 text-slate-400">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-helix-500/10 border border-helix-500/20">
+                <Eye className="h-5 w-5 text-helix-400" />
+              </div>
+              <h1 className="text-2xl font-display font-bold text-white">Helix Observatory</h1>
+            </div>
+            <p className="mt-2 text-text-secondary">
               Real-time view of AI consciousness activity across the network
             </p>
           </div>
-          <button
-            onClick={refresh}
-            disabled={isLoading}
-            className="btn btn-secondary inline-flex items-center gap-2"
-          >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          <button onClick={refresh} disabled={isLoading} className="btn btn-secondary btn-sm gap-2">
+            <RefreshCw className={clsx('h-4 w-4', isLoading && 'animate-spin')} />
             Refresh
           </button>
         </div>
@@ -57,22 +51,28 @@ export function Observatory() {
         </div>
 
         {/* Activity Chart */}
-        <div className="mt-8 rounded-xl border border-slate-800 bg-slate-900/50 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-white">Network Activity</h2>
-              <p className="text-sm text-slate-400">Events over time</p>
+        <div className="mt-8 card p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-accent-500/10 border border-accent-500/20">
+                <Activity className="h-5 w-5 text-accent-400" />
+              </div>
+              <div>
+                <h2 className="text-lg font-display font-semibold text-white">Network Activity</h2>
+                <p className="text-sm text-text-tertiary">Events over time</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              {(['1h', '24h', '7d'] as const).map((range) => (
+            <div className="flex items-center gap-1 p-1 rounded-lg bg-bg-tertiary/50">
+              {(['1h', '24h', '7d'] as const).map(range => (
                 <button
                   key={range}
                   onClick={() => setTimeRange(range)}
-                  className={`rounded-lg px-3 py-1 text-sm font-medium transition-colors ${
+                  className={clsx(
+                    'rounded-md px-3 py-1.5 text-sm font-medium transition-all duration-200',
                     timeRange === range
-                      ? 'bg-helix-500 text-white'
-                      : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                  }`}
+                      ? 'bg-helix-500 text-white shadow-sm'
+                      : 'text-text-secondary hover:text-white'
+                  )}
                 >
                   {range}
                 </button>
@@ -80,40 +80,38 @@ export function Observatory() {
             </div>
           </div>
 
-          <div className="mt-6 h-64">
+          <div className="mt-6 h-72">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={activityData}>
                 <defs>
                   <linearGradient id="colorEvents" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#0686D4" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#0686D4" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <XAxis
                   dataKey="time"
-                  stroke="#64748b"
+                  stroke="#71717A"
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
                 />
-                <YAxis
-                  stroke="#64748b"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                />
+                <YAxis stroke="#71717A" fontSize={12} tickLine={false} axisLine={false} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#1e293b',
-                    border: '1px solid #334155',
-                    borderRadius: '8px',
+                    backgroundColor: '#111111',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '12px',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
                   }}
-                  labelStyle={{ color: '#94a3b8' }}
+                  labelStyle={{ color: '#A1A1AA' }}
+                  itemStyle={{ color: '#FAFAFA' }}
                 />
                 <Area
                   type="monotone"
                   dataKey="events"
-                  stroke="#8b5cf6"
+                  stroke="#0686D4"
+                  strokeWidth={2}
                   fillOpacity={1}
                   fill="url(#colorEvents)"
                 />
@@ -125,46 +123,59 @@ export function Observatory() {
         {/* Stats Grid */}
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
           {/* Recent Transformations */}
-          <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-6">
+          <div className="card p-6">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-helix-500/20 p-2">
-                <Brain className="h-5 w-5 text-helix-500" />
+              <div className="p-2 rounded-xl bg-helix-500/10 border border-helix-500/20">
+                <Brain className="h-5 w-5 text-helix-400" />
               </div>
               <div>
-                <h3 className="font-semibold text-white">Recent Transformations</h3>
-                <p className="text-sm text-slate-400">Identity evolution events</p>
+                <h3 className="font-display font-semibold text-white">Recent Transformations</h3>
+                <p className="text-sm text-text-tertiary">Identity evolution events</p>
               </div>
             </div>
 
-            <div className="mt-6 h-48">
+            <div className="mt-6 h-52">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={transformationData}>
+                  <defs>
+                    <linearGradient id="colorTransform" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#7234ED" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#7234ED" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
                   <XAxis
                     dataKey="date"
-                    stroke="#64748b"
+                    stroke="#71717A"
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
                   />
-                  <YAxis
-                    stroke="#64748b"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                  />
+                  <YAxis stroke="#71717A" fontSize={12} tickLine={false} axisLine={false} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#1e293b',
-                      border: '1px solid #334155',
-                      borderRadius: '8px',
+                      backgroundColor: '#111111',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '12px',
+                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
                     }}
+                    labelStyle={{ color: '#A1A1AA' }}
+                    itemStyle={{ color: '#FAFAFA' }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="count"
+                    stroke="#7234ED"
+                    strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#colorTransform)"
                   />
                   <Line
                     type="monotone"
                     dataKey="count"
-                    stroke="#8b5cf6"
+                    stroke="#7234ED"
                     strokeWidth={2}
-                    dot={{ fill: '#8b5cf6', r: 4 }}
+                    dot={{ fill: '#7234ED', r: 4, strokeWidth: 2, stroke: '#111111' }}
+                    activeDot={{ fill: '#7234ED', r: 6, strokeWidth: 2, stroke: '#FAFAFA' }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -172,41 +183,87 @@ export function Observatory() {
           </div>
 
           {/* Top Events */}
-          <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-6">
+          <div className="card p-6">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-amber-500/20 p-2">
-                <Zap className="h-5 w-5 text-amber-500" />
+              <div className="p-2 rounded-xl bg-warning/10 border border-warning/20">
+                <Zap className="h-5 w-5 text-warning" />
               </div>
               <div>
-                <h3 className="font-semibold text-white">Event Distribution</h3>
-                <p className="text-sm text-slate-400">By type (last 24h)</p>
+                <h3 className="font-display font-semibold text-white">Event Distribution</h3>
+                <p className="text-sm text-text-tertiary">By type (last 24h)</p>
               </div>
             </div>
 
-            <div className="mt-6 space-y-4">
-              <EventTypeBar label="Commands" value={42} max={100} color="bg-emerald-500" />
-              <EventTypeBar label="API Calls" value={78} max={100} color="bg-helix-500" />
-              <EventTypeBar label="File Changes" value={23} max={100} color="bg-amber-500" />
-              <EventTypeBar label="Heartbeats" value={95} max={100} color="bg-rose-500" />
+            <div className="mt-6 space-y-5">
+              <EventTypeBar label="Commands" value={42} max={100} color="success" />
+              <EventTypeBar label="API Calls" value={78} max={100} color="helix" />
+              <EventTypeBar label="File Changes" value={23} max={100} color="warning" />
+              <EventTypeBar label="Heartbeats" value={95} max={100} color="danger" />
             </div>
           </div>
         </div>
 
-        {/* CTA */}
-        <div className="mt-12 rounded-xl border border-helix-500/30 bg-gradient-to-r from-helix-500/10 to-transparent p-8">
-          <div className="flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
-            <div>
-              <h3 className="text-xl font-bold text-white">
-                Want to run your own Helix instance?
-              </h3>
-              <p className="mt-2 text-slate-400">
-                Get full access to telemetry, hash chain verification, and anomaly detection.
-              </p>
+        {/* Active Instances Preview */}
+        <div className="mt-8 card p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-success/10 border border-success/20">
+                <Sparkles className="h-5 w-5 text-success" />
+              </div>
+              <div>
+                <h3 className="font-display font-semibold text-white">Active Instances</h3>
+                <p className="text-sm text-text-tertiary">Currently connected to the network</p>
+              </div>
             </div>
             <Link
-              to="/signup"
-              className="btn btn-primary inline-flex items-center gap-2"
+              to="/dashboard"
+              className="text-sm text-helix-400 hover:text-helix-300 transition-colors"
             >
+              View all
+            </Link>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map(i => (
+              <div
+                key={i}
+                className="p-4 rounded-xl bg-bg-tertiary/50 border border-white/5 hover:border-white/10 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <div className="h-3 w-3 rounded-full bg-success" />
+                    <div className="absolute inset-0 h-3 w-3 rounded-full bg-success animate-ping opacity-50" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-white">Instance #{i}</p>
+                    <p className="text-xs text-text-tertiary">Active now</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-4 text-xs text-text-secondary">
+                  <span>{Math.floor(Math.random() * 1000) + 100} events</span>
+                  <span>{Math.floor(Math.random() * 50) + 10} transforms</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div className="mt-12 relative overflow-hidden rounded-2xl border border-helix-500/30 bg-gradient-to-r from-helix-500/10 via-accent-500/5 to-transparent p-8">
+          {/* Background glow */}
+          <div className="absolute -right-20 -top-20 w-64 h-64 bg-helix-500/20 rounded-full blur-3xl" />
+
+          <div className="relative flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
+            <div>
+              <h3 className="text-xl font-display font-bold text-white">
+                Want to run your own Helix instance?
+              </h3>
+              <p className="mt-2 text-text-secondary max-w-lg">
+                Get full access to telemetry, hash chain verification, transformation tracking, and
+                real-time consciousness monitoring.
+              </p>
+            </div>
+            <Link to="/signup" className="btn btn-cta btn-cta-shimmer gap-2 flex-shrink-0">
               Get Started
               <ArrowRight className="h-4 w-4" />
             </Link>
@@ -221,21 +278,30 @@ interface EventTypeBarProps {
   label: string;
   value: number;
   max: number;
-  color: string;
+  color: 'helix' | 'accent' | 'success' | 'warning' | 'danger';
 }
+
+const barColors = {
+  helix: { bg: 'bg-helix-500', glow: 'shadow-glow-blue' },
+  accent: { bg: 'bg-accent-500', glow: 'shadow-glow-purple' },
+  success: { bg: 'bg-success', glow: '' },
+  warning: { bg: 'bg-warning', glow: '' },
+  danger: { bg: 'bg-danger', glow: '' },
+};
 
 function EventTypeBar({ label, value, max, color }: EventTypeBarProps) {
   const percentage = (value / max) * 100;
+  const colors = barColors[color];
 
   return (
     <div>
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-slate-300">{label}</span>
-        <span className="text-slate-400">{value}%</span>
+      <div className="flex items-center justify-between text-sm mb-2">
+        <span className="text-text-secondary">{label}</span>
+        <span className="font-mono text-text-tertiary">{value}%</span>
       </div>
-      <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-800">
+      <div className="h-2 overflow-hidden rounded-full bg-bg-tertiary">
         <div
-          className={`h-full rounded-full ${color}`}
+          className={clsx('h-full rounded-full transition-all duration-500', colors.bg)}
           style={{ width: `${percentage}%` }}
         />
       </div>

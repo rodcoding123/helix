@@ -20,10 +20,10 @@ struct StatusPill: View {
 
         var color: Color {
             switch self {
-            case .connected: .green
-            case .connecting: .yellow
-            case .error: .red
-            case .disconnected: .gray
+            case .connected: .statusSuccess
+            case .connecting: .statusWarning
+            case .error: .statusDanger
+            case .disconnected: .textTertiary
             }
         }
     }
@@ -48,48 +48,48 @@ struct StatusPill: View {
                 HStack(spacing: 8) {
                     Circle()
                         .fill(self.gateway.color)
-                        .frame(width: 9, height: 9)
+                        .frame(width: 8, height: 8)
                         .scaleEffect(self.gateway == .connecting ? (self.pulse ? 1.15 : 0.85) : 1.0)
                         .opacity(self.gateway == .connecting ? (self.pulse ? 1.0 : 0.6) : 1.0)
 
                     Text(self.gateway.title)
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(.textPrimary)
                 }
 
                 Divider()
                     .frame(height: 14)
-                    .opacity(0.35)
+                    .opacity(0.25)
 
                 if let activity {
                     HStack(spacing: 6) {
                         Image(systemName: activity.systemImage)
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(activity.tint ?? .primary)
+                            .foregroundStyle(activity.tint ?? .helixBlue)
                         Text(activity.title)
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(.textSecondary)
                             .lineLimit(1)
                     }
                     .transition(.opacity.combined(with: .move(edge: .top)))
                 } else {
                     Image(systemName: self.voiceWakeEnabled ? "mic.fill" : "mic.slash")
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(self.voiceWakeEnabled ? .primary : .secondary)
+                        .foregroundStyle(self.voiceWakeEnabled ? .helixBlue : .textTertiary)
                         .accessibilityLabel(self.voiceWakeEnabled ? "Voice Wake enabled" : "Voice Wake disabled")
                         .transition(.opacity.combined(with: .move(edge: .top)))
                 }
             }
-            .padding(.vertical, 8)
-            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .padding(.horizontal, 14)
             .background {
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(.ultraThinMaterial)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color.bgSecondary.opacity(0.95))
                     .overlay {
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .strokeBorder(.white.opacity(self.brighten ? 0.24 : 0.18), lineWidth: 0.5)
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .strokeBorder(.white.opacity(self.brighten ? 0.15 : 0.08), lineWidth: 0.5)
                     }
-                    .shadow(color: .black.opacity(0.25), radius: 12, y: 6)
+                    .shadow(color: .black.opacity(0.3), radius: 12, y: 6)
             }
         }
         .buttonStyle(.plain)

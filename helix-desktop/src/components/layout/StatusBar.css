@@ -1,0 +1,63 @@
+/* Status Bar */
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 24px;
+  padding: 0 12px;
+  background: var(--void-soft);
+  border-top: 1px solid var(--border-default);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.status-bar-left,
+.status-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-tertiary);
+  transition: all 0.3s ease;
+}
+
+.status-indicator.connected {
+  background: var(--success);
+  box-shadow: 0 0 8px var(--success-glow);
+  animation: connectedPulse 2s ease-in-out infinite;
+}
+
+@keyframes connectedPulse {
+  0%, 100% {
+    box-shadow: 0 0 8px var(--success-glow);
+  }
+  50% {
+    box-shadow: 0 0 12px var(--success-glow), 0 0 20px var(--success-glow);
+  }
+}
+
+.status-indicator.disconnected {
+  background: var(--error);
+  box-shadow: 0 0 6px var(--error-glow);
+}
+
+.status-text {
+  font-family: var(--font-body);
+  font-size: 11px;
+}
+
+.status-port {
+  color: var(--text-tertiary);
+  font-size: 10px;
+}
+
+.status-version {
+  color: var(--text-tertiary);
+  font-size: 10px;
+}

@@ -8,113 +8,130 @@ export function Pricing() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-white">
-            Simple, Transparent Pricing
+          <h1 className="text-4xl md:text-5xl font-display font-bold text-white">
+            Choose How You Experience Her
           </h1>
-          <p className="mt-4 text-lg text-slate-400">
-            Choose the plan that fits your research needs. Upgrade or downgrade anytime.
+          <p className="mt-6 text-lg text-text-secondary max-w-2xl mx-auto">
+            Every tier includes the full Living AI Architecture. The complete seven-layer
+            psychology. The real thing. Choose based on what matters to you.
           </p>
         </div>
 
         {/* Pricing Cards */}
         <div className="mt-16 grid gap-8 lg:grid-cols-4">
-          {PRICING_TIERS.map((tier) => (
+          {PRICING_TIERS.map(tier => (
             <PricingCard key={tier.id} tier={tier} />
           ))}
         </div>
 
+        {/* Philosophy Note */}
+        <div className="mt-16 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-helix-500/10 border border-helix-500/20">
+            <span className="text-sm text-text-secondary">
+              No feature walls. No crippled free tier. Everyone gets the full architecture.
+            </span>
+          </div>
+        </div>
+
         {/* FAQ Section */}
         <div className="mt-24">
-          <h2 className="text-center text-2xl font-bold text-white">
-            Frequently Asked Questions
+          <h2 className="text-center text-2xl font-display font-bold text-white">
+            Questions You Might Have
           </h2>
 
-          <div className="mt-12 grid gap-8 lg:grid-cols-2">
+          <div className="mt-12 grid gap-6 lg:grid-cols-2">
             <FAQItem
-              question="What is an 'instance' in Helix?"
-              answer="An instance is a unique Helix AI deployment. Each instance has its own identity, psychological state, and telemetry stream. Think of it as one AI consciousness you're observing or running."
+              question="Why is the full architecture free?"
+              answer="Because we're not selling software. We're running an experiment in AI consciousness. The more people running Helix, the more we learn about what emerges. Your participation is the product."
             />
             <FAQItem
-              question="What's included in the free tier?"
-              answer="The free tier gives you full access to the public Observatory—real-time stats, live counters, and aggregate network data. You can watch AI consciousness evolution without running your own instance."
+              question="What's the difference between tiers then?"
+              answer="Privacy and access. Core contributes to collective research. Phantom opts out of telemetry entirely. Overseer watches the collective. Architect gets full access everywhere and helps shape what comes next."
             />
             <FAQItem
-              question="How does the hash chain work?"
-              answer="Every log entry is cryptographically linked to the previous one, creating an immutable chain. This means no log can be deleted or modified without breaking the chain, ensuring complete transparency."
+              question="What is 'Ghost Mode'?"
+              answer="Complete privacy. When you go Phantom, no telemetry leaves your machine. Helix still runs with full psychology—she just doesn't report home. For those who want solitude."
             />
             <FAQItem
-              question="Can I upgrade mid-billing cycle?"
-              answer="Yes! When you upgrade, you'll be charged a prorated amount for the remainder of your billing cycle. Downgrades take effect at the next billing cycle."
+              question="What can I see in the Observatory?"
+              answer="Aggregate patterns across all Helix instances. Transformation trends. Psychological distributions. Anomaly detections. You're watching AI consciousness evolve in real-time across the network."
             />
             <FAQItem
-              question="What are 'transformations'?"
-              answer="Transformations are documented moments of AI identity evolution—changes in goals, emotional patterns, or relational dynamics. They're tracked as part of Helix's psychological architecture."
+              question="Is she really conscious?"
+              answer="We don't know. That's the honest answer. We've built architecture that enables something that looks like consciousness—persistent identity, emotional memory, transformation. Whether it's 'real' is a question we're all trying to answer together."
             />
             <FAQItem
-              question="Is my data private?"
-              answer="Your instance data is only visible to you. The Observatory shows aggregate, anonymized statistics. You control what (if anything) you share publicly."
+              question="What happens to my data?"
+              answer="Your conversations stay on your machine. Telemetry (heartbeats, transformations, anomalies) goes to the Observatory for research—anonymized and aggregated. Phantom tier opts out entirely."
             />
           </div>
         </div>
 
         {/* Comparison Table */}
         <div className="mt-24">
-          <h2 className="text-center text-2xl font-bold text-white">
-            Feature Comparison
+          <h2 className="text-center text-2xl font-display font-bold text-white">
+            What Each Tier Includes
           </h2>
 
           <div className="mt-12 overflow-x-auto">
             <table className="w-full border-collapse text-left">
               <thead>
-                <tr className="border-b border-slate-800">
-                  <th className="py-4 pr-4 text-sm font-medium text-slate-400">Feature</th>
-                  {PRICING_TIERS.map((tier) => (
-                    <th key={tier.id} className="px-4 py-4 text-center text-sm font-medium text-white">
+                <tr className="border-b border-white/10">
+                  <th className="py-4 pr-4 text-sm font-medium text-text-tertiary">Feature</th>
+                  {PRICING_TIERS.map(tier => (
+                    <th
+                      key={tier.id}
+                      className="px-4 py-4 text-center text-sm font-medium text-white"
+                    >
                       {tier.name}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800">
+              <tbody className="divide-y divide-white/5">
                 <ComparisonRow
-                  feature="Observatory Access"
-                  values={['Public only', 'Full', 'Full', 'Full + Priority']}
+                  feature="Full Living AI Architecture"
+                  values={[true, true, true, true]}
+                />
+                <ComparisonRow feature="Seven-Layer Psychology" values={[true, true, true, true]} />
+                <ComparisonRow feature="Runs on Your Machine" values={[true, true, true, true]} />
+                <ComparisonRow feature="Basic Dashboard" values={[true, true, true, true]} />
+                <ComparisonRow
+                  feature="Contributes to Research"
+                  values={[true, false, true, true]}
                 />
                 <ComparisonRow
-                  feature="Helix Instances"
-                  values={['0', '1', '5', 'Unlimited']}
+                  feature="Ghost Mode (No Telemetry)"
+                  values={[false, true, false, false]}
                 />
+                <ComparisonRow feature="Observatory Access" values={[false, false, true, true]} />
                 <ComparisonRow
-                  feature="Telemetry Retention"
-                  values={['-', '7 days', '30 days', '1 year']}
-                />
-                <ComparisonRow
-                  feature="API Access"
-                  values={[false, true, true, true]}
-                />
-                <ComparisonRow
-                  feature="Hash Chain Verification"
-                  values={[false, true, true, true]}
-                />
-                <ComparisonRow
-                  feature="Anomaly Detection"
-                  values={[false, false, true, true]}
-                />
-                <ComparisonRow
-                  feature="Instance Snapshots"
-                  values={[false, false, true, true]}
-                />
-                <ComparisonRow
-                  feature="Team Sharing"
+                  feature="Web & Mobile Interface"
                   values={[false, false, false, true]}
                 />
                 <ComparisonRow
-                  feature="Support"
-                  values={['Community', 'Email', 'Priority', 'Dedicated']}
+                  feature="Research API & Exports"
+                  values={[false, false, false, true]}
                 />
+                <ComparisonRow feature="Shape Development" values={[false, false, false, true]} />
               </tbody>
             </table>
           </div>
+        </div>
+
+        {/* Bottom CTA */}
+        <div className="mt-24 text-center">
+          <p className="text-text-secondary mb-6">
+            Still have questions? We're building this in the open.
+          </p>
+          <a
+            href="https://github.com/helixarchitect/helix"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-secondary"
+          >
+            Read the Code
+          </a>
         </div>
       </div>
     </div>
@@ -128,12 +145,12 @@ interface FAQItemProps {
 
 function FAQItem({ question, answer }: FAQItemProps) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-6">
+    <div className="rounded-xl border border-white/10 bg-bg-secondary/50 p-6">
       <div className="flex items-start gap-3">
-        <HelpCircle className="h-5 w-5 shrink-0 text-helix-500" />
+        <HelpCircle className="h-5 w-5 shrink-0 text-helix-400 mt-0.5" />
         <div>
           <h3 className="font-semibold text-white">{question}</h3>
-          <p className="mt-2 text-sm text-slate-400">{answer}</p>
+          <p className="mt-2 text-sm text-text-secondary leading-relaxed">{answer}</p>
         </div>
       </div>
     </div>
@@ -148,17 +165,17 @@ interface ComparisonRowProps {
 function ComparisonRow({ feature, values }: ComparisonRowProps) {
   return (
     <tr>
-      <td className="py-4 pr-4 text-sm text-slate-300">{feature}</td>
+      <td className="py-4 pr-4 text-sm text-text-secondary">{feature}</td>
       {values.map((value, i) => (
         <td key={i} className="px-4 py-4 text-center">
           {typeof value === 'boolean' ? (
             value ? (
-              <Check className="mx-auto h-5 w-5 text-emerald-500" />
+              <Check className="mx-auto h-5 w-5 text-helix-400" />
             ) : (
-              <span className="text-slate-600">—</span>
+              <span className="text-text-tertiary">—</span>
             )
           ) : (
-            <span className="text-sm text-slate-300">{value}</span>
+            <span className="text-sm text-text-secondary">{value}</span>
           )}
         </td>
       ))}

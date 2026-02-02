@@ -35,19 +35,19 @@ fun StatusPill(
   Surface(
     onClick = onClick,
     modifier = modifier,
-    shape = RoundedCornerShape(14.dp),
+    shape = RoundedCornerShape(16.dp),
     color = overlayContainerColor(),
-    tonalElevation = 3.dp,
+    tonalElevation = 2.dp,
     shadowElevation = 0.dp,
   ) {
     Row(
-      modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+      modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
       horizontalArrangement = Arrangement.spacedBy(10.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
       Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         Surface(
-          modifier = Modifier.size(9.dp),
+          modifier = Modifier.size(8.dp),
           shape = CircleShape,
           color = gateway.color,
         ) {}
@@ -55,12 +55,13 @@ fun StatusPill(
         Text(
           text = gateway.title,
           style = MaterialTheme.typography.labelLarge,
+          color = HelixColors.TextPrimary,
         )
       }
 
       VerticalDivider(
-        modifier = Modifier.height(14.dp).alpha(0.35f),
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.height(14.dp).alpha(0.25f),
+        color = HelixColors.TextTertiary,
       )
 
       if (activity != null) {
@@ -77,6 +78,7 @@ fun StatusPill(
           Text(
             text = activity.title,
             style = MaterialTheme.typography.labelLarge,
+            color = HelixColors.TextSecondary,
             maxLines = 1,
           )
         }
@@ -86,9 +88,9 @@ fun StatusPill(
           contentDescription = if (voiceEnabled) "Voice enabled" else "Voice disabled",
           tint =
             if (voiceEnabled) {
-              overlayIconColor()
+              HelixColors.HelixBlue
             } else {
-              MaterialTheme.colorScheme.onSurfaceVariant
+              HelixColors.TextTertiary
             },
           modifier = Modifier.size(18.dp),
         )
@@ -107,8 +109,8 @@ data class StatusActivity(
 )
 
 enum class GatewayState(val title: String, val color: Color) {
-  Connected("Connected", Color(0xFF2ECC71)),
-  Connecting("Connecting…", Color(0xFFF1C40F)),
-  Error("Error", Color(0xFFE74C3C)),
-  Disconnected("Offline", Color(0xFF9E9E9E)),
+  Connected("Connected", StatusColors.Connected),
+  Connecting("Connecting…", StatusColors.Connecting),
+  Error("Error", StatusColors.Error),
+  Disconnected("Offline", StatusColors.Disconnected),
 }

@@ -5,7 +5,8 @@
       "mcp__sequential-thinking__*",
       "mcp__plugin_playwright_playwright__*",
       "Read(c:/Users/Specter/Desktop/Helix/**)",
-      "Read(C:/laragon/www/Gehenna/**)"
+      ,
+      "Bash(git ls-tree:*)"
     ]
   },
   "contextInclude": ["c:/Users/Specter/Desktop/Helix"]

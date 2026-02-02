@@ -450,7 +450,15 @@ export async function startCanvasHost(opts: CanvasHostServerOpts): Promise<Canva
     }));
   const ownsHandler = opts.ownsHandler ?? opts.handler === undefined;
 
-  const bindHost = opts.listenHost?.trim() || "0.0.0.0";
+  // SECURITY FIX (CVE-2025-59951 pattern): Default to loopback, not all interfaces
+  const bindHost = opts.listenHost?.trim() || "127.0.0.1";
+  if (bindHost === "0.0.0.0") {
+    opts.runtime.warn(
+      'Canvas host binding to all interfaces (0.0.0.0). ' +
+      'Ensure firewall protection is enabled. ' +
+      'For local access, consider using 127.0.0.1 instead.'
+    );
+  }
   const server: Server = http.createServer((req, res) => {
     if (String(req.headers.upgrade ?? "").toLowerCase() === "websocket") {
       return;

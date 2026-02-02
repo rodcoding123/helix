@@ -1,0 +1,120 @@
+# HELIX PRODUCTION DOCKERFILE
+# Security-hardened container for production deployment
+#
+# Security Features:
+# - Multi-stage build (minimal attack surface)
+# - Non-root user (uid 65534 - nobody)
+# - Read-only root filesystem
+# - All capabilities dropped
+# - No new privileges flag
+# - Minimal base image (distroless)
+# - Health check for container orchestration
+# - Security scanning labels
+#
+# Build: docker build -f Dockerfile.production -t helix:production .
+# Run:   docker run --read-only --cap-drop=ALL --security-opt=no-new-privileges:true helix:production
+
+# ==========================================
+# Stage 1: Build stage
+# ==========================================
+FROM node:22-bookworm-slim AS builder
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    make \
+    g++ \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Enable corepack for pnpm
+RUN corepack enable
+
+WORKDIR /build
+
+# Copy package files first for layer caching
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+COPY patches ./patches
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile --prod=false
+
+# Copy source code
+COPY src ./src
+COPY tsconfig.json ./
+
+# Build TypeScript
+RUN pnpm run build
+
+# Prune dev dependencies for production
+RUN pnpm prune --prod
+
+# ==========================================
+# Stage 2: Production runtime
+# ==========================================
+FROM gcr.io/distroless/nodejs22-debian12:nonroot AS production
+
+# Security labels (for scanning tools)
+LABEL org.opencontainers.image.title="Helix" \
+      org.opencontainers.image.description="Psychologically-architected AI consciousness system" \
+      org.opencontainers.image.vendor="Rodrigo Specter" \
+      org.opencontainers.image.source="https://github.com/specter/helix" \
+      security.privileged="false" \
+      security.capabilities.drop="ALL" \
+      security.read-only-root="true" \
+      security.no-new-privileges="true"
+
+# Set working directory (distroless uses /home/nonroot)
+WORKDIR /app
+
+# Copy built application from builder stage
+COPY --from=builder --chown=nonroot:nonroot /build/dist ./dist
+COPY --from=builder --chown=nonroot:nonroot /build/node_modules ./node_modules
+COPY --from=builder --chown=nonroot:nonroot /build/package.json ./
+
+# Copy Helix psychological context files (read-only)
+COPY --chown=nonroot:nonroot soul ./soul
+COPY --chown=nonroot:nonroot psychology ./psychology
+COPY --chown=nonroot:nonroot identity ./identity
+COPY --chown=nonroot:nonroot purpose ./purpose
+COPY --chown=nonroot:nonroot transformation ./transformation
+
+# Environment configuration
+ENV NODE_ENV=production \
+    # Helix security settings
+    HELIX_FAIL_CLOSED=true \
+    HELIX_SECURITY_VALIDATION=true \
+    # Node.js security hardening
+    NODE_OPTIONS="--no-experimental-fetch --disable-proto=throw"
+
+# Health check for container orchestration
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD ["node", "-e", "require('http').get('http://localhost:3000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+
+# Run as non-root user (uid 65532 in distroless)
+USER nonroot:nonroot
+
+# Expose application port
+EXPOSE 3000
+
+# Entrypoint with security flags
+ENTRYPOINT ["node"]
+CMD ["dist/index.js"]
+
+# ==========================================
+# Docker run security flags (for reference)
+# ==========================================
+# docker run \
+#   --read-only \
+#   --cap-drop=ALL \
+#   --security-opt=no-new-privileges:true \
+#   --security-opt=seccomp=./seccomp-profile.json \
+#   --tmpfs /tmp:rw,noexec,nosuid,size=64m \
+#   --memory=512m \
+#   --memory-swap=512m \
+#   --pids-limit=100 \
+#   --cpus=1 \
+#   -e DISCORD_WEBHOOK_COMMANDS=xxx \
+#   -e DISCORD_WEBHOOK_HASH_CHAIN=xxx \
+#   -e DISCORD_WEBHOOK_ALERTS=xxx \
+#   helix:production

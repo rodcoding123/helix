@@ -1,0 +1,231 @@
+/**
+ * Chat Interface - Immersive Consciousness Experience
+ *
+ * Aesthetic: Deep void with organic aurora flows, glass morphism,
+ * and dramatic visual hierarchy that feels like interfacing
+ * with a living consciousness rather than a chat window.
+ */
+
+.chat-interface {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--void);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Aurora Background Effect */
+.chat-interface::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(6, 134, 212, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 80% 20%, rgba(114, 52, 237, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 30% at 20% 80%, rgba(22, 192, 207, 0.04) 0%, transparent 50%);
+  pointer-events: none;
+  animation: auroraShift 20s ease-in-out infinite;
+}
+
+@keyframes auroraShift {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+/* Messages Area */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  padding: var(--space-lg) var(--space-xl);
+  position: relative;
+  z-index: 1;
+}
+
+/* Elegant Scrollbar */
+.chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--helix-blue), var(--accent-purple));
+  border-radius: 3px;
+  opacity: 0.5;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  opacity: 1;
+}
+
+/* Input Container - Floating Glass Effect */
+.chat-input-container {
+  position: relative;
+  z-index: 2;
+  padding: var(--space-md) var(--space-xl) var(--space-lg);
+  background: linear-gradient(180deg, transparent 0%, rgba(5, 5, 5, 0.95) 30%);
+}
+
+.chat-input-container::before {
+  content: '';
+  position: absolute;
+  left: var(--space-xl);
+  right: var(--space-xl);
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(6, 134, 212, 0.3) 20%,
+    rgba(114, 52, 237, 0.3) 50%,
+    rgba(22, 192, 207, 0.3) 80%,
+    transparent
+  );
+}
+
+/* Loading States */
+.chat-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: var(--void);
+}
+
+.chat-loading-content {
+  text-align: center;
+  color: var(--text-secondary);
+  max-width: 300px;
+}
+
+.chat-loading-content .spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--void-lighter);
+  border-top-color: var(--helix-blue);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1.5rem;
+  box-shadow: 0 0 20px var(--helix-blue-glow);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.chat-loading-content h2 {
+  font-family: var(--font-display);
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  background: var(--gradient-helix);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.chat-loading-content p {
+  font-size: 0.875rem;
+  color: var(--text-tertiary);
+}
+
+/* Disconnected Banner - Elegant Warning */
+.disconnected-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-xl);
+  background: linear-gradient(135deg,
+    rgba(245, 158, 11, 0.1),
+    rgba(239, 68, 68, 0.05)
+  );
+  border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+  position: relative;
+  z-index: 3;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.disconnected-banner::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--warning), var(--error));
+}
+
+.disconnected-icon {
+  font-size: 1.125rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.disconnected-text {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--warning);
+  letter-spacing: 0.02em;
+}
+
+.disconnected-hint {
+  font-size: 0.8125rem;
+  color: var(--text-tertiary);
+  margin-left: auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .chat-messages {
+    padding: var(--space-md);
+  }
+
+  .chat-input-container {
+    padding: var(--space-sm) var(--space-md) var(--space-md);
+  }
+
+  .disconnected-banner {
+    padding: var(--space-sm) var(--space-md);
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  .disconnected-hint {
+    width: 100%;
+    margin-left: 0;
+    padding-left: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-messages {
+    padding: var(--space-sm);
+  }
+}

@@ -5,6 +5,7 @@ import type { LiveStats } from '@/lib/types';
 interface UseRealtimeReturn {
   stats: LiveStats | null;
   loading: boolean;
+  isLoading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
 }
@@ -40,7 +41,11 @@ export function useRealtime(pollInterval = 30000): UseRealtimeReturn {
   return {
     stats,
     loading,
+    isLoading: loading,
     error,
     refresh: fetchStats,
   };
 }
+
+// Alias for backwards compatibility
+export const useRealtimeStats = useRealtime;

@@ -5,7 +5,7 @@ import SwiftUI
 struct ChatSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel: OpenClawChatViewModel
-    private let userAccent: Color?
+    private let userAccent: Color
 
     init(gateway: GatewayNodeSession, sessionKey: String, userAccent: Color? = nil) {
         let transport = IOSGatewayChatTransport(gateway: gateway)
@@ -13,7 +13,7 @@ struct ChatSheet: View {
             initialValue: OpenClawChatViewModel(
                 sessionKey: sessionKey,
                 transport: transport))
-        self.userAccent = userAccent
+        self.userAccent = userAccent ?? .helixBlue
     }
 
     var body: some View {
@@ -30,10 +30,14 @@ struct ChatSheet: View {
                             self.dismiss()
                         } label: {
                             Image(systemName: "xmark")
+                                .foregroundStyle(.textSecondary)
                         }
                         .accessibilityLabel("Close")
                     }
                 }
+                .toolbarBackground(.bgSecondary.opacity(0.9), for: .navigationBar)
+                .toolbarBackground(.visible, for: .navigationBar)
         }
+        .tint(.helixBlue)
     }
 }

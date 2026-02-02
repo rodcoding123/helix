@@ -32,7 +32,7 @@ export type {
   HelixContextFile,
 } from "./types.js";
 
-export { HELIX_LAYER_FILES } from "./types.js";
+export { HELIX_LAYER_FILES, HelixSecurityError, SECURITY_ERROR_CODES } from "./types.js";
 
 // Re-export telemetry types
 export type {
@@ -45,8 +45,15 @@ export type {
 
 export { DEFAULT_TELEMETRY_CONFIG, NEVER_TRANSMITTED } from "./telemetry-types.js";
 
-// Discord webhook utilities
-export { sendToDiscord, WEBHOOKS, COLORS, createEmbed } from "./discord-webhook.js";
+// Discord webhook utilities (including fail-closed security mode)
+export {
+  sendToDiscord,
+  WEBHOOKS,
+  COLORS,
+  createEmbed,
+  setFailClosedMode,
+  isFailClosedMode,
+} from "./discord-webhook.js";
 
 // Command logging
 export {

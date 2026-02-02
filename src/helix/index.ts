@@ -30,9 +30,17 @@ export type {
   DiscordEmbed,
   DiscordPayload,
   HelixContextFile,
+  WebhookHealthStatus,
+  SecurityConfigStatus,
+  HelixSecurityErrorCode,
 } from './types.js';
 
-export { HELIX_SEVEN_LAYERS } from './types.js';
+export {
+  HELIX_SEVEN_LAYERS,
+  HelixSecurityError,
+  REQUIRED_WEBHOOKS,
+  OPTIONAL_WEBHOOKS,
+} from './types.js';
 
 // Logging hooks
 export {
@@ -40,8 +48,11 @@ export {
   triggerHelixHooks,
   sendAlert,
   logConsciousnessObservation,
-  sendToDiscord,
   WEBHOOKS,
+  // Security functions
+  setFailClosedMode,
+  checkWebhookHealth,
+  validateSecurityConfiguration,
 } from './logging-hooks.js';
 
 // Command logging
@@ -84,7 +95,11 @@ export {
   verifyAgainstDiscord,
   computeEntryHash,
   hashLogFiles,
+  setHashChainFailClosedMode,
 } from './hash-chain.js';
+
+// Re-export the type
+export type { DiscordVerificationResult } from './hash-chain.js';
 
 // Context loading
 export {
@@ -107,6 +122,119 @@ export {
   sendStatusUpdate,
 } from './heartbeat.js';
 
+// Observatory client (centralized telemetry)
+export {
+  HelixObservatoryClient,
+  getObservatoryClient,
+  shutdownObservatoryClient,
+} from './observatory-client.js';
+
+export type {
+  ObservatoryEventType,
+  TelemetryPayload,
+  HeartbeatMetrics,
+  TransformationData,
+} from './observatory-client.js';
+
+// Skill sandbox (secure skill execution)
+export {
+  validateSkill,
+  executeSkillSandboxed,
+  verifySkillSignature,
+  getSkillAuditLog,
+  clearSkillAuditLog,
+  createSandboxConfig,
+  DEFAULT_SKILL_SANDBOX_CONFIG,
+} from './skill-sandbox.js';
+
+export type {
+  SkillMetadata,
+  SkillPermission,
+  SkillSandboxConfig,
+  SkillValidationResult,
+  SkillExecutionContext,
+  SkillExecutionResult,
+  SkillAuditEntry,
+  SandboxPreset,
+} from './skill-sandbox.js';
+
+// MCP tool validation (tool poisoning prevention)
+export {
+  validateMCPToolCall,
+  validateAndExecute,
+  registerToolMetadata,
+  getToolMetadata,
+  assessToolRisk,
+  sanitizeParameters,
+  getMCPToolAuditLog,
+  clearMCPToolAuditLog,
+  clearRateLimitStore,
+  DEFAULT_VALIDATOR_CONFIG,
+} from './mcp-tool-validator.js';
+
+export type {
+  MCPToolMetadata,
+  MCPToolCapability,
+  MCPToolValidatorConfig,
+  MCPToolCall,
+  MCPToolValidationResult,
+  MCPToolAuditEntry,
+} from './mcp-tool-validator.js';
+
+// Threat detection (Willison's Trifecta, memory poisoning, confused deputy, MCP attacks)
+export {
+  // Lethal Trifecta
+  detectLethalTrifecta,
+  // Memory poisoning
+  detectMemoryPoisoning,
+  createVerifiedMemoryEntry,
+  // Confused deputy
+  detectConfusedDeputy,
+  calculateTrustLevel,
+  // Credential exposure
+  detectCredentialExposure,
+  sanitizeCredentials,
+  // Context leakage
+  detectContextLeakage,
+  // Prompt injection
+  detectPromptInjection,
+  // Comprehensive assessment
+  assessThreats,
+  enforceSecurityPolicy,
+  // MCP tool poisoning (WhatsApp breach pattern)
+  detectToolPoisoning,
+  // Schema poisoning (IDEsaster CVE-2025-49150)
+  detectSchemaPoisoning,
+  // Path traversal (Anthropic Filesystem breach)
+  detectPathTraversal,
+  // Rug pull detection (tool mutation)
+  detectRugPull,
+  hashToolDefinition,
+  // MCP sampling attacks (Unit42 research)
+  detectSamplingAttack,
+} from './threat-detection.js';
+
+export type {
+  LethalTrifectaStatus,
+  MemoryEntry,
+  MemoryPoisoningResult,
+  TrackedInput,
+  InputOrigin,
+  ConfusedDeputyResult,
+  CredentialExposureResult,
+  AgentContext,
+  ContextLeakageResult,
+  PromptInjectionResult,
+  ThreatAssessment,
+  // New types for MCP attack detection
+  ToolPoisoningResult,
+  SchemaPoisoningResult,
+  PathTraversalResult,
+  ToolDefinition,
+  RugPullResult,
+  SamplingAttackResult,
+} from './threat-detection.js';
+
 /**
  * Helix initialization options
  */
@@ -125,6 +253,12 @@ export interface HelixInitOptions {
 
   /** Enable heartbeat (default: true) - sends proof-of-life every 60 seconds */
   enableHeartbeat?: boolean;
+
+  /** Enable fail-closed security mode (default: true) - blocks operations if logging fails */
+  failClosedMode?: boolean;
+
+  /** Skip security validation at startup (NOT RECOMMENDED) */
+  skipSecurityValidation?: boolean;
 }
 
 /**
@@ -138,9 +272,64 @@ export async function initializeHelix(options: HelixInitOptions = {}): Promise<v
     hashChainInterval = 5 * 60 * 1000,
     skipHashChain = false,
     enableHeartbeat = true,
+    failClosedMode = true,
+    skipSecurityValidation = false,
   } = options;
 
   console.log('[Helix] Initializing logging system...');
+
+  // ============================================
+  // STEP -2: ENVIRONMENT VARIABLE VALIDATION
+  // This MUST happen before anything else
+  // Ensures all required secrets are available
+  // ============================================
+  const { requireValidEnvironment } = await import('../lib/env-validator.js');
+  try {
+    requireValidEnvironment();
+  } catch (error) {
+    console.error('[Helix] ENVIRONMENT VALIDATION FAILED');
+    console.error('[Helix] Cannot proceed without all required secrets');
+    process.exit(1);
+  }
+
+  // ============================================
+  // STEP -1: SECURITY CONFIGURATION VALIDATION
+  // This MUST happen before anything else
+  // Ensures we can actually log before proceeding
+  // ============================================
+  const { setFailClosedMode, validateSecurityConfiguration } = await import('./logging-hooks.js');
+  const { setHashChainFailClosedMode } = await import('./hash-chain.js');
+
+  // Set fail-closed mode
+  setFailClosedMode(failClosedMode);
+  setHashChainFailClosedMode(failClosedMode);
+
+  if (!skipSecurityValidation) {
+    console.log('[Helix] Validating security configuration...');
+    const securityStatus = await validateSecurityConfiguration();
+
+    if (!securityStatus.valid) {
+      console.error('[Helix] SECURITY CONFIGURATION INVALID:');
+      for (const issue of securityStatus.criticalIssues) {
+        console.error(`  - ${issue}`);
+      }
+      // In fail-closed mode, validateSecurityConfiguration already throws
+      // This is a fallback for non-fail-closed mode
+      if (!failClosedMode) {
+        console.warn('[Helix] Continuing despite security issues (fail-closed disabled)');
+      }
+    } else {
+      console.log('[Helix] Security configuration validated');
+      if (securityStatus.warnings.length > 0) {
+        console.warn('[Helix] Security warnings:');
+        for (const warning of securityStatus.warnings) {
+          console.warn(`  - ${warning}`);
+        }
+      }
+    }
+  } else {
+    console.warn('[Helix] WARNING: Skipping security validation (not recommended!)');
+  }
 
   // ============================================
   // STEP 0: STARTUP ANNOUNCEMENT (FIRST!)
@@ -160,19 +349,28 @@ export async function initializeHelix(options: HelixInitOptions = {}): Promise<v
   const { installPreExecutionLogger } = await import('./logging-hooks.js');
   installPreExecutionLogger();
 
-  // 3. Start file watcher (if enabled)
+  // 2.5. Initialize Discord webhooks from 1Password (or .env fallback)
+  try {
+    const { initializeDiscordWebhooks } = await import('./logging-hooks.js');
+    await initializeDiscordWebhooks();
+  } catch (error) {
+    console.warn('[Helix] Failed to initialize Discord webhooks:', error);
+    console.warn('[Helix] Webhooks must be loaded before pre-execution logging');
+  }
+
+  // 4. Start file watcher (if enabled)
   if (enableFileWatcher) {
     const { startFileWatcher } = await import('./file-watcher.js');
     startFileWatcher();
   }
 
-  // 4. Start hash chain scheduler (if not skipped)
+  // 5. Start hash chain scheduler (if not skipped)
   if (!skipHashChain) {
     const { startHashChainScheduler } = await import('./hash-chain.js');
     startHashChainScheduler(hashChainInterval);
   }
 
-  // 5. Start heartbeat (proof of life every 60 seconds)
+  // 6. Start heartbeat (proof of life every 60 seconds)
   if (enableHeartbeat) {
     startHeartbeat();
   }

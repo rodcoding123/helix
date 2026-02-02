@@ -32,6 +32,6 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['dist/', 'node_modules/', '*.js', '*.mjs', 'openclaw-helix/', 'scripts/', 'eslint.config.js'],
+    ignores: ['dist/', 'node_modules/', '*.js', '*.mjs', 'openclaw-helix/', 'scripts/', 'web/', 'eslint.config.js'],
   }
 );

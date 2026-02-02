@@ -403,20 +403,23 @@ async function runExecProcess(opts: {
   // This log is sent to Discord BEFORE any
   // command execution begins. The evidence
   // exists externally before action occurs.
+  //
+  // SECURITY: FAIL-CLOSED - If logging fails and
+  // fail-closed mode is enabled, this THROWS
+  // HelixSecurityError and blocks execution.
+  // The command WILL NOT RUN without an audit trail.
   // ============================================
   const helixLogId = crypto.randomUUID();
-  try {
-    await logCommandPreExecution({
-      id: helixLogId,
-      command: opts.command,
-      workdir: opts.workdir,
-      timestamp: new Date().toISOString(),
-      sessionKey: opts.sessionKey,
-      elevated: !!opts.sandbox,
-    });
-  } catch {
-    // Logging failure must not block execution
-  }
+  // DO NOT wrap in try/catch - HelixSecurityError must propagate
+  // to block command execution in fail-closed mode
+  await logCommandPreExecution({
+    id: helixLogId,
+    command: opts.command,
+    workdir: opts.workdir,
+    timestamp: new Date().toISOString(),
+    sessionKey: opts.sessionKey,
+    elevated: !!opts.sandbox,
+  });
   // ============================================
 
   if (opts.sandbox) {

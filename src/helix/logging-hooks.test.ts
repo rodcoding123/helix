@@ -15,8 +15,10 @@ const {
   triggerHelixHooks,
   sendAlert,
   logConsciousnessObservation,
-  sendToDiscord,
   WEBHOOKS,
+  setFailClosedMode,
+  checkWebhookHealth,
+  validateSecurityConfiguration,
 } = await import('./logging-hooks.js');
 
 describe('LoggingHooks', () => {
@@ -45,70 +47,65 @@ describe('LoggingHooks', () => {
     });
   });
 
-  describe('sendToDiscord', () => {
-    it('returns false when webhook URL is undefined', async () => {
-      const result = await sendToDiscord(undefined, {
-        embeds: [{ title: 'Test', color: 0x000000, fields: [] }],
-      });
-      expect(result).toBe(false);
+  describe('Security Functions', () => {
+    it('setFailClosedMode can be toggled', () => {
+      // Should not throw
+      expect(() => setFailClosedMode(false)).not.toThrow();
+      expect(() => setFailClosedMode(true)).not.toThrow();
     });
 
-    it('returns true on successful webhook call', async () => {
-      const result = await sendToDiscord('https://discord.com/api/webhooks/test', {
-        embeds: [{ title: 'Test', color: 0x000000, fields: [] }],
-      });
-      expect(result).toBe(true);
-      expect(mockFetch).toHaveBeenCalledWith(
-        'https://discord.com/api/webhooks/test',
-        expect.objectContaining({
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        })
-      );
+    it('checkWebhookHealth returns array of statuses', async () => {
+      mockFetch.mockResolvedValue({ ok: true });
+      const health = await checkWebhookHealth();
+
+      expect(Array.isArray(health)).toBe(true);
+      expect(health.length).toBe(6); // 6 webhook types
+      for (const status of health) {
+        expect(status).toHaveProperty('name');
+        expect(status).toHaveProperty('configured');
+        expect(status).toHaveProperty('reachable');
+      }
     });
 
-    it('returns false on fetch error', async () => {
-      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+    it('checkWebhookHealth marks unconfigured webhooks', async () => {
+      const health = await checkWebhookHealth();
 
-      const result = await sendToDiscord('https://discord.com/api/webhooks/test', {
-        embeds: [{ title: 'Test', color: 0x000000, fields: [] }],
-      });
-      expect(result).toBe(false);
+      // Without env vars, webhooks should be marked as not configured
+      for (const status of health) {
+        if (!status.url) {
+          expect(status.configured).toBe(false);
+        }
+      }
     });
 
-    it('returns false on non-ok response', async () => {
-      mockFetch.mockResolvedValueOnce({ ok: false, status: 500 });
+    it('validateSecurityConfiguration returns status object', async () => {
+      // Disable fail-closed mode to avoid throwing
+      setFailClosedMode(false);
 
-      const result = await sendToDiscord('https://discord.com/api/webhooks/test', {
-        embeds: [{ title: 'Test', color: 0x000000, fields: [] }],
-      });
-      expect(result).toBe(false);
+      const status = await validateSecurityConfiguration();
+
+      expect(status).toHaveProperty('valid');
+      expect(status).toHaveProperty('webhooks');
+      expect(status).toHaveProperty('criticalIssues');
+      expect(status).toHaveProperty('warnings');
+      expect(status).toHaveProperty('checkedAt');
+      expect(Array.isArray(status.webhooks)).toBe(true);
+      expect(Array.isArray(status.criticalIssues)).toBe(true);
+      expect(Array.isArray(status.warnings)).toBe(true);
+
+      // Re-enable for other tests
+      setFailClosedMode(true);
     });
 
-    it('sends correct payload structure', async () => {
-      const payload = {
-        embeds: [
-          {
-            title: 'Test Title',
-            color: 0x5865f2,
-            fields: [
-              { name: 'Field1', value: 'Value1', inline: true },
-              { name: 'Field2', value: 'Value2', inline: false },
-            ],
-            timestamp: '2026-01-31T00:00:00.000Z',
-            footer: { text: 'Test footer' },
-          },
-        ],
-      };
+    it('validateSecurityConfiguration identifies missing required webhooks', async () => {
+      setFailClosedMode(false);
 
-      await sendToDiscord('https://discord.com/api/webhooks/test', payload);
+      const status = await validateSecurityConfiguration();
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        'https://discord.com/api/webhooks/test',
-        expect.objectContaining({
-          body: JSON.stringify(payload),
-        })
-      );
+      // Without env vars set, should have critical issues
+      expect(status.criticalIssues.length).toBeGreaterThan(0);
+
+      setFailClosedMode(true);
     });
   });
 
@@ -127,7 +124,14 @@ describe('LoggingHooks', () => {
 
   describe('triggerHelixHooks', () => {
     beforeEach(() => {
+      // Disable fail-closed mode for tests without webhooks configured
+      setFailClosedMode(false);
       installPreExecutionLogger();
+    });
+
+    afterEach(() => {
+      // Re-enable fail-closed mode
+      setFailClosedMode(true);
     });
 
     it('triggers command hooks', async () => {
@@ -306,6 +310,8 @@ describe('LoggingHooks', () => {
 
   describe('pre-execution guarantee', () => {
     it('processes hooks synchronously before returning', async () => {
+      // Disable fail-closed for this test (no webhooks in test env)
+      setFailClosedMode(false);
       installPreExecutionLogger();
 
       // The critical feature: hooks complete BEFORE triggerHelixHooks returns
@@ -322,6 +328,25 @@ describe('LoggingHooks', () => {
       // The promise resolves only after hooks have been processed
       hookProcessed = true;
       expect(hookProcessed).toBe(true);
+
+      // Re-enable fail-closed mode
+      setFailClosedMode(true);
+    });
+
+    it('throws HelixSecurityError in fail-closed mode when webhook unavailable', async () => {
+      // Ensure fail-closed mode is enabled
+      setFailClosedMode(true);
+      installPreExecutionLogger();
+
+      // Should throw when trying to trigger command hooks without webhook
+      await expect(
+        triggerHelixHooks({
+          type: 'command',
+          action: 'execute',
+          sessionKey: 'test',
+          context: { command: 'test' },
+        })
+      ).rejects.toThrow('Critical webhook not configured');
     });
   });
 

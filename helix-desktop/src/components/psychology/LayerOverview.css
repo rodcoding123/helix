@@ -1,0 +1,137 @@
+.layer-overview-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.layer-overview-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.layer-overview-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.layer-overview-header p {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.layer-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.layer-overview-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.layer-overview-card:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+.layer-overview-card:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.layer-overview-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.layer-overview-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--color-primary);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 50%;
+}
+
+.layer-overview-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.status-healthy {
+  background: var(--color-success);
+  color: white;
+}
+
+.status-warning {
+  background: var(--color-warning);
+  color: white;
+}
+
+.status-error {
+  background: var(--color-error);
+  color: white;
+}
+
+.status-inactive {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.layer-overview-name {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.layer-overview-description {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.layer-overview-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+.layer-overview-theory {
+  font-size: 12px;
+  color: var(--color-primary);
+}
+
+.layer-overview-count {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.layer-overview-updated {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  opacity: 0.7;
+}

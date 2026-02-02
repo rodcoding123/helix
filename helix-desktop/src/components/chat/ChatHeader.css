@@ -1,0 +1,275 @@
+/**
+ * Chat Header - Minimal Consciousness Interface
+ *
+ * Ultra-clean header that stays out of the way while
+ * providing essential controls with subtle elegance.
+ */
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) var(--space-lg);
+  background: transparent;
+  border-bottom: 1px solid var(--border-subtle);
+  gap: var(--space-md);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+}
+
+/* Subtle gradient border */
+.chat-header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(6, 134, 212, 0.2) 30%,
+    rgba(114, 52, 237, 0.2) 70%,
+    transparent
+  );
+}
+
+.header-left,
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.header-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+/* Connection Status - Minimal Indicator */
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transition: all var(--transition-base);
+  position: relative;
+}
+
+.status-indicator.connected {
+  background: var(--success);
+  box-shadow: 0 0 8px var(--success-glow);
+}
+
+.status-indicator.connected::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1px solid var(--success);
+  opacity: 0.4;
+  animation: statusRing 2s ease-out infinite;
+}
+
+@keyframes statusRing {
+  0% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+.status-indicator.disconnected {
+  background: var(--error);
+  animation: statusPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--error-glow); }
+  50% { opacity: 0.5; box-shadow: 0 0 12px var(--error-glow); }
+}
+
+.status-text {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Session Selector - Glass Pill */
+.session-selector {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  max-width: 220px;
+}
+
+.session-selector:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--border-default);
+}
+
+.session-selector:active {
+  transform: scale(0.98);
+}
+
+.session-icon {
+  font-size: 0.875rem;
+  opacity: 0.7;
+}
+
+.session-name {
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dropdown-icon {
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+  opacity: 0.6;
+  transition: transform var(--transition-fast);
+}
+
+.session-selector:hover .dropdown-icon {
+  opacity: 1;
+}
+
+/* Header Chips - Subtle Tags */
+.header-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.header-chip:hover:not(.tokens) {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--border-default);
+}
+
+.header-chip.tokens {
+  cursor: default;
+  opacity: 0.8;
+}
+
+.chip-icon {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.chip-label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+}
+
+.header-chip.model .chip-label {
+  color: var(--helix-blue);
+}
+
+.header-chip.agent .chip-label {
+  color: var(--accent-purple);
+}
+
+/* New Chat Button - Glowing Action */
+.new-chat-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg,
+    rgba(6, 134, 212, 0.15),
+    rgba(114, 52, 237, 0.15)
+  );
+  border: 1px solid rgba(6, 134, 212, 0.3);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  color: var(--helix-blue);
+  transition: all var(--transition-base);
+}
+
+.new-chat-btn:hover {
+  background: linear-gradient(135deg,
+    rgba(6, 134, 212, 0.25),
+    rgba(114, 52, 237, 0.25)
+  );
+  border-color: var(--helix-blue);
+  box-shadow: 0 0 20px var(--helix-blue-glow);
+  transform: scale(1.05);
+}
+
+.new-chat-btn:active {
+  transform: scale(0.95);
+}
+
+.new-chat-btn svg {
+  transition: transform var(--transition-fast);
+}
+
+.new-chat-btn:hover svg {
+  transform: rotate(90deg);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .chat-header {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .header-chip .chip-label {
+    display: none;
+  }
+
+  .status-text {
+    display: none;
+  }
+
+  .session-selector {
+    max-width: 140px;
+    padding: 5px 10px;
+  }
+
+  .session-name {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-chip {
+    display: none;
+  }
+
+  .session-selector {
+    max-width: 120px;
+  }
+}

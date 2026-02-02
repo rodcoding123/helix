@@ -1,0 +1,291 @@
+/**
+ * Chat Input - Floating Aurora Command Center
+ *
+ * Premium input field with glowing effects, command modes,
+ * and seamless integration with the consciousness interface.
+ */
+
+.chat-input-wrapper {
+  position: relative;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.chat-input {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-end;
+  position: relative;
+}
+
+/* Input Prefix Indicators */
+.input-prefix {
+  position: absolute;
+  left: var(--space-md);
+  bottom: 14px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.prefix-slash {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--helix-blue);
+  text-shadow: 0 0 8px var(--helix-blue-glow);
+}
+
+.prefix-bang {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--warning);
+  text-shadow: 0 0 8px var(--warning-glow);
+}
+
+/* ================================================================
+   MAIN TEXTAREA
+   ================================================================ */
+
+.chat-input textarea {
+  flex: 1;
+  min-height: 48px;
+  max-height: 200px;
+  resize: none;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  padding: 14px var(--space-lg);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  transition: all var(--transition-base);
+}
+
+.chat-input textarea:focus {
+  outline: none;
+  border-color: var(--helix-blue);
+  background: rgba(6, 134, 212, 0.03);
+  box-shadow:
+    0 0 0 3px rgba(6, 134, 212, 0.1),
+    0 0 30px rgba(6, 134, 212, 0.15);
+}
+
+.chat-input textarea::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* Command Mode - Blue Theme */
+.chat-input textarea.command-mode {
+  border-color: var(--helix-blue);
+  background: rgba(6, 134, 212, 0.06);
+  padding-left: 2rem;
+  box-shadow: 0 0 20px var(--helix-blue-glow);
+}
+
+/* Bash Mode - Orange/Warning Theme */
+.chat-input textarea.bash-mode {
+  border-color: var(--warning);
+  background: rgba(245, 158, 11, 0.06);
+  padding-left: 2rem;
+  font-family: var(--font-mono);
+  box-shadow: 0 0 20px var(--warning-glow);
+}
+
+/* Disabled State */
+.chat-input textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--void-medium);
+}
+
+/* ================================================================
+   INPUT ACTIONS
+   ================================================================ */
+
+.input-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  position: absolute;
+  right: var(--space-sm);
+  bottom: var(--space-sm);
+}
+
+.ctrlc-hint {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  padding: 4px 8px;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: var(--radius-sm);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* ================================================================
+   SEND/STOP BUTTON
+   ================================================================ */
+
+.chat-input-button {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.chat-input-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Send Button - Gradient Glow */
+.chat-input-button.send {
+  background: linear-gradient(135deg, var(--helix-blue), var(--accent-purple));
+  color: white;
+  box-shadow: 0 4px 20px var(--helix-blue-glow);
+}
+
+.chat-input-button.send::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.chat-input-button.send:hover:not(:disabled) {
+  transform: scale(1.08) translateY(-2px);
+  box-shadow:
+    0 6px 30px var(--helix-blue-glow),
+    0 0 40px var(--accent-purple-glow);
+}
+
+.chat-input-button.send:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+.chat-input-button.send:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Stop Button - Pulsing Red */
+.chat-input-button.stop {
+  background: var(--error);
+  color: white;
+  box-shadow: 0 4px 20px var(--error-glow);
+  animation: stopPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes stopPulse {
+  0%, 100% {
+    box-shadow: 0 4px 20px var(--error-glow);
+  }
+  50% {
+    box-shadow: 0 4px 30px var(--error-glow), 0 0 40px var(--error-glow);
+  }
+}
+
+.chat-input-button.stop:hover:not(:disabled) {
+  background: #dc2626;
+  transform: scale(1.08);
+}
+
+.chat-input-button svg {
+  position: relative;
+  z-index: 1;
+}
+
+/* ================================================================
+   INPUT HINTS
+   ================================================================ */
+
+.input-hints {
+  display: flex;
+  gap: var(--space-lg);
+  padding-top: var(--space-sm);
+  justify-content: center;
+}
+
+.hint {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color var(--transition-fast);
+}
+
+.hint:hover {
+  color: var(--text-tertiary);
+}
+
+.hint kbd {
+  padding: 2px 8px;
+  background: var(--void-light);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  color: var(--text-tertiary);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+
+@media (max-width: 640px) {
+  .chat-input-wrapper {
+    padding: 0;
+  }
+
+  .chat-input textarea {
+    font-size: 16px; /* Prevent zoom on iOS */
+    min-height: 44px;
+    padding: 12px var(--space-md);
+    border-radius: var(--radius-lg);
+  }
+
+  .input-hints {
+    display: none;
+  }
+
+  .chat-input-button {
+    width: 44px;
+    height: 44px;
+  }
+
+  .input-prefix {
+    left: 12px;
+    bottom: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-input textarea {
+    padding-right: 50px;
+  }
+
+  .input-actions {
+    right: 4px;
+    bottom: 4px;
+  }
+}

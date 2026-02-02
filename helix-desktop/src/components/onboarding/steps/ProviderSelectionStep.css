@@ -1,0 +1,366 @@
+/* ================================================================
+   PROVIDER SELECTION STEP - Choose Your AI
+
+   NOTE: All selectors are scoped to .provider-selection-step to
+   override conflicting styles from Steps.css
+   ================================================================ */
+
+.provider-selection-step {
+  max-width: 620px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.provider-selection-step h2 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  background: var(--gradient-helix);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
+}
+
+.provider-selection-step .step-description {
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ===== Provider Groups List ===== */
+.provider-selection-step .provider-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 6px;
+  text-align: left;
+}
+
+.provider-selection-step .provider-group {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  /* CRITICAL: Prevent flex shrinking so items don't collapse */
+  flex-shrink: 0 !important;
+}
+
+.provider-selection-step .provider-group:hover {
+  border-color: var(--border-strong);
+}
+
+.provider-selection-step .provider-group.recommended {
+  border-color: var(--helix-blue);
+  box-shadow: 0 0 20px var(--helix-blue-glow);
+}
+
+.provider-selection-step .provider-group.expanded {
+  background: var(--void-light);
+  border-color: var(--helix-blue);
+}
+
+/* ===== Provider Group Header ===== */
+.provider-selection-step .provider-group-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s ease;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+
+.provider-selection-step .provider-group-header:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.provider-selection-step .provider-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--void-lighter);
+  border-radius: var(--radius-sm);
+}
+
+.provider-selection-step .provider-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.provider-selection-step .provider-label {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.provider-selection-step .provider-hint {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  line-height: 1.3;
+}
+
+.provider-selection-step .recommended-badge {
+  padding: 4px 10px;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 600;
+  background: var(--gradient-helix);
+  color: white;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  box-shadow: 0 4px 10px var(--helix-blue-glow);
+}
+
+.provider-selection-step .expand-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.provider-selection-step .provider-group.expanded .expand-icon {
+  transform: rotate(45deg);
+}
+
+/* ===== Provider Options (expanded) ===== */
+.provider-selection-step .provider-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border-default);
+  background: var(--void-soft);
+  animation: providerSlideDown 0.2s ease;
+}
+
+@keyframes providerSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.provider-selection-step .provider-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--void-medium);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  color: var(--text-primary);
+  /* Override Steps.css conflicting styles */
+  flex-direction: row;
+  position: static;
+  overflow: visible;
+}
+
+.provider-selection-step .provider-option::before {
+  /* Remove the pseudo-element from Steps.css */
+  display: none;
+}
+
+.provider-selection-step .provider-option:hover {
+  background: var(--void-light);
+  border-color: var(--border-strong);
+  transform: none;
+}
+
+.provider-selection-step .provider-option.selected {
+  background: rgba(6, 134, 212, 0.1);
+  border-color: var(--helix-blue);
+  box-shadow: 0 0 20px var(--helix-blue-glow);
+}
+
+.provider-selection-step .provider-option.oauth {
+  border-left: 3px solid var(--success);
+}
+
+.provider-selection-step .option-indicator {
+  color: var(--text-tertiary);
+  font-size: 16px;
+  margin-top: 2px;
+  transition: color 0.2s ease;
+}
+
+.provider-selection-step .provider-option.selected .option-indicator {
+  color: var(--helix-blue);
+}
+
+.provider-selection-step .option-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.provider-selection-step .option-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.provider-selection-step .oauth-badge {
+  padding: 2px 6px;
+  font-size: 9px;
+  font-weight: 600;
+  background: var(--success);
+  color: white;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.provider-selection-step .option-hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* ===== Step Actions ===== */
+.provider-selection-step .step-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-top: 16px;
+}
+
+.provider-selection-step .action-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.provider-selection-step .btn-text {
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  font-family: var(--font-body);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 6px 10px;
+  transition: color 0.2s ease;
+}
+
+.provider-selection-step .btn-text:hover {
+  color: var(--text-secondary);
+}
+
+.provider-selection-step .btn-primary,
+.provider-selection-step .btn-secondary {
+  padding: 12px 24px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.provider-selection-step .btn-primary {
+  background: var(--gradient-helix);
+  color: white;
+  border: none;
+  box-shadow: var(--shadow-md), var(--shadow-glow-blue);
+}
+
+.provider-selection-step .btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg), 0 0 60px var(--helix-blue-glow);
+}
+
+.provider-selection-step .btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.provider-selection-step .btn-secondary {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
+}
+
+.provider-selection-step .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+/* ===== Scrollbar Styling ===== */
+.provider-selection-step .provider-groups::-webkit-scrollbar {
+  width: 6px;
+}
+
+.provider-selection-step .provider-groups::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.provider-selection-step .provider-groups::-webkit-scrollbar-thumb {
+  background: var(--void-lighter);
+  border-radius: 3px;
+}
+
+.provider-selection-step .provider-groups::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 600px) {
+  .provider-selection-step {
+    padding: 16px;
+  }
+
+  .provider-selection-step .provider-groups {
+    max-height: 400px;
+  }
+
+  .provider-selection-step .provider-group-header {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+
+  .provider-selection-step .provider-icon {
+    font-size: 24px;
+  }
+}

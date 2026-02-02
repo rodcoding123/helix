@@ -6,10 +6,13 @@ import { useAuth } from './useAuth';
 interface UseInstancesReturn {
   instances: Instance[];
   loading: boolean;
+  isLoading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
   create: (name: string, instanceKey: string) => Promise<Instance | null>;
+  createInstance: (name: string) => Promise<Instance | null>;
   remove: (id: string) => Promise<boolean>;
+  deleteInstance: (id: string) => Promise<boolean>;
 }
 
 export function useInstances(): UseInstancesReturn {
@@ -38,10 +41,11 @@ export function useInstances(): UseInstancesReturn {
   }, [fetchInstances]);
 
   const create = useCallback(
-    async (name: string, instanceKey: string): Promise<Instance | null> => {
-      const instance = await createInstance(name, instanceKey);
+    async (name: string, instanceKey?: string): Promise<Instance | null> => {
+      const key = instanceKey || crypto.randomUUID();
+      const instance = await createInstance(name, key);
       if (instance) {
-        setInstances((prev) => [instance, ...prev]);
+        setInstances(prev => [instance, ...prev]);
       }
       return instance;
     },
@@ -51,7 +55,7 @@ export function useInstances(): UseInstancesReturn {
   const remove = useCallback(async (id: string): Promise<boolean> => {
     const success = await deleteInstance(id);
     if (success) {
-      setInstances((prev) => prev.filter((i) => i.id !== id));
+      setInstances(prev => prev.filter(i => i.id !== id));
     }
     return success;
   }, []);
@@ -59,9 +63,12 @@ export function useInstances(): UseInstancesReturn {
   return {
     instances,
     loading,
+    isLoading: loading,
     error,
     refresh: fetchInstances,
     create,
+    createInstance: (name: string) => create(name),
     remove,
+    deleteInstance: remove,
   };
 }

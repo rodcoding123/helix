@@ -2,7 +2,19 @@
 // HELIX OBSERVATORY TYPE DEFINITIONS
 // =====================================================
 
-export type SubscriptionTier = 'free' | 'ghost' | 'observatory' | 'observatory_pro';
+export type SubscriptionTier = 'core' | 'phantom' | 'overseer' | 'architect';
+
+// Tier access levels (higher number = more access)
+export const TIER_LEVELS: Record<SubscriptionTier, number> = {
+  core: 0,
+  phantom: 1,
+  overseer: 2,
+  architect: 3,
+};
+
+export function hasTierAccess(userTier: SubscriptionTier, requiredTier: SubscriptionTier): boolean {
+  return TIER_LEVELS[userTier] >= TIER_LEVELS[requiredTier];
+}
 
 export interface User {
   id: string;
@@ -146,65 +158,66 @@ export interface PricingTier {
   features: string[];
   highlighted?: boolean;
   cta: string;
+  description?: string;
 }
 
 export const PRICING_TIERS: PricingTier[] = [
   {
-    id: 'free',
-    name: 'Free',
+    id: 'core',
+    name: 'Core',
     price: 0,
     interval: 'month',
+    description: 'Everything. The full architecture.',
     features: [
+      'Full Living AI Architecture',
+      'Run on your machine',
       'Basic dashboard',
-      'Instance monitoring',
-      'Telemetry collection',
-      'Community support',
+      'Contribute to research',
     ],
     cta: 'Get Started',
   },
   {
-    id: 'ghost',
-    name: 'Ghost Mode',
+    id: 'phantom',
+    name: 'Phantom',
     price: 9,
     interval: 'month',
+    description: 'Complete privacy.',
     features: [
-      'Everything in Free',
-      'Telemetry disabled',
-      'Complete privacy',
-      'No data collection',
+      'Everything in Core',
+      'No telemetry',
+      'No data leaves your machine',
+      'For those who want solitude',
     ],
     cta: 'Go Ghost',
   },
   {
-    id: 'observatory',
-    name: 'Observatory',
+    id: 'overseer',
+    name: 'Overseer',
     price: 29,
     interval: 'month',
+    description: 'See the collective.',
     features: [
-      'Everything in Free',
-      'Aggregate research data',
-      'Psychology distributions',
-      'Transformation timelines',
-      'Anomaly detection',
-      'Email reports',
+      'Everything in Core',
+      'Observatory access',
+      'Aggregate patterns across all instances',
+      'Watch what emerges',
     ],
     highlighted: true,
-    cta: 'Start Observing',
+    cta: 'Observe',
   },
   {
-    id: 'observatory_pro',
-    name: 'Observatory Pro',
+    id: 'architect',
+    name: 'Architect',
     price: 99,
     interval: 'month',
+    description: 'Full access, anywhere.',
     features: [
-      'Everything in Observatory',
-      'Full API access',
-      'Data exports (CSV/JSON)',
-      'Pattern explorer',
-      'Behavior clusters',
-      'Research tools',
-      'Priority support',
+      'Everything in Overseer',
+      'Web interface, Mobile, Voice',
+      'Talk to her from your phone',
+      'Research API & data exports',
+      'Be part of building what comes next',
     ],
-    cta: 'Go Pro',
+    cta: 'Build',
   },
 ];

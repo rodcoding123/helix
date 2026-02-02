@@ -1,17 +1,52 @@
 import { useEffect, useState } from 'react';
 import { Activity, Brain, Zap, Heart } from 'lucide-react';
 import { useRealtimeStats } from '@/hooks/useRealtime';
+import clsx from 'clsx';
 
 interface CounterCardProps {
   label: string;
   value: number;
   icon: React.ReactNode;
   suffix?: string;
-  color: string;
+  color: 'helix' | 'accent' | 'success' | 'warning' | 'danger';
 }
+
+const colorClasses = {
+  helix: {
+    bg: 'bg-helix-500/10',
+    glow: 'bg-helix-500/30',
+    text: 'text-helix-400',
+    border: 'border-helix-500/20',
+  },
+  accent: {
+    bg: 'bg-accent-500/10',
+    glow: 'bg-accent-500/30',
+    text: 'text-accent-400',
+    border: 'border-accent-500/20',
+  },
+  success: {
+    bg: 'bg-success/10',
+    glow: 'bg-success/30',
+    text: 'text-success',
+    border: 'border-success/20',
+  },
+  warning: {
+    bg: 'bg-warning/10',
+    glow: 'bg-warning/30',
+    text: 'text-warning',
+    border: 'border-warning/20',
+  },
+  danger: {
+    bg: 'bg-danger/10',
+    glow: 'bg-danger/30',
+    text: 'text-danger',
+    border: 'border-danger/20',
+  },
+};
 
 function CounterCard({ label, value, icon, suffix = '', color }: CounterCardProps) {
   const [displayValue, setDisplayValue] = useState(value);
+  const colors = colorClasses[color];
 
   useEffect(() => {
     // Animate the counter
@@ -20,7 +55,7 @@ function CounterCard({ label, value, icon, suffix = '', color }: CounterCardProp
 
     const step = Math.ceil(Math.abs(diff) / 20);
     const interval = setInterval(() => {
-      setDisplayValue((prev) => {
+      setDisplayValue(prev => {
         if (diff > 0) {
           return Math.min(prev + step, value);
         } else {
@@ -33,30 +68,81 @@ function CounterCard({ label, value, icon, suffix = '', color }: CounterCardProp
   }, [value, displayValue]);
 
   return (
-    <div className="relative overflow-hidden rounded-xl bg-slate-900/50 p-6 border border-slate-800">
-      <div className={`absolute -right-4 -top-4 h-24 w-24 rounded-full ${color} opacity-10 blur-2xl`} />
+    <div
+      className={clsx(
+        'group relative overflow-hidden rounded-xl p-6',
+        'bg-bg-secondary/50 backdrop-blur-sm',
+        'border border-white/5 hover:border-white/10',
+        'transition-all duration-300'
+      )}
+    >
+      {/* Glow effect */}
+      <div
+        className={clsx(
+          'absolute -right-8 -top-8 h-32 w-32 rounded-full blur-3xl transition-opacity duration-300',
+          colors.glow,
+          'opacity-20 group-hover:opacity-40'
+        )}
+      />
+
       <div className="relative">
-        <div className={`inline-flex rounded-lg ${color} bg-opacity-20 p-3`}>
-          {icon}
+        {/* Icon */}
+        <div className={clsx('inline-flex rounded-xl p-3', colors.bg, colors.border, 'border')}>
+          <div className={colors.text}>{icon}</div>
         </div>
-        <p className="mt-4 text-sm text-slate-400">{label}</p>
-        <p className="mt-1 text-3xl font-bold text-white">
+
+        {/* Label */}
+        <p className="mt-4 text-sm text-text-tertiary uppercase tracking-wide">{label}</p>
+
+        {/* Value */}
+        <p className="mt-1 text-3xl font-display font-bold text-white">
           {displayValue.toLocaleString()}
-          {suffix && <span className="text-lg text-slate-400">{suffix}</span>}
+          {suffix && <span className="text-lg text-text-tertiary ml-1">{suffix}</span>}
         </p>
+      </div>
+
+      {/* Pulse indicator */}
+      <div className="absolute top-4 right-4">
+        <div
+          className={clsx(
+            'h-2 w-2 rounded-full',
+            colors.text.replace('text-', 'bg-'),
+            'animate-pulse'
+          )}
+        />
       </div>
     </div>
   );
 }
 
-export function LiveCounter() {
+interface LiveCounterProps {
+  inline?: boolean;
+}
+
+export function LiveCounter({ inline = false }: LiveCounterProps) {
   const { stats, isLoading } = useRealtimeStats();
 
+  // Inline mode: just render the active count as a span
+  if (inline) {
+    if (isLoading) {
+      return <span className="inline-block w-8 h-4 bg-white/10 rounded animate-pulse" />;
+    }
+    return (
+      <span className="font-bold text-helix-400">
+        {(stats?.active_instances ?? 0).toLocaleString()}
+      </span>
+    );
+  }
+
+  // Full mode: render the grid of counter cards
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="h-36 animate-pulse rounded-xl bg-slate-900/50" />
+          <div
+            key={i}
+            className="h-36 rounded-xl bg-bg-secondary/50 border border-white/5 animate-pulse"
+          />
         ))}
       </div>
     );
@@ -66,27 +152,27 @@ export function LiveCounter() {
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       <CounterCard
         label="Active Instances"
-        value={stats?.activeInstances ?? 0}
-        icon={<Activity className="h-6 w-6 text-emerald-500" />}
-        color="bg-emerald-500"
+        value={stats?.active_instances ?? 0}
+        icon={<Activity className="h-6 w-6" />}
+        color="success"
       />
       <CounterCard
-        label="Total Transformations"
-        value={stats?.totalTransformations ?? 0}
-        icon={<Brain className="h-6 w-6 text-helix-500" />}
-        color="bg-helix-500"
+        label="Transformations"
+        value={stats?.total_transformations ?? 0}
+        icon={<Brain className="h-6 w-6" />}
+        color="helix"
       />
       <CounterCard
-        label="Events Today"
-        value={stats?.eventsToday ?? 0}
-        icon={<Zap className="h-6 w-6 text-amber-500" />}
-        color="bg-amber-500"
+        label="Total Sessions"
+        value={stats?.total_sessions ?? 0}
+        icon={<Zap className="h-6 w-6" />}
+        color="warning"
       />
       <CounterCard
-        label="Heartbeats / min"
-        value={stats?.heartbeatsPerMinute ?? 0}
-        icon={<Heart className="h-6 w-6 text-rose-500" />}
-        color="bg-rose-500"
+        label="Heartbeats"
+        value={stats?.total_heartbeats ?? 0}
+        icon={<Heart className="h-6 w-6" />}
+        color="danger"
       />
     </div>
   );

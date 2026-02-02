@@ -4,12 +4,28 @@
  *
  * CRITICAL: Hash chain entries are sent to Discord BEFORE local storage.
  * This makes the chain unhackable - Discord has the authoritative record.
+ *
+ * SECURITY: Implements FAIL-CLOSED behavior - operations block if Discord unreachable
  */
 
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { HashChainEntry, DiscordEmbed } from './types.js';
+import { HelixSecurityError } from './types.js';
+
+// Security mode - when true, operations fail if Discord logging fails
+let failClosedMode = true;
+
+/**
+ * Set fail-closed mode for hash chain operations
+ */
+export function setHashChainFailClosedMode(enabled: boolean): void {
+  if (!enabled) {
+    console.warn('[Helix] WARNING: Disabling fail-closed mode for hash chain!');
+  }
+  failClosedMode = enabled;
+}
 
 /**
  * Type guard for HashChainEntry
@@ -56,9 +72,19 @@ let schedulerInterval: NodeJS.Timeout | null = null;
 
 /**
  * Send hash chain entry to Discord
+ * SECURITY: In fail-closed mode, throws if Discord unreachable
  */
 async function sendToDiscord(entry: HashChainEntry): Promise<boolean> {
-  if (!DISCORD_WEBHOOK) return false;
+  if (!DISCORD_WEBHOOK) {
+    if (failClosedMode) {
+      throw new HelixSecurityError(
+        'Hash chain webhook not configured - cannot guarantee integrity',
+        'WEBHOOK_NOT_CONFIGURED',
+        { entry }
+      );
+    }
+    return false;
+  }
 
   const logStatesList = Object.entries(entry.logStates)
     .map(([file, hash]) => `\`${path.basename(file)}\`: \`${hash.slice(0, 12)}...\``)
@@ -75,7 +101,7 @@ async function sendToDiscord(entry: HashChainEntry): Promise<boolean> {
       { name: 'Log States', value: logStatesList || 'No logs found', inline: false },
     ],
     timestamp: entry.timestamp,
-    footer: { text: 'Integrity verification - sent before local storage' },
+    footer: { text: 'Integrity verification - sent before local storage (fail-closed)' },
   };
 
   try {
@@ -84,8 +110,27 @@ async function sendToDiscord(entry: HashChainEntry): Promise<boolean> {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ embeds: [embed] }),
     });
+
+    if (!response.ok && failClosedMode) {
+      throw new HelixSecurityError(
+        `Hash chain logging failed (HTTP ${response.status}) - integrity compromised`,
+        'LOGGING_FAILED',
+        { status: response.status }
+      );
+    }
+
     return response.ok;
   } catch (error) {
+    if (error instanceof HelixSecurityError) throw error;
+
+    if (failClosedMode) {
+      throw new HelixSecurityError(
+        'Discord unreachable - hash chain integrity cannot be guaranteed',
+        'DISCORD_UNREACHABLE',
+        { error: error instanceof Error ? error.message : String(error) }
+      );
+    }
+
     console.error('[Helix] Hash chain Discord webhook failed:', error);
     return false;
   }
@@ -180,11 +225,11 @@ export async function createHashChainEntry(): Promise<HashChainEntry> {
   };
 
   // >>>>>> SEND TO DISCORD FIRST (unhackable) <<<<<<
+  // In fail-closed mode, this will throw if Discord unreachable
   const discordSuccess = await sendToDiscord(entry);
 
-  if (!discordSuccess) {
-    console.warn('[Helix] Hash chain entry not confirmed by Discord');
-    // Continue anyway - local log still valuable
+  if (!discordSuccess && !failClosedMode) {
+    console.warn('[Helix] Hash chain entry not confirmed by Discord (fail-closed disabled)');
   }
 
   // >>>>>> THEN write locally <<<<<<
@@ -328,20 +373,132 @@ export function stopHashChainScheduler(): void {
 }
 
 /**
- * Compare local chain with Discord records
- * This verifies that local logs haven't been tampered with
+ * Discord verification result
  */
-export function verifyAgainstDiscord(): {
+export interface DiscordVerificationResult {
   verified: boolean;
+  method: 'automatic' | 'manual';
+  localEntries: number;
+  discordEntries?: number;
+  mismatches: string[];
   message: string;
-} {
-  // This would require Discord API access to read message history
-  // For now, return a placeholder indicating the check would need manual verification
-  return {
-    verified: false,
-    message:
-      'Manual verification required: Check Discord hash-chain channel against local chain file',
-  };
+  verificationSteps?: string[];
 }
 
+/**
+ * Compare local chain with Discord records
+ * This verifies that local logs haven't been tampered with
+ *
+ * NOTE: Full automatic verification requires Discord Bot API access.
+ * Without a bot token, this provides manual verification instructions.
+ */
+export async function verifyAgainstDiscord(): Promise<DiscordVerificationResult> {
+  const result: DiscordVerificationResult = {
+    verified: false,
+    method: 'manual',
+    localEntries: 0,
+    mismatches: [],
+    message: '',
+    verificationSteps: [],
+  };
+
+  // Get local chain state
+  try {
+    const content = await fs.readFile(CHAIN_FILE, 'utf-8');
+    const lines = content.trim().split('\n').filter(Boolean);
+    result.localEntries = lines.length;
+
+    if (lines.length === 0) {
+      result.verified = true;
+      result.message = 'Local chain is empty - nothing to verify';
+      return result;
+    }
+
+    // Extract hashes for manual verification
+    const localHashes: string[] = [];
+    for (const line of lines) {
+      const entry = parseHashChainEntry(line);
+      if (entry) {
+        localHashes.push(entry.entryHash.slice(0, 32));
+      }
+    }
+
+    // Check if Discord bot token is available for automatic verification
+    const discordBotToken = process.env.DISCORD_BOT_TOKEN;
+    const discordChannelId = process.env.DISCORD_HASH_CHAIN_CHANNEL_ID;
+
+    if (discordBotToken && discordChannelId) {
+      // Automatic verification using Discord API
+      try {
+        const response = await fetch(
+          `https://discord.com/api/v10/channels/${discordChannelId}/messages?limit=100`,
+          {
+            headers: { Authorization: `Bot ${discordBotToken}` },
+          }
+        );
+
+        if (response.ok) {
+          const messages = (await response.json()) as Array<{
+            embeds?: Array<{ fields?: Array<{ name: string; value: string }> }>;
+          }>;
+          result.method = 'automatic';
+          result.discordEntries = messages.length;
+
+          // Extract hashes from Discord messages
+          const discordHashes: string[] = [];
+          for (const msg of messages) {
+            const embed = msg.embeds?.[0];
+            const hashField = embed?.fields?.find(f => f.name === 'Entry Hash');
+            if (hashField) {
+              // Extract hash from format: `abc123...`
+              const match = hashField.value.match(/`([a-f0-9]+)\.\.\./);
+              if (match) {
+                discordHashes.push(match[1]);
+              }
+            }
+          }
+
+          // Compare hashes
+          for (let i = 0; i < localHashes.length; i++) {
+            const localHash = localHashes[i];
+            if (!discordHashes.includes(localHash)) {
+              result.mismatches.push(`Entry ${i}: Local hash ${localHash} not found in Discord`);
+            }
+          }
+
+          result.verified = result.mismatches.length === 0;
+          result.message = result.verified
+            ? `Verified ${result.localEntries} entries against Discord`
+            : `Found ${result.mismatches.length} mismatches - possible tampering!`;
+        }
+      } catch (error) {
+        result.message = `Discord API error: ${error instanceof Error ? error.message : String(error)}`;
+      }
+    } else {
+      // Manual verification required
+      result.verificationSteps = [
+        '1. Open the Discord #helix-hash-chain channel',
+        '2. Compare the Entry Hash values with local chain file',
+        `3. Local chain file: ${CHAIN_FILE}`,
+        `4. Expected entries: ${result.localEntries}`,
+        '5. Look for any missing or different hashes',
+        '',
+        'Recent local hashes (newest first):',
+        ...localHashes
+          .slice(-5)
+          .reverse()
+          .map((h, i) => `   ${i + 1}. ${h}...`),
+      ];
+
+      result.message =
+        'Manual verification required - set DISCORD_BOT_TOKEN and DISCORD_HASH_CHAIN_CHANNEL_ID for automatic verification';
+    }
+  } catch (error) {
+    result.message = `Failed to read local chain: ${error instanceof Error ? error.message : String(error)}`;
+  }
+
+  return result;
+}
+
+// setHashChainFailClosedMode is exported via its declaration above
 export { computeEntryHash, hashLogFiles };

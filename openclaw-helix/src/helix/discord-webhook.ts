@@ -4,9 +4,12 @@
  *
  * CRITICAL: These webhooks fire synchronously BEFORE actions execute.
  * Discord has the log before Helix can do anything.
+ *
+ * SECURITY: Implements FAIL-CLOSED behavior - operations BLOCK when logging unavailable
  */
 
 import type { DiscordEmbed, DiscordPayload } from "./types.js";
+import { HelixSecurityError, SECURITY_ERROR_CODES } from "./types.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 
 const log = createSubsystemLogger("helix/discord");
@@ -21,15 +24,54 @@ export const WEBHOOKS = {
   hashChain: process.env.DISCORD_WEBHOOK_HASH_CHAIN,
 } as const;
 
+// ============================================
+// FAIL-CLOSED SECURITY MODE
+// When enabled, operations BLOCK if logging unavailable
+// This ensures the "unhackable logging" guarantee
+// ============================================
+let failClosedMode = process.env.HELIX_FAIL_CLOSED !== "false";
+
+/**
+ * Enable or disable fail-closed security mode
+ * WARNING: Disabling this compromises the "unhackable logging" guarantee
+ */
+export function setFailClosedMode(enabled: boolean): void {
+  if (!enabled) {
+    log.warn("SECURITY WARNING: Disabling fail-closed mode compromises security!");
+  }
+  failClosedMode = enabled;
+}
+
+/**
+ * Check if fail-closed mode is enabled
+ */
+export function isFailClosedMode(): boolean {
+  return failClosedMode;
+}
+
 /**
  * Send a payload to a Discord webhook
  * MUST be awaited for pre-execution logging to ensure log arrives before action
+ *
+ * @param webhookUrl - The Discord webhook URL
+ * @param payload - The payload to send
+ * @param critical - If true and fail-closed mode is enabled, throws on failure
+ * @returns true if successful, false if non-critical failure
+ * @throws HelixSecurityError if critical logging fails in fail-closed mode
  */
 export async function sendToDiscord(
   webhookUrl: string | undefined,
   payload: DiscordPayload,
+  critical: boolean = false,
 ): Promise<boolean> {
   if (!webhookUrl) {
+    if (critical && failClosedMode) {
+      throw new HelixSecurityError(
+        "Critical webhook not configured - execution blocked for security",
+        SECURITY_ERROR_CODES.WEBHOOK_NOT_CONFIGURED,
+        { payload }
+      );
+    }
     return false;
   }
 
@@ -45,13 +87,35 @@ export async function sendToDiscord(
         status: response.status,
         statusText: response.statusText,
       });
+
+      if (critical && failClosedMode) {
+        throw new HelixSecurityError(
+          `Critical logging failed (HTTP ${response.status}) - execution blocked`,
+          SECURITY_ERROR_CODES.LOGGING_FAILED,
+          { status: response.status, payload }
+        );
+      }
     }
 
     return response.ok;
   } catch (error) {
+    // Re-throw HelixSecurityError
+    if (error instanceof HelixSecurityError) {
+      throw error;
+    }
+
     log.error("Discord webhook error", {
       error: error instanceof Error ? error.message : String(error),
     });
+
+    if (critical && failClosedMode) {
+      throw new HelixSecurityError(
+        "Discord unreachable - execution blocked for security",
+        SECURITY_ERROR_CODES.DISCORD_UNREACHABLE,
+        { error: error instanceof Error ? error.message : String(error) }
+      );
+    }
+
     return false;
   }
 }
