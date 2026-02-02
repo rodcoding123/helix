@@ -64,7 +64,7 @@ export class EmbeddingService {
 
       // Gemini API requires batch embedding through batchEmbedContents
       const requests = texts.map((text) => ({
-        content: { parts: [{ text }] },
+        content: { role: 'user', parts: [{ text }] },
       }));
 
       const result = await model.batchEmbedContents({
