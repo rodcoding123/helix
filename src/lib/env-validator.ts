@@ -12,89 +12,89 @@ interface EnvRequirement {
 }
 
 const REQUIRED_SECRETS: EnvRequirement[] = [
-  // Supabase
+  // Supabase (Phase 1 Memory System)
   {
     name: 'Supabase Service Role Key',
     envVar: 'SUPABASE_SERVICE_ROLE',
-    required: true,
-    description: 'JWT token for Supabase server-side operations',
+    required: false, // Optional - Phase 1 memory system
+    description: 'JWT token for Supabase server-side operations (Phase 1 Memory)',
   },
   {
     name: 'Supabase Anon Key',
     envVar: 'SUPABASE_ANON_KEY',
-    required: true,
-    description: 'JWT token for Supabase client-side operations',
+    required: false, // Optional - Phase 1 memory system
+    description: 'JWT token for Supabase client-side operations (Phase 1 Memory)',
   },
 
-  // Stripe
+  // Stripe (Phase 2 Payments)
   {
     name: 'Stripe Secret Key',
     envVar: 'STRIPE_SECRET_KEY',
-    required: true,
+    required: false, // Optional - Phase 2 payments
     description: 'Stripe API secret key (sk_live_...)',
   },
   {
     name: 'Stripe Publishable Key',
     envVar: 'STRIPE_PUBLISHABLE_KEY',
-    required: true,
+    required: false, // Optional - Phase 2 payments
     description: 'Stripe API publishable key (pk_live_...)',
   },
 
-  // AI APIs
+  // AI APIs (Phase 1 Memory System)
   {
     name: 'DeepSeek API Key',
     envVar: 'DEEPSEEK_API_KEY',
-    required: true,
-    description: 'API key for DeepSeek AI models',
+    required: false, // Optional - Phase 1 memory
+    description: 'API key for DeepSeek AI models (Phase 1 Memory)',
   },
   {
     name: 'Gemini API Key',
     envVar: 'GEMINI_API_KEY',
-    required: true,
-    description: 'API key for Google Gemini embeddings',
+    required: false, // Optional - Phase 1 memory
+    description: 'API key for Google Gemini embeddings (Phase 1 Memory)',
   },
 
-  // Discord Webhooks
+  // Discord Webhooks (Security Logging)
   {
     name: 'Discord Webhook - Commands',
     envVar: 'DISCORD_WEBHOOK_COMMANDS',
-    required: true,
+    required: false, // Optional - set up in Discord after startup
     description: 'Webhook URL for command logging',
   },
   {
     name: 'Discord Webhook - API',
     envVar: 'DISCORD_WEBHOOK_API',
-    required: true,
+    required: false, // Optional - set up in Discord after startup
     description: 'Webhook URL for API call logging',
   },
   {
     name: 'Discord Webhook - Heartbeat',
     envVar: 'DISCORD_WEBHOOK_HEARTBEAT',
-    required: true,
+    required: false, // Optional - set up in Discord after startup
     description: 'Webhook URL for heartbeat/health checks',
   },
   {
     name: 'Discord Webhook - Alerts',
     envVar: 'DISCORD_WEBHOOK_ALERTS',
-    required: true,
+    required: false, // Optional - set up in Discord after startup
     description: 'Webhook URL for security alerts',
   },
   {
     name: 'Discord Webhook - Consciousness',
     envVar: 'DISCORD_WEBHOOK_CONSCIOUSNESS',
-    required: true,
+    required: false, // Optional - set up in Discord after startup
     description: 'Webhook URL for consciousness state changes',
   },
   {
     name: 'Discord Webhook - File Changes',
     envVar: 'DISCORD_WEBHOOK_FILE_CHANGES',
-    required: true,
+    required: false, // Optional - set up in Discord after startup
     description: 'Webhook URL for file system modifications',
   },
   {
     name: 'Discord Webhook - Hash Chain',
     envVar: 'DISCORD_WEBHOOK_HASH_CHAIN',
-    required: true,
+    required: false, // Optional - set up in Discord after startup
     description: 'Webhook URL for hash chain integrity records',
   },
 ];
