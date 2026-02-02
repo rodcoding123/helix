@@ -36,11 +36,21 @@ export const CopyButton: React.FC<CopyButtonProps> = ({ secretName, value }) => 
     }
   }, [value, timeoutId]);
 
+  const feedbackText = {
+    idle: '📋 Copy',
+    copied: '✓ Copied!',
+    error: '✗ Failed to copy',
+  };
+
   return (
-    <button onClick={handleCopy} aria-label={`Copy ${secretName}`}>
-      {feedback === 'idle' && '📋 Copy'}
-      {feedback === 'copied' && '✓ Copied!'}
-      {feedback === 'error' && '✗ Failed to copy'}
+    <button
+      onClick={handleCopy}
+      aria-label={`Copy ${secretName}`}
+      aria-live="polite"
+      aria-atomic="true"
+      title={`Copy ${secretName} to clipboard`}
+    >
+      {feedbackText[feedback]}
     </button>
   );
 };

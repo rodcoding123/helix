@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import type { SecretType } from '../../../types/secrets';
 
 interface CreateSecretModalProps {
@@ -26,8 +26,21 @@ export const CreateSecretModal: React.FC<CreateSecretModalProps> = ({
   const [secretType, setSecretType] = useState<SecretType>('SUPABASE_ANON_KEY');
   const [expiresAt, setExpiresAt] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const nameInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isOpen && nameInputRef.current) {
+      nameInputRef.current.focus();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      onClose();
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,19 +71,22 @@ export const CreateSecretModal: React.FC<CreateSecretModalProps> = ({
   };
 
   return (
-    <dialog open>
-      <h2>Create New Secret</h2>
+    <dialog open onKeyDown={handleKeyDown} role="dialog" aria-labelledby="modal-title" aria-modal="true">
+      <h2 id="modal-title">Create New Secret</h2>
       <form onSubmit={handleSubmit}>
         <div>
           <label htmlFor="name">Secret Name</label>
           <input
             id="name"
+            ref={nameInputRef}
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g., Production Stripe Key"
+            aria-describedby={errors.name ? 'name-error' : undefined}
+            aria-invalid={!!errors.name}
           />
-          {errors.name && <p className="error">{errors.name}</p>}
+          {errors.name && <p id="name-error" className="error">{errors.name}</p>}
         </div>
 
         <div>
@@ -79,6 +95,8 @@ export const CreateSecretModal: React.FC<CreateSecretModalProps> = ({
             id="type"
             value={secretType}
             onChange={(e) => setSecretType(e.target.value as SecretType)}
+            aria-describedby={errors.secretType ? 'type-error' : undefined}
+            aria-invalid={!!errors.secretType}
           >
             {SECRET_TYPES.map((type) => (
               <option key={type.value} value={type.value}>
@@ -86,7 +104,7 @@ export const CreateSecretModal: React.FC<CreateSecretModalProps> = ({
               </option>
             ))}
           </select>
-          {errors.secretType && <p className="error">{errors.secretType}</p>}
+          {errors.secretType && <p id="type-error" className="error">{errors.secretType}</p>}
         </div>
 
         <div>
@@ -96,15 +114,17 @@ export const CreateSecretModal: React.FC<CreateSecretModalProps> = ({
             type="date"
             value={expiresAt}
             onChange={(e) => setExpiresAt(e.target.value)}
+            aria-describedby={errors.expiresAt ? 'expires-error' : undefined}
+            aria-invalid={!!errors.expiresAt}
           />
-          {errors.expiresAt && <p className="error">{errors.expiresAt}</p>}
+          {errors.expiresAt && <p id="expires-error" className="error">{errors.expiresAt}</p>}
         </div>
 
         <div className="modal-actions">
-          <button type="button" onClick={onClose}>
+          <button type="button" onClick={onClose} aria-label="Cancel creating secret">
             Cancel
           </button>
-          <button type="submit">Create Secret</button>
+          <button type="submit" aria-label="Create secret with provided details">Create Secret</button>
         </div>
       </form>
     </dialog>
