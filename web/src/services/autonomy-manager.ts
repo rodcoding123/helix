@@ -8,6 +8,8 @@ import type {
   AutonomySettings,
 } from '@/lib/types/agents';
 import { DiscordLoggerService } from './discord-logger';
+import { OpenClawGatewayService } from './openclaw-gateway';
+import { AgentService } from './agent';
 
 /**
  * AutonomyManagerService: Manages the approval workflow and autonomy levels
@@ -16,6 +18,8 @@ import { DiscordLoggerService } from './discord-logger';
 export class AutonomyManagerService {
   private supabase: SupabaseClient | null = null;
   private discordLogger: DiscordLoggerService | null = null;
+  private openclawGateway: OpenClawGatewayService | null = null;
+  private agentService: AgentService | null = null;
 
   private async getSupabaseClient(): Promise<SupabaseClient> {
     if (this.supabase) return this.supabase;
@@ -32,6 +36,20 @@ export class AutonomyManagerService {
       this.discordLogger = new DiscordLoggerService();
     }
     return this.discordLogger;
+  }
+
+  private getOpenClawGateway(): OpenClawGatewayService {
+    if (!this.openclawGateway) {
+      this.openclawGateway = new OpenClawGatewayService();
+    }
+    return this.openclawGateway;
+  }
+
+  private getAgentService(): AgentService {
+    if (!this.agentService) {
+      this.agentService = new AgentService();
+    }
+    return this.agentService;
   }
 
   /**
@@ -291,17 +309,159 @@ export class AutonomyManagerService {
       const action = actionData;
 
       try {
-        // In a real implementation, this would:
-        // 1. Execute the actual action based on action_type
-        // 2. Capture the result/error
-        // 3. Log to Discord
-        // For now, we'll just mark it as executed
-
-        const result = {
+        // Execute action based on type
+        let result: Record<string, unknown> = {
           executed: true,
           timestamp: new Date(),
           message: `${action.action_type} executed successfully`,
         };
+
+        switch (action.action_type) {
+          case 'agent_creation': {
+            // Extract agent details from action description
+            const agentMatch = action.action_description.match(
+              /Create agent "([^"]+)" with role "([^"]+)"/
+            );
+            if (agentMatch) {
+              const agentService = this.getAgentService();
+              const newAgent = await agentService.createAgent(
+                userId,
+                agentMatch[1],
+                agentMatch[2],
+                action.action_description,
+                'autonomy_action'
+              );
+              result = {
+                ...result,
+                agentId: newAgent.id,
+                agentName: newAgent.name,
+                agentRole: newAgent.role,
+              };
+            }
+            break;
+          }
+
+          case 'agent_autonomy_upgrade': {
+            // Extract agent ID and new autonomy level
+            const agentMatch = action.action_description.match(
+              /Upgrade agent ([a-f0-9-]+) autonomy to level (\d)/
+            );
+            if (agentMatch && action.agent_id) {
+              const agentService = this.getAgentService();
+              const level = parseInt(agentMatch[2]) as 0 | 1 | 2 | 3;
+              const updatedAgent = await agentService.setAgentAutonomy(
+                action.agent_id,
+                userId,
+                level
+              );
+              result = {
+                ...result,
+                agentId: updatedAgent.id,
+                newAutonomyLevel: updatedAgent.autonomy_level,
+              };
+            }
+            break;
+          }
+
+          case 'tool_execution': {
+            // Execute tool via OpenClaw gateway
+            const toolMatch = action.action_description.match(
+              /Execute tool "([^"]+)"(?: with (.+))?/
+            );
+            if (toolMatch) {
+              const toolName = toolMatch[1];
+              const parameters = toolMatch[2]
+                ? JSON.parse(`{${toolMatch[2]}}`)
+                : {};
+
+              const openclaw = this.getOpenClawGateway();
+              const executionResult = await openclaw.executeTool(
+                toolName,
+                parameters
+              );
+
+              if (executionResult.success) {
+                result = {
+                  ...result,
+                  toolName,
+                  toolOutput: executionResult.output,
+                };
+              } else {
+                throw new Error(
+                  executionResult.error || 'Tool execution failed'
+                );
+              }
+            }
+            break;
+          }
+
+          case 'skill_creation': {
+            // Register new skill with OpenClaw
+            const skillMatch = action.action_description.match(
+              /Register skill "([^"]+)": (.+)/
+            );
+            if (skillMatch) {
+              const skillName = skillMatch[1];
+              const skillDescription = skillMatch[2];
+
+              const openclaw = this.getOpenClawGateway();
+              const skillResult = await openclaw.registerSkill(
+                skillName,
+                skillDescription,
+                []
+              );
+
+              if (skillResult.success) {
+                result = {
+                  ...result,
+                  skillName,
+                  skillRegistered: true,
+                };
+              } else {
+                throw new Error(skillResult.error || 'Skill registration failed');
+              }
+            }
+            break;
+          }
+
+          case 'code_edit': {
+            // Propose code modifications
+            const codeMatch = action.action_description.match(
+              /Modify file "([^"]+)": (.+)/
+            );
+            if (codeMatch) {
+              const filePath = codeMatch[1];
+              const changes = codeMatch[2];
+
+              const openclaw = this.getOpenClawGateway();
+              const codeResult = await openclaw.proposeCodeModification(
+                filePath,
+                changes,
+                'Proposed by Helix autonomy action'
+              );
+
+              if (codeResult.success) {
+                result = {
+                  ...result,
+                  filePath,
+                  modificationProposed: true,
+                  output: codeResult.output,
+                };
+              } else {
+                throw new Error(codeResult.error || 'Code modification failed');
+              }
+            }
+            break;
+          }
+
+          // Add more action types as needed
+          default:
+            // For unknown action types, just log success
+            result = {
+              ...result,
+              message: `Action type "${action.action_type}" executed (no specific handler)`,
+            };
+        }
 
         const { error: updateError } = await supabase
           .from('autonomy_actions')

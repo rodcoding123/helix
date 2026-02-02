@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AgentService } from './agent';
-import type { Agent, AgentPersonality } from '@/lib/types/agents';
+import type { AgentPersonality } from '@/lib/types/agents';
 
 // Mock Supabase
 vi.mock('@supabase/supabase-js', () => {
@@ -227,7 +227,13 @@ describe('AgentService', () => {
         ],
         primary_emotion: 'neutral',
         secondary_emotions: [],
-        emotional_dimensions: {},
+        emotional_dimensions: {
+          valence: 0.5,
+          arousal: 0.3,
+          dominance: 0.5,
+          novelty: 0.2,
+          self_relevance: 0.4,
+        },
         topics: ['greeting'],
       };
 

@@ -1,11 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AutonomyManagerService } from './autonomy-manager';
-import type { AutonomySettings } from '@/lib/types/agents';
 
 // Mock Supabase
 vi.mock('@supabase/supabase-js', () => ({
   createClient: vi.fn(() => ({
-    from: vi.fn((table) => ({
+    from: vi.fn((_table) => ({
       insert: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({
