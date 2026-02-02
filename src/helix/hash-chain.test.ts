@@ -14,6 +14,7 @@ import {
   startHashChainScheduler,
   stopHashChainScheduler,
   setHashChainFailClosedMode,
+  verifyAgainstDiscord,
 } from './hash-chain.js';
 
 // Mock fs and fetch
@@ -458,5 +459,628 @@ describe('Hash Chain - Edge Cases', () => {
     }
     const hash = computeEntryHash('2024-01-15T10:30:00.000Z', 'prev', manyStates);
     expect(hash).toHaveLength(64);
+  });
+});
+
+describe('Hash Chain - Fail-Closed Mode', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+    vi.mocked(fs.readFile).mockRejectedValue(new Error('ENOENT'));
+    vi.mocked(fs.appendFile).mockResolvedValue(undefined);
+    vi.mocked(fs.mkdir).mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    // Restore fail-open mode for other tests
+    setHashChainFailClosedMode(false);
+  });
+
+  it('should handle Discord webhook failures differently in fail-closed vs fail-open mode', async () => {
+    // Test fail-closed mode throws
+    setHashChainFailClosedMode(true);
+    mockFetch.mockRejectedValueOnce(new Error('Network error'));
+    process.env.DISCORD_WEBHOOK_HASH_CHAIN = 'https://discord.com/api/webhooks/test';
+
+    await expect(createHashChainEntry()).rejects.toThrow();
+
+    // Test fail-open mode continues
+    setHashChainFailClosedMode(false);
+    mockFetch.mockRejectedValueOnce(new Error('Network error'));
+
+    const entry = await createHashChainEntry();
+    expect(entry).toBeDefined();
+  });
+
+  it('should throw when Discord returns non-ok status in fail-closed mode', async () => {
+    setHashChainFailClosedMode(true);
+    mockFetch.mockResolvedValue({ ok: false, status: 500 });
+
+    process.env.DISCORD_WEBHOOK_HASH_CHAIN = 'https://discord.com/api/webhooks/test';
+
+    await expect(createHashChainEntry()).rejects.toThrow('integrity compromised');
+  });
+
+  it('should throw when Discord is unreachable in fail-closed mode', async () => {
+    setHashChainFailClosedMode(true);
+    mockFetch.mockRejectedValue(new Error('Network error'));
+
+    process.env.DISCORD_WEBHOOK_HASH_CHAIN = 'https://discord.com/api/webhooks/test';
+
+    await expect(createHashChainEntry()).rejects.toThrow('Discord unreachable');
+  });
+
+  it('should not throw in fail-open mode when Discord fails', async () => {
+    setHashChainFailClosedMode(false);
+    mockFetch.mockResolvedValue({ ok: false, status: 500 });
+
+    process.env.DISCORD_WEBHOOK_HASH_CHAIN = 'https://discord.com/api/webhooks/test';
+
+    const entry = await createHashChainEntry();
+    expect(entry).toBeDefined();
+  });
+
+  it('should prevent disabling fail-closed mode in production', () => {
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+
+    expect(() => setHashChainFailClosedMode(false)).toThrow('SECURITY ERROR');
+
+    process.env.NODE_ENV = originalEnv;
+  });
+
+  it('should allow enabling fail-closed mode in production', () => {
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+
+    expect(() => setHashChainFailClosedMode(true)).not.toThrow();
+
+    process.env.NODE_ENV = originalEnv;
+  });
+});
+
+describe('Hash Chain - Discord Integration', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    setHashChainFailClosedMode(false);
+    vi.mocked(fs.readFile).mockRejectedValue(new Error('ENOENT'));
+    vi.mocked(fs.appendFile).mockResolvedValue(undefined);
+    vi.mocked(fs.mkdir).mockResolvedValue(undefined);
+    process.env.DISCORD_WEBHOOK_HASH_CHAIN = 'https://discord.com/api/webhooks/test/token';
+  });
+
+  it('should send formatted embed to Discord', async () => {
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+
+    await createHashChainEntry();
+
+    // Just verify fetch was called with the correct webhook URL pattern
+    expect(mockFetch).toHaveBeenCalled();
+    expect(mockFetch.mock.calls[0][0]).toContain('discord.com/api/webhooks');
+
+    const payload = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(payload.embeds).toHaveLength(1);
+    expect(payload.embeds[0].title).toBe('🔗 Hash Chain Entry');
+    expect(payload.embeds[0].color).toBe(0x9b59b6);
+    expect(payload.embeds[0].fields).toBeDefined();
+  });
+
+  it('should include sequence number in Discord embed', async () => {
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+
+    await createHashChainEntry();
+
+    const payload = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const sequenceField = payload.embeds[0].fields.find((f: any) => f.name === 'Sequence');
+    expect(sequenceField).toBeDefined();
+    expect(sequenceField.value).toContain('#');
+  });
+
+  it('should include entry hash in Discord embed', async () => {
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+
+    await createHashChainEntry();
+
+    const payload = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const hashField = payload.embeds[0].fields.find((f: any) => f.name === 'Entry Hash');
+    expect(hashField).toBeDefined();
+    expect(hashField.value).toContain('...');
+  });
+
+  it('should include previous hash in Discord embed', async () => {
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+
+    await createHashChainEntry();
+
+    const payload = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const prevField = payload.embeds[0].fields.find((f: any) => f.name === 'Previous Hash');
+    expect(prevField).toBeDefined();
+  });
+
+  it('should include log states in Discord embed', async () => {
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+
+    await createHashChainEntry();
+
+    const payload = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const logStatesField = payload.embeds[0].fields.find((f: any) => f.name === 'Log States');
+    expect(logStatesField).toBeDefined();
+  });
+
+  it('should include timestamp in Discord embed', async () => {
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+
+    await createHashChainEntry();
+
+    const payload = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(payload.embeds[0].timestamp).toBeDefined();
+  });
+
+  it('should include fail-closed footer in Discord embed', async () => {
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+
+    await createHashChainEntry();
+
+    const payload = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(payload.embeds[0].footer.text).toContain('fail-closed');
+  });
+});
+
+describe('Hash Chain - Chain Reconstruction', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    setHashChainFailClosedMode(false);
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+    vi.mocked(fs.appendFile).mockResolvedValue(undefined);
+    vi.mocked(fs.mkdir).mockResolvedValue(undefined);
+  });
+
+  it('should reconstruct chain from multiple entries', async () => {
+    const entry1 = {
+      timestamp: '2024-01-15T10:00:00.000Z',
+      previousHash: 'GENESIS',
+      logStates: { 'a.log': 'hash1' },
+      entryHash: computeEntryHash('2024-01-15T10:00:00.000Z', 'GENESIS', { 'a.log': 'hash1' }),
+      sequence: 0,
+    };
+    const entry2 = {
+      timestamp: '2024-01-15T10:05:00.000Z',
+      previousHash: entry1.entryHash,
+      logStates: { 'a.log': 'hash2' },
+      entryHash: computeEntryHash('2024-01-15T10:05:00.000Z', entry1.entryHash, {
+        'a.log': 'hash2',
+      }),
+      sequence: 1,
+    };
+    const entry3 = {
+      timestamp: '2024-01-15T10:10:00.000Z',
+      previousHash: entry2.entryHash,
+      logStates: { 'a.log': 'hash3' },
+      entryHash: computeEntryHash('2024-01-15T10:10:00.000Z', entry2.entryHash, {
+        'a.log': 'hash3',
+      }),
+      sequence: 2,
+    };
+
+    const chainContent =
+      JSON.stringify(entry1) + '\n' + JSON.stringify(entry2) + '\n' + JSON.stringify(entry3) + '\n';
+    vi.mocked(fs.readFile).mockResolvedValue(chainContent);
+
+    const result = await verifyChain();
+
+    expect(result.valid).toBe(true);
+    expect(result.entries).toBe(3);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('should handle chain with whitespace lines', async () => {
+    const entry = {
+      timestamp: '2024-01-15T10:00:00.000Z',
+      previousHash: 'GENESIS',
+      logStates: { 'a.log': 'hash1' },
+      entryHash: computeEntryHash('2024-01-15T10:00:00.000Z', 'GENESIS', { 'a.log': 'hash1' }),
+      sequence: 0,
+    };
+
+    const chainContent = '\n\n' + JSON.stringify(entry) + '\n\n\n';
+    vi.mocked(fs.readFile).mockResolvedValue(chainContent);
+
+    const result = await verifyChain();
+
+    expect(result.valid).toBe(true);
+    expect(result.entries).toBe(1);
+  });
+
+  it('should detect tampering in middle of long chain', async () => {
+    const entries = [];
+    let prevHash = 'GENESIS';
+
+    for (let i = 0; i < 10; i++) {
+      const timestamp = `2024-01-15T10:${i.toString().padStart(2, '0')}:00.000Z`;
+      const logStates = { 'a.log': `hash${i}` };
+      const entryHash = computeEntryHash(timestamp, prevHash, logStates);
+
+      entries.push({
+        timestamp,
+        previousHash: prevHash,
+        logStates,
+        entryHash: i === 5 ? 'TAMPERED' : entryHash, // Tamper entry 5
+        sequence: i,
+      });
+
+      prevHash = i === 5 ? 'TAMPERED' : entryHash;
+    }
+
+    const chainContent = entries.map(e => JSON.stringify(e)).join('\n');
+    vi.mocked(fs.readFile).mockResolvedValue(chainContent);
+
+    const result = await verifyChain();
+
+    expect(result.valid).toBe(false);
+    expect(result.errors.length).toBeGreaterThan(0);
+    expect(result.errors.some(e => e.includes('Entry 5'))).toBe(true);
+  });
+
+  it('should get correct state from multi-entry chain', async () => {
+    const entries = [];
+    let prevHash = 'GENESIS';
+
+    for (let i = 0; i < 5; i++) {
+      const timestamp = `2024-01-15T10:${i.toString().padStart(2, '0')}:00.000Z`;
+      const logStates = { 'a.log': `hash${i}` };
+      const entryHash = computeEntryHash(timestamp, prevHash, logStates);
+
+      entries.push({
+        timestamp,
+        previousHash: prevHash,
+        logStates,
+        entryHash,
+        sequence: i,
+      });
+
+      prevHash = entryHash;
+    }
+
+    const chainContent = entries.map(e => JSON.stringify(e)).join('\n');
+    vi.mocked(fs.readFile).mockResolvedValue(chainContent);
+
+    const state = await getChainState();
+
+    expect(state.lastHash).toBe(entries[4].entryHash);
+    expect(state.sequence).toBe(5); // Next sequence
+    expect(state.entries).toBe(5);
+  });
+});
+
+describe('Hash Chain - Environment Configuration', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    setHashChainFailClosedMode(false);
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+    vi.mocked(fs.appendFile).mockResolvedValue(undefined);
+    vi.mocked(fs.mkdir).mockResolvedValue(undefined);
+  });
+
+  it('should use HELIX_LOG_FILES environment variable', async () => {
+    const originalEnv = process.env.HELIX_LOG_FILES;
+    process.env.HELIX_LOG_FILES = '/custom/log1.log,/custom/log2.log';
+
+    vi.mocked(fs.readFile).mockImplementation((path: any) => {
+      if (path.includes('hash_chain.log')) {
+        return Promise.reject(new Error('ENOENT'));
+      }
+      return Promise.resolve(Buffer.from('test log content'));
+    });
+
+    const states = await hashLogFiles();
+
+    expect(states['log1.log']).toBeDefined();
+    expect(states['log2.log']).toBeDefined();
+
+    if (originalEnv) {
+      process.env.HELIX_LOG_FILES = originalEnv;
+    } else {
+      delete process.env.HELIX_LOG_FILES;
+    }
+  });
+
+  it('should handle missing environment-specified log files', async () => {
+    const originalEnv = process.env.HELIX_LOG_FILES;
+    process.env.HELIX_LOG_FILES = '/missing/log.log';
+
+    vi.mocked(fs.readFile).mockRejectedValue(new Error('ENOENT'));
+
+    const states = await hashLogFiles();
+
+    expect(states['log.log']).toBe('MISSING');
+
+    if (originalEnv) {
+      process.env.HELIX_LOG_FILES = originalEnv;
+    } else {
+      delete process.env.HELIX_LOG_FILES;
+    }
+  });
+});
+
+describe('Hash Chain - Discord Verification', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    delete process.env.DISCORD_BOT_TOKEN;
+    delete process.env.DISCORD_HASH_CHAIN_CHANNEL_ID;
+  });
+
+  it('should handle empty chain verification', async () => {
+    vi.mocked(fs.readFile).mockResolvedValue('');
+
+    const result = await verifyAgainstDiscord();
+
+    expect(result.localEntries).toBe(0);
+    expect(result.message).toContain('empty');
+  });
+
+  it('should provide manual verification steps when bot token not available', async () => {
+    const entry = {
+      timestamp: '2024-01-15T10:00:00.000Z',
+      previousHash: 'GENESIS',
+      logStates: { 'a.log': 'hash1' },
+      entryHash: 'abc123def456',
+      sequence: 0,
+    };
+
+    vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(entry));
+
+    const result = await verifyAgainstDiscord();
+
+    expect(result.method).toBe('manual');
+    expect(result.verified).toBe(false);
+    expect(result.verificationSteps).toBeDefined();
+    expect(result.verificationSteps!.length).toBeGreaterThan(0);
+    expect(result.verificationSteps![0]).toContain('Discord');
+  });
+
+  it('should include local hashes in manual verification steps', async () => {
+    const entry1 = {
+      timestamp: '2024-01-15T10:00:00.000Z',
+      previousHash: 'GENESIS',
+      logStates: { 'a.log': 'hash1' },
+      entryHash: 'abc123def456',
+      sequence: 0,
+    };
+    const entry2 = {
+      timestamp: '2024-01-15T10:05:00.000Z',
+      previousHash: 'abc123def456',
+      logStates: { 'a.log': 'hash2' },
+      entryHash: 'def456ghi789',
+      sequence: 1,
+    };
+
+    const chainContent = JSON.stringify(entry1) + '\n' + JSON.stringify(entry2);
+    vi.mocked(fs.readFile).mockResolvedValue(chainContent);
+
+    const result = await verifyAgainstDiscord();
+
+    expect(result.verificationSteps).toBeDefined();
+    expect(result.verificationSteps!.some(step => step.includes('abc123'))).toBe(true);
+    expect(result.verificationSteps!.some(step => step.includes('def456'))).toBe(true);
+  });
+
+  it('should perform automatic verification when bot token available', async () => {
+    process.env.DISCORD_BOT_TOKEN = 'test-bot-token';
+    process.env.DISCORD_HASH_CHAIN_CHANNEL_ID = '123456789';
+
+    const entry = {
+      timestamp: '2024-01-15T10:00:00.000Z',
+      previousHash: 'GENESIS',
+      logStates: { 'a.log': 'hash1' },
+      entryHash: 'abc123def456ghi789',
+      sequence: 0,
+    };
+
+    vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(entry));
+
+    // Mock Discord API response
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => [
+        {
+          embeds: [
+            {
+              fields: [
+                { name: 'Entry Hash', value: '`abc123def456ghi789...`' },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const result = await verifyAgainstDiscord();
+
+    expect(result.method).toBe('automatic');
+    expect(mockFetch).toHaveBeenCalledWith(
+      'https://discord.com/api/v10/channels/123456789/messages?limit=100',
+      expect.objectContaining({
+        headers: { Authorization: 'Bot test-bot-token' },
+      })
+    );
+  });
+
+  it('should use automatic verification mode when bot token available', async () => {
+    process.env.DISCORD_BOT_TOKEN = 'test-bot-token';
+    process.env.DISCORD_HASH_CHAIN_CHANNEL_ID = '123456789';
+
+    const entry = {
+      timestamp: '2024-01-15T10:00:00.000Z',
+      previousHash: 'GENESIS',
+      logStates: { 'a.log': 'hash1' },
+      entryHash: 'abc123def456ghi789jkl012mno3456789abcdef1234567890',
+      sequence: 0,
+    };
+
+    vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(entry));
+
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => [],
+    });
+
+    const result = await verifyAgainstDiscord();
+
+    // Should use automatic mode and call Discord API
+    expect(result.method).toBe('automatic');
+    expect(mockFetch).toHaveBeenCalledWith(
+      'https://discord.com/api/v10/channels/123456789/messages?limit=100',
+      expect.objectContaining({
+        headers: { Authorization: 'Bot test-bot-token' },
+      })
+    );
+  });
+
+  it('should detect mismatches in automatic verification', async () => {
+    process.env.DISCORD_BOT_TOKEN = 'test-bot-token';
+    process.env.DISCORD_HASH_CHAIN_CHANNEL_ID = '123456789';
+
+    const entry = {
+      timestamp: '2024-01-15T10:00:00.000Z',
+      previousHash: 'GENESIS',
+      logStates: { 'a.log': 'hash1' },
+      entryHash: 'abc123def456ghi789jkl012mno345',
+      sequence: 0,
+    };
+
+    vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(entry));
+
+    // Discord has different hash
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => [
+        {
+          embeds: [
+            {
+              fields: [
+                { name: 'Entry Hash', value: '`xyz789different_hash_value...`' },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const result = await verifyAgainstDiscord();
+
+    expect(result.verified).toBe(false);
+    expect(result.mismatches.length).toBeGreaterThan(0);
+    expect(result.mismatches[0]).toContain('not found in Discord');
+    expect(result.message).toContain('tampering');
+  });
+
+  it('should handle Discord API errors gracefully', async () => {
+    process.env.DISCORD_BOT_TOKEN = 'test-bot-token';
+    process.env.DISCORD_HASH_CHAIN_CHANNEL_ID = '123456789';
+
+    const entry = {
+      timestamp: '2024-01-15T10:00:00.000Z',
+      previousHash: 'GENESIS',
+      logStates: { 'a.log': 'hash1' },
+      entryHash: 'abc123',
+      sequence: 0,
+    };
+
+    vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(entry));
+
+    mockFetch.mockRejectedValue(new Error('Network error'));
+
+    const result = await verifyAgainstDiscord();
+
+    expect(result.verified).toBe(false);
+    expect(result.message).toContain('Discord API error');
+  });
+
+  it('should handle Discord API non-ok responses', async () => {
+    process.env.DISCORD_BOT_TOKEN = 'test-bot-token';
+    process.env.DISCORD_HASH_CHAIN_CHANNEL_ID = '123456789';
+
+    const entry = {
+      timestamp: '2024-01-15T10:00:00.000Z',
+      previousHash: 'GENESIS',
+      logStates: { 'a.log': 'hash1' },
+      entryHash: 'abc123',
+      sequence: 0,
+    };
+
+    vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(entry));
+
+    mockFetch.mockResolvedValue({ ok: false, status: 403 });
+
+    const result = await verifyAgainstDiscord();
+
+    expect(result.verified).toBe(false);
+    expect(result.method).toBe('manual'); // Falls back to manual
+  });
+
+  it('should count Discord entries in automatic verification', async () => {
+    process.env.DISCORD_BOT_TOKEN = 'test-bot-token';
+    process.env.DISCORD_HASH_CHAIN_CHANNEL_ID = '123456789';
+
+    const entry = {
+      timestamp: '2024-01-15T10:00:00.000Z',
+      previousHash: 'GENESIS',
+      logStates: { 'a.log': 'hash1' },
+      entryHash: 'abc123',
+      sequence: 0,
+    };
+
+    vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(entry));
+
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => [
+        { embeds: [{ fields: [{ name: 'Entry Hash', value: '`hash1...`' }] }] },
+        { embeds: [{ fields: [{ name: 'Entry Hash', value: '`hash2...`' }] }] },
+        { embeds: [{ fields: [{ name: 'Entry Hash', value: '`hash3...`' }] }] },
+      ],
+    });
+
+    const result = await verifyAgainstDiscord();
+
+    expect(result.discordEntries).toBe(3);
+  });
+
+  it('should handle messages without embeds in Discord response', async () => {
+    process.env.DISCORD_BOT_TOKEN = 'test-bot-token';
+    process.env.DISCORD_HASH_CHAIN_CHANNEL_ID = '123456789';
+
+    const entry = {
+      timestamp: '2024-01-15T10:00:00.000Z',
+      previousHash: 'GENESIS',
+      logStates: { 'a.log': 'hash1' },
+      entryHash: 'abc123',
+      sequence: 0,
+    };
+
+    vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(entry));
+
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => [
+        { embeds: [] }, // No embeds
+        { embeds: undefined }, // Missing embeds
+        {}, // No embeds property
+      ],
+    });
+
+    const result = await verifyAgainstDiscord();
+
+    // Should not crash, just not find matching hashes
+    expect(result.verified).toBe(false);
+  });
+
+  it('should handle chain file read errors', async () => {
+    vi.mocked(fs.readFile).mockRejectedValue(new Error('Permission denied'));
+
+    const result = await verifyAgainstDiscord();
+
+    expect(result.verified).toBe(false);
+    expect(result.message).toContain('Failed to read local chain');
   });
 });

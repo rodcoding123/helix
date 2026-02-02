@@ -40,6 +40,44 @@
   color: #6b7280;
 }
 
+/* Header Buttons */
+.header-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.header-buttons .btn {
+  flex: 1;
+  min-width: 140px;
+}
+
+/* Skill Card Actions */
+.skill-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.skill-card-actions .btn {
+  flex: 1;
+}
+
+/* Execute Actions */
+.execute-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.execute-actions .btn {
+  flex: 1;
+  min-width: 140px;
+}
+
 /* Search Bar */
 .skills-search {
   display: flex;

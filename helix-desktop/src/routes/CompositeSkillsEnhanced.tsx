@@ -3,9 +3,10 @@
  * Build complex multi-step workflows by chaining tools together
  */
 
-import { useEffect, useState } from 'react';
-import { Plus, Search, Loader, X, Trash2, ChevronDown, Play } from 'lucide-react';
+import { useEffect, useState, memo } from 'react';
+import { Plus, Search, Loader, X, Trash2, ChevronDown, Play, Download, Upload, Save } from 'lucide-react';
 import { useCompositeSkills } from '../hooks/useCompositeSkills';
+import { useTauriFileOps } from '../hooks/useTauriFileOps';
 import '../components/skills/SkillsEnhanced.css';
 
 interface SkillStep {
@@ -18,6 +19,38 @@ interface SkillStep {
   errorHandling?: 'stop' | 'continue' | 'retry';
 }
 
+// Memoized skill card component for performance
+interface SkillCardProps {
+  skill: any;
+  onExecute: (skill: any) => void;
+  onExport: (skill: any) => void;
+  onDelete: (skillId: string) => void;
+  tauriLoading: boolean;
+}
+
+const SkillCard = memo(({ skill, onExecute, onExport, onDelete, tauriLoading }: SkillCardProps) => (
+  <div className="skill-card">
+    <h3 className="skill-name">{skill.name}</h3>
+    <p className="skill-desc">{skill.description || 'No description'}</p>
+    <div className="skill-stats">
+      <span>{skill.steps.length} steps</span>
+      <span>Executed {skill.executionCount || 0}x</span>
+    </div>
+    <div className="skill-card-actions">
+      <button className="btn btn-primary" onClick={() => onExecute(skill)} disabled={tauriLoading}>
+        <Play size={16} />
+        Execute
+      </button>
+      <button className="btn btn-icon" title="Export" onClick={() => onExport(skill)} disabled={tauriLoading}>
+        <Download size={16} />
+      </button>
+      <button className="btn btn-icon btn-danger" title="Delete" onClick={() => onDelete(skill.id)}>
+        <Trash2 size={18} />
+      </button>
+    </div>
+  </div>
+));
+
 export default function CompositeSkillsEnhanced() {
   const {
     compositeSkills,
@@ -28,6 +61,14 @@ export default function CompositeSkillsEnhanced() {
     createCompositeSkill,
     executeSkill
   } = useCompositeSkills();
+
+  const {
+    exportSkill,
+    importSkill,
+    saveResult,
+    notify,
+    isLoading: tauriLoading
+  } = useTauriFileOps();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showBuilder, setShowBuilder] = useState(false);
@@ -76,6 +117,11 @@ export default function CompositeSkillsEnhanced() {
 
   const handleRemoveStep = (stepId: string) => {
     setSteps(steps.filter(s => s.stepId !== stepId));
+  };
+
+  const handleDeleteSkill = (skillId: string) => {
+    // Delete skill - implementation would call backend
+    console.log('Delete skill:', skillId);
   };
 
   const handleMoveStep = (stepId: string, direction: 'up' | 'down') => {
@@ -150,10 +196,30 @@ export default function CompositeSkillsEnhanced() {
               <p>Build multi-step workflows by chaining tools together</p>
             </div>
           </div>
-          <button className="btn btn-primary btn-lg" onClick={() => setShowBuilder(true)}>
-            <Plus size={20} />
-            New Skill
-          </button>
+          <div className="header-buttons">
+            <button className="btn btn-primary btn-lg" onClick={() => setShowBuilder(true)}>
+              <Plus size={20} />
+              New Skill
+            </button>
+            <button
+              className="btn btn-secondary btn-lg"
+              onClick={async () => {
+                try {
+                  const content = await importSkill();
+                  if (content) {
+                    const skillData = JSON.parse(content);
+                    await createCompositeSkill(skillData);
+                  }
+                } catch (err) {
+                  await notify('Import Failed', err instanceof Error ? err.message : 'Failed to import skill', 'error');
+                }
+              }}
+              disabled={tauriLoading}
+            >
+              <Upload size={20} />
+              Import Skill
+            </button>
+          </div>
         </div>
 
         <div className="skills-search">
@@ -182,24 +248,17 @@ export default function CompositeSkillsEnhanced() {
             </div>
           ) : (
             filteredSkills.map(skill => (
-              <div key={skill.id} className="skill-card">
-                <h3 className="skill-name">{skill.name}</h3>
-                <p className="skill-desc">{skill.description || 'No description'}</p>
-                <div className="skill-stats">
-                  <span>{skill.steps.length} steps</span>
-                  <span>Executed {skill.executionCount || 0}x</span>
-                </div>
-                <button
-                  className="btn btn-primary"
-                  onClick={() => {
-                    setSelectedSkill(skill);
-                    setShowExecute(true);
-                  }}
-                >
-                  <Play size={16} />
-                  Execute
-                </button>
-              </div>
+              <SkillCard
+                key={skill.id}
+                skill={skill}
+                onExecute={(s) => {
+                  setSelectedSkill(s);
+                  setShowExecute(true);
+                }}
+                onExport={exportSkill}
+                onDelete={handleDeleteSkill}
+                tauriLoading={tauriLoading}
+              />
             ))
           )}
         </div>
@@ -435,19 +494,29 @@ export default function CompositeSkillsEnhanced() {
             <div className="step-count">Workflow: {selectedSkill.steps.length} steps</div>
           </div>
 
-          <button
-            className="btn btn-primary btn-lg"
-            onClick={async () => {
-              try {
-                await executeSkill(selectedSkill.id);
-              } catch (err) {
-                console.error('Execution failed:', err);
-              }
-            }}
-          >
-            <Play size={20} />
-            Run Workflow
-          </button>
+          <div className="execute-actions">
+            <button
+              className="btn btn-primary btn-lg"
+              onClick={async () => {
+                try {
+                  await executeSkill(selectedSkill.id);
+                } catch (err) {
+                  console.error('Execution failed:', err);
+                }
+              }}
+            >
+              <Play size={20} />
+              Run Workflow
+            </button>
+            <button
+              className="btn btn-secondary"
+              onClick={() => saveResult(selectedSkill, selectedSkill.name, 'skill')}
+              disabled={tauriLoading}
+            >
+              <Save size={16} />
+              Save Skill
+            </button>
+          </div>
         </div>
       </div>
     );

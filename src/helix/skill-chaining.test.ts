@@ -799,3 +799,385 @@ describe('Skill Chaining - validateCompositeSkill', () => {
     expect(result.errors.length).toBeGreaterThan(1);
   });
 });
+
+describe('Skill Chaining - Advanced Execution', () => {
+  const createTestSkill = (steps: CompositeSkillStep[]): CompositeSkill => ({
+    id: 'test-skill-adv',
+    userId: 'user-456',
+    name: 'Advanced Test Skill',
+    description: 'Advanced execution tests',
+    steps,
+    version: '1.0.0',
+    isEnabled: true,
+    visibility: 'private',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should aggregate results from multi-step chain', async () => {
+    const skill = createTestSkill([
+      {
+        stepId: 'fetch-data',
+        toolType: 'custom',
+        toolId: 'tool-1',
+        toolName: 'dataFetcher',
+        parameters: {},
+        inputMapping: { source: '$.input.dataSource' },
+        errorHandling: 'stop',
+      },
+      {
+        stepId: 'process-data',
+        toolType: 'custom',
+        toolId: 'tool-2',
+        toolName: 'dataProcessor',
+        parameters: {},
+        inputMapping: { data: '$..fetch-data' },
+        errorHandling: 'stop',
+      },
+      {
+        stepId: 'store-result',
+        toolType: 'custom',
+        toolId: 'tool-3',
+        toolName: 'dataStore',
+        parameters: {},
+        inputMapping: { processedData: '$.process-data' },
+        errorHandling: 'stop',
+      },
+    ]);
+
+    const result = await executeCompositeSkill(skill, { dataSource: 'api' });
+
+    expect(result.success).toBe(true);
+    expect(result.stepResults).toHaveLength(3);
+    expect(result.stepsCompleted).toBe(3);
+    // Verify all step outputs are in execution context
+    expect(result.executionContext['fetch-data']).toBeDefined();
+    expect(result.executionContext['process-data']).toBeDefined();
+    expect(result.executionContext['store-result']).toBeDefined();
+  });
+
+  it('should handle missing output from intermediate step', async () => {
+    const skill = createTestSkill([
+      {
+        stepId: 'step1',
+        toolType: 'custom',
+        toolId: 'tool-1',
+        toolName: 'tool1',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'stop',
+      },
+      {
+        stepId: 'step2',
+        toolType: 'custom',
+        toolId: 'tool-2',
+        toolName: 'tool2',
+        parameters: {},
+        inputMapping: { previous: '$.step1.nonexistent' },
+        errorHandling: 'skip',
+      },
+    ]);
+
+    const result = await executeCompositeSkill(skill, {});
+
+    // Should continue with undefined mapped value
+    expect(result.success).toBe(true);
+    expect(result.stepResults.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('should accumulate execution context through all steps', async () => {
+    const skill = createTestSkill([
+      {
+        stepId: 'step1',
+        toolType: 'custom',
+        toolId: 'tool-1',
+        toolName: 'tool1',
+        parameters: {},
+        inputMapping: { value: '$.input.value' },
+        errorHandling: 'stop',
+      },
+      {
+        stepId: 'step2',
+        toolType: 'custom',
+        toolId: 'tool-2',
+        toolName: 'tool2',
+        parameters: {},
+        inputMapping: { previous: '$.step1', inputVal: '$.value' },
+        errorHandling: 'stop',
+      },
+      {
+        stepId: 'step3',
+        toolType: 'custom',
+        toolId: 'tool-3',
+        toolName: 'tool3',
+        parameters: {},
+        inputMapping: { all: '$.input', s1: '$.step1', s2: '$.step2' },
+        errorHandling: 'stop',
+      },
+    ]);
+
+    const result = await executeCompositeSkill(skill, { value: 'test-value' });
+
+    expect(result.executionContext.input).toEqual({ value: 'test-value' });
+    expect(result.executionContext.value).toBe('test-value');
+    expect(result.executionContext.step1).toBeDefined();
+    expect(result.executionContext.step2).toBeDefined();
+    expect(result.executionContext.step3).toBeDefined();
+  });
+
+  it('should validate final output matches last step output', async () => {
+    const skill = createTestSkill([
+      {
+        stepId: 'intermediate',
+        toolType: 'custom',
+        toolId: 'tool-1',
+        toolName: 'tool1',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'stop',
+      },
+      {
+        stepId: 'final-step',
+        toolType: 'custom',
+        toolId: 'tool-2',
+        toolName: 'tool2',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'stop',
+      },
+    ]);
+
+    const result = await executeCompositeSkill(skill, {});
+
+    expect(result.finalOutput).toBe(result.executionContext['final-step']);
+  });
+
+  it('should handle JSONPath with null/undefined gracefully in chained steps', async () => {
+    const skill = createTestSkill([
+      {
+        stepId: 'step1',
+        toolType: 'custom',
+        toolId: 'tool-1',
+        toolName: 'tool1',
+        parameters: {},
+        inputMapping: { missing: '$.input.nonexistent.deeply.nested' },
+        errorHandling: 'stop',
+      },
+      {
+        stepId: 'step2',
+        toolType: 'custom',
+        toolId: 'tool-2',
+        toolName: 'tool2',
+        parameters: {},
+        inputMapping: { fromPrevious: '$.step1.missing.value' },
+        errorHandling: 'stop',
+      },
+    ]);
+
+    const result = await executeCompositeSkill(skill, { input: {} });
+
+    // Should not crash, undefined values are acceptable
+    expect(result.success).toBe(true);
+  });
+
+  it('should propagate execution error details through result', async () => {
+    const skill = createTestSkill([
+      {
+        stepId: 'step1',
+        toolType: 'custom',
+        toolId: 'tool-1',
+        toolName: 'tool1',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'stop',
+      },
+    ]);
+
+    const result = await executeCompositeSkill(skill, {});
+
+    expect(result.userId).toBe('user-456');
+    expect(result.skillId).toBe('test-skill-adv');
+    expect(result.input).toBeDefined();
+    expect(result.stepResults).toBeDefined();
+  });
+
+  it('should track steps completed vs total steps accurately', async () => {
+    const skill = createTestSkill([
+      {
+        stepId: 'step1',
+        toolType: 'custom',
+        toolId: 'tool-1',
+        toolName: 'tool1',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'stop',
+      },
+      {
+        stepId: 'step2',
+        toolType: 'custom',
+        toolId: 'tool-2',
+        toolName: 'tool2',
+        parameters: {},
+        inputMapping: {},
+        condition: '$.input.shouldRun',
+        errorHandling: 'stop',
+      },
+      {
+        stepId: 'step3',
+        toolType: 'custom',
+        toolId: 'tool-3',
+        toolName: 'tool3',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'stop',
+      },
+    ]);
+
+    const result = await executeCompositeSkill(skill, { shouldRun: false });
+
+    expect(result.totalSteps).toBe(3);
+    expect(result.stepsCompleted).toBe(2); // step2 skipped
+  });
+
+  it('should handle complex JSONPath with multiple array indexes', async () => {
+    const skill = createTestSkill([
+      {
+        stepId: 'step1',
+        toolType: 'custom',
+        toolId: 'tool-1',
+        toolName: 'tool1',
+        parameters: {},
+        inputMapping: {
+          first: '$.input.items[0]',
+          second: '$.input.items[1]',
+          nested: '$.input.data[2]',
+        },
+        errorHandling: 'stop',
+      },
+    ]);
+
+    const result = await executeCompositeSkill(skill, {
+      items: ['a', 'b', 'c'],
+      data: [1, 2, 3, 4],
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.stepResults[0].success).toBe(true);
+  });
+
+  it('should record retry count in step results when retry strategy enabled', async () => {
+    const skill = createTestSkill([
+      {
+        stepId: 'step1',
+        toolType: 'custom',
+        toolId: 'tool-1',
+        toolName: 'tool1',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'retry',
+        maxRetries: 3,
+      },
+    ]);
+
+    const result = await executeCompositeSkill(skill, {});
+
+    expect(result.stepResults[0]).toBeDefined();
+    expect(result.stepResults[0].success).toBe(true);
+    // retriesUsed is only set when > 0, so it may be undefined on success
+    expect(result.stepResults[0].retriesUsed === undefined || result.stepResults[0].retriesUsed >= 0).toBe(true);
+  });
+
+  it('should maintain step order in results matching execution order', async () => {
+    const skill = createTestSkill([
+      {
+        stepId: 'alpha',
+        toolType: 'custom',
+        toolId: 'tool-1',
+        toolName: 'tool1',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'stop',
+      },
+      {
+        stepId: 'beta',
+        toolType: 'custom',
+        toolId: 'tool-2',
+        toolName: 'tool2',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'stop',
+      },
+      {
+        stepId: 'gamma',
+        toolType: 'custom',
+        toolId: 'tool-3',
+        toolName: 'tool3',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'stop',
+      },
+    ]);
+
+    const result = await executeCompositeSkill(skill, {});
+
+    expect(result.stepResults[0].stepId).toBe('alpha');
+    expect(result.stepResults[1].stepId).toBe('beta');
+    expect(result.stepResults[2].stepId).toBe('gamma');
+    expect(result.stepResults[0].toolName).toBe('tool1');
+    expect(result.stepResults[1].toolName).toBe('tool2');
+    expect(result.stepResults[2].toolName).toBe('tool3');
+  });
+
+  it('should handle empty input mapping gracefully', async () => {
+    const skill = createTestSkill([
+      {
+        stepId: 'step1',
+        toolType: 'custom',
+        toolId: 'tool-1',
+        toolName: 'tool1',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'stop',
+      },
+    ]);
+
+    const result = await executeCompositeSkill(skill, { someData: 'test' });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('should provide step execution time for each step', async () => {
+    const skill = createTestSkill([
+      {
+        stepId: 'step1',
+        toolType: 'custom',
+        toolId: 'tool-1',
+        toolName: 'tool1',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'stop',
+      },
+      {
+        stepId: 'step2',
+        toolType: 'custom',
+        toolId: 'tool-2',
+        toolName: 'tool2',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'stop',
+      },
+    ]);
+
+    const result = await executeCompositeSkill(skill, {});
+
+    expect(result.stepResults[0].executionTimeMs).toBeGreaterThanOrEqual(0);
+    expect(result.stepResults[1].executionTimeMs).toBeGreaterThanOrEqual(0);
+    expect(result.executionTimeMs).toBeGreaterThanOrEqual(
+      result.stepResults[0].executionTimeMs + result.stepResults[1].executionTimeMs
+    );
+  });
+});

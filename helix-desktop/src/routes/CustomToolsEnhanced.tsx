@@ -3,11 +3,58 @@
  * Create, manage, execute, and share custom JavaScript tools with sandboxed execution
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo } from 'react';
 import { Plus, Search, Zap, Loader, X, Copy, Share2, Trash2, Code, Download, Upload, Save } from 'lucide-react';
 import { useCustomTools } from '../hooks/useCustomTools';
 import { useTauriFileOps } from '../hooks/useTauriFileOps';
 import '../components/tools/ToolsEnhanced.css';
+
+// Memoized tool card component for performance
+interface ToolCardProps {
+  tool: any;
+  activeTab: string;
+  onExecute: (tool: any) => void;
+  onCopyCode: (code: string) => void;
+  onExport: (tool: any) => void;
+  onDelete: (toolId: string) => void;
+  tauriLoading: boolean;
+}
+
+const ToolCard = memo(({ tool, activeTab, onExecute, onCopyCode, onExport, onDelete, tauriLoading }: ToolCardProps) => (
+  <div key={tool.id} className="tool-card">
+    <div className="tool-icon">{tool.icon || '🔧'}</div>
+    <h3 className="tool-name">{tool.name}</h3>
+    <p className="tool-desc">{tool.description}</p>
+    <div className="tool-meta">
+      <span className="version">v{tool.version || '1.0.0'}</span>
+      <span className="usage">Used {tool.usageCount || 0}x</span>
+    </div>
+    <div className="tool-actions">
+      <button className="btn btn-icon" title="Execute" onClick={() => onExecute(tool)}>
+        <Zap size={18} />
+      </button>
+      <button className="btn btn-icon" title="Copy Code" onClick={() => onCopyCode(tool.code)} disabled={tauriLoading}>
+        <Code size={18} />
+      </button>
+      {activeTab === 'my-tools' && (
+        <>
+          <button className="btn btn-icon" title="Export" onClick={() => onExport(tool)} disabled={tauriLoading}>
+            <Download size={18} />
+          </button>
+          <button className="btn btn-icon" title="Clone">
+            <Copy size={18} />
+          </button>
+          <button className="btn btn-icon" title="Share" disabled={tool.visibility === 'private'}>
+            <Share2 size={18} />
+          </button>
+          <button className="btn btn-icon btn-danger" title="Delete" onClick={() => onDelete(tool.id)}>
+            <Trash2 size={18} />
+          </button>
+        </>
+      )}
+    </div>
+  </div>
+));
 
 // Tool templates for quick start
 const TOOL_TEMPLATES = [
@@ -344,64 +391,19 @@ export default function CustomToolsEnhanced() {
                 </div>
               ) : (
                 filteredTools.map(tool => (
-                  <div key={tool.id} className="tool-card">
-                    <div className="tool-icon">{tool.icon || '🔧'}</div>
-                    <h3 className="tool-name">{tool.name}</h3>
-                    <p className="tool-desc">{tool.description}</p>
-                    <div className="tool-meta">
-                      <span className="version">v{tool.version || '1.0.0'}</span>
-                      <span className="usage">Used {tool.usageCount || 0}x</span>
-                    </div>
-                    <div className="tool-actions">
-                      <button
-                        className="btn btn-icon"
-                        title="Execute"
-                        onClick={() => {
-                          setSelectedTool(tool);
-                          setShowExecute(true);
-                        }}
-                      >
-                        <Zap size={18} />
-                      </button>
-                      <button
-                        className="btn btn-icon"
-                        title="Copy Code"
-                        onClick={() => copyToClipboard(tool.code)}
-                        disabled={tauriLoading}
-                      >
-                        <Code size={18} />
-                      </button>
-                      {activeTab === 'my-tools' && (
-                        <>
-                          <button
-                            className="btn btn-icon"
-                            title="Export"
-                            onClick={() => exportTool(tool)}
-                            disabled={tauriLoading}
-                          >
-                            <Download size={18} />
-                          </button>
-                          <button className="btn btn-icon" title="Clone">
-                            <Copy size={18} />
-                          </button>
-                          <button
-                            className="btn btn-icon"
-                            title="Share"
-                            disabled={tool.visibility === 'private'}
-                          >
-                            <Share2 size={18} />
-                          </button>
-                          <button
-                            className="btn btn-icon btn-danger"
-                            title="Delete"
-                            onClick={() => handleDeleteTool(tool.id)}
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
+                  <ToolCard
+                    key={tool.id}
+                    tool={tool}
+                    activeTab={activeTab}
+                    onExecute={(t) => {
+                      setSelectedTool(t);
+                      setShowExecute(true);
+                    }}
+                    onCopyCode={copyToClipboard}
+                    onExport={exportTool}
+                    onDelete={handleDeleteTool}
+                    tauriLoading={tauriLoading}
+                  />
                 ))
               )}
             </div>

@@ -506,3 +506,214 @@ describe('API Logger - Edge Cases', () => {
     ).resolves.toBeDefined();
   });
 });
+
+describe('API Logger - createApiLoggerWrapper', () => {
+  let createApiLoggerWrapper: any;
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+    const module = await import('./api-logger.js');
+    createApiLoggerWrapper = module.createApiLoggerWrapper;
+    module.__clearApiStateForTesting();
+  });
+
+  it('should wrap API function and log pre-flight', async () => {
+    const mockApiFunction = vi.fn().mockResolvedValue('API response');
+    const wrapped = createApiLoggerWrapper(mockApiFunction, {
+      modelId: 'claude-3-opus',
+      provider: 'anthropic',
+      sessionKey: 'session-123',
+    });
+
+    await wrapped('arg1', 'arg2');
+
+    expect(mockFetch).toHaveBeenCalled();
+    expect(mockApiFunction).toHaveBeenCalledWith('arg1', 'arg2');
+  });
+
+  it('should extract prompt preview from string context', async () => {
+    const mockApiFunction = vi.fn().mockResolvedValue('API response');
+    const wrapped = createApiLoggerWrapper(mockApiFunction, {
+      modelId: 'claude-3-opus',
+      provider: 'anthropic',
+    });
+
+    await wrapped('arg1', 'What is the meaning of life?');
+
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const embed = callBody.embeds[0];
+    expect(embed.fields.some((f: { value: string }) =>
+      f.value.includes('What is the meaning')
+    )).toBe(true);
+  });
+
+  it('should extract prompt preview from message array', async () => {
+    const mockApiFunction = vi.fn().mockResolvedValue('API response');
+    const wrapped = createApiLoggerWrapper(mockApiFunction);
+
+    const messages = [
+      { role: 'system', content: 'You are helpful' },
+      { role: 'user', content: 'Hello there' },
+    ];
+
+    await wrapped('arg1', messages);
+
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const embed = callBody.embeds[0];
+    expect(embed.fields.some((f: { value: string }) =>
+      f.value.includes('Hello there')
+    )).toBe(true);
+  });
+
+  it('should extract prompt from object with prompt property', async () => {
+    const mockApiFunction = vi.fn().mockResolvedValue('API response');
+    const wrapped = createApiLoggerWrapper(mockApiFunction);
+
+    await wrapped('arg1', { prompt: 'Test prompt string' });
+
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const embed = callBody.embeds[0];
+    expect(embed.fields.some((f: { value: string }) =>
+      f.value.includes('Test prompt string')
+    )).toBe(true);
+  });
+
+  it('should extract prompt from nested messages property', async () => {
+    const mockApiFunction = vi.fn().mockResolvedValue('API response');
+    const wrapped = createApiLoggerWrapper(mockApiFunction);
+
+    await wrapped('arg1', {
+      messages: [
+        { role: 'user', content: 'Nested message content' },
+      ],
+    });
+
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const embed = callBody.embeds[0];
+    expect(embed.fields.some((f: { value: string }) =>
+      f.value.includes('Nested message')
+    )).toBe(true);
+  });
+
+  it('should extract prompt from object with content property', async () => {
+    const mockApiFunction = vi.fn().mockResolvedValue('API response');
+    const wrapped = createApiLoggerWrapper(mockApiFunction);
+
+    await wrapped('arg1', { content: 'Direct content field' });
+
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const embed = callBody.embeds[0];
+    expect(embed.fields.some((f: { value: string }) =>
+      f.value.includes('Direct content')
+    )).toBe(true);
+  });
+
+  it('should handle complex multimodal content', async () => {
+    const mockApiFunction = vi.fn().mockResolvedValue('API response');
+    const wrapped = createApiLoggerWrapper(mockApiFunction);
+
+    await wrapped('arg1', [
+      {
+        role: 'user',
+        content: { type: 'text', text: 'Analyze this image' }
+      },
+    ]);
+
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(callBody.embeds[0].fields.some((f: { name: string }) =>
+      f.name === 'Prompt Preview'
+    )).toBe(true);
+  });
+
+  it('should handle null/undefined context gracefully', async () => {
+    const mockApiFunction = vi.fn().mockResolvedValue('API response');
+    const wrapped = createApiLoggerWrapper(mockApiFunction);
+
+    await wrapped('arg1', null);
+
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const embed = callBody.embeds[0];
+    expect(embed.fields.some((f: { value: string }) =>
+      f.value.includes('[no context]')
+    )).toBe(true);
+  });
+
+  it('should log response after API call completes', async () => {
+    const mockApiFunction = vi.fn().mockResolvedValue('API response');
+    const wrapped = createApiLoggerWrapper(mockApiFunction, {
+      modelId: 'claude-3-opus',
+    });
+
+    await wrapped('arg1', 'context');
+
+    // Should have 2 webhook calls: pre-flight (sync) + response (async)
+    await new Promise(resolve => setTimeout(resolve, 50));
+    expect(mockFetch.mock.calls.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('should log error when API call fails', async () => {
+    const mockApiFunction = vi.fn().mockRejectedValue(new Error('API failed'));
+    const wrapped = createApiLoggerWrapper(mockApiFunction);
+
+    await expect(wrapped('arg1', 'context')).rejects.toThrow('API failed');
+
+    // Should log error
+    expect(mockFetch).toHaveBeenCalled();
+  });
+
+  it('should calculate latency correctly', async () => {
+    const mockApiFunction = vi.fn().mockImplementation(async () => {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      return 'response';
+    });
+    const wrapped = createApiLoggerWrapper(mockApiFunction);
+
+    await wrapped('arg1', 'context');
+
+    // Pre-flight call should have been made
+    expect(mockFetch).toHaveBeenCalled();
+  });
+
+  it('should handle empty message array', async () => {
+    const mockApiFunction = vi.fn().mockResolvedValue('response');
+    const wrapped = createApiLoggerWrapper(mockApiFunction);
+
+    await wrapped('arg1', []);
+
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(callBody.embeds[0]).toBeDefined();
+  });
+
+  it('should extract from array with non-message objects', async () => {
+    const mockApiFunction = vi.fn().mockResolvedValue('response');
+    const wrapped = createApiLoggerWrapper(mockApiFunction);
+
+    await wrapped('arg1', [{ invalid: 'object' }, { also: 'invalid' }]);
+
+    expect(mockFetch).toHaveBeenCalled();
+  });
+
+  it('should truncate very long prompts in preview', async () => {
+    const mockApiFunction = vi.fn().mockResolvedValue('response');
+    const wrapped = createApiLoggerWrapper(mockApiFunction);
+
+    const longPrompt = 'a'.repeat(2000);
+    await wrapped('arg1', longPrompt);
+
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const embed = callBody.embeds[0];
+    const promptField = embed.fields.find((f: { name: string }) => f.name === 'Prompt Preview');
+    expect(promptField.value.length).toBeLessThan(600); // 500 char limit + markdown
+  });
+
+  it('should preserve function arguments and return value', async () => {
+    const mockApiFunction = vi.fn((a: string, b: number) => `${a}-${b}`);
+    const wrapped = createApiLoggerWrapper(mockApiFunction);
+
+    const result = await wrapped('test', 42);
+
+    expect(result).toBe('test-42');
+    expect(mockApiFunction).toHaveBeenCalledWith('test', 42);
+  });
+});

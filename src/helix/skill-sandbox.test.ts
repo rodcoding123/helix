@@ -610,3 +610,120 @@ describe('Skill Sandbox - Configuration', () => {
     expect(customConfig.allowedHosts).toContain('localhost');
   });
 });
+
+describe('Skill Sandbox - Extended Coverage', () => {
+  beforeEach(() => {
+    clearSkillAuditLog();
+  });
+
+  it('should handle skill with multiple permissions', () => {
+    const metadata: SkillMetadata = {
+      name: 'multi-perm-skill',
+      version: '1.0.0',
+      author: 'test@example.com',
+      permissions: ['fs:read', 'fs:write', 'net:http'],
+    };
+
+    const config = { ...DEFAULT_SKILL_SANDBOX_CONFIG, requireSignature: false };
+    const result = validateSkill('return true;', metadata, config);
+
+    expect(result.valid).toBe(true);
+    expect(result.permissionsGranted).toContain('fs:read');
+  });
+
+  it('should deny process:spawn permission', () => {
+    const metadata: SkillMetadata = {
+      name: 'spawn-skill',
+      version: '1.0.0',
+      author: 'test@example.com',
+      permissions: ['process:spawn'],
+    };
+
+    const config = { ...DEFAULT_SKILL_SANDBOX_CONFIG, requireSignature: false };
+    const result = validateSkill('return true;', metadata, config);
+
+    expect(result.permissionsDenied).toContain('process:spawn');
+  });
+
+  it('should validate empty skill name', () => {
+    const metadata: SkillMetadata = {
+      name: '',
+      version: '1.0.0',
+      author: 'test@example.com',
+      permissions: [],
+    };
+
+    const config = { ...DEFAULT_SKILL_SANDBOX_CONFIG, requireSignature: false };
+    const result = validateSkill('return true;', metadata, config);
+
+    expect(result.valid).toBe(false);
+  });
+
+  it('should detect eval usage', () => {
+    const metadata: SkillMetadata = {
+      name: 'eval-skill',
+      version: '1.0.0',
+      author: 'test@example.com',
+      permissions: [],
+    };
+
+    const config = { ...DEFAULT_SKILL_SANDBOX_CONFIG, requireSignature: false };
+    const result = validateSkill('eval("code");', metadata, config);
+
+    expect(result.warnings.some(w => w.includes('eval'))).toBe(true);
+  });
+
+  it('should handle empty code', () => {
+    const metadata: SkillMetadata = {
+      name: 'empty-skill',
+      version: '1.0.0',
+      author: 'test@example.com',
+      permissions: [],
+    };
+
+    const config = { ...DEFAULT_SKILL_SANDBOX_CONFIG, requireSignature: false };
+    const result = validateSkill('', metadata, config);
+
+    expect(result.valid).toBe(false);
+  });
+
+  it('should track execution time', async () => {
+    const metadata: SkillMetadata = {
+      name: 'timing-skill',
+      version: '1.0.0',
+      author: 'test@example.com',
+      permissions: [],
+    };
+
+    const config = { ...DEFAULT_SKILL_SANDBOX_CONFIG, requireSignature: false };
+    const result = await executeSkillSandboxed(
+      'return 123;',
+      metadata,
+      {},
+      'test-session',
+      config
+    );
+
+    expect(result.executionTimeMs).toBeGreaterThanOrEqual(0);
+  });
+
+  it('should include session key', async () => {
+    const metadata: SkillMetadata = {
+      name: 'session-skill',
+      version: '1.0.0',
+      author: 'test@example.com',
+      permissions: [],
+    };
+
+    const config = { ...DEFAULT_SKILL_SANDBOX_CONFIG, requireSignature: false };
+    const result = await executeSkillSandboxed(
+      'return 42;',
+      metadata,
+      {},
+      'my-session',
+      config
+    );
+
+    expect(result.sessionKey).toBe('my-session');
+  });
+});

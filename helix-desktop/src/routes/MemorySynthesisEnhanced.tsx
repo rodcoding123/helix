@@ -3,9 +3,10 @@
  * Use Claude AI to analyze conversation history and detect psychological patterns
  */
 
-import { useEffect, useState } from 'react';
-import { Loader, Brain, TrendingUp, Clock, CheckCircle, AlertCircle, Zap } from 'lucide-react';
+import { useEffect, useState, memo } from 'react';
+import { Loader, Brain, TrendingUp, Clock, CheckCircle, AlertCircle, Zap, Save } from 'lucide-react';
 import { useMemorySynthesis } from '../hooks/useMemorySynthesis';
+import { useTauriFileOps } from '../hooks/useTauriFileOps';
 import '../components/synthesis/SynthesisEnhanced.css';
 
 interface SynthesisOption {
@@ -16,6 +17,60 @@ interface SynthesisOption {
   color: string;
   estimatedTime: string;
 }
+
+// Memoized pattern card component for performance
+interface PatternCardProps {
+  pattern: any;
+  expandedPattern: string | null;
+  onToggleExpand: (patternId: string | null) => void;
+}
+
+const PatternCard = memo(({ pattern, expandedPattern, onToggleExpand }: PatternCardProps) => (
+  <div
+    className="pattern-item"
+    onClick={() => onToggleExpand(expandedPattern === pattern.id ? null : pattern.id)}
+  >
+    <div className="pattern-row">
+      <div className="pattern-left">
+        <div className="pattern-title">{pattern.description}</div>
+        <div className="pattern-meta">
+          <span className="meta-type">{pattern.type}</span>
+          <span className="meta-layer">Layer {pattern.layer}</span>
+        </div>
+      </div>
+      <div className="pattern-confidence">
+        <div className="confidence-value">
+          {(pattern.confidence * 100).toFixed(0)}%
+        </div>
+        <div className="confidence-bar">
+          <div
+            className="confidence-fill"
+            style={{ width: `${pattern.confidence * 100}%` }}
+          />
+        </div>
+      </div>
+    </div>
+
+    {expandedPattern === pattern.id && (
+      <div className="pattern-details">
+        <div className="details-content">
+          <div className="detail-row">
+            <div className="detail-label">Confidence Score:</div>
+            <div className="detail-value">{(pattern.confidence * 100).toFixed(1)}%</div>
+          </div>
+          <div className="detail-row">
+            <div className="detail-label">Psychology Layer:</div>
+            <div className="detail-value">Layer {pattern.layer}</div>
+          </div>
+          <div className="detail-row">
+            <div className="detail-label">Pattern Type:</div>
+            <div className="detail-value">{pattern.type}</div>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+));
 
 export default function MemorySynthesisEnhanced() {
   const {
@@ -29,6 +84,11 @@ export default function MemorySynthesisEnhanced() {
     pollJobStatus,
     clearJobs
   } = useMemorySynthesis();
+
+  const {
+    saveResult,
+    isLoading: tauriLoading
+  } = useTauriFileOps();
 
   const [synthesisType, setSynthesisType] = useState<'emotional_patterns' | 'prospective_self' | 'relational_memory' | 'narrative_coherence' | 'full_synthesis'>('emotional_patterns');
   const [filterType, setFilterType] = useState<string>('all');
@@ -257,6 +317,15 @@ export default function MemorySynthesisEnhanced() {
                       {currentJob.error}
                     </div>
                   )}
+
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => saveResult(currentJob.analysis, synthesisType, 'tool')}
+                    disabled={tauriLoading}
+                  >
+                    <Save size={16} />
+                    Save Analysis
+                  </button>
                 </div>
               )}
             </div>
@@ -289,51 +358,12 @@ export default function MemorySynthesisEnhanced() {
             ) : (
               <div className="patterns-display">
                 {filteredPatterns.map((pattern) => (
-                  <div
+                  <PatternCard
                     key={pattern.id}
-                    className="pattern-item"
-                    onClick={() => setExpandedPattern(expandedPattern === pattern.id ? null : pattern.id)}
-                  >
-                    <div className="pattern-row">
-                      <div className="pattern-left">
-                        <div className="pattern-title">{pattern.description}</div>
-                        <div className="pattern-meta">
-                          <span className="meta-type">{pattern.type}</span>
-                          <span className="meta-layer">Layer {pattern.layer}</span>
-                        </div>
-                      </div>
-                      <div className="pattern-confidence">
-                        <div className="confidence-value">
-                          {(pattern.confidence * 100).toFixed(0)}%
-                        </div>
-                        <div className="confidence-bar">
-                          <div
-                            className="confidence-fill"
-                            style={{ width: `${pattern.confidence * 100}%` }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {expandedPattern === pattern.id && (
-                      <div className="pattern-details">
-                        <div className="details-content">
-                          <div className="detail-row">
-                            <div className="detail-label">Confidence Score:</div>
-                            <div className="detail-value">{(pattern.confidence * 100).toFixed(1)}%</div>
-                          </div>
-                          <div className="detail-row">
-                            <div className="detail-label">Psychology Layer:</div>
-                            <div className="detail-value">Layer {pattern.layer}</div>
-                          </div>
-                          <div className="detail-row">
-                            <div className="detail-label">Pattern Type:</div>
-                            <div className="detail-value">{pattern.type}</div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                    pattern={pattern}
+                    expandedPattern={expandedPattern}
+                    onToggleExpand={setExpandedPattern}
+                  />
                 ))}
               </div>
             )}
