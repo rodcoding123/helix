@@ -28,8 +28,7 @@ describe('Accessibility Tests', () => {
       expect(rotateButton).toHaveAttribute('aria-label');
     });
 
-    it('should be keyboard navigable', async () => {
-      const user = userEvent.setup();
+    it('should be keyboard navigable', () => {
       render(<SecretsList secrets={[mockSecret]} onRotate={() => {}} onDelete={() => {}} />);
 
       const rotateButton = screen.getByRole('button', { name: /rotate/i });
@@ -67,7 +66,7 @@ describe('Accessibility Tests', () => {
       expect(mockOnClose).toHaveBeenCalled();
     });
 
-    it('should have focus management', async () => {
+    it('should have focus management', () => {
       render(
         <CreateSecretModal
           isOpen={true}

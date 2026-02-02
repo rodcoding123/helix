@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { isFeatureEnabled, setFeatureFlag, getFeatureFlags, resetFeatureFlags } from '../feature-flags';
+import { isFeatureEnabled, setFeatureFlag } from '../feature-flags';
 
 describe('Feature Flags', () => {
   let storedFlags: Record<string, string> = {};
