@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import type { SecretType, SecretSourceType, CreateUserApiKeyRequest, UserApiKey } from '../src/lib/types/secrets';
+import type { SecretType, SecretSourceType, CreateUserApiKeyRequest } from '../src/lib/types/secrets';
 import { encryptWithKey, generateNonce } from '../src/lib/encryption/symmetric';
 import { deriveEncryptionKey } from '../src/lib/encryption/key-derivation';
 
