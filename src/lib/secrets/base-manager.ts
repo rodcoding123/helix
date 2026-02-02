@@ -25,11 +25,11 @@ export class BaseSecretsManager implements SecretsManager {
     this.userId = userId;
   }
 
-  async loadSecret(type: SecretType, _options?: SecretLoadOptions): Promise<string | null> {
+  loadSecret(type: SecretType, _options?: SecretLoadOptions): Promise<string | null> {
     const stored = this.storage.get(type);
 
     if (!stored) {
-      return null;
+      return Promise.resolve(null);
     }
 
     // Update last accessed time
@@ -37,10 +37,10 @@ export class BaseSecretsManager implements SecretsManager {
 
     // In real implementation, decrypt encryptedValue
     // For now, return plaintext (testing only)
-    return stored.encryptedValue;
+    return Promise.resolve(stored.encryptedValue);
   }
 
-  async loadAllSecrets(_options?: SecretLoadOptions): Promise<Map<SecretType, string>> {
+  loadAllSecrets(_options?: SecretLoadOptions): Promise<Map<SecretType, string>> {
     const result = new Map<SecretType, string>();
 
     this.storage.forEach((_data, type) => {
@@ -52,10 +52,10 @@ export class BaseSecretsManager implements SecretsManager {
       }
     });
 
-    return result;
+    return Promise.resolve(result);
   }
 
-  async storeSecret(
+  storeSecret(
     type: SecretType,
     value: string,
     sourceType: SecretSourceType,
@@ -81,23 +81,22 @@ export class BaseSecretsManager implements SecretsManager {
 
     this.storage.set(type, stored);
 
-    return metadata;
+    return Promise.resolve(metadata);
   }
 
-  async deleteSecret(type: SecretType): Promise<void> {
+  deleteSecret(type: SecretType): Promise<void> {
     this.storage.delete(type);
+    return Promise.resolve();
   }
 
-  async rotateSecret(
-    type: SecretType,
-    newValue: string,
-    expiresAt?: Date
-  ): Promise<SecretMetadata> {
+  rotateSecret(type: SecretType, newValue: string, expiresAt?: Date): Promise<SecretMetadata> {
     const existing = this.storage.get(type);
 
     if (!existing) {
-      throw new Error(
-        `Cannot rotate secret: ${type} does not exist. Store the secret first using storeSecret().`
+      return Promise.reject(
+        new Error(
+          `Cannot rotate secret: ${type} does not exist. Store the secret first using storeSecret().`
+        )
       );
     }
 
@@ -113,26 +112,26 @@ export class BaseSecretsManager implements SecretsManager {
       derivationSalt: existing.derivationSalt,
     });
 
-    return metadata;
+    return Promise.resolve(metadata);
   }
 
-  async getMetadata(type: SecretType): Promise<SecretMetadata | null> {
+  getMetadata(type: SecretType): Promise<SecretMetadata | null> {
     const stored = this.storage.get(type);
-    return stored?.metadata || null;
+    return Promise.resolve(stored?.metadata || null);
   }
 
-  async validateSecret(type: SecretType): Promise<boolean> {
+  validateSecret(type: SecretType): Promise<boolean> {
     const stored = this.storage.get(type);
 
     if (!stored) {
-      return false;
+      return Promise.resolve(false);
     }
 
     // Check if expired
     if (stored.metadata.expiresAt && new Date() > stored.metadata.expiresAt) {
-      return false;
+      return Promise.resolve(false);
     }
 
-    return stored.metadata.isActive;
+    return Promise.resolve(stored.metadata.isActive);
   }
 }

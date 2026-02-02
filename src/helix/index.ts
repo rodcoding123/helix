@@ -286,7 +286,7 @@ export async function initializeHelix(options: HelixInitOptions = {}): Promise<v
   const { requireValidEnvironment } = await import('../lib/env-validator.js');
   try {
     requireValidEnvironment();
-  } catch (error) {
+  } catch {
     console.error('[Helix] ENVIRONMENT VALIDATION FAILED');
     console.error('[Helix] Cannot proceed without all required secrets');
     process.exit(1);
@@ -352,7 +352,7 @@ export async function initializeHelix(options: HelixInitOptions = {}): Promise<v
   // 2.5. Initialize Discord webhooks from 1Password (or .env fallback)
   try {
     const { initializeDiscordWebhooks } = await import('./logging-hooks.js');
-    await initializeDiscordWebhooks();
+    initializeDiscordWebhooks();
   } catch (error) {
     console.warn('[Helix] Failed to initialize Discord webhooks:', error);
     console.warn('[Helix] Webhooks must be loaded before pre-execution logging');

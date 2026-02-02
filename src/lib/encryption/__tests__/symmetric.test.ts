@@ -9,45 +9,45 @@ describe('Symmetric Encryption (AES-256-GCM)', () => {
     encryptionKey = randomBytes(32); // 256-bit key
   });
 
-  it('should encrypt and decrypt plaintext', async () => {
+  it('should encrypt and decrypt plaintext', () => {
     const plaintext = 'sk_live_1234567890';
-    const nonce = await generateNonce();
+    const nonce = generateNonce();
 
-    const encrypted = await encryptWithKey(plaintext, encryptionKey, nonce);
-    const decrypted = await decryptWithKey(encrypted, encryptionKey);
+    const encrypted = encryptWithKey(plaintext, encryptionKey, nonce);
+    const decrypted = decryptWithKey(encrypted, encryptionKey);
 
     expect(decrypted).toBe(plaintext);
   });
 
-  it('should produce different ciphertexts for same plaintext with different nonces', async () => {
+  it('should produce different ciphertexts for same plaintext with different nonces', () => {
     const plaintext = 'sk_live_1234567890';
 
-    const nonce1 = await generateNonce();
-    const nonce2 = await generateNonce();
+    const nonce1 = generateNonce();
+    const nonce2 = generateNonce();
 
-    const encrypted1 = await encryptWithKey(plaintext, encryptionKey, nonce1);
-    const encrypted2 = await encryptWithKey(plaintext, encryptionKey, nonce2);
+    const encrypted1 = encryptWithKey(plaintext, encryptionKey, nonce1);
+    const encrypted2 = encryptWithKey(plaintext, encryptionKey, nonce2);
 
     expect(encrypted1).not.toBe(encrypted2);
   });
 
-  it('should fail decryption with wrong key', async () => {
+  it('should fail decryption with wrong key', () => {
     const plaintext = 'sk_live_1234567890';
-    const nonce = await generateNonce();
+    const nonce = generateNonce();
     const wrongKey = randomBytes(32);
 
-    const encrypted = await encryptWithKey(plaintext, encryptionKey, nonce);
+    const encrypted = encryptWithKey(plaintext, encryptionKey, nonce);
 
-    await expect(async () => {
-      await decryptWithKey(encrypted, wrongKey);
-    }).rejects.toThrow();
+    expect(() => {
+      decryptWithKey(encrypted, wrongKey);
+    }).toThrow();
   });
 
-  it('should detect tampering (authentication tag fails)', async () => {
+  it('should detect tampering (authentication tag fails)', () => {
     const plaintext = 'sk_live_1234567890';
-    const nonce = await generateNonce();
+    const nonce = generateNonce();
 
-    let encrypted = await encryptWithKey(plaintext, encryptionKey, nonce);
+    let encrypted = encryptWithKey(plaintext, encryptionKey, nonce);
 
     // Tamper with ciphertext component specifically
     const parts = encrypted.split(':');
@@ -56,15 +56,15 @@ describe('Symmetric Encryption (AES-256-GCM)', () => {
     parts[1] = ciphertextBuffer.toString('hex');
     encrypted = parts.join(':');
 
-    await expect(async () => {
-      await decryptWithKey(encrypted, encryptionKey);
-    }).rejects.toThrow();
+    expect(() => {
+      decryptWithKey(encrypted, encryptionKey);
+    }).toThrow();
   });
 
-  it('should generate unique nonces', async () => {
-    const nonce1 = await generateNonce();
-    const nonce2 = await generateNonce();
-    const nonce3 = await generateNonce();
+  it('should generate unique nonces', () => {
+    const nonce1 = generateNonce();
+    const nonce2 = generateNonce();
+    const nonce3 = generateNonce();
 
     expect(nonce1).not.toEqual(nonce2);
     expect(nonce2).not.toEqual(nonce3);
@@ -73,40 +73,40 @@ describe('Symmetric Encryption (AES-256-GCM)', () => {
 });
 
 describe('Input Validation', () => {
-  it('should throw for invalid key length', async () => {
+  it('should throw for invalid key length', () => {
     const shortKey = randomBytes(16); // 128-bit, not 256-bit
-    const nonce = await generateNonce();
+    const nonce = generateNonce();
     const plaintext = 'test';
 
-    await expect(async () => {
-      await encryptWithKey(plaintext, shortKey, nonce);
-    }).rejects.toThrow('Key must be 32 bytes');
+    expect(() => {
+      encryptWithKey(plaintext, shortKey, nonce);
+    }).toThrow('Key must be 32 bytes');
   });
 
-  it('should throw for invalid nonce length', async () => {
+  it('should throw for invalid nonce length', () => {
     const invalidNonce = randomBytes(8); // 64-bit, not 96-bit
     const key = randomBytes(32);
 
-    await expect(async () => {
-      await encryptWithKey('test', key, invalidNonce);
-    }).rejects.toThrow('Nonce must be 12 bytes');
+    expect(() => {
+      encryptWithKey('test', key, invalidNonce);
+    }).toThrow('Nonce must be 12 bytes');
   });
 
-  it('should throw for invalid ciphertext format', async () => {
+  it('should throw for invalid ciphertext format', () => {
     const key = randomBytes(32);
 
-    await expect(async () => {
-      await decryptWithKey('invalid:format', key);
-    }).rejects.toThrow('Invalid');
+    expect(() => {
+      decryptWithKey('invalid:format', key);
+    }).toThrow('Invalid');
   });
 
-  it('should encrypt and decrypt empty string', async () => {
+  it('should encrypt and decrypt empty string', () => {
     const plaintext = '';
-    const nonce = await generateNonce();
+    const nonce = generateNonce();
     const encryptionKey = randomBytes(32);
 
-    const encrypted = await encryptWithKey(plaintext, encryptionKey, nonce);
-    const decrypted = await decryptWithKey(encrypted, encryptionKey);
+    const encrypted = encryptWithKey(plaintext, encryptionKey, nonce);
+    const decrypted = decryptWithKey(encrypted, encryptionKey);
 
     expect(decrypted).toBe('');
   });

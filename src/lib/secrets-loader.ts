@@ -28,10 +28,7 @@ const SECRETS_CACHE = new Map<string, string>();
  * @returns The secret value
  * @throws Error if secret not found or 1Password CLI fails
  */
-export async function loadSecret(
-  itemName: string,
-  field: SecretField = 'password'
-): Promise<string> {
+export function loadSecret(itemName: string, field: SecretField = 'password'): string {
   // Check cache first
   const cacheKey = `${itemName}:${field}`;
   if (SECRETS_CACHE.has(cacheKey)) {
@@ -43,7 +40,7 @@ export async function loadSecret(
 
   if (useOnePassword) {
     try {
-      const secret = await loadSecretFrom1Password(itemName, field);
+      const secret = loadSecretFrom1Password(itemName, field);
       SECRETS_CACHE.set(cacheKey, secret);
       return secret;
     } catch (error) {
@@ -52,7 +49,7 @@ export async function loadSecret(
         `Warning: Could not load "${itemName}" from 1Password. Trying .env fallback.`,
         error
       );
-      const secret = await loadSecretFromEnv(itemName);
+      const secret = loadSecretFromEnv(itemName);
       if (secret) {
         SECRETS_CACHE.set(cacheKey, secret);
         return secret;
@@ -62,7 +59,7 @@ export async function loadSecret(
   }
 
   // Dev mode: load from .env
-  const secret = await loadSecretFromEnv(itemName);
+  const secret = loadSecretFromEnv(itemName);
   if (!secret) {
     throw new Error(`Secret "${itemName}" not found in .env (dev mode)`);
   }
@@ -73,39 +70,32 @@ export async function loadSecret(
 /**
  * Load a secret directly from 1Password using op CLI
  */
-async function loadSecretFrom1Password(itemName: string, field: SecretField): Promise<string> {
+function loadSecretFrom1Password(itemName: string, field: SecretField): string {
+  // First, verify 1Password CLI is installed and authenticated
   try {
-    // First, verify 1Password CLI is installed and authenticated
-    try {
-      execSync('op whoami', { stdio: 'pipe' });
-    } catch {
-      throw new Error('1Password CLI not authenticated. Run: op account add');
-    }
-
-    // Fetch the secret using op CLI
-    const command = `op item get "${itemName}" --vault "${VAULT_NAME}" --fields="${field}" --format=json`;
-    const result = execSync(command, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
-
-    // Parse the JSON response
-    const parsed = JSON.parse(result);
-    if (parsed.value) {
-      return parsed.value;
-    }
-
-    throw new Error(`Field "${field}" not found in item "${itemName}"`);
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`Failed to load secret from 1Password: ${error.message}`);
-    }
-    throw error;
+    execSync('op whoami', { stdio: 'pipe' });
+  } catch {
+    throw new Error('1Password CLI not authenticated. Run: op account add');
   }
+
+  // Fetch the secret using op CLI
+  const command = `op item get "${itemName}" --vault "${VAULT_NAME}" --fields="${field}" --format=json`;
+  const result = execSync(command, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
+
+  // Parse the JSON response
+  const parsed = JSON.parse(result) as { value?: string };
+  if (parsed.value) {
+    return parsed.value;
+  }
+
+  throw new Error(`Field "${field}" not found in item "${itemName}"`);
 }
 
 /**
  * Load secret from .env files (fallback for development)
  * Maps item names to env variable names
  */
-async function loadSecretFromEnv(itemName: string): Promise<string | null> {
+function loadSecretFromEnv(itemName: string): string | null {
   const mapping: Record<string, string> = {
     'Supabase URL': 'VITE_SUPABASE_URL',
     'Supabase Service Role': 'SUPABASE_SERVICE_ROLE_KEY',
@@ -155,7 +145,7 @@ async function loadSecretFromEnv(itemName: string): Promise<string | null> {
  * Load all secrets into environment variables
  * Useful for initialization or Docker entrypoint
  */
-export async function loadAllSecrets(): Promise<Record<string, string>> {
+export function loadAllSecrets(): Record<string, string> {
   const secrets: Record<string, string> = {};
 
   const itemsToLoad = [
@@ -213,7 +203,7 @@ export async function loadAllSecrets(): Promise<Record<string, string>> {
 
   for (const item of itemsToLoad) {
     try {
-      const value = await loadSecret(item.name, item.field);
+      const value = loadSecret(item.name, item.field);
       secrets[item.envVar] = value;
       process.env[item.envVar] = value;
     } catch (error) {
@@ -228,10 +218,10 @@ export async function loadAllSecrets(): Promise<Record<string, string>> {
 /**
  * Verify all required secrets are available
  */
-export async function verifySecrets(): Promise<{
+export function verifySecrets(): {
   status: 'ok' | 'warning' | 'error';
   messages: string[];
-}> {
+} {
   const messages: string[] = [];
   let status: 'ok' | 'warning' | 'error' = 'ok';
 
@@ -245,10 +235,10 @@ export async function verifySecrets(): Promise<{
 
   for (const secretName of requiredSecrets) {
     try {
-      await loadSecret(secretName);
-      messages.push(`✓ ${secretName}`);
+      loadSecret(secretName);
+      messages.push(`OK ${secretName}`);
     } catch (error) {
-      messages.push(`✗ ${secretName} - ${error}`);
+      messages.push(`FAIL ${secretName} - ${String(error)}`);
       status = 'error';
     }
   }

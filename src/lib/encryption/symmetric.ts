@@ -9,7 +9,7 @@ const NONCE_LENGTH = 12; // 96 bits (standard for GCM)
  * CRITICAL: Never reuse nonce with same key
  * @returns 12-byte nonce (96 bits)
  */
-export async function generateNonce(): Promise<Buffer> {
+export function generateNonce(): Buffer {
   return randomBytes(NONCE_LENGTH);
 }
 
@@ -20,11 +20,7 @@ export async function generateNonce(): Promise<Buffer> {
  * @param nonce - 12-byte nonce (must be unique per key)
  * @returns Hex string of nonce + ciphertext + authTag
  */
-export async function encryptWithKey(
-  plaintext: string,
-  key: Buffer,
-  nonce: Buffer
-): Promise<string> {
+export function encryptWithKey(plaintext: string, key: Buffer, nonce: Buffer): string {
   if (key.length !== 32) {
     throw new Error('Key must be 32 bytes (256 bits) for AES-256');
   }
@@ -52,7 +48,7 @@ export async function encryptWithKey(
  * @returns Decrypted plaintext
  * @throws If authentication tag verification fails (tampering detected)
  */
-export async function decryptWithKey(ciphertext: string, key: Buffer): Promise<string> {
+export function decryptWithKey(ciphertext: string, key: Buffer): string {
   if (key.length !== 32) {
     throw new Error('Key must be 32 bytes (256 bits) for AES-256');
   }
@@ -82,7 +78,7 @@ export async function decryptWithKey(ciphertext: string, key: Buffer): Promise<s
 
   try {
     decrypted += decipher.final('utf8');
-  } catch (error) {
+  } catch {
     throw new Error('Authentication tag verification failed - ciphertext may be tampered');
   }
 

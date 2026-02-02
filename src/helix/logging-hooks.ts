@@ -27,15 +27,15 @@ let WEBHOOKS = {
  * Initialize Discord webhooks from 1Password
  * Call this once at application startup
  */
-export async function initializeDiscordWebhooks(): Promise<void> {
+export function initializeDiscordWebhooks(): void {
   try {
     WEBHOOKS = {
-      commands: await loadSecret('Discord Webhook - Commands', 'notes'),
-      api: await loadSecret('Discord Webhook - API', 'notes'),
-      files: await loadSecret('Discord Webhook - File Changes', 'notes'),
-      consciousness: await loadSecret('Discord Webhook - Consciousness', 'notes'),
-      alerts: await loadSecret('Discord Webhook - Alerts', 'notes'),
-      hashChain: await loadSecret('Discord Webhook - Hash Chain', 'notes'),
+      commands: loadSecret('Discord Webhook - Commands', 'notes'),
+      api: loadSecret('Discord Webhook - API', 'notes'),
+      files: loadSecret('Discord Webhook - File Changes', 'notes'),
+      consciousness: loadSecret('Discord Webhook - Consciousness', 'notes'),
+      alerts: loadSecret('Discord Webhook - Alerts', 'notes'),
+      hashChain: loadSecret('Discord Webhook - Hash Chain', 'notes'),
     };
     console.log('[Helix] Discord webhooks initialized from 1Password');
   } catch (error) {

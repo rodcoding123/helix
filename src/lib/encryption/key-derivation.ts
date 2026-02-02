@@ -16,7 +16,7 @@ const KEY_DERIVATION_CONFIG: KeyDerivationConfig = {
  * Generate cryptographically secure random salt
  * @returns Random 16-byte buffer (128 bits)
  */
-export async function generateSalt(): Promise<Buffer> {
+export function generateSalt(): Buffer {
   return randomBytes(KEY_DERIVATION_CONFIG.saltLength);
 }
 

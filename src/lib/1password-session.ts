@@ -6,6 +6,7 @@
 
 import { execSync } from 'child_process';
 import { existsSync, writeFileSync, mkdirSync } from 'fs';
+import { hostname } from 'os';
 import { join } from 'path';
 
 interface SessionConfig {
@@ -40,7 +41,7 @@ export class OnePasswordSessionManager {
   /**
    * Check current session status
    */
-  async getSessionStatus(): Promise<SessionStatus> {
+  getSessionStatus(): SessionStatus {
     try {
       const version = execSync('op --version', { encoding: 'utf-8' }).trim();
 
@@ -61,7 +62,7 @@ export class OnePasswordSessionManager {
     } catch (error) {
       return {
         authenticated: false,
-        error: `1Password CLI not found or error: ${error}`,
+        error: `1Password CLI not found or error: ${String(error)}`,
       };
     }
   }
@@ -70,7 +71,7 @@ export class OnePasswordSessionManager {
    * Authenticate using service account (for CI/CD)
    * Uses OP_SERVICE_ACCOUNT_TOKEN environment variable
    */
-  async authenticateServiceAccount(): Promise<boolean> {
+  authenticateServiceAccount(): boolean {
     const token = process.env.OP_SERVICE_ACCOUNT_TOKEN;
 
     if (!token) {
@@ -85,7 +86,7 @@ export class OnePasswordSessionManager {
       process.env.OP_SERVICE_ACCOUNT_TOKEN = token;
 
       // Verify authentication works
-      const status = await this.getSessionStatus();
+      const status = this.getSessionStatus();
 
       if (status.authenticated) {
         console.log('[1Password] ✓ Service account authenticated');
@@ -104,7 +105,7 @@ export class OnePasswordSessionManager {
    * For local development: check if session is cached
    * Returns true if cached session is available
    */
-  async hasCachedSession(): Promise<boolean> {
+  hasCachedSession(): boolean {
     const sessionFile = join(this.sessionCacheDir, 'session.json');
     return existsSync(sessionFile);
   }
@@ -113,18 +114,18 @@ export class OnePasswordSessionManager {
    * Cache current session for offline use
    * WARNING: Only use in secure environments
    */
-  async cacheSession(): Promise<boolean> {
+  cacheSession(): boolean {
     const sessionFile = join(this.sessionCacheDir, 'session.json');
 
     try {
-      const status = await this.getSessionStatus();
+      const status = this.getSessionStatus();
 
       if (status.authenticated) {
         const sessionData = {
           account: status.account,
           version: status.version,
           cachedAt: new Date().toISOString(),
-          hostname: require('os').hostname(),
+          hostname: hostname(),
         };
 
         writeFileSync(sessionFile, JSON.stringify(sessionData, null, 2));
@@ -147,9 +148,9 @@ export class OnePasswordSessionManager {
    *   2. Service account (if OP_SERVICE_ACCOUNT_TOKEN is set)
    *   3. Interactive login (prompts user)
    */
-  async ensureAuthenticated(): Promise<boolean> {
+  ensureAuthenticated(): boolean {
     // Check current session
-    const status = await this.getSessionStatus();
+    const status = this.getSessionStatus();
 
     if (status.authenticated) {
       console.log(`[1Password] ✓ Already authenticated as ${status.account}`);
@@ -157,17 +158,17 @@ export class OnePasswordSessionManager {
     }
 
     // Try service account (CI/CD)
-    const serviceAuth = await this.authenticateServiceAccount();
+    const serviceAuth = this.authenticateServiceAccount();
     if (serviceAuth) {
       return true;
     }
 
     // Try cached session (local dev)
-    const cached = await this.hasCachedSession();
+    const cached = this.hasCachedSession();
     if (cached) {
       console.log('[1Password] Using cached session');
       // Attempt to use cached session by verifying current auth
-      const verifyStatus = await this.getSessionStatus();
+      const verifyStatus = this.getSessionStatus();
       if (verifyStatus.authenticated) {
         return true;
       }
@@ -193,10 +194,10 @@ export class OnePasswordSessionManager {
    * Load a secret from 1Password vault
    * Handles session management transparently
    */
-  async getSecret(title: string, vault = 'Helix'): Promise<string | null> {
+  getSecret(title: string, vault = 'Helix'): string | null {
     try {
       // Ensure we're authenticated
-      await this.ensureAuthenticated();
+      this.ensureAuthenticated();
 
       // Fetch the secret
       const result = execSync(`op item get "${title}" --vault "${vault}" --format json`, {
@@ -204,7 +205,12 @@ export class OnePasswordSessionManager {
         stdio: ['pipe', 'pipe', 'pipe'], // Suppress stderr
       }).trim();
 
-      const item = JSON.parse(result);
+      interface OnePasswordItem {
+        fields?: Array<{ type: string; purpose: string; value: string }>;
+        notes?: string;
+      }
+
+      const item = JSON.parse(result) as OnePasswordItem;
 
       // Extract password or notes field
       if (item.fields) {
@@ -222,7 +228,7 @@ export class OnePasswordSessionManager {
 
       return null;
     } catch (error) {
-      if ((error as any).message?.includes('not found')) {
+      if (error instanceof Error && error.message.includes('not found')) {
         return null;
       }
       throw error;
@@ -232,11 +238,11 @@ export class OnePasswordSessionManager {
   /**
    * Debug information about 1Password setup
    */
-  async getDebugInfo(): Promise<Record<string, any>> {
+  getDebugInfo(): Record<string, unknown> {
     try {
-      const status = await this.getSessionStatus();
+      const status = this.getSessionStatus();
       const hasServiceToken = !!process.env.OP_SERVICE_ACCOUNT_TOKEN;
-      const hasCached = await this.hasCachedSession();
+      const hasCached = this.hasCachedSession();
 
       return {
         cli: {
@@ -299,8 +305,8 @@ export function getSessionManager(config?: SessionConfig): OnePasswordSessionMan
 /**
  * Quick check - is 1Password available?
  */
-export async function is1PasswordAvailable(): Promise<boolean> {
+export function is1PasswordAvailable(): boolean {
   const manager = getSessionManager();
-  const status = await manager.getSessionStatus();
+  const status = manager.getSessionStatus();
   return !status.error && status.version !== undefined;
 }

@@ -90,10 +90,10 @@ export class DatabaseSecretsManager extends BaseSecretsManager {
     sourceType: SecretSourceType,
     expiresAt?: Date
   ): Promise<SecretMetadata> {
-    const nonce = await generateNonce();
+    const nonce = generateNonce();
     const encryptionKey = await deriveEncryptionKey(`${this.userId}:${type}`, nonce);
 
-    const encryptedValue = await encryptWithKey(value, encryptionKey, nonce);
+    const encryptedValue = encryptWithKey(value, encryptionKey, nonce);
 
     const { data: inserted, error } = await this.supabase
       .from('user_api_keys')
@@ -148,7 +148,7 @@ export class DatabaseSecretsManager extends BaseSecretsManager {
   ): Promise<string> {
     const salt = Buffer.from(saltHex, 'hex');
     const key = await deriveEncryptionKey(`${this.userId}:${secretType}`, salt);
-    return await decryptWithKey(encryptedValue, key);
+    return decryptWithKey(encryptedValue, key);
   }
 
   async loadAllSecrets(_options?: SecretLoadOptions): Promise<Map<SecretType, string>> {
@@ -257,9 +257,9 @@ export class DatabaseSecretsManager extends BaseSecretsManager {
       const existingData = existing as UserApiKey;
 
       // Create new encrypted value
-      const nonce = await generateNonce();
+      const nonce = generateNonce();
       const encryptionKey = await deriveEncryptionKey(`${this.userId}:${type}`, nonce);
-      const encryptedValue = await encryptWithKey(newValue, encryptionKey, nonce);
+      const encryptedValue = encryptWithKey(newValue, encryptionKey, nonce);
 
       // Update the secret
       const { data: updated, error } = await this.supabase
