@@ -73,7 +73,9 @@ describe('Gateway Security - validateGatewayBind', () => {
 
     const result = validateGatewayBind(config);
 
-    expect(result.warnings).toContain('Gateway bound to 0.0.0.0 - exposed to all network interfaces');
+    expect(result.warnings).toContain(
+      'Gateway bound to 0.0.0.0 - exposed to all network interfaces'
+    );
   });
 
   it('should provide recommendations for 0.0.0.0 binding', () => {
@@ -233,10 +235,10 @@ describe('Gateway Security - logGatewaySecurityStatus', () => {
   });
 
   afterEach(() => {
-    consoleLogSpy.mockRestore();
-    consoleWarnSpy.mockRestore();
-    consoleErrorSpy.mockRestore();
-    processExitSpy.mockRestore();
+    consoleLogSpy?.mockRestore?.();
+    consoleWarnSpy?.mockRestore?.();
+    consoleErrorSpy?.mockRestore?.();
+    processExitSpy?.mockRestore?.();
   });
 
   it('should log security check header', () => {
@@ -410,6 +412,30 @@ describe('Gateway Security - enforceSecureGateway', () => {
       authRequired: false,
     };
 
+    expect(() => enforceSecureGateway(config)).not.toThrow();
+  });
+
+  it('should throw error when binding to 0.0.0.0 without auth (line 157 test)', () => {
+    const config: GatewayBindConfig = {
+      host: '0.0.0.0',
+      port: 8080,
+      authRequired: false,
+    };
+
+    // This specifically tests the validation that catches 0.0.0.0 without auth
+    expect(() => enforceSecureGateway(config)).toThrow(
+      'Gateway configuration insecure: Authentication REQUIRED when binding to 0.0.0.0'
+    );
+  });
+
+  it('should pass when 0.0.0.0 with auth required (line 157 else branch)', () => {
+    const config: GatewayBindConfig = {
+      host: '0.0.0.0',
+      port: 8080,
+      authRequired: true,
+    };
+
+    // This tests the else branch - when auth IS required, should not throw
     expect(() => enforceSecureGateway(config)).not.toThrow();
   });
 });

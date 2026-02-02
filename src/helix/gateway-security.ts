@@ -36,9 +36,7 @@ export function validateGatewayBind(config: GatewayBindConfig): BindValidationRe
   // Check for 0.0.0.0 (bind to all interfaces)
   if (config.host === '0.0.0.0') {
     result.warnings.push('Gateway bound to 0.0.0.0 - exposed to all network interfaces');
-    result.recommendations.push(
-      'Use 127.0.0.1 (localhost) for local development'
-    );
+    result.recommendations.push('Use 127.0.0.1 (localhost) for local development');
     result.recommendations.push(
       'Use private IP (192.168.*, 10.*, 172.16-31.*) for internal networks'
     );
@@ -48,9 +46,7 @@ export function validateGatewayBind(config: GatewayBindConfig): BindValidationRe
       result.errors.push('Authentication REQUIRED when binding to 0.0.0.0');
       result.valid = false;
     } else {
-      result.warnings.push(
-        'Authentication enabled - verify tokens cannot be bypassed'
-      );
+      result.warnings.push('Authentication enabled - verify tokens cannot be bypassed');
     }
   }
 
@@ -68,9 +64,7 @@ export function validateGatewayBind(config: GatewayBindConfig): BindValidationRe
 
   // Check port
   if (config.port < 1024) {
-    result.warnings.push(
-      `Port ${config.port} requires elevated privileges (root/sudo)`
-    );
+    result.warnings.push(`Port ${config.port} requires elevated privileges (root/sudo)`);
   }
 
   if (config.port === 80 || config.port === 443) {
@@ -147,9 +141,7 @@ export function enforceSecureGateway(config: GatewayBindConfig): void {
   const validation = validateGatewayBind(config);
 
   if (!validation.valid) {
-    throw new Error(
-      `Gateway configuration insecure: ${validation.errors.join('; ')}`
-    );
+    throw new Error(`Gateway configuration insecure: ${validation.errors.join('; ')}`);
   }
 
   // Warn about exposed binding

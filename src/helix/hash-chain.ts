@@ -29,7 +29,7 @@ export function setHashChainFailClosedMode(enabled: boolean): void {
   if (process.env.NODE_ENV === 'production' && !enabled) {
     throw new Error(
       '[Helix] SECURITY ERROR: Cannot disable fail-closed mode for hash chain in production. ' +
-      'This function is for testing only and is not exported in production builds.'
+        'This function is for testing only and is not exported in production builds.'
     );
   }
 
