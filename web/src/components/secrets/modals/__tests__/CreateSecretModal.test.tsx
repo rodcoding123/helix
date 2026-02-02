@@ -88,7 +88,7 @@ describe('CreateSecretModal Component', () => {
     const typeSelect = screen.getByLabelText(/secret type/i);
 
     await user.type(nameInput, 'My API Key');
-    await user.selectOption(typeSelect, 'stripe_key');
+    await user.selectOptions(typeSelect, 'stripe_key');
 
     // Submit
     const createButton = screen.getByRole('button', { name: /create/i });
@@ -120,7 +120,7 @@ describe('CreateSecretModal Component', () => {
     const typeSelect = screen.getByLabelText(/secret type/i) as HTMLSelectElement;
 
     await user.type(nameInput, 'My API Key');
-    await user.selectOption(typeSelect, 'stripe_key');
+    await user.selectOptions(typeSelect, 'stripe_key');
 
     const createButton = screen.getByRole('button', { name: /create/i });
     await user.click(createButton);
@@ -158,7 +158,7 @@ describe('CreateSecretModal Component', () => {
     const expiresInput = screen.getByLabelText(/expiration date/i);
 
     await user.type(nameInput, 'My API Key');
-    await user.selectOption(typeSelect, 'api_key');
+    await user.selectOptions(typeSelect, 'api_key');
     await user.type(expiresInput, '2026-12-31');
 
     // Submit
