@@ -164,9 +164,9 @@ describe('BaseSecretsManager', () => {
     });
 
     it('should throw when rotating non-existent secret', async () => {
-      expect(async () => {
-        await manager.rotateSecret(SecretType.STRIPE_SECRET_KEY, 'new-value');
-      }).rejects.toThrow('Cannot rotate secret');
+      await expect(
+        manager.rotateSecret(SecretType.STRIPE_SECRET_KEY, 'new-value')
+      ).rejects.toThrow('Cannot rotate secret');
     });
   });
 });
