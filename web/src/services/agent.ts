@@ -1,6 +1,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { loadSecret } from '@/lib/secrets-loader';
 import type { Agent, AgentConversation, AgentPersonality } from '@/lib/types/agents';
+import { DiscordLoggerService } from './discord-logger';
 
 /**
  * AgentService: Manages agent lifecycle, personality, and memory
@@ -8,6 +9,7 @@ import type { Agent, AgentConversation, AgentPersonality } from '@/lib/types/age
  */
 export class AgentService {
   private supabase: SupabaseClient | null = null;
+  private discordLogger: DiscordLoggerService | null = null;
 
   private async getSupabaseClient(): Promise<SupabaseClient> {
     if (this.supabase) return this.supabase;
@@ -17,6 +19,13 @@ export class AgentService {
 
     this.supabase = createClient(url, anonKey);
     return this.supabase;
+  }
+
+  private getDiscordLogger(): DiscordLoggerService {
+    if (!this.discordLogger) {
+      this.discordLogger = new DiscordLoggerService();
+    }
+    return this.discordLogger;
   }
 
   /**
@@ -71,7 +80,18 @@ export class AgentService {
         throw new Error(`Failed to create agent: ${error.message}`);
       }
 
-      return this.formatAgent(data);
+      const agent = this.formatAgent(data);
+
+      // Log agent creation to Discord (non-fatal if it fails)
+      try {
+        const discordLogger = this.getDiscordLogger();
+        await discordLogger.logAgentCreated(userId, agent);
+      } catch (discordError) {
+        console.error('Failed to log agent creation to Discord:', discordError);
+        // Don't throw - Discord logging is non-fatal
+      }
+
+      return agent;
     } catch (error) {
       console.error('Failed to create agent:', error);
       throw error;
@@ -202,7 +222,18 @@ export class AgentService {
         throw new Error(`Failed to update personality: ${error.message}`);
       }
 
-      return this.formatAgent(data);
+      const updatedAgent = this.formatAgent(data);
+
+      // Log personality evolution to Discord periodically (non-fatal if it fails)
+      try {
+        const discordLogger = this.getDiscordLogger();
+        await discordLogger.logPersonalityEvolution(userId, updatedAgent);
+      } catch (discordError) {
+        console.error('Failed to log personality evolution to Discord:', discordError);
+        // Don't throw - Discord logging is non-fatal
+      }
+
+      return updatedAgent;
     } catch (error) {
       console.error('Failed to update agent personality:', error);
       throw error;

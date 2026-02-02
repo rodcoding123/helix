@@ -7,6 +7,7 @@ import type {
   RiskLevel,
   AutonomySettings,
 } from '@/lib/types/agents';
+import { DiscordLoggerService } from './discord-logger';
 
 /**
  * AutonomyManagerService: Manages the approval workflow and autonomy levels
@@ -14,6 +15,7 @@ import type {
  */
 export class AutonomyManagerService {
   private supabase: SupabaseClient | null = null;
+  private discordLogger: DiscordLoggerService | null = null;
 
   private async getSupabaseClient(): Promise<SupabaseClient> {
     if (this.supabase) return this.supabase;
@@ -23,6 +25,13 @@ export class AutonomyManagerService {
 
     this.supabase = createClient(url, anonKey);
     return this.supabase;
+  }
+
+  private getDiscordLogger(): DiscordLoggerService {
+    if (!this.discordLogger) {
+      this.discordLogger = new DiscordLoggerService();
+    }
+    return this.discordLogger;
   }
 
   /**
@@ -161,6 +170,25 @@ export class AutonomyManagerService {
 
       const action = this.formatAction(data);
 
+      // Log action to Discord if it needs approval (non-fatal if it fails)
+      if (needsApproval) {
+        try {
+          const discordLogger = this.getDiscordLogger();
+          const messageId = await discordLogger.logAutonomyAction(userId, action);
+
+          // Store the Discord message ID for reference
+          if (messageId) {
+            await supabase
+              .from('autonomy_actions')
+              .update({ discord_message_id: messageId })
+              .eq('id', action.id);
+          }
+        } catch (discordError) {
+          console.error('Failed to log action to Discord:', discordError);
+          // Don't throw - Discord logging is non-fatal
+        }
+      }
+
       // If doesn't need approval, auto-execute immediately
       if (!needsApproval) {
         await this.executeAction(action.id, userId);
@@ -288,6 +316,24 @@ export class AutonomyManagerService {
         if (updateError) {
           throw new Error(`Failed to update action: ${updateError.message}`);
         }
+
+        // Log executed action to Discord (non-fatal if it fails)
+        try {
+          const { data: updatedActionData } = await supabase
+            .from('autonomy_actions')
+            .select()
+            .eq('id', actionId)
+            .single();
+
+          if (updatedActionData) {
+            const discordLogger = this.getDiscordLogger();
+            const updatedAction = this.formatAction(updatedActionData);
+            await discordLogger.logExecutedAction(userId, updatedAction);
+          }
+        } catch (discordError) {
+          console.error('Failed to log executed action to Discord:', discordError);
+          // Don't throw - Discord logging is non-fatal
+        }
       } catch (execError) {
         // Mark action as failed
         const errorMessage =
@@ -302,6 +348,24 @@ export class AutonomyManagerService {
             updated_at: new Date(),
           })
           .eq('id', actionId);
+
+        // Log failed action to Discord (non-fatal if it fails)
+        try {
+          const { data: failedActionData } = await supabase
+            .from('autonomy_actions')
+            .select()
+            .eq('id', actionId)
+            .single();
+
+          if (failedActionData) {
+            const discordLogger = this.getDiscordLogger();
+            const failedAction = this.formatAction(failedActionData);
+            await discordLogger.logExecutedAction(userId, failedAction);
+          }
+        } catch (discordError) {
+          console.error('Failed to log failed action to Discord:', discordError);
+          // Don't throw - Discord logging is non-fatal
+        }
 
         throw execError;
       }

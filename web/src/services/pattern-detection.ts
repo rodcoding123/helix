@@ -2,6 +2,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { loadSecret } from '@/lib/secrets-loader';
 import type { Conversation } from '@/lib/types/memory';
 import type { AgentProposal, PatternAnalysisResult } from '@/lib/types/agents';
+import { DiscordLoggerService } from './discord-logger';
 
 /**
  * PatternDetectionService: Analyzes user conversations to detect patterns
@@ -9,6 +10,7 @@ import type { AgentProposal, PatternAnalysisResult } from '@/lib/types/agents';
  */
 export class PatternDetectionService {
   private supabase: SupabaseClient | null = null;
+  private discordLogger: DiscordLoggerService | null = null;
 
   private async getSupabaseClient(): Promise<SupabaseClient> {
     if (this.supabase) return this.supabase;
@@ -18,6 +20,13 @@ export class PatternDetectionService {
 
     this.supabase = createClient(url, anonKey);
     return this.supabase;
+  }
+
+  private getDiscordLogger(): DiscordLoggerService {
+    if (!this.discordLogger) {
+      this.discordLogger = new DiscordLoggerService();
+    }
+    return this.discordLogger;
   }
 
   /**
@@ -76,6 +85,19 @@ export class PatternDetectionService {
           status: 'pending',
           created_at: new Date(),
         }));
+
+      // Log proposals to Discord (non-fatal if it fails)
+      if (proposals.length > 0) {
+        try {
+          const discordLogger = this.getDiscordLogger();
+          for (const proposal of proposals) {
+            await discordLogger.logAgentProposal(userId, proposal);
+          }
+        } catch (discordError) {
+          console.error('Failed to log proposals to Discord:', discordError);
+          // Don't throw - Discord logging is non-fatal
+        }
+      }
 
       return proposals;
     } catch (error) {
