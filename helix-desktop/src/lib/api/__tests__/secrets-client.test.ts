@@ -103,3 +103,63 @@ describe('SecretsClient', () => {
     await expect(client.listSecrets()).rejects.toThrow('Unauthorized');
   });
 });
+
+describe('SecretsClient - Retry Logic', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('should retry on network error with exponential backoff', async () => {
+    const client = new SecretsClient('test-token');
+    let attempts = 0;
+
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+      attempts++;
+      if (attempts < 3) throw new TypeError('Network error');
+      return { ok: true, json: async () => ({ secrets: [] }) } as Response;
+    });
+
+    const result = await client.listSecrets();
+    expect(attempts).toBe(3);
+    expect(result).toEqual([]);
+  });
+
+  it('should not retry on 401 unauthorized error', async () => {
+    const client = new SecretsClient('test-token');
+    let attempts = 0;
+
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+      attempts++;
+      return { ok: false, status: 401, json: async () => ({ error: 'Unauthorized' }) } as Response;
+    });
+
+    await expect(client.listSecrets()).rejects.toThrow('Unauthorized');
+    expect(attempts).toBe(1);
+  });
+
+  it('should not retry on 400 bad request error', async () => {
+    const client = new SecretsClient('test-token');
+    let attempts = 0;
+
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+      attempts++;
+      return { ok: false, status: 400, json: async () => ({ error: 'Bad request' }) } as Response;
+    });
+
+    await expect(client.listSecrets()).rejects.toThrow('Bad request');
+    expect(attempts).toBe(1);
+  });
+
+  it('should retry on 503 service unavailable with max retries', async () => {
+    const client = new SecretsClient('test-token');
+    let attempts = 0;
+
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+      attempts++;
+      return { ok: false, status: 503, json: async () => ({ error: 'Service unavailable' }) } as Response;
+    });
+
+    await expect(client.listSecrets()).rejects.toThrow('Service unavailable');
+    expect(attempts).toBe(3);
+  });
+});
