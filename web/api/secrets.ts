@@ -25,6 +25,20 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-User-ID',
 };
 
+/**
+ * Helper function to log to audit table with error handling
+ */
+async function logAudit(
+  supabase: SupabaseClient,
+  auditData: Record<string, unknown>
+): Promise<void> {
+  try {
+    await supabase.from('api_key_access_audit').insert(auditData);
+  } catch (error) {
+    console.error('Failed to log audit record:', error);
+  }
+}
+
 export default async function handler(request: Request): Promise<Response> {
   // Handle preflight
   if (request.method === 'OPTIONS') {
@@ -117,18 +131,14 @@ async function handleListSecrets(
       console.error('Failed to list secrets:', error);
 
       // Audit log failure
-      try {
-        await supabase.from('api_key_access_audit').insert({
-          user_id: userId,
-          action: 'list' as const,
-          context: 'REST API - list secrets',
-          source: 'api',
-          success: false,
-          error_message: error.message,
-        });
-      } catch (auditError) {
-        console.error('Failed to log audit record:', auditError);
-      }
+      await logAudit(supabase, {
+        user_id: userId,
+        action: 'list',
+        context: 'REST API - list secrets',
+        source: 'api',
+        success: false,
+        error_message: error.message,
+      });
 
       return new Response(JSON.stringify({ error: 'Failed to retrieve secrets' }), {
         status: 500,
@@ -148,17 +158,13 @@ async function handleListSecrets(
     }));
 
     // Audit log successful list
-    try {
-      await supabase.from('api_key_access_audit').insert({
-        user_id: userId,
-        action: 'list' as const,
-        context: 'REST API - list secrets',
-        source: 'api',
-        success: true,
-      });
-    } catch (auditError) {
-      console.error('Failed to log audit record:', auditError);
-    }
+    await logAudit(supabase, {
+      user_id: userId,
+      action: 'list',
+      context: 'REST API - list secrets',
+      source: 'api',
+      success: true,
+    });
 
     return new Response(JSON.stringify({ secrets: secretMetadata }), {
       status: 200,
@@ -168,18 +174,14 @@ async function handleListSecrets(
     console.error('Error listing secrets:', error);
 
     // Audit log unexpected error
-    try {
-      await supabase.from('api_key_access_audit').insert({
-        user_id: userId,
-        action: 'list' as const,
-        context: 'REST API - list secrets',
-        source: 'api',
-        success: false,
-        error_message: error instanceof Error ? error.message : 'Unknown error',
-      });
-    } catch (auditError) {
-      console.error('Failed to log audit record:', auditError);
-    }
+    await logAudit(supabase, {
+      user_id: userId,
+      action: 'list',
+      context: 'REST API - list secrets',
+      source: 'api',
+      success: false,
+      error_message: error instanceof Error ? error.message : 'Unknown error',
+    });
 
     return new Response(JSON.stringify({ error: 'Failed to retrieve secrets' }), {
       status: 500,
@@ -312,16 +314,13 @@ async function handleCreateSecret(
       console.error('Failed to create secret:', error);
 
       // Audit log failure
-      await supabase.from('api_key_access_audit').insert({
+      await logAudit(supabase, {
         user_id: userId,
-        secret_id: undefined,
-        action: 'create' as const,
+        action: 'create',
         context: 'REST API - create secret',
         source: 'api',
         success: false,
         error_message: error.message,
-      }).catch((auditError) => {
-        console.error('Failed to log audit record:', auditError);
       });
 
       return new Response(JSON.stringify({ error: 'Failed to create secret' }), {
@@ -331,15 +330,13 @@ async function handleCreateSecret(
     }
 
     // Audit log successful creation
-    await supabase.from('api_key_access_audit').insert({
+    await logAudit(supabase, {
       user_id: userId,
       secret_id: newSecret.id,
-      action: 'create' as const,
+      action: 'create',
       context: 'REST API - create secret',
       source: 'api',
       success: true,
-    }).catch((auditError) => {
-      console.error('Failed to log audit record:', auditError);
     });
 
     return new Response(
@@ -358,15 +355,13 @@ async function handleCreateSecret(
     console.error('Error creating secret:', error);
 
     // Audit log unexpected error
-    await supabase.from('api_key_access_audit').insert({
+    await logAudit(supabase, {
       user_id: userId,
-      action: 'create' as const,
+      action: 'create',
       context: 'REST API - create secret',
       source: 'api',
       success: false,
       error_message: error instanceof Error ? error.message : 'Unknown error',
-    }).catch((auditError) => {
-      console.error('Failed to log audit record:', auditError);
     });
 
     return new Response(JSON.stringify({ error: 'Failed to create secret' }), {
@@ -416,15 +411,13 @@ async function handleGetSecret(
 
     if (error || !secret) {
       // Audit log not found
-      await supabase.from('api_key_access_audit').insert({
+      await logAudit(supabase, {
         user_id: userId,
-        action: 'read' as const,
+        action: 'read',
         context: 'REST API - read secret',
         source: 'api',
         success: false,
         error_message: 'Secret not found',
-      }).catch((auditError) => {
-        console.error('Failed to log audit record:', auditError);
       });
 
       return new Response(JSON.stringify({ error: 'Secret not found' }), {
@@ -434,15 +427,13 @@ async function handleGetSecret(
     }
 
     // Audit log successful read
-    await supabase.from('api_key_access_audit').insert({
+    await logAudit(supabase, {
       user_id: userId,
       secret_id: secret.id,
-      action: 'read' as const,
+      action: 'read',
       context: 'REST API - read secret',
       source: 'api',
       success: true,
-    }).catch((auditError) => {
-      console.error('Failed to log audit record:', auditError);
     });
 
     return new Response(
@@ -465,15 +456,13 @@ async function handleGetSecret(
     console.error('Error getting secret:', error);
 
     // Audit log unexpected error
-    await supabase.from('api_key_access_audit').insert({
+    await logAudit(supabase, {
       user_id: userId,
-      action: 'read' as const,
+      action: 'read',
       context: 'REST API - read secret',
       source: 'api',
       success: false,
       error_message: error instanceof Error ? error.message : 'Unknown error',
-    }).catch((auditError) => {
-      console.error('Failed to log audit record:', auditError);
     });
 
     return new Response(JSON.stringify({ error: 'Failed to retrieve secret' }), {
@@ -554,15 +543,13 @@ async function handleRotateSecret(
 
     if (fetchError || !currentSecret) {
       // Audit log fetch failure
-      await supabase.from('api_key_access_audit').insert({
+      await logAudit(supabase, {
         user_id: userId,
-        action: 'rotate' as const,
+        action: 'rotate',
         context: 'REST API - rotate secret',
         source: 'api',
         success: false,
         error_message: 'Secret not found',
-      }).catch((auditError) => {
-        console.error('Failed to log audit record:', auditError);
       });
 
       return new Response(JSON.stringify({ error: 'Secret not found' }), {
@@ -604,16 +591,14 @@ async function handleRotateSecret(
       console.error('Failed to rotate secret:', error);
 
       // Audit log rotation failure
-      await supabase.from('api_key_access_audit').insert({
+      await logAudit(supabase, {
         user_id: userId,
         secret_id: currentSecret?.id,
-        action: 'rotate' as const,
+        action: 'rotate',
         context: 'REST API - rotate secret',
         source: 'api',
         success: false,
         error_message: error ? error.message : 'Failed to rotate secret',
-      }).catch((auditError) => {
-        console.error('Failed to log audit record:', auditError);
       });
 
       return new Response(JSON.stringify({ error: 'Failed to rotate secret' }), {
@@ -623,15 +608,13 @@ async function handleRotateSecret(
     }
 
     // Audit log successful rotation
-    await supabase.from('api_key_access_audit').insert({
+    await logAudit(supabase, {
       user_id: userId,
       secret_id: updatedSecret.id,
-      action: 'rotate' as const,
+      action: 'rotate',
       context: 'REST API - rotate secret',
       source: 'api',
       success: true,
-    }).catch((auditError) => {
-      console.error('Failed to log audit record:', auditError);
     });
 
     return new Response(
@@ -649,15 +632,13 @@ async function handleRotateSecret(
     console.error('Error rotating secret:', error);
 
     // Audit log unexpected error
-    await supabase.from('api_key_access_audit').insert({
+    await logAudit(supabase, {
       user_id: userId,
-      action: 'rotate' as const,
+      action: 'rotate',
       context: 'REST API - rotate secret',
       source: 'api',
       success: false,
       error_message: error instanceof Error ? error.message : 'Unknown error',
-    }).catch((auditError) => {
-      console.error('Failed to log audit record:', auditError);
     });
 
     return new Response(JSON.stringify({ error: 'Failed to rotate secret' }), {
@@ -698,14 +679,19 @@ async function handleDeleteSecret(
       );
     }
 
-    // Get secret ID before deletion
-    const { data: secretToDelete } = await supabase
-      .from('user_api_keys')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('secret_type', secretType)
-      .single()
-      .catch(() => ({ data: null }));
+    // Get secret ID before deletion for audit logging
+    let secretIdToDelete: string | undefined;
+    try {
+      const { data } = await supabase
+        .from('user_api_keys')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('secret_type', secretType)
+        .single();
+      secretIdToDelete = data?.id;
+    } catch {
+      // Ignore error, we'll try to delete anyway
+    }
 
     // Soft delete
     const { error } = await supabase
@@ -722,16 +708,14 @@ async function handleDeleteSecret(
       console.error('Failed to delete secret:', error);
 
       // Audit log deletion failure
-      await supabase.from('api_key_access_audit').insert({
+      await logAudit(supabase, {
         user_id: userId,
-        secret_id: secretToDelete?.id,
-        action: 'delete' as const,
+        secret_id: secretIdToDelete,
+        action: 'delete',
         context: 'REST API - delete secret',
         source: 'api',
         success: false,
         error_message: error.message,
-      }).catch((auditError) => {
-        console.error('Failed to log audit record:', auditError);
       });
 
       return new Response(JSON.stringify({ error: 'Failed to delete secret' }), {
@@ -741,15 +725,13 @@ async function handleDeleteSecret(
     }
 
     // Audit log successful deletion
-    await supabase.from('api_key_access_audit').insert({
+    await logAudit(supabase, {
       user_id: userId,
-      secret_id: secretToDelete?.id,
-      action: 'delete' as const,
+      secret_id: secretIdToDelete,
+      action: 'delete',
       context: 'REST API - delete secret',
       source: 'api',
       success: true,
-    }).catch((auditError) => {
-      console.error('Failed to log audit record:', auditError);
     });
 
     return new Response(JSON.stringify({ success: true }), {
@@ -760,15 +742,13 @@ async function handleDeleteSecret(
     console.error('Error deleting secret:', error);
 
     // Audit log unexpected error
-    await supabase.from('api_key_access_audit').insert({
+    await logAudit(supabase, {
       user_id: userId,
-      action: 'delete' as const,
+      action: 'delete',
       context: 'REST API - delete secret',
       source: 'api',
       success: false,
       error_message: error instanceof Error ? error.message : 'Unknown error',
-    }).catch((auditError) => {
-      console.error('Failed to log audit record:', auditError);
     });
 
     return new Response(JSON.stringify({ error: 'Failed to delete secret' }), {
