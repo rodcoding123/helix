@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { SecretsClient } from '../lib/api/secrets-client';
 import { useAuth } from '../lib/auth-context.tsx';
 import type { UserApiKey } from '../types/secrets';
@@ -11,7 +11,7 @@ export function useSecretsData() {
   const [error, setError] = useState<string | null>(null);
   const [selectedSecret, setSelectedSecret] = useState<UserApiKey | null>(null);
 
-  const client = new SecretsClient(token || '');
+  const client = useMemo(() => new SecretsClient(token || ''), [token]);
 
   const loadSecrets = useCallback(async () => {
     if (!token) return;
@@ -34,6 +34,7 @@ export function useSecretsData() {
 
   const createSecret = useCallback(
     async (input: CreateSecretInput) => {
+      setError(null);
       try {
         const secret = await client.createSecret(input);
         setSecrets((prev) => [...prev, secret]);
@@ -48,6 +49,7 @@ export function useSecretsData() {
 
   const rotateSecret = useCallback(
     async (secretId: string) => {
+      setError(null);
       try {
         const updated = await client.rotateSecret(secretId);
         setSecrets((prev) =>
@@ -64,6 +66,7 @@ export function useSecretsData() {
 
   const deleteSecret = useCallback(
     async (secretId: string) => {
+      setError(null);
       try {
         await client.deleteSecret(secretId);
         setSecrets((prev) => prev.filter((s) => s.id !== secretId));
@@ -85,5 +88,17 @@ export function useSecretsData() {
     createSecret,
     rotateSecret,
     deleteSecret,
-  };
+  } as SecretsDataResult;
+}
+
+export interface SecretsDataResult {
+  secrets: UserApiKey[];
+  loading: boolean;
+  error: string | null;
+  selectedSecret: UserApiKey | null;
+  setSelectedSecret: (secret: UserApiKey | null) => void;
+  loadSecrets: () => Promise<void>;
+  createSecret: (input: CreateSecretInput) => Promise<UserApiKey>;
+  rotateSecret: (secretId: string) => Promise<UserApiKey>;
+  deleteSecret: (secretId: string) => Promise<void>;
 }
