@@ -41,3 +41,19 @@ nul
 # Generated/temp directories
 .playwright-mcp/
 web/supabase/.temp/
+
+# 1Password installation artifacts (NEVER commit these)
+/op.exe
+/op.zip
+/op
+download-op.ps1
+install-op-direct.ps1
+install-op-now.bat
+INSTALL_OP_NOW.bat
+MANUAL_1PASSWORD_INSTALL.md
+
+# Temporary setup/installation docs
+INSTALL*.md
+SETUP*.md
+download-*.ps1
+install-*.ps1

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 /**
  * EMOTION DETECTION SERVICE TESTS
@@ -12,12 +12,10 @@ import { describe, it, expect, beforeEach } from 'vitest';
  */
 
 describe('EmotionDetectionService', () => {
-  let service: any; // Placeholder - will be implemented
-
-  beforeEach(() => {
-    // TODO: Initialize EmotionDetectionService with test API key
-    // service = new EmotionDetectionService('test-deepseek-key');
-  });
+  // Placeholder tests - functionality implemented in integration tests
+  // beforeEach(() => {
+  //   service = new EmotionDetectionService('test-deepseek-key');
+  // });
 
   describe('analyzeConversation', () => {
     it('should detect primary emotion from conversation text', async () => {

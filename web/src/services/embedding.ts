@@ -72,14 +72,16 @@ export class EmbeddingService {
       });
 
       // Validate each embedding
-      const embeddings = result.embeddings.map((emb: any) => {
-        if (!emb.values || emb.values.length !== 768) {
-          throw new Error(
-            `Expected 768-dimensional embedding, got ${emb.values?.length}`
-          );
+      const embeddings = result.embeddings.map(
+        (emb: { values: number[] }) => {
+          if (!emb.values || emb.values.length !== 768) {
+            throw new Error(
+              `Expected 768-dimensional embedding, got ${emb.values?.length}`
+            );
+          }
+          return emb.values;
         }
-        return emb.values;
-      });
+      );
 
       return embeddings;
     } catch (error) {

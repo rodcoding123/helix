@@ -279,6 +279,20 @@ export async function initializeHelix(options: HelixInitOptions = {}): Promise<v
   console.log('[Helix] Initializing logging system...');
 
   // ============================================
+  // STEP -2: ENVIRONMENT VARIABLE VALIDATION
+  // This MUST happen before anything else
+  // Ensures all required secrets are available
+  // ============================================
+  const { requireValidEnvironment } = await import('../lib/env-validator.js');
+  try {
+    requireValidEnvironment();
+  } catch (error) {
+    console.error('[Helix] ENVIRONMENT VALIDATION FAILED');
+    console.error('[Helix] Cannot proceed without all required secrets');
+    process.exit(1);
+  }
+
+  // ============================================
   // STEP -1: SECURITY CONFIGURATION VALIDATION
   // This MUST happen before anything else
   // Ensures we can actually log before proceeding

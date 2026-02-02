@@ -263,7 +263,7 @@ describe('End-to-End Memory Flow', () => {
         conversation1[0].content
       );
 
-      const stored1 = await repository.storeConversation({
+      await repository.storeConversation({
         user_id: userId,
         messages: conversation1,
         primary_emotion: emb1Data.primary_emotion,
@@ -288,7 +288,7 @@ describe('End-to-End Memory Flow', () => {
         conversation2[0].content
       );
 
-      const stored2 = await repository.storeConversation({
+      await repository.storeConversation({
         user_id: userId,
         messages: conversation2,
         primary_emotion: emb2Data.primary_emotion,
