@@ -6,7 +6,10 @@
       "mcp__plugin_playwright_playwright__*",
       "Read(c:/Users/Specter/Desktop/Helix/**)",
       "Bash(git ls-tree:*)",
-      "Bash(__NEW_LINE_a5e71934e2d0c2c9__ mkdir -p \"c:/Users/Specter/Desktop/Helix/docs/archive/planning\")"
+      "Bash(__NEW_LINE_a5e71934e2d0c2c9__ mkdir -p \"c:/Users/Specter/Desktop/Helix/docs/archive/planning\")",
+      "Bash(for i in 009 010 011 012 013 014 015 016 017 019 020)",
+      "Bash(do npx supabase migration repair --status applied $i)",
+      "Read(//c/Users/Specter/Desktop/Helix/**)"
     ]
   },
   "contextInclude": [

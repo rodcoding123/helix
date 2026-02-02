@@ -27,12 +27,25 @@ export const customToolHandlers: GatewayRequestHandlers = {
    * }
    */
   'tools.execute_custom': async ({ params, respond, context, client }) => {
+    const executionId = crypto.randomUUID();
+    const startTime = Date.now();
+    let userId: string | undefined;
+
     try {
       // Validate parameters
       if (!params || typeof params !== 'object') {
         respond(false, undefined, {
           code: 'INVALID_REQUEST',
           message: 'Invalid parameters',
+        });
+        return;
+      }
+
+      userId = client?.connect?.userId;
+      if (!userId) {
+        respond(false, undefined, {
+          code: 'UNAUTHORIZED',
+          message: 'Authentication required',
         });
         return;
       }
@@ -62,9 +75,10 @@ export const customToolHandlers: GatewayRequestHandlers = {
 
       // Log execution start
       context.logGateway.log?.('CUSTOM_TOOL_EXECUTION_START', {
+        executionId,
         toolId: toolId || 'unknown',
         toolName: skillMetadata.name,
-        userId: client?.connect?.userId,
+        userId,
       });
 
       // Execute with sandbox
@@ -72,34 +86,77 @@ export const customToolHandlers: GatewayRequestHandlers = {
         code,
         skillMetadata,
         toolParams || {},
-        context.deps.session?.key || 'unknown',
+        executionId,
         DEFAULT_SKILL_SANDBOX_CONFIG,
       );
 
+      const executionTimeMs = Date.now() - startTime;
+
+      // Store execution record if we have a tool ID and user
+      if (toolId && userId) {
+        try {
+          const db = context.db;
+          await db.query(
+            `INSERT INTO custom_tool_usage
+             (id, custom_tool_id, user_id, input_params, output_result, status, error_message, execution_time_ms, timestamp)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())`,
+            [
+              executionId,
+              toolId,
+              userId,
+              JSON.stringify(toolParams || {}),
+              result.success ? JSON.stringify(result.output) : null,
+              result.success ? 'success' : 'failure',
+              result.error || null,
+              executionTimeMs,
+            ]
+          );
+
+          // Update tool usage count
+          await db.query(
+            `UPDATE custom_tools SET usage_count = usage_count + 1, last_used = NOW() WHERE id = $1`,
+            [toolId]
+          );
+        } catch (dbError) {
+          context.logGateway.error?.('CUSTOM_TOOL_STORAGE_ERROR', {
+            executionId,
+            error: dbError instanceof Error ? dbError.message : String(dbError),
+            userId,
+          });
+          // Don't fail the execution, just log the storage error
+        }
+      }
+
       // Log execution completion
       context.logGateway.log?.('CUSTOM_TOOL_EXECUTION_COMPLETE', {
+        executionId,
         toolId: toolId || 'unknown',
         success: result.success,
-        executionTimeMs: result.executionTimeMs,
-        userId: client?.connect?.userId,
+        executionTimeMs,
+        userId,
       });
 
       respond(true, {
         success: result.success,
         output: result.output,
-        executionTimeMs: result.executionTimeMs,
+        executionTimeMs,
         auditLog: result.auditLog,
+        executionId,
       });
 
     } catch (error) {
+      const executionTimeMs = Date.now() - startTime;
       context.logGateway.error?.('CUSTOM_TOOL_EXECUTION_ERROR', {
+        executionId,
         error: error instanceof Error ? error.message : String(error),
-        userId: client?.connect?.userId,
+        executionTimeMs,
+        userId,
       });
 
       respond(false, undefined, {
         code: 'EXECUTION_ERROR',
         message: error instanceof Error ? error.message : 'Unknown error',
+        executionId,
       });
     }
   },
@@ -117,9 +174,11 @@ export const customToolHandlers: GatewayRequestHandlers = {
    *   description: string
    *   parameters: Record<string, unknown> (JSON schema)
    *   version: string
+   *   usageCount: number
+   *   isEnabled: boolean
    * }
    */
-  'tools.get_metadata': async ({ params, respond }) => {
+  'tools.get_metadata': async ({ params, respond, context, client }) => {
     try {
       if (!params || typeof params !== 'object') {
         respond(false, undefined, {
@@ -130,26 +189,50 @@ export const customToolHandlers: GatewayRequestHandlers = {
       }
 
       const { toolId } = params as { toolId?: string };
+      const userId = client?.connect?.userId;
 
-      if (!toolId) {
+      if (!toolId || !userId) {
         respond(false, undefined, {
           code: 'INVALID_REQUEST',
-          message: 'toolId is required',
+          message: 'toolId and authentication are required',
         });
         return;
       }
 
-      // TODO: Implement database lookup when tables are available
-      // For now, return a placeholder
+      // Query database for tool metadata
+      const db = context.db;
+      const result = await db.query(
+        `SELECT id, name, description, parameters, version, usage_count, is_enabled
+         FROM custom_tools
+         WHERE id = $1 AND user_id = $2`,
+        [toolId, userId]
+      );
+
+      if (!result.rows || result.rows.length === 0) {
+        respond(false, undefined, {
+          code: 'NOT_FOUND',
+          message: `Tool not found: ${toolId}`,
+        });
+        return;
+      }
+
+      const tool = result.rows[0];
       respond(true, {
-        id: toolId,
-        name: 'placeholder-tool',
-        description: 'Database not yet initialized',
-        parameters: {},
-        version: '1.0.0',
+        id: tool.id,
+        name: tool.name,
+        description: tool.description,
+        parameters: tool.parameters || {},
+        version: tool.version || '1.0.0',
+        usageCount: tool.usage_count || 0,
+        isEnabled: tool.is_enabled !== false,
       });
 
     } catch (error) {
+      context.logGateway.error?.('TOOLS_GET_METADATA_ERROR', {
+        error: error instanceof Error ? error.message : String(error),
+        userId: client?.connect?.userId,
+      });
+
       respond(false, undefined, {
         code: 'LOOKUP_ERROR',
         message: error instanceof Error ? error.message : 'Unknown error',
@@ -170,23 +253,65 @@ export const customToolHandlers: GatewayRequestHandlers = {
    *     version: string
    *     usageCount: number
    *     lastUsed: string (ISO timestamp)
+   *     isEnabled: boolean
+   *     visibility: string
    *   }>
+   *   total: number
    * }
    */
   'tools.list': async ({ respond, context, client }) => {
     try {
-      // TODO: Implement database query when tables are available
-      // For now, return empty list
+      const userId = client?.connect?.userId;
+
+      if (!userId) {
+        respond(false, undefined, {
+          code: 'UNAUTHORIZED',
+          message: 'Authentication required',
+        });
+        return;
+      }
+
       context.logGateway.log?.('TOOLS_LIST_REQUEST', {
-        userId: client?.connect?.userId,
+        userId,
+      });
+
+      // Query database for user's tools
+      const db = context.db;
+      const result = await db.query(
+        `SELECT id, name, description, version, usage_count, last_used, is_enabled, visibility
+         FROM custom_tools
+         WHERE user_id = $1
+         ORDER BY last_used DESC NULLS LAST, created_at DESC`,
+        [userId]
+      );
+
+      const tools = (result.rows || []).map((tool) => ({
+        id: tool.id,
+        name: tool.name,
+        description: tool.description,
+        version: tool.version || '1.0.0',
+        usageCount: tool.usage_count || 0,
+        lastUsed: tool.last_used?.toISOString() || null,
+        isEnabled: tool.is_enabled !== false,
+        visibility: tool.visibility || 'private',
+      }));
+
+      context.logGateway.log?.('TOOLS_LIST_RESPONSE', {
+        userId,
+        count: tools.length,
       });
 
       respond(true, {
-        tools: [],
-        total: 0,
+        tools,
+        total: tools.length,
       });
 
     } catch (error) {
+      context.logGateway.error?.('TOOLS_LIST_ERROR', {
+        error: error instanceof Error ? error.message : String(error),
+        userId: client?.connect?.userId,
+      });
+
       respond(false, undefined, {
         code: 'LIST_ERROR',
         message: error instanceof Error ? error.message : 'Unknown error',
