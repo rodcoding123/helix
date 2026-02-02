@@ -11,9 +11,10 @@
 import crypto from 'node:crypto';
 import type { InternalHookEvent, WebhookHealthStatus, SecurityConfigStatus } from './types.js';
 import { HelixSecurityError, REQUIRED_WEBHOOKS, OPTIONAL_WEBHOOKS } from './types.js';
+import { loadSecret } from '../lib/secrets-loader.js';
 
-// Discord webhook URLs from environment
-const WEBHOOKS = {
+// Discord webhook URLs - loaded at initialization
+let WEBHOOKS = {
   commands: process.env.DISCORD_WEBHOOK_COMMANDS,
   api: process.env.DISCORD_WEBHOOK_API,
   files: process.env.DISCORD_WEBHOOK_FILE_CHANGES,
@@ -21,6 +22,27 @@ const WEBHOOKS = {
   alerts: process.env.DISCORD_WEBHOOK_ALERTS,
   hashChain: process.env.DISCORD_WEBHOOK_HASH_CHAIN,
 };
+
+/**
+ * Initialize Discord webhooks from 1Password
+ * Call this once at application startup
+ */
+export async function initializeDiscordWebhooks(): Promise<void> {
+  try {
+    WEBHOOKS = {
+      commands: await loadSecret('Discord Webhook - Commands', 'notes'),
+      api: await loadSecret('Discord Webhook - API', 'notes'),
+      files: await loadSecret('Discord Webhook - File Changes', 'notes'),
+      consciousness: await loadSecret('Discord Webhook - Consciousness', 'notes'),
+      alerts: await loadSecret('Discord Webhook - Alerts', 'notes'),
+      hashChain: await loadSecret('Discord Webhook - Hash Chain', 'notes'),
+    };
+    console.log('[Helix] Discord webhooks initialized from 1Password');
+  } catch (error) {
+    console.warn('[Helix] Failed to load webhooks from 1Password, using environment fallback:', error);
+    // .env fallback is already loaded above
+  }
+}
 
 // Security mode - when true, operations fail if logging unavailable
 let failClosedMode = true;
