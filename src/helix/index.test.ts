@@ -166,6 +166,8 @@ describe('Helix Index Module', () => {
         valid: true,
         criticalIssues: [],
         warnings: ['Test warning'],
+        webhooks: [],
+        checkedAt: new Date().toISOString(),
       });
 
       const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -184,6 +186,8 @@ describe('Helix Index Module', () => {
         valid: false,
         criticalIssues: ['Critical issue'],
         warnings: [],
+        webhooks: [],
+        checkedAt: new Date().toISOString(),
       });
 
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -207,11 +211,12 @@ describe('Helix Index Module', () => {
       const { announceStartup } = await import('./heartbeat.js');
       const { ensureHelixDirectoryStructure } = await import('./helix-context-loader.js');
 
-      vi.mocked(announceStartup).mockImplementation(async () => {
+      vi.mocked(announceStartup).mockImplementation(async (): Promise<boolean> => {
         callOrder.push('announceStartup');
+        return true;
       });
 
-      vi.mocked(ensureHelixDirectoryStructure).mockImplementation(async () => {
+      vi.mocked(ensureHelixDirectoryStructure).mockImplementation(async (): Promise<void> => {
         callOrder.push('ensureDirectories');
       });
 
@@ -407,10 +412,17 @@ describe('Helix Index Module', () => {
 
       vi.mocked(createHashChainEntry).mockImplementation(async () => {
         callOrder.push('createHashChainEntry');
+        return {
+          timestamp: new Date().toISOString(),
+          previousHash: '',
+          logStates: {},
+          entryHash: 'abc123',
+        };
       });
 
-      vi.mocked(announceShutdown).mockImplementation(async () => {
+      vi.mocked(announceShutdown).mockImplementation(async (): Promise<boolean> => {
         callOrder.push('announceShutdown');
+        return true;
       });
 
       await shutdownHelix();

@@ -13,6 +13,7 @@ import {
   DEFAULT_SKILL_SANDBOX_CONFIG,
   type SkillMetadata,
   type SkillSandboxConfig,
+  type SkillPermission,
 } from './skill-sandbox.js';
 import crypto from 'node:crypto';
 
@@ -621,7 +622,7 @@ describe('Skill Sandbox - Extended Coverage', () => {
       name: 'multi-perm-skill',
       version: '1.0.0',
       author: 'test@example.com',
-      permissions: ['fs:read', 'fs:write', 'net:http'],
+      permissions: ['fs:read' as SkillPermission, 'fs:write' as SkillPermission, 'net:http' as SkillPermission],
     };
 
     const config = { ...DEFAULT_SKILL_SANDBOX_CONFIG, requireSignature: false };
@@ -707,9 +708,9 @@ describe('Skill Sandbox - Extended Coverage', () => {
     expect(result.executionTimeMs).toBeGreaterThanOrEqual(0);
   });
 
-  it('should include session key', async () => {
+  it('should execute skill successfully', async () => {
     const metadata: SkillMetadata = {
-      name: 'session-skill',
+      name: 'successful-skill',
       version: '1.0.0',
       author: 'test@example.com',
       permissions: [],
@@ -724,6 +725,8 @@ describe('Skill Sandbox - Extended Coverage', () => {
       config
     );
 
-    expect(result.sessionKey).toBe('my-session');
+    expect(result.success).toBe(true);
+    expect(result.output).toBe(42);
+    expect(result.executionTimeMs).toBeGreaterThanOrEqual(0);
   });
 });

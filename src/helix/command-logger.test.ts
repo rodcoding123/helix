@@ -12,6 +12,7 @@ import {
   createLoggedExecutor,
   __resetPendingCommandsForTesting,
 } from './command-logger.js';
+import crypto from 'node:crypto';
 
 // Mock fetch globally
 const mockFetch = vi.fn();
@@ -47,6 +48,7 @@ describe('Command Logger - Pre-Execution Logging', () => {
 
   it('should generate log ID if not provided', async () => {
     const log = {
+      id: crypto.randomUUID(),
       command: 'ls -la',
       workdir: '/home/user',
       timestamp: '2024-01-15T10:30:00.000Z',
@@ -75,6 +77,7 @@ describe('Command Logger - Pre-Execution Logging', () => {
 
   it('should include session key if provided', async () => {
     const log = {
+      id: crypto.randomUUID(),
       command: 'npm test',
       workdir: '/project',
       timestamp: '2024-01-15T10:30:00.000Z',
@@ -91,6 +94,7 @@ describe('Command Logger - Pre-Execution Logging', () => {
 
   it('should mark elevated commands with warning', async () => {
     const log = {
+      id: crypto.randomUUID(),
       command: 'sudo rm -rf /',
       workdir: '/root',
       timestamp: '2024-01-15T10:30:00.000Z',
@@ -107,6 +111,7 @@ describe('Command Logger - Pre-Execution Logging', () => {
 
   it('should sanitize sensitive data in commands', async () => {
     const log = {
+      id: crypto.randomUUID(),
       command: 'curl --api_key=secret123 https://api.example.com',
       workdir: '/tmp',
       timestamp: '2024-01-15T10:30:00.000Z',
@@ -123,6 +128,7 @@ describe('Command Logger - Pre-Execution Logging', () => {
   it('should truncate very long commands', async () => {
     const longCommand = 'echo ' + 'a'.repeat(2000);
     const log = {
+      id: crypto.randomUUID(),
       command: longCommand,
       workdir: '/tmp',
       timestamp: '2024-01-15T10:30:00.000Z',
@@ -145,6 +151,7 @@ describe('Command Logger - Pre-Execution Logging', () => {
     });
 
     await logCommandPreExecution({
+      id: crypto.randomUUID(),
       command: 'test',
       workdir: '/tmp',
       timestamp: '2024-01-15T10:30:00.000Z',
@@ -159,6 +166,7 @@ describe('Command Logger - Pre-Execution Logging', () => {
     // Should not throw
     await expect(
       logCommandPreExecution({
+        id: crypto.randomUUID(),
         command: 'test',
         workdir: '/tmp',
         timestamp: '2024-01-15T10:30:00.000Z',
@@ -288,7 +296,7 @@ describe('Command Logger - Post-Execution Logging', () => {
       exitCode: 0,
       signal: null,
       durationMs: 50,
-      outputPreview: undefined,
+      outputPreview: '',
     };
 
     await expect(logCommandPostExecution(log)).resolves.not.toThrow();
@@ -567,6 +575,7 @@ describe('Command Logger - Edge Cases', () => {
   it('should handle empty command', async () => {
     await expect(
       logCommandPreExecution({
+        id: crypto.randomUUID(),
         command: '',
         workdir: '/tmp',
         timestamp: '2024-01-15T10:30:00.000Z',
@@ -577,6 +586,7 @@ describe('Command Logger - Edge Cases', () => {
   it('should handle special characters in workdir', async () => {
     await expect(
       logCommandPreExecution({
+        id: crypto.randomUUID(),
         command: 'test',
         workdir: '/path/with spaces/and-special!@#$chars',
         timestamp: '2024-01-15T10:30:00.000Z',
@@ -604,6 +614,7 @@ describe('Command Logger - Edge Cases', () => {
     mockFetch.mockRejectedValue(new Error('Network error'));
 
     const result = await logCommandPreExecution({
+      id: crypto.randomUUID(),
       command: 'test',
       workdir: '/tmp',
       timestamp: '2024-01-15T10:30:00.000Z',

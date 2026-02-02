@@ -103,7 +103,7 @@ describe('API Logger - Pre-Flight Logging', () => {
   });
 
   it('should add request to pending map', async () => {
-    const requestId = await logApiPreFlight({
+    await logApiPreFlight({
       model: 'claude-3-opus',
       provider: 'anthropic',
       timestamp: '2024-01-15T10:30:00.000Z',

@@ -3,7 +3,7 @@
  * Tests all 15+ security detection functions
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
   detectLethalTrifecta,
   detectMemoryPoisoning,
@@ -22,7 +22,6 @@ import {
   detectSamplingAttack,
   assessThreats,
   enforceSecurityPolicy,
-  type LethalTrifectaStatus,
   type MemoryEntry,
   type TrackedInput,
   type AgentContext,

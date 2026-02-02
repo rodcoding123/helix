@@ -3,7 +3,6 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import {
   computeEntryHash,

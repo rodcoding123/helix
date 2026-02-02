@@ -236,7 +236,11 @@ describe('MCP Tool Validator - Parameter Sanitization', () => {
 
   it('should sanitize arrays of objects', () => {
     const params = {
-      items: [{ __proto__: 'bad1' }, { safe: 'value' }, { constructor: 'bad2' }],
+      items: [
+        { __proto__: 'bad1' } as Record<string, unknown>,
+        { safe: 'value' },
+        { constructor: 'bad2' } as Record<string, unknown>,
+      ],
     };
     const { sanitized, modifications } = sanitizeParameters(params, config);
 

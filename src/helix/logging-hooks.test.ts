@@ -606,7 +606,7 @@ describe('LoggingHooks', () => {
       // Mock a fetch that throws HelixSecurityError
       const { HelixSecurityError } = await import('./types.js');
       mockFetch.mockRejectedValue(
-        new HelixSecurityError('Test error', 'TEST_ERROR', { test: true })
+        new HelixSecurityError('Test error', 'WEBHOOK_UNAVAILABLE', { test: true })
       );
 
       await expect(

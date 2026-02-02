@@ -1,3 +1,6 @@
+-- Ensure pgvector extension is available
+CREATE EXTENSION IF NOT EXISTS vector;
+
 -- Create semantic search RPC function for pgvector similarity search
 -- This function performs efficient cosine similarity search on conversation embeddings
 

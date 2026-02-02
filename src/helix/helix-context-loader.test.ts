@@ -371,7 +371,7 @@ describe('Context Loader - ensureHelixDirectoryStructure', () => {
     await ensureHelixDirectoryStructure('/workspace');
 
     const calls = vi.mocked(fs.mkdir).mock.calls;
-    const soulCall = calls.find(call => call[0].includes('soul'));
+    const soulCall = calls.find(call => String(call[0]).includes('soul'));
     expect(soulCall).toBeDefined();
   });
 
@@ -381,7 +381,7 @@ describe('Context Loader - ensureHelixDirectoryStructure', () => {
     await ensureHelixDirectoryStructure('/workspace');
 
     const calls = vi.mocked(fs.mkdir).mock.calls;
-    const psychologyCall = calls.find(call => call[0].includes('psychology'));
+    const psychologyCall = calls.find(call => String(call[0]).includes('psychology'));
     expect(psychologyCall).toBeDefined();
   });
 
@@ -391,7 +391,7 @@ describe('Context Loader - ensureHelixDirectoryStructure', () => {
     await ensureHelixDirectoryStructure('/workspace');
 
     const calls = vi.mocked(fs.mkdir).mock.calls;
-    const identityCall = calls.find(call => call[0].includes('identity'));
+    const identityCall = calls.find(call => String(call[0]).includes('identity'));
     expect(identityCall).toBeDefined();
   });
 
@@ -401,7 +401,7 @@ describe('Context Loader - ensureHelixDirectoryStructure', () => {
     await ensureHelixDirectoryStructure('/workspace');
 
     const calls = vi.mocked(fs.mkdir).mock.calls;
-    const transformationCall = calls.find(call => call[0].includes('transformation'));
+    const transformationCall = calls.find(call => String(call[0]).includes('transformation'));
     expect(transformationCall).toBeDefined();
   });
 
@@ -411,7 +411,7 @@ describe('Context Loader - ensureHelixDirectoryStructure', () => {
     await ensureHelixDirectoryStructure('/workspace');
 
     const calls = vi.mocked(fs.mkdir).mock.calls;
-    const purposeCall = calls.find(call => call[0].includes('purpose'));
+    const purposeCall = calls.find(call => String(call[0]).includes('purpose'));
     expect(purposeCall).toBeDefined();
   });
 
@@ -421,7 +421,7 @@ describe('Context Loader - ensureHelixDirectoryStructure', () => {
     await ensureHelixDirectoryStructure('/workspace');
 
     const calls = vi.mocked(fs.mkdir).mock.calls;
-    const scriptsCall = calls.find(call => call[0].includes('scripts'));
+    const scriptsCall = calls.find(call => String(call[0]).includes('scripts'));
     expect(scriptsCall).toBeDefined();
   });
 
@@ -431,7 +431,7 @@ describe('Context Loader - ensureHelixDirectoryStructure', () => {
     await ensureHelixDirectoryStructure('/workspace');
 
     const calls = vi.mocked(fs.mkdir).mock.calls;
-    const legacyCall = calls.find(call => call[0].includes('legacy'));
+    const legacyCall = calls.find(call => String(call[0]).includes('legacy'));
     expect(legacyCall).toBeDefined();
   });
 });
@@ -439,7 +439,7 @@ describe('Context Loader - ensureHelixDirectoryStructure', () => {
 describe('Context Loader - validateContextFile', () => {
   it('should validate valid JSON with required fields', () => {
     const content = '{"field1": "value1", "field2": "value2"}';
-    const schema = { field1: 'required', field2: 'required' };
+    const schema: Record<string, 'required' | 'optional'> = { field1: 'required', field2: 'required' };
 
     const result = validateContextFile(content, schema);
 
@@ -449,7 +449,7 @@ describe('Context Loader - validateContextFile', () => {
 
   it('should reject missing required field', () => {
     const content = '{"field1": "value1"}';
-    const schema = { field1: 'required', field2: 'required' };
+    const schema: Record<string, 'required' | 'optional'> = { field1: 'required', field2: 'required' };
 
     const result = validateContextFile(content, schema);
 
@@ -459,7 +459,7 @@ describe('Context Loader - validateContextFile', () => {
 
   it('should allow missing optional field', () => {
     const content = '{"field1": "value1"}';
-    const schema = { field1: 'required', field2: 'optional' };
+    const schema: Record<string, 'required' | 'optional'> = { field1: 'required', field2: 'optional' };
 
     const result = validateContextFile(content, schema);
 
@@ -468,7 +468,7 @@ describe('Context Loader - validateContextFile', () => {
 
   it('should reject invalid JSON', () => {
     const content = 'invalid json {]';
-    const schema = { field1: 'required' };
+    const schema: Record<string, 'required' | 'optional'> = { field1: 'required' };
 
     const result = validateContextFile(content, schema);
 
@@ -478,7 +478,7 @@ describe('Context Loader - validateContextFile', () => {
 
   it('should reject non-object JSON', () => {
     const content = '"string value"';
-    const schema = { field1: 'required' };
+    const schema: Record<string, 'required' | 'optional'> = { field1: 'required' };
 
     const result = validateContextFile(content, schema);
 
@@ -488,7 +488,7 @@ describe('Context Loader - validateContextFile', () => {
 
   it('should reject null JSON', () => {
     const content = 'null';
-    const schema = { field1: 'required' };
+    const schema: Record<string, 'required' | 'optional'> = { field1: 'required' };
 
     const result = validateContextFile(content, schema);
 
@@ -498,7 +498,7 @@ describe('Context Loader - validateContextFile', () => {
 
   it('should validate empty schema', () => {
     const content = '{"field1": "value1"}';
-    const schema = {};
+    const schema: Record<string, 'required' | 'optional'> = {};
 
     const result = validateContextFile(content, schema);
 
@@ -507,7 +507,7 @@ describe('Context Loader - validateContextFile', () => {
 
   it('should handle multiple missing required fields', () => {
     const content = '{}';
-    const schema = { field1: 'required', field2: 'required', field3: 'required' };
+    const schema: Record<string, 'required' | 'optional'> = { field1: 'required', field2: 'required', field3: 'required' };
 
     const result = validateContextFile(content, schema);
 
@@ -520,7 +520,7 @@ describe('Context Loader - validateContextFile', () => {
 
   it('should validate nested objects', () => {
     const content = '{"outer": {"inner": "value"}}';
-    const schema = { outer: 'required' };
+    const schema: Record<string, 'required' | 'optional'> = { outer: 'required' };
 
     const result = validateContextFile(content, schema);
 
@@ -529,7 +529,7 @@ describe('Context Loader - validateContextFile', () => {
 
   it('should validate arrays', () => {
     const content = '{"items": [1, 2, 3]}';
-    const schema = { items: 'required' };
+    const schema: Record<string, 'required' | 'optional'> = { items: 'required' };
 
     const result = validateContextFile(content, schema);
 
