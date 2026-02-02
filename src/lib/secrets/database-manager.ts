@@ -70,7 +70,8 @@ export class DatabaseSecretsManager extends BaseSecretsManager {
       if (userApiKey.encryption_method === 'aes-256-gcm') {
         const decrypted = await this.decryptSecretValue(
           userApiKey.encrypted_value,
-          userApiKey.derivation_salt || ''
+          userApiKey.derivation_salt || '',
+          type
         );
         return decrypted;
       }
@@ -140,9 +141,13 @@ export class DatabaseSecretsManager extends BaseSecretsManager {
    * Salt is stored alongside encrypted data
    * Key is derived from: userId:secretType + salt
    */
-  private async decryptSecretValue(encryptedValue: string, saltHex: string): Promise<string> {
+  private async decryptSecretValue(
+    encryptedValue: string,
+    saltHex: string,
+    secretType: SecretType
+  ): Promise<string> {
     const salt = Buffer.from(saltHex, 'hex');
-    const key = await deriveEncryptionKey(`${this.userId}`, salt);
+    const key = await deriveEncryptionKey(`${this.userId}:${secretType}`, salt);
     return await decryptWithKey(encryptedValue, key);
   }
 
@@ -178,7 +183,8 @@ export class DatabaseSecretsManager extends BaseSecretsManager {
           try {
             value = await this.decryptSecretValue(
               apiKey.encrypted_value,
-              apiKey.derivation_salt || ''
+              apiKey.derivation_salt || '',
+              apiKey.secret_type
             );
           } catch (error) {
             console.error(`Failed to decrypt secret ${apiKey.secret_type}:`, error);
