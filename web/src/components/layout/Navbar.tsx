@@ -36,6 +36,7 @@ export function Navbar() {
         { href: '/dashboard', label: 'Dashboard' },
         { href: '/observatory', label: 'Observatory' },
         { href: '/code', label: 'Code' },
+        { href: '/secrets', label: 'Secrets' },
         { href: '/settings', label: 'Settings' },
       ]
     : [

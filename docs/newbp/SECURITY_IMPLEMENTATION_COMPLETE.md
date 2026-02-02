@@ -28,7 +28,7 @@ A comprehensive PhD-level security audit identified 14 attack vectors across Hel
 - `src/lib/secrets-loader.ts` - Smart secret loader with 1Password + .env fallback
 - `src/helix/logging-hooks.ts` - Async webhook initialization
 - `src/helix/index.ts` - Webhook init at app startup
-- Multi-location .env search (root, web/, openclaw-helix/)
+- Multi-location .env search (root, web/, helix-runtime/)
 
 **Current Status:** Secrets load from .env safely (.env files in .gitignore)
 **When 1Password Available:** Run `./scripts/setup-1password.sh` - automatic upgrade
@@ -53,7 +53,7 @@ A comprehensive PhD-level security audit identified 14 attack vectors across Hel
 **Before:** CVSS 7.5 | Exposes to all network interfaces by default
 **After:** CVSS 2.0 | Defaults to 127.0.0.1 (localhost only)
 
-**Implementation:** `openclaw-helix/src/canvas-host/server.ts:453`
+**Implementation:** `helix-runtime/src/canvas-host/server.ts:453`
 ```typescript
 const bindHost = opts.listenHost?.trim() || "127.0.0.1";
 ```
@@ -62,7 +62,7 @@ const bindHost = opts.listenHost?.trim() || "127.0.0.1";
 **Before:** CVSS 7.0 | Silent fallback to 0.0.0.0 on binding failure
 **After:** CVSS 1.5 | Fail-closed with explicit error messages
 
-**Implementation:** `openclaw-helix/src/gateway/net.ts:130-200`
+**Implementation:** `helix-runtime/src/gateway/net.ts:130-200`
 ```
 SECURITY: No automatic fallback to 0.0.0.0
 - loopback mode: Throws if unavailable
@@ -172,9 +172,9 @@ npm run start
 - `src/helix/index.ts` - Webhook initialization at startup
 - `src/helix/logging-hooks.ts` - Added `initializeDiscordWebhooks()`
 - `src/lib/secrets-loader.ts` - Fixed .env file search paths
-- `openclaw-helix/Dockerfile.sandbox` - Non-root user, removed tools
-- `openclaw-helix/src/canvas-host/server.ts` - 127.0.0.1 default binding
-- `openclaw-helix/src/gateway/net.ts` - Fail-closed gateway binding
+- `helix-runtime/Dockerfile.sandbox` - Non-root user, removed tools
+- `helix-runtime/src/canvas-host/server.ts` - 127.0.0.1 default binding
+- `helix-runtime/src/gateway/net.ts` - Fail-closed gateway binding
 
 ### New Files
 - `src/lib/secrets-loader.ts` - Smart secret loading (NEW)

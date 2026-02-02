@@ -90,7 +90,7 @@ This blueprint defines the complete architecture for a scalable, future-proof sy
 
 ```
 helix/
-├── openclaw-helix/              # Modified OpenClaw engine
+├── helix-runtime/              # Modified OpenClaw engine
 │   └── src/helix/               # Seven-layer integration
 │
 ├── web/                         # Observatory Web Platform
@@ -740,7 +740,7 @@ rules:
     condition:
       type: 'command_pattern'
       patterns:
-        - '*/openclaw-helix/src/*'
+        - '*/helix-runtime/src/*'
         - '*/helix/*.ts'
         - 'npm run build'
     action:

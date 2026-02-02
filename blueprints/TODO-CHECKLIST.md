@@ -168,7 +168,7 @@
 ## Phase 3: Blueprint 03 - OpenClaw Integration
 
 ### Source Migration
-- [x] Full sync of all source directories from `openclaw-helix/src/` to `helix-engine/src/`
+- [x] Full sync of all source directories from `helix-runtime/src/` to `helix-engine/src/`
   - acp, agents, auto-reply, browser, canvas-host, channels, cli, commands
   - compat, config, cron, daemon, discord, docs, gateway, hooks, imessage
   - infra, line, link-understanding, logging, macos, markdown, media
@@ -176,8 +176,8 @@
   - process, providers, routing, scripts, security, sessions, shared
   - signal, slack, telegram, terminal, test-helpers, test-utils, tts
   - tui, types, utils, web, whatsapp, wizard
-- [x] Copy `openclaw-helix/skills/` → `helix-engine/skills/`
-- [x] Copy `openclaw-helix/extensions/` → `helix-engine/extensions/` (30 extensions)
+- [x] Copy `helix-runtime/skills/` → `helix-engine/skills/`
+- [x] Copy `helix-runtime/extensions/` → `helix-engine/extensions/` (30 extensions)
 
 ### Cleanup
 - [x] Remove CLI components from copied code (created stub modules)
@@ -194,7 +194,7 @@
 ### Build Status
 - [x] Update `helix-engine/package.json` with all dependencies
 - [x] Update `helix-engine/tsconfig.json` for ES2023 + DOM
-- [x] Full source sync from `openclaw-helix/src/` to `helix-engine/src/`
+- [x] Full source sync from `helix-runtime/src/` to `helix-engine/src/`
 - [x] Build emits JS (uses `noEmitOnError: false`)
   - ~50 type errors remaining (mostly channel integrations: telegram, discord, slack, web)
   - Core gateway, agents, plugins modules compile and run successfully

@@ -97,14 +97,14 @@ You are integrating the OpenClaw engine into helix-engine to make chat work.
 
 ## Context
 - Working directory: c:\Users\Specter\Desktop\Helix
-- Source: openclaw-helix/ (existing OpenClaw code)
+- Source: helix-runtime/ (existing OpenClaw code)
 - Target: helix-engine/ (Helix engine we're building)
 - Blueprint: blueprints/03-OPENCLAW-INTEGRATION.md
 
 ## Your Tasks
 
 ### 1. Analyze OpenClaw Structure
-First, explore openclaw-helix/src/ to understand:
+First, explore helix-runtime/src/ to understand:
 - Gateway implementation (src/gateway/)
 - Agent runner (src/agents/)
 - Plugin system (src/plugins/)
@@ -112,7 +112,7 @@ First, explore openclaw-helix/src/ to understand:
 - Skill loader (src/skills/)
 
 ### 2. Copy Core Modules
-Copy these directories from openclaw-helix/src/ to helix-engine/src/:
+Copy these directories from helix-runtime/src/ to helix-engine/src/:
 - gateway/ (keep our server.ts, merge protocol handling)
 - agents/ (agent-runner, model-auth, bootstrap)
 - plugins/ (registry, loader)
@@ -136,7 +136,7 @@ Update helix-engine/src/gateway/server.ts:
 - Integrate psychology context loading
 
 ### 5. Update Dependencies
-Update helix-engine/package.json with any new dependencies from openclaw-helix/package.json that are needed for agents.
+Update helix-engine/package.json with any new dependencies from helix-runtime/package.json that are needed for agents.
 
 ### 6. Test
 Ensure `npm run build` succeeds in helix-engine/

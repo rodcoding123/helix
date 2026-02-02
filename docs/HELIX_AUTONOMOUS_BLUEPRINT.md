@@ -6,7 +6,7 @@
 **Repository:** [github.com/rodcoding123/helix](https://github.com/rodcoding123/helix)
 **Purpose:** Full autonomy configuration with incorruptible logging
 
-> **Note:** Helix is a unified repository. The OpenClaw engine lives at `openclaw-helix/` within the repo - it is not a separate fork or external dependency.
+> **Note:** Helix is a unified repository. The OpenClaw engine lives at `helix-runtime/` within the repo - it is not a separate fork or external dependency.
 
 ---
 
@@ -653,7 +653,7 @@ brew install node python rsync fswatch git pnpm
 git clone https://github.com/rodcoding123/helix.git ~/.helix
 cd ~/.helix
 npm install && npm run build
-cd openclaw-helix && pnpm install && pnpm run build && npm link
+cd helix-runtime && pnpm install && pnpm run build && npm link
 cd ~
 
 # 5. Initialize workspace

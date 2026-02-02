@@ -41,7 +41,7 @@ npx ts-node scripts/verify-1password.ts
 ### P0-002: OpenClaw Sandbox Dockerfile Runs as Root ✅ FIXED
 **Status:** FIXED
 
-**File Modified:** `openclaw-helix/Dockerfile.sandbox`
+**File Modified:** `helix-runtime/Dockerfile.sandbox`
 
 **Changes:**
 ```dockerfile
@@ -73,7 +73,7 @@ WORKDIR /home/sandbox
 ### P1-001: Canvas Host Default 0.0.0.0 Binding ✅ FIXED
 **Status:** FIXED
 
-**File Modified:** `openclaw-helix/src/canvas-host/server.ts:453`
+**File Modified:** `helix-runtime/src/canvas-host/server.ts:453`
 
 **Change:**
 ```typescript
@@ -99,7 +99,7 @@ if (bindHost === "0.0.0.0") {
 ### P1-002: Gateway 0.0.0.0 Fallback Pattern ✅ FIXED
 **Status:** FIXED
 
-**File Modified:** `openclaw-helix/src/gateway/net.ts:130-180` (`resolveGatewayBindHost` function)
+**File Modified:** `helix-runtime/src/gateway/net.ts:130-180` (`resolveGatewayBindHost` function)
 
 **Changes:**
 - ❌ REMOVED: Automatic fallback to 0.0.0.0
@@ -134,7 +134,7 @@ custom mode:    User IP (throws if unavailable)
 
 Option 1: Remove Matrix Extension (if not needed)
 ```bash
-cd openclaw-helix
+cd helix-runtime
 pnpm remove @vector-im/matrix-bot-sdk
 ```
 
@@ -146,7 +146,7 @@ pnpm add -D @vector-im/matrix-bot-sdk@forked
 
 Option 3: Update and wait for upstream fix
 ```bash
-cd openclaw-helix
+cd helix-runtime
 pnpm update
 pnpm audit fix
 ```
@@ -222,7 +222,7 @@ export async function loadVerifiedMemory(path: string, publicKey: Uint8Array): P
 - [ ] Developer: Update code to call `initializeDiscordWebhooks()` at app startup
 
 ### Phase 2: Container Security ✅
-- [ ] Build Docker image: `docker build -t helix-sandbox openclaw-helix/Dockerfile.sandbox`
+- [ ] Build Docker image: `docker build -t helix-sandbox helix-runtime/Dockerfile.sandbox`
 - [ ] Verify non-root: `docker run helix-sandbox id`  (should show uid=1000)
 - [ ] Verify no curl/git: `docker run helix-sandbox which curl` (should fail)
 
@@ -233,7 +233,7 @@ export async function loadVerifiedMemory(path: string, publicKey: Uint8Array): P
 - [ ] Check warning logs when 0.0.0.0 is used
 
 ### Phase 4: Dependency Audit
-- [ ] Run: `cd openclaw-helix && pnpm audit`
+- [ ] Run: `cd helix-runtime && pnpm audit`
 - [ ] Remove or patch matrix-bot-sdk
 - [ ] Re-run audit to confirm fix
 

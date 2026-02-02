@@ -76,7 +76,7 @@ Ensure OpenClaw UI is running:
 
 ```bash
 # Start OpenClaw control UI (if not running)
-cd openclaw-helix && npm run dev
+cd helix-runtime && npm run dev
 ```
 
 ### Use Playwright MCP Tools

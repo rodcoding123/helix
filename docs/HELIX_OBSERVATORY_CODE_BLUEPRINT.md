@@ -462,7 +462,7 @@ export class WebRTCVoice {
 ## 3.3 Helix Gateway Voice Handler
 
 ```typescript
-// helix/openclaw-helix/src/helix/voice/webrtc-server.ts
+// helix/helix-runtime/src/helix/voice/webrtc-server.ts
 
 export class WebRTCServer {
   private peerConnection: RTCPeerConnection;

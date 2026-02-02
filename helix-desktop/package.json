@@ -15,7 +15,7 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "test": "vitest",
-    "prepare:openclaw": "cd ../openclaw-helix && pnpm install && pnpm build",
+    "prepare:openclaw": "cd ../helix-runtime && pnpm install && pnpm build",
     "prepare:node": "node scripts/bundle-node.js",
     "prepare:all": "npm run prepare:openclaw && npm run prepare:node",
     "postbuild": "node scripts/post-build.js",

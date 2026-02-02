@@ -37,7 +37,7 @@ npm run test:watch
 npm run openclaw:test
 
 # Or directly
-cd openclaw-helix && pnpm run test
+cd helix-runtime && pnpm run test
 ```
 
 ### Run All Tests
@@ -70,7 +70,7 @@ src/helix/
 ### OpenClaw
 
 ```
-openclaw-helix/
+helix-runtime/
 ├── src/**/*.test.ts         # Unit tests (~500 files)
 ├── test/                    # Integration tests
 └── vitest configs:
@@ -132,24 +132,24 @@ npm run test -- --filter=command-logger
 npm run test -- --filter="HashChain"
 
 # OpenClaw filters
-cd openclaw-helix && pnpm run test -- --filter=agents
-cd openclaw-helix && pnpm run test -- --filter=gateway
+cd helix-runtime && pnpm run test -- --filter=agents
+cd helix-runtime && pnpm run test -- --filter=gateway
 ```
 
 ## OpenClaw Test Variants
 
 ```bash
 # Unit tests only
-cd openclaw-helix && pnpm run test:unit
+cd helix-runtime && pnpm run test:unit
 
 # E2E tests
-cd openclaw-helix && pnpm run test:e2e
+cd helix-runtime && pnpm run test:e2e
 
 # Gateway tests
-cd openclaw-helix && pnpm run test:gateway
+cd helix-runtime && pnpm run test:gateway
 
 # Live tests (requires running services)
-cd openclaw-helix && pnpm run test:live
+cd helix-runtime && pnpm run test:live
 ```
 
 ## Troubleshooting
@@ -161,7 +161,7 @@ cd openclaw-helix && pnpm run test:live
 npx vitest --clearCache
 
 # OpenClaw
-cd openclaw-helix && pnpm exec vitest --clearCache
+cd helix-runtime && pnpm exec vitest --clearCache
 ```
 
 ### Verbose Output
@@ -171,7 +171,7 @@ cd openclaw-helix && pnpm exec vitest --clearCache
 npx vitest run --reporter=verbose
 
 # OpenClaw
-cd openclaw-helix && pnpm run test -- --reporter=verbose
+cd helix-runtime && pnpm run test -- --reporter=verbose
 ```
 
 ### Mock Discord Webhooks

@@ -84,7 +84,7 @@ jobs:
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
         run: |
-          docker build -f openclaw-helix/Dockerfile.1password -t helix:latest .
+          docker build -f helix-runtime/Dockerfile.1password -t helix:latest .
 
       # Deploy (example: push to registry)
       - name: Push to container registry
@@ -138,7 +138,7 @@ build:
   services:
     - docker:dind
   script:
-    - docker build -f openclaw-helix/Dockerfile.1password -t helix:latest .
+    - docker build -f helix-runtime/Dockerfile.1password -t helix:latest .
     - docker tag helix:latest $CI_REGISTRY_IMAGE:latest
     - docker push $CI_REGISTRY_IMAGE:latest
   env:
@@ -191,7 +191,7 @@ npx ts-node scripts/verify-1password.ts
 
 ```bash
 # Local testing
-docker build -f openclaw-helix/Dockerfile.1password -t helix:dev .
+docker build -f helix-runtime/Dockerfile.1password -t helix:dev .
 
 # Run with service account token
 docker run \

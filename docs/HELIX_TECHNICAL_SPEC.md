@@ -20,10 +20,10 @@ This document maps the theoretical Living AI Architecture (seven layers) to **ac
 
 ## 1.1 Key Source Files
 
-OpenClaw engine lives within the Helix repository at `openclaw-helix/`:
+OpenClaw engine lives within the Helix repository at `helix-runtime/`:
 
 ```text
-openclaw-helix/src/
+helix-runtime/src/
 ├── agents/
 │   ├── workspace.ts              # Bootstrap file loading (SOUL.md, USER.md)
 │   ├── bootstrap-files.ts        # Context injection
@@ -1048,7 +1048,7 @@ Every graceful shutdown also logs:
 
 1. **Clone Helix repository** (unified repo including OpenClaw engine)
 2. **Build src/helix/** logging modules
-3. **Build openclaw-helix/** engine
+3. **Build helix-runtime/** engine
 4. **Test Discord webhooks** with `npm run test:webhooks`
 5. **Link OpenClaw globally** with `npm link`
 
@@ -1057,7 +1057,7 @@ Every graceful shutdown also logs:
 1. Set up Discord channels and webhooks
 2. Clone Helix repository to ~/.helix/
 3. Build Helix TypeScript modules
-4. Build OpenClaw engine (openclaw-helix/)
+4. Build OpenClaw engine (helix-runtime/)
 5. Configure cron jobs
 6. Deploy SOUL.md and psychology configs
 7. First boot and verify logging works

@@ -1,0 +1,6 @@
+# Ignore all state files
+*
+
+# Except this gitignore and README
+!.gitignore
+!README.md

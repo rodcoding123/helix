@@ -565,7 +565,7 @@ CTA: "Contact Sales"
 
 ### 11.1 Theme System
 
-**File**: `openclaw-helix/apps/android/app/src/main/java/ai/openclaw/android/ui/OpenClawTheme.kt`
+**File**: `helix-runtime/apps/android/app/src/main/java/ai/openclaw/android/ui/OpenClawTheme.kt`
 
 **Tasks**:
 
@@ -577,7 +577,7 @@ CTA: "Contact Sales"
 
 ### 11.2 Colors XML
 
-**File**: `openclaw-helix/apps/android/app/src/main/res/values/colors.xml`
+**File**: `helix-runtime/apps/android/app/src/main/res/values/colors.xml`
 
 **Tasks**:
 
@@ -602,8 +602,8 @@ CTA: "Contact Sales"
 
 **Files**:
 
-- `openclaw-helix/apps/ios/Sources/OpenClawApp.swift`
-- `openclaw-helix/apps/ios/Sources/RootCanvas.swift`
+- `helix-runtime/apps/ios/Sources/OpenClawApp.swift`
+- `helix-runtime/apps/ios/Sources/RootCanvas.swift`
 
 **Tasks**:
 
@@ -630,8 +630,8 @@ CTA: "Contact Sales"
 **Targets**:
 
 - `web/public/` - Web assets
-- `openclaw-helix/apps/android/app/src/main/res/` - Android
-- `openclaw-helix/apps/ios/Sources/Assets.xcassets/` - iOS
+- `helix-runtime/apps/android/app/src/main/res/` - Android
+- `helix-runtime/apps/ios/Sources/Assets.xcassets/` - iOS
 
 **Files to Copy**:
 

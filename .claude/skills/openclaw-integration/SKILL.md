@@ -24,7 +24,7 @@ OpenClaw is a multi-platform AI agent framework with:
 ## Key Directories
 
 ```
-openclaw-helix/
+helix-runtime/
 ├── src/
 │   ├── agents/              # Agent definitions
 │   │   ├── bootstrap-files.ts   # Context loading

@@ -38,7 +38,7 @@
     "node_modules/",
     "*.js",
     "*.mjs",
-    "openclaw-helix/",
+    "helix-runtime/",
     "scripts/",
     "web/"
   ]

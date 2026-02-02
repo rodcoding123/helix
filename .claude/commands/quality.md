@@ -7,7 +7,7 @@ Run all quality checks across the entire Helix system (core + OpenClaw).
 ```bash
 /quality              # Full system quality check
 /quality --core       # Helix core only (src/)
-/quality --openclaw   # OpenClaw only (openclaw-helix/)
+/quality --openclaw   # OpenClaw only (helix-runtime/)
 ```
 
 ## What It Does
@@ -32,7 +32,7 @@ npm run format:check
 npm run test
 ```
 
-### System 2: OpenClaw (`openclaw-helix/`)
+### System 2: OpenClaw (`helix-runtime/`)
 
 Uses OxLint + OxFmt + Vitest:
 
@@ -104,7 +104,7 @@ Validates all 7 psychological layers:
 
 ---
 
-### OpenClaw (openclaw-helix/)
+### OpenClaw (helix-runtime/)
 
 #### TypeScript Analysis
 
@@ -157,7 +157,7 @@ npm install
 
 # Install OpenClaw dependencies
 npm run openclaw:install
-# Or: cd openclaw-helix && pnpm install
+# Or: cd helix-runtime && pnpm install
 ```
 
 ## When to Use

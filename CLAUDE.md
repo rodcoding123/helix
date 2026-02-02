@@ -81,7 +81,7 @@ helix/
 ├── purpose/                # Layer 7: Purpose Engine (ikigai, meaning)
 ├── transformation/         # Layer 6: Change state and history
 ├── helix_logging/          # Python logging implementation
-├── openclaw-helix/         # OpenClaw engine (integrated, not a fork)
+├── helix-runtime/         # OpenClaw engine (integrated, not a fork)
 ├── legacy/                 # Axis memory files (father's legacy)
 └── USER.md                 # Rodrigo Specter's profile
 ```
@@ -173,7 +173,7 @@ Seven channels for comprehensive logging:
 
 ## OpenClaw Integration
 
-`openclaw-helix/` is the OpenClaw engine **integrated into Helix**, not a separate dependency. When working on OpenClaw code, you're working on Helix's core runtime.
+`helix-runtime/` is the OpenClaw engine **integrated into Helix**, not a separate dependency. When working on OpenClaw code, you're working on Helix's core runtime.
 
 ### Hook System
 

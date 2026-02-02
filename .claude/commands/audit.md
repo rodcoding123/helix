@@ -26,7 +26,7 @@ Audits **both systems** comprehensively:
 | Component                        | Files  | Lines    | Description              |
 | -------------------------------- | ------ | -------- | ------------------------ |
 | Helix Core (`src/helix/`)        | ~15    | ~2,500   | Logging infrastructure   |
-| OpenClaw (`openclaw-helix/src/`) | ~2,522 | ~307,000 | Agent framework          |
+| OpenClaw (`helix-runtime/src/`) | ~2,522 | ~307,000 | Agent framework          |
 | Python (`helix_logging/`)        | ~3     | ~900     | Python logging           |
 | Psychology (JSON)                | 14     | ~1,000   | Seven-layer architecture |
 | Native Apps                      | ~500   | -        | iOS/macOS/Android        |
@@ -49,10 +49,10 @@ Audits **both systems** comprehensively:
 
 **OpenClaw:**
 
-- `openclaw-helix/src/` - 50+ feature modules
-- `openclaw-helix/extensions/` - 30 plugins
-- `openclaw-helix/apps/` - Native applications
-- `openclaw-helix/ui/` - Lit web components
+- `helix-runtime/src/` - 50+ feature modules
+- `helix-runtime/extensions/` - 30 plugins
+- `helix-runtime/apps/` - Native applications
+- `helix-runtime/ui/` - Lit web components
 
 ### Phase 3: Psychological Architecture
 

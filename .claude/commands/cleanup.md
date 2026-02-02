@@ -69,7 +69,7 @@ node scripts/archive-hash-chain.js
 - `.env` files
 - Psychological layer files (`soul/`, `identity/`, `psychology/`, `purpose/`, `transformation/`)
 - `helix_logging/` Python modules
-- `openclaw-helix/` source
+- `helix-runtime/` source
 
 ## Output Format
 

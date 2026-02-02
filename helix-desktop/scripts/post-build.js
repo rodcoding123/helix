@@ -75,26 +75,26 @@ function findFiles(baseDir, pattern) {
 
 /**
  * Verify required resources exist
- * Note: helix-desktop uses openclaw-helix as a sibling project, not a bundled resource
+ * Note: helix-desktop uses helix-runtime as a sibling project, not a bundled resource
  */
 function verifyResources() {
-  // Check openclaw-helix sibling project
-  const openclawDir = join(rootDir, '..', 'openclaw-helix');
+  // Check helix-runtime sibling project
+  const openclawDir = join(rootDir, '..', 'helix-runtime');
   const openclawDist = join(openclawDir, 'dist');
 
   const missing = [];
   const found = [];
 
-  // Check if openclaw-helix exists and is built
+  // Check if helix-runtime exists and is built
   if (existsSync(openclawDir)) {
-    found.push('openclaw-helix (sibling project)');
+    found.push('helix-runtime (sibling project)');
     if (existsSync(openclawDist)) {
-      found.push('openclaw-helix/dist (built)');
+      found.push('helix-runtime/dist (built)');
     } else {
-      missing.push('openclaw-helix/dist (run: cd ../openclaw-helix && pnpm build)');
+      missing.push('helix-runtime/dist (run: cd ../helix-runtime && pnpm build)');
     }
   } else {
-    missing.push('openclaw-helix (sibling project not found)');
+    missing.push('helix-runtime (sibling project not found)');
   }
 
   return { found, missing };

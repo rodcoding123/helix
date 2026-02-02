@@ -29,7 +29,7 @@ All security improvements for 1Password integration and CI/CD have been **comple
 - Debug information for troubleshooting
 
 ### 4. ✅ Docker Integration
-- **New:** `openclaw-helix/Dockerfile.1password`
+- **New:** `helix-runtime/Dockerfile.1password`
 - Installs 1Password CLI with GPG key verification
 - Pre-flight validation before app startup
 - Service account token environment variable support
@@ -72,7 +72,7 @@ All security improvements for 1Password integration and CI/CD have been **comple
 - `src/lib/1password-session.ts` - NEW - Session management module
 
 ### Docker/Deployment:
-- `openclaw-helix/Dockerfile.1password` - NEW - Production Docker image
+- `helix-runtime/Dockerfile.1password` - NEW - Production Docker image
 - `docker-compose.1password.yml` - NEW - Docker Compose configuration
 
 ### CI/CD:
@@ -148,7 +148,7 @@ export HELIX_SECRETS_SOURCE=1password
 npx ts-node scripts/verify-1password.ts
 
 # Deploy Docker
-docker build -f openclaw-helix/Dockerfile.1password -t helix:prod .
+docker build -f helix-runtime/Dockerfile.1password -t helix:prod .
 docker run -e OP_SERVICE_ACCOUNT_TOKEN=$OP_SERVICE_ACCOUNT_TOKEN helix:prod
 ```
 
@@ -196,7 +196,7 @@ npm run test -- src/lib/secrets-loader.test.ts
 # Expected: All tests pass
 
 # 4. Docker build
-docker build -f openclaw-helix/Dockerfile.1password -t helix:test .
+docker build -f helix-runtime/Dockerfile.1password -t helix:test .
 # Expected: Build succeeds
 
 # 5. Docker compose

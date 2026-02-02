@@ -78,7 +78,7 @@ This is FREE and runs locally. No subscription required.
 
 ```
 helix/
-├── openclaw-helix/
+├── helix-runtime/
 │   ├── src/
 │   │   └── helix/
 │   │       ├── voice/                    # NEW - Voice engine
@@ -178,7 +178,7 @@ helix/
 ## 2.3 Speech-to-Text Options
 
 ```typescript
-// helix/openclaw-helix/src/helix/voice/speech-to-text.ts
+// helix/helix-runtime/src/helix/voice/speech-to-text.ts
 
 interface STTConfig {
   provider: 'whisper-local' | 'whisper-api' | 'deepgram' | 'assembly';
@@ -208,7 +208,7 @@ interface STTConfig {
 ## 2.4 Text-to-Speech Options
 
 ```typescript
-// helix/openclaw-helix/src/helix/voice/text-to-speech.ts
+// helix/helix-runtime/src/helix/voice/text-to-speech.ts
 
 interface TTSConfig {
   provider: 'elevenlabs' | 'openai' | 'edge' | 'system';
@@ -324,7 +324,7 @@ interface VoiceButtonState {
 **New behavior:** Stream stdout/stderr character-by-character.
 
 ```typescript
-// helix/openclaw-helix/ui/src/components/terminal/live-terminal.ts
+// helix/helix-runtime/ui/src/components/terminal/live-terminal.ts
 
 interface LiveTerminalProps {
   command: string;
@@ -410,7 +410,7 @@ process.on('exit', code => {
 **New behavior:** Side-by-side or unified diff with syntax highlighting.
 
 ```typescript
-// helix/openclaw-helix/ui/src/components/diff-view/diff-panel.ts
+// helix/helix-runtime/ui/src/components/diff-view/diff-panel.ts
 
 interface DiffPanelProps {
   filePath: string;
@@ -645,30 +645,30 @@ HELIX_USER_ID=xxx               # Your Observatory user ID
 
 ## Phase 1: Voice Engine (Week 1) ✅
 
-- [x] Wake word detection (Vosk) - `openclaw-helix/src/helix/voice/wake-word.ts`
-- [x] Whisper integration (local, base model) - `openclaw-helix/src/helix/voice/speech-to-text.ts`
-- [x] ElevenLabs streaming TTS - `openclaw-helix/src/helix/voice/text-to-speech.ts`
-- [x] Voice activity detection - `openclaw-helix/src/helix/voice/voice-activity.ts`
-- [x] Basic voice button UI - `openclaw-helix/ui/src/components/voice/voice-button.ts`
+- [x] Wake word detection (Vosk) - `helix-runtime/src/helix/voice/wake-word.ts`
+- [x] Whisper integration (local, base model) - `helix-runtime/src/helix/voice/speech-to-text.ts`
+- [x] ElevenLabs streaming TTS - `helix-runtime/src/helix/voice/text-to-speech.ts`
+- [x] Voice activity detection - `helix-runtime/src/helix/voice/voice-activity.ts`
+- [x] Basic voice button UI - `helix-runtime/ui/src/components/voice/voice-button.ts`
 
 ## Phase 2: Enhanced UI (Week 2) ✅
 
-- [x] Live bash streaming - `openclaw-helix/ui/src/components/terminal/live-terminal.ts`
-- [x] Diff view component - `openclaw-helix/ui/src/components/diff/diff-panel.ts`
+- [x] Live bash streaming - `helix-runtime/ui/src/components/terminal/live-terminal.ts`
+- [x] Diff view component - `helix-runtime/ui/src/components/diff/diff-panel.ts`
 - [x] Enhanced tool cards - Existing OpenClaw UI
-- [x] Voice indicator animations - `openclaw-helix/ui/src/components/voice/voice-indicator.ts`
-- [x] Waveform visualization - `openclaw-helix/ui/src/components/voice/waveform.ts`
+- [x] Voice indicator animations - `helix-runtime/ui/src/components/voice/voice-indicator.ts`
+- [x] Waveform visualization - `helix-runtime/ui/src/components/voice/waveform.ts`
 
 ## Phase 3: Session Sync (Week 3) ✅
 
-- [x] Local session persistence - `openclaw-helix/src/helix/session/types.ts`
-- [x] Supabase sync protocol - `openclaw-helix/src/helix/session/supabase-sync.ts`
-- [x] Conflict resolution - `openclaw-helix/src/helix/session/conflict-resolution.ts`
+- [x] Local session persistence - `helix-runtime/src/helix/session/types.ts`
+- [x] Supabase sync protocol - `helix-runtime/src/helix/session/supabase-sync.ts`
+- [x] Conflict resolution - `helix-runtime/src/helix/session/conflict-resolution.ts`
 - [x] Offline support - Pending changes queue in sync module
 
 ## Phase 4: Polish (Week 4) ✅
 
-- [x] Voice settings panel - `openclaw-helix/ui/src/components/voice/voice-settings.ts`
+- [x] Voice settings panel - `helix-runtime/ui/src/components/voice/voice-settings.ts`
 - [x] Multiple wake word phrases - Configurable in `config-schema.ts`
 - [x] Voice command shortcuts ("stop", "cancel", "undo") - Handled in voice state machine
 - [x] Performance optimization - Streaming architecture

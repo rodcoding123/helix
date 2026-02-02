@@ -10,10 +10,10 @@ OpenClaw becomes the **invisible engine** powering Helix. Users never see "OpenC
 
 ## Current State Analysis
 
-### OpenClaw Structure (openclaw-helix/)
+### OpenClaw Structure (helix-runtime/)
 
 ```
-openclaw-helix/
+helix-runtime/
 ├── src/
 │   ├── cli/                 # CLI parsing (Commander.js) ← REMOVE
 │   ├── commands/            # Command implementations ← EXTRACT API
@@ -163,18 +163,18 @@ npm init -y
 
 ```bash
 # Copy core modules (preserve git history with filter-branch or manual)
-cp -r ../openclaw-helix/src/gateway ./src/
-cp -r ../openclaw-helix/src/agents ./src/
-cp -r ../openclaw-helix/src/plugins ./src/
-cp -r ../openclaw-helix/src/hooks ./src/
-cp -r ../openclaw-helix/src/skills ./src/
-cp -r ../openclaw-helix/src/channels ./src/
-cp -r ../openclaw-helix/src/memory ./src/
-cp -r ../openclaw-helix/src/config ./src/
+cp -r ../helix-runtime/src/gateway ./src/
+cp -r ../helix-runtime/src/agents ./src/
+cp -r ../helix-runtime/src/plugins ./src/
+cp -r ../helix-runtime/src/hooks ./src/
+cp -r ../helix-runtime/src/skills ./src/
+cp -r ../helix-runtime/src/channels ./src/
+cp -r ../helix-runtime/src/memory ./src/
+cp -r ../helix-runtime/src/config ./src/
 
 # Copy bundled assets
-cp -r ../openclaw-helix/skills ./
-cp -r ../openclaw-helix/extensions ./
+cp -r ../helix-runtime/skills ./
+cp -r ../helix-runtime/extensions ./
 ```
 
 **Step 1.3: Remove CLI Components**

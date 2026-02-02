@@ -453,6 +453,6 @@ helix-engine/
 ## References
 
 - [Tauri Documentation](https://tauri.app/v1/guides/)
-- [OpenClaw Gateway Protocol](./openclaw-helix/src/gateway/protocol/)
+- [OpenClaw Gateway Protocol](./helix-runtime/src/gateway/protocol/)
 - [Helix Psychological Architecture](./docs/)
 - [Web Observatory Architecture](./web/src/)

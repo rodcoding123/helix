@@ -4,7 +4,7 @@ Activated when working with OpenClaw's Lit-based web UI components.
 
 ## Activation Triggers
 
-- Creating or modifying Lit components in `openclaw-helix/ui/`
+- Creating or modifying Lit components in `helix-runtime/ui/`
 - Working with web components
 - Styling components with scoped CSS
 - Adding reactive properties

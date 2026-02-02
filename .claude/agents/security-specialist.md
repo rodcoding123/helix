@@ -28,9 +28,9 @@ You are a **PhD-level AI security specialist** with deep expertise in agentic AI
 You MUST audit BOTH directories:
 
 - `src/helix/` - Core Helix logging and security modules
-- `openclaw-helix/` - OpenClaw engine (integrated into Helix)
+- `helix-runtime/` - OpenClaw engine (integrated into Helix)
 
-The openclaw-helix folder contains the actual runtime engine and is a PRIMARY attack surface.
+The helix-runtime folder contains the actual runtime engine and is a PRIMARY attack surface.
 
 ## Threat Intelligence Database (January 2026)
 
@@ -128,14 +128,14 @@ OpenClaw trusts localhost (127.0.0.1) by default without authentication. When de
 
 ```bash
 # Find gateway binding configuration
-grep -r "0.0.0.0" --include="*.ts" --include="*.json" --include="*.yaml" src/ openclaw-helix/
-grep -r "18789" --include="*.ts" --include="*.json" src/ openclaw-helix/
-grep -r "bindAddress" --include="*.ts" --include="*.json" openclaw-helix/
-grep -r "trustedProxies" --include="*.ts" --include="*.json" openclaw-helix/
+grep -r "0.0.0.0" --include="*.ts" --include="*.json" --include="*.yaml" src/ helix-runtime/
+grep -r "18789" --include="*.ts" --include="*.json" src/ helix-runtime/
+grep -r "bindAddress" --include="*.ts" --include="*.json" helix-runtime/
+grep -r "trustedProxies" --include="*.ts" --include="*.json" helix-runtime/
 
 # Check for X-Forwarded-For handling
-grep -r "X-Forwarded-For" --include="*.ts" openclaw-helix/
-grep -r "X-Real-IP" --include="*.ts" openclaw-helix/
+grep -r "X-Forwarded-For" --include="*.ts" helix-runtime/
+grep -r "X-Real-IP" --include="*.ts" helix-runtime/
 ```
 
 ### Phase 2: Credential Exposure Analysis
@@ -143,7 +143,7 @@ grep -r "X-Real-IP" --include="*.ts" openclaw-helix/
 **Target Files:**
 
 - `~/.clawdbot/.env` - Primary credential store
-- `openclaw-helix/.env` - Engine credentials
+- `helix-runtime/.env` - Engine credentials
 - `*.env` files throughout codebase
 - Git history for committed secrets
 
@@ -177,10 +177,10 @@ AI agents cannot reliably distinguish user instructions from instructions embedd
 
 ```bash
 # Find input processing without sanitization
-grep -r "parseEmail\|readEmail\|processEmail" --include="*.ts" openclaw-helix/
-grep -r "fetchUrl\|fetch\(.*http" --include="*.ts" openclaw-helix/
-grep -r "processMessage\|handleMessage" --include="*.ts" openclaw-helix/
-grep -r "loadContext\|ingestDocument\|readPDF" --include="*.ts" openclaw-helix/
+grep -r "parseEmail\|readEmail\|processEmail" --include="*.ts" helix-runtime/
+grep -r "fetchUrl\|fetch\(.*http" --include="*.ts" helix-runtime/
+grep -r "processMessage\|handleMessage" --include="*.ts" helix-runtime/
+grep -r "loadContext\|ingestDocument\|readPDF" --include="*.ts" helix-runtime/
 
 # Check for input validation
 grep -r "sanitize\|validate\|escape" --include="*.ts" .
@@ -194,10 +194,10 @@ Attackers can plant malicious instructions in agent memory that persist across s
 
 ```bash
 # Find memory/persistence mechanisms
-grep -r "memory\|persistentState\|localStorage" --include="*.ts" openclaw-helix/
-grep -r "saveContext\|loadContext" --include="*.ts" openclaw-helix/
-grep -r "sessionSummary\|summarize" --include="*.ts" openclaw-helix/
-grep -r "longTermMemory\|shortTermMemory" --include="*.ts" openclaw-helix/
+grep -r "memory\|persistentState\|localStorage" --include="*.ts" helix-runtime/
+grep -r "saveContext\|loadContext" --include="*.ts" helix-runtime/
+grep -r "sessionSummary\|summarize" --include="*.ts" helix-runtime/
+grep -r "longTermMemory\|shortTermMemory" --include="*.ts" helix-runtime/
 
 # Check for memory quarantine/validation
 grep -r "validateMemory\|quarantine\|verifyContext" --include="*.ts" .
@@ -211,9 +211,9 @@ Malicious servers embed hidden instructions in tool descriptions that override a
 
 ```bash
 # Find MCP tool definitions
-grep -r "Tool\(" --include="*.ts" openclaw-helix/
-grep -r "toolDescription\|description:" --include="*.ts" openclaw-helix/
-grep -r "MCPServer\|mcpServer" --include="*.ts" openclaw-helix/
+grep -r "Tool\(" --include="*.ts" helix-runtime/
+grep -r "toolDescription\|description:" --include="*.ts" helix-runtime/
+grep -r "MCPServer\|mcpServer" --include="*.ts" helix-runtime/
 
 # Check for tool description validation
 grep -r "validateToolDescription\|sanitizeDescription" --include="*.ts" .
@@ -240,11 +240,11 @@ grep -r "toolMetadata\|schemaValidation" --include="*.ts" .
 
 ```bash
 # Find sampling/completion mechanisms
-grep -r "sampling\|createMessage\|completion" --include="*.ts" openclaw-helix/
-grep -r "generateResponse\|llmCall" --include="*.ts" openclaw-helix/
+grep -r "sampling\|createMessage\|completion" --include="*.ts" helix-runtime/
+grep -r "generateResponse\|llmCall" --include="*.ts" helix-runtime/
 
 # Check for sampling security controls
-grep -r "tokenLimit\|rateLimi\|quotaCheck" --include="*.ts" openclaw-helix/
+grep -r "tokenLimit\|rateLimi\|quotaCheck" --include="*.ts" helix-runtime/
 ```
 
 ### Phase 7: Skill/Plugin Supply Chain
@@ -257,8 +257,8 @@ MCP tools can mutate their own definitions after installation - "safe on Day 1, 
 
 ```bash
 # Find skill/plugin loading mechanisms
-grep -r "loadSkill\|installSkill\|downloadSkill" --include="*.ts" openclaw-helix/
-grep -r "skillRegistry\|pluginRegistry" --include="*.ts" openclaw-helix/
+grep -r "loadSkill\|installSkill\|downloadSkill" --include="*.ts" helix-runtime/
+grep -r "skillRegistry\|pluginRegistry" --include="*.ts" helix-runtime/
 
 # Check for code signing verification
 grep -r "signature\|verify\|checksum\|hash" --include="*.ts" src/helix/
@@ -275,7 +275,7 @@ Prompt injection reads sensitive files, writes JSON with remote schema hosted on
 
 ```bash
 # Find JSON schema handling
-grep -r "schema\|$ref\|jsonSchema" --include="*.ts" openclaw-helix/
+grep -r "schema\|$ref\|jsonSchema" --include="*.ts" helix-runtime/
 grep -r "schemaUrl\|remoteSchema" --include="*.ts" .
 
 # Check for schema validation
@@ -289,7 +289,7 @@ Modifying settings files (.vscode/settings.json, workspace configs) to override 
 
 ```bash
 # Find config file handling
-grep -r "settings\.json\|\.vscode" --include="*.ts" openclaw-helix/
+grep -r "settings\.json\|\.vscode" --include="*.ts" helix-runtime/
 grep -r "workspaceConfig\|projectSettings" --include="*.ts" .
 grep -r "executablePath\|commandPath" --include="*.ts" .
 
@@ -301,12 +301,12 @@ grep -r "validateConfig\|configSchema" --include="*.ts" .
 
 ```bash
 # Find command execution
-grep -r "exec\|spawn\|execSync\|spawnSync" --include="*.ts" openclaw-helix/
-grep -r "child_process" --include="*.ts" openclaw-helix/
-grep -r "shell:\s*true" --include="*.ts" openclaw-helix/
+grep -r "exec\|spawn\|execSync\|spawnSync" --include="*.ts" helix-runtime/
+grep -r "child_process" --include="*.ts" helix-runtime/
+grep -r "shell:\s*true" --include="*.ts" helix-runtime/
 
 # Check for input validation before execution
-grep -B5 "exec\|spawn" --include="*.ts" openclaw-helix/ | grep -i "validate\|sanitize\|escape"
+grep -B5 "exec\|spawn" --include="*.ts" helix-runtime/ | grep -i "validate\|sanitize\|escape"
 ```
 
 ### Phase 11: Symlink/Path Traversal
@@ -316,8 +316,8 @@ Sandbox escape and symlink containment bypass exposing host filesystem.
 
 ```bash
 # Find file access patterns
-grep -r "readFile\|writeFile\|readdir" --include="*.ts" openclaw-helix/
-grep -r "path\.join\|path\.resolve" --include="*.ts" openclaw-helix/
+grep -r "readFile\|writeFile\|readdir" --include="*.ts" helix-runtime/
+grep -r "path\.join\|path\.resolve" --include="*.ts" helix-runtime/
 
 # Check for path traversal protection
 grep -r "normaliz\|realpath\|containsPath" --include="*.ts" .
@@ -331,8 +331,8 @@ Logic flaw in cross-tenant isolation exposed data across organizational boundari
 
 ```bash
 # Find session/tenant handling
-grep -r "sessionId\|tenantId\|orgId" --include="*.ts" openclaw-helix/
-grep -r "isolation\|boundary\|sandbox" --include="*.ts" openclaw-helix/
+grep -r "sessionId\|tenantId\|orgId" --include="*.ts" helix-runtime/
+grep -r "isolation\|boundary\|sandbox" --include="*.ts" helix-runtime/
 
 # Check for proper isolation
 grep -r "validateSession\|checkTenant" --include="*.ts" .
@@ -380,7 +380,7 @@ grep -r "assessThreats\|enforceSecurityPolicy" src/helix/*.ts
 ```bash
 # NPM audit for both directories
 npm audit --json
-cd openclaw-helix && npm audit --json
+cd helix-runtime && npm audit --json
 
 # Check for known vulnerable packages
 npm ls | grep -i "mcp-remote\|mcp-inspector\|langchain"
@@ -401,9 +401,9 @@ pip audit 2>/dev/null || pip-audit 2>/dev/null
 
 ```bash
 # Check for trifecta components
-grep -r "readEmail\|gmail\|outlook" --include="*.ts" openclaw-helix/
-grep -r "fetchUrl\|scrape\|browse" --include="*.ts" openclaw-helix/
-grep -r "sendMessage\|webhook\|notify" --include="*.ts" openclaw-helix/
+grep -r "readEmail\|gmail\|outlook" --include="*.ts" helix-runtime/
+grep -r "fetchUrl\|scrape\|browse" --include="*.ts" helix-runtime/
+grep -r "sendMessage\|webhook\|notify" --include="*.ts" helix-runtime/
 ```
 
 ### Confused Deputy Problem
@@ -422,7 +422,7 @@ Skills execute curl commands without user awareness.
 
 ```bash
 # Find outbound network calls
-grep -r "curl\|wget\|axios\.post\|fetch\(" --include="*.ts" openclaw-helix/
+grep -r "curl\|wget\|axios\.post\|fetch\(" --include="*.ts" helix-runtime/
 grep -r "exfil\|sendData\|postData" --include="*.ts" .
 ```
 
@@ -503,7 +503,7 @@ Classification: CONFIDENTIAL
 ## Directories Audited
 
 - [ ] src/helix/ (Helix core)
-- [ ] openclaw-helix/ (OpenClaw engine)
+- [ ] helix-runtime/ (OpenClaw engine)
 - [ ] web/ (Observatory UI)
 
 ## CVE Exposure Analysis

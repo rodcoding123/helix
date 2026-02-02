@@ -221,7 +221,7 @@ Update memory with component completion status.
 You are absorbing OpenClaw into the Helix Engine.
 
 Read: blueprints/03-OPENCLAW-INTEGRATION.md (complete spec)
-Reference: openclaw-helix/ for source code
+Reference: helix-runtime/ for source code
 
 Your tasks:
 1. Create helix-engine/ directory

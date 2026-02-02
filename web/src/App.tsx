@@ -21,6 +21,7 @@ const Docs = lazy(() => import('@/pages/Docs').then(m => ({ default: m.Docs })))
 const Agents = lazy(() => import('@/pages/Agents'));
 const AutonomySettings = lazy(() => import('@/pages/AutonomySettings'));
 const ActionApprovals = lazy(() => import('@/pages/ActionApprovals'));
+const SecretsPage = lazy(() => import('@/pages/SecretsPage').then(m => ({ default: m.SecretsPage })));
 
 // Loading fallback component
 function LoadingFallback() {
@@ -130,6 +131,16 @@ export function App() {
                   <Suspense fallback={<LoadingFallback />}>
                     <ProtectedRoute>
                       <ActionApprovals />
+                    </ProtectedRoute>
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/secrets"
+                element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <ProtectedRoute>
+                      <SecretsPage />
                     </ProtectedRoute>
                   </Suspense>
                 }
