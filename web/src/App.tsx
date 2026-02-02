@@ -18,6 +18,9 @@ const Code = lazy(() => import('@/pages/Code').then(m => ({ default: m.Code })))
 const Research = lazy(() => import('@/pages/Research').then(m => ({ default: m.Research })));
 const Settings = lazy(() => import('@/pages/Settings').then(m => ({ default: m.Settings })));
 const Docs = lazy(() => import('@/pages/Docs').then(m => ({ default: m.Docs })));
+const Agents = lazy(() => import('@/pages/Agents'));
+const AutonomySettings = lazy(() => import('@/pages/AutonomySettings'));
+const ActionApprovals = lazy(() => import('@/pages/ActionApprovals'));
 
 // Loading fallback component
 function LoadingFallback() {
@@ -98,6 +101,36 @@ export function App() {
                 element={
                   <Suspense fallback={<LoadingFallback />}>
                     <Docs />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/agents"
+                element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <ProtectedRoute>
+                      <Agents />
+                    </ProtectedRoute>
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/autonomy-settings"
+                element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <ProtectedRoute>
+                      <AutonomySettings />
+                    </ProtectedRoute>
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/action-approvals"
+                element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <ProtectedRoute>
+                      <ActionApprovals />
+                    </ProtectedRoute>
                   </Suspense>
                 }
               />

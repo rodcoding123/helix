@@ -68,7 +68,7 @@ export class PatternDetectionService {
       );
 
       // Convert analysis to proposals
-      const proposals: AgentProposal[] = analysis.recommendations
+      const proposalsToPersist = analysis.recommendations
         .filter((recommendation) => {
           // Don't propose if agent already exists
           return !existingRoles.some((role) =>
@@ -76,15 +76,40 @@ export class PatternDetectionService {
           );
         })
         .map((recommendation) => ({
-          id: `proposal_${Date.now()}_${Math.random()}`,
           user_id: userId,
           proposed_name: recommendation.proposed_name,
           proposed_role: recommendation.proposed_role,
           reason: recommendation.reason,
           detected_pattern: recommendation.detected_pattern,
           status: 'pending',
-          created_at: new Date(),
         }));
+
+      // Persist proposals to database
+      const proposals: AgentProposal[] = [];
+      if (proposalsToPersist.length > 0) {
+        const { data: persistedProposals, error: persistError } = await supabase
+          .from('agent_proposals')
+          .insert(proposalsToPersist)
+          .select();
+
+        if (persistError) {
+          console.error('Failed to persist proposals to database:', persistError);
+        } else if (persistedProposals) {
+          // Format persisted proposals
+          for (const persisted of persistedProposals) {
+            proposals.push({
+              id: persisted.id,
+              user_id: persisted.user_id,
+              proposed_name: persisted.proposed_name,
+              proposed_role: persisted.proposed_role,
+              reason: persisted.reason,
+              detected_pattern: persisted.detected_pattern,
+              status: persisted.status,
+              created_at: new Date(persisted.created_at),
+            });
+          }
+        }
+      }
 
       // Log proposals to Discord (non-fatal if it fails)
       if (proposals.length > 0) {
