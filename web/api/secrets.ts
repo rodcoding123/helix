@@ -3,11 +3,6 @@ import type { SecretType, SecretSourceType, CreateUserApiKeyRequest, UserApiKey 
 import { encryptWithKey, generateNonce } from '../src/lib/encryption/symmetric';
 import { deriveEncryptionKey } from '../src/lib/encryption/key-derivation';
 
-// Vercel Edge Function for secrets management
-export const config = {
-  runtime: 'edge',
-};
-
 interface SecretMetadata {
   id: string;
   secretType: SecretType;
@@ -146,7 +141,7 @@ async function handleListSecrets(
       });
     }
 
-    const secretMetadata: SecretMetadata[] = (secrets || []).map((secret: UserApiKey) => ({
+    const secretMetadata: SecretMetadata[] = (secrets || []).map((secret: any) => ({
       id: secret.id,
       secretType: secret.secret_type,
       sourceType: secret.source_type,

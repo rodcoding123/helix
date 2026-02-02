@@ -1,8 +1,4 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-
-export const config = {
-  runtime: 'edge',
-};
+import { createClient } from '@supabase/supabase-js';
 
 /**
  * Cron job for autonomous pattern detection
