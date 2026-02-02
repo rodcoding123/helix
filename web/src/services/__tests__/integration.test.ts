@@ -12,13 +12,10 @@ import type { ConversationMessage } from '@/lib/types/memory';
 
 describe('EmotionDetectionService - Integration Tests', () => {
   let emotionService: EmotionDetectionService;
-  const apiKey = process.env.DEEPSEEK_API_KEY;
 
   beforeAll(() => {
-    if (!apiKey) {
-      throw new Error('DEEPSEEK_API_KEY environment variable not set');
-    }
-    emotionService = new EmotionDetectionService(apiKey);
+    // API key will be loaded automatically from 1Password or .env fallback
+    emotionService = new EmotionDetectionService();
   });
 
   it('should detect joy emotion from positive conversation', async () => {
@@ -180,13 +177,10 @@ describe('EmotionDetectionService - Integration Tests', () => {
 
 describe('TopicExtractionService - Integration Tests', () => {
   let topicService: TopicExtractionService;
-  const apiKey = process.env.DEEPSEEK_API_KEY;
 
   beforeAll(() => {
-    if (!apiKey) {
-      throw new Error('DEEPSEEK_API_KEY environment variable not set');
-    }
-    topicService = new TopicExtractionService(apiKey);
+    // API key will be loaded automatically from 1Password or .env fallback
+    topicService = new TopicExtractionService();
   });
 
   it('should extract 3-5 topics from conversation', async () => {
@@ -280,14 +274,11 @@ describe('TopicExtractionService - Integration Tests', () => {
 describe('Emotion Detection and Topic Extraction - Combined Tests', () => {
   let emotionService: EmotionDetectionService;
   let topicService: TopicExtractionService;
-  const apiKey = process.env.DEEPSEEK_API_KEY;
 
   beforeAll(() => {
-    if (!apiKey) {
-      throw new Error('DEEPSEEK_API_KEY environment variable not set');
-    }
-    emotionService = new EmotionDetectionService(apiKey);
-    topicService = new TopicExtractionService(apiKey);
+    // API keys will be loaded automatically from 1Password or .env fallback
+    emotionService = new EmotionDetectionService();
+    topicService = new TopicExtractionService();
   });
 
   it('should analyze emotion and extract topics from same conversation', async () => {

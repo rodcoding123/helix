@@ -29,11 +29,10 @@ describe('End-to-End Memory Flow', () => {
   const userId = '00000000-0000-0000-0000-000000000000';
 
   beforeEach(() => {
-    emotionService = new EmotionDetectionService(
-      process.env.DEEPSEEK_API_KEY!
-    );
-    topicService = new TopicExtractionService(process.env.DEEPSEEK_API_KEY!);
-    embeddingService = new EmbeddingService(process.env.GEMINI_API_KEY!);
+    // Services now load API keys automatically from 1Password or .env fallback
+    emotionService = new EmotionDetectionService();
+    topicService = new TopicExtractionService();
+    embeddingService = new EmbeddingService();
     repository = new MemoryRepository();
   });
 

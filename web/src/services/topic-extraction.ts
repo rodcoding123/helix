@@ -1,10 +1,19 @@
+import { loadSecret } from '@/lib/secrets-loader';
 import type { ExtractedTopic, ConversationMessage } from '@/lib/types/memory';
 
 export class TopicExtractionService {
-  private apiKey: string;
+  private apiKey: string | null = null;
 
-  constructor(apiKey: string) {
-    this.apiKey = apiKey;
+  /**
+   * Lazy-load API key from 1Password or .env fallback
+   * Cached in memory for performance
+   */
+  private async getApiKey(): Promise<string> {
+    if (this.apiKey) {
+      return this.apiKey;
+    }
+    this.apiKey = await loadSecret('DeepSeek API Key');
+    return this.apiKey;
   }
 
   /**
@@ -24,11 +33,13 @@ export class TopicExtractionService {
         .map((m) => `${m.role}: ${m.content}`)
         .join('\n');
 
+      const apiKey = await this.getApiKey();
+
       const response = await fetch('https://api.deepseek.com/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.apiKey}`,
+          Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
           model: 'deepseek-chat',
