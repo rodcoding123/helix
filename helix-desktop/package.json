@@ -15,6 +15,7 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "test": "vitest",
+    "test:e2e": "playwright test",
     "prepare:openclaw": "cd ../helix-runtime && pnpm install && pnpm build",
     "prepare:node": "node scripts/bundle-node.js",
     "prepare:all": "npm run prepare:openclaw && npm run prepare:node",
@@ -42,6 +43,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
+    "@playwright/test": "^1.58.1",
     "@tauri-apps/cli": "^2",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",

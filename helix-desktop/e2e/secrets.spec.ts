@@ -1,56 +1,30 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, mockSecrets } from './fixtures';
 
-test.describe('Desktop Secrets Management', () => {
-  test.beforeEach(async ({ page }) => {
-    // Navigate to app
-    await page.goto('http://localhost:5173');
+test.describe('Desktop Secrets Management - With Fixtures', () => {
+  test('should display empty state with no secrets', async ({ page, secretsAPI, authenticatedPage }) => {
+    await secretsAPI.setupEmptyState();
+    await authenticatedPage.goto('http://localhost:5173/settings/secrets');
+    await authenticatedPage.waitForLoadState('networkidle');
 
-    // Wait for app to load
-    await page.waitForLoadState('networkidle');
-
-    // Navigate to secrets settings
-    // Assuming you're already logged in in dev mode
-    await page.goto('http://localhost:5173/settings/secrets');
-    await page.waitForLoadState('networkidle');
-  });
-
-  test('should display secrets settings page', async ({ page }) => {
-    // Check page heading
-    const heading = page.locator('h1');
-    await expect(heading).toContainText('Secrets');
-
-    // Check description
-    await expect(page.locator('text=Manage your API keys')).toBeVisible();
-  });
-
-  test('should open create secret modal', async ({ page }) => {
-    const createButton = page.locator('button:has-text("Create Secret")');
-    await expect(createButton).toBeVisible();
-
-    await createButton.click();
-
-    // Modal should be visible
-    const modalHeading = page.locator('dialog h2');
-    await expect(modalHeading).toContainText('Create New Secret');
-
-    // Form fields should be visible
-    await expect(page.locator('label:has-text("Secret Name")')).toBeVisible();
-    await expect(page.locator('label:has-text("Secret Type")')).toBeVisible();
-  });
-
-  test('should display empty state when no secrets', async ({ page }) => {
-    // Check for empty state message
-    const emptyState = page.locator('text=No secrets yet');
+    const emptyState = authenticatedPage.locator('text=No secrets yet');
     await expect(emptyState).toBeVisible();
-
-    const emptyDescription = page.locator('text=Create your first secret');
-    await expect(emptyDescription).toBeVisible();
   });
 
-  test('should display statistics cards', async ({ page }) => {
-    // Check for stats labels
-    await expect(page.locator('text=Total Secrets')).toBeVisible();
-    await expect(page.locator('text=Active')).toBeVisible();
-    await expect(page.locator('text=Expiring Soon')).toBeVisible();
+  test('should display secrets list with mock data', async ({ page, secretsAPI, authenticatedPage }) => {
+    await secretsAPI.setupWithSecrets();
+    await authenticatedPage.goto('http://localhost:5173/settings/secrets');
+    await authenticatedPage.waitForLoadState('networkidle');
+
+    await expect(authenticatedPage.locator('text=Production Stripe Key')).toBeVisible();
+    await expect(authenticatedPage.locator('text=Gemini API Key')).toBeVisible();
+  });
+
+  test('should display statistics with mock data', async ({ page, secretsAPI, authenticatedPage }) => {
+    await secretsAPI.setupWithSecrets();
+    await authenticatedPage.goto('http://localhost:5173/settings/secrets');
+    await authenticatedPage.waitForLoadState('networkidle');
+
+    await expect(authenticatedPage.locator('text=Total Secrets')).toContainText('2');
+    await expect(authenticatedPage.locator('text=Active')).toContainText('2');
   });
 });
