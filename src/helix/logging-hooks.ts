@@ -51,12 +51,24 @@ export function initializeDiscordWebhooks(): void {
 let failClosedMode = true;
 
 /**
- * Enable or disable fail-closed security mode
- * WARNING: Disabling this compromises the "unhackable logging" guarantee
+ * Enable or disable fail-closed security mode (INTERNAL ONLY)
+ * WARNING: This function is for testing only. In production, fail-closed is always enabled.
+ * Disabling this compromises the "unhackable logging" guarantee.
+ *
+ * @internal
+ * @throws Error if attempting to disable in production
  */
-export function setFailClosedMode(enabled: boolean): void {
+function setFailClosedMode(enabled: boolean): void {
+  // Production security: fail-closed mode CANNOT be disabled
+  if (process.env.NODE_ENV === 'production' && !enabled) {
+    throw new Error(
+      '[Helix] SECURITY ERROR: Cannot disable fail-closed mode in production. ' +
+      'This function is for testing only and is not exported in production builds.'
+    );
+  }
+
   if (!enabled) {
-    console.warn('[Helix] WARNING: Disabling fail-closed mode compromises security!');
+    console.warn('[Helix] WARNING: Disabling fail-closed mode compromises security! (TEST MODE ONLY)');
   }
   failClosedMode = enabled;
 }

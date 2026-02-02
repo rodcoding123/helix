@@ -49,8 +49,7 @@ export {
   sendAlert,
   logConsciousnessObservation,
   WEBHOOKS,
-  // Security functions
-  setFailClosedMode,
+  // Security functions (setFailClosedMode is internal-only for security)
   checkWebhookHealth,
   validateSecurityConfiguration,
 } from './logging-hooks.js';
@@ -95,7 +94,7 @@ export {
   verifyAgainstDiscord,
   computeEntryHash,
   hashLogFiles,
-  setHashChainFailClosedMode,
+  // setHashChainFailClosedMode is internal-only for security
 } from './hash-chain.js';
 
 // Re-export the type

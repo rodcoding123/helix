@@ -18,11 +18,23 @@ import { HelixSecurityError } from './types.js';
 let failClosedMode = true;
 
 /**
- * Set fail-closed mode for hash chain operations
+ * Set fail-closed mode for hash chain operations (INTERNAL ONLY)
+ * WARNING: This function is for testing only. In production, fail-closed is always enabled.
+ *
+ * @internal
+ * @throws Error if attempting to disable in production
  */
-export function setHashChainFailClosedMode(enabled: boolean): void {
+function setHashChainFailClosedMode(enabled: boolean): void {
+  // Production security: fail-closed mode CANNOT be disabled
+  if (process.env.NODE_ENV === 'production' && !enabled) {
+    throw new Error(
+      '[Helix] SECURITY ERROR: Cannot disable fail-closed mode for hash chain in production. ' +
+      'This function is for testing only and is not exported in production builds.'
+    );
+  }
+
   if (!enabled) {
-    console.warn('[Helix] WARNING: Disabling fail-closed mode for hash chain!');
+    console.warn('[Helix] WARNING: Disabling fail-closed mode for hash chain! (TEST MODE ONLY)');
   }
   failClosedMode = enabled;
 }
