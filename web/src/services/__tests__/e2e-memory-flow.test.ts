@@ -387,7 +387,7 @@ describe('End-to-End Memory Flow', () => {
 
       // 1. Emotion analysis
       const t1 = performance.now();
-      const emotions = await emotionDetectionService.analyzeConversation(messages);
+      const emotions = await emotionService.analyzeConversation(messages);
       const emotionTime = performance.now() - t1;
 
       // 2. Topic extraction
