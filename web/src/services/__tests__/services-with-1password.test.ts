@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { EmotionDetectionService } from '@/services/emotion-detection';
 import { TopicExtractionService } from '@/services/topic-extraction';
 import { EmbeddingService } from '@/services/embedding';

@@ -1,11 +1,19 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { Conversation, EmotionAnalysis } from '@/lib/types/memory';
+import { loadSecret } from '@/lib/secrets-loader';
 
 export class MemoryRepository {
-  private supabase = createClient(
-    process.env.VITE_SUPABASE_URL!,
-    process.env.VITE_SUPABASE_KEY!
-  );
+  private supabase: SupabaseClient | null = null;
+
+  private async getSupabaseClient(): Promise<SupabaseClient> {
+    if (this.supabase) return this.supabase;
+
+    const url = await loadSecret('Supabase URL');
+    const anonKey = await loadSecret('Supabase Anon Key');
+
+    this.supabase = createClient(url, anonKey);
+    return this.supabase;
+  }
 
   /**
    * Store a new conversation with full emotional analysis and embedding
@@ -15,7 +23,8 @@ export class MemoryRepository {
   async storeConversation(
     conversation: Omit<Conversation, 'id' | 'created_at' | 'updated_at'>
   ): Promise<Conversation> {
-    const { data, error } = await this.supabase
+    const supabase = await this.getSupabaseClient();
+    const { data, error } = await supabase
       .from('conversations')
       .insert([
         {
@@ -66,7 +75,8 @@ export class MemoryRepository {
     limit: number = 10,
     offset: number = 0
   ): Promise<Conversation[]> {
-    const { data, error } = await this.supabase
+    const supabase = await this.getSupabaseClient();
+    const { data, error } = await supabase
       .from('conversations')
       .select('*')
       .eq('user_id', userId)
@@ -97,8 +107,9 @@ export class MemoryRepository {
     embedding: number[],
     limit: number = 5
   ): Promise<Conversation[]> {
+    const supabase = await this.getSupabaseClient();
     // Use RPC function for efficient vector similarity search
-    const { data, error } = await this.supabase.rpc('semantic_search', {
+    const { data, error } = await supabase.rpc('semantic_search', {
       query_embedding: embedding,
       user_id_param: userId,
       match_count: limit,
@@ -124,7 +135,8 @@ export class MemoryRepository {
     conversationId: string,
     emotions: EmotionAnalysis
   ): Promise<void> {
-    const { error } = await this.supabase
+    const supabase = await this.getSupabaseClient();
+    const { error } = await supabase
       .from('conversations')
       .update({
         primary_emotion: emotions.primary_emotion,

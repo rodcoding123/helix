@@ -1,10 +1,22 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { loadSecret } from '@/lib/secrets-loader';
 
 export class EmbeddingService {
-  private client: GoogleGenerativeAI;
+  private client: GoogleGenerativeAI | null = null;
 
-  constructor(apiKey: string) {
+  private async getClient(): Promise<GoogleGenerativeAI> {
+    if (this.client) return this.client;
+
+    const apiKey = await loadSecret('Gemini API Key');
     this.client = new GoogleGenerativeAI(apiKey);
+    return this.client;
+  }
+
+  constructor(apiKey?: string) {
+    // Support legacy constructor for tests
+    if (apiKey) {
+      this.client = new GoogleGenerativeAI(apiKey);
+    }
   }
 
   /**
@@ -17,7 +29,8 @@ export class EmbeddingService {
         throw new Error('Text input cannot be empty');
       }
 
-      const model = this.client.getGenerativeModel({
+      const client = await this.getClient();
+      const model = client.getGenerativeModel({
         model: 'embedding-001',
       });
 
@@ -58,7 +71,8 @@ export class EmbeddingService {
         throw new Error('All texts must be non-empty');
       }
 
-      const model = this.client.getGenerativeModel({
+      const client = await this.getClient();
+      const model = client.getGenerativeModel({
         model: 'embedding-001',
       });
 
