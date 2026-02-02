@@ -1,17 +1,14 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseClient } from '@supabase/supabase-js';
 import type { Conversation, EmotionAnalysis } from '@/lib/types/memory';
-import { loadSecret } from '@/lib/secrets-loader';
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 
 export class MemoryRepository {
   private supabase: SupabaseClient | null = null;
 
-  private async getSupabaseClient(): Promise<SupabaseClient> {
+  private getSupabaseClient(): SupabaseClient {
     if (this.supabase) return this.supabase;
 
-    const url = await loadSecret('Supabase URL');
-    const anonKey = await loadSecret('Supabase Anon Key');
-
-    this.supabase = createClient(url, anonKey);
+    this.supabase = getSupabaseBrowserClient();
     return this.supabase;
   }
 
@@ -23,7 +20,7 @@ export class MemoryRepository {
   async storeConversation(
     conversation: Omit<Conversation, 'id' | 'created_at' | 'updated_at'>
   ): Promise<Conversation> {
-    const supabase = await this.getSupabaseClient();
+    const supabase = this.getSupabaseClient();
     const { data, error } = await supabase
       .from('conversations')
       .insert([
@@ -75,7 +72,7 @@ export class MemoryRepository {
     limit: number = 10,
     offset: number = 0
   ): Promise<Conversation[]> {
-    const supabase = await this.getSupabaseClient();
+    const supabase = this.getSupabaseClient();
     const { data, error } = await supabase
       .from('conversations')
       .select('*')
@@ -107,7 +104,7 @@ export class MemoryRepository {
     embedding: number[],
     limit: number = 5
   ): Promise<Conversation[]> {
-    const supabase = await this.getSupabaseClient();
+    const supabase = this.getSupabaseClient();
     // Use RPC function for efficient vector similarity search
     const { data, error } = await supabase.rpc('semantic_search', {
       query_embedding: embedding,
@@ -135,7 +132,7 @@ export class MemoryRepository {
     conversationId: string,
     emotions: EmotionAnalysis
   ): Promise<void> {
-    const supabase = await this.getSupabaseClient();
+    const supabase = this.getSupabaseClient();
     const { error } = await supabase
       .from('conversations')
       .update({

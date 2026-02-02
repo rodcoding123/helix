@@ -1,5 +1,3 @@
-import { loadSecret } from '@/lib/secrets-loader';
-
 interface OpenClawToolDefinition {
   name: string;
   description: string;
@@ -14,25 +12,12 @@ interface OpenClawExecutionResult {
 }
 
 /**
- * OpenClawGatewayService: Communicates with OpenClaw engine
- * Handles tool execution, skill management, and code modifications
+ * Browser-compatible OpenClaw gateway service
+ * Communicates with OpenClaw engine via API endpoints
  */
 export class OpenClawGatewayService {
-  private gatewayUrl: string | null = null;
-  private apiKey: string | null = null;
-  private initialized = false;
-
   async initialize(): Promise<void> {
-    if (this.initialized) return;
-
-    try {
-      this.gatewayUrl = await loadSecret('OpenClaw Gateway URL');
-      this.apiKey = await loadSecret('OpenClaw API Key');
-      this.initialized = true;
-    } catch (error) {
-      console.error('Failed to initialize OpenClaw gateway:', error);
-      // Gateway is optional - continue without it
-    }
+    // No initialization needed - will call API endpoint directly
   }
 
   /**
@@ -44,35 +29,26 @@ export class OpenClawGatewayService {
   ): Promise<OpenClawExecutionResult> {
     await this.initialize();
 
-    if (!this.gatewayUrl || !this.apiKey) {
-      return {
-        success: false,
-        error: 'OpenClaw gateway not configured',
-        executedAt: new Date(),
-      };
-    }
-
     try {
-      const response = await fetch(`${this.gatewayUrl}/tools/execute`, {
+      const response = await fetch('/api/openclaw/execute-tool', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
           toolName,
           parameters,
-          timestamp: new Date().toISOString(),
         }),
       });
 
       if (!response.ok) {
+        const error = await response.text();
         throw new Error(
-          `Tool execution failed: ${response.status} ${response.statusText}`
+          `Tool execution failed: ${response.status} ${error}`
         );
       }
 
-      const data = await response.json();
+      const data = await response.json() as { output?: string };
       return {
         success: true,
         output: data.output,
@@ -99,32 +75,23 @@ export class OpenClawGatewayService {
   ): Promise<OpenClawExecutionResult> {
     await this.initialize();
 
-    if (!this.gatewayUrl || !this.apiKey) {
-      return {
-        success: false,
-        error: 'OpenClaw gateway not configured',
-        executedAt: new Date(),
-      };
-    }
-
     try {
-      const response = await fetch(`${this.gatewayUrl}/skills/register`, {
+      const response = await fetch('/api/openclaw/register-skill', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
           skillName,
           description,
           tools: toolDefinitions,
-          timestamp: new Date().toISOString(),
         }),
       });
 
       if (!response.ok) {
+        const error = await response.text();
         throw new Error(
-          `Skill registration failed: ${response.status} ${response.statusText}`
+          `Skill registration failed: ${response.status} ${error}`
         );
       }
 
@@ -154,39 +121,27 @@ export class OpenClawGatewayService {
   ): Promise<OpenClawExecutionResult> {
     await this.initialize();
 
-    if (!this.gatewayUrl || !this.apiKey) {
-      return {
-        success: false,
-        error: 'OpenClaw gateway not configured',
-        executedAt: new Date(),
-      };
-    }
-
     try {
-      const response = await fetch(
-        `${this.gatewayUrl}/code/propose-modifications`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${this.apiKey}`,
-          },
-          body: JSON.stringify({
-            filePath,
-            proposedChanges,
-            reason,
-            timestamp: new Date().toISOString(),
-          }),
-        }
-      );
+      const response = await fetch('/api/openclaw/propose-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          filePath,
+          proposedChanges,
+          reason,
+        }),
+      });
 
       if (!response.ok) {
+        const error = await response.text();
         throw new Error(
-          `Code modification proposal failed: ${response.status} ${response.statusText}`
+          `Code modification proposal failed: ${response.status} ${error}`
         );
       }
 
-      const data = await response.json();
+      const data = await response.json() as { prId?: string };
       return {
         success: true,
         output: `Code modification proposed for review (PR: ${data.prId})`,
@@ -209,26 +164,22 @@ export class OpenClawGatewayService {
   async getAvailableTools(): Promise<OpenClawToolDefinition[]> {
     await this.initialize();
 
-    if (!this.gatewayUrl || !this.apiKey) {
-      console.warn('OpenClaw gateway not configured, returning empty tools list');
-      return [];
-    }
-
     try {
-      const response = await fetch(`${this.gatewayUrl}/tools/list`, {
+      const response = await fetch('/api/openclaw/tools', {
         method: 'GET',
         headers: {
-          Authorization: `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
         },
       });
 
       if (!response.ok) {
-        throw new Error(
-          `Failed to fetch tools: ${response.status} ${response.statusText}`
+        console.warn(
+          `Failed to fetch tools: ${response.status}`
         );
+        return [];
       }
 
-      const data = await response.json();
+      const data = await response.json() as { tools?: OpenClawToolDefinition[] };
       return data.tools || [];
     } catch (error) {
       console.error('Failed to get available tools:', error);
@@ -242,16 +193,9 @@ export class OpenClawGatewayService {
   async sendHeartbeat(): Promise<boolean> {
     await this.initialize();
 
-    if (!this.gatewayUrl || !this.apiKey) {
-      return false;
-    }
-
     try {
-      const response = await fetch(`${this.gatewayUrl}/health`, {
+      const response = await fetch('/api/openclaw/health', {
         method: 'GET',
-        headers: {
-          Authorization: `Bearer ${this.apiKey}`,
-        },
       });
 
       return response.ok;

@@ -460,13 +460,12 @@ describe('Services Integration with 1Password', () => {
     });
 
     it('should support dependency injection for testing', () => {
-      // Services support optional constructor parameters for tests
-      const testApiKey = 'test-key-12345';
-      const emotionServiceWithKey = new EmotionDetectionService();
-      const embeddingServiceWithKey = new EmbeddingService(testApiKey);
+      // Services call API endpoints instead of direct secret loading
+      const emotionService = new EmotionDetectionService();
+      const embeddingService = new EmbeddingService();
 
-      expect(emotionServiceWithKey).toBeDefined();
-      expect(embeddingServiceWithKey).toBeDefined();
+      expect(emotionService).toBeDefined();
+      expect(embeddingService).toBeDefined();
     });
   });
 

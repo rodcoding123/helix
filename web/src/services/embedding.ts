@@ -1,27 +1,11 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { loadSecret } from '@/lib/secrets-loader';
-
+/**
+ * Browser-compatible embedding service
+ * Calls /api/embedding endpoint instead of using Gemini API directly
+ */
 export class EmbeddingService {
-  private client: GoogleGenerativeAI | null = null;
-
-  private async getClient(): Promise<GoogleGenerativeAI> {
-    if (this.client) return this.client;
-
-    const apiKey = await loadSecret('Gemini API Key');
-    this.client = new GoogleGenerativeAI(apiKey);
-    return this.client;
-  }
-
-  constructor(apiKey?: string) {
-    // Support legacy constructor for tests
-    if (apiKey) {
-      this.client = new GoogleGenerativeAI(apiKey);
-    }
-  }
-
   /**
    * Generate a 768-dimensional embedding for a single text
-   * Uses Google's embedding-001 model (normalized vectors)
+   * Uses API endpoint that calls Google's embedding-001 model
    */
   async generateEmbedding(text: string): Promise<number[]> {
     try {
@@ -29,15 +13,23 @@ export class EmbeddingService {
         throw new Error('Text input cannot be empty');
       }
 
-      const client = await this.getClient();
-      const model = client.getGenerativeModel({
-        model: 'embedding-001',
+      const response = await fetch('/api/embedding', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text }),
       });
 
-      const result = await model.embedContent(text);
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(
+          `Embedding API error: ${response.status} - ${error}`
+        );
+      }
 
-      // Gemini returns normalized embeddings (768-dimensional)
-      const embedding = result.embedding.values;
+      const data = await response.json() as { embedding: number[] };
+      const embedding = data.embedding;
 
       if (!embedding || embedding.length !== 768) {
         throw new Error(
@@ -59,7 +51,7 @@ export class EmbeddingService {
 
   /**
    * Generate embeddings for multiple texts efficiently
-   * Gemini batches these internally for better performance
+   * Calls API endpoint for batch embedding
    */
   async generateBatchEmbeddings(texts: string[]): Promise<number[][]> {
     try {
@@ -71,31 +63,36 @@ export class EmbeddingService {
         throw new Error('All texts must be non-empty');
       }
 
-      const client = await this.getClient();
-      const model = client.getGenerativeModel({
-        model: 'embedding-001',
+      const response = await fetch('/api/embedding/batch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ texts }),
       });
 
-      // Gemini API requires batch embedding through batchEmbedContents
-      const requests = texts.map((text) => ({
-        content: { role: 'user', parts: [{ text }] },
-      }));
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(
+          `Batch embedding API error: ${response.status} - ${error}`
+        );
+      }
 
-      const result = await model.batchEmbedContents({
-        requests,
-      });
+      const data = await response.json() as { embeddings: number[][] };
+      const embeddings = data.embeddings;
 
       // Validate each embedding
-      const embeddings = result.embeddings.map(
-        (emb: { values: number[] }) => {
-          if (!emb.values || emb.values.length !== 768) {
-            throw new Error(
-              `Expected 768-dimensional embedding, got ${emb.values?.length}`
-            );
-          }
-          return emb.values;
+      if (!Array.isArray(embeddings)) {
+        throw new Error('Expected embeddings array in response');
+      }
+
+      embeddings.forEach((emb, i) => {
+        if (!emb || emb.length !== 768) {
+          throw new Error(
+            `Expected 768-dimensional embedding, got ${emb?.length} at index ${i}`
+          );
         }
-      );
+      });
 
       return embeddings;
     } catch (error) {

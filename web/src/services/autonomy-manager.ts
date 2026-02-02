@@ -1,5 +1,5 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { loadSecret } from '@/lib/secrets-loader';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import type {
   AutonomyAction,
   AutonomyLevel,
@@ -21,13 +21,10 @@ export class AutonomyManagerService {
   private openclawGateway: OpenClawGatewayService | null = null;
   private agentService: AgentService | null = null;
 
-  private async getSupabaseClient(): Promise<SupabaseClient> {
+  private getSupabaseClient(): SupabaseClient {
     if (this.supabase) return this.supabase;
 
-    const url = await loadSecret('Supabase URL');
-    const anonKey = await loadSecret('Supabase Anon Key');
-
-    this.supabase = createClient(url, anonKey);
+    this.supabase = getSupabaseBrowserClient();
     return this.supabase;
   }
 
@@ -57,7 +54,7 @@ export class AutonomyManagerService {
    */
   async getAutonomySettings(userId: string): Promise<AutonomySettings> {
     try {
-      const supabase = await this.getSupabaseClient();
+      const supabase = this.getSupabaseClient();
 
       let { data, error } = await supabase
         .from('autonomy_settings')
@@ -112,7 +109,7 @@ export class AutonomyManagerService {
     updates: Partial<AutonomySettings>
   ): Promise<AutonomySettings> {
     try {
-      const supabase = await this.getSupabaseClient();
+      const supabase = this.getSupabaseClient();
 
       const { data, error } = await supabase
         .from('autonomy_settings')
@@ -149,7 +146,7 @@ export class AutonomyManagerService {
     agentId?: string
   ): Promise<AutonomyAction> {
     try {
-      const supabase = await this.getSupabaseClient();
+      const supabase = this.getSupabaseClient();
       const settings = await this.getAutonomySettings(userId);
 
       // Determine if this action needs approval
@@ -228,7 +225,7 @@ export class AutonomyManagerService {
     approvalMethod: 'discord_reaction' | 'web_ui' = 'web_ui'
   ): Promise<AutonomyAction> {
     try {
-      const supabase = await this.getSupabaseClient();
+      const supabase = this.getSupabaseClient();
 
       const { data, error } = await supabase
         .from('autonomy_actions')
@@ -263,7 +260,7 @@ export class AutonomyManagerService {
    */
   async rejectAction(actionId: string, userId: string): Promise<AutonomyAction> {
     try {
-      const supabase = await this.getSupabaseClient();
+      const supabase = this.getSupabaseClient();
 
       const { data, error } = await supabase
         .from('autonomy_actions')
@@ -292,7 +289,7 @@ export class AutonomyManagerService {
    */
   async executeAction(actionId: string, userId: string): Promise<void> {
     try {
-      const supabase = await this.getSupabaseClient();
+      const supabase = this.getSupabaseClient();
 
       // Get the action
       const { data: actionData, error: getError } = await supabase
@@ -540,7 +537,7 @@ export class AutonomyManagerService {
    */
   async getPendingActions(userId: string): Promise<AutonomyAction[]> {
     try {
-      const supabase = await this.getSupabaseClient();
+      const supabase = this.getSupabaseClient();
 
       const { data, error } = await supabase
         .from('autonomy_actions')
@@ -569,7 +566,7 @@ export class AutonomyManagerService {
     offset: number = 0
   ): Promise<AutonomyAction[]> {
     try {
-      const supabase = await this.getSupabaseClient();
+      const supabase = this.getSupabaseClient();
 
       const { data, error } = await supabase
         .from('autonomy_actions')

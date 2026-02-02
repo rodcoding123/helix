@@ -10,7 +10,7 @@ describe('EmbeddingService - Unit Tests', () => {
   let service: EmbeddingService;
 
   beforeEach(() => {
-    service = new EmbeddingService('mock-api-key');
+    service = new EmbeddingService();
   });
 
   describe('validateEmbedding', () => {

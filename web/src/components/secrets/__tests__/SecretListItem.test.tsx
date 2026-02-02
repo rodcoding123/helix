@@ -8,8 +8,8 @@ describe('SecretListItem Component', () => {
     id: 'secret-1',
     user_id: 'user-123',
     key_name: 'API Key',
-    secret_type: 'api_key',
-    source_type: 'manual',
+    secret_type: 'STRIPE_SECRET_KEY',
+    source_type: 'user-provided',
     created_at: '2025-01-01T00:00:00Z',
     expires_at: '2026-01-01T00:00:00Z',
     is_active: true,
@@ -62,7 +62,7 @@ describe('SecretListItem Component', () => {
 
   it('should display secret metadata', () => {
     render(<SecretListItem secret={mockSecret} />);
-    expect(screen.getByText(/type: api_key/i)).toBeInTheDocument();
+    expect(screen.getByText(/type: STRIPE_SECRET_KEY/i)).toBeInTheDocument();
     expect(screen.getByText(/version: 1/i)).toBeInTheDocument();
   });
 

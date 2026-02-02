@@ -1,4 +1,3 @@
-import { loadSecret } from '@/lib/secrets-loader';
 import type { AgentProposal, AutonomyAction, Agent } from '@/lib/types/agents';
 
 interface DiscordEmbed {
@@ -31,30 +30,36 @@ interface DiscordMessage {
 }
 
 /**
- * DiscordLoggerService: Logs agent proposals and autonomy actions to Discord
- * Provides approval workflow via reactions and buttons
+ * Browser-compatible Discord logger service
+ * Logs agent proposals and autonomy actions to Discord via API endpoint
  */
 export class DiscordLoggerService {
-  private webhookUrls: Map<string, string> = new Map();
-  private initialized = false;
-
   async initialize(): Promise<void> {
-    if (this.initialized) return;
+    // No initialization needed - will call API endpoint directly
+  }
 
+  /**
+   * Send message to Discord via API endpoint
+   */
+  private async sendMessage(
+    channel: 'agents' | 'autonomy' | 'actions',
+    message: DiscordMessage
+  ): Promise<void> {
     try {
-      // Load Discord webhooks from 1Password
-      const agentsWebhook = await loadSecret('Discord Agents Webhook');
-      const autonomyWebhook = await loadSecret('Discord Autonomy Webhook');
-      const actionsWebhook = await loadSecret('Discord Actions Webhook');
+      const response = await fetch('/api/discord-log', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ channel, message }),
+      });
 
-      this.webhookUrls.set('agents', agentsWebhook);
-      this.webhookUrls.set('autonomy', autonomyWebhook);
-      this.webhookUrls.set('actions', actionsWebhook);
-
-      this.initialized = true;
+      if (!response.ok) {
+        console.error(`Failed to send Discord message to ${channel}`);
+      }
     } catch (error) {
-      console.error('Failed to initialize Discord webhooks:', error);
-      // Continue without Discord - not fatal
+      console.error(`Discord logging error for ${channel}:`, error);
+      // Non-fatal - don't throw
     }
   }
 
@@ -66,9 +71,6 @@ export class DiscordLoggerService {
     proposal: AgentProposal
   ): Promise<void> {
     await this.initialize();
-
-    const webhookUrl = this.webhookUrls.get('agents');
-    if (!webhookUrl) return;
 
     const embed: DiscordEmbed = {
       title: '🤖 Agent Proposal',
@@ -116,32 +118,13 @@ export class DiscordLoggerService {
       content:
         '📢 Helix has detected a pattern and proposes a new agent:',
       embeds: [embed],
-      components: [
-        {
-          type: 1,
-          components: [
-            {
-              type: 2,
-              style: 3, // Green
-              label: 'Approve',
-              custom_id: `approve_proposal_${proposal.id}`,
-            },
-            {
-              type: 2,
-              style: 4, // Red
-              label: 'Reject',
-              custom_id: `reject_proposal_${proposal.id}`,
-            },
-          ],
-        },
-      ],
     };
 
-    await this.sendWebhook(webhookUrl, message);
+    await this.sendMessage('agents', message);
   }
 
   /**
-   * Log autonomy action for approval
+   * Log pending autonomy action to #helix-autonomy channel
    */
   async logAutonomyAction(
     userId: string,
@@ -149,35 +132,20 @@ export class DiscordLoggerService {
   ): Promise<string> {
     await this.initialize();
 
-    const webhookUrl = this.webhookUrls.get('autonomy');
-    if (!webhookUrl) return '';
-
-    const getRiskColor = (risk: string): number => {
-      switch (risk) {
-        case 'low':
-          return 0x22c55e; // Green
-        case 'medium':
-          return 0xf59e0b; // Amber
-        case 'high':
-          return 0xef4444; // Red
-        default:
-          return 0x6b7280; // Gray
-      }
-    };
+    const riskColor = {
+      low: 0x22c55e, // Green
+      medium: 0xeab308, // Yellow
+      high: 0xef4444, // Red
+    }[action.risk_level] || 0x808080;
 
     const embed: DiscordEmbed = {
-      title: '⚡ Action Awaiting Approval',
+      title: `⚠️ ${action.action_type
+        .split('_')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ')} Pending Approval`,
       description: action.action_description,
-      color: getRiskColor(action.risk_level),
+      color: riskColor,
       fields: [
-        {
-          name: 'Action Type',
-          value: action.action_type
-            .split('_')
-            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-            .join(' '),
-          inline: true,
-        },
         {
           name: 'Risk Level',
           value: action.risk_level.toUpperCase(),
@@ -185,7 +153,7 @@ export class DiscordLoggerService {
         },
         {
           name: 'Status',
-          value: 'Pending Approval',
+          value: action.status,
           inline: true,
         },
         {
@@ -201,8 +169,7 @@ export class DiscordLoggerService {
     };
 
     const message: DiscordMessage = {
-      content:
-        '🔔 Helix is requesting approval for an action:',
+      content: '🔔 A new action requires your approval:',
       embeds: [embed],
       components: [
         {
@@ -210,13 +177,13 @@ export class DiscordLoggerService {
           components: [
             {
               type: 2,
-              style: 3, // Green
+              style: 3,
               label: 'Approve',
               custom_id: `approve_action_${action.id}`,
             },
             {
               type: 2,
-              style: 4, // Red
+              style: 4,
               label: 'Reject',
               custom_id: `reject_action_${action.id}`,
             },
@@ -225,175 +192,79 @@ export class DiscordLoggerService {
       ],
     };
 
-    const messageId = await this.sendWebhook(webhookUrl, message);
-    return messageId;
+    await this.sendMessage('autonomy', message);
+    return action.id;
   }
 
   /**
-   * Log executed action to #helix-actions channel
+   * Log executed action result
    */
-  async logExecutedAction(userId: string, action: AutonomyAction): Promise<void> {
+  async logExecutedAction(_userId: string, action: AutonomyAction): Promise<void> {
     await this.initialize();
 
-    const webhookUrl = this.webhookUrls.get('actions');
-    if (!webhookUrl) return;
-
-    const getStatusColor = (status: string): number => {
-      switch (status) {
-        case 'executed':
-          return 0x22c55e; // Green
-        case 'rejected':
-          return 0xef4444; // Red
-        case 'failed':
-          return 0xf59e0b; // Amber
-        default:
-          return 0x6b7280; // Gray
-      }
-    };
+    const statusColor = {
+      pending: 0xeab308,
+      approved: 0x22c55e,
+      rejected: 0xef4444,
+      failed: 0xef4444,
+      completed: 0x22c55e,
+      executed: 0x22c55e,
+    }[action.status] || 0x808080;
 
     const embed: DiscordEmbed = {
-      title: '✅ Action Executed',
+      title: `✅ Action ${action.status.charAt(0).toUpperCase() + action.status.slice(1)}`,
       description: action.action_description,
-      color: getStatusColor(action.status),
+      color: statusColor,
       fields: [
         {
           name: 'Action Type',
-          value: action.action_type
-            .split('_')
-            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-            .join(' '),
+          value: action.action_type,
           inline: true,
         },
         {
           name: 'Status',
-          value: action.status.toUpperCase(),
+          value: action.status,
           inline: true,
         },
         {
           name: 'User ID',
-          value: userId,
+          value: _userId,
           inline: true,
         },
       ],
       footer: {
         text: `Action ID: ${action.id}`,
       },
-      timestamp: action.executed_at?.toISOString() || new Date().toISOString(),
+      timestamp: new Date().toISOString(),
     };
 
-    if (action.error_message) {
-      embed.fields!.push({
-        name: 'Error',
-        value: action.error_message,
-        inline: false,
-      });
-    }
-
     const message: DiscordMessage = {
+      content: `📝 Action execution completed:`,
       embeds: [embed],
     };
 
-    await this.sendWebhook(webhookUrl, message);
+    await this.sendMessage('actions', message);
   }
 
   /**
-   * Log agent creation success
+   * Log agent creation
    */
   async logAgentCreated(userId: string, agent: Agent): Promise<void> {
     await this.initialize();
 
-    const webhookUrl = this.webhookUrls.get('agents');
-    if (!webhookUrl) return;
-
     const embed: DiscordEmbed = {
-      title: '🎉 Agent Created',
-      description: `**${agent.name}** is now available!`,
-      color: 0x22c55e, // Green
+      title: '🆕 Agent Created',
+      description: agent.description,
+      color: 0x06b6d4, // Cyan
       fields: [
+        {
+          name: 'Agent Name',
+          value: agent.name,
+          inline: true,
+        },
         {
           name: 'Role',
           value: agent.role,
-          inline: true,
-        },
-        {
-          name: 'Created By',
-          value: agent.created_by === 'system' ? 'Helix (auto-detected)' : 'User Request',
-          inline: true,
-        },
-        {
-          name: 'Autonomy Level',
-          value: ['Propose-Only', 'Inform-After', 'Alert-Async', 'Autonomous'][
-            agent.autonomy_level
-          ],
-          inline: true,
-        },
-        {
-          name: 'Description',
-          value: agent.description,
-          inline: false,
-        },
-        {
-          name: 'User ID',
-          value: userId,
-          inline: true,
-        },
-      ],
-      footer: {
-        text: `Agent ID: ${agent.id}`,
-      },
-      timestamp: agent.created_at.toISOString(),
-    };
-
-    const message: DiscordMessage = {
-      embeds: [embed],
-    };
-
-    await this.sendWebhook(webhookUrl, message);
-  }
-
-  /**
-   * Log personality evolution
-   */
-  async logPersonalityEvolution(userId: string, agent: Agent): Promise<void> {
-    await this.initialize();
-
-    const webhookUrl = this.webhookUrls.get('agents');
-    if (!webhookUrl) return;
-
-    const { personality } = agent;
-    const embed: DiscordEmbed = {
-      title: '🧠 Personality Evolution',
-      description: `**${agent.name}** is learning...`,
-      color: 0x6366f1, // Indigo
-      fields: [
-        {
-          name: 'Verbosity',
-          value: this.getBar(personality.verbosity),
-          inline: true,
-        },
-        {
-          name: 'Formality',
-          value: this.getBar(personality.formality),
-          inline: true,
-        },
-        {
-          name: 'Creativity',
-          value: this.getBar(personality.creativity),
-          inline: true,
-        },
-        {
-          name: 'Proactivity',
-          value: this.getBar(personality.proactivity),
-          inline: true,
-        },
-        {
-          name: 'Warmth',
-          value: this.getBar(personality.warmth),
-          inline: true,
-        },
-        {
-          name: 'Conversations',
-          value: String(agent.conversation_count),
           inline: true,
         },
         {
@@ -409,46 +280,67 @@ export class DiscordLoggerService {
     };
 
     const message: DiscordMessage = {
+      content: '🎉 A new agent has been created!',
       embeds: [embed],
     };
 
-    await this.sendWebhook(webhookUrl, message);
+    await this.sendMessage('agents', message);
   }
 
-  // Private helper methods
+  /**
+   * Log agent personality evolution
+   */
+  async logPersonalityEvolution(_userId: string, agent: Agent): Promise<void> {
+    await this.initialize();
 
-  private async sendWebhook(
-    webhookUrl: string,
-    message: DiscordMessage
-  ): Promise<string> {
-    try {
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+    const { personality } = agent;
+    const embed: DiscordEmbed = {
+      title: '🧠 Personality Evolution',
+      description: `${agent.name}'s personality has evolved through interactions`,
+      color: 0xa855f7, // Purple
+      fields: [
+        {
+          name: 'Agent',
+          value: agent.name,
+          inline: true,
         },
-        body: JSON.stringify(message),
-      });
+        {
+          name: 'Verbosity',
+          value: `${(personality.verbosity * 100).toFixed(0)}%`,
+          inline: true,
+        },
+        {
+          name: 'Formality',
+          value: `${(personality.formality * 100).toFixed(0)}%`,
+          inline: true,
+        },
+        {
+          name: 'Creativity',
+          value: `${(personality.creativity * 100).toFixed(0)}%`,
+          inline: true,
+        },
+        {
+          name: 'Proactivity',
+          value: `${(personality.proactivity * 100).toFixed(0)}%`,
+          inline: true,
+        },
+        {
+          name: 'Warmth',
+          value: `${(personality.warmth * 100).toFixed(0)}%`,
+          inline: true,
+        },
+      ],
+      footer: {
+        text: `Agent ID: ${agent.id}`,
+      },
+      timestamp: new Date().toISOString(),
+    };
 
-      if (!response.ok) {
-        throw new Error(
-          `Discord webhook failed: ${response.status} ${response.statusText}`
-        );
-      }
+    const message: DiscordMessage = {
+      content: '📊 Agent personality update:',
+      embeds: [embed],
+    };
 
-      // Return message ID if available in response
-      const data = await response.json();
-      return data.id || '';
-    } catch (error) {
-      console.error('Failed to send Discord webhook:', error);
-      // Don't throw - logging failures shouldn't block operations
-      return '';
-    }
-  }
-
-  private getBar(value: number): string {
-    const filled = Math.round(value * 10);
-    const empty = 10 - filled;
-    return `${'█'.repeat(filled)}${'░'.repeat(empty)} ${(value * 100).toFixed(0)}%`;
+    await this.sendMessage('agents', message);
   }
 }

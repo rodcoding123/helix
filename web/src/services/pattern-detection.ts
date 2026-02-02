@@ -1,5 +1,5 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { loadSecret } from '@/lib/secrets-loader';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import type { Conversation } from '@/lib/types/memory';
 import type { AgentProposal, PatternAnalysisResult } from '@/lib/types/agents';
 import { DiscordLoggerService } from './discord-logger';
@@ -12,13 +12,10 @@ export class PatternDetectionService {
   private supabase: SupabaseClient | null = null;
   private discordLogger: DiscordLoggerService | null = null;
 
-  private async getSupabaseClient(): Promise<SupabaseClient> {
+  private getSupabaseClient(): SupabaseClient {
     if (this.supabase) return this.supabase;
 
-    const url = await loadSecret('Supabase URL');
-    const anonKey = await loadSecret('Supabase Anon Key');
-
-    this.supabase = createClient(url, anonKey);
+    this.supabase = getSupabaseBrowserClient();
     return this.supabase;
   }
 
@@ -35,7 +32,7 @@ export class PatternDetectionService {
    */
   async detectAgentProposals(userId: string): Promise<AgentProposal[]> {
     try {
-      const supabase = await this.getSupabaseClient();
+      const supabase = this.getSupabaseClient();
 
       // Get recent memories for pattern analysis
       const { data: memories, error } = await supabase

@@ -5,7 +5,7 @@ describe('EmbeddingService', () => {
   let service: EmbeddingService;
 
   beforeEach(() => {
-    service = new EmbeddingService(process.env.GEMINI_API_KEY!);
+    service = new EmbeddingService();
   });
 
   describe('generateEmbedding', () => {

@@ -1,5 +1,5 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { loadSecret } from '@/lib/secrets-loader';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import type { Agent, AgentConversation, AgentPersonality } from '@/lib/types/agents';
 import { DiscordLoggerService } from './discord-logger';
 
@@ -11,13 +11,10 @@ export class AgentService {
   private supabase: SupabaseClient | null = null;
   private discordLogger: DiscordLoggerService | null = null;
 
-  private async getSupabaseClient(): Promise<SupabaseClient> {
+  private getSupabaseClient(): SupabaseClient {
     if (this.supabase) return this.supabase;
 
-    const url = await loadSecret('Supabase URL');
-    const anonKey = await loadSecret('Supabase Anon Key');
-
-    this.supabase = createClient(url, anonKey);
+    this.supabase = getSupabaseBrowserClient();
     return this.supabase;
   }
 
@@ -40,7 +37,7 @@ export class AgentService {
     initialPersonality?: Partial<AgentPersonality>
   ): Promise<Agent> {
     try {
-      const supabase = await this.getSupabaseClient();
+      const supabase = this.getSupabaseClient();
 
       const defaultPersonality: AgentPersonality = {
         verbosity: 0.5,
@@ -103,7 +100,7 @@ export class AgentService {
    */
   async getAgent(agentId: string, userId: string): Promise<Agent | null> {
     try {
-      const supabase = await this.getSupabaseClient();
+      const supabase = this.getSupabaseClient();
 
       const { data, error } = await supabase
         .from('agents')
@@ -131,7 +128,7 @@ export class AgentService {
    */
   async getUserAgents(userId: string): Promise<Agent[]> {
     try {
-      const supabase = await this.getSupabaseClient();
+      const supabase = this.getSupabaseClient();
 
       const { data, error } = await supabase
         .from('agents')
@@ -160,7 +157,7 @@ export class AgentService {
     level: 0 | 1 | 2 | 3
   ): Promise<Agent> {
     try {
-      const supabase = await this.getSupabaseClient();
+      const supabase = this.getSupabaseClient();
 
       const { data, error } = await supabase
         .from('agents')
@@ -193,7 +190,7 @@ export class AgentService {
     personality: Partial<AgentPersonality>
   ): Promise<Agent> {
     try {
-      const supabase = await this.getSupabaseClient();
+      const supabase = this.getSupabaseClient();
 
       // Get current agent
       const agent = await this.getAgent(agentId, userId);
@@ -249,7 +246,7 @@ export class AgentService {
     conversation: Omit<AgentConversation, 'id' | 'agent_id' | 'user_id' | 'created_at' | 'updated_at'>
   ): Promise<AgentConversation> {
     try {
-      const supabase = await this.getSupabaseClient();
+      const supabase = this.getSupabaseClient();
 
       const { data, error } = await supabase
         .from('agent_conversations')
@@ -294,7 +291,7 @@ export class AgentService {
     offset: number = 0
   ): Promise<AgentConversation[]> {
     try {
-      const supabase = await this.getSupabaseClient();
+      const supabase = this.getSupabaseClient();
 
       const { data, error } = await supabase
         .from('agent_conversations')
@@ -320,7 +317,7 @@ export class AgentService {
    */
   async deleteAgent(agentId: string, userId: string): Promise<void> {
     try {
-      const supabase = await this.getSupabaseClient();
+      const supabase = this.getSupabaseClient();
 
       const { error } = await supabase
         .from('agents')
