@@ -12,7 +12,7 @@ describe('useSecretsData Hook', () => {
       token: 'test-token',
       user: { id: 'user-123', email: 'test@example.com' },
       isLoading: false,
-    } as any);
+    } as unknown as ReturnType<typeof authModule.useAuth>);
   });
 
   it('should load secrets on mount', async () => {

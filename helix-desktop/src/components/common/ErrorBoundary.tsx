@@ -64,7 +64,7 @@ function DefaultErrorFallback({ error, onReset }: DefaultErrorFallbackProps): Re
         <p className="error-boundary__message">
           An unexpected error occurred. Please try again.
         </p>
-        {process.env.NODE_ENV === 'development' && (
+        {import.meta.env.DEV && (
           <details className="error-boundary__details">
             <summary>Error Details</summary>
             <pre className="error-boundary__stack">

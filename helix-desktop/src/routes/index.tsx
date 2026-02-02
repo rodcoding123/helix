@@ -98,6 +98,7 @@ export const ROUTES = {
   SETTINGS_AGENTS: '/settings/agents',
   SETTINGS_PRIVACY: '/settings/privacy',
   SETTINGS_PSYCHOLOGY: '/settings/psychology',
+  SETTINGS_SECRETS: '/settings/secrets',
   PSYCHOLOGY: '/psychology',
   PSYCHOLOGY_LAYER: (layer: string) => `/psychology/${layer}`,
   MEMORY: '/memory',

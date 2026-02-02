@@ -25,7 +25,7 @@ export const CopyButton: React.FC<CopyButtonProps> = ({ secretName, value }) => 
       }, 10000);
 
       setTimeoutId(id as unknown as number);
-    } catch (err) {
+    } catch (_err) {
       setFeedback('error');
 
       const id = window.setTimeout(() => {

@@ -20,12 +20,12 @@ describe('SecretsClient', () => {
 
   beforeEach(() => {
     client = new SecretsClient(mockToken);
-    global.fetch = vi.fn();
+    globalThis.fetch = vi.fn();
   });
 
   it('should fetch all secrets', async () => {
     const mockResponse = { secrets: [mockSecret] };
-    vi.mocked(global.fetch).mockResolvedValueOnce({
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => mockResponse,
     } as Response);
@@ -33,7 +33,7 @@ describe('SecretsClient', () => {
     const result = await client.listSecrets();
 
     expect(result).toEqual([mockSecret]);
-    expect(global.fetch).toHaveBeenCalledWith('/api/secrets', expect.objectContaining({
+    expect(globalThis.fetch).toHaveBeenCalledWith('/api/secrets', expect.objectContaining({
       headers: expect.objectContaining({
         'Authorization': `Bearer ${mockToken}`,
       }),
@@ -47,7 +47,7 @@ describe('SecretsClient', () => {
       expires_at: undefined,
     };
 
-    vi.mocked(global.fetch).mockResolvedValueOnce({
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => mockSecret,
     } as Response);
@@ -55,7 +55,7 @@ describe('SecretsClient', () => {
     const result = await client.createSecret(newSecret);
 
     expect(result).toEqual(mockSecret);
-    expect(global.fetch).toHaveBeenCalledWith('/api/secrets', expect.objectContaining({
+    expect(globalThis.fetch).toHaveBeenCalledWith('/api/secrets', expect.objectContaining({
       method: 'POST',
       headers: expect.objectContaining({
         'Authorization': `Bearer ${mockToken}`,
@@ -67,7 +67,7 @@ describe('SecretsClient', () => {
 
   it('should rotate a secret', async () => {
     const updatedSecret = { ...mockSecret, key_version: 2 };
-    vi.mocked(global.fetch).mockResolvedValueOnce({
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => updatedSecret,
     } as Response);
@@ -75,26 +75,26 @@ describe('SecretsClient', () => {
     const result = await client.rotateSecret('secret-1');
 
     expect(result.key_version).toBe(2);
-    expect(global.fetch).toHaveBeenCalledWith('/api/secrets/secret-1/rotate', expect.objectContaining({
+    expect(globalThis.fetch).toHaveBeenCalledWith('/api/secrets/secret-1/rotate', expect.objectContaining({
       method: 'POST',
     }));
   });
 
   it('should delete a secret', async () => {
-    vi.mocked(global.fetch).mockResolvedValueOnce({
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ success: true }),
     } as Response);
 
     await client.deleteSecret('secret-1');
 
-    expect(global.fetch).toHaveBeenCalledWith('/api/secrets/secret-1', expect.objectContaining({
+    expect(globalThis.fetch).toHaveBeenCalledWith('/api/secrets/secret-1', expect.objectContaining({
       method: 'DELETE',
     }));
   });
 
   it('should handle 401 unauthorized error', async () => {
-    vi.mocked(global.fetch).mockResolvedValueOnce({
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
       ok: false,
       status: 401,
       json: async () => ({ error: 'Unauthorized' }),

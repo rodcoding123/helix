@@ -3,7 +3,7 @@ import { useSecretsData } from '../../hooks/useSecretsData';
 import { SecretsList } from '../secrets/SecretsList';
 import { CreateSecretModal } from '../secrets/modals/CreateSecretModal';
 import { RotateSecretModal } from '../secrets/modals/RotateSecretModal';
-import type { UserApiKey } from '../../types/secrets';
+import type { SecretType } from '../../types/secrets';
 import '../secrets/Secrets.css';
 
 export const SecretsSettings: React.FC = () => {
@@ -21,7 +21,7 @@ export const SecretsSettings: React.FC = () => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isRotateOpen, setIsRotateOpen] = useState(false);
 
-  const handleCreate = async (data: any) => {
+  const handleCreate = async (data: { name: string; secret_type: SecretType; expires_at?: Date }) => {
     await createSecret(data);
     setIsCreateOpen(false);
   };
