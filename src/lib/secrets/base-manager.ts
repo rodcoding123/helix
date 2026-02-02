@@ -18,17 +18,14 @@ import {
  * await manager.storeSecret(SecretType.STRIPE_SECRET_KEY, 'sk_live_...', SecretSourceType.USER_PROVIDED);
  */
 export class BaseSecretsManager implements SecretsManager {
-  private userId: string;
+  protected userId: string;
   private storage: Map<SecretType, StoredSecretData> = new Map();
 
   constructor(userId: string) {
     this.userId = userId;
   }
 
-  async loadSecret(
-    type: SecretType,
-    _options?: SecretLoadOptions
-  ): Promise<string | null> {
+  async loadSecret(type: SecretType, _options?: SecretLoadOptions): Promise<string | null> {
     const stored = this.storage.get(type);
 
     if (!stored) {
@@ -99,7 +96,9 @@ export class BaseSecretsManager implements SecretsManager {
     const existing = this.storage.get(type);
 
     if (!existing) {
-      throw new Error(`Cannot rotate secret: ${type} does not exist. Store the secret first using storeSecret().`);
+      throw new Error(
+        `Cannot rotate secret: ${type} does not exist. Store the secret first using storeSecret().`
+      );
     }
 
     const metadata: SecretMetadata = {
