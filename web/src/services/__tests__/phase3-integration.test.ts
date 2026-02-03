@@ -5,12 +5,12 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from '../../types/database';
 
-const supabase = createClient<Database>(
+// Use any for database client to bypass Supabase typing issues in test environment
+const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL!,
   import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY! || import.meta.env.VITE_SUPABASE_ANON_KEY!
-);
+) as any;
 
 describe('Phase 3 Integration Tests', () => {
   let userId: string;
@@ -70,7 +70,7 @@ describe('Phase 3 Integration Tests', () => {
       expect(error).toBeNull();
       expect(Array.isArray(data)).toBe(true);
       expect(data?.length).toBeGreaterThan(0);
-      expect(data?.some(t => t.id === toolId)).toBe(true);
+      expect(data?.some((t: any) => t.id === toolId)).toBe(true);
     });
 
     it('should track tool usage', async () => {
@@ -139,7 +139,7 @@ describe('Phase 3 Integration Tests', () => {
 
       expect(error).toBeNull();
       expect(Array.isArray(data)).toBe(true);
-      expect(data?.some(s => s.id === skillId)).toBe(true);
+      expect(data?.some((s: any) => s.id === skillId)).toBe(true);
     });
 
     it('should record skill execution', async () => {
@@ -268,13 +268,13 @@ describe('Phase 3 Integration Tests', () => {
 
     it('should have proper RLS policies', async () => {
       // Try to access another user's data (should fail if RLS works)
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('custom_tools')
         .select('*');
 
       // Should either return empty or user's own tools
       if (data) {
-        data.forEach(tool => {
+        data.forEach((tool: any) => {
           expect(tool.user_id).toBe(userId);
         });
       }

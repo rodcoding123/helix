@@ -18,6 +18,7 @@ interface VoiceRecorderState {
   duration: number;
   audioBlob: Blob | null;
   audioUrl: string | null;
+  isUploading?: boolean;
 }
 
 interface VoiceRecorderControls {
@@ -107,10 +108,11 @@ export function useVoiceRecorder(): [VoiceRecorderState, VoiceRecorderControls] 
         }
       };
 
-      mediaRecorder.onerror = (event: MediaRecorderErrorEvent) => {
+      mediaRecorder.onerror = (event: Event) => {
+        const errorEvent = event as any;
         setState(prev => ({
           ...prev,
-          error: `Recording error: ${event.error}`,
+          error: `Recording error: ${errorEvent.error?.name || 'Unknown error'}`,
           isRecording: false,
         }));
       };
