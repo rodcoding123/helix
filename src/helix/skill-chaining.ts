@@ -222,10 +222,24 @@ function mapInputParameters(
 /**
  * Execute a single step (placeholder - real implementation would call gateway)
  */
-function executeStep(
+// For testing: allows overriding step execution behavior
+const STEP_EXECUTION_CONFIG = new Map<string, { error?: Error; result?: unknown }>();
+
+export function executeStep(
   step: CompositeSkillStep,
   mappedInput: Record<string, unknown>
 ): Promise<unknown> {
+  // Check if test has configured this step to fail
+  if (STEP_EXECUTION_CONFIG.has(step.stepId)) {
+    const config = STEP_EXECUTION_CONFIG.get(step.stepId)!;
+    if (config.error) {
+      return Promise.reject(config.error);
+    }
+    if (config.result !== undefined) {
+      return Promise.resolve(config.result);
+    }
+  }
+
   // TODO: Implement actual tool execution via gateway
   // For now, return a mock result
   return Promise.resolve({
@@ -234,6 +248,23 @@ function executeStep(
     input: mappedInput,
     output: { result: 'mock result' },
   });
+}
+
+/**
+ * Test helper: configure step execution behavior
+ */
+export function configureStepExecution(
+  stepId: string,
+  config: { error?: Error; result?: unknown }
+): void {
+  STEP_EXECUTION_CONFIG.set(stepId, config);
+}
+
+/**
+ * Test helper: clear step execution configuration
+ */
+export function clearStepExecutionConfig(): void {
+  STEP_EXECUTION_CONFIG.clear();
 }
 
 /**
@@ -313,7 +344,7 @@ export async function executeCompositeSkill(
         if (step.errorHandling === 'stop') {
           skillFailed = true;
           skillError = `Step '${step.stepId}' failed: ${stepError}`;
-          break;
+          // NOTE: Do NOT break here - we need to record the step result below
         } else if (step.errorHandling === 'skip') {
           // Skip this step and continue to next
         } else if (step.errorHandling === 'retry') {

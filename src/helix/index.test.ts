@@ -3,13 +3,8 @@
  * Covers initialization, shutdown, status, and export verification
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import {
-  initializeHelix,
-  shutdownHelix,
-  getHelixStatus,
-  type HelixInitOptions,
-} from './index.js';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { initializeHelix, shutdownHelix, getHelixStatus, type HelixInitOptions } from './index.js';
 
 // Mock all module imports
 vi.mock('./logging-hooks.js', () => ({
@@ -64,9 +59,9 @@ vi.mock('./helix-context-loader.js', () => ({
   ensureHelixDirectoryStructure: vi.fn().mockResolvedValue(undefined),
   loadHelixContextFiles: vi.fn(),
   loadHelixContextFilesDetailed: vi.fn(),
-  getHelixContextStatus: vi.fn().mockResolvedValue([
-    { layer: 1, name: 'Narrative Core', file: 'HELIX_SOUL.md', status: 'ok' },
-  ]),
+  getHelixContextStatus: vi
+    .fn()
+    .mockResolvedValue([{ layer: 1, name: 'Narrative Core', file: 'HELIX_SOUL.md', status: 'ok' }]),
   buildLayerSummary: vi.fn(),
   validateContextFile: vi.fn(),
   HELIX_LAYER_FILES: {},
@@ -99,14 +94,41 @@ vi.mock('../lib/env-validator.js', () => ({
 }));
 
 describe('Helix Index Module', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+  beforeEach(async () => {
     // Reset environment
     delete process.env.OPENCLAW_WORKSPACE;
-  });
 
-  afterEach(() => {
-    vi.restoreAllMocks();
+    // Clear mock call counts (but keep implementations)
+    const {
+      setFailClosedMode,
+      validateSecurityConfiguration,
+      installPreExecutionLogger,
+      initializeDiscordWebhooks,
+    } = await import('./logging-hooks.js');
+    vi.mocked(setFailClosedMode).mockClear();
+    vi.mocked(validateSecurityConfiguration).mockClear();
+    vi.mocked(installPreExecutionLogger).mockClear();
+    vi.mocked(initializeDiscordWebhooks).mockClear();
+
+    const { startHashChainScheduler, stopHashChainScheduler, createHashChainEntry } =
+      await import('./hash-chain.js');
+    vi.mocked(startHashChainScheduler).mockClear();
+    vi.mocked(stopHashChainScheduler).mockClear();
+    vi.mocked(createHashChainEntry).mockClear();
+
+    const { startHeartbeat, stopHeartbeat, announceStartup, announceShutdown } =
+      await import('./heartbeat.js');
+    vi.mocked(startHeartbeat).mockClear();
+    vi.mocked(stopHeartbeat).mockClear();
+    vi.mocked(announceStartup).mockClear();
+    vi.mocked(announceShutdown).mockClear();
+
+    const { startFileWatcher, stopFileWatcher } = await import('./file-watcher.js');
+    vi.mocked(startFileWatcher).mockClear();
+    vi.mocked(stopFileWatcher).mockClear();
+
+    const { ensureHelixDirectoryStructure } = await import('./helix-context-loader.js');
+    vi.mocked(ensureHelixDirectoryStructure).mockClear();
   });
 
   describe('initializeHelix', () => {
@@ -455,9 +477,7 @@ describe('Helix Index Module', () => {
           count: 10,
           uptime: '10m',
         },
-        contextStatus: [
-          { layer: 1, name: 'Narrative Core', file: 'HELIX_SOUL.md', status: 'ok' },
-        ],
+        contextStatus: [{ layer: 1, name: 'Narrative Core', file: 'HELIX_SOUL.md', status: 'ok' }],
       });
     });
 

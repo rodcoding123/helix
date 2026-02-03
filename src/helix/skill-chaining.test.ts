@@ -6,6 +6,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   executeCompositeSkill,
   validateCompositeSkill,
+  configureStepExecution,
+  clearStepExecutionConfig,
   type CompositeSkill,
   type CompositeSkillStep,
 } from './skill-chaining.js';
@@ -1088,7 +1090,9 @@ describe('Skill Chaining - Advanced Execution', () => {
     expect(result.stepResults[0]).toBeDefined();
     expect(result.stepResults[0].success).toBe(true);
     // retriesUsed is only set when > 0, so it may be undefined on success
-    expect(result.stepResults[0].retriesUsed === undefined || result.stepResults[0].retriesUsed >= 0).toBe(true);
+    expect(
+      result.stepResults[0].retriesUsed === undefined || result.stepResults[0].retriesUsed >= 0
+    ).toBe(true);
   });
 
   it('should maintain step order in results matching execution order', async () => {
@@ -1179,5 +1183,344 @@ describe('Skill Chaining - Advanced Execution', () => {
     expect(result.executionTimeMs).toBeGreaterThanOrEqual(
       result.stepResults[0].executionTimeMs + result.stepResults[1].executionTimeMs
     );
+  });
+});
+
+/**
+ * Error Handling Strategies - With Real Failure Scenarios
+ */
+describe('Skill Chaining - Error Handling Strategies (Real Failures)', () => {
+  const createTestSkill = (steps: CompositeSkillStep[]): CompositeSkill => ({
+    id: 'test-skill-1',
+    userId: 'user-123',
+    name: 'Test Skill',
+    description: 'A test composite skill',
+    steps,
+    version: '1.0.0',
+    isEnabled: true,
+    visibility: 'private',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
+
+  beforeEach(() => {
+    clearStepExecutionConfig();
+  });
+
+  it('should stop execution on first step failure when errorHandling is stop', async () => {
+    configureStepExecution('step1', { error: new Error('Step 1 failed') });
+
+    const skill = createTestSkill([
+      {
+        stepId: 'step1',
+        toolType: 'custom',
+        toolId: 'tool-1',
+        toolName: 'tool1',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'stop',
+      },
+      {
+        stepId: 'step2',
+        toolType: 'custom',
+        toolId: 'tool-2',
+        toolName: 'tool2',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'stop',
+      },
+    ]);
+
+    const result = await executeCompositeSkill(skill, {});
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('Step 1 failed');
+    expect(result.stepsCompleted).toBe(0);
+    expect(result.stepResults).toHaveLength(1);
+    expect(result.stepResults[0].success).toBe(false);
+    expect(result.stepResults[0].error).toContain('Step 1 failed');
+  });
+
+  it('should skip failed step and continue with next step when errorHandling is skip', async () => {
+    configureStepExecution('step1', { error: new Error('Step 1 failed') });
+    configureStepExecution('step2', { result: { result: 'step2' } });
+
+    const skill = createTestSkill([
+      {
+        stepId: 'step1',
+        toolType: 'custom',
+        toolId: 'tool-1',
+        toolName: 'tool1',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'skip',
+      },
+      {
+        stepId: 'step2',
+        toolType: 'custom',
+        toolId: 'tool-2',
+        toolName: 'tool2',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'stop',
+      },
+    ]);
+
+    const result = await executeCompositeSkill(skill, {});
+
+    expect(result.success).toBe(true);
+    expect(result.stepsCompleted).toBe(1);
+    expect(result.stepResults).toHaveLength(2);
+    expect(result.stepResults[0].success).toBe(false);
+    expect(result.stepResults[1].success).toBe(true);
+  });
+
+  it('should continue to next step when errorHandling is continue despite failure', async () => {
+    configureStepExecution('step1', { error: new Error('Step 1 failed') });
+    configureStepExecution('step2', { result: { result: 'step2' } });
+
+    const skill = createTestSkill([
+      {
+        stepId: 'step1',
+        toolType: 'custom',
+        toolId: 'tool-1',
+        toolName: 'tool1',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'continue',
+      },
+      {
+        stepId: 'step2',
+        toolType: 'custom',
+        toolId: 'tool-2',
+        toolName: 'tool2',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'stop',
+      },
+    ]);
+
+    const result = await executeCompositeSkill(skill, {});
+
+    expect(result.success).toBe(true);
+    expect(result.stepsCompleted).toBe(1);
+    expect(result.stepResults).toHaveLength(2);
+    expect(result.stepResults[0].success).toBe(false);
+    expect(result.stepResults[1].success).toBe(true);
+  });
+
+  it('should record error details in step results', async () => {
+    configureStepExecution('step1', { error: new Error('Custom error message') });
+
+    const skill = createTestSkill([
+      {
+        stepId: 'step1',
+        toolType: 'custom',
+        toolId: 'tool-1',
+        toolName: 'tool1',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'skip',
+      },
+    ]);
+
+    const result = await executeCompositeSkill(skill, {});
+
+    expect(result.stepResults[0].error).toContain('Custom error message');
+    expect(result.stepResults[0].success).toBe(false);
+  });
+
+  it('should handle mixed error handling strategies in multi-step chain', async () => {
+    configureStepExecution('step1', { error: new Error('Step 1 failed') });
+    configureStepExecution('step2', { result: { result: 'step2' } });
+    configureStepExecution('step3', { error: new Error('Step 3 failed') });
+    configureStepExecution('step4', { result: { result: 'step4' } });
+
+    const skill = createTestSkill([
+      {
+        stepId: 'step1',
+        toolType: 'custom',
+        toolId: 'tool-1',
+        toolName: 'tool1',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'skip',
+      },
+      {
+        stepId: 'step2',
+        toolType: 'custom',
+        toolId: 'tool-2',
+        toolName: 'tool2',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'stop',
+      },
+      {
+        stepId: 'step3',
+        toolType: 'custom',
+        toolId: 'tool-3',
+        toolName: 'tool3',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'continue',
+      },
+      {
+        stepId: 'step4',
+        toolType: 'custom',
+        toolId: 'tool-4',
+        toolName: 'tool4',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'stop',
+      },
+    ]);
+
+    const result = await executeCompositeSkill(skill, {});
+
+    expect(result.success).toBe(true);
+    expect(result.stepsCompleted).toBe(2);
+    expect(result.stepResults).toHaveLength(4);
+    expect(result.stepResults[0].success).toBe(false);
+    expect(result.stepResults[1].success).toBe(true);
+    expect(result.stepResults[2].success).toBe(false);
+    expect(result.stepResults[3].success).toBe(true);
+  });
+
+  it('should handle condition evaluation failure with stop strategy', async () => {
+    const skill = createTestSkill([
+      {
+        stepId: 'step1',
+        toolType: 'custom',
+        toolId: 'tool-1',
+        toolName: 'tool1',
+        parameters: {},
+        inputMapping: {},
+        condition: 'invalid.jsonpath[', // Invalid condition
+        errorHandling: 'stop',
+      },
+    ]);
+
+    const result = await executeCompositeSkill(skill, {});
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('Condition evaluation failed');
+  });
+
+  it('should handle condition evaluation failure with skip strategy', async () => {
+    configureStepExecution('step2', { result: { result: 'step2' } });
+
+    const skill = createTestSkill([
+      {
+        stepId: 'step1',
+        toolType: 'custom',
+        toolId: 'tool-1',
+        toolName: 'tool1',
+        parameters: {},
+        inputMapping: {},
+        condition: 'invalid.jsonpath[', // Invalid condition
+        errorHandling: 'skip',
+      },
+      {
+        stepId: 'step2',
+        toolType: 'custom',
+        toolId: 'tool-2',
+        toolName: 'tool2',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'stop',
+      },
+    ]);
+
+    const result = await executeCompositeSkill(skill, {});
+
+    expect(result.success).toBe(true);
+    expect(result.stepsCompleted).toBe(1);
+    // When condition evaluation fails with skip strategy, step is skipped and not recorded
+    expect(result.stepResults).toHaveLength(1);
+    expect(result.stepResults[0].stepId).toBe('step2');
+    expect(result.stepResults[0].success).toBe(true);
+  });
+
+  it('should store output in context for subsequent steps', async () => {
+    configureStepExecution('step1', { result: { result: { value: 'from-step1' } } });
+    configureStepExecution('step2', { result: { result: 'from-step2' } });
+
+    const skill = createTestSkill([
+      {
+        stepId: 'step1',
+        toolType: 'custom',
+        toolId: 'tool-1',
+        toolName: 'tool1',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'stop',
+      },
+      {
+        stepId: 'step2',
+        toolType: 'custom',
+        toolId: 'tool-2',
+        toolName: 'tool2',
+        parameters: {},
+        inputMapping: { param1: '$.step1' },
+        errorHandling: 'stop',
+      },
+    ]);
+
+    const result = await executeCompositeSkill(skill, {});
+
+    expect(result.success).toBe(true);
+    expect(result.executionContext.step1).toBeDefined();
+    expect(result.executionContext.step2).toBeDefined();
+  });
+
+  it('should increment stepsCompleted only for successful steps', async () => {
+    configureStepExecution('step1', { error: new Error('Failed') });
+    configureStepExecution('step2', { result: { result: 'success' } });
+    configureStepExecution('step3', { error: new Error('Failed') });
+    configureStepExecution('step4', { result: { result: 'success' } });
+
+    const skill = createTestSkill([
+      {
+        stepId: 'step1',
+        toolType: 'custom',
+        toolId: 'tool-1',
+        toolName: 'tool1',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'skip',
+      },
+      {
+        stepId: 'step2',
+        toolType: 'custom',
+        toolId: 'tool-2',
+        toolName: 'tool2',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'continue',
+      },
+      {
+        stepId: 'step3',
+        toolType: 'custom',
+        toolId: 'tool-3',
+        toolName: 'tool3',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'skip',
+      },
+      {
+        stepId: 'step4',
+        toolType: 'custom',
+        toolId: 'tool-4',
+        toolName: 'tool4',
+        parameters: {},
+        inputMapping: {},
+        errorHandling: 'stop',
+      },
+    ]);
+
+    const result = await executeCompositeSkill(skill, {});
+
+    expect(result.stepsCompleted).toBe(2);
+    expect(result.totalSteps).toBe(4);
   });
 });
