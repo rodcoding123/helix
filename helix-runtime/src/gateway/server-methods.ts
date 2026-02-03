@@ -10,6 +10,7 @@ import { connectHandlers } from "./server-methods/connect.js";
 import { cronHandlers } from "./server-methods/cron.js";
 import { customToolHandlers } from "./server-methods/custom-tools.js";
 import { deviceHandlers } from "./server-methods/devices.js";
+import { calendarHandlers } from "./server-methods/calendar.js";
 import { emailHandlers } from "./server-methods/email.js";
 import { execApprovalsHandlers } from "./server-methods/exec-approvals.js";
 import { healthHandlers } from "./server-methods/health.js";
@@ -121,6 +122,18 @@ const WRITE_METHODS = new Set([
   "email.delete_conversation",
   "email.get_attachment",
   "email.preview_attachment",
+  // Calendar Integration
+  "calendar.add_event",
+  "calendar.get_events",
+  "calendar.search_events",
+  "calendar.get_event",
+  "calendar.update_event",
+  "calendar.delete_event",
+  "calendar.create_recurring",
+  "calendar.update_attendees",
+  "calendar.sync_calendar",
+  "calendar.get_sync_status",
+  "calendar.get_calendar_view",
 ]);
 
 function authorizeGatewayMethod(method: string, client: GatewayRequestOptions["client"]) {
@@ -223,6 +236,7 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...voiceHandlers,
   ...browserHandlers,
   ...emailHandlers,
+  ...calendarHandlers,
 };
 
 export async function handleGatewayRequest(
