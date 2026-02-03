@@ -430,6 +430,79 @@ export class MemorySynthesisService {
   }
 
   /**
+   * Run memory synthesis via gateway RPC
+   */
+  async runSynthesis(
+    userId: string,
+    synthesisType: string,
+    conversationLimit?: number
+  ): Promise<{ jobId: string; status: string; insights?: any }> {
+    try {
+      const { getGatewayRPCClient } = await import('@/lib/gateway-rpc-client');
+      const client = getGatewayRPCClient();
+
+      const result = await client.startMemorySynthesis(
+        userId,
+        synthesisType,
+        conversationLimit ? { conversationLimit } : undefined
+      );
+
+      // Update job status in database
+      const supabase = this.getSupabaseClient();
+      await supabase
+        .from('memory_synthesis_jobs')
+        .update({
+          status: result.status,
+        })
+        .eq('id', result.jobId);
+
+      return result;
+    } catch (error) {
+      console.error('Failed to run synthesis:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get synthesis job status via gateway RPC
+   */
+  async getSynthesisStatus(jobId: string): Promise<{
+    status: string;
+    progress: number;
+    insights?: any;
+  }> {
+    try {
+      const { getGatewayRPCClient } = await import('@/lib/gateway-rpc-client');
+      const client = getGatewayRPCClient();
+
+      const result = await client.getMemorySynthesisStatus(jobId);
+
+      // Store insights if job is complete
+      if (result.status === 'completed' && result.insights) {
+        const supabase = this.getSupabaseClient();
+
+        // Store patterns from insights
+        for (const pattern of result.insights.patterns || []) {
+          await supabase.from('memory_patterns').insert([
+            {
+              pattern_type: pattern.type,
+              description: pattern.description,
+              confidence: pattern.confidence,
+              evidence: pattern.evidence || [],
+              user_confirmed: null,
+            },
+          ]);
+        }
+      }
+
+      return result;
+    } catch (error) {
+      console.error('Failed to get synthesis status:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Cancel synthesis job
    */
   async cancelSynthesisJob(jobId: string): Promise<void> {

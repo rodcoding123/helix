@@ -117,21 +117,23 @@ export function useMemorySynthesis() {
   );
 
   /**
-   * Run synthesis analysis
+   * Run synthesis analysis via gateway RPC
    */
   const runSynthesis = useCallback(
-    async (userId: string, jobId: string, synthesisType: string): Promise<SynthesisInsights> => {
+    async (userId: string, jobId: string, synthesisType: string): Promise<any> => {
       setIsLoading(true);
       setError(null);
       try {
         const service = getService();
-        const insights = await service.synthesizeMemoryPatterns(userId, jobId, synthesisType);
+
+        // Run real RPC synthesis
+        const result = await service.runSynthesis(userId, synthesisType, 100);
 
         // Reload jobs and patterns
         await loadSynthesisJobs(userId);
         await loadMemoryPatterns(userId);
 
-        return insights;
+        return result.insights || {};
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to run synthesis';
         setError(message);
