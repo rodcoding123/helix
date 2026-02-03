@@ -167,14 +167,14 @@ export interface HashChainEntry {
  */
 export interface SecretOperationEntry {
   operation: 'preload' | 'access' | 'rotation' | 'plugin_attempt' | 'failure';
-  secretName?: string;  // Sanitized name only, never the actual secret value
-  pluginId?: string;    // If operation involves plugin access attempt
+  secretName?: string; // Sanitized name only, never the actual secret value
+  pluginId?: string; // If operation involves plugin access attempt
   source: '1password' | 'env' | 'cache';
   success: boolean;
   timestamp: string;
   durationMs?: number;
   keyVersion?: number;
-  details?: string;     // Additional context, can be sanitized error message
+  details?: string; // Additional context, can be sanitized error message
 }
 
 /**

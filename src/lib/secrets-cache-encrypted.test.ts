@@ -161,7 +161,8 @@ describe('EncryptedSecretsCache', () => {
       const parts = encrypted.split(':');
 
       // Tamper with the ciphertext by changing a hex character
-      const tamperedCiphertext = parts[0] + ':' + (parts[1][0] === '0' ? '1' : '0') + parts[1].slice(1) + ':' + parts[2];
+      const tamperedCiphertext =
+        parts[0] + ':' + (parts[1][0] === '0' ? '1' : '0') + parts[1].slice(1) + ':' + parts[2];
 
       // Replace with tampered value
       cache['cache'].set('TAMPERED', tamperedCiphertext);
@@ -222,7 +223,8 @@ describe('EncryptedSecretsCache', () => {
     });
 
     it('encrypts JWT tokens', () => {
-      const jwt = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+      const jwt =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
       cache.set('JWT_TOKEN', jwt);
 
       const encrypted = cache['cache'].get('JWT_TOKEN')!;

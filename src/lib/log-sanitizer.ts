@@ -28,7 +28,10 @@ export class LogSanitizer {
     { pattern: /rk_test_[a-zA-Z0-9]{8,}/g, name: 'stripe_rk_test' },
 
     // Discord webhooks
-    { pattern: /https:\/\/discord\.com\/api\/webhooks\/\d+\/[a-zA-Z0-9_-]+/g, name: 'discord_webhook' },
+    {
+      pattern: /https:\/\/discord\.com\/api\/webhooks\/\d+\/[a-zA-Z0-9_-]+/g,
+      name: 'discord_webhook',
+    },
 
     // JWT tokens (eyJ... format)
     { pattern: /eyJ[a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*/g, name: 'jwt_token' },
@@ -43,7 +46,10 @@ export class LogSanitizer {
 
     // Supabase
     { pattern: /supabase[_-]?key[=:\s]+[a-zA-Z0-9_\-\.]{8,}/gi, name: 'supabase_key' },
-    { pattern: /supabase[_-]?url[=:\s]+https:\/\/[a-zA-Z0-9\-\.]+\.supabase\.co/gi, name: 'supabase_url' },
+    {
+      pattern: /supabase[_-]?url[=:\s]+https:\/\/[a-zA-Z0-9\-\.]+\.supabase\.co/gi,
+      name: 'supabase_url',
+    },
 
     // DeepSeek API key
     { pattern: /sk-[a-zA-Z0-9]{8,}/g, name: 'deepseek_api_key' },
@@ -63,7 +69,10 @@ export class LogSanitizer {
     { pattern: /github[_-]?token[=:\s]+[a-zA-Z0-9_]{36,}/gi, name: 'github_token_var' },
 
     // Generic secrets in URLs
-    { pattern: /[?&](?:api_?key|secret|token|password|auth)[=]([a-zA-Z0-9_\-\.]{8,})/gi, name: 'secret_in_url' },
+    {
+      pattern: /[?&](?:api_?key|secret|token|password|auth)[=]([a-zA-Z0-9_\-\.]{8,})/gi,
+      name: 'secret_in_url',
+    },
 
     // Password-like patterns
     { pattern: /password[=:\s]+[^\s]{8,}/gi, name: 'password_assignment' },
@@ -75,7 +84,10 @@ export class LogSanitizer {
     { pattern: /token[=:\s]+[a-zA-Z0-9_\-\.]{8,}/gi, name: 'token_assignment' },
 
     // SSH keys
-    { pattern: /-----BEGIN [A-Z ]+ PRIVATE KEY-----[\s\S]*?-----END [A-Z ]+ PRIVATE KEY-----/g, name: 'ssh_private_key' },
+    {
+      pattern: /-----BEGIN [A-Z ]+ PRIVATE KEY-----[\s\S]*?-----END [A-Z ]+ PRIVATE KEY-----/g,
+      name: 'ssh_private_key',
+    },
 
     // Hex strings that look like secrets (32+ chars)
     { pattern: /[a-f0-9]{32,}/g, name: 'hex_secret' },
@@ -141,7 +153,7 @@ export class LogSanitizer {
       }
 
       if (Array.isArray(input)) {
-        return JSON.stringify(input.map((item) => this.sanitize(item)));
+        return JSON.stringify(input.map(item => this.sanitize(item)));
       }
 
       try {
@@ -164,7 +176,7 @@ export class LogSanitizer {
     for (const { pattern, name } of this.patterns) {
       // Create fresh regex to avoid global state issues
       const regex = new RegExp(pattern.source, pattern.flags);
-      result = result.replace(regex, (match) => {
+      result = result.replace(regex, match => {
         // Create consistent hash of the secret (not the value itself)
         const hash = this.createSecretHash(match, name);
         return `[REDACTED:${hash}]`;

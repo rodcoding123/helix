@@ -263,7 +263,9 @@ describe('Helix Index Module', () => {
       await initializeHelix();
 
       // Verify initialization succeeded without errors
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('[Helix] Initializing logging system'));
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[Helix] Initializing logging system')
+      );
 
       consoleLogSpy.mockRestore();
     });

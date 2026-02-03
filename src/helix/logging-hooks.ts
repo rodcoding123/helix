@@ -13,6 +13,7 @@ import type { InternalHookEvent, WebhookHealthStatus, SecurityConfigStatus } fro
 import { HelixSecurityError, REQUIRED_WEBHOOKS, OPTIONAL_WEBHOOKS } from './types.js';
 import { loadSecret } from '../lib/secrets-loader.js';
 import { globalSanitizer } from '../lib/log-sanitizer.js';
+import { resilientDiscordSend, getResilienceStatus } from './resilience-middleware.js';
 
 // Discord webhook URLs - loaded at initialization
 let WEBHOOKS = {
@@ -97,9 +98,11 @@ interface DiscordPayload {
 }
 
 /**
- * Send a payload to a Discord webhook
- * In fail-closed mode, throws HelixSecurityError if webhook unavailable
+ * Send a payload to a Discord webhook with resilience
+ * In fail-closed mode, throws HelixSecurityError if webhook unavailable AND operation not queued
  * Returns true if successful, false otherwise (only in non-critical mode)
+ *
+ * RESILIENCE: Uses circuit breaker + operation queue for graceful degradation
  */
 async function sendToDiscord(
   webhookUrl: string | undefined,
@@ -118,21 +121,41 @@ async function sendToDiscord(
   }
 
   try {
-    const response = await fetch(webhookUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+    // Use resilient send which wraps circuit breaker + operation queue
+    const result = await resilientDiscordSend(webhookUrl, payload, critical);
 
-    if (!response.ok && critical && failClosedMode) {
+    // If operation was queued, it won't be lost
+    if (result.queued) {
+      if (critical && failClosedMode) {
+        // For critical operations, queuing alone isn't enough - but at least it's not lost
+        console.warn(
+          `[Helix] Critical operation queued (Discord unavailable): ${result.operationId}`
+        );
+        // Don't throw if queued - operation will be retried when Discord recovers
+        return false;
+      }
+      // Non-critical: queue is acceptable
+      return false;
+    }
+
+    // Successful send
+    if (result.success) {
+      return true;
+    }
+
+    // Failed to send and not queued
+    if (critical && failClosedMode) {
       throw new HelixSecurityError(
-        `Critical logging failed (HTTP ${response.status}) - execution blocked`,
+        `Critical logging failed - execution blocked (error: ${result.error})`,
         'LOGGING_FAILED',
-        { status: response.status, payload }
+        { error: result.error, operationId: result.operationId }
       );
     }
 
-    return response.ok;
+    // SECURITY: Sanitize error to prevent secret leakage in logs
+    const sanitizedError = globalSanitizer.sanitize(result.error);
+    console.error('[Helix] Discord webhook failed:', sanitizedError);
+    return false;
   } catch (error) {
     if (error instanceof HelixSecurityError) throw error;
 
@@ -502,6 +525,27 @@ export async function logConsciousnessObservation(
       },
     ],
   });
+}
+
+/**
+ * Get resilience status for monitoring
+ * Shows circuit breaker states and operation queue status
+ * Useful for health checks and dashboards
+ *
+ * @returns Resilience status including circuit breaker states and queue metrics
+ */
+export function getDiscordResilienceStatus() {
+  try {
+    return getResilienceStatus();
+  } catch (error) {
+    console.error('[Helix] Failed to get resilience status:', error);
+    return {
+      discord: { state: 'unknown', error: String(error) },
+      onePassword: { state: 'unknown' },
+      plugins: { state: 'unknown' },
+      queue: { total: 0, pending: 0, processed: 0, deadLetters: 0 },
+    };
+  }
 }
 
 // sendToDiscord is not exported as public - it's internal

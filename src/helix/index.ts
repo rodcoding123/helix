@@ -305,9 +305,7 @@ export async function preloadSecrets(): Promise<void> {
     }
 
     const durationMs = Date.now() - startTime;
-    console.log(
-      `[Helix] Preloaded ${secretCount} secrets from 1Password in ${durationMs}ms`
-    );
+    console.log(`[Helix] Preloaded ${secretCount} secrets from 1Password in ${durationMs}ms`);
 
     // Log to hash chain (Phase 1B.1)
     try {

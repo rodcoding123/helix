@@ -87,7 +87,8 @@ describe('LogSanitizer', () => {
 
   describe('JWT Tokens', () => {
     it('redacts JWT tokens', () => {
-      const jwt = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+      const jwt =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
       const result = sanitizer.sanitize(`Token: ${jwt}`);
 
       expect(result).not.toContain('eyJhbGciOi');
@@ -277,7 +278,8 @@ MIIEpAIBAAKCAQEA0Z3VS5JJcds3s7k8/7N8+X4lJF9HwzI5bNuVFgJ7...
   describe('Error Sanitization', () => {
     it('sanitizes error message and stack', () => {
       const error = new Error('Failed to load sk_live_test123abc456');
-      error.stack = 'Error: Failed to load sk_live_test123abc456\n    at ...sk_live_secretkey123...';
+      error.stack =
+        'Error: Failed to load sk_live_test123abc456\n    at ...sk_live_secretkey123...';
 
       const result = sanitizer.sanitizeError(error);
 
@@ -315,11 +317,12 @@ MIIEpAIBAAKCAQEA0Z3VS5JJcds3s7k8/7N8+X4lJF9HwzI5bNuVFgJ7...
     });
 
     it('detects secret categories', () => {
-      const text = 'sk_live_test123abc456 https://discord.com/api/webhooks/123/abc eyJhbGciOiJIUzI1NiI...';
+      const text =
+        'sk_live_test123abc456 https://discord.com/api/webhooks/123/abc eyJhbGciOiJIUzI1NiI...';
       const detected = sanitizer.detectSecrets(text);
 
       expect(detected.length).toBeGreaterThan(0);
-      const categories = detected.map((d) => d.category);
+      const categories = detected.map(d => d.category);
       expect(categories).toContain('stripe_sk_live');
       expect(categories).toContain('discord_webhook');
     });

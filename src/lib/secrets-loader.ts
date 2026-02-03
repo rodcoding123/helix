@@ -20,6 +20,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { EncryptedSecretsCache } from './secrets-cache-encrypted.js';
 import { logSecretOperation } from '../helix/hash-chain.js';
+import { circuitBreakers } from '../helix/circuit-breaker.js';
 
 export type SecretField = 'password' | 'notes' | 'username' | 'email' | 'url';
 
@@ -45,8 +46,11 @@ async function initializeCache(): Promise<void> {
 }
 
 // Start initialization immediately
-initializeCache().catch((error) => {
-  console.error('[Secrets Loader] Async init failed:', error instanceof Error ? error.message : String(error));
+initializeCache().catch(error => {
+  console.error(
+    '[Secrets Loader] Async init failed:',
+    error instanceof Error ? error.message : String(error)
+  );
 });
 
 /**
@@ -209,26 +213,40 @@ export function loadSecret(itemName: string, field: SecretField = 'password'): s
 
 /**
  * Load a secret directly from 1Password using op CLI
+ * RESILIENCE: Wrapped with circuit breaker monitoring
  */
 function loadSecretFrom1Password(itemName: string, field: SecretField): string {
-  // First, verify 1Password CLI is installed and authenticated
   try {
-    execSync('op whoami', { stdio: 'pipe' });
-  } catch {
-    throw new Error('1Password CLI not authenticated. Run: op account add');
+    // First, verify 1Password CLI is installed and authenticated
+    try {
+      execSync('op whoami', { stdio: 'pipe' });
+    } catch {
+      throw new Error('1Password CLI not authenticated. Run: op account add');
+    }
+
+    // Fetch the secret using op CLI
+    const command = `op item get "${itemName}" --vault "${VAULT_NAME}" --fields="${field}" --format=json`;
+    const result = execSync(command, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
+
+    // Parse the JSON response
+    const parsed = JSON.parse(result) as { value?: string };
+    if (parsed.value) {
+      return parsed.value;
+    }
+
+    throw new Error(`Field "${field}" not found in item "${itemName}"`);
+  } catch (error) {
+    // Track failure with circuit breaker for monitoring
+    // This is async but fire-and-forget to keep loadSecret synchronous
+    circuitBreakers.onePassword
+      .execute(() => Promise.reject(error instanceof Error ? error : new Error(String(error))))
+      .catch(() => {
+        // Circuit breaker failure is expected and tracked internally
+      });
+
+    // Re-throw the original error
+    throw error;
   }
-
-  // Fetch the secret using op CLI
-  const command = `op item get "${itemName}" --vault "${VAULT_NAME}" --fields="${field}" --format=json`;
-  const result = execSync(command, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
-
-  // Parse the JSON response
-  const parsed = JSON.parse(result) as { value?: string };
-  if (parsed.value) {
-    return parsed.value;
-  }
-
-  throw new Error(`Field "${field}" not found in item "${itemName}"`);
 }
 
 /**

@@ -161,9 +161,10 @@ export async function analyzeAccessPatterns(): Promise<OnePasswordAccessPattern[
       riskLevel = riskLevel === 'high' ? 'high' : 'medium';
     }
 
-    const lastAccess = accesses.length > 0
-      ? new Date(accesses[accesses.length - 1].timestamp).toISOString()
-      : undefined;
+    const lastAccess =
+      accesses.length > 0
+        ? new Date(accesses[accesses.length - 1].timestamp).toISOString()
+        : undefined;
 
     patterns.push({
       itemName: item.name,
@@ -190,11 +191,14 @@ export async function startOnePasswordAuditScheduler(): Promise<NodeJS.Timeout> 
   await runAuditCheck();
 
   // Schedule hourly checks
-  const intervalId = setInterval(() => {
-    runAuditCheck().catch(err => {
-      console.error('[1Password Audit] Scheduler error:', err);
-    });
-  }, 60 * 60 * 1000); // 60 minutes
+  const intervalId = setInterval(
+    () => {
+      runAuditCheck().catch(err => {
+        console.error('[1Password Audit] Scheduler error:', err);
+      });
+    },
+    60 * 60 * 1000
+  ); // 60 minutes
 
   return intervalId;
 }
@@ -232,7 +236,9 @@ async function runAuditCheck(): Promise<void> {
       title: '⚠️ 1Password Unusual Activity',
       color: 0xe74c3c, // Red
       description: `${unusualPatterns.length} items with unusual access patterns detected`,
-      items: unusualPatterns.map(p => `- **${p.itemName}** (${p.accessCount} accesses): ${p.reason || 'Unknown'}` ),
+      items: unusualPatterns.map(
+        p => `- **${p.itemName}** (${p.accessCount} accesses): ${p.reason || 'Unknown'}`
+      ),
     };
 
     console.warn('[1Password Audit] Unusual patterns detected:', {
@@ -257,33 +263,35 @@ async function runAuditCheck(): Promise<void> {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            embeds: [{
-              title: alert.title,
-              color: alert.color,
-              description: alert.description,
-              fields: [
-                {
-                  name: 'Affected Items',
-                  value: alert.items.slice(0, 10).join('\n') || 'N/A',
-                  inline: false,
-                },
-                {
-                  name: 'Total Unusual',
-                  value: `${unusualPatterns.length}/${patterns.length}`,
-                  inline: true,
-                },
-                {
-                  name: 'Max Risk Level',
-                  value: unusualPatterns.some(p => p.riskLevel === 'high')
-                    ? '🔴 HIGH'
-                    : unusualPatterns.some(p => p.riskLevel === 'medium')
-                      ? '🟠 MEDIUM'
-                      : '🟡 LOW',
-                  inline: true,
-                },
-              ],
-              timestamp: new Date().toISOString(),
-            }],
+            embeds: [
+              {
+                title: alert.title,
+                color: alert.color,
+                description: alert.description,
+                fields: [
+                  {
+                    name: 'Affected Items',
+                    value: alert.items.slice(0, 10).join('\n') || 'N/A',
+                    inline: false,
+                  },
+                  {
+                    name: 'Total Unusual',
+                    value: `${unusualPatterns.length}/${patterns.length}`,
+                    inline: true,
+                  },
+                  {
+                    name: 'Max Risk Level',
+                    value: unusualPatterns.some(p => p.riskLevel === 'high')
+                      ? '🔴 HIGH'
+                      : unusualPatterns.some(p => p.riskLevel === 'medium')
+                        ? '🟠 MEDIUM'
+                        : '🟡 LOW',
+                    inline: true,
+                  },
+                ],
+                timestamp: new Date().toISOString(),
+              },
+            ],
           }),
         }).catch(err => {
           console.error('[1Password Audit] Failed to send Discord alert:', err);

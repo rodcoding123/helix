@@ -34,7 +34,7 @@ const originalDebug = console.debug ?? originalLog;
  * Override console.log with sanitization
  */
 console.log = (...args: unknown[]): void => {
-  const sanitized = args.map((arg) => globalSanitizer.sanitize(arg));
+  const sanitized = args.map(arg => globalSanitizer.sanitize(arg));
   originalLog.apply(console, sanitized);
 };
 
@@ -43,7 +43,7 @@ console.log = (...args: unknown[]): void => {
  * Critical: This prevents error object leakage containing secrets
  */
 console.error = (...args: unknown[]): void => {
-  const sanitized = args.map((arg) => {
+  const sanitized = args.map(arg => {
     if (arg instanceof Error) {
       return globalSanitizer.sanitizeError(arg);
     }
@@ -56,7 +56,7 @@ console.error = (...args: unknown[]): void => {
  * Override console.warn with sanitization
  */
 console.warn = (...args: unknown[]): void => {
-  const sanitized = args.map((arg) => globalSanitizer.sanitize(arg));
+  const sanitized = args.map(arg => globalSanitizer.sanitize(arg));
   originalWarn.apply(console, sanitized);
 };
 
@@ -64,7 +64,7 @@ console.warn = (...args: unknown[]): void => {
  * Override console.info with sanitization
  */
 (console.info as any) = (...args: unknown[]): void => {
-  const sanitized = args.map((arg) => globalSanitizer.sanitize(arg));
+  const sanitized = args.map(arg => globalSanitizer.sanitize(arg));
   originalInfo.apply(console, sanitized);
 };
 
@@ -72,7 +72,7 @@ console.warn = (...args: unknown[]): void => {
  * Override console.debug with sanitization
  */
 (console.debug as any) = (...args: unknown[]): void => {
-  const sanitized = args.map((arg) => globalSanitizer.sanitize(arg));
+  const sanitized = args.map(arg => globalSanitizer.sanitize(arg));
   originalDebug.apply(console, sanitized);
 };
 

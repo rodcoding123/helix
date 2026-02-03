@@ -72,7 +72,10 @@ export class EncryptedSecretsCache {
       await this.checkAndRotateKey();
 
       // Load previous key if still in grace period
-      if (this.rotationMetadata.previousKeyExpiredAt && this.rotationMetadata.previousKeyExpiredAt > Date.now()) {
+      if (
+        this.rotationMetadata.previousKeyExpiredAt &&
+        this.rotationMetadata.previousKeyExpiredAt > Date.now()
+      ) {
         this.previousMasterKey = this.masterKey; // In production, could reload from versioned derivation
         this.previousKeyExpiredAt = this.rotationMetadata.previousKeyExpiredAt;
       }
@@ -138,7 +141,9 @@ export class EncryptedSecretsCache {
       }
 
       // Only current key available and it failed
-      throw new Error(`[Secrets Cache] Decryption failed for key "${key}" - tampering detected or corrupted data`);
+      throw new Error(
+        `[Secrets Cache] Decryption failed for key "${key}" - tampering detected or corrupted data`
+      );
     }
   }
 

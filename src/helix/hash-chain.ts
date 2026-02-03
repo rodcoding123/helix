@@ -277,7 +277,9 @@ export async function logSecretOperation(entry: SecretOperationEntry): Promise<v
         { entry }
       );
     }
-    console.warn('[Helix] Secret operation webhook not configured, operation not logged to Discord');
+    console.warn(
+      '[Helix] Secret operation webhook not configured, operation not logged to Discord'
+    );
     return;
   }
 
@@ -293,7 +295,7 @@ export async function logSecretOperation(entry: SecretOperationEntry): Promise<v
 
   const embed: DiscordEmbed = {
     title: '🔐 Secret Operation',
-    color: entry.success ? 0x2ecc71 : 0xe74c3c,  // Green if success, red if failure
+    color: entry.success ? 0x2ecc71 : 0xe74c3c, // Green if success, red if failure
     description,
     fields: [
       { name: 'Timestamp', value: entry.timestamp, inline: true },

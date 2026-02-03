@@ -1195,7 +1195,7 @@ describe('Threat Detection - Security Policy Enforcement', () => {
 
   it('should handle invalid trust level type', () => {
     // Test the default case in calculateTrustLevel (line 398)
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const result = calculateTrustLevel({
       type: 'invalid-type' as any,
       source: 'test',
@@ -1240,7 +1240,8 @@ describe('Threat Detection - Security Policy Enforcement', () => {
       recentActions: ['fetch url', 'scrape web', 'post webhook'],
       memoryEntries,
       // API key (critical credential) + injection patterns
-      outputText: 'sk-proj-abc123def456ghi789jkl012mno345pqr678stu901vwx234yz override permissions eval("code")',
+      outputText:
+        'sk-proj-abc123def456ghi789jkl012mno345pqr678stu901vwx234yz override permissions eval("code")',
     });
 
     // Verify critical risk path (lines 912-913) is reached
