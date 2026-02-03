@@ -95,6 +95,21 @@ const BASE_METHODS = [
   "memory.synthesize",
   "memory.synthesis_status",
   "memory.list_patterns",
+  // Email Integration
+  "email.add_account",
+  "email.get_accounts",
+  "email.remove_account",
+  "email.sync_inbox",
+  "email.get_sync_status",
+  "email.get_conversations",
+  "email.search_conversations",
+  "email.get_conversation",
+  "email.send_message",
+  "email.mark_read",
+  "email.star_conversation",
+  "email.delete_conversation",
+  "email.get_attachment",
+  "email.preview_attachment",
 ];
 
 export function listGatewayMethods(): string[] {

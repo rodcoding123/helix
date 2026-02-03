@@ -10,6 +10,7 @@ import { connectHandlers } from "./server-methods/connect.js";
 import { cronHandlers } from "./server-methods/cron.js";
 import { customToolHandlers } from "./server-methods/custom-tools.js";
 import { deviceHandlers } from "./server-methods/devices.js";
+import { emailHandlers } from "./server-methods/email.js";
 import { execApprovalsHandlers } from "./server-methods/exec-approvals.js";
 import { healthHandlers } from "./server-methods/health.js";
 import { logsHandlers } from "./server-methods/logs.js";
@@ -105,6 +106,21 @@ const WRITE_METHODS = new Set([
   "memory.synthesize",
   "memory.synthesis_status",
   "memory.list_patterns",
+  // Email Integration
+  "email.add_account",
+  "email.get_accounts",
+  "email.remove_account",
+  "email.sync_inbox",
+  "email.get_sync_status",
+  "email.get_conversations",
+  "email.search_conversations",
+  "email.get_conversation",
+  "email.send_message",
+  "email.mark_read",
+  "email.star_conversation",
+  "email.delete_conversation",
+  "email.get_attachment",
+  "email.preview_attachment",
 ]);
 
 function authorizeGatewayMethod(method: string, client: GatewayRequestOptions["client"]) {
@@ -206,6 +222,7 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...memorySynthesisHandlers,
   ...voiceHandlers,
   ...browserHandlers,
+  ...emailHandlers,
 };
 
 export async function handleGatewayRequest(
