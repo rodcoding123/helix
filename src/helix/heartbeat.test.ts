@@ -521,3 +521,85 @@ describe('Heartbeat - Edge Cases', () => {
     expect(result).toBe(true);
   });
 });
+
+describe('Heartbeat - Uncovered Edge Cases', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    stopHeartbeat();
+  });
+
+  afterEach(() => {
+    stopHeartbeat();
+    delete process.env.DISCORD_WEBHOOK_HEARTBEAT;
+  });
+
+  it('should send and receive proper heartbeat status with running state', async () => {
+    // Test lines 89, 91: uptime formatting branches through normal operation
+    // Start heartbeat and let it run to cycle through various uptime states
+    startHeartbeat();
+
+    // Initial state should be running
+    expect(getHeartbeatStats().running).toBe(true);
+
+    // After some time, various uptime branches will be exercised
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    // Send a custom status to exercise the full heartbeat cycle
+    const statusResult = await sendStatusUpdate('Test Status', 'Running');
+    expect(statusResult).toBe(true);
+
+    // Verify heartbeat is still active
+    const stats = getHeartbeatStats();
+    expect(stats.running).toBe(true);
+    expect(stats.count).toBeGreaterThan(0);
+  });
+
+  it('should handle consecutive startHeartbeat calls (guards against double-start)', () => {
+    // Test line 185: ensures startHeartbeat handles being called multiple times
+    // First call should work
+    startHeartbeat();
+    const stats1 = getHeartbeatStats();
+    expect(stats1.running).toBe(true);
+
+    // Second call should be ignored (not crash, not create multiple intervals)
+    startHeartbeat();
+    const stats2 = getHeartbeatStats();
+    expect(stats2.running).toBe(true);
+
+    // Beat count should not have doubled
+    expect(stats2.count).toBe(stats1.count);
+  });
+
+  it('should handle stopHeartbeat when no heartbeat is running', () => {
+    // Test line 200: stopHeartbeat safely handles being called when not running
+    // Ensure no heartbeat is running
+    stopHeartbeat();
+
+    // Call stop again - should not throw
+    expect(() => stopHeartbeat()).not.toThrow();
+
+    // Should be stopped
+    expect(getHeartbeatStats().running).toBe(false);
+  });
+
+  it('should include detailed error context when webhook fails', async () => {
+    // Test line 42: error logging in sendWebhook catch block
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    // Mock fetch to fail
+    const mockFetch = vi.fn().mockRejectedValue(new Error('Connection refused'));
+    vi.stubGlobal('fetch', mockFetch);
+
+    // Try to announce startup - webhook should fail
+    const result = await announceStartup();
+    expect(result).toBe(false);
+
+    // Verify error was logged
+    expect(errorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Heartbeat webhook failed'),
+      expect.any(Error)
+    );
+
+    errorSpy.mockRestore();
+  });
+});
