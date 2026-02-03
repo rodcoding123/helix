@@ -18,16 +18,20 @@ struct RootTabs: View {
                 .tabItem { Label("Voice", systemImage: "mic") }
                 .tag(1)
 
+            EmailTab()
+                .tabItem { Label("Email", systemImage: "envelope") }
+                .tag(2)
+
             SettingsTab()
                 .tabItem { Label("Settings", systemImage: "gearshape") }
-                .tag(2)
+                .tag(3)
         }
         .overlay(alignment: .topLeading) {
             StatusPill(
                 gateway: self.gatewayStatus,
                 voiceWakeEnabled: self.voiceWakeEnabled,
                 activity: self.statusActivity,
-                onTap: { self.selectedTab = 2 })
+                onTap: { self.selectedTab = 3 })
                 .padding(.leading, 10)
                 .safeAreaPadding(.top, 10)
         }
