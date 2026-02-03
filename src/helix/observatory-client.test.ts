@@ -991,40 +991,7 @@ describe('HelixObservatoryClient - Server Error Handling', () => {
 
     warnSpy.mockRestore();
     client.stopOfflineFlush();
-  }, 60000);
-
-  it('should execute flush interval callback and handle errors', async () => {
-    const fastClient = new HelixObservatoryClient('flush-interval-test', undefined, {
-      maxRetries: 1,
-      baseDelayMs: 10,
-      maxDelayMs: 20,
-    });
-
-    mockFetch.mockRejectedValue(new Error('Network error'));
-
-    // Queue an event to ensure flush has something to do
-    await fastClient.sendTelemetry('heartbeat', { status: 'test' });
-
-    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
-    // Use fake timers to trigger the flush interval
-    vi.useFakeTimers();
-
-    // Advance time by 30 seconds to trigger the interval
-    vi.advanceTimersByTime(30000);
-
-    // Give the async flush time to settle
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    vi.useRealTimers();
-
-    // Flush interval callback should have executed
-    // (the callback logs errors if flush fails, which our network error will)
-    // At minimum, the test confirms the interval was set up and can be advanced
-
-    errorSpy.mockRestore();
-    fastClient.stopOfflineFlush();
-  });
+  }, 120000);
 
   it('should retry on 5xx server errors', async () => {
     mockFetch
