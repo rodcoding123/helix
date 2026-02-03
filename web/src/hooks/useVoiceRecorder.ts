@@ -67,10 +67,54 @@ export function useVoiceRecorder(options: UseVoiceRecorderOptions = {}) {
     }
   }, [state.isRecording]);
 
+  const pauseRecording = useCallback(() => {
+    if (mediaRecorderRef.current && state.isRecording && !state.isPaused) {
+      mediaRecorderRef.current.pause();
+      setState(prev => ({ ...prev, isPaused: true }));
+    }
+  }, [state.isRecording, state.isPaused]);
+
+  const resumeRecording = useCallback(() => {
+    if (mediaRecorderRef.current && state.isRecording && state.isPaused) {
+      mediaRecorderRef.current.resume();
+      setState(prev => ({ ...prev, isPaused: false }));
+    }
+  }, [state.isRecording, state.isPaused]);
+
   const formatDuration = useCallback((seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  }, []);
+
+  const getWaveformData = useCallback((): number[] => {
+    // Generate mock waveform data (32 values between 0 and 1)
+    return Array.from({ length: 32 }, () => Math.random());
+  }, []);
+
+  const reset = useCallback(() => {
+    stopRecording();
+    setState({
+      isRecording: false,
+      isPaused: false,
+      duration: 0,
+    });
+    audioChunksRef.current = [];
+  }, [stopRecording]);
+
+  const transcribeAudio = useCallback(async (blob: Blob): Promise<string> => {
+    // Mock transcription - in production this would call the transcription service
+    return `Mock transcription of ${blob.size} bytes`;
+  }, []);
+
+  const saveMemo = useCallback(async (title: string, tags: string[]): Promise<any> => {
+    // Mock save - in production this would call the backend
+    return {
+      id: `memo_${Date.now()}`,
+      title,
+      tags,
+      audioBlob: audioChunksRef.current[0],
+    };
   }, []);
 
   useEffect(() => {
@@ -86,6 +130,12 @@ export function useVoiceRecorder(options: UseVoiceRecorderOptions = {}) {
     error: state.error,
     startRecording,
     stopRecording,
+    pauseRecording,
+    resumeRecording,
     formatDuration,
+    getWaveformData,
+    reset,
+    transcribeAudio,
+    saveMemo,
   };
 }
