@@ -672,6 +672,7 @@ describe('Skill Chaining - validateCompositeSkill', () => {
       steps: [
         {
           stepId: 'step1',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
           toolType: 'invalid' as any,
           toolId: 'tool-1',
           toolName: 'tool1',
@@ -706,6 +707,7 @@ describe('Skill Chaining - validateCompositeSkill', () => {
           toolId: 'tool-1',
           toolName: 'tool1',
           parameters: {},
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
           inputMapping: { param1: 123 as any },
           errorHandling: 'stop',
         },
@@ -780,6 +782,7 @@ describe('Skill Chaining - validateCompositeSkill', () => {
       steps: [
         {
           stepId: '',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
           toolType: 'invalid' as any,
           toolId: 'tool-1',
           toolName: '',
@@ -799,6 +802,35 @@ describe('Skill Chaining - validateCompositeSkill', () => {
 
     expect(result.valid).toBe(false);
     expect(result.errors.length).toBeGreaterThan(1);
+  });
+});
+
+describe('Skill Chaining - Empty Steps Execution', () => {
+  it('should execute skill with empty steps array', async () => {
+    const skill: CompositeSkill = {
+      id: 'empty-skill',
+      userId: 'user-123',
+      name: 'Empty Skill',
+      description: 'Skill with no steps',
+      steps: [],
+      version: '1.0.0',
+      isEnabled: true,
+      visibility: 'private',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    const result = await executeCompositeSkill(skill, { testInput: 'value' });
+
+    expect(result).toBeDefined();
+    expect(result.success).toBe(true);
+    expect(result.skillId).toBe('empty-skill');
+    expect(result.userId).toBe('user-123');
+    expect(result.input).toEqual({ testInput: 'value' });
+    expect(result.stepResults).toEqual([]);
+    expect(result.stepsCompleted).toBe(0);
+    expect(result.totalSteps).toBe(0);
+    expect(result.error).toBeUndefined();
   });
 });
 
