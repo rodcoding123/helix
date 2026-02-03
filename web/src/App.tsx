@@ -23,6 +23,7 @@ const AutonomySettings = lazy(() => import('@/pages/AutonomySettings'));
 const ActionApprovals = lazy(() => import('@/pages/ActionApprovals'));
 const SecretsPage = lazy(() => import('@/pages/SecretsPage').then(m => ({ default: m.SecretsPage })));
 const Voice = lazy(() => import('@/pages/Voice').then(m => ({ default: m.Voice })));
+const Email = lazy(() => import('@/pages/Email').then(m => ({ default: m.Email })));
 
 // Loading fallback component
 function LoadingFallback() {
@@ -152,6 +153,16 @@ export function App() {
                   <Suspense fallback={<LoadingFallback />}>
                     <ProtectedRoute>
                       <Voice />
+                    </ProtectedRoute>
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/email"
+                element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <ProtectedRoute>
+                      <Email />
                     </ProtectedRoute>
                   </Suspense>
                 }
