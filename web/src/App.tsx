@@ -22,6 +22,7 @@ const Agents = lazy(() => import('@/pages/Agents'));
 const AutonomySettings = lazy(() => import('@/pages/AutonomySettings'));
 const ActionApprovals = lazy(() => import('@/pages/ActionApprovals'));
 const SecretsPage = lazy(() => import('@/pages/SecretsPage').then(m => ({ default: m.SecretsPage })));
+const Voice = lazy(() => import('@/pages/Voice').then(m => ({ default: m.Voice })));
 
 // Loading fallback component
 function LoadingFallback() {
@@ -141,6 +142,16 @@ export function App() {
                   <Suspense fallback={<LoadingFallback />}>
                     <ProtectedRoute>
                       <SecretsPage />
+                    </ProtectedRoute>
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/voice"
+                element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <ProtectedRoute>
+                      <Voice />
                     </ProtectedRoute>
                   </Suspense>
                 }
