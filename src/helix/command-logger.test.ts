@@ -537,6 +537,35 @@ describe('Command Logger - Logged Executor', () => {
     expect(failureCall.embeds[0].title).toContain('Failed');
   });
 
+  it('should rethrow executor errors after logging', async () => {
+    // This test specifically exercises the throw statement on line 245
+    const testError = new Error('Custom executor error');
+    const mockExecutor = vi.fn().mockRejectedValueOnce(testError);
+    const loggedExecutor = createLoggedExecutor(mockExecutor);
+
+    try {
+      await loggedExecutor('failing-command', '/home');
+      // Should not reach here
+      expect.fail('Expected error to be thrown');
+    } catch (caughtError) {
+      // Verify the exact error was rethrown
+      expect(caughtError).toBe(testError);
+      expect(caughtError).toBeInstanceOf(Error);
+
+      // Verify failure was logged before rethrow
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+      const failureLog = JSON.parse(mockFetch.mock.calls[1][1].body);
+      expect(failureLog.embeds[0].title).toContain('Failed');
+      // Verify the error message was logged in the fields
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const errorField = failureLog.embeds[0].fields.find(
+        (f: { name: string }) => f.name === 'Error'
+      );
+      expect(errorField?.value).toContain('Custom executor error');
+    }
+  });
+
   it('should pass session key to logs', async () => {
     const mockExecutor = vi.fn().mockResolvedValue('result');
     const loggedExecutor = createLoggedExecutor(mockExecutor, {
