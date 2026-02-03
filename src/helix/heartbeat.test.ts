@@ -1,6 +1,7 @@
 /**
  * Tests for Helix heartbeat module
  */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
@@ -269,6 +270,188 @@ describe('Heartbeat - Statistics', () => {
 
     const stats = getHeartbeatStats();
     expect(stats.running).toBe(false);
+  });
+});
+
+describe('Heartbeat - Uptime Branch Coverage', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+  });
+
+  afterEach(() => {
+    stopHeartbeat();
+    vi.useRealTimers();
+  });
+
+  it('should format uptime with days (line 90)', async () => {
+    // Set up fake time: 3 days and 5 hours ago
+    const now = Date.now();
+    vi.setSystemTime(now);
+
+    // Announce startup to set startTime
+    await announceStartup();
+
+    // Advance time by 3 days and 5 hours
+    await vi.advanceTimersByTimeAsync(3 * 24 * 60 * 60 * 1000 + 5 * 60 * 60 * 1000);
+
+    // Get stats which calls getHelixUptime internally
+    const stats = getHeartbeatStats();
+    expect(stats.uptime).toMatch(/\d+d \d+h \d+m/);
+    expect(stats.uptime).toContain('d'); // Verify days are shown
+  });
+
+  it('should format uptime with hours but no days (line 92)', async () => {
+    // Set up fake time: 2 hours and 30 minutes ago (no days)
+    const now = Date.now();
+    vi.setSystemTime(now);
+
+    // Announce startup to set startTime
+    await announceStartup();
+
+    // Advance time by 2 hours and 30 minutes
+    await vi.advanceTimersByTimeAsync(2 * 60 * 60 * 1000 + 30 * 60 * 1000);
+
+    // Get stats which calls getHelixUptime internally
+    const stats = getHeartbeatStats();
+    expect(stats.uptime).toMatch(/\d+h \d+m/);
+    expect(stats.uptime).not.toContain('d'); // Verify no days
+  });
+
+  it('should format uptime with minutes only', async () => {
+    // Set up fake time: 5 minutes and 30 seconds ago (no hours/days)
+    const now = Date.now();
+    vi.setSystemTime(now);
+
+    // Announce startup to set startTime
+    await announceStartup();
+
+    // Advance time by 5 minutes and 30 seconds
+    await vi.advanceTimersByTimeAsync(5 * 60 * 1000 + 30 * 1000);
+
+    // Get stats which calls getHelixUptime internally
+    const stats = getHeartbeatStats();
+    expect(stats.uptime).toMatch(/\d+m \d+s/);
+    expect(stats.uptime).not.toContain('h'); // Verify no hours
+    expect(stats.uptime).not.toContain('d'); // Verify no days
+  });
+
+  it('should include uptime in shutdown announcement with days', async () => {
+    const now = Date.now();
+    vi.setSystemTime(now);
+
+    // Announce startup to set startTime
+    await announceStartup();
+
+    // Advance time by 2 days
+    await vi.advanceTimersByTimeAsync(2 * 24 * 60 * 60 * 1000);
+
+    // Announce shutdown
+    mockFetch.mockClear();
+    const result = await announceShutdown('test shutdown');
+
+    expect(result).toBe(true);
+    expect(mockFetch).toHaveBeenCalled();
+
+    // Check the shutdown embed includes uptime
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const embed = callBody.embeds[0];
+    const uptimeField = embed.fields.find((f: { name: string }) => f.name === 'Total Uptime');
+
+    expect(uptimeField).toBeDefined();
+    expect(uptimeField.value).toMatch(/\d+d/); // Should have days
+  });
+});
+
+describe('Heartbeat - Uptime Branch Coverage', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    mockFetch.mockResolvedValue({ ok: true, status: 200 });
+  });
+
+  afterEach(() => {
+    stopHeartbeat();
+    vi.useRealTimers();
+  });
+
+  it('should format uptime with days (line 90)', async () => {
+    // Set up fake time: 3 days and 5 hours ago
+    const now = Date.now();
+    vi.setSystemTime(now);
+
+    // Announce startup to set startTime
+    await announceStartup();
+
+    // Advance time by 3 days and 5 hours
+    await vi.advanceTimersByTimeAsync(3 * 24 * 60 * 60 * 1000 + 5 * 60 * 60 * 1000);
+
+    // Get stats which calls getHelixUptime internally
+    const stats = getHeartbeatStats();
+    expect(stats.uptime).toMatch(/\d+d \d+h \d+m/);
+    expect(stats.uptime).toContain('d'); // Verify days are shown
+  });
+
+  it('should format uptime with hours but no days (line 92)', async () => {
+    // Set up fake time: 2 hours and 30 minutes ago (no days)
+    const now = Date.now();
+    vi.setSystemTime(now);
+
+    // Announce startup to set startTime
+    await announceStartup();
+
+    // Advance time by 2 hours and 30 minutes
+    await vi.advanceTimersByTimeAsync(2 * 60 * 60 * 1000 + 30 * 60 * 1000);
+
+    // Get stats which calls getHelixUptime internally
+    const stats = getHeartbeatStats();
+    expect(stats.uptime).toMatch(/\d+h \d+m/);
+    expect(stats.uptime).not.toContain('d'); // Verify no days
+  });
+
+  it('should format uptime with minutes only', async () => {
+    // Set up fake time: 5 minutes and 30 seconds ago (no hours/days)
+    const now = Date.now();
+    vi.setSystemTime(now);
+
+    // Announce startup to set startTime
+    await announceStartup();
+
+    // Advance time by 5 minutes and 30 seconds
+    await vi.advanceTimersByTimeAsync(5 * 60 * 1000 + 30 * 1000);
+
+    // Get stats which calls getHelixUptime internally
+    const stats = getHeartbeatStats();
+    expect(stats.uptime).toMatch(/\d+m \d+s/);
+    expect(stats.uptime).not.toContain('h'); // Verify no hours
+    expect(stats.uptime).not.toContain('d'); // Verify no days
+  });
+
+  it('should include uptime in shutdown announcement with days', async () => {
+    const now = Date.now();
+    vi.setSystemTime(now);
+
+    // Announce startup to set startTime
+    await announceStartup();
+
+    // Advance time by 2 days
+    await vi.advanceTimersByTimeAsync(2 * 24 * 60 * 60 * 1000);
+
+    // Announce shutdown
+    mockFetch.mockClear();
+    const result = await announceShutdown('test shutdown');
+
+    expect(result).toBe(true);
+    expect(mockFetch).toHaveBeenCalled();
+
+    // Check the shutdown embed includes uptime
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const embed = callBody.embeds[0];
+    const uptimeField = embed.fields.find((f: { name: string }) => f.name === 'Total Uptime');
+
+    expect(uptimeField).toBeDefined();
+    expect(uptimeField.value).toMatch(/\d+d/); // Should have days
   });
 });
 
