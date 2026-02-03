@@ -17,5 +17,10 @@ export { useCustomTools } from './useCustomTools';
 export { useCompositeSkills } from './useCompositeSkills';
 export { useMemorySynthesis } from './useMemorySynthesis';
 
+// Phase 4.1: Voice Features (Real-time Voice, Recording, Commands)
+export { useVoiceRecorder } from './useVoiceRecorder';
+export type { WebRTCVoiceState, WebRTCVoiceControls } from './useWebRTCVoice';
+export { useWebRTCVoice } from './useWebRTCVoice';
+
 // Phase C: Tauri Desktop Features
 export { useTauriFileOps } from './useTauriFileOps';

@@ -1,0 +1,318 @@
+/* Voice Components Styling */
+
+.voice-memo-recorder {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.8) 100%);
+  border: 1px solid rgba(71, 85, 105, 0.3);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.recorder-header {
+  margin-bottom: 1.5rem;
+}
+
+.recorder-header h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.recorder-subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #94a3b8;
+}
+
+.recorder-controls {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.recording-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid #dc2626;
+  border-radius: 0.5rem;
+  color: #fca5a5;
+  animation: pulse 1s infinite;
+}
+
+.recording-indicator .pulse {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  background: #dc2626;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.recording-status {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid #dc2626;
+  border-radius: 0.5rem;
+  color: #fca5a5;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.error-message {
+  padding: 0.75rem 1rem;
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid #dc2626;
+  border-radius: 0.5rem;
+  color: #fca5a5;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.memo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(51, 65, 85, 0.3);
+  border-radius: 0.5rem;
+}
+
+.tags-input {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid #3b82f6;
+  border-radius: 0.375rem;
+  color: #93c5fd;
+  font-size: 0.85rem;
+}
+
+.tag button {
+  background: none;
+  border: none;
+  color: #93c5fd;
+  cursor: pointer;
+  padding: 0;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.tag button:hover {
+  color: #7dd3fc;
+}
+
+.tag-input-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.tag-input-group input {
+  flex: 1;
+  padding: 0.5rem;
+  background: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 0.375rem;
+  color: #e2e8f0;
+  font-size: 0.9rem;
+}
+
+.tag-input-group input:focus {
+  outline: none;
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+}
+
+/* Voice Command Manager */
+
+.voice-command-manager {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.8) 100%);
+  border: 1px solid rgba(71, 85, 105, 0.3);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+}
+
+.manager-header {
+  margin-bottom: 1.5rem;
+}
+
+.manager-header h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.command-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(51, 65, 85, 0.3);
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+}
+
+.commands-list {
+  margin-top: 1.5rem;
+}
+
+.commands-list h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.empty-state {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #94a3b8;
+  background: rgba(51, 65, 85, 0.2);
+  border-radius: 0.5rem;
+}
+
+.commands {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.command-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1rem;
+  background: rgba(51, 65, 85, 0.3);
+  border: 1px solid rgba(71, 85, 105, 0.3);
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.command-item:hover {
+  background: rgba(51, 65, 85, 0.5);
+  border-color: rgba(96, 165, 250, 0.3);
+}
+
+.command-info {
+  flex: 1;
+}
+
+.command-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.command-trigger .label {
+  font-weight: 600;
+  color: #f1f5f9;
+  font-size: 0.85rem;
+}
+
+.command-trigger code {
+  background: rgba(15, 23, 42, 0.5);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  color: #fbbf24;
+  font-family: 'Monaco', monospace;
+  font-size: 0.85rem;
+}
+
+.command-tool {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #cbd5e1;
+}
+
+.command-tool .label {
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.command-stats {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-weight: 600;
+}
+
+.status.enabled {
+  background: rgba(16, 185, 129, 0.2);
+  color: #86efac;
+}
+
+.status.disabled {
+  background: rgba(107, 114, 128, 0.2);
+  color: #d1d5db;
+}
+
+.command-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Responsive */
+
+@media (max-width: 640px) {
+  .command-item {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .command-actions {
+    width: 100%;
+  }
+}
