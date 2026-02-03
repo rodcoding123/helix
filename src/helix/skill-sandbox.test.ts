@@ -65,11 +65,9 @@ describe('Skill Sandbox - Signature Verification', () => {
     // Create valid signature prefix
     const signedData = `${sampleSkillCode}|${metadata.name}|${metadata.version}|${metadata.author}|${metadata.signedAt}`;
     const dataHash = crypto.createHash('sha256').update(signedData).digest('hex');
-    const validSignature = crypto
-      .createHash('sha256')
-      .update(`${trustedKey}:${dataHash}`)
-      .digest('hex')
-      .slice(0, 16) + '-rest-of-signature';
+    const validSignature =
+      crypto.createHash('sha256').update(`${trustedKey}:${dataHash}`).digest('hex').slice(0, 16) +
+      '-rest-of-signature';
 
     metadata.signature = validSignature;
 
@@ -105,11 +103,9 @@ describe('Skill Sandbox - Signature Verification', () => {
 
     const signedData = `${sampleSkillCode}|${metadata.name}|${metadata.version}|${metadata.author}|${metadata.signedAt}`;
     const dataHash = crypto.createHash('sha256').update(signedData).digest('hex');
-    const validSignature = crypto
-      .createHash('sha256')
-      .update(`${trustedKey2}:${dataHash}`)
-      .digest('hex')
-      .slice(0, 16) + '-sig';
+    const validSignature =
+      crypto.createHash('sha256').update(`${trustedKey2}:${dataHash}`).digest('hex').slice(0, 16) +
+      '-sig';
 
     metadata.signature = validSignature;
 
@@ -622,7 +618,11 @@ describe('Skill Sandbox - Extended Coverage', () => {
       name: 'multi-perm-skill',
       version: '1.0.0',
       author: 'test@example.com',
-      permissions: ['filesystem:read' as SkillPermission, 'filesystem:write' as SkillPermission, 'network:outbound' as SkillPermission],
+      permissions: [
+        'filesystem:read' as SkillPermission,
+        'filesystem:write' as SkillPermission,
+        'network:outbound' as SkillPermission,
+      ],
     };
 
     const config = { ...DEFAULT_SKILL_SANDBOX_CONFIG, requireSignature: false };
@@ -695,13 +695,18 @@ describe('Skill Sandbox - Extended Coverage', () => {
 
   it.skip('should execute skill successfully', async () => {
     // Skip: VM execution has timeout issues in test environment
-    const result = await executeSkillSandboxed(
-      'return 42;',
-      metadata,
-      {},
-      'my-session',
-      config
-    );
+    const metadata: SkillMetadata = {
+      name: 'test-skill',
+      version: '1.0.0',
+      author: 'test',
+      signature: '',
+    };
+    const config: SkillSandboxConfig = {
+      ...DEFAULT_SKILL_SANDBOX_CONFIG,
+      timeoutMs: 5000,
+    };
+
+    const result = await executeSkillSandboxed('return 42;', metadata, {}, 'my-session', config);
 
     expect(result.success).toBe(true);
     expect(result.output).toBe(42);

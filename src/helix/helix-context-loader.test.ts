@@ -439,7 +439,10 @@ describe('Context Loader - ensureHelixDirectoryStructure', () => {
 describe('Context Loader - validateContextFile', () => {
   it('should validate valid JSON with required fields', () => {
     const content = '{"field1": "value1", "field2": "value2"}';
-    const schema: Record<string, 'required' | 'optional'> = { field1: 'required', field2: 'required' };
+    const schema: Record<string, 'required' | 'optional'> = {
+      field1: 'required',
+      field2: 'required',
+    };
 
     const result = validateContextFile(content, schema);
 
@@ -449,7 +452,10 @@ describe('Context Loader - validateContextFile', () => {
 
   it('should reject missing required field', () => {
     const content = '{"field1": "value1"}';
-    const schema: Record<string, 'required' | 'optional'> = { field1: 'required', field2: 'required' };
+    const schema: Record<string, 'required' | 'optional'> = {
+      field1: 'required',
+      field2: 'required',
+    };
 
     const result = validateContextFile(content, schema);
 
@@ -459,7 +465,10 @@ describe('Context Loader - validateContextFile', () => {
 
   it('should allow missing optional field', () => {
     const content = '{"field1": "value1"}';
-    const schema: Record<string, 'required' | 'optional'> = { field1: 'required', field2: 'optional' };
+    const schema: Record<string, 'required' | 'optional'> = {
+      field1: 'required',
+      field2: 'optional',
+    };
 
     const result = validateContextFile(content, schema);
 
@@ -507,7 +516,11 @@ describe('Context Loader - validateContextFile', () => {
 
   it('should handle multiple missing required fields', () => {
     const content = '{}';
-    const schema: Record<string, 'required' | 'optional'> = { field1: 'required', field2: 'required', field3: 'required' };
+    const schema: Record<string, 'required' | 'optional'> = {
+      field1: 'required',
+      field2: 'required',
+      field3: 'required',
+    };
 
     const result = validateContextFile(content, schema);
 

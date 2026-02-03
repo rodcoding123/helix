@@ -81,9 +81,12 @@ describe('API Logger - Pre-Flight Logging', () => {
 
     const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
     const embed = callBody.embeds[0];
-    expect(embed.fields.some((f: { name: string; value: string }) =>
-      f.name === 'Prompt Preview' && f.value.includes('What is the meaning')
-    )).toBe(true);
+    expect(
+      embed.fields.some(
+        (f: { name: string; value: string }) =>
+          f.name === 'Prompt Preview' && f.value.includes('What is the meaning')
+      )
+    ).toBe(true);
   });
 
   it('should truncate long prompt previews', async () => {
@@ -231,9 +234,11 @@ describe('API Logger - Response Logging', () => {
 
     const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
     const embed = callBody.embeds[0];
-    expect(embed.fields.some((f: { name: string; value: string }) =>
-      f.name === 'Latency' && f.value.includes('2345ms')
-    )).toBe(true);
+    expect(
+      embed.fields.some(
+        (f: { name: string; value: string }) => f.name === 'Latency' && f.value.includes('2345ms')
+      )
+    ).toBe(true);
   });
 
   it('should handle missing response preview', async () => {
@@ -288,9 +293,11 @@ describe('API Logger - Error Logging', () => {
 
     const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
     const embed = callBody.embeds[0];
-    expect(embed.fields.some((f: { name: string; value: string }) =>
-      f.name === 'Status' && f.value === '429'
-    )).toBe(true);
+    expect(
+      embed.fields.some(
+        (f: { name: string; value: string }) => f.name === 'Status' && f.value === '429'
+      )
+    ).toBe(true);
   });
 
   it('should handle optional status code', async () => {
@@ -543,9 +550,9 @@ describe('API Logger - createApiLoggerWrapper', () => {
 
     const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
     const embed = callBody.embeds[0];
-    expect(embed.fields.some((f: { value: string }) =>
-      f.value.includes('What is the meaning')
-    )).toBe(true);
+    expect(
+      embed.fields.some((f: { value: string }) => f.value.includes('What is the meaning'))
+    ).toBe(true);
   });
 
   it('should extract prompt preview from message array', async () => {
@@ -561,9 +568,7 @@ describe('API Logger - createApiLoggerWrapper', () => {
 
     const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
     const embed = callBody.embeds[0];
-    expect(embed.fields.some((f: { value: string }) =>
-      f.value.includes('Hello there')
-    )).toBe(true);
+    expect(embed.fields.some((f: { value: string }) => f.value.includes('Hello there'))).toBe(true);
   });
 
   it('should extract prompt from object with prompt property', async () => {
@@ -574,9 +579,9 @@ describe('API Logger - createApiLoggerWrapper', () => {
 
     const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
     const embed = callBody.embeds[0];
-    expect(embed.fields.some((f: { value: string }) =>
-      f.value.includes('Test prompt string')
-    )).toBe(true);
+    expect(
+      embed.fields.some((f: { value: string }) => f.value.includes('Test prompt string'))
+    ).toBe(true);
   });
 
   it('should extract prompt from nested messages property', async () => {
@@ -584,16 +589,14 @@ describe('API Logger - createApiLoggerWrapper', () => {
     const wrapped = createApiLoggerWrapper(mockApiFunction);
 
     await wrapped('arg1', {
-      messages: [
-        { role: 'user', content: 'Nested message content' },
-      ],
+      messages: [{ role: 'user', content: 'Nested message content' }],
     });
 
     const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
     const embed = callBody.embeds[0];
-    expect(embed.fields.some((f: { value: string }) =>
-      f.value.includes('Nested message')
-    )).toBe(true);
+    expect(embed.fields.some((f: { value: string }) => f.value.includes('Nested message'))).toBe(
+      true
+    );
   });
 
   it('should extract prompt from object with content property', async () => {
@@ -604,9 +607,9 @@ describe('API Logger - createApiLoggerWrapper', () => {
 
     const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
     const embed = callBody.embeds[0];
-    expect(embed.fields.some((f: { value: string }) =>
-      f.value.includes('Direct content')
-    )).toBe(true);
+    expect(embed.fields.some((f: { value: string }) => f.value.includes('Direct content'))).toBe(
+      true
+    );
   });
 
   it('should handle complex multimodal content', async () => {
@@ -616,14 +619,14 @@ describe('API Logger - createApiLoggerWrapper', () => {
     await wrapped('arg1', [
       {
         role: 'user',
-        content: { type: 'text', text: 'Analyze this image' }
+        content: { type: 'text', text: 'Analyze this image' },
       },
     ]);
 
     const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(callBody.embeds[0].fields.some((f: { name: string }) =>
-      f.name === 'Prompt Preview'
-    )).toBe(true);
+    expect(
+      callBody.embeds[0].fields.some((f: { name: string }) => f.name === 'Prompt Preview')
+    ).toBe(true);
   });
 
   it('should handle null/undefined context gracefully', async () => {
@@ -634,9 +637,9 @@ describe('API Logger - createApiLoggerWrapper', () => {
 
     const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
     const embed = callBody.embeds[0];
-    expect(embed.fields.some((f: { value: string }) =>
-      f.value.includes('[no context]')
-    )).toBe(true);
+    expect(embed.fields.some((f: { value: string }) => f.value.includes('[no context]'))).toBe(
+      true
+    );
   });
 
   it('should log response after API call completes', async () => {

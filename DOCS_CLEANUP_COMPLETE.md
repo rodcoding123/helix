@@ -12,6 +12,7 @@ Comprehensive cleanup and reorganization of all Helix documentation completed.
 ### What Was Done
 
 #### 1. Deleted Duplicates
+
 - ❌ Removed `/web/docs/guides/` folder entirely
   - AGENT_TEMPLATES.md (duplicate)
   - CUSTOM_TOOLS.md (duplicate)
@@ -22,6 +23,7 @@ Comprehensive cleanup and reorganization of all Helix documentation completed.
 **Why**: These guides are now in the protected `/web/docs/knowledge-base/` folder and should only exist there.
 
 #### 2. Created Archive Structure
+
 - ✅ Created `/docs/archive/` for historical documentation
   - `planning/` - Implementation specs and roadmaps
   - `phase-reports/` - Completion reports and test results
@@ -30,7 +32,9 @@ Comprehensive cleanup and reorganization of all Helix documentation completed.
 **Why**: Preserve history while keeping active docs clean and focused.
 
 #### 3. Archived Old Planning Documents
+
 **Moved 25 files** from `/docs/newbp/` to `/docs/archive/`:
+
 - Daily logs and week summaries (7 files)
 - Phase completion reports (6 files)
 - Implementation specs (12 files)
@@ -38,7 +42,9 @@ Comprehensive cleanup and reorganization of all Helix documentation completed.
 **Why**: These represent historical planning and were useful during development but no longer needed for current work.
 
 #### 4. Kept Important References
+
 **Left in `/docs/newbp/`** (3 files):
+
 - `ALL-PHASES-SUMMARY.md` - High-level phase overview
 - `README-IMPLEMENTATION-PLAN.md` - Implementation reference
 - `GROWTH-IMPROVEMENT-ROADMAP.md` - Strategic roadmap
@@ -46,6 +52,7 @@ Comprehensive cleanup and reorganization of all Helix documentation completed.
 **Why**: These provide valuable high-level context and strategy reference.
 
 #### 5. Created Comprehensive Navigation
+
 - ✅ New `/docs/README.md` - Master documentation guide
 - ✅ `/docs/archive/README.md` - Archive documentation guide
 - ✅ Updated `/web/docs/knowledge-base/README.md` - User docs
@@ -124,18 +131,21 @@ Comprehensive cleanup and reorganization of all Helix documentation completed.
 ## Key Improvements
 
 ### For Users ✅
+
 - Clear, organized knowledge base
 - Protected from cleanup
 - Accessible from app Help menu
 - 43,000+ words of comprehensive guides
 
 ### For Developers ✅
+
 - Master README guides to right documentation
 - Architecture docs are discoverable
 - Historical context available in archive
 - Current plans clearly marked
 
 ### For Operations ✅
+
 - Cleaner folder structure
 - Less clutter = easier maintenance
 - Clear distinction between active and historical
@@ -145,24 +155,26 @@ Comprehensive cleanup and reorganization of all Helix documentation completed.
 
 ## Files Summary
 
-| Category | Count | Status |
-|----------|-------|--------|
-| **Deleted** | 5 | Duplicates removed ✅ |
-| **Archived** | 25 | Historical docs preserved ✅ |
-| **Active** | 32 | Core documentation ✅ |
-| **User Docs** | 10 | Knowledge base ✅ |
-| **Total** | 72 | Organized & clean ✅ |
+| Category      | Count | Status                       |
+| ------------- | ----- | ---------------------------- |
+| **Deleted**   | 5     | Duplicates removed ✅        |
+| **Archived**  | 25    | Historical docs preserved ✅ |
+| **Active**    | 32    | Core documentation ✅        |
+| **User Docs** | 10    | Knowledge base ✅            |
+| **Total**     | 72    | Organized & clean ✅         |
 
 ---
 
 ## Documentation Accessibility
 
 ### For Users
+
 - **Web**: `/help` route in app
 - **Desktop**: Help menu in app
 - **Files**: `/web/docs/knowledge-base/`
 
 ### For Developers
+
 - **Start**: `/docs/README.md`
 - **Architecture**: `/docs/blueprints/` and root specs
 - **Implementation**: `/docs/plans/`

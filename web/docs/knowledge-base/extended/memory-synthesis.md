@@ -24,21 +24,25 @@ This happens across **7 psychological layers**:
 Use Memory Synthesis when you want to:
 
 **Understand yourself better**
+
 - "What patterns do I have?"
 - "What makes me happy/stressed?"
 - "How do others affect my mood?"
 
 **Identify blind spots**
+
 - "What am I not seeing?"
 - "What keeps coming up?"
 - "Where am I stuck?"
 
 **Plan improvements**
+
 - "When am I most productive?"
 - "What goals matter to me?"
 - "How can I better manage stress?"
 
 **Get recommendations**
+
 - "What should I focus on?"
 - "How can I improve relationships?"
 - "What's blocking my growth?"
@@ -56,30 +60,35 @@ Use Memory Synthesis when you want to:
 Select which aspect to analyze:
 
 **Emotional Patterns**
+
 - What emotions dominate your conversations?
 - What triggers strong reactions?
 - How stable is your emotional state?
 - **Best for:** Understanding mood patterns, identifying stress triggers
 
 **Prospective Self**
+
 - What are your goals and aspirations?
 - What fears hold you back?
 - How do you see your future?
 - **Best for:** Career planning, goal setting, understanding ambitions
 
 **Relational Memory**
+
 - How do you interact with others?
 - What attachment patterns emerge?
 - Who influences you most?
 - **Best for:** Improving relationships, understanding dynamics
 
 **Narrative Coherence**
+
 - What's your life story?
 - What themes connect your experiences?
 - How has your identity evolved?
 - **Best for:** Self-discovery, finding meaning
 
 **Full Synthesis**
+
 - Complete analysis across all layers
 - Comprehensive insights
 - Full recommendations
@@ -88,18 +97,22 @@ Select which aspect to analyze:
 ### Step 3: Set Time Range (Optional)
 
 **All time** (default)
+
 - Analyzes everything you've discussed
 - Long-term patterns
 
 **Last week**
+
 - Recent patterns and shifts
 - Current state
 
 **Last month**
+
 - Monthly trends
 - Seasonal patterns
 
 **Custom date range**
+
 - Analyze specific periods
 - Compare time ranges
 
@@ -139,6 +152,7 @@ Each detected pattern shows:
 ```
 
 **Information:**
+
 - **Pattern** - What was detected
 - **Layer** - Which psychological layer (1-7)
 - **Confidence** - How sure is the system (0-100%)
@@ -148,42 +162,49 @@ Each detected pattern shows:
 ### Seven Layers Overview
 
 **Layer 1: Narrative Core** 📖
+
 - Your life story
 - Key themes in your identity
 - How you see yourself
 - Example patterns: "See yourself as a problem-solver", "Value continuous learning"
 
 **Layer 2: Emotional Memory** 💭
+
 - Emotional patterns
 - Triggers and responses
 - Mood patterns
 - Example patterns: "Anxious about deadlines", "Excited by new challenges"
 
 **Layer 3: Relational Memory** 🤝
+
 - Relationship patterns
 - How you connect with others
 - Attachment styles
 - Example patterns: "Build trust slowly", "Most comfortable with introverts"
 
 **Layer 4: Prospective Self** 🎯
+
 - Goals and aspirations
 - Fears and concerns
 - Future identity
 - Example patterns: "Goal: meaningful impact", "Fear: being irrelevant"
 
 **Layer 5: Integration Rhythms** ⏳
+
 - Patterns and cycles
 - When you're most productive
 - Seasonal themes
 - Example patterns: "More creative in mornings", "Struggle in winter"
 
 **Layer 6: Transformation** 🌱
+
 - How you're changing
 - Growth areas
 - Evolution of your thinking
 - Example patterns: "Becoming more patient", "Shifting priorities"
 
 **Layer 7: Purpose Engine** ✨
+
 - Meaning and values
 - What matters most
 - Your ikigai (purpose)
@@ -235,35 +256,42 @@ This feedback improves future analyses!
 See all detected patterns organized by:
 
 **By Layer**
+
 - Click a layer to see patterns for that layer
 - Example: Click "Layer 4" to see your goals
 
 **By Confidence**
+
 - Highest confidence patterns first
 - More reliable patterns at top
 
 **By Recency**
+
 - Most recently observed
 - Shows current state
 
 ### Confidence Scoring
 
 **90-100%** - Very confident
+
 - Pattern appears consistently
 - Strong supporting evidence
 - Trust these patterns
 
 **70-89%** - Confident
+
 - Pattern appears multiple times
 - Some supporting evidence
 - Generally reliable
 
 **50-69%** - Moderate confidence
+
 - Pattern is emerging
 - Limited evidence
 - Worth confirming or rejecting
 
 **Below 50%** - Low confidence
+
 - Rare pattern
 - Weak supporting evidence
 - Probably not significant
@@ -301,6 +329,7 @@ After analysis, see recommendations:
 ```
 
 **Actions:**
+
 - **Acknowledge** - "Got it, I'll work on this"
 - **Dismiss** - "Not relevant to me"
 - **Save** - Save for later reference
@@ -322,6 +351,7 @@ Set up automatic regular analyses:
 4. Click **Schedule**
 
 Automatic analyses:
+
 - Run on schedule
 - Send you the results
 - Build long-term awareness
@@ -480,6 +510,7 @@ Action: Reject or ask for more data
 ### What Gets Analyzed
 
 Your conversations are analyzed to find patterns:
+
 - Text content
 - Topics discussed
 - Emotional language
@@ -488,6 +519,7 @@ Your conversations are analyzed to find patterns:
 ### What Doesn't Get Shared
 
 Your patterns are private:
+
 - Your data stays with you
 - Not shared with others
 - Not used for external training
@@ -496,6 +528,7 @@ Your patterns are private:
 ### Data Control
 
 You can:
+
 - Delete any pattern
 - Delete any conversation
 - Delete entire analysis
@@ -507,6 +540,7 @@ You can:
 
 **Problem:** Analysis is still running after 5 minutes
 **Solution:**
+
 - Close and try again
 - Check internet connection
 - Try analyzing shorter time period
@@ -516,6 +550,7 @@ You can:
 
 **Problem:** "No patterns detected" message
 **Solution:**
+
 - You might need more conversation history
 - Try analyzing a longer time period
 - Have you had diverse conversations?
@@ -525,6 +560,7 @@ You can:
 
 **Problem:** Detected patterns don't match reality
 **Solution:**
+
 - Click ✗ Reject to give feedback
 - System learns from rejections
 - Run analysis again in a few days
@@ -534,6 +570,7 @@ You can:
 
 **Problem:** Confirm button not responding
 **Solution:**
+
 - Refresh the page
 - Check internet connection
 - Try again in a moment
@@ -543,6 +580,7 @@ You can:
 
 **Problem:** No recommendations appeared
 **Solution:**
+
 - Confirm at least one pattern first
 - Some analyses have fewer recommendations
 - Try running again
@@ -617,6 +655,7 @@ Trend: Improving overall
 ### Confirm Patterns Honestly
 
 Give accurate feedback:
+
 - ✓ Confirm true patterns
 - ✗ Reject wrong patterns
 - System learns from accuracy
@@ -624,6 +663,7 @@ Give accurate feedback:
 ### Run Regularly
 
 Frequency recommendations:
+
 - **Weekly** - Track current state
 - **Monthly** - See bigger trends
 - **Quarterly** - Plan improvements
@@ -632,6 +672,7 @@ Frequency recommendations:
 ### Act on Insights
 
 Insights are only valuable if used:
+
 1. Identify pattern
 2. Understand it
 3. Take one action
@@ -641,6 +682,7 @@ Insights are only valuable if used:
 ### Use Recommendations
 
 Recommendations are personalized:
+
 - Based on YOUR patterns
 - Tailored to YOU
 - Worth trying
@@ -657,6 +699,7 @@ Memory Synthesis helps you:
 ✓ Track your growth
 
 **Workflow:**
+
 1. Choose analysis type
 2. Set time range (optional)
 3. Run analysis
@@ -669,6 +712,7 @@ Memory Synthesis helps you:
 10. Celebrate growth
 
 **Next steps:**
+
 1. Run an initial analysis
 2. Review all 7 layers
 3. Confirm patterns honestly

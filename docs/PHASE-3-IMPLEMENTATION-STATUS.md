@@ -11,6 +11,7 @@
 **Phase 3 is functionally complete on both web and gateway layers.** All three core features (Custom Tools, Composite Skills, Memory Synthesis) have their backend execution engines, gateway RPC methods, web services, React hooks, and UI components implemented.
 
 ### Current State:
+
 - ✅ **Database**: All 3 Phase 3 migrations applied (015, 016, 017)
 - ✅ **Backend Execution**: 3 core engines built (skill-sandbox, skill-chaining, memory-synthesis)
 - ✅ **Gateway RPC**: 9 methods registered and implemented
@@ -28,6 +29,7 @@
 ### 1. Custom Tools System (75% → 100%)
 
 **New Implementations:**
+
 - `helix-runtime/src/helix/skill-sandbox.ts` (NEW)
   - Secure sandboxed execution with timeouts
   - Dangerous code pattern detection
@@ -40,6 +42,7 @@
   - `tools.list` - List user's tools
 
 **Existing Components:**
+
 - Web Service: `web/src/services/custom-tools.ts` ✅
   - Code validation
   - Sandbox profile management
@@ -56,11 +59,13 @@
   - `ToolCapabilityBadge.tsx` component ✅
 
 **Database:**
+
 - Tables: custom_tools, custom_tool_usage
 - RLS Policies: User access, public read
 - Indexes: user_id, visibility, enabled status
 
 **Execution Flow:**
+
 ```
 User → Web UI → useCustomTools Hook
   → CustomToolsService.executeTool()
@@ -74,6 +79,7 @@ User → Web UI → useCustomTools Hook
 ### 2. Composite Skills System (80% → 100%)
 
 **New Implementations:**
+
 - `helix-runtime/src/helix/skill-chaining.ts` (NEW)
   - Multi-step workflow execution
   - JSONPath-based input mapping
@@ -88,6 +94,7 @@ User → Web UI → useCustomTools Hook
   - `skills.list_composite` - List user's skills
 
 **Existing Components:**
+
 - Web Service: `web/src/services/composite-skills.ts` ✅
   - Skill validation
   - Execution tracking
@@ -104,11 +111,13 @@ User → Web UI → useCustomTools Hook
   - Execution history
 
 **Database:**
+
 - Tables: composite_skills, composite_skill_executions
 - RLS Policies: User access, public read
 - Indexes: user_id, visibility, enabled status, created_at
 
 **Skill Definition Structure:**
+
 ```typescript
 {
   id: string,
@@ -131,6 +140,7 @@ User → Web UI → useCustomTools Hook
 ### 3. Memory Synthesis System (60% → 100%)
 
 **New Implementations:**
+
 - Enhanced `helix-runtime/src/gateway/server-methods/memory-synthesis.ts`
   - `memory.synthesize` - Run synthesis with Claude API
   - `memory.synthesis_status` - Get job status
@@ -138,6 +148,7 @@ User → Web UI → useCustomTools Hook
   - Full 7-layer prompt templates (emotional, prospective, relational, narrative, etc.)
 
 **Existing Components:**
+
 - Web Service: `web/src/services/memory-synthesis.ts` ✅
   - Synthesis job management
   - Pattern storage
@@ -154,11 +165,13 @@ User → Web UI → useCustomTools Hook
   - Recommendation display
 
 **Database:**
+
 - Tables: memory_synthesis_jobs, memory_patterns, synthesis_recommendations
 - RLS Policies: User access only
 - Indexes: user_id, status, layer, confidence
 
 **Claude Integration:**
+
 - Model: claude-3-5-sonnet-20241022
 - Max tokens: 4096
 - 5 synthesis types:
@@ -174,8 +187,8 @@ User → Web UI → useCustomTools Hook
 
 ```json
 {
-  "@anthropic-ai/sdk": "^0.24.0",  // Claude API integration
-  "jsonpath": "^1.1.1"              // JSONPath for skill chaining
+  "@anthropic-ai/sdk": "^0.24.0", // Claude API integration
+  "jsonpath": "^1.1.1" // JSONPath for skill chaining
 }
 ```
 
@@ -184,22 +197,26 @@ User → Web UI → useCustomTools Hook
 ## 🚀 Gateway RPC Methods
 
 **Custom Tools (3 methods):**
+
 - ✅ `tools.execute_custom` - POST
 - ✅ `tools.get_metadata` - GET
 - ✅ `tools.list` - GET
 
 **Composite Skills (4 methods):**
+
 - ✅ `skills.execute_composite` - POST
 - ✅ `skills.validate_composite` - POST
 - ✅ `skills.get_metadata` - GET
 - ✅ `skills.list_composite` - GET
 
 **Memory Synthesis (3 methods):**
+
 - ✅ `memory.synthesize` - POST
 - ✅ `memory.synthesis_status` - GET
 - ✅ `memory.list_patterns` - GET
 
 **Authorization:**
+
 - All Phase 3 methods in WRITE_METHODS set
 - Require `operator.write` scope
 - User auth context passed to handlers
@@ -208,17 +225,18 @@ User → Web UI → useCustomTools Hook
 
 ## 📊 Implementation Summary Table
 
-| Component | Backend | Gateway | Service | Hook | Pages | Components | Status |
-|-----------|---------|---------|---------|------|-------|------------|--------|
-| **Custom Tools** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Complete |
-| **Composite Skills** | ✅ | ✅ | ✅ | ✅ | ✅ | ⏳ | 95% |
-| **Memory Synthesis** | ✅ | ✅ | ✅ | ✅ | ✅ | ⏳ | 95% |
+| Component            | Backend | Gateway | Service | Hook | Pages | Components | Status   |
+| -------------------- | ------- | ------- | ------- | ---- | ----- | ---------- | -------- |
+| **Custom Tools**     | ✅      | ✅      | ✅      | ✅   | ✅    | ✅         | Complete |
+| **Composite Skills** | ✅      | ✅      | ✅      | ✅   | ✅    | ⏳         | 95%      |
+| **Memory Synthesis** | ✅      | ✅      | ✅      | ✅   | ✅    | ⏳         | 95%      |
 
 ---
 
 ## 🧪 Testing Requirements
 
 ### Unit Tests Needed:
+
 1. **skill-sandbox.ts**
    - [ ] Code validation (dangerous patterns)
    - [ ] Timeout protection
@@ -239,6 +257,7 @@ User → Web UI → useCustomTools Hook
    - [ ] Audit logging
 
 ### Integration Tests Needed:
+
 1. [ ] End-to-end custom tool execution (Web UI → Gateway → Sandbox → Web UI)
 2. [ ] Multi-step skill execution with data passing
 3. [ ] Memory synthesis job submission and monitoring
@@ -250,6 +269,7 @@ User → Web UI → useCustomTools Hook
 ## 🐛 Known TODOs
 
 ### Database Integration:
+
 - `tools.get_metadata` - TODO: Implement database lookup (line 142)
 - `tools.list` - TODO: Implement database query (line 178)
 - `skills.get_metadata` - TODO: Implement database lookup (line 190)
@@ -258,6 +278,7 @@ User → Web UI → useCustomTools Hook
 - `memory.list_patterns` - TODO: Implement database query (line 339)
 
 ### Tool Execution:
+
 - `skill-chaining.ts` has mock `executeTool()` (line 298)
   - Should call gateway RPC `tools.execute_custom` in production
   - Currently returns mock results for demo tools (double, add10, stringify)
@@ -267,6 +288,7 @@ User → Web UI → useCustomTools Hook
 ## 📝 Next Steps (Week 2-3)
 
 ### Week 2: Desktop Parity
+
 1. Port CustomTools page to desktop
 2. Port CompositeSkills page to desktop
 3. Port MemorySynthesis page to desktop
@@ -275,6 +297,7 @@ User → Web UI → useCustomTools Hook
 6. Test on macOS, Windows, Linux
 
 ### Week 3: Testing & Documentation
+
 1. Run integration test suite
 2. Database integration tests
 3. Security testing (sandbox escape attempts)
@@ -284,6 +307,7 @@ User → Web UI → useCustomTools Hook
 7. Polish UI animations and error messages
 
 ### After Phase 3 Complete
+
 - Phase 4.1: Voice enhancements (2 weeks)
   - Voice memo recording
   - Transcript search
@@ -295,18 +319,21 @@ User → Web UI → useCustomTools Hook
 ## 📚 File Manifest
 
 ### New Files Created:
+
 ```
 helix-runtime/src/helix/skill-sandbox.ts (NEW - 200 lines)
 helix-runtime/src/helix/skill-chaining.ts (NEW - 270 lines)
 ```
 
 ### Modified Files:
+
 ```
 helix-runtime/package.json (added jsonpath, @anthropic-ai/sdk)
 helix-runtime/src/gateway/server-methods.ts (imports already added)
 ```
 
 ### Existing Files (Already Complete):
+
 ```
 helix-runtime/src/gateway/server-methods/custom-tools.ts ✅
 helix-runtime/src/gateway/server-methods/composite-skills.ts ✅

@@ -19,6 +19,7 @@ CREATE OR REPLACE FUNCTION semantic_search(query_embedding vector(768), ...)
 ### Root Cause
 
 Migration 008_conversations_tables.sql should enable the pgvector extension:
+
 ```sql
 CREATE EXTENSION IF NOT EXISTS vector;
 ```
@@ -50,11 +51,13 @@ However, when migration 009_semantic_search_rpc.sql attempts to use the `vector`
 ### Option 2: Manual PostgreSQL Connection
 
 1. Obtain the direct PostgreSQL connection string:
+
    ```
    postgresql://postgres:[PASSWORD]@db.ncygunbukmpwhtzwbnvp.supabase.co:5432/postgres
    ```
 
 2. Connect using psql:
+
    ```bash
    psql "postgresql://postgres:[PASSWORD]@db.ncygunbukmpwhtzwbnvp.supabase.co:5432/postgres"
    ```
@@ -76,17 +79,18 @@ Create a fresh Supabase project with pgvector pre-enabled and run all migrations
 
 All Phase 3 table definitions are prepared in `phase3_migrations_direct.sql`:
 
-| Table | Purpose | Status |
-|-------|---------|--------|
-| custom_tools | User-created tool definitions | ✓ Ready |
-| custom_tool_usage | Tool execution audit log | ✓ Ready |
-| composite_skills | Multi-step workflow definitions | ✓ Ready |
-| composite_skill_executions | Skill execution history | ✓ Ready |
-| memory_synthesis_jobs | Background analysis jobs | ✓ Ready |
-| memory_patterns | Detected psychological patterns | ✓ Ready |
-| synthesis_recommendations | Pattern-based recommendations | ✓ Ready |
+| Table                      | Purpose                         | Status  |
+| -------------------------- | ------------------------------- | ------- |
+| custom_tools               | User-created tool definitions   | ✓ Ready |
+| custom_tool_usage          | Tool execution audit log        | ✓ Ready |
+| composite_skills           | Multi-step workflow definitions | ✓ Ready |
+| composite_skill_executions | Skill execution history         | ✓ Ready |
+| memory_synthesis_jobs      | Background analysis jobs        | ✓ Ready |
+| memory_patterns            | Detected psychological patterns | ✓ Ready |
+| synthesis_recommendations  | Pattern-based recommendations   | ✓ Ready |
 
 All tables include:
+
 - Row-Level Security (RLS) policies
 - Proper foreign key constraints
 - Optimized indexes
@@ -99,6 +103,7 @@ All tables include:
 ### Execution Can Proceed Without Tables (Short-term)
 
 The execution engine implementation (custom tools, skill chaining, memory synthesis) can proceed with:
+
 - Mock database implementations
 - In-memory storage for testing
 - Local SQLite databases for development
@@ -107,6 +112,7 @@ The execution engine implementation (custom tools, skill chaining, memory synthe
 ### Phase 3 Features Require Tables (Production)
 
 Once tables are created:
+
 1. Custom tool executions can be persisted
 2. Skill execution history can be tracked
 3. Memory synthesis results can be stored
@@ -117,11 +123,13 @@ Once tables are created:
 ## Recommended Action Plan
 
 ### Immediate (Next 2 hours)
+
 1. **Enable pgvector** through one of the options above
 2. **Apply Phase 3 migrations** using the SQL script
 3. **Verify table creation** with test queries
 
 ### Short-term (Phase 3 Implementation - 2 weeks)
+
 1. Build execution engines with production database integration
 2. Port desktop components
 3. Run integration tests with real database
@@ -129,6 +137,7 @@ Once tables are created:
 ### Resolution Timeline
 
 **Critical Path:**
+
 1. ✓ Phase 3 tables created → Day 1 (4 hours)
 2. → Execution engines built → Days 1-6 (30 hours)
 3. → Desktop UI ported → Week 2 (40 hours)
@@ -175,4 +184,3 @@ If pgvector issue persists:
 **Owner:** Development Team
 **Priority:** CRITICAL - Blocking Phase 3 completion
 **Status:** AWAITING ACTION
-

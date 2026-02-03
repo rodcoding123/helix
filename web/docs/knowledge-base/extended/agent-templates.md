@@ -35,11 +35,13 @@ Click any category to see all available templates.
 ### Searching for Templates
 
 Use the search bar to find templates by:
+
 - **Name**: "Code Reviewer", "Content Writer"
 - **Description**: "document analysis", "team collaboration"
 - **Tags**: "python", "remote-work", "budget-friendly"
 
 Example searches:
+
 - `code review` - Find templates that review code
 - `documentation` - Find templates that help with docs
 - `team lead` - Find templates for team management
@@ -65,6 +67,7 @@ Each template displays:
 ```
 
 **Key Information:**
+
 - **Title** - Template name
 - **Description** - What the agent does
 - **Rating** - Community feedback (1-5 stars)
@@ -142,6 +145,7 @@ Templates let you test an agent with a few messages before deciding to use it lo
 Click the **☆** icon on any template to add it to your **Favorites**.
 
 Favorites appear:
+
 - In the **Favorites** section at the top
 - In your **Recently Used** list
 - As quick-access buttons in the chat interface
@@ -149,6 +153,7 @@ Favorites appear:
 ### Manage Favorites
 
 Go to **Templates → Favorites** to:
+
 - See all saved templates
 - Remove favorites you no longer need
 - Organize into custom folders (coming soon)
@@ -177,6 +182,7 @@ Want to share your template with others?
 4. You earn points for templates people use
 
 **Guidelines for public templates:**
+
 - Write clear, helpful descriptions
 - Use accurate tags for discoverability
 - Test thoroughly before publishing
@@ -206,6 +212,7 @@ Want to share your template with others?
 
 Start with: "Code Reviewer" template
 Customize:
+
 - Change tone to "Friendly" (less intimidating)
 - Add Python and JavaScript capabilities
 - Save as "Python Code Buddy"
@@ -214,6 +221,7 @@ Customize:
 
 Start with: "Content Writer" template
 Customize:
+
 - Change formality to "Professional" for business writing
 - Disable formatting features you don't need
 - Add instruction: "Use Oxford commas"
@@ -223,6 +231,7 @@ Customize:
 
 Start with: "Learning Coach" template
 Customize:
+
 - Add knowledge: "Focus on algebra and pre-calculus"
 - Change tone to "Patient"
 - Save as "Math Tutor"
@@ -233,6 +242,7 @@ Customize:
 
 **Problem**: A template I saved isn't showing up
 **Solution**:
+
 - Check if it's private (only visible in your profile)
 - Try searching for the name
 - Refresh the page
@@ -241,6 +251,7 @@ Customize:
 
 **Problem**: My changes to a template aren't saved
 **Solution**:
+
 - Make sure you click "Save as Template"
 - Check that you have a unique name
 - Try refreshing and retrying
@@ -249,6 +260,7 @@ Customize:
 
 **Problem**: The agent isn't responding as the template describes
 **Solution**:
+
 - Check the system prompt in the template details
 - Try simplifying your requests
 - Try a different template for comparison
@@ -258,6 +270,7 @@ Customize:
 
 **Problem**: The template is slow to respond
 **Solution**:
+
 - Try a simpler template
 - Disable unnecessary capabilities
 - Reduce the length of your messages
@@ -268,6 +281,7 @@ Customize:
 ### Template Versioning
 
 Templates are updated over time. If a template has a new version:
+
 - You'll see **Update Available** badge
 - Click to see **What's Changed**
 - Update your saved copies to get improvements
@@ -286,6 +300,7 @@ Want features from multiple templates?
 ### Templates with Integrations
 
 Some templates include integrations:
+
 - **Google Calendar** - Schedule meetings
 - **Slack** - Send messages
 - **Email** - Send notifications
@@ -332,6 +347,7 @@ Find template → Preview → Customize → Test → Save → Use
 ### Time-Saving Trick
 
 Customize a template once, then:
+
 - Use it for similar tasks
 - Clone it for variations
 - Share the link with teammates
@@ -340,6 +356,7 @@ Customize a template once, then:
 ### Building a Template Library
 
 Create templates for your common tasks:
+
 - Daily standup reports
 - Code review comments
 - Email drafting
@@ -359,6 +376,7 @@ Agent Templates are your shortcut to powerful AI agents. By understanding how to
 ✓ Share knowledge with the community
 
 **Next steps:**
+
 1. Browse the **Templates** section
 2. Find one that matches your needs
 3. Try it with a test message

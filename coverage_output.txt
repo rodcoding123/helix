@@ -1,0 +1,1035 @@
+
+> helix@1.0.0 test:coverage
+> vitest run --coverage
+
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90mC:/Users/Specter/Desktop/Helix[39m
+      [2mCoverage enabled with [22m[33mv8[39m
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Startup Announcement[2m > [22m[2mshould announce startup to Discord
+[22m[39m[Helix] Announcing startup to Discord...
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Startup Announcement[2m > [22m[2mshould announce startup to Discord
+[22m[39m[Helix] Startup announced successfully
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Startup Announcement[2m > [22m[2mshould include system information
+[22m[39m[Helix] Announcing startup to Discord...
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Startup Announcement[2m > [22m[2mshould include system information
+[22m[39m[Helix] Startup announced successfully
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Startup Announcement[2m > [22m[2mshould return false on webhook failure
+[22m[39m[Helix] Announcing startup to Discord...
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Startup Announcement[2m > [22m[2mshould handle network errors
+[22m[39m[Helix] Announcing startup to Discord...
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Periodic Heartbeats[2m > [22m[2mshould start heartbeat and send immediately
+[22m[39m[Helix] Heartbeat started (interval: 60s)
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Periodic Heartbeats[2m > [22m[2mshould start heartbeat and send immediately
+[22m[39m[Helix] Heartbeat stopped
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Periodic Heartbeats[2m > [22m[2mshould send heartbeats at 60 second intervals
+[22m[39m[Helix] Heartbeat started (interval: 60s)
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Periodic Heartbeats[2m > [22m[2mshould send heartbeats at 60 second intervals
+[22m[39m[Helix] Heartbeat stopped
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Periodic Heartbeats[2m > [22m[2mshould increment beat counter
+[22m[39m[Helix] Heartbeat started (interval: 60s)
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Periodic Heartbeats[2m > [22m[2mshould increment beat counter
+[22m[39m[Helix] Heartbeat stopped
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Periodic Heartbeats[2m > [22m[2mshould include system metrics
+[22m[39m[Helix] Heartbeat started (interval: 60s)
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Periodic Heartbeats[2m > [22m[2mshould include system metrics
+[22m[39m[Helix] Heartbeat stopped
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Periodic Heartbeats[2m > [22m[2mshould stop heartbeats when stopped
+[22m[39m[Helix] Heartbeat started (interval: 60s)
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Periodic Heartbeats[2m > [22m[2mshould stop heartbeats when stopped
+[22m[39m[Helix] Heartbeat stopped
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Periodic Heartbeats[2m > [22m[2mshould not start multiple heartbeats
+[22m[39m[Helix] Heartbeat started (interval: 60s)
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Periodic Heartbeats[2m > [22m[2mshould not start multiple heartbeats
+[22m[39m[Helix] Heartbeat stopped
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Periodic Heartbeats[2m > [22m[2mshould handle webhook failures gracefully
+[22m[39m[Helix] Heartbeat started (interval: 60s)
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Periodic Heartbeats[2m > [22m[2mshould handle webhook failures gracefully
+[22m[39m[Helix] Heartbeat stopped
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Shutdown Announcement[2m > [22m[2mshould announce shutdown to Discord
+[22m[39m[Helix] Announcing shutdown to Discord...
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Shutdown Announcement[2m > [22m[2mshould announce shutdown to Discord
+[22m[39m[Helix] Shutdown announced successfully
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Shutdown Announcement[2m > [22m[2mshould include shutdown reason
+[22m[39m[Helix] Announcing shutdown to Discord...
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Shutdown Announcement[2m > [22m[2mshould include shutdown reason
+[22m[39m[Helix] Shutdown announced successfully
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Shutdown Announcement[2m > [22m[2mshould default to graceful shutdown
+[22m[39m[Helix] Announcing shutdown to Discord...
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Shutdown Announcement[2m > [22m[2mshould default to graceful shutdown
+[22m[39m[Helix] Shutdown announced successfully
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Shutdown Announcement[2m > [22m[2mshould include uptime statistics
+[22m[39m[Helix] Announcing startup to Discord...
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Shutdown Announcement[2m > [22m[2mshould include uptime statistics
+[22m[39m[Helix] Startup announced successfully
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Shutdown Announcement[2m > [22m[2mshould include uptime statistics
+[22m[39m[Helix] Announcing shutdown to Discord...
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Shutdown Announcement[2m > [22m[2mshould include uptime statistics
+[22m[39m[Helix] Shutdown announced successfully
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Shutdown Announcement[2m > [22m[2mshould return false on webhook failure
+[22m[39m[Helix] Announcing shutdown to Discord...
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Statistics[2m > [22m[2mshould update stats when heartbeat running
+[22m[39m[Helix] Heartbeat started (interval: 60s)
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Statistics[2m > [22m[2mshould update stats when heartbeat running
+[22m[39m[Helix] Heartbeat stopped
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Statistics[2m > [22m[2mshould track heartbeat count
+[22m[39m[Helix] Heartbeat started (interval: 60s)
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Statistics[2m > [22m[2mshould track heartbeat count
+[22m[39m[Helix] Heartbeat stopped
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Statistics[2m > [22m[2mshould show running as false after stop
+[22m[39m[Helix] Heartbeat started (interval: 60s)
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Statistics[2m > [22m[2mshould show running as false after stop
+[22m[39m[Helix] Heartbeat stopped
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Status Updates[2m > [22m[2mshould include uptime in status
+[22m[39m[Helix] Announcing startup to Discord...
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Status Updates[2m > [22m[2mshould include uptime in status
+[22m[39m[Helix] Startup announced successfully
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Edge Cases[2m > [22m[2mshould handle missing webhook URL
+[22m[39m[Helix] Announcing startup to Discord...
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Edge Cases[2m > [22m[2mshould handle network timeout
+[22m[39m[Helix] Announcing startup to Discord...
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2minstallPreExecutionLogger[2m > [22m[2minstalls hooks without throwing
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2minstallPreExecutionLogger[2m > [22m[2mcan be called multiple times safely
+[22m[39m[Helix] Pre-execution logging hooks installed
+[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mtriggerHelixHooks[2m > [22m[2mtriggers command hooks
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mtriggerHelixHooks[2m > [22m[2mtriggers session:start hooks
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mtriggerHelixHooks[2m > [22m[2mtriggers session:end hooks
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mtriggerHelixHooks[2m > [22m[2mtriggers agent:bootstrap hooks
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mtriggerHelixHooks[2m > [22m[2mhandles events with missing sessionKey
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mtriggerHelixHooks[2m > [22m[2mhandles events with missing context
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mpre-execution guarantee[2m > [22m[2mprocesses hooks synchronously before returning
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mpre-execution guarantee[2m > [22m[2menforces fail-closed mode in pre-execution logger
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mfail-closed mode edge cases[2m > [22m[2mthrows HelixSecurityError when critical webhook returns non-ok status
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mfail-closed mode edge cases[2m > [22m[2mthrows HelixSecurityError when Discord unreachable on critical operation
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mhash chain update with criticality[2m > [22m[2mmarks command actions as critical in hash chain
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mhash chain update with criticality[2m > [22m[2mmarks non-command actions as non-critical in hash chain
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+ [31m❯[39m src/helix/gateway-security.test.ts [2m([22m[2m33 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 23[2mms[22m[39m
+     [32m✓[39m should validate localhost binding as safe[32m 2[2mms[22m[39m
+     [32m✓[39m should validate localhost string binding as safe[32m 0[2mms[22m[39m
+     [32m✓[39m should require authentication for 0.0.0.0 binding[32m 0[2mms[22m[39m
+     [32m✓[39m should allow 0.0.0.0 binding with authentication[32m 0[2mms[22m[39m
+     [32m✓[39m should warn about 0.0.0.0 exposure to all interfaces[32m 0[2mms[22m[39m
+     [32m✓[39m should provide recommendations for 0.0.0.0 binding[32m 0[2mms[22m[39m
+     [32m✓[39m should warn about private IP binding (10.x.x.x)[32m 0[2mms[22m[39m
+     [32m✓[39m should warn about private IP binding (192.168.x.x)[32m 0[2mms[22m[39m
+     [32m✓[39m should warn about private IP binding (172.16-31.x.x)[32m 0[2mms[22m[39m
+     [32m✓[39m should warn about privileged ports below 1024[32m 0[2mms[22m[39m
+     [32m✓[39m should warn about standard HTTP port 80 conflicts[32m 0[2mms[22m[39m
+     [32m✓[39m should warn about standard HTTPS port 443 conflicts[32m 0[2mms[22m[39m
+     [32m✓[39m should not warn about standard non-privileged ports on localhost[32m 0[2mms[22m[39m
+     [32m✓[39m should handle link-local IP 169.254.x.x as private[32m 0[2mms[22m[39m
+     [32m✓[39m should handle 172.31.x.x as private (upper bound)[32m 0[2mms[22m[39m
+     [32m✓[39m should recommend authentication verification for 0.0.0.0 with auth[32m 0[2mms[22m[39m
+     [32m✓[39m should log security check header[32m 2[2mms[22m[39m
+     [32m✓[39m should log bind configuration[32m 0[2mms[22m[39m
+     [32m✓[39m should log authentication status when required[32m 0[2mms[22m[39m
+     [32m✓[39m should log authentication status when not enforced[32m 0[2mms[22m[39m
+     [32m✓[39m should log security errors when present[32m 2[2mms[22m[39m
+     [32m✓[39m should log security warnings when present[32m 0[2mms[22m[39m
+     [32m✓[39m should log recommendations when present[32m 0[2mms[22m[39m
+     [32m✓[39m should exit with code 1 when validation fails[32m 0[2mms[22m[39m
+     [32m✓[39m should log success message when validation passes[32m 1[2mms[22m[39m
+     [32m✓[39m should not exit when validation passes[32m 0[2mms[22m[39m
+     [32m✓[39m should allow secure localhost configuration[32m 0[2mms[22m[39m
+     [32m✓[39m should throw on 0.0.0.0 without authentication[32m 0[2mms[22m[39m
+     [32m✓[39m should throw with specific error message for missing auth[32m 0[2mms[22m[39m
+     [32m✓[39m should allow 0.0.0.0 with authentication enabled[32m 0[2mms[22m[39m
+     [32m✓[39m should allow private IP without authentication[32m 0[2mms[22m[39m
+[31m     [31m×[31m should throw error when binding to 0.0.0.0 without auth (line 157 test)[39m[32m 8[2mms[22m[39m
+     [32m✓[39m should pass when 0.0.0.0 with auth required (line 157 else branch)[32m 0[2mms[22m[39m
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - sendTelemetry[2m > [22m[2mshould queue events after max retries
+[22m[39m[Helix Observatory] Event queued for later (queue size: 1)
+
+ [32m✓[39m src/helix/skill-chaining.test.ts [2m([22m[2m40 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Heartbeat Error Handling[2m > [22m[2mshould log error when heartbeat fails in interval
+[22m[39m[Helix] Heartbeat started (interval: 60s)
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Retry Logic[2m > [22m[2mshould queue after all retries exhausted
+[22m[39m[Helix Observatory] Event queued for later (queue size: 1)
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Heartbeat Error Handling[2m > [22m[2mshould log error when heartbeat fails in interval
+[22m[39m[Helix] Heartbeat stopped
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Singleton[2m > [22m[2mshould create singleton client
+[22m[39m[Helix Observatory] Client shutdown complete
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Uptime Edge Cases[2m > [22m[2mshould handle uptime in hours format
+[22m[39m[Helix] Announcing startup to Discord...
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Singleton[2m > [22m[2mshould shutdown singleton client
+[22m[39m[Helix Observatory] Client shutdown complete
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Uptime Edge Cases[2m > [22m[2mshould handle uptime in hours format
+[22m[39m[Helix] Startup announced successfully
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Shutdown[2m > [22m[2mshould stop offline flush on shutdown
+[22m[39m[Helix Observatory] Client shutdown complete
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Uptime Edge Cases[2m > [22m[2mshould handle uptime in days format
+[22m[39m[Helix] Announcing startup to Discord...
+
+[90mstdout[2m | src/helix/heartbeat.test.ts[2m > [22m[2mHeartbeat - Uptime Edge Cases[2m > [22m[2mshould handle uptime in days format
+[22m[39m[Helix] Startup announced successfully
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Offline Queue[2m > [22m[2mshould queue events when max queue size reached
+[22m[39m[Helix Observatory] Event queued for later (queue size: 1)
+
+ [32m✓[39m src/helix/heartbeat.test.ts [2m([22m[2m46 tests[22m[2m)[22m[32m 160[2mms[22m[39m
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Offline Queue[2m > [22m[2mshould queue events when max queue size reached
+[22m[39m[Helix Observatory] Event queued for later (queue size: 2)
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Offline Queue[2m > [22m[2mshould queue events when max queue size reached
+[22m[39m[Helix Observatory] Event queued for later (queue size: 3)
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Offline Queue[2m > [22m[2mshould queue events when max queue size reached
+[22m[39m[Helix Observatory] Event queued for later (queue size: 4)
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mtriggerHelixHooks wildcard matching[2m > [22m[2mtriggers both exact and wildcard hooks
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2msendToDiscord critical webhook not configured path[2m > [22m[2mthrows HelixSecurityError when critical webhook undefined in fail-closed mode
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2msendToDiscord critical webhook not configured path[2m > [22m[2mreturns false when critical webhook undefined but fail-closed disabled
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mhash chain criticality logic[2m > [22m[2midentifies command-related actions as critical
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mhash chain criticality logic[2m > [22m[2midentifies non-command actions as non-critical
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2mhash chain criticality logic[2m > [22m[2mprocesses agent bootstrap events
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/logging-hooks.test.ts[2m > [22m[2mLoggingHooks[2m > [22m[2msendToDiscord branch coverage[2m > [22m[2mcovers both conditions in webhook check
+[22m[39m[Helix] Pre-execution logging hooks installed
+
+[90mstdout[2m | src/helix/hash-chain.test.ts[2m > [22m[2mHash Chain - Scheduler[2m > [22m[2mshould start scheduler and create initial entry
+[22m[39m[Helix] Hash chain scheduler started (interval: 1s)
+
+ [32m✓[39m src/helix/command-logger.test.ts [2m([22m[2m39 tests[22m[2m)[22m[32m 124[2mms[22m[39m
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Offline Queue[2m > [22m[2mshould queue events when max queue size reached
+[22m[39m[Helix Observatory] Event queued for later (queue size: 5)
+
+ [32m✓[39m src/helix/api-logger.test.ts [2m([22m[2m43 tests[22m[2m)[22m[32m 245[2mms[22m[39m
+[90mstdout[2m | src/helix/hash-chain.test.ts[2m > [22m[2mHash Chain - Scheduler[2m > [22m[2mshould start scheduler and create initial entry
+[22m[39m[Helix] Initial hash chain entry created
+
+[90mstdout[2m | src/helix/hash-chain.test.ts[2m > [22m[2mHash Chain - Scheduler[2m > [22m[2mshould start scheduler and create initial entry
+[22m[39m[Helix] Hash chain scheduler stopped
+
+[90mstdout[2m | src/helix/hash-chain.test.ts[2m > [22m[2mHash Chain - Scheduler[2m > [22m[2mshould create entries at regular intervals
+[22m[39m[Helix] Hash chain scheduler started (interval: 1s)
+
+[90mstdout[2m | src/helix/hash-chain.test.ts[2m > [22m[2mHash Chain - Scheduler[2m > [22m[2mshould create entries at regular intervals
+[22m[39m[Helix] Initial hash chain entry created
+
+[90mstdout[2m | src/helix/hash-chain.test.ts[2m > [22m[2mHash Chain - Scheduler[2m > [22m[2mshould create entries at regular intervals
+[22m[39m[Helix] Hash chain scheduler stopped
+
+[90mstdout[2m | src/helix/hash-chain.test.ts[2m > [22m[2mHash Chain - Scheduler[2m > [22m[2mshould stop scheduler
+[22m[39m[Helix] Hash chain scheduler started (interval: 1s)
+
+[90mstdout[2m | src/helix/hash-chain.test.ts[2m > [22m[2mHash Chain - Scheduler[2m > [22m[2mshould stop scheduler
+[22m[39m[Helix] Initial hash chain entry created
+
+[90mstdout[2m | src/helix/hash-chain.test.ts[2m > [22m[2mHash Chain - Scheduler[2m > [22m[2mshould stop scheduler
+[22m[39m[Helix] Hash chain scheduler stopped
+
+ [32m✓[39m src/helix/logging-hooks.test.ts [2m([22m[2m80 tests[22m[2m)[22m[32m 189[2mms[22m[39m
+[90mstdout[2m | src/helix/hash-chain.test.ts[2m > [22m[2mHash Chain - Scheduler[2m > [22m[2mshould not start multiple schedulers
+[22m[39m[Helix] Hash chain scheduler started (interval: 1s)
+
+[90mstdout[2m | src/helix/hash-chain.test.ts[2m > [22m[2mHash Chain - Scheduler[2m > [22m[2mshould not start multiple schedulers
+[22m[39m[Helix] Initial hash chain entry created
+
+[90mstdout[2m | src/helix/hash-chain.test.ts[2m > [22m[2mHash Chain - Scheduler[2m > [22m[2mshould not start multiple schedulers
+[22m[39m[Helix] Hash chain scheduler stopped
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Offline Queue[2m > [22m[2mshould flush offline queue when connectivity restored
+[22m[39m[Helix Observatory] Event queued for later (queue size: 1)
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Offline Queue[2m > [22m[2mshould flush offline queue when connectivity restored
+[22m[39m[Helix Observatory] Event queued for later (queue size: 2)
+
+ [31m❯[39m src/helix/hash-chain.test.ts [2m([22m[2m70 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 41[2mms[22m[39m
+     [32m✓[39m should compute deterministic hash for same inputs[32m 2[2mms[22m[39m
+     [32m✓[39m should produce different hash for different timestamps[32m 1[2mms[22m[39m
+     [32m✓[39m should produce different hash for different previous hash[32m 0[2mms[22m[39m
+     [32m✓[39m should produce different hash for different log states[32m 0[2mms[22m[39m
+     [32m✓[39m should sort log states alphabetically for consistency[32m 0[2mms[22m[39m
+     [32m✓[39m should handle empty log states[32m 0[2mms[22m[39m
+     [32m✓[39m should handle GENESIS as previous hash[32m 0[2mms[22m[39m
+     [32m✓[39m should handle very long log state values[32m 0[2mms[22m[39m
+     [32m✓[39m should handle special characters in log states[32m 0[2mms[22m[39m
+     [32m✓[39m should hash existing log files[32m 1[2mms[22m[39m
+     [32m✓[39m should mark missing log files as MISSING[32m 0[2mms[22m[39m
+     [32m✓[39m should handle empty log files[32m 0[2mms[22m[39m
+     [32m✓[39m should create hash chain entry with correct structure[32m 2[2mms[22m[39m
+     [32m✓[39m should send to Discord before writing locally[32m 2[2mms[22m[39m
+     [32m✓[39m should link to previous hash[32m 0[2mms[22m[39m
+     [32m✓[39m should use GENESIS for first entry[32m 0[2mms[22m[39m
+     [32m✓[39m should handle Discord webhook failure in fail-open mode[32m 0[2mms[22m[39m
+     [32m✓[39m should handle file write failure gracefully[32m 5[2mms[22m[39m
+     [32m✓[39m should verify valid chain[32m 0[2mms[22m[39m
+     [32m✓[39m should detect tampered entry hash[32m 1[2mms[22m[39m
+     [32m✓[39m should detect broken chain link[32m 0[2mms[22m[39m
+     [32m✓[39m should handle empty chain[32m 0[2mms[22m[39m
+     [32m✓[39m should handle malformed JSON[32m 0[2mms[22m[39m
+     [32m✓[39m should handle missing chain file[32m 0[2mms[22m[39m
+     [32m✓[39m should return current chain state[32m 0[2mms[22m[39m
+     [32m✓[39m should return GENESIS state for empty chain[32m 0[2mms[22m[39m
+     [32m✓[39m should start scheduler and create initial entry[32m 3[2mms[22m[39m
+     [32m✓[39m should create entries at regular intervals[32m 1[2mms[22m[39m
+     [32m✓[39m should stop scheduler[32m 1[2mms[22m[39m
+     [32m✓[39m should not start multiple schedulers[32m 1[2mms[22m[39m
+     [32m✓[39m should handle null values in log states[32m 0[2mms[22m[39m
+     [32m✓[39m should handle very long timestamp[32m 0[2mms[22m[39m
+     [32m✓[39m should handle many log states[32m 0[2mms[22m[39m
+     [32m✓[39m should handle Discord webhook failures differently in fail-closed vs fail-open mode[32m 2[2mms[22m[39m
+     [32m✓[39m should throw when Discord returns non-ok status in fail-closed mode[32m 0[2mms[22m[39m
+     [32m✓[39m should throw when Discord is unreachable in fail-closed mode[32m 0[2mms[22m[39m
+     [32m✓[39m should not throw in fail-open mode when Discord fails[32m 0[2mms[22m[39m
+     [32m✓[39m should prevent disabling fail-closed mode in production[32m 0[2mms[22m[39m
+     [32m✓[39m should allow enabling fail-closed mode in production[32m 0[2mms[22m[39m
+     [32m✓[39m should send formatted embed to Discord[32m 0[2mms[22m[39m
+     [32m✓[39m should include sequence number in Discord embed[32m 0[2mms[22m[39m
+     [32m✓[39m should include entry hash in Discord embed[32m 0[2mms[22m[39m
+     [32m✓[39m should include previous hash in Discord embed[32m 0[2mms[22m[39m
+     [32m✓[39m should include log states in Discord embed[32m 0[2mms[22m[39m
+     [32m✓[39m should include timestamp in Discord embed[32m 0[2mms[22m[39m
+     [32m✓[39m should include fail-closed footer in Discord embed[32m 0[2mms[22m[39m
+     [32m✓[39m should reconstruct chain from multiple entries[32m 0[2mms[22m[39m
+     [32m✓[39m should handle chain with whitespace lines[32m 0[2mms[22m[39m
+     [32m✓[39m should detect tampering in middle of long chain[32m 0[2mms[22m[39m
+     [32m✓[39m should get correct state from multi-entry chain[32m 0[2mms[22m[39m
+     [32m✓[39m should use HELIX_LOG_FILES environment variable[32m 0[2mms[22m[39m
+     [32m✓[39m should handle missing environment-specified log files[32m 0[2mms[22m[39m
+[31m     [31m×[31m should throw HelixSecurityError when webhook not configured in fail-closed mode[39m[32m 3[2mms[22m[39m
+[31m     [31m×[31m should return false when webhook not configured in fail-open mode[39m[32m 1[2mms[22m[39m
+     [32m✓[39m should return GENESIS when last entry is malformed JSON[32m 0[2mms[22m[39m
+     [32m✓[39m should return GENESIS when last entry is missing required fields[32m 0[2mms[22m[39m
+     [32m✓[39m should handle empty chain verification[32m 0[2mms[22m[39m
+     [32m✓[39m should provide manual verification steps when bot token not available[32m 0[2mms[22m[39m
+     [32m✓[39m should include local hashes in manual verification steps[32m 0[2mms[22m[39m
+     [32m✓[39m should perform automatic verification when bot token available[32m 0[2mms[22m[39m
+     [32m✓[39m should use automatic verification mode when bot token available[32m 0[2mms[22m[39m
+     [32m✓[39m should detect mismatches in automatic verification[32m 0[2mms[22m[39m
+     [32m✓[39m should handle Discord API errors gracefully[32m 0[2mms[22m[39m
+     [32m✓[39m should handle Discord API non-ok responses[32m 0[2mms[22m[39m
+     [32m✓[39m should count Discord entries in automatic verification[32m 0[2mms[22m[39m
+     [32m✓[39m should handle messages without embeds in Discord response[32m 0[2mms[22m[39m
+     [32m✓[39m should handle chain file read errors[32m 0[2mms[22m[39m
+[31m     [31m×[31m should extract hash from Discord field with correct regex[39m[32m 1[2mms[22m[39m
+     [32m✓[39m should handle Discord messages with fields but no Entry Hash field[32m 0[2mms[22m[39m
+     [32m✓[39m should handle Discord hash fields with no regex match[32m 0[2mms[22m[39m
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Offline Queue[2m > [22m[2mshould flush offline queue when connectivity restored
+[22m[39m[Helix Observatory] Event queued for later (queue size: 3)
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould initialize with default options
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Offline Queue[2m > [22m[2mshould flush offline queue when connectivity restored
+[22m[39m[Helix Observatory] Attempting to flush 3 queued events
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Offline Queue[2m > [22m[2mshould flush offline queue when connectivity restored
+[22m[39m[Helix Observatory] Flushed 3/3 queued events
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Offline Queue[2m > [22m[2mshould drop stale queued events older than 24 hours
+[22m[39m[Helix Observatory] Event queued for later (queue size: 1)
+
+ [32m✓[39m src/helix/helix-context-loader.test.ts [2m([22m[2m64 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m src/helix/threat-detection.test.ts [2m([22m[2m113 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Offline Queue[2m > [22m[2mshould drop stale queued events older than 24 hours
+[22m[39m[Helix Observatory] Attempting to flush 1 queued events
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Offline Queue[2m > [22m[2mshould drop stale queued events older than 24 hours
+[22m[39m[Helix Observatory] Flushed 0/1 queued events
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould initialize with default options
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould initialize with default options
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould initialize with default options
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould initialize with custom options
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould initialize with custom options
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould validate security configuration by default
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould validate security configuration by default
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Offline Queue[2m > [22m[2mshould handle OPTIONS request failure during flush connectivity check
+[22m[39m[Helix Observatory] Event queued for later (queue size: 1)
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould validate security configuration by default
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Offline Queue[2m > [22m[2mshould handle OPTIONS request failure during flush connectivity check
+[22m[39m[Helix Observatory] Attempting to flush 1 queued events
+
+ [32m✓[39m src/helix/mcp-tool-validator-ultra-aggressive.test.ts [2m([22m[2m51 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould validate security configuration by default
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould skip security validation when requested
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould skip security validation when requested
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould handle security validation warnings
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould handle security validation warnings
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould handle security validation warnings
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould handle security validation warnings
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould handle invalid security configuration in non-fail-closed mode
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould handle invalid security configuration in non-fail-closed mode
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould handle invalid security configuration in non-fail-closed mode
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould announce startup before other initialization
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould announce startup before other initialization
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould announce startup before other initialization
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould announce startup before other initialization
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould install pre-execution logger
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould install pre-execution logger
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould install pre-execution logger
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould install pre-execution logger
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould initialize Discord webhooks
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould initialize Discord webhooks
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould initialize Discord webhooks
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould initialize Discord webhooks
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould handle Discord webhook initialization failure gracefully
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould handle Discord webhook initialization failure gracefully
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould handle Discord webhook initialization failure gracefully
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould handle Discord webhook initialization failure gracefully
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start file watcher when enabled
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start file watcher when enabled
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start file watcher when enabled
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start file watcher when enabled
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould not start file watcher when disabled
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould not start file watcher when disabled
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould not start file watcher when disabled
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould not start file watcher when disabled
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start hash chain scheduler with custom interval
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start hash chain scheduler with custom interval
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start hash chain scheduler with custom interval
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start hash chain scheduler with custom interval
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould skip hash chain when requested
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould skip hash chain when requested
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould skip hash chain when requested
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould skip hash chain when requested
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start heartbeat when enabled
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start heartbeat when enabled
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start heartbeat when enabled
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould start heartbeat when enabled
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould not start heartbeat when disabled
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould not start heartbeat when disabled
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould not start heartbeat when disabled
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould not start heartbeat when disabled
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould use OPENCLAW_WORKSPACE environment variable
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould use OPENCLAW_WORKSPACE environment variable
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould use OPENCLAW_WORKSPACE environment variable
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould use OPENCLAW_WORKSPACE environment variable
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould expand tilde in workspace directory
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould expand tilde in workspace directory
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould expand tilde in workspace directory
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould expand tilde in workspace directory
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould validate environment before initialization
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould validate environment before initialization
+[22m[39m[Helix] Validating security configuration...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould validate environment before initialization
+[22m[39m[Helix] Security configuration validated
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould validate environment before initialization
+[22m[39m[Helix] Logging system initialized successfully
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2minitializeHelix[2m > [22m[2mshould exit on environment validation failure
+[22m[39m[Helix] Initializing logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould shutdown with default reason
+[22m[39m[Helix] Shutting down logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould shutdown with default reason
+[22m[39m[Helix] Logging system shut down
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould shutdown with custom reason
+[22m[39m[Helix] Shutting down logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould shutdown with custom reason
+[22m[39m[Helix] Logging system shut down
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould stop heartbeat first
+[22m[39m[Helix] Shutting down logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould stop heartbeat first
+[22m[39m[Helix] Logging system shut down
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Offline Queue[2m > [22m[2mshould handle OPTIONS request with non-ok status during flush
+[22m[39m[Helix Observatory] Event queued for later (queue size: 1)
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Offline Queue[2m > [22m[2mshould handle OPTIONS request with non-ok status during flush
+[22m[39m[Helix Observatory] Attempting to flush 1 queued events
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould stop file watcher
+[22m[39m[Helix] Shutting down logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould stop file watcher
+[22m[39m[Helix] Logging system shut down
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould stop hash chain scheduler
+[22m[39m[Helix] Shutting down logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould stop hash chain scheduler
+[22m[39m[Helix] Logging system shut down
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould create final hash chain entry
+[22m[39m[Helix] Shutting down logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould create final hash chain entry
+[22m[39m[Helix] Logging system shut down
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould announce shutdown last
+[22m[39m[Helix] Shutting down logging system...
+
+[90mstdout[2m | src/helix/index.test.ts[2m > [22m[2mHelix Index Module[2m > [22m[2mshutdownHelix[2m > [22m[2mshould announce shutdown last
+[22m[39m[Helix] Logging system shut down
+
+ [32m✓[39m src/helix/index.test.ts [2m([22m[2m32 tests[22m[2m)[22m[32m 53[2mms[22m[39m
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mgetWatchedDirectories[2m > [22m[2mreturns filtered list of directories
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mgetWatchedDirectories[2m > [22m[2mreturns filtered list of directories
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mgetWatchedDirectories[2m > [22m[2mfilters out undefined/null values
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mgetWatchedDirectories[2m > [22m[2mfilters out undefined/null values
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mgetHashCacheSize[2m > [22m[2mreturns number
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mgetHashCacheSize[2m > [22m[2mreturns number
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mgetHashCacheSize[2m > [22m[2mreturns 0 after stop
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mgetHashCacheSize[2m > [22m[2mreturns 0 after stop
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mgetHashCacheSize[2m > [22m[2mreturns 0 after stop
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstopFileWatcher[2m > [22m[2mclears hash cache
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstopFileWatcher[2m > [22m[2mclears hash cache
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstopFileWatcher[2m > [22m[2mclears hash cache
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstopFileWatcher[2m > [22m[2mcan be called multiple times safely
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstopFileWatcher[2m > [22m[2mcan be called multiple times safely
+[22m[39m[Helix] File watchers stopped
+[Helix] File watchers stopped
+[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstopFileWatcher[2m > [22m[2mcan be called multiple times safely
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mmanualLogFileChange[2m > [22m[2mhandles created file change
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mmanualLogFileChange[2m > [22m[2mhandles created file change
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mmanualLogFileChange[2m > [22m[2mhandles modified file change
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Offline Queue[2m > [22m[2mshould clear queue array before processing during flush
+[22m[39m[Helix Observatory] Event queued for later (queue size: 1)
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mmanualLogFileChange[2m > [22m[2mhandles modified file change
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mmanualLogFileChange[2m > [22m[2mhandles deleted file change
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mmanualLogFileChange[2m > [22m[2mhandles deleted file change
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mmanualLogFileChange[2m > [22m[2mhandles file read errors gracefully
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mmanualLogFileChange[2m > [22m[2mhandles file read errors gracefully
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mmanualLogFileChange[2m > [22m[2mhandles stat errors gracefully
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mmanualLogFileChange[2m > [22m[2mhandles stat errors gracefully
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mignore patterns[2m > [22m[2mshould have common ignore patterns defined
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mignore patterns[2m > [22m[2mshould have common ignore patterns defined
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mcritical file detection[2m > [22m[2mdefines critical files for enhanced logging
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mcritical file detection[2m > [22m[2mdefines critical files for enhanced logging
+[22m[39m[Helix] File watchers stopped
+
+ [32m✓[39m src/helix/skill-chaining-ultra-aggressive.test.ts [2m([22m[2m36 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mhash computation[2m > [22m[2muses MD5 for file hashing
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mhash computation[2m > [22m[2muses MD5 for file hashing
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2membed formatting[2m > [22m[2muses correct emojis for change types
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2membed formatting[2m > [22m[2muses correct emojis for change types
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2membed formatting[2m > [22m[2muses correct colors for change types
+[22m[39m[Helix] File watchers stopped
+
+ [32m✓[39m src/lib/secrets/__tests__/database-manager.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 308[2mms[22m[39m
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2membed formatting[2m > [22m[2muses correct colors for change types
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2msize formatting[2m > [22m[2mformats sizes correctly
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2msize formatting[2m > [22m[2mformats sizes correctly
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2msendWebhook[2m > [22m[2msends webhook with correct format
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2msendWebhook[2m > [22m[2msends webhook with correct format
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2msendWebhook[2m > [22m[2mhandles webhook failure gracefully
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2msendWebhook[2m > [22m[2mhandles webhook failure gracefully
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2msendWebhook[2m > [22m[2mdoes nothing when webhook URL not configured
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2msendWebhook[2m > [22m[2mdoes nothing when webhook URL not configured
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2mcreates embed with hash field for non-deleted files
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2mcreates embed with hash field for non-deleted files
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2mcreates embed with size field in bytes for small files
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2mcreates embed with size field in bytes for small files
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2mcreates embed with size field in KB for large files
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2mcreates embed with size field in KB for large files
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2mmarks critical files with warning
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2mmarks critical files with warning
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2mmarks USER.md as critical
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2mmarks USER.md as critical
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2mmarks MEMORY.md as critical
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2mmarks MEMORY.md as critical
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2mmarks goals.json as critical
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Offline Queue[2m > [22m[2mshould clear queue array before processing during flush
+[22m[39m[Helix Observatory] Event queued for later (queue size: 2)
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2mmarks goals.json as critical
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Offline Queue[2m > [22m[2mshould clear queue array before processing during flush
+[22m[39m[Helix Observatory] Attempting to flush 2 queued events
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Offline Queue[2m > [22m[2mshould clear queue array before processing during flush
+[22m[39m[Helix Observatory] Flushed 2/2 queued events
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2mmarks attachments.json as critical
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2mmarks attachments.json as critical
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2muses correct color for created files
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2muses correct color for created files
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2muses correct color for modified files
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2muses correct color for modified files
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2muses correct color for deleted files
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2muses correct color for deleted files
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2mincludes timestamp field
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2mincludes timestamp field
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2mincludes footer text
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mlogFileChange embed creation[2m > [22m[2mincludes footer text
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstartFileWatcher[2m > [22m[2mchecks directory exists before watching
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstartFileWatcher[2m > [22m[2mchecks directory exists before watching
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstartFileWatcher[2m > [22m[2mchecks directory exists before watching
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstartFileWatcher[2m > [22m[2mskips non-existent directories
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstartFileWatcher[2m > [22m[2mskips non-existent directories
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstartFileWatcher[2m > [22m[2mskips non-existent directories
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstartFileWatcher[2m > [22m[2mresolves ~ to home directory
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstartFileWatcher[2m > [22m[2mresolves ~ to home directory
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstartFileWatcher[2m > [22m[2mresolves ~ to home directory
+[22m[39m[Helix] Initialized hash cache for C:\Users\Specter/.openclaw/workspace (0 files)
+[Helix] Watching directory: C:\Users\Specter/.openclaw/workspace
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstartFileWatcher[2m > [22m[2mresolves ~ to home directory
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstartFileWatcher[2m > [22m[2mstarts fs.watch with recursive option
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstartFileWatcher[2m > [22m[2mstarts fs.watch with recursive option
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstartFileWatcher[2m > [22m[2mstarts fs.watch with recursive option
+[22m[39m[Helix] Initialized hash cache for C:\Users\Specter/.openclaw/workspace (0 files)
+[Helix] Watching directory: C:\Users\Specter/.openclaw/workspace
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstartFileWatcher[2m > [22m[2mstarts fs.watch with recursive option
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstartFileWatcher[2m > [22m[2mhandles watch errors gracefully
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstartFileWatcher[2m > [22m[2mhandles watch errors gracefully
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstartFileWatcher[2m > [22m[2mhandles watch errors gracefully
+[22m[39m[Helix] Initialized hash cache for C:\Users\Specter/.openclaw/workspace (0 files)
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mstartFileWatcher[2m > [22m[2mhandles watch errors gracefully
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2minitializeHashCache[2m > [22m[2mhandles readdir errors gracefully
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2minitializeHashCache[2m > [22m[2mhandles readdir errors gracefully
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2minitializeHashCache[2m > [22m[2mhandles readdir errors gracefully
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mhandleFsEvent integration[2m > [22m[2mdetects file creation
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mhandleFsEvent integration[2m > [22m[2mdetects file creation
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mhandleFsEvent integration[2m > [22m[2mdetects file creation
+[22m[39m[Helix] Initialized hash cache for C:\Users\Specter/.openclaw/workspace (0 files)
+[Helix] Watching directory: C:\Users\Specter/.openclaw/workspace
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mhandleFsEvent integration[2m > [22m[2mdetects file creation
+[22m[39m[Helix] File watchers stopped
+
+[90mstdout[2m | src/helix/file-watcher.test.ts[2m > [22m[2mFileWatcher[2m > [22m[2mhandleFsEvent integration[2m > [22m[2mdetects file creation
+[22m[39m[Helix] File watchers stopped
+
+ [32m✓[39m src/helix/file-watcher.test.ts [2m([22m[2m51 tests[22m[2m | [22m[33m11 skipped[39m[2m)[22m[32m 56[2mms[22m[39m
+ [32m✓[39m src/helix/mcp-tool-validator.test.ts [2m([22m[2m51 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/helix/skill-sandbox.test.ts [2m([22m[2m42 tests[22m[2m | [22m[33m8 skipped[39m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/helix/types.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/helix/skill-sandbox-aggressive.test.ts [2m([22m[2m35 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/helix/skill-sandbox-extended.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m src/helix/skill-sandbox-ultra-aggressive.test.ts [2m([22m[2m32 tests[22m[2m | [22m[33m8 skipped[39m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/lib/encryption/__tests__/symmetric.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/lib/secrets/base-manager.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/lib/encryption/__tests__/key-derivation.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 780[2mms[22m[39m
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Exponential Backoff[2m > [22m[2mshould cap backoff at maxDelayMs
+[22m[39m[Helix Observatory] Event queued for later (queue size: 1)
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Edge Cases[2m > [22m[2mshould handle shutdown with non-empty queue
+[22m[39m[Helix Observatory] Event queued for later (queue size: 1)
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Edge Cases[2m > [22m[2mshould handle shutdown with non-empty queue
+[22m[39m[Helix Observatory] Event queued for later (queue size: 2)
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Edge Cases[2m > [22m[2mshould handle shutdown with non-empty queue
+[22m[39m[Helix Observatory] Attempting final flush before shutdown...
+[Helix Observatory] Attempting to flush 2 queued events
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Edge Cases[2m > [22m[2mshould handle shutdown with non-empty queue
+[22m[39m[Helix Observatory] Flushed 2/2 queued events
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Edge Cases[2m > [22m[2mshould handle shutdown with non-empty queue
+[22m[39m[Helix Observatory] Client shutdown complete
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Edge Cases[2m > [22m[2mshould handle multiple consecutive network errors correctly
+[22m[39m[Helix Observatory] Event queued for later (queue size: 1)
+
+[90mstdout[2m | src/helix/observatory-client.test.ts[2m > [22m[2mHelixObservatoryClient - Server Error Handling[2m > [22m[2mshould mark client as online after successful request
+[22m[39m[Helix Observatory] Event queued for later (queue size: 1)
+
+ [32m✓[39m src/helix/observatory-client.test.ts [2m([22m[2m58 tests[22m[2m)[22m[33m 1757[2mms[22m[39m
+     [33m[2m✓[22m[39m should apply exponential backoff on retries [33m 730[2mms[22m[39m
+     [33m[2m✓[22m[39m should retry on network error with backoff [33m 320[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m22 passed[39m[22m[90m (24)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m935 passed[39m[22m[2m | [22m[33m27 skipped[39m[90m (966)[39m
+[2m   Start at [22m 19:58:01
+[2m   Duration [22m 2.17s[2m (transform 973ms, setup 182ms, import 1.39s, tests 3.87s, environment 2ms)[22m
+

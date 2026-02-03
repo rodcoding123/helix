@@ -9,6 +9,7 @@ Complete documentation for the Helix project, organized by audience and purpose.
 → Go to **[Knowledge Base](/web/docs/knowledge-base/README.md)**
 
 The knowledge base contains user-friendly guides:
+
 - [Agent Templates](./knowledge-base/extended/agent-templates.md) - Discover and customize AI agents
 - [Marketplace](./knowledge-base/extended/marketplace.md) - Find and share resources
 - [Custom Tools](./knowledge-base/extended/custom-tools.md) - Create specialized AI functions
@@ -40,6 +41,7 @@ The knowledge base contains user-friendly guides:
 - [Living AI Architecture](./LIVING_AI_ARCHITECTURE_v1.md) - Psychological layer architecture
 
 **Component specifications:**
+
 - [Observatory Blueprint](./HELIX_OBSERVATORY_BLUEPRINT.md) - Web UI architecture
 - [Observatory Code Blueprint](./HELIX_OBSERVATORY_CODE_BLUEPRINT.md) - React/Frontend implementation
 - [Local Interface Blueprint](./HELIX_LOCAL_INTERFACE_BLUEPRINT.md) - Desktop app architecture
@@ -53,27 +55,32 @@ The knowledge base contains user-friendly guides:
 ### Implementation References
 
 **How things work:**
+
 - [OpenClaw Analysis](./blueprints/OPENCLAW-ANALYSIS.md) - Gateway and tool execution
 - [Platform Parity Matrix](./blueprints/PLATFORM-PARITY-MATRIX.md) - Web vs Desktop features
 - [Web/Mobile Strategy](./blueprints/WEB-MOBILE-STRATEGY.md) - Cross-platform strategy
 
 **Business & Operations:**
+
 - [Pricing & Cost Analysis](./blueprints/PRICING-COST-ANALYSIS.md) - Cost model and pricing
 - [User Showcase Analysis](./blueprints/USER-SHOWCASE-ANALYSIS.md) - Target user profiles
 
 ### Development Setup
 
 **Getting started:**
+
 - [1Password CI/CD Setup](./1PASSWORD-CICD-SETUP.md) - Secrets management setup
 - [Deployment with 1Password](./DEPLOYMENT_WITH_1PASSWORD.md) - Production deployment
 - [Layer 5 Cron Setup](./LAYER5_CRON_SETUP.md) - Scheduled job configuration
 
 **Desktop Development:**
+
 - [Desktop Signing Setup](/helix-desktop/docs/SIGNING-SETUP.md) - macOS app signing
 
 ### Current Implementation Plans
 
 **Latest implementation directions:**
+
 - [Phase 3 Desktop Secrets API](/docs/plans/2026-02-02-desktop-phase3-secrets-api.md)
 - [Per-User Secrets Architecture](/docs/plans/2026-02-02-per-user-secrets-architecture.md)
 - [Phase 3 Frontend Secrets Dashboard](/docs/plans/2026-02-02-phase3-frontend-secrets-dashboard.md)
@@ -155,27 +162,32 @@ The knowledge base contains user-friendly guides:
 → [Pricing Model](./blueprints/PRICING-COST-ANALYSIS.md)
 
 ### Backend Developer
+
 → [Technical Specification](./HELIX_TECHNICAL_SPEC.md)
 → [Autonomous Blueprint](./HELIX_AUTONOMOUS_BLUEPRINT.md)
 → [OpenClaw Analysis](./blueprints/OPENCLAW-ANALYSIS.md)
 → [Current Plans](./plans/)
 
 ### Frontend Developer
+
 → [Observatory Blueprint](./HELIX_OBSERVATORY_BLUEPRINT.md)
 → [Observatory Code Blueprint](./HELIX_OBSERVATORY_CODE_BLUEPRINT.md)
 → [Platform Parity](./blueprints/PLATFORM-PARITY-MATRIX.md)
 → [Knowledge Base Integration](./knowledge-base/INTEGRATION.md)
 
 ### DevOps / Infrastructure
+
 → [1Password Setup](./1PASSWORD-CICD-SETUP.md)
 → [Deployment Guide](./DEPLOYMENT_WITH_1PASSWORD.md)
 → [Layer 5 Cron](./LAYER5_CRON_SETUP.md)
 
 ### Mobile Developer
+
 → [Web/Mobile Strategy](./blueprints/WEB-MOBILE-STRATEGY.md)
 → [Local Interface](./HELIX_LOCAL_INTERFACE_BLUEPRINT.md)
 
 ### Desktop Developer
+
 → [Local Interface Blueprint](./HELIX_LOCAL_INTERFACE_BLUEPRINT.md)
 → [Signing Setup](/helix-desktop/docs/SIGNING-SETUP.md)
 → [Platform Parity](./blueprints/PLATFORM-PARITY-MATRIX.md)
@@ -198,36 +210,41 @@ The knowledge base contains user-friendly guides:
 
 ## 🔍 Finding Specific Topics
 
-| Topic | Document |
-|-------|----------|
-| How agents work | [Autonomous Blueprint](./HELIX_AUTONOMOUS_BLUEPRINT.md) |
-| Memory architecture | [Living AI Architecture](./LIVING_AI_ARCHITECTURE_v1.md) |
-| Web UI | [Observatory Blueprint](./HELIX_OBSERVATORY_BLUEPRINT.md) |
-| Desktop app | [Local Interface Blueprint](./HELIX_LOCAL_INTERFACE_BLUEPRINT.md) |
-| Secrets management | [1Password Setup](./1PASSWORD-CICD-SETUP.md) |
-| Deployment | [Deployment Guide](./DEPLOYMENT_WITH_1PASSWORD.md) |
-| Phase 3 Implementation | [Phase 3 Current State](./PHASE-3-CURRENT-STATE.md) |
-| User guides | [Knowledge Base](./knowledge-base/README.md) |
-| Cost model | [Pricing Analysis](./blueprints/PRICING-COST-ANALYSIS.md) |
-| Strategy | [Growth Roadmap](./newbp/GROWTH-IMPROVEMENT-ROADMAP.md) |
+| Topic                  | Document                                                          |
+| ---------------------- | ----------------------------------------------------------------- |
+| How agents work        | [Autonomous Blueprint](./HELIX_AUTONOMOUS_BLUEPRINT.md)           |
+| Memory architecture    | [Living AI Architecture](./LIVING_AI_ARCHITECTURE_v1.md)          |
+| Web UI                 | [Observatory Blueprint](./HELIX_OBSERVATORY_BLUEPRINT.md)         |
+| Desktop app            | [Local Interface Blueprint](./HELIX_LOCAL_INTERFACE_BLUEPRINT.md) |
+| Secrets management     | [1Password Setup](./1PASSWORD-CICD-SETUP.md)                      |
+| Deployment             | [Deployment Guide](./DEPLOYMENT_WITH_1PASSWORD.md)                |
+| Phase 3 Implementation | [Phase 3 Current State](./PHASE-3-CURRENT-STATE.md)               |
+| User guides            | [Knowledge Base](./knowledge-base/README.md)                      |
+| Cost model             | [Pricing Analysis](./blueprints/PRICING-COST-ANALYSIS.md)         |
+| Strategy               | [Growth Roadmap](./newbp/GROWTH-IMPROVEMENT-ROADMAP.md)           |
 
 ---
 
 ## 📝 Documentation Maintenance
 
 ### Active Documentation
+
 These files are actively used and updated:
+
 - `/blueprints/` - Architecture and design
 - `/plans/` - Current implementation plans
 - Root level `.md` files - Technical specifications
 - `/web/docs/knowledge-base/` - User documentation (protected)
 
 ### Historical Documentation
+
 These files are archived for reference:
+
 - `/archive/` - Old planning documents and phase reports
 - Some `/newbp/` files - Historical implementation notes
 
 ### How to Update Documentation
+
 1. For user guides: Update files in `/web/docs/knowledge-base/`
 2. For architecture: Update files in `/blueprints/` or root
 3. For deprecated info: Move to `/archive/` with explanation

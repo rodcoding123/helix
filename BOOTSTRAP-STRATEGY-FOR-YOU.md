@@ -1,6 +1,7 @@
 # Bootstrap Strategy - Your Path Forward
 
 **Your Situation:**
+
 - $0 budget
 - 0 users
 - Broke right now
@@ -103,6 +104,7 @@ MEMORY_SYNTHESIS_EVERY_CONVERSATION=true
 ```
 
 **What you get:**
+
 - Unlimited real-time conversations with Claude
 - All 100+ ElevenLabs voices available
 - Best speech recognition (Whisper Large)
@@ -118,6 +120,7 @@ MEMORY_SYNTHESIS_EVERY_CONVERSATION=true
 ## The Launch Timeline
 
 ### WEEK 1-2: Clean up Phase C, prepare Free Tier
+
 ```
 Tasks:
   ☐ Finalize Phase C documentation
@@ -132,6 +135,7 @@ Outcome: Free tier is public and working
 ```
 
 ### WEEK 3-4: Build BYOK Infrastructure
+
 ```
 Tasks:
   ☐ Design API key management UI
@@ -146,6 +150,7 @@ Outcome: Infrastructure ready for Developer tier
 ```
 
 ### WEEK 5-6: Launch Developer Tier
+
 ```
 Tasks:
   ☐ Integrate Phase 4.1 voice features
@@ -160,6 +165,7 @@ Outcome: Developer tier is live
 ```
 
 ### MONTH 2: Iterate Based on Feedback
+
 ```
 You now have:
   - Free tier users (growth)
@@ -170,6 +176,7 @@ You now have:
 ```
 
 ### MONTH 3-6: Build Pro Tier (Only if working)
+
 ```
 Decision point:
   ✅ If Free→Developer conversion is good
@@ -279,6 +286,7 @@ This is genuinely unique.
 ### Recommended Action Items:
 
 1. **Build Your Personal Dream Setup** (2-3 hours)
+
    ```bash
    # Add to .env.local your API keys
    # Run: npm run dev
@@ -287,6 +295,7 @@ This is genuinely unique.
    ```
 
 2. **Finalize Phase C Documentation** (2 hours)
+
    ```
    Review all Phase C docs
    Make sure release notes are perfect
@@ -294,6 +303,7 @@ This is genuinely unique.
    ```
 
 3. **Start BYOK Architecture Design** (4-6 hours)
+
    ```
    Design the key management UI
    Sketch the encryption layer
@@ -326,6 +336,7 @@ The only risk:
 ❌ **User acquisition** - How do you get traction without marketing budget?
 
 But that's OK because:
+
 - Free tier gets people interested
 - Developer tier gets power users engaged
 - Power users tell their friends
@@ -381,12 +392,15 @@ You get to this point without borrowing a penny.
 ## Your Three Decisions
 
 ### Decision 1: When to Launch?
+
 **Answer:** Immediately with Free tier (you can launch today)
 
 ### Decision 2: When to Add Developer Tier?
+
 **Answer:** After 2-3 weeks when BYOK infrastructure is ready
 
 ### Decision 3: When to Add Pro Tier?
+
 **Answer:** Only after you have 100+ Developer users AND revenue OR funding
 
 ---
@@ -426,28 +440,33 @@ All based on smart architecture decisions (BYOK, Free tier).
 **Launch immediately with:**
 
 ✅ **Free Tier** - This week
-  - Whisper Local
-  - System TTS
-  - Basic memory
-  - Completely free
+
+- Whisper Local
+- System TTS
+- Basic memory
+- Completely free
 
 ✅ **Developer Tier** - In 2 weeks
-  - Same as Free
-  - PLUS BYOK for power users
-  - PLUS Phase 4.1
-  - Zero cost to you
+
+- Same as Free
+- PLUS BYOK for power users
+- PLUS Phase 4.1
+- Zero cost to you
 
 ✅ **Your Personal Setup** - This week
-  - Build the dream experience
-  - Use your own API keys
-  - Know what you're building
+
+- Build the dream experience
+- Use your own API keys
+- Know what you're building
 
 ✅ **Pro Tier** - Only when profitable
-  - Not for launch
-  - Only when traction is clear
-  - Only when you can afford losses
+
+- Not for launch
+- Only when traction is clear
+- Only when you can afford losses
 
 This strategy:
+
 - Costs you $0
 - Gets you real users
 - Gives you product feedback
@@ -457,5 +476,5 @@ This strategy:
 
 ---
 
-*Bootstrap Strategy For You | February 2, 2026*
-*From $0 Budget to Sustainable Business*
+_Bootstrap Strategy For You | February 2, 2026_
+_From $0 Budget to Sustainable Business_

@@ -119,7 +119,7 @@ async function callDeepgram(userId: string, audio: Buffer) {
   // Use their key for their API call
   const response = await fetch('https://api.deepgram.com/v1/listen', {
     headers: {
-      'Authorization': `Token ${keys.deepgramKey}`,
+      Authorization: `Token ${keys.deepgramKey}`,
     },
     body: audio,
   });
@@ -131,6 +131,7 @@ async function callDeepgram(userId: string, audio: Buffer) {
 ### Step 3: Billing is Transparent
 
 **User sees:**
+
 ```
 Deepgram Usage: 2.5 hours this month
   Cost: 2.5 × $0.0043/min = $6.45
@@ -293,6 +294,7 @@ LOCAL_WHISPER_DEVICE=mps            # If you have Apple Silicon
 ```
 
 **Run locally:**
+
 ```bash
 npm run dev -- --personal-mode
 
@@ -308,6 +310,7 @@ npm run dev -- --personal-mode
 ```
 
 **Your cost:**
+
 - Whatever you spend on API keys
 - But you get to experience the product as intended
 - You know exactly how users will experience it
@@ -324,11 +327,11 @@ npm run dev -- --personal-mode
 // Only decrypted when needed for API calls
 
 const encryptionConfig = {
-  algorithm: 'aes-256-gcm',    // Military grade
-  keyDerivation: 'argon2',      // Password hashing
+  algorithm: 'aes-256-gcm', // Military grade
+  keyDerivation: 'argon2', // Password hashing
   iv: randomBytes(16),
-  authTag: true,                // Detect tampering
-}
+  authTag: true, // Detect tampering
+};
 
 // Keys are NEVER logged
 // Keys are NEVER sent to our servers
@@ -395,6 +398,7 @@ vs.
 ```
 
 Your marketing message:
+
 ```
 "Helix Developer Tier is completely free.
  Just bring your own API keys from Deepgram,
@@ -404,6 +408,7 @@ Your marketing message:
 ```
 
 This appeals to:
+
 - Developers (technical, control-oriented)
 - Privacy-conscious users
 - Power users (want to control their infrastructure)
@@ -414,6 +419,7 @@ This appeals to:
 ## Implementation Path (No Money Required)
 
 ### Phase 1: Free Tier (Week 1-2)
+
 ```
 1. Whisper Local + System TTS
 2. Basic memory storage
@@ -421,6 +427,7 @@ This appeals to:
 ```
 
 ### Phase 2: BYOK Setup (Week 3-4)
+
 ```
 1. Build key management UI
 2. Encrypt/decrypt infrastructure
@@ -432,6 +439,7 @@ Cost to run: $0 (no APIs called by us)
 ```
 
 ### Phase 3: Launch Developer Tier (Week 5)
+
 ```
 1. Add Developer tier option
 2. Onboarding flow for BYOK keys
@@ -443,6 +451,7 @@ Revenue from users: $0 (but we cost them $0 too)
 ```
 
 ### Phase 4: Iterate & Grow (Month 2+)
+
 ```
 1. Get feedback from Developer users
 2. They tell you which providers work best
@@ -452,6 +461,7 @@ Revenue from users: $0 (but we cost them $0 too)
 ```
 
 ### Phase 5: Pro Tier (When Profitable)
+
 ```
 1. Add managed API option
 2. Only when you have Developer tier revenue/users
@@ -523,6 +533,7 @@ Helix BYOK Model:
 5. **Build your personal dream setup** - So you know the experience
 
 Then launch with:
+
 - Free tier: Everyone
 - Developer tier: Anyone with API keys
 
@@ -530,5 +541,5 @@ Zero dollars spent, zero dollars revenue needed initially.
 
 ---
 
-*BYOK Architecture Guide | February 2, 2026*
-*The Secret to Free, Scalable Voice Infrastructure*
+_BYOK Architecture Guide | February 2, 2026_
+_The Secret to Free, Scalable Voice Infrastructure_

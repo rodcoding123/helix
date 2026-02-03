@@ -10,12 +10,12 @@
 
 **Major Discovery:** OpenClaw (our framework base) **already implements** most Phase 2 features. The real question is: should Helix expose their UIs now, or prioritize Phase 3 extensibility first?
 
-| Feature | Backend | UI | Status |
-| --- | --- | --- | --- |
-| **Voice** | ✅ Complete | ⚠️ Basic | Ready to enhance |
-| **Scheduled Tasks** | ✅ Complete | ✅ Complete | Fully exposed |
-| **Email** | 🟡 Partial (Gmail) | ❌ Missing | Needs email client UI |
-| **Calendar** | ❌ None | ❌ None | Requires full build |
+| Feature             | Backend            | UI          | Status                |
+| ------------------- | ------------------ | ----------- | --------------------- |
+| **Voice**           | ✅ Complete        | ⚠️ Basic    | Ready to enhance      |
+| **Scheduled Tasks** | ✅ Complete        | ✅ Complete | Fully exposed         |
+| **Email**           | 🟡 Partial (Gmail) | ❌ Missing  | Needs email client UI |
+| **Calendar**        | ❌ None            | ❌ None     | Requires full build   |
 
 ---
 
@@ -26,6 +26,7 @@
 **OpenClaw Status:** Production-ready
 
 **What's Built:**
+
 - **Speech-to-Text (STT)** - Multiple providers: Deepgram, Google, OpenAI, Groq, ElevenLabs
 - **Text-to-Speech (TTS)** - ElevenLabs, OpenAI, Edge TTS with voice selection, speed control
 - **Voice Activity Detection (VAD)** - Automatic speech boundary detection
@@ -34,6 +35,7 @@
 - **WebRTC Voice** - Real-time bidirectional with echo cancellation, noise suppression, auto-gain
 
 **Current UI Exposure:**
+
 - ✅ Web: VoiceButton, VoiceIndicator, AudioVisualizer components in Code interface
 - ✅ Desktop: VoiceSettings panel for provider selection
 - ✅ Desktop: VoiceStep in onboarding wizard
@@ -41,6 +43,7 @@
 - ✅ CLI commands: `openclaw voicecall call/continue/speak/end/status`
 
 **What's Missing:**
+
 - Voice memo recording UI
 - Voice transcript search
 - Voice command shortcuts
@@ -57,6 +60,7 @@
 **OpenClaw Status:** Production-ready with full UI
 
 **What's Built:**
+
 - **Cron Job Scheduler** - Persistent job storage, runs ~30 jobs routinely
 - **Three Schedule Types:**
   - `at`: One-shot timestamps
@@ -75,6 +79,7 @@
   - Timezone support
 
 **Current UI Exposure:**
+
 - ✅ Desktop: CronJobEditor with visual builder + preset templates
 - ✅ Desktop: CronJobManager with full CRUD operations
 - ✅ CLI: `openclaw cron add/edit/remove/list/run/runs` with subcommands
@@ -82,6 +87,7 @@
 - ✅ Agent tools: Can create jobs from within runs
 
 **What's Missing:**
+
 - Pre-built job template library
 - Analytics on job execution (success rate, duration)
 - Bulk import/export
@@ -99,6 +105,7 @@
 **OpenClaw Status:** Backend exists, UI missing
 
 **What's Built:**
+
 - **Gmail Integration** - Full Pub/Sub monitoring via Google's push notifications
   - Watch implementation with auto-renewal
   - Real-time triggering when emails arrive
@@ -112,6 +119,7 @@
 - **Auto-Reply System** - Email handling in message pipeline
 
 **Current UI Exposure:**
+
 - ❌ No visual email inbox
 - ❌ No email composition UI
 - ❌ No email search interface
@@ -119,6 +127,7 @@
 - ✅ Monitoring works (pushes trigger agent actions)
 
 **What's Missing:**
+
 - Email inbox viewer component
 - Email message reader with HTML rendering
 - Email composer with rich text editor
@@ -139,6 +148,7 @@
 **OpenClaw Status:** Completely missing
 
 **What's NOT Built:**
+
 - No Google Calendar API integration
 - No Outlook/Office 365 calendar support
 - No iCalendar parsing
@@ -147,9 +157,11 @@
 - No time slot querying
 
 **Current UI Exposure:**
+
 - ❌ No calendar anywhere
 
 **Why It Wasn't Built:**
+
 - Complex OAuth flows (Google + Microsoft separately)
 - Privacy concerns with calendar data sync
 - Limited value without context-aware scheduling
@@ -166,11 +178,13 @@
 We didn't "defer Phase 2" - we **inherited Phase 2 from OpenClaw** and made a UI prioritization decision:
 
 **Option 1: Expose Phase 2 UIs**
+
 - ✅ Pro: Users get email, calendar, scheduled tasks
 - ❌ Con: Slows Phase 3 extensibility platform
 - ⏱️ Time: 12-16 weeks for all four features
 
 **Option 2: Prioritize Phase 3 (What We Did)**
+
 - ✅ Pro: Users can build their own integrations
 - ✅ Pro: More powerful long-term (users build Phase 2+)
 - ⏱️ Time: Week 1-6 Phase 3 foundation
@@ -178,18 +192,21 @@ We didn't "defer Phase 2" - we **inherited Phase 2 from OpenClaw** and made a UI
 ### Why This Was The Right Call
 
 **User Empowerment:**
+
 - Custom Tools + Skills = users can query Gmail API themselves
 - Schedule Composite Skills with built-in cron
 - Build Calendar integrations as Custom Tools
 - Voice is already available for advanced scenarios
 
 **Business Value:**
+
 - Phase 3 extensibility platform = unlimited growth
 - Community-contributed integrations
 - Marketplace for user-built solutions
 - Less maintenance burden (users support their tools)
 
 **Resource Efficiency:**
+
 - Phase 3 unlocks all Phase 2 features for users
 - One extensibility platform > four separate integrations
 - Community contributions amplify team effort
@@ -198,12 +215,12 @@ We didn't "defer Phase 2" - we **inherited Phase 2 from OpenClaw** and made a UI
 
 ## Phase 2 Feature Completion Timeline
 
-| Feature | Backend | Current UI | Work Needed | Timeline | Priority |
-| --- | --- | --- | --- | --- | --- |
-| Voice | ✅ Complete | ⚠️ Basic | 1-2 weeks | Week 7-8 | High |
-| Scheduled Tasks | ✅ Complete | ✅ Complete | 2-3 weeks (analytics) | Week 9-11 | Medium |
-| Email | 🟡 Partial | ❌ None | 6-8 weeks | Week 12-19 | High |
-| Calendar | ❌ Missing | ❌ None | 6-10 weeks | Week 20+ | Medium |
+| Feature         | Backend     | Current UI  | Work Needed           | Timeline   | Priority |
+| --------------- | ----------- | ----------- | --------------------- | ---------- | -------- |
+| Voice           | ✅ Complete | ⚠️ Basic    | 1-2 weeks             | Week 7-8   | High     |
+| Scheduled Tasks | ✅ Complete | ✅ Complete | 2-3 weeks (analytics) | Week 9-11  | Medium   |
+| Email           | 🟡 Partial  | ❌ None     | 6-8 weeks             | Week 12-19 | High     |
+| Calendar        | ❌ Missing  | ❌ None     | 6-10 weeks            | Week 20+   | Medium   |
 
 ---
 
@@ -212,6 +229,7 @@ We didn't "defer Phase 2" - we **inherited Phase 2 from OpenClaw** and made a UI
 ### Short Term (February - March 2026)
 
 **Complete Phase 3 First** ✅
+
 - Finish Desktop UI for Custom Tools
 - Implement Composite Skill execution
 - Complete Memory Synthesis UI
@@ -220,11 +238,13 @@ We didn't "defer Phase 2" - we **inherited Phase 2 from OpenClaw** and made a UI
 ### Medium Term (April - May 2026)
 
 **Add Voice UI Enhancements** (1-2 weeks)
+
 - Voice memo recording
 - Voice transcript search
 - Voice shortcuts/commands
 
 **Build Email Client UI** (6-8 weeks)
+
 - Inbox viewer
 - Message reader
 - Composer
@@ -233,6 +253,7 @@ We didn't "defer Phase 2" - we **inherited Phase 2 from OpenClaw** and made a UI
 ### Long Term (June 2026+)
 
 **Calendar Integration** (6-10 weeks)
+
 - Google Calendar OAuth
 - Outlook/Office 365 support
 - Event scheduling UI
@@ -243,6 +264,7 @@ We didn't "defer Phase 2" - we **inherited Phase 2 from OpenClaw** and made a UI
 ## Implementation Roadmap
 
 ### Phase 3 Completion (Weeks 1-6)
+
 ```
 Week 1-2: Desktop Custom Tools UI
 Week 3-4: Composite Skill execution engine
@@ -250,6 +272,7 @@ Week 5-6: Memory Synthesis algorithms & UI
 ```
 
 ### Phase 2 Enhancement (Weeks 7-19)
+
 ```
 Week 7-8:   Voice memo + shortcuts
 Week 9-11:  Task analytics & templates
@@ -262,21 +285,25 @@ Week 20+:   Calendar integration
 ## Files to Leverage
 
 **For Voice Enhancement:**
+
 - `helix-runtime/src/helix/voice/` - All STT/TTS logic (ready)
 - `web/src/components/code/voice/` - Base components
 - `helix-runtime/docs/tts.md` - Configuration guide
 
 **For Email Client:**
+
 - `helix-runtime/src/hooks/gmail.ts` - Existing Gmail integration
 - `helix-runtime/src/hooks/gmail-watcher.ts` - Monitoring
 - `helix-runtime/skills/himalaya/` - Email CLI tool
 
 **For Scheduled Tasks:**
+
 - `helix-desktop/src/components/automation/CronJobEditor.tsx` - Existing UI
 - `helix-runtime/src/cron/` - Scheduler service
 - `helix-runtime/docs/automation/cron-jobs.md` - Full spec
 
 **For Calendar (Future):**
+
 - Design from scratch following OpenClaw patterns
 
 ---
@@ -286,6 +313,7 @@ Week 20+:   Calendar integration
 **This isn't about what's possible - it's about what to prioritize.**
 
 OpenClaw gives us:
+
 - ✅ Voice (complete)
 - ✅ Scheduled Tasks (complete)
 - 🟡 Email monitoring (complete, UI missing)

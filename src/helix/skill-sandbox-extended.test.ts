@@ -114,11 +114,8 @@ describe('Skill Sandbox - Extended Validation', () => {
 
     const signedData = `${code}|${metadata.name}|${metadata.version}|${metadata.author}|${metadata.signedAt}`;
     const dataHash = crypto.createHash('sha256').update(signedData).digest('hex');
-    const signature = crypto
-      .createHash('sha256')
-      .update(`key2:${dataHash}`)
-      .digest('hex')
-      .slice(0, 16) + '-sig';
+    const signature =
+      crypto.createHash('sha256').update(`key2:${dataHash}`).digest('hex').slice(0, 16) + '-sig';
 
     metadata.signature = signature;
 

@@ -39,6 +39,7 @@ Your revenue: Later (subscription on top of BYOK)
 ```
 
 **This is perfect for bootstrapping because:**
+
 1. Zero cost to launch
 2. Zero cost to scale
 3. Users control their own spending
@@ -51,6 +52,7 @@ Your revenue: Later (subscription on top of BYOK)
 ### TIER 1: FREE (Cost to you: $0)
 
 **Features:**
+
 - Speech Recognition: Whisper Local (offline)
 - Voice Output: System TTS (macOS/Windows/Linux)
 - Wake Word: Vosk (free, offline)
@@ -58,6 +60,7 @@ Your revenue: Later (subscription on top of BYOK)
 - Conversations: Text-based only (not Phase 4.1)
 
 **Limitations:**
+
 - Local-only (no cloud sync)
 - No real-time voice conversations
 - Robot-like voice
@@ -65,6 +68,7 @@ Your revenue: Later (subscription on top of BYOK)
 - Single device only
 
 **For who:**
+
 - Budget users
 - Privacy-first users
 - Offline-only preference
@@ -73,6 +77,7 @@ Your revenue: Later (subscription on top of BYOK)
 **Cost to user:** $0
 
 **Example user story:**
+
 ```
 User launches Helix
 → Uses local Whisper for voice input
@@ -88,9 +93,11 @@ User launches Helix
 ### TIER 2: DEVELOPER (Cost to you: $0) ⭐ BOOTSTRAPPING TIER
 
 **Features (same as Free):**
+
 - Everything from Free tier
 
 **PLUS (requires user to provide API keys):**
+
 - Deepgram STT (user provides key)
 - ElevenLabs OR OpenAI TTS (user provides key)
 - Claude API for memory synthesis (user provides key)
@@ -100,6 +107,7 @@ User launches Helix
 - API key management UI
 
 **Limitations:**
+
 - User must have their own API keys
 - User pays Deepgram directly
 - User pays Claude directly
@@ -107,6 +115,7 @@ User launches Helix
 - No conversation history cloud sync
 
 **For who:**
+
 - Developers/technical users
 - Users comfortable with API keys
 - Power users
@@ -114,15 +123,18 @@ User launches Helix
 
 **Cost to company:** $0 (users pay APIs directly)
 **Cost to user:** Variable (typically $50-100/month if using frequently)
-  - Deepgram: $0.0043/min (10 hrs = $26)
-  - Claude: ~$10-30/month (depending on synthesis usage)
-  - ElevenLabs: $0 if using Edge TTS, or $99/month if premium voices
+
+- Deepgram: $0.0043/min (10 hrs = $26)
+- Claude: ~$10-30/month (depending on synthesis usage)
+- ElevenLabs: $0 if using Edge TTS, or $99/month if premium voices
 
 **Pricing model:**
+
 - Free tier (monetize later with pro features)
 - OR charge $0/month ("Free Developer Tier")
 
 **Example user story:**
+
 ```
 Developer user signs up
 → Provides Deepgram API key (from their account)
@@ -141,6 +153,7 @@ Developer user signs up
 **Paid Tier: $9.99-19.99/month**
 
 **Features (hybrid approach):**
+
 - AI Voice Input: Deepgram (we pay)
 - Voice Output: Edge TTS (we pay, free) OR ElevenLabs (add $10/month)
 - Real-time conversations: LIMITED (1 hour/month)
@@ -150,6 +163,7 @@ Developer user signs up
 - Async voice messages: Send/receive like Telegram
 
 **Async Voice Messaging (Key feature):**
+
 ```
 User 1 records voice message
 → Auto-transcribed by Deepgram
@@ -162,22 +176,26 @@ Reduces Claude API usage (async = cheaper batch processing)
 ```
 
 **Real-time conversation limit:**
+
 - 1 hour per month of real-time voice
 - Great for testing, not production daily use
 - Each user gets 1 realtime session
 
 **Limitations:**
+
 - Real-time limited to 1 hour/month
 - Memory synthesis 1x/day
 - No BYOK (we manage keys, handle costs)
 - Conversation history kept for 30 days only
 
 **For who:**
+
 - Users who want convenience (no API keys to manage)
 - Casual voice users
 - Want to try real-time but don't need heavy use
 
 **Cost breakdown:**
+
 - Deepgram (1 hour/month × 100 users): ~$25
 - Claude (limited synthesis): ~$10
 - ElevenLabs (if they choose upgrade): $99/month (split across users)
@@ -187,6 +205,7 @@ Reduces Claude API usage (async = cheaper batch processing)
 - **Margin: ~95%** ✅
 
 **Pricing model:**
+
 - $9.99/month (basic Pro)
 - $14.99/month (Pro + premium voice)
 - $19.99/month (Pro + premium voice + more hours)
@@ -198,6 +217,7 @@ Reduces Claude API usage (async = cheaper batch processing)
 **Paid Tier: $29.99-49.99/month**
 
 **Features:**
+
 - Everything from Pro
 - PLUS unlimited real-time conversations
 - Claude API unlimited (your cost: ~$100-150/month per user)
@@ -207,24 +227,29 @@ Reduces Claude API usage (async = cheaper batch processing)
 - Priority support
 
 **Async voice messaging:**
+
 - Unlimited (same as Pro)
 - Plus ability to create "voice channels" with others
 
 **Real-time conversations:**
+
 - Unlimited hours
 - Sub-400ms latency
 - Full interruption support (Phase 4.1)
 - Can use in group conversations
 
 **Limitations:**
+
 - Still cloud-managed (not BYOK)
 
 **For who:**
+
 - Power users
 - Professional use
 - Want unlimited access
 
 **Cost breakdown:**
+
 - Deepgram (unlimited): ~$100-150/month
 - Claude (unlimited synthesis): ~$30-50/month
 - ElevenLabs premium: ~$99/month
@@ -234,6 +259,7 @@ Reduces Claude API usage (async = cheaper batch processing)
 - **This is a loss leader** ❌
 
 **Note:** Premium tier is LOSS MAKING until you have:
+
 1. 100+ premium users (revenue covers costs)
 2. Better pricing with providers
 3. Or you only offer this to enterprise
@@ -290,6 +316,7 @@ Total: ~$160-170/month for YOUR ultimate personal AI voice assistant
 ```
 
 **This is achievable because:**
+
 1. You have the architecture already
 2. Everything's local-first (privacy)
 3. You're just using your own API keys
@@ -297,6 +324,7 @@ Total: ~$160-170/month for YOUR ultimate personal AI voice assistant
 5. Can iterate fast without user constraints
 
 **Setup process:**
+
 ```
 1. Clone helix-desktop locally
 2. Create .env.local with your API keys:
@@ -315,6 +343,7 @@ Total: ~$160-170/month for YOUR ultimate personal AI voice assistant
 ## Launch Strategy (No Money Required)
 
 ### Phase 1: Launch (Week 1-2)
+
 ```
 1. Build Free tier (Whisper Local + System TTS)
 2. Build Developer tier UI (BYOK configuration)
@@ -326,6 +355,7 @@ You get: Working product for free users
 ```
 
 ### Phase 2: Developer Beta (Week 3-4)
+
 ```
 1. Post on Reddit/HN about BYOK model
 2. Get developers to use it (they have own API keys)
@@ -337,6 +367,7 @@ You get: Real users, real feedback, no money spent
 ```
 
 ### Phase 3: Pro Tier Launch (Month 2)
+
 ```
 1. Add Pro tier when you have 100+ Developer users
 2. Set up Stripe subscription
@@ -347,6 +378,7 @@ Revenue: Starts generating immediately
 ```
 
 ### Phase 4: Premium Tier (Month 6+)
+
 ```
 1. Only if Pro tier is profitable
 2. Add Premium tier for power users
@@ -542,6 +574,7 @@ npm run dev -- --personal-config
 ```
 
 **Cost to you personally:**
+
 - Whatever you spend on API keys monthly
 - But you get the absolute BEST experience possible
 - And you can iterate on features for your users
@@ -595,10 +628,11 @@ With this strategy:
 ✅ **You own 100% of the product**
 
 The BYOK model is perfect for bootstrapping voice features because you flip the economics:
+
 - Traditional SaaS pays for infrastructure upfront
 - BYOK model lets users pay for their own infrastructure
 
 ---
 
-*Product Pricing Strategy | February 2, 2026*
-*Zero Budget Bootstrap with BYOK Model*
+_Product Pricing Strategy | February 2, 2026_
+_Zero Budget Bootstrap with BYOK Model_

@@ -16,21 +16,25 @@ Think of it like creating a mini-app: "TextToUppercase" or "EmailValidator" or "
 Create a custom tool when you need:
 
 **One-time automation**
+
 - "Parse this specific format"
 - "Transform data this way"
 - "Validate this business rule"
 
 **Reusable functionality**
+
 - Multiple agents need the same logic
 - You do this transformation regularly
 - The logic is self-contained
 
 **Custom logic**
+
 - The built-in tools don't do exactly what you need
 - You want to enforce specific business rules
 - You need to integrate a specific API
 
 **Examples of useful tools:**
+
 - ✓ Email validator (validates company email format)
 - ✓ Currency converter (with fixed rates)
 - ✓ Text formatter (applies your style guide)
@@ -50,17 +54,20 @@ Create a custom tool when you need:
 Fill in:
 
 **Name** (required)
+
 - Clear, action-based name
 - Examples: "Email Validator", "Text Reverser", "JSON Parser"
 - ✓ Good: "Phone Number Formatter"
 - ✗ Bad: "tool1" or "function"
 
 **Description** (required)
+
 - What does this tool do?
 - Who would use it?
 - Example: "Formats phone numbers to E.164 international format (e.g., +1234567890)"
 
 **Icon** (optional)
+
 - Single emoji to represent the tool
 - ☎️ for phone tool
 - 📧 for email tool
@@ -68,6 +75,7 @@ Fill in:
 - Makes it easy to identify
 
 **Visibility** (required)
+
 - **Private** - Only you can use it
 - **Public** - Anyone can see and clone it from Marketplace
 
@@ -76,6 +84,7 @@ Fill in:
 Parameters are the inputs your tool accepts. Click **Add Parameter** for each:
 
 **Text Parameter**
+
 ```
 Name: phoneNumber
 Type: Text (String)
@@ -84,6 +93,7 @@ Required: Yes ✓
 ```
 
 **Number Parameter**
+
 ```
 Name: discount
 Type: Number
@@ -92,6 +102,7 @@ Required: No
 ```
 
 **Boolean Parameter**
+
 ```
 Name: includeArea
 Type: Boolean
@@ -100,6 +111,7 @@ Required: No (defaults to true)
 ```
 
 **Object Parameter**
+
 ```
 Name: person
 Type: Object
@@ -108,6 +120,7 @@ Required: No
 ```
 
 **Array Parameter**
+
 ```
 Name: items
 Type: Array
@@ -116,6 +129,7 @@ Required: No
 ```
 
 **Example: Email Validator Tool**
+
 ```
 Parameter 1: Email Address
 ├─ Type: Text
@@ -133,6 +147,7 @@ Parameter 2: Check DNS
 Click the **Code Editor** and write your function. Your function receives parameters and returns results:
 
 **Basic Template**
+
 ```javascript
 async function execute(params) {
   // params.parameterName contains the input
@@ -140,27 +155,26 @@ async function execute(params) {
   // Return the result
   return {
     success: true,
-    result: "your output here"
+    result: 'your output here',
   };
 }
 ```
 
 **Simple Example: Text Reverser**
+
 ```javascript
 async function execute(params) {
-  const reversed = params.text
-    .split('')
-    .reverse()
-    .join('');
+  const reversed = params.text.split('').reverse().join('');
 
   return {
     result: reversed,
-    length: reversed.length
+    length: reversed.length,
   };
 }
 ```
 
 **Email Validator Example**
+
 ```javascript
 async function execute(params) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -169,27 +183,29 @@ async function execute(params) {
   return {
     email: params.email,
     isValid: isValid,
-    message: isValid ? "Valid email" : "Invalid email format"
+    message: isValid ? 'Valid email' : 'Invalid email format',
   };
 }
 ```
 
 **Number Formatter Example**
+
 ```javascript
 async function execute(params) {
   const formatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: params.currency || 'USD'
+    currency: params.currency || 'USD',
   });
 
   return {
     original: params.amount,
-    formatted: formatter.format(params.amount)
+    formatted: formatter.format(params.amount),
   };
 }
 ```
 
 **JSON Validator Example**
+
 ```javascript
 async function execute(params) {
   try {
@@ -197,13 +213,13 @@ async function execute(params) {
     return {
       valid: true,
       result: parsed,
-      message: "Valid JSON"
+      message: 'Valid JSON',
     };
   } catch (error) {
     return {
       valid: false,
       error: error.message,
-      message: "Invalid JSON"
+      message: 'Invalid JSON',
     };
   }
 }
@@ -234,16 +250,19 @@ Capabilities determine what your tool can do. Choose only what you need:
 Based on your capabilities, the tool automatically gets a security level:
 
 **Strict Sandbox** (No file/network access)
+
 - ✓ Safest
 - ✓ Pure computation (text, math, validation)
 - Examples: Validators, formatters, parsers
 
 **Standard Sandbox** (Filesystem read + localhost)
+
 - ✓ Safe for most tools
 - Can read local files and access localhost services
 - Examples: Config readers, API adapters
 
 **Permissive Sandbox** (Full access)
+
 - ⚠️ Highest risk
 - Full file and network access
 - Only use if you fully trust the code
@@ -257,6 +276,7 @@ Before saving, test with sample data:
 3. See the **output** in the results panel
 
 **Testing Email Validator:**
+
 ```
 Input:
   email: "user@example.com"
@@ -277,6 +297,7 @@ Keep testing until you're happy with the results.
 Click **Save Tool**
 
 Your tool is now:
+
 - ✓ Saved to your account
 - ✓ Available for your agents to use
 - ✓ Ready for reuse
@@ -287,11 +308,13 @@ Your tool is now:
 ### In Chats
 
 When chatting with an agent:
+
 - The agent can suggest using your tools if relevant
 - You can manually suggest: "Use my EmailValidator tool"
 - Agent executes and shows the result
 
 Example:
+
 ```
 You: "Validate these email addresses for me"
 Agent: "I'll use your Email Validator tool"
@@ -302,6 +325,7 @@ Agent: "All emails are valid!"
 ### In Skills
 
 When creating multi-step workflows:
+
 - Select your custom tools as workflow steps
 - Chain them together
 - Map outputs to inputs
@@ -311,6 +335,7 @@ When creating multi-step workflows:
 ### In Automations
 
 Set tools to run automatically:
+
 - "Every day, clean up my data with my Cleaner tool"
 - "When new emails arrive, validate them"
 - Scheduling and automation options coming soon
@@ -328,6 +353,7 @@ Set tools to run automatically:
 ### Edit a Tool
 
 Click **Edit** on any tool to modify:
+
 - Name, description, icon
 - Parameters
 - Code
@@ -339,6 +365,7 @@ Changes take effect immediately for new uses.
 ### Test Again
 
 After editing, you can:
+
 - Click **Test** to verify your changes
 - Fix any issues before others use it
 - Keep previous version as reference
@@ -346,6 +373,7 @@ After editing, you can:
 ### Delete a Tool
 
 Click **Delete** to remove a tool:
+
 - Removes from your account
 - No longer available to use
 - Already-saved workflows are affected
@@ -354,6 +382,7 @@ Click **Delete** to remove a tool:
 ### Clone Someone Else's Tool
 
 Find a tool you like in the Marketplace:
+
 1. Click **Clone**
 2. Customize for your needs
 3. Save as your own version
@@ -367,11 +396,7 @@ Validates that email is from approved domain:
 
 ```javascript
 async function execute(params) {
-  const approvedDomains = [
-    'company.com',
-    'company.co.uk',
-    'team.company.com'
-  ];
+  const approvedDomains = ['company.com', 'company.co.uk', 'team.company.com'];
 
   const email = params.email.toLowerCase();
   const domain = email.split('@')[1];
@@ -382,9 +407,7 @@ async function execute(params) {
     email: params.email,
     domain: domain,
     approved: isApproved,
-    message: isApproved
-      ? `✓ ${domain} is approved`
-      : `✗ ${domain} is not approved`
+    message: isApproved ? `✓ ${domain} is approved` : `✗ ${domain} is not approved`,
   };
 }
 ```
@@ -405,7 +428,7 @@ async function execute(params) {
 
   return {
     html: html,
-    length: html.length
+    length: html.length,
   };
 }
 ```
@@ -430,7 +453,7 @@ async function execute(params) {
   return {
     headers: headers,
     rowCount: rows.length,
-    rows: rows
+    rows: rows,
   };
 }
 ```
@@ -445,11 +468,16 @@ async function execute(params) {
   let score = 0;
   let feedback = [];
 
-  if (pwd.length >= 8) score += 1; else feedback.push('Use 8+ characters');
-  if (/[a-z]/.test(pwd)) score += 1; else feedback.push('Add lowercase letters');
-  if (/[A-Z]/.test(pwd)) score += 1; else feedback.push('Add uppercase letters');
-  if (/[0-9]/.test(pwd)) score += 1; else feedback.push('Add numbers');
-  if (/[!@#$%^&*]/.test(pwd)) score += 1; else feedback.push('Add special characters');
+  if (pwd.length >= 8) score += 1;
+  else feedback.push('Use 8+ characters');
+  if (/[a-z]/.test(pwd)) score += 1;
+  else feedback.push('Add lowercase letters');
+  if (/[A-Z]/.test(pwd)) score += 1;
+  else feedback.push('Add uppercase letters');
+  if (/[0-9]/.test(pwd)) score += 1;
+  else feedback.push('Add numbers');
+  if (/[!@#$%^&*]/.test(pwd)) score += 1;
+  else feedback.push('Add special characters');
 
   const strength = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong', 'Very Strong'][score];
 
@@ -457,7 +485,7 @@ async function execute(params) {
     strength: strength,
     score: score,
     feedback: feedback,
-    suggestions: feedback.length > 0 ? feedback : ['Great password!']
+    suggestions: feedback.length > 0 ? feedback : ['Great password!'],
   };
 }
 ```
@@ -467,12 +495,14 @@ async function execute(params) {
 ### Keep Tools Focused
 
 **✓ Good tools:**
+
 - Do one thing well
 - Have clear purpose
 - Easy to test
 - Reusable
 
 **✗ Bad tools:**
+
 - Try to do everything
 - Complex logic
 - Hard to understand
@@ -486,12 +516,12 @@ Always return structured results:
 // ✓ Good: Clear structure
 return {
   success: true,
-  result: "...",
-  message: "User-friendly message"
+  result: '...',
+  message: 'User-friendly message',
 };
 
 // ✗ Bad: Unclear output
-return "Something happened";
+return 'Something happened';
 ```
 
 ### Handle Errors Gracefully
@@ -519,13 +549,13 @@ return JSON.parse(untrustedData);
 
 ```javascript
 // ✗ Bad: Requests network access to format text
-capabilities: ['network:outbound']
+capabilities: ['network:outbound'];
 async function execute(params) {
   return { result: params.text.toUpperCase() };
 }
 
 // ✓ Good: No unnecessary permissions
-capabilities: []
+capabilities: [];
 async function execute(params) {
   return { result: params.text.toUpperCase() };
 }
@@ -550,6 +580,7 @@ Parameter 2: Check MX Records
 
 **Problem:** My tool runs but gives wrong results
 **Solution:**
+
 - Test with different inputs
 - Check for edge cases (empty strings, null values)
 - Add debugging: console.log() shows in results
@@ -559,6 +590,7 @@ Parameter 2: Check MX Records
 
 **Problem:** Tool takes too long to run
 **Solution:**
+
 - Remove unnecessary loops
 - Don't process huge files
 - Consider breaking into smaller tools
@@ -568,6 +600,7 @@ Parameter 2: Check MX Records
 
 **Problem:** My code tries to read files but fails
 **Solution:**
+
 - Check that "filesystem:read" capability is enabled
 - Verify the file exists and path is correct
 - Check permissions on the file
@@ -577,6 +610,7 @@ Parameter 2: Check MX Records
 
 **Problem:** Parameters aren't being passed to function
 **Solution:**
+
 - Check parameter names match exactly (case-sensitive)
 - Verify `async function execute(params)` signature
 - Access with `params.parameterName`
@@ -586,6 +620,7 @@ Parameter 2: Check MX Records
 
 **Problem:** I created a tool but can't find it
 **Solution:**
+
 - Check you're in the right workspace
 - Try searching for the name
 - Check if it was accidentally deleted
@@ -610,6 +645,7 @@ Parameter 2: Check MX Records
 ### Contribute Improvements
 
 If you improve a cloned tool:
+
 1. Save your version
 2. Write notes about what changed
 3. Consider publishing if a general improvement
@@ -625,12 +661,12 @@ Use your tools from other tools:
 async function execute(params) {
   // Your EmailValidator tool is available as 'emailValidator'
   const validation = await emailValidator.run({
-    email: params.email
+    email: params.email,
   });
 
   if (validation.isValid) {
     // Continue processing
-    return { valid: true, message: "Email validated" };
+    return { valid: true, message: 'Email validated' };
   } else {
     return { valid: false, error: validation.error };
   }
@@ -662,13 +698,13 @@ async function execute(params) {
   const results = params.items.map(item => {
     return {
       input: item,
-      processed: item.toUpperCase()
+      processed: item.toUpperCase(),
     };
   });
 
   return {
     count: results.length,
-    results: results
+    results: results,
   };
 }
 ```
@@ -684,6 +720,7 @@ Custom Tools let you:
 ✓ Share useful utilities
 
 **Workflow:**
+
 1. Define what it does (name, description)
 2. Specify inputs (parameters)
 3. Write the logic (code)
@@ -693,6 +730,7 @@ Custom Tools let you:
 7. Share if helpful
 
 **Next steps:**
+
 1. Identify a repetitive task you do
 2. Create a custom tool for it
 3. Test with real data

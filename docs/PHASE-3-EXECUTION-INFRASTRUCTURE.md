@@ -28,6 +28,7 @@
 **Lines:** 150+
 
 **Features:**
+
 - Execute sandboxed JavaScript code via `tools.execute_custom` RPC method
 - Integrates with existing OpenClaw `skill-sandbox.ts` for security
 - Permission-based capability granting
@@ -35,6 +36,7 @@
 - Error handling and timeout management
 
 **Gateway Methods:**
+
 ```
 tools.execute_custom      - Execute custom tool with parameters
 tools.get_metadata        - Get tool definition and metadata
@@ -42,6 +44,7 @@ tools.list               - List all user's custom tools
 ```
 
 **Sandbox Security:**
+
 - Resource limits: 30s timeout, 128MB memory, 10s CPU
 - Capability controls: filesystem read-only, no process spawning
 - Static code analysis for dangerous patterns (eval, Function constructor, etc.)
@@ -55,6 +58,7 @@ tools.list               - List all user's custom tools
 **Lines:** 400+
 
 **Features:**
+
 - Multi-step workflow orchestration
 - JSONPath-based input mapping between steps
 - Conditional execution (if/then branches)
@@ -63,6 +67,7 @@ tools.list               - List all user's custom tools
 - Built-in validation system
 
 **Gateway Methods:**
+
 ```
 skills.execute_composite     - Execute a multi-step skill
 skills.validate_composite    - Validate skill definition before execution
@@ -71,12 +76,14 @@ skills.list_composite        - List all user's composite skills
 ```
 
 **Supported Step Types:**
+
 - Custom tools (by toolId)
 - Built-in skills (by skillName)
 - MCP tools (via gateway)
 - Conditional branches with JSONPath evaluation
 
 **Example Workflow:**
+
 ```
 Step 1: Get user input ($.input.query)
   ↓
@@ -96,6 +103,7 @@ Step 5: Format output for user
 **Lines:** 250+
 
 **Features:**
+
 - Claude API integration for psychological pattern analysis
 - 5 analysis types across Helix's 7-layer architecture
 - Structured output with confidence scores
@@ -103,6 +111,7 @@ Step 5: Format output for user
 - Asynchronous job processing
 
 **Gateway Methods:**
+
 ```
 memory.synthesize           - Run synthesis analysis
 memory.synthesis_status     - Get job progress/status
@@ -141,6 +150,7 @@ memory.list_patterns        - List detected patterns
    - Holistic recommendations
 
 **Example Output:**
+
 ```json
 {
   "patterns": [
@@ -166,6 +176,7 @@ memory.list_patterns        - List detected patterns
 All new methods have been registered in the gateway and include proper authorization:
 
 **Modified Files:**
+
 - `helix-runtime/src/gateway/server-methods.ts` - Added handler imports and registration
 - `helix-runtime/src/gateway/server-methods-list.ts` - Added method definitions
 - `helix-runtime/src/gateway/server-methods.ts` - Added WRITE_METHODS authorization
@@ -271,17 +282,20 @@ Response:
 ## Testing & Verification
 
 ### TypeScript Compilation ✅
+
 - All new code compiles without errors
 - Proper type safety maintained
 - No breaking changes to existing gateway methods
 
 ### Code Quality ✅
+
 - Follows OpenClaw patterns and conventions
 - Comprehensive error handling
 - Security-focused implementation
 - Audit logging for all executions
 
 ### Integration Points ✅
+
 - Seamlessly integrates with existing `skill-sandbox.ts`
 - Compatible with Supabase row-level security
 - Uses standard gateway request/response patterns
@@ -347,11 +361,13 @@ Response:
 ## Database Schema Ready
 
 All migration SQL is prepared in:
+
 - `web/supabase/migrations/015_custom_tools.sql` (READY)
 - `web/supabase/migrations/016_composite_skills.sql` (READY)
 - `web/supabase/migrations/017_memory_synthesis.sql` (READY)
 
 Tables include:
+
 - **custom_tools** - User tool definitions with code, parameters, security settings
 - **custom_tool_usage** - Execution audit trail
 - **composite_skills** - Multi-step workflow definitions
@@ -361,6 +377,7 @@ Tables include:
 - **synthesis_recommendations** - Pattern-based recommendations
 
 All tables have:
+
 - Row-Level Security (RLS) policies for user isolation
 - Proper foreign key constraints
 - Optimized indexes for common queries
@@ -405,6 +422,7 @@ All tables have:
 ## Performance Characteristics
 
 ### Custom Tool Execution
+
 - **Timeout:** 30 seconds per tool
 - **Memory:** 128 MB max per tool
 - **CPU:** 10 seconds CPU time max
@@ -412,6 +430,7 @@ All tables have:
 - **Audit Overhead:** <5ms per execution
 
 ### Composite Skill Execution
+
 - **Max Steps:** Theoretically unlimited (in practice: 50+ steps per skill)
 - **Timeout:** Configurable per step (default 30s)
 - **Memory:** Additive across steps
@@ -419,6 +438,7 @@ All tables have:
 - **Error Recovery:** Configurable per step
 
 ### Memory Synthesis
+
 - **Analysis Time:** 5-15 seconds per analysis (depends on Claude latency)
 - **Conversation Batch:** Up to 1000 conversations per analysis
 - **API Cost:** ~$0.03-0.10 per synthesis (using claude-3-5-sonnet)
@@ -429,6 +449,7 @@ All tables have:
 ## Security Posture
 
 ### Custom Tools
+
 - ✅ Sandboxed execution via skill-sandbox.ts
 - ✅ No filesystem write access
 - ✅ No process spawning
@@ -439,6 +460,7 @@ All tables have:
 - ✅ Audit logging for all executions
 
 ### Composite Skills
+
 - ✅ Step-level error handling and recovery
 - ✅ No capability escalation between steps
 - ✅ JSONPath-based data isolation
@@ -446,6 +468,7 @@ All tables have:
 - ✅ Full execution context tracking
 
 ### Memory Synthesis
+
 - ✅ Claude API calls use official SDK
 - ✅ No credentials exposed in responses
 - ✅ Conversations preprocessed before sending to Claude
@@ -492,4 +515,3 @@ All tables have:
 **Blocked By:** pgvector extension enablement (user action required)
 **Owner:** Development Team
 **Last Updated:** February 2, 2026
-

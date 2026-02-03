@@ -48,7 +48,7 @@ const result = await client.request('tools.execute_custom', {
     }
     return await main();
   `,
-  params: { value: 21 }
+  params: { value: 21 },
 });
 
 // Result:
@@ -63,6 +63,7 @@ const result = await client.request('tools.execute_custom', {
 ### Allowed Operations
 
 ✅ **Allowed in Custom Tools:**
+
 - Math operations
 - String manipulation
 - Object/array manipulation
@@ -72,6 +73,7 @@ const result = await client.request('tools.execute_custom', {
 - Date operations
 
 ❌ **NOT Allowed:**
+
 - `eval()`, `Function()` constructor
 - `require()`, dynamic `import()`
 - Process access
@@ -85,10 +87,10 @@ Define what your tool is allowed to do:
 
 ```typescript
 const capabilities = [
-  'filesystem:read',        // Read files (future)
-  'network:localhost',      // Local network (future)
+  'filesystem:read', // Read files (future)
+  'network:localhost', // Local network (future)
   // process:spawn          // NOT allowed for user tools
-]
+];
 ```
 
 ---
@@ -108,21 +110,21 @@ const skill: CompositeSkill = {
       stepId: 'analyze',
       toolName: 'analyze_text',
       inputMapping: {
-        text: '$.input.data'
+        text: '$.input.data',
       },
-      errorHandling: 'stop'
+      errorHandling: 'stop',
     },
     {
       stepId: 'report',
       toolName: 'create_report',
       inputMapping: {
         analysis: '$.analyze.result',
-        title: '$.input.title'
+        title: '$.input.title',
       },
       condition: '$.analyze.result.score > 50',
-      errorHandling: 'continue'
-    }
-  ]
+      errorHandling: 'continue',
+    },
+  ],
 };
 ```
 
@@ -133,8 +135,8 @@ const result = await client.request('skills.execute_composite', {
   skillId: 'skill-123',
   input: {
     data: 'Some text to analyze',
-    title: 'Analysis Report'
-  }
+    title: 'Analysis Report',
+  },
 });
 
 // Result structure:
@@ -233,7 +235,7 @@ const result = await client.request('memory.synthesize', {
     { id: 'conv-1', text: 'I feel anxious about deadlines', timestamp: '2024-01-01T10:00:00Z' },
     { id: 'conv-2', text: 'Work stress is affecting my sleep', timestamp: '2024-01-02T10:00:00Z' },
     // ... more conversations
-  ]
+  ],
 });
 
 // Result:
@@ -260,32 +262,37 @@ const result = await client.request('memory.synthesize', {
 ### Synthesis Types
 
 **1. Emotional Patterns** (Layer 2)
+
 ```typescript
-synthesisType: 'emotional_patterns'
+synthesisType: 'emotional_patterns';
 // Detects emotional triggers, regulation patterns, intensity variations
 ```
 
 **2. Prospective Self** (Layer 4)
+
 ```typescript
-synthesisType: 'prospective_self'
+synthesisType: 'prospective_self';
 // Identifies goals, fears, possible selves, values
 ```
 
 **3. Relational Memory** (Layer 3)
+
 ```typescript
-synthesisType: 'relational_memory'
+synthesisType: 'relational_memory';
 // Analyzes relationships, attachment patterns, trust dynamics
 ```
 
 **4. Narrative Coherence** (Layer 1)
+
 ```typescript
-synthesisType: 'narrative_coherence'
+synthesisType: 'narrative_coherence';
 // Examines life narrative, sense-making, identity consistency
 ```
 
 **5. Full Synthesis** (All Layers)
+
 ```typescript
-synthesisType: 'full_synthesis'
+synthesisType: 'full_synthesis';
 // Comprehensive analysis across all 7 psychological layers
 ```
 
@@ -293,7 +300,7 @@ synthesisType: 'full_synthesis'
 
 ```typescript
 const status = await client.request('memory.synthesis_status', {
-  jobId: 'job-123'
+  jobId: 'job-123',
 });
 
 // Result:
@@ -308,8 +315,8 @@ const status = await client.request('memory.synthesis_status', {
 
 ```typescript
 const patterns = await client.request('memory.list_patterns', {
-  layer: 2,  // Optional: specific layer
-  patternType: 'emotional_trigger'  // Optional: specific type
+  layer: 2, // Optional: specific layer
+  patternType: 'emotional_trigger', // Optional: specific type
 });
 
 // Result:
@@ -338,6 +345,7 @@ const patterns = await client.request('memory.list_patterns', {
 **Navigation**: Settings → Custom Tools
 
 **Features:**
+
 - Create new tools with code editor
 - Validate code for dangerous patterns
 - Set capabilities (filesystem, network, etc.)
@@ -347,6 +355,7 @@ const patterns = await client.request('memory.list_patterns', {
 - Track execution time and results
 
 **Actions:**
+
 ```
 1. Click "Create Tool"
 2. Write JavaScript code
@@ -363,6 +372,7 @@ const patterns = await client.request('memory.list_patterns', {
 **Navigation**: Skills → Composite Skills
 
 **Features:**
+
 - Drag-and-drop skill builder
 - Add steps with tool selection
 - Configure input mappings via JSONPath
@@ -372,6 +382,7 @@ const patterns = await client.request('memory.list_patterns', {
 - View execution history
 
 **Actions:**
+
 ```
 1. Click "Create Skill"
 2. Add steps one at a time
@@ -390,6 +401,7 @@ const patterns = await client.request('memory.list_patterns', {
 **Navigation**: Observatory → Memory Synthesis
 
 **Features:**
+
 - Submit synthesis jobs
 - Monitor job progress
 - View detected patterns
@@ -399,6 +411,7 @@ const patterns = await client.request('memory.list_patterns', {
 - Schedule recurring synthesis
 
 **Actions:**
+
 ```
 1. Go to Memory Synthesis
 2. Select synthesis type
@@ -419,6 +432,7 @@ const patterns = await client.request('memory.list_patterns', {
 #### Custom Tools
 
 **Execute Tool**
+
 ```typescript
 client.request('tools.execute_custom', {
   toolId?: string,
@@ -430,12 +444,14 @@ client.request('tools.execute_custom', {
 ```
 
 **Get Metadata**
+
 ```typescript
 client.request('tools.get_metadata', { toolId: string })
 → { id, name, description, parameters, version }
 ```
 
 **List Tools**
+
 ```typescript
 client.request('tools.list', {})
 → { tools: [...], total: number }
@@ -444,6 +460,7 @@ client.request('tools.list', {})
 #### Composite Skills
 
 **Execute Skill**
+
 ```typescript
 client.request('skills.execute_composite', {
   skillId?: string,
@@ -454,6 +471,7 @@ client.request('skills.execute_composite', {
 ```
 
 **Validate Skill**
+
 ```typescript
 client.request('skills.validate_composite', { skill: CompositeSkill })
 → { valid: boolean, errors: string[] }
@@ -462,6 +480,7 @@ client.request('skills.validate_composite', { skill: CompositeSkill })
 #### Memory Synthesis
 
 **Run Synthesis**
+
 ```typescript
 client.request('memory.synthesize', {
   synthesisType: string,
@@ -486,10 +505,10 @@ const result = await customToolsService.executeTool({
     }
     return await main();
   `,
-  params: { value: 21 }
+  params: { value: 21 },
 });
 
-console.log(result);  // { success: true, output: {doubled: 42}, ... }
+console.log(result); // { success: true, output: {doubled: 42}, ... }
 ```
 
 ### Test a Composite Skill
@@ -502,17 +521,17 @@ const skillDefinition = {
     {
       stepId: 'step1',
       toolName: 'double',
-      inputMapping: { x: '$.input.value' }
-    }
-  ]
+      inputMapping: { x: '$.input.value' },
+    },
+  ],
 };
 
 const result = await compositeSkillsService.executeSkill({
   skill: skillDefinition,
-  input: { value: 21 }
+  input: { value: 21 },
 });
 
-console.log(result.finalOutput);  // { result: 42 }
+console.log(result.finalOutput); // { result: 42 }
 ```
 
 ---
@@ -520,16 +539,21 @@ console.log(result.finalOutput);  // { result: 42 }
 ## ⚠️ Common Issues
 
 ### "Code contains dangerous function: eval"
+
 **Solution**: Don't use `eval()`, `Function()`, `require()`, or `import()`
 
 ### "Execution timeout exceeded"
+
 **Solution**: Your tool took longer than 30 seconds. Optimize logic or break into multiple tools
 
 ### "Parameter 'x' has implicit any type"
+
 **Solution**: Make sure your code parameter names match your inputMapping keys
 
 ### "JSONPath is invalid"
+
 **Solution**: Check JSONPath syntax. Examples:
+
 - `$.input.value` ✅
 - `$.step1.result` ✅
 - `$[0].name` ❌ (array access not in this version)
@@ -548,21 +572,24 @@ console.log(result.finalOutput);  // { result: 42 }
 ## 🎯 Next Steps
 
 **For End Users:**
+
 - Create your first custom tool
 - Chain tools into a skill
 - Run memory synthesis on your conversations
 
 **For Developers:**
+
 - Add database integration to complete TODOs
 - Build tests for execution engines
 - Port components to desktop
 - Optimize performance
 
 **For System Admins:**
+
 - Monitor custom tool execution
 - Review audit logs
 - Manage user capabilities
 
 ---
 
-*Phase 3 Quick Start Guide v1.0 | February 2, 2026*
+_Phase 3 Quick Start Guide v1.0 | February 2, 2026_

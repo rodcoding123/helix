@@ -9,6 +9,7 @@ This document tracks the cleanup of all documentation files across the Helix pro
 ## PART 1: WEB DOCS
 
 ### `/web/docs/guides/` (DUPLICATES - DELETE)
+
 These are now in the knowledge base. Safe to delete.
 
 - [ ] `AGENT_TEMPLATES.md` - ❌ DUPLICATE (moved to knowledge-base)
@@ -20,6 +21,7 @@ These are now in the knowledge base. Safe to delete.
 **Action:** Delete entire `/web/docs/guides/` folder
 
 ### `/web/docs/knowledge-base/` (KEEP - PROTECTED)
+
 New protected knowledge base. Keep as-is.
 
 - [x] Verified and protected
@@ -37,6 +39,7 @@ New protected knowledge base. Keep as-is.
 ## PART 3: ROOT DOCS - BLUEPRINTS
 
 ### `/docs/blueprints/`
+
 Architecture and design documents. Most are important.
 
 - [ ] `AXIS_BLUEPRINT_v1.md` - Review (v1 - check if v2 exists)
@@ -56,6 +59,7 @@ Architecture and design documents. Most are important.
 ## PART 4: ROOT DOCS - NEW BLUEPRINTS
 
 ### `/docs/newbp/`
+
 Most are planning/implementation notes from development. Candidates for archiving.
 
 - [ ] `ALL-PHASES-SUMMARY.md` - Review (summary document)
@@ -138,4 +142,3 @@ Most are planning/implementation notes from development. Candidates for archivin
 - ❌ DELETE - Remove completely (duplicates)
 - Archive - Move to archive folder (historical/outdated)
 - Review - Read file to determine action
-

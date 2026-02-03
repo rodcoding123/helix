@@ -63,12 +63,14 @@ export function setFailClosedMode(enabled: boolean): void {
   if (process.env.NODE_ENV === 'production' && !enabled) {
     throw new Error(
       '[Helix] SECURITY ERROR: Cannot disable fail-closed mode in production. ' +
-      'This function is for testing only and is not exported in production builds.'
+        'This function is for testing only and is not exported in production builds.'
     );
   }
 
   if (!enabled) {
-    console.warn('[Helix] WARNING: Disabling fail-closed mode compromises security! (TEST MODE ONLY)');
+    console.warn(
+      '[Helix] WARNING: Disabling fail-closed mode compromises security! (TEST MODE ONLY)'
+    );
   }
   failClosedMode = enabled;
 }

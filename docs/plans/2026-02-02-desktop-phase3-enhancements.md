@@ -5,6 +5,7 @@
 **Goal:** Add production-grade enhancements (error recovery, accessibility, feature flags, E2E fixtures, documentation, performance optimization, and component exports) to the Helix Desktop secrets management system.
 
 **Architecture:** Seven focused enhancements building on the Phase 3 foundation:
+
 1. **Error Recovery** - Exponential backoff retry logic in API client
 2. **E2E Fixtures** - Shared mock data for consistent CI/CD testing
 3. **Accessibility** - WCAG compliance with ARIA labels, keyboard navigation, focus management
@@ -20,6 +21,7 @@
 ## Task 1: Error Recovery with Retry Logic
 
 **Files:**
+
 - Modify: `helix-desktop/src/lib/api/secrets-client.ts`
 - Test: `helix-desktop/src/lib/api/__tests__/secrets-client.test.ts`
 
@@ -76,7 +78,11 @@ describe('SecretsClient - Retry Logic', () => {
 
     vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
       attempts++;
-      return { ok: false, status: 503, json: async () => ({ error: 'Service unavailable' }) } as Response;
+      return {
+        ok: false,
+        status: 503,
+        json: async () => ({ error: 'Service unavailable' }),
+      } as Response;
     });
 
     await expect(client.listSecrets()).rejects.toThrow('Service unavailable');
@@ -177,8 +183,8 @@ export class SecretsClient {
 
           // Retry on server errors (5xx)
           if (isRetryableStatus(response.status) && attempt < this.retryConfig.maxRetries) {
-            const backoffDelay = this.retryConfig.initialDelay *
-              Math.pow(this.retryConfig.backoffMultiplier, attempt);
+            const backoffDelay =
+              this.retryConfig.initialDelay * Math.pow(this.retryConfig.backoffMultiplier, attempt);
             await delay(backoffDelay);
             continue;
           }
@@ -192,8 +198,8 @@ export class SecretsClient {
 
         // Check if error is retryable
         if (isRetryableError(error) && attempt < this.retryConfig.maxRetries) {
-          const backoffDelay = this.retryConfig.initialDelay *
-            Math.pow(this.retryConfig.backoffMultiplier, attempt);
+          const backoffDelay =
+            this.retryConfig.initialDelay * Math.pow(this.retryConfig.backoffMultiplier, attempt);
           await delay(backoffDelay);
           continue;
         }
@@ -262,6 +268,7 @@ Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>"
 ## Task 2: E2E Test Fixtures Setup
 
 **Files:**
+
 - Create: `helix-desktop/e2e/fixtures.ts`
 - Modify: `helix-desktop/e2e/secrets.spec.ts`
 
@@ -333,7 +340,7 @@ export const test = base.extend<TestFixtures>({
     });
 
     // Mock API responses
-    await page.route('**/api/secrets', async (route) => {
+    await page.route('**/api/secrets', async route => {
       if (route.request().method() === 'GET') {
         await route.abort('blockedbyresponse');
       } else {
@@ -347,7 +354,7 @@ export const test = base.extend<TestFixtures>({
   secretsAPI: async ({ page }, use) => {
     const api = {
       mockSecrets: async (secrets: UserApiKey[]) => {
-        await page.route('**/api/secrets', (route) => {
+        await page.route('**/api/secrets', route => {
           if (route.request().method() === 'GET') {
             route.abort('blockedbyresponse');
           }
@@ -355,7 +362,7 @@ export const test = base.extend<TestFixtures>({
       },
 
       setupEmptyState: async () => {
-        await page.route('**/api/secrets', (route) => {
+        await page.route('**/api/secrets', route => {
           if (route.request().method() === 'GET') {
             route.fulfill({
               status: 200,
@@ -367,7 +374,7 @@ export const test = base.extend<TestFixtures>({
       },
 
       setupWithSecrets: async () => {
-        await page.route('**/api/secrets', (route) => {
+        await page.route('**/api/secrets', route => {
           if (route.request().method() === 'GET') {
             route.fulfill({
               status: 200,
@@ -394,7 +401,11 @@ Modify `helix-desktop/e2e/secrets.spec.ts`:
 import { test, expect, mockSecrets } from './fixtures';
 
 test.describe('Desktop Secrets Management - With Fixtures', () => {
-  test('should display empty state with no secrets', async ({ page, secretsAPI, authenticatedPage }) => {
+  test('should display empty state with no secrets', async ({
+    page,
+    secretsAPI,
+    authenticatedPage,
+  }) => {
     await secretsAPI.setupEmptyState();
     await authenticatedPage.goto('http://localhost:5173/settings/secrets');
     await authenticatedPage.waitForLoadState('networkidle');
@@ -403,7 +414,11 @@ test.describe('Desktop Secrets Management - With Fixtures', () => {
     await expect(emptyState).toBeVisible();
   });
 
-  test('should display secrets list with mock data', async ({ page, secretsAPI, authenticatedPage }) => {
+  test('should display secrets list with mock data', async ({
+    page,
+    secretsAPI,
+    authenticatedPage,
+  }) => {
     await secretsAPI.setupWithSecrets();
     await authenticatedPage.goto('http://localhost:5173/settings/secrets');
     await authenticatedPage.waitForLoadState('networkidle');
@@ -412,7 +427,11 @@ test.describe('Desktop Secrets Management - With Fixtures', () => {
     await expect(authenticatedPage.locator('text=Gemini API Key')).toBeVisible();
   });
 
-  test('should display statistics with mock data', async ({ page, secretsAPI, authenticatedPage }) => {
+  test('should display statistics with mock data', async ({
+    page,
+    secretsAPI,
+    authenticatedPage,
+  }) => {
     await secretsAPI.setupWithSecrets();
     await authenticatedPage.goto('http://localhost:5173/settings/secrets');
     await authenticatedPage.waitForLoadState('networkidle');
@@ -453,6 +472,7 @@ Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>"
 ## Task 3: Accessibility Enhancements
 
 **Files:**
+
 - Modify: `helix-desktop/src/components/secrets/SecretsList.tsx`
 - Modify: `helix-desktop/src/components/secrets/modals/CreateSecretModal.tsx`
 - Modify: `helix-desktop/src/components/secrets/CopyButton.tsx`
@@ -903,6 +923,7 @@ Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>"
 ## Task 4: Feature Flags System
 
 **Files:**
+
 - Create: `helix-desktop/src/lib/feature-flags.ts`
 - Modify: `helix-desktop/src/components/settings/SecretsSettings.tsx`
 - Test: `helix-desktop/src/lib/__tests__/feature-flags.test.ts`
@@ -1009,7 +1030,7 @@ export function isFeatureEnabled(
   // Handle percentage-based rollout
   if (typeof value === 'number' && context?.userId) {
     const hash = context.userId.split('').reduce((acc, char) => {
-      return ((acc << 5) - acc) + char.charCodeAt(0);
+      return (acc << 5) - acc + char.charCodeAt(0);
     }, 0);
     const userPercentage = Math.abs(hash) % 100;
     return userPercentage < value;
@@ -1189,6 +1210,7 @@ Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>"
 ## Task 5: Component Barrel Exports
 
 **Files:**
+
 - Create: `helix-desktop/src/components/secrets/index.ts`
 - Modify: `helix-desktop/src/components/settings/SecretsSettings.tsx`
 - Test: `helix-desktop/src/components/secrets/__tests__/barrel-exports.test.ts`
@@ -1258,11 +1280,7 @@ Update imports in `helix-desktop/src/components/settings/SecretsSettings.tsx`:
 ```typescript
 import React, { useState } from 'react';
 import { useSecretsData } from '../../hooks/useSecretsData';
-import {
-  SecretsList,
-  CreateSecretModal,
-  RotateSecretModal
-} from '../secrets';
+import { SecretsList, CreateSecretModal, RotateSecretModal } from '../secrets';
 import { isFeatureEnabled } from '../../lib/feature-flags';
 import type { SecretType } from '../../types/secrets';
 import '../secrets/Secrets.css';
@@ -1304,6 +1322,7 @@ Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>"
 ## Task 6: JSDoc Documentation
 
 **Files:**
+
 - Modify: `helix-desktop/src/hooks/useSecretsData.ts`
 - Modify: `helix-desktop/src/lib/api/secrets-client.ts`
 
@@ -1311,7 +1330,7 @@ Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>"
 
 Update `helix-desktop/src/hooks/useSecretsData.ts`:
 
-```typescript
+````typescript
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { SecretsClient } from '../lib/api/secrets-client';
 import { useAuth } from '../lib/auth-context';
@@ -1393,52 +1412,61 @@ export function useSecretsData(): SecretsDataResult {
    * @param {CreateSecretInput} input - Secret creation data
    * @returns {Promise<UserApiKey>} Created secret
    */
-  const createSecret = useCallback(async (input: CreateSecretInput): Promise<UserApiKey> => {
-    setError(null);
-    try {
-      const secret = await client.createSecret(input);
-      setSecrets(prev => [...prev, secret]);
-      return secret;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to create secret';
-      setError(message);
-      throw err;
-    }
-  }, [client]);
+  const createSecret = useCallback(
+    async (input: CreateSecretInput): Promise<UserApiKey> => {
+      setError(null);
+      try {
+        const secret = await client.createSecret(input);
+        setSecrets(prev => [...prev, secret]);
+        return secret;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to create secret';
+        setError(message);
+        throw err;
+      }
+    },
+    [client]
+  );
 
   /**
    * Rotate a secret (generate new version)
    * @param {string} secretId - ID of secret to rotate
    * @returns {Promise<UserApiKey>} Updated secret
    */
-  const rotateSecret = useCallback(async (secretId: string): Promise<UserApiKey> => {
-    setError(null);
-    try {
-      const updated = await client.rotateSecret(secretId);
-      setSecrets(prev => prev.map(s => (s.id === secretId ? updated : s)));
-      return updated;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to rotate secret';
-      setError(message);
-      throw err;
-    }
-  }, [client]);
+  const rotateSecret = useCallback(
+    async (secretId: string): Promise<UserApiKey> => {
+      setError(null);
+      try {
+        const updated = await client.rotateSecret(secretId);
+        setSecrets(prev => prev.map(s => (s.id === secretId ? updated : s)));
+        return updated;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to rotate secret';
+        setError(message);
+        throw err;
+      }
+    },
+    [client]
+  );
 
   /**
    * Delete a secret
    * @param {string} secretId - ID of secret to delete
    */
-  const deleteSecret = useCallback(async (secretId: string): Promise<void> => {
-    setError(null);
-    try {
-      await client.deleteSecret(secretId);
-      setSecrets(prev => prev.filter(s => s.id !== secretId));
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to delete secret';
-      setError(message);
-      throw err;
-    }
-  }, [client]);
+  const deleteSecret = useCallback(
+    async (secretId: string): Promise<void> => {
+      setError(null);
+      try {
+        await client.deleteSecret(secretId);
+        setSecrets(prev => prev.filter(s => s.id !== secretId));
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to delete secret';
+        setError(message);
+        throw err;
+      }
+    },
+    [client]
+  );
 
   return {
     secrets,
@@ -1452,11 +1480,11 @@ export function useSecretsData(): SecretsDataResult {
     deleteSecret,
   };
 }
-```
+````
 
 Update `helix-desktop/src/lib/api/secrets-client.ts`:
 
-```typescript
+````typescript
 import type { UserApiKey } from '../../types/secrets';
 import type { SecretType } from '../../types/secrets';
 
@@ -1578,8 +1606,8 @@ export class SecretsClient {
           }
 
           if (isRetryableStatus(response.status) && attempt < this.retryConfig.maxRetries) {
-            const backoffDelay = this.retryConfig.initialDelay *
-              Math.pow(this.retryConfig.backoffMultiplier, attempt);
+            const backoffDelay =
+              this.retryConfig.initialDelay * Math.pow(this.retryConfig.backoffMultiplier, attempt);
             await delay(backoffDelay);
             continue;
           }
@@ -1592,8 +1620,8 @@ export class SecretsClient {
         lastError = error as Error;
 
         if (isRetryableError(error) && attempt < this.retryConfig.maxRetries) {
-          const backoffDelay = this.retryConfig.initialDelay *
-            Math.pow(this.retryConfig.backoffMultiplier, attempt);
+          const backoffDelay =
+            this.retryConfig.initialDelay * Math.pow(this.retryConfig.backoffMultiplier, attempt);
           await delay(backoffDelay);
           continue;
         }
@@ -1648,7 +1676,7 @@ export class SecretsClient {
     });
   }
 }
-```
+````
 
 **Step 2: Commit**
 
@@ -1674,6 +1702,7 @@ Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>"
 ## Task 7: Performance Optimization
 
 **Files:**
+
 - Modify: `helix-desktop/src/components/secrets/modals/CreateSecretModal.tsx`
 - Modify: `helix-desktop/src/components/secrets/modals/RotateSecretModal.tsx`
 - Modify: `helix-desktop/src/components/settings/SecretsSettings.tsx`

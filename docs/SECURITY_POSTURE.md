@@ -23,23 +23,26 @@ Helix implements a **comprehensive, defense-in-depth security architecture** tha
 ### ✅ Level 1: Prevention Controls
 
 #### 1.1 Pre-commit Hooks (Husky)
+
 - **Purpose**: Prevent credentials from being committed to git
 - **Implementation**: `.husky/pre-commit` with regex detection
 - **Detects**:
   - AWS keys (AKIA...)
   - Private keys (-----BEGIN)
-  - API keys (sk_live_, pk_live_)
-  - GitHub tokens (ghp_)
+  - API keys (sk*live*, pk*live*)
+  - GitHub tokens (ghp\_)
   - Discord webhooks
   - JWT tokens
 - **Status**: ✅ IMPLEMENTED
 
 #### 1.2 Repository Protection
+
 - **gitignore hardening**: Blocks all `.env*` files across all directories
 - **Exceptions**: `.env.example` files kept for reference
 - **Status**: ✅ IMPLEMENTED
 
 #### 1.3 Environment Variable Validation
+
 - **Source**: `src/lib/env-validator.ts`
 - **Validates**: All required secrets are present at startup
 - **Fails**: If required secrets missing (exit code 1)
@@ -48,24 +51,28 @@ Helix implements a **comprehensive, defense-in-depth security architecture** tha
 ### ✅ Level 2: CI/CD Security
 
 #### 2.1 Gitleaks Secret Scanning
+
 - **Purpose**: Detect credentials in commit history
 - **Implementation**: GitHub Actions workflow `.github/workflows/security.yml`
 - **Triggers**: On push to main/develop, on pull requests
 - **Status**: ✅ IMPLEMENTED
 
 #### 2.2 Dependency Vulnerability Scanning
+
 - **Tool**: `npm audit`
 - **Level**: Moderate (fails on high/critical)
 - **Frequency**: Every push
 - **Status**: ✅ IMPLEMENTED
 
 #### 2.3 CodeQL Analysis
+
 - **Purpose**: Detect code-level security issues
 - **Coverage**: JavaScript/TypeScript analysis
 - **Frequency**: Every push
 - **Status**: ✅ IMPLEMENTED
 
 #### 2.4 Permission Analysis
+
 - **Checks**: No world-readable sensitive files
 - **Blocks**: Any committed .env files
 - **Status**: ✅ IMPLEMENTED
@@ -73,6 +80,7 @@ Helix implements a **comprehensive, defense-in-depth security architecture** tha
 ### ✅ Level 3: Runtime Security
 
 #### 3.1 Fail-Closed Mode
+
 - **Status**: ALWAYS ENABLED in production
 - **Cannot be disabled**: Throws error if attempted
 - **Enforces**: All operations fail if logging unavailable
@@ -80,6 +88,7 @@ Helix implements a **comprehensive, defense-in-depth security architecture** tha
 - **Status**: ✅ IMPLEMENTED
 
 #### 3.2 Pre-Execution Logging
+
 - **Timing**: Logs to Discord BEFORE command execution
 - **Purpose**: Ensures every action is recorded before it happens
 - **Fallback**: None - operations block if Discord unreachable
@@ -87,6 +96,7 @@ Helix implements a **comprehensive, defense-in-depth security architecture** tha
 - **Status**: ✅ IMPLEMENTED
 
 #### 3.3 Hash Chain Integrity
+
 - **Purpose**: Cryptographic verification of audit trail
 - **Method**: SHA-256 hashing with previous hash linking
 - **Storage**: Discord (primary), local file (backup)
@@ -94,6 +104,7 @@ Helix implements a **comprehensive, defense-in-depth security architecture** tha
 - **Status**: ✅ IMPLEMENTED
 
 #### 3.4 Gateway Security
+
 - **Purpose**: Prevent unauthorized network access
 - **Validates**: Binding configuration (host/port)
 - **Enforces**: Auth required if binding to 0.0.0.0
@@ -102,6 +113,7 @@ Helix implements a **comprehensive, defense-in-depth security architecture** tha
 - **Status**: ✅ IMPLEMENTED
 
 #### 3.5 1Password Integration
+
 - **Purpose**: Load all secrets from 1Password vault
 - **Source**: `src/lib/secrets-loader.ts`
 - **Fallback**: .env files (development only)
@@ -113,23 +125,24 @@ Helix implements a **comprehensive, defense-in-depth security architecture** tha
 
 All implementations from security audit PASS:
 
-| Threat | Detection | Status |
-|--------|-----------|--------|
-| Prompt Injection | `detectPromptInjection()` | ✅ PASS |
-| Memory Poisoning | `detectMemoryPoisoning()` | ✅ PASS |
-| Confused Deputy | `detectConfusedDeputy()` | ✅ PASS |
-| MCP Tool Poisoning | `detectToolPoisoning()` | ✅ PASS |
-| Schema Poisoning | `detectSchemaPoisoning()` | ✅ PASS |
-| Path Traversal | `detectPathTraversal()` | ✅ PASS |
-| Rug Pull (Tool Mutation) | `detectRugPull()` | ✅ PASS |
-| Credential Exposure | `detectCredentialExposure()` | ✅ PASS |
-| Lethal Trifecta | `detectLethalTrifecta()` | ✅ PASS |
+| Threat                   | Detection                    | Status  |
+| ------------------------ | ---------------------------- | ------- |
+| Prompt Injection         | `detectPromptInjection()`    | ✅ PASS |
+| Memory Poisoning         | `detectMemoryPoisoning()`    | ✅ PASS |
+| Confused Deputy          | `detectConfusedDeputy()`     | ✅ PASS |
+| MCP Tool Poisoning       | `detectToolPoisoning()`      | ✅ PASS |
+| Schema Poisoning         | `detectSchemaPoisoning()`    | ✅ PASS |
+| Path Traversal           | `detectPathTraversal()`      | ✅ PASS |
+| Rug Pull (Tool Mutation) | `detectRugPull()`            | ✅ PASS |
+| Credential Exposure      | `detectCredentialExposure()` | ✅ PASS |
+| Lethal Trifecta          | `detectLethalTrifecta()`     | ✅ PASS |
 
 ---
 
 ## Security Checklist
 
 ### Pre-Deployment
+
 - [ ] Run `/quality` - all checks pass
 - [ ] Run `/test` - 100% tests passing
 - [ ] Run `npm run security:rotate-secrets --dry-run`
@@ -137,12 +150,14 @@ All implementations from security audit PASS:
 - [ ] Verify `.env` files are deleted (not in git)
 
 ### Deployment
+
 - [ ] Set Vercel environment variables (see VERCEL_SETUP.md)
 - [ ] Deploy to production: `git push origin main`
 - [ ] Verify Discord webhooks initialized (check logs)
 - [ ] Test fail-closed mode with offline Discord (should block operations)
 
 ### Post-Deployment
+
 - [ ] Monitor Discord for log entries
 - [ ] Verify hash chain updates appear
 - [ ] Confirm all operations logged before execution
@@ -152,15 +167,16 @@ All implementations from security audit PASS:
 
 ## Secret Rotation Schedule
 
-| Secret | Frequency | Method | Impact |
-|--------|-----------|--------|--------|
-| Stripe Secret Key | Quarterly | `npm run security:rotate-secrets` | Requires redeploy |
-| DeepSeek API Key | Quarterly | `npm run security:rotate-secrets` | Requires redeploy |
-| Gemini API Key | Quarterly | `npm run security:rotate-secrets` | Requires redeploy |
-| Discord Webhooks | On compromise | Manual in Discord | Redeploy required |
-| Supabase Keys | On auth change | Manual in Supabase | Requires JWT update |
+| Secret            | Frequency      | Method                            | Impact              |
+| ----------------- | -------------- | --------------------------------- | ------------------- |
+| Stripe Secret Key | Quarterly      | `npm run security:rotate-secrets` | Requires redeploy   |
+| DeepSeek API Key  | Quarterly      | `npm run security:rotate-secrets` | Requires redeploy   |
+| Gemini API Key    | Quarterly      | `npm run security:rotate-secrets` | Requires redeploy   |
+| Discord Webhooks  | On compromise  | Manual in Discord                 | Redeploy required   |
+| Supabase Keys     | On auth change | Manual in Supabase                | Requires JWT update |
 
 **Process**:
+
 1. Generate new secret in provider (Stripe, etc.)
 2. Store in 1Password vault
 3. Run `npm run security:rotate-secrets`
@@ -173,38 +189,38 @@ All implementations from security audit PASS:
 
 ### OWASP Top 10 (2023)
 
-| Vulnerability | Status | Control |
-|---------------|--------|---------|
-| A01 Broken Access Control | ✅ CONTROLLED | Pre-execution logging, fail-closed mode |
-| A02 Cryptographic Failures | ✅ FIXED | 1Password integration, hash chain |
-| A03 Injection | ✅ CONTROLLED | Input validation, threat detection |
-| A04 Insecure Design | ✅ DESIGNED | Defense-in-depth architecture |
-| A05 Security Misconfiguration | ✅ AUTOMATED | CI/CD validation, environment checks |
-| A06 Vulnerable Components | ✅ SCANNED | npm audit, CodeQL, Gitleaks |
-| A07 Authentication Failures | ✅ ENFORCED | Token validation, fail-closed |
-| A08 Data Integrity | ✅ PROTECTED | Hash chain, Discord logging |
-| A09 Logging Failures | ✅ ELIMINATED | Pre-execution logging always |
-| A10 SSRF | ✅ MITIGATED | Network isolation, gateway security |
+| Vulnerability                 | Status        | Control                                 |
+| ----------------------------- | ------------- | --------------------------------------- |
+| A01 Broken Access Control     | ✅ CONTROLLED | Pre-execution logging, fail-closed mode |
+| A02 Cryptographic Failures    | ✅ FIXED      | 1Password integration, hash chain       |
+| A03 Injection                 | ✅ CONTROLLED | Input validation, threat detection      |
+| A04 Insecure Design           | ✅ DESIGNED   | Defense-in-depth architecture           |
+| A05 Security Misconfiguration | ✅ AUTOMATED  | CI/CD validation, environment checks    |
+| A06 Vulnerable Components     | ✅ SCANNED    | npm audit, CodeQL, Gitleaks             |
+| A07 Authentication Failures   | ✅ ENFORCED   | Token validation, fail-closed           |
+| A08 Data Integrity            | ✅ PROTECTED  | Hash chain, Discord logging             |
+| A09 Logging Failures          | ✅ ELIMINATED | Pre-execution logging always            |
+| A10 SSRF                      | ✅ MITIGATED  | Network isolation, gateway security     |
 
 ### CWE Top 25
 
-| CWE | Issue | Status |
-|-----|-------|--------|
-| CWE-798 | Hardcoded Credentials | ✅ FIXED (1Password) |
-| CWE-434 | Unrestricted File Upload | ✅ CONTROLLED (Tauri dialogs) |
-| CWE-306 | Missing Auth | ✅ ENFORCED (token validation) |
-| CWE-327 | Weak Crypto | ✅ UPGRADED (SHA-256) |
-| CWE-202 | Exposure of Sensitive Info | ✅ ELIMINATED (fail-closed) |
+| CWE     | Issue                      | Status                         |
+| ------- | -------------------------- | ------------------------------ |
+| CWE-798 | Hardcoded Credentials      | ✅ FIXED (1Password)           |
+| CWE-434 | Unrestricted File Upload   | ✅ CONTROLLED (Tauri dialogs)  |
+| CWE-306 | Missing Auth               | ✅ ENFORCED (token validation) |
+| CWE-327 | Weak Crypto                | ✅ UPGRADED (SHA-256)          |
+| CWE-202 | Exposure of Sensitive Info | ✅ ELIMINATED (fail-closed)    |
 
 ### AI-Specific Threats (Unit42, NIST)
 
-| Threat | Detection | Status |
-|--------|-----------|--------|
-| Prompt Injection | Pattern matching | ✅ DETECTED |
-| Model Extraction | Rate limiting | ✅ CONTROLLED |
-| Membership Inference | Output filtering | ✅ MITIGATED |
-| Poisoning Attack | Hash verification | ✅ DETECTED |
-| Jailbreak Attempts | Semantic analysis | ✅ DETECTED |
+| Threat               | Detection         | Status        |
+| -------------------- | ----------------- | ------------- |
+| Prompt Injection     | Pattern matching  | ✅ DETECTED   |
+| Model Extraction     | Rate limiting     | ✅ CONTROLLED |
+| Membership Inference | Output filtering  | ✅ MITIGATED  |
+| Poisoning Attack     | Hash verification | ✅ DETECTED   |
+| Jailbreak Attempts   | Semantic analysis | ✅ DETECTED   |
 
 ---
 
@@ -213,9 +229,11 @@ All implementations from security audit PASS:
 ### If Credentials Are Exposed
 
 1. **Immediate** (5 minutes):
+
    ```bash
    npm run security:rotate-secrets
    ```
+
    This will rotate all rotatable secrets and redeploy.
 
 2. **Short-term** (30 minutes):
@@ -324,6 +342,7 @@ npm run test -- threat-detection.test.ts
 ### Discord Monitoring
 
 Set up Discord alerts for:
+
 - ⚠️ Command execution failures
 - 🚨 Security alerts (threat detected)
 - 💣 Authentication failures
@@ -355,6 +374,7 @@ Set up Discord alerts for:
 ## Future Security Enhancements
 
 ### Phase 5: Security Hardening (Planned)
+
 - [ ] Hardware Security Module (HSM) integration
 - [ ] Encrypted credential storage at rest
 - [ ] Secret rotation with zero downtime
@@ -362,6 +382,7 @@ Set up Discord alerts for:
 - [ ] Network segmentation
 
 ### Phase 6: Compliance (Planned)
+
 - [ ] SOC 2 Type II audit
 - [ ] ISO 27001 certification
 - [ ] GDPR compliance assessment
@@ -369,6 +390,7 @@ Set up Discord alerts for:
 - [ ] PCI DSS compliance (if handling payment data)
 
 ### Phase 7: Advanced Threat Detection (Planned)
+
 - [ ] Machine learning anomaly detection
 - [ ] Behavioral analysis of AI agent
 - [ ] Advanced cryptographic proofs
@@ -379,11 +401,13 @@ Set up Discord alerts for:
 ## References
 
 ### Documentation
+
 - [PRODUCTION_SECRETS_SETUP.md](./PRODUCTION_SECRETS_SETUP.md) - Complete setup guide
 - [VERCEL_SETUP.md](../VERCEL_SETUP.md) - Vercel deployment guide
 - [HELIX_ARCHITECTURE.md](./HELIX_ARCHITECTURE.md) - System architecture
 
 ### Security Resources
+
 - [OWASP Top 10 2023](https://owasp.org/Top10/)
 - [CWE Top 25 2023](https://cwe.mitre.org/top25/)
 - [NIST AI Risk Management Framework](https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf)
@@ -391,6 +415,7 @@ Set up Discord alerts for:
 - [Gitleaks Documentation](https://github.com/gitleaks/gitleaks)
 
 ### Tools & Services
+
 - [1Password Developer Documentation](https://developer.1password.com/)
 - [Vercel Security](https://vercel.com/security)
 - [Supabase Security](https://supabase.com/security)
@@ -400,12 +425,12 @@ Set up Discord alerts for:
 
 ## Approval & Governance
 
-| Role | Name | Approval | Date |
-|------|------|----------|------|
-| Owner | Rodrigo Specter | ✅ | 2026-02-02 |
-| Security Lead | Claude Code Agent | ✅ | 2026-02-02 |
-| DevOps | (To be assigned) | ⏳ | - |
-| External Audit | (Recommended) | ⏳ | - |
+| Role           | Name              | Approval | Date       |
+| -------------- | ----------------- | -------- | ---------- |
+| Owner          | Rodrigo Specter   | ✅       | 2026-02-02 |
+| Security Lead  | Claude Code Agent | ✅       | 2026-02-02 |
+| DevOps         | (To be assigned)  | ⏳       | -          |
+| External Audit | (Recommended)     | ⏳       | -          |
 
 ---
 

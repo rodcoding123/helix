@@ -192,7 +192,7 @@ import MarketplaceGuide from '@/docs/knowledge-base/extended/marketplace.md?raw'
 
 const GUIDE_CONTENT = {
   'agent-templates': AgentTemplatesGuide,
-  'marketplace': MarketplaceGuide,
+  marketplace: MarketplaceGuide,
   // ... etc
 };
 
@@ -317,6 +317,7 @@ useEffect(() => {
 ### Styling Issues
 
 The component uses Tailwind CSS. Ensure:
+
 - Tailwind is configured in your project
 - Dark mode is enabled
 - Color palette includes slate colors
@@ -341,6 +342,7 @@ The component uses Tailwind CSS. Ensure:
 ## Support
 
 For issues with the knowledge base:
+
 1. Check this guide first
 2. Review component code comments
 3. Check GitHub issues

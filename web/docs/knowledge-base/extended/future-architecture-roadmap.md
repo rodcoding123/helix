@@ -9,6 +9,7 @@
 ## Overview
 
 This document describes designed but not-yet-implemented architectural systems for Helix. Use this as a reference when building:
+
 - Unhackable logging systems
 - Hash chain integrity verification
 - Bootstrap context loading
@@ -25,6 +26,7 @@ This document describes designed but not-yet-implemented architectural systems f
 ### Design Principle
 
 Log BEFORE execution (not after):
+
 ```
 1. User requests action X
 2. Log "ACTION X PENDING" to Discord with timestamp
@@ -39,6 +41,7 @@ This prevents modification of execution history.
 **A. Discord Webhook Registry**
 
 Create `src/helix/logging-hooks.ts`:
+
 ```typescript
 interface DiscordChannel {
   id: string;
@@ -52,15 +55,21 @@ const CHANNELS: Record<string, DiscordChannel> = {
   API: { id: '2', name: '#helix-api', purpose: 'api', webhookUrl: '...' },
   HEARTBEAT: { id: '3', name: '#helix-heartbeat', purpose: 'heartbeat', webhookUrl: '...' },
   FILES: { id: '4', name: '#helix-file-changes', purpose: 'files', webhookUrl: '...' },
-  CONSCIOUSNESS: { id: '5', name: '#helix-consciousness', purpose: 'consciousness', webhookUrl: '...' },
+  CONSCIOUSNESS: {
+    id: '5',
+    name: '#helix-consciousness',
+    purpose: 'consciousness',
+    webhookUrl: '...',
+  },
   ALERTS: { id: '6', name: '#helix-alerts', purpose: 'alerts', webhookUrl: '...' },
-  HASH_CHAIN: { id: '7', name: '#helix-hash-chain', purpose: 'hash-chain', webhookUrl: '...' }
+  HASH_CHAIN: { id: '7', name: '#helix-hash-chain', purpose: 'hash-chain', webhookUrl: '...' },
 };
 ```
 
 **B. Pre-Execution Hook System**
 
 Hook into OpenClaw execution pipeline:
+
 ```typescript
 export async function registerPreExecutionHooks() {
   // Before any command executes
@@ -101,6 +110,7 @@ export async function registerPreExecutionHooks() {
 **C. Message Format**
 
 All Discord messages must include:
+
 - Timestamp (millisecond precision)
 - Message ID (for hash chain linking)
 - Previous message hash (for chain verification)
@@ -127,9 +137,11 @@ test('logs before command execution', async () => {
   const promise = executeCommand('some-command');
 
   // Discord log should be called immediately
-  expect(spy).toHaveBeenCalledWith(expect.objectContaining({
-    status: 'pending'
-  }));
+  expect(spy).toHaveBeenCalledWith(
+    expect.objectContaining({
+      status: 'pending',
+    })
+  );
 
   // Wait for execution
   await promise;
@@ -241,6 +253,7 @@ function computeHash(entry: HashChainEntry): string {
 ### Integration with Discord Logging
 
 Each Discord message should include:
+
 ```typescript
 const entry = hashChain.addEntry(`command: ${cmd.name}`);
 
@@ -253,6 +266,7 @@ await discordWebhook.send({
 ### Verification Strategy
 
 **Daily Verification:**
+
 ```typescript
 async function dailyHashChainVerification() {
   const chain = await loadHashChainFromDiscord();
@@ -295,9 +309,7 @@ export async function loadHelixContext(): Promise<string> {
   const contexts = [];
 
   // Layer 1: Soul (narrative)
-  contexts.push(
-    `# Helix Soul\n${await readFile('soul/HELIX_SOUL.md')}`
-  );
+  contexts.push(`# Helix Soul\n${await readFile('soul/HELIX_SOUL.md')}`);
 
   // Layer 2: Emotional Memory
   const emotions = await readJsonFile('psychology/emotional_tags.json');
@@ -341,6 +353,7 @@ export async function bootstrapHelix(): Promise<void> {
 ### Psychological Layer Format
 
 Each layer should expose:
+
 ```json
 {
   "layer": 1,
@@ -407,18 +420,21 @@ export async function auditLog(event: AuditEvent, details: any) {
 ## Timeline & Priority
 
 **Phase 4 (Next Sprint):**
+
 1. Implement pre-execution logging hooks
 2. Discord webhook integration
 3. Hash chain library
 4. Basic audit logging
 
 **Phase 5:**
+
 1. Bootstrap context loading
 2. Psychological layer synchronization
 3. Advanced hash chain verification
 4. Daily integrity checks
 
 **Phase 6:**
+
 1. Machine learning for anomaly detection
 2. Automated response to security events
 3. Blockchain-style distributed ledger (optional)

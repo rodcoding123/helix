@@ -11,6 +11,7 @@ Helix uses 1Password for secure secret management across all environments. This 
 Environment variables are set via Vercel Dashboard or CLI and are immutable at deployment time.
 
 **Required for Web API Routes**:
+
 - `SUPABASE_URL` - Supabase project URL
 - `SUPABASE_SERVICE_ROLE_KEY` - Service role key (for backend operations)
 - `HELIX_SECRETS_SOURCE=1password` - Force 1Password mode for Helix core (if running on Vercel)
@@ -20,6 +21,7 @@ Environment variables are set via Vercel Dashboard or CLI and are immutable at d
 Local environment uses 1Password CLI (`op`) for secret loading.
 
 **Required**:
+
 - 1Password CLI installed and authenticated: `op account add`
 - `HELIX_SECRETS_SOURCE=1password` (recommended) or `HELIX_SECRETS_SOURCE=env` for dev
 - Vault named "Helix" in 1Password with all secrets
@@ -28,22 +30,22 @@ Local environment uses 1Password CLI (`op`) for secret loading.
 
 All items must exist in the "Helix" vault:
 
-| Item Name | Field | Type | Example Value |
-|-----------|-------|------|----------------|
-| Supabase URL | url | URL | https://xxxxx.supabase.co |
-| Supabase Service Role | password | Secret | eyJhbGc... |
-| Supabase Anon Key | password | Secret | eyJhbGc... |
-| Stripe Secret Key | password | Secret | sk_live_... |
-| Stripe Publishable Key | password | Secret | pk_live_... |
-| DeepSeek API Key | password | Secret | sk-... |
-| Gemini API Key | password | Secret | AIzaSy... |
-| Discord Webhook - Commands | notes | Text | https://discord.com/api/webhooks/... |
-| Discord Webhook - API | notes | Text | https://discord.com/api/webhooks/... |
-| Discord Webhook - Heartbeat | notes | Text | https://discord.com/api/webhooks/... |
-| Discord Webhook - Alerts | notes | Text | https://discord.com/api/webhooks/... |
-| Discord Webhook - Consciousness | notes | Text | https://discord.com/api/webhooks/... |
-| Discord Webhook - File Changes | notes | Text | https://discord.com/api/webhooks/... |
-| Discord Webhook - Hash Chain | notes | Text | https://discord.com/api/webhooks/... |
+| Item Name                       | Field    | Type   | Example Value                        |
+| ------------------------------- | -------- | ------ | ------------------------------------ |
+| Supabase URL                    | url      | URL    | https://xxxxx.supabase.co            |
+| Supabase Service Role           | password | Secret | eyJhbGc...                           |
+| Supabase Anon Key               | password | Secret | eyJhbGc...                           |
+| Stripe Secret Key               | password | Secret | sk*live*...                          |
+| Stripe Publishable Key          | password | Secret | pk*live*...                          |
+| DeepSeek API Key                | password | Secret | sk-...                               |
+| Gemini API Key                  | password | Secret | AIzaSy...                            |
+| Discord Webhook - Commands      | notes    | Text   | https://discord.com/api/webhooks/... |
+| Discord Webhook - API           | notes    | Text   | https://discord.com/api/webhooks/... |
+| Discord Webhook - Heartbeat     | notes    | Text   | https://discord.com/api/webhooks/... |
+| Discord Webhook - Alerts        | notes    | Text   | https://discord.com/api/webhooks/... |
+| Discord Webhook - Consciousness | notes    | Text   | https://discord.com/api/webhooks/... |
+| Discord Webhook - File Changes  | notes    | Text   | https://discord.com/api/webhooks/... |
+| Discord Webhook - Hash Chain    | notes    | Text   | https://discord.com/api/webhooks/... |
 
 ## Vercel Setup
 
@@ -128,6 +130,7 @@ This function is for testing only and is not exported in production builds.
 ```
 
 This ensures:
+
 - All commands are logged to Discord BEFORE execution
 - Operations block if Discord is unreachable
 - Hash chain integrity is maintained
@@ -222,11 +225,13 @@ op item get "Discord Webhook - Commands" --vault Helix --format=json
 ### Fail-Closed Mode Error in Production
 
 If you see:
+
 ```
 [Helix] SECURITY ERROR: Cannot disable fail-closed mode in production.
 ```
 
 This is **expected and correct**. Fail-closed mode is locked in production. To disable for testing:
+
 1. Set `NODE_ENV=development` or `NODE_ENV=test`
 2. The function will then work for testing only
 
@@ -246,6 +251,7 @@ This is **expected and correct**. Fail-closed mode is locked in production. To d
 ## Rotation Schedule
 
 Rotate secrets on:
+
 - **Quarterly**: Stripe, DeepSeek, Gemini API keys
 - **Monthly**: Discord webhook URLs (if compromised)
 - **On-demand**: Supabase keys (if user accesses are revoked)

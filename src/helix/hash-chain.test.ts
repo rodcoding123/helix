@@ -783,12 +783,12 @@ describe('Hash Chain - Environment Configuration', () => {
     const originalEnv = process.env.HELIX_LOG_FILES;
     process.env.HELIX_LOG_FILES = '/custom/log1.log,/custom/log2.log';
 
-    vi.mocked(fs.readFile).mockImplementation((path: string | Buffer | URL) => {
+    vi.mocked(fs.readFile).mockImplementation(((path: unknown) => {
       if (String(path).includes('hash_chain.log')) {
         return Promise.reject(new Error('ENOENT'));
       }
       return Promise.resolve(Buffer.from('test log content'));
-    });
+    }) as any);
 
     const states = await hashLogFiles();
 

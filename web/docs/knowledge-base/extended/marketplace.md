@@ -25,6 +25,7 @@ Think of it like an app store for AI agents and tools—find what you need, use 
 ### Browse by Category
 
 **Templates are organized by:**
+
 - Productivity (task management, planning)
 - Analytics (data analysis, reporting)
 - Communication (writing, translation)
@@ -33,6 +34,7 @@ Think of it like an app store for AI agents and tools—find what you need, use 
 - Learning (tutoring, research)
 
 **Tools are tagged by:**
+
 - Utility (text, formatting)
 - Integration (API, external services)
 - Analysis (data, statistics)
@@ -51,6 +53,7 @@ Search Query Examples:
 ```
 
 **Advanced search:**
+
 - `tag:productivity` - Resources with specific tag
 - `type:tool` - Only show tools
 - `rating:4+` - Only highly-rated resources
@@ -59,12 +62,14 @@ Search Query Examples:
 ### Filter & Sort
 
 **Filters:**
+
 - **Rating** - 1-5 stars
 - **Download count** - Popular resources
 - **Last updated** - Recent vs established
 - **Creator** - Find all resources from one person
 
 **Sort by:**
+
 - **Trending** - Most popular this week
 - **New** - Recently published
 - **Rating** - Highest rated first
@@ -78,6 +83,7 @@ Search Query Examples:
 Before cloning, click **Preview** to see:
 
 **For Templates:**
+
 - System prompt (how the agent behaves)
 - Personality settings
 - Capabilities (what tools it can use)
@@ -85,6 +91,7 @@ Before cloning, click **Preview** to see:
 - User reviews
 
 **For Tools:**
+
 - Function description
 - Input parameters
 - Output format
@@ -92,6 +99,7 @@ Before cloning, click **Preview** to see:
 - Example usage
 
 **For Skills:**
+
 - Workflow steps
 - How data flows between steps
 - Error handling strategy
@@ -118,6 +126,7 @@ You now have a personal copy you can modify!
 ### Templates
 
 After cloning, you can change:
+
 - System prompt (how it should behave)
 - Personality (tone, formality)
 - Capabilities (which tools it can use)
@@ -129,6 +138,7 @@ After cloning, you can change:
 ### Tools
 
 After cloning, you can modify:
+
 - Function code (JavaScript)
 - Input parameters
 - Capabilities (what it can access)
@@ -136,6 +146,7 @@ After cloning, you can modify:
 - Metadata (name, description, tags)
 
 **Example:**
+
 ```javascript
 // Original tool
 async function execute(params) {
@@ -146,7 +157,7 @@ async function execute(params) {
 async function execute(params) {
   return {
     result: params.text.toUpperCase(),
-    wordCount: params.text.split(' ').length
+    wordCount: params.text.split(' ').length,
   };
 }
 ```
@@ -154,6 +165,7 @@ async function execute(params) {
 ### Skills
 
 After cloning, you can:
+
 - Add or remove steps
 - Change tool references
 - Modify input mapping
@@ -165,12 +177,14 @@ After cloning, you can:
 ### When to Publish
 
 Publish a template/tool/skill when:
+
 - ✓ It solves a real problem
 - ✓ You've tested it thoroughly
 - ✓ You've written clear descriptions
 - ✓ You want to help the community
 
 Don't publish if:
+
 - ✗ It's incomplete or untested
 - ✗ It's just copied with no changes
 - ✗ It contains sensitive information
@@ -196,6 +210,7 @@ Choose: **Public** ✓ (Everyone can see and clone)
 **Step 3: Review**
 
 Check:
+
 - Name is clear and searchable
 - Description explains what it does
 - Tags match content
@@ -210,12 +225,15 @@ Your resource is now live! 🎉
 ### Writing Good Descriptions
 
 **Good description:**
+
 > "Template for analyzing customer feedback. Uses sentiment analysis to categorize comments as positive, negative, or neutral. Perfect for product teams reviewing survey responses. Customizable for different industries."
 
 **Bad description:**
+
 > "Template for feedback"
 
 **Tips:**
+
 - Start with what it does
 - Mention who would use it
 - Include use cases
@@ -233,12 +251,14 @@ Your resource is now live! 🎉
 ### Update Your Resource
 
 Click **Edit** on any public resource to:
+
 - Update description
 - Add tags
 - Change category
 - Fix issues based on feedback
 
 New version appears with:
+
 - Updated badge
 - Changelog link
 - Option for users to update
@@ -246,11 +266,13 @@ New version appears with:
 ### Manage Ratings & Reviews
 
 Monitor:
+
 - **Total rating** - Average of all reviews
 - **Review count** - How many people reviewed it
 - **Recent feedback** - Latest user comments
 
 Respond to reviews:
+
 - Helpful feedback → Thank them
 - Issues reported → Fix and publish update
 - Feature requests → Consider for v2
@@ -258,6 +280,7 @@ Respond to reviews:
 ### Remove Your Resource
 
 If needed, you can:
+
 - **Archive** - Hide from Marketplace (keep for history)
 - **Delete** - Permanently remove
 - **Deprecate** - Mark as no longer maintained
@@ -276,6 +299,7 @@ Note: Already-cloned copies aren't affected.
 6. Give credit in the description
 
 **Example:**
+
 ```
 "Email Summarizer - Legal Edition"
 
@@ -295,6 +319,7 @@ Great for: Law firms, legal departments
 Group related resources:
 
 **Project Planning Collection:**
+
 - Project Planner template
 - Task Breakdown skill
 - Team Coordinator template
@@ -309,21 +334,25 @@ Users can find and use your whole collection together!
 Resources in the Marketplace should be:
 
 **Functional**
+
 - Tested and working
 - Clear instructions
 - Appropriate error handling
 
 **Useful**
+
 - Solves a real problem
 - Well-documented
 - Easy to understand
 
 **Safe**
+
 - No malicious code
 - Appropriate permissions
 - Respects privacy
 
 **Respectful**
+
 - No plagiarism (give credit)
 - No offensive content
 - Professional tone
@@ -331,12 +360,14 @@ Resources in the Marketplace should be:
 ### Code of Conduct
 
 When publishing:
+
 - Give credit to resources you built on
 - Don't publish identical copies
 - Be responsive to bug reports
 - Help others improve their versions
 
 When using community resources:
+
 - Respect creator attribution
 - Share feedback (positive and constructive)
 - Report issues respectfully
@@ -347,6 +378,7 @@ When using community resources:
 ### For Your Resources
 
 Track:
+
 - **Download count** - How many people cloned it
 - **Star rating** - Average user rating
 - **Comments** - Discussion and feedback
@@ -366,6 +398,7 @@ Track:
 ### Earning Recognition
 
 Top creators earn:
+
 - **Featured** badge on popular resources
 - **Community Star** if consistently helpful
 - **Creator** status with special benefits
@@ -374,6 +407,7 @@ Top creators earn:
 ### Feedback Loop
 
 Pay attention to:
+
 - **Ratings** - Does it meet expectations?
 - **Comments** - What do users love/hate?
 - **Clone count** - Is it actually useful?
@@ -387,6 +421,7 @@ Use this to improve future versions.
 
 **Problem:** Clone button is disabled
 **Solution:**
+
 - Make sure you're logged in
 - Check that resource is marked public
 - Try refreshing the page
@@ -395,6 +430,7 @@ Use this to improve future versions.
 
 **Problem:** After cloning, some features don't work
 **Solution:**
+
 - Check if you have required capabilities enabled
 - Review the original preview to see differences
 - Read comments for known issues
@@ -404,6 +440,7 @@ Use this to improve future versions.
 
 **Problem:** I remember a resource but can't find it
 **Solution**:
+
 - Try different search terms
 - Check filters (rating, date, etc.)
 - Sort by "Most downloaded"
@@ -413,6 +450,7 @@ Use this to improve future versions.
 
 **Problem:** Can't publish my resource
 **Solution:**
+
 - Check all required fields are filled
 - Verify resource is tested and working
 - Ensure description is clear
@@ -423,6 +461,7 @@ Use this to improve future versions.
 
 **Problem:** My published resource isn't popular
 **Solution:**
+
 - Update description with better keywords
 - Add tags that people search for
 - Include example use cases
@@ -442,6 +481,7 @@ Clone a resource and share with teammates:
 5. Option: Publish team version
 
 Teammate workflow:
+
 ```
 Find → Clone → Customize → Use → Provide Feedback → Refine
 ```
@@ -455,6 +495,7 @@ Track your resource versions:
 - v2.0 - Major features, redesign
 
 Provide:
+
 - Release notes ("What's new")
 - Breaking changes ("What changed")
 - Migration path ("How to upgrade")
@@ -489,6 +530,7 @@ The Marketplace is your community resource hub. By understanding how to:
 ✓ Build on others' work
 
 You can leverage collective intelligence to:
+
 - Get better tools faster
 - Help others solve problems
 - Build a personal library
@@ -496,6 +538,7 @@ You can leverage collective intelligence to:
 - Participate in the community
 
 **Next steps:**
+
 1. Explore the Marketplace
 2. Find a resource that helps you
 3. Clone and customize it

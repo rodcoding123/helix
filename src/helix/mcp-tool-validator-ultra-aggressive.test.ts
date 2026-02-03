@@ -502,18 +502,12 @@ describe('MCP Tool Validator Ultra-Aggressive - Risk Assessment Edge Cases', () 
   });
 
   it('should prioritize critical over high risk', () => {
-    const risk = assessToolRisk('mixed-tool', [
-      'filesystem:write',
-      'process:spawn',
-    ]);
+    const risk = assessToolRisk('mixed-tool', ['filesystem:write', 'process:spawn']);
     expect(risk).toBe('critical');
   });
 
   it('should prioritize high over medium risk', () => {
-    const risk = assessToolRisk('mixed-tool-2', [
-      'filesystem:read',
-      'network:outbound',
-    ]);
+    const risk = assessToolRisk('mixed-tool-2', ['filesystem:read', 'network:outbound']);
     expect(risk).toBe('high');
   });
 });

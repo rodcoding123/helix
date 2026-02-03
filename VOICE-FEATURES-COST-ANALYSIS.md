@@ -8,17 +8,18 @@
 
 ## Executive Summary
 
-| Scenario | Cost | Quality | Latency |
-|----------|------|---------|---------|
-| **Budget (All Free)** | $0/month | Good | Acceptable |
-| **Balanced (Mixed)** | $10-50/month | Excellent | Fast |
-| **Premium (Best-in-class)** | $200-500+/month | Premium | Sub-400ms |
+| Scenario                    | Cost            | Quality   | Latency    |
+| --------------------------- | --------------- | --------- | ---------- |
+| **Budget (All Free)**       | $0/month        | Good      | Acceptable |
+| **Balanced (Mixed)**        | $10-50/month    | Excellent | Fast       |
+| **Premium (Best-in-class)** | $200-500+/month | Premium   | Sub-400ms  |
 
 ---
 
 ## 1. SPEECH-TO-TEXT (STT) Costs
 
 ### Option 1: Whisper Local (FREE) ✅ Recommended
+
 ```
 Cost: $0
 What you need:
@@ -40,6 +41,7 @@ Trade-offs:
 ```
 
 ### Option 2: Whisper API (PAID - $0.02/min)
+
 ```
 Cost: $0.02 per minute of audio
 
@@ -60,6 +62,7 @@ Trade-offs:
 ```
 
 ### Option 3: Deepgram (PAID - $0.0043/min)
+
 ```
 Cost: $0.0043 per minute (streaming)
 
@@ -80,6 +83,7 @@ Trade-offs:
 ```
 
 ### Option 4: AssemblyAI (PAID - $0.0001/min equivalent)
+
 ```
 Cost: ~$13/hour transcription (async)
 
@@ -103,6 +107,7 @@ Trade-offs:
 ## 2. TEXT-TO-SPEECH (TTS) Costs
 
 ### Option 1: System TTS (FREE) ✅ Best Value
+
 ```
 Cost: $0
 Built-in to:
@@ -123,6 +128,7 @@ Trade-offs:
 ```
 
 ### Option 2: Edge TTS (FREE) ✅ Great Alternative
+
 ```
 Cost: $0 (Microsoft Azure free tier)
 "Neural voices" from Microsoft
@@ -142,6 +148,7 @@ Trade-offs:
 ```
 
 ### Option 3: OpenAI TTS (PAID - $0.015/1k chars)
+
 ```
 Cost: $0.015 per 1,000 characters
 
@@ -162,6 +169,7 @@ Trade-offs:
 ```
 
 ### Option 4: ElevenLabs (PAID - $0.30/1k chars)
+
 ```
 Cost: $0.30 per 1,000 characters (or subscription)
 
@@ -187,6 +195,7 @@ Trade-offs:
 ## 3. Claude Realtime API (Phase 4.1 Core)
 
 ### Claude Realtime API Pricing (PAID)
+
 ```
 Model: claude-3-5-sonnet (Realtime)
 
@@ -227,6 +236,7 @@ Trade-offs:
 ## 4. Wake Word Detection Costs
 
 ### Option 1: Vosk (FREE) ✅ Best
+
 ```
 Cost: $0
 Open-source wake word detector
@@ -244,6 +254,7 @@ Trade-offs:
 ```
 
 ### Option 2: Porcupine (PAID - ~$0-99)
+
 ```
 Cost: $0 free tier, commercial pricing on request
 
@@ -261,6 +272,7 @@ Trade-offs:
 ## 5. Infrastructure & Hosting Costs
 
 ### Desktop Application (Helix Desktop)
+
 ```
 Cost: $0 (no recurring server costs)
 
@@ -273,6 +285,7 @@ Architecture:
 ```
 
 ### Optional: Cloud Backend (if you add it later)
+
 ```
 Minimal recommended:
   - Server: $20-50/month (small VPS)
@@ -286,6 +299,7 @@ Minimal recommended:
 ## 6. Telephony Costs (Optional - for voice calls)
 
 ### If you add voice calling (Phase 4.2+):
+
 ```
 Twilio:
   - Inbound call: $0.0085/minute
@@ -412,6 +426,7 @@ Use case:
 ## 8. COST BREAKDOWN BY FEATURE
 
 ### Feature: Real-Time Voice Conversation (Phase 4.1)
+
 ```
 Minimum required:
   - STT (Deepgram): $50/month
@@ -422,6 +437,7 @@ Total: $55-70/month for good experience
 ```
 
 ### Feature: Voice Memos
+
 ```
 Cost: Minimal
   - STT: included above
@@ -432,6 +448,7 @@ Total: ~$5/month (if storing in cloud)
 ```
 
 ### Feature: Voice Commands (triggering tools)
+
 ```
 Cost: Minimal
   - Uses existing Claude API tokens
@@ -441,6 +458,7 @@ Total: $0 additional
 ```
 
 ### Feature: Telephony (phone calling)
+
 ```
 Cost per call:
   - Twilio/Telnyx: ~$0.01/minute
@@ -454,6 +472,7 @@ Total: $5-10/month for moderate use
 ## 9. COST OPTIMIZATION STRATEGIES
 
 ### Strategy 1: Hybrid Approach
+
 ```typescript
 // Use Deepgram for realtime, but fallback to local Whisper for offline
 if (navigator.onLine) {
@@ -467,6 +486,7 @@ Savings: 10-30% compared to cloud-only
 ```
 
 ### Strategy 2: Tiered Service Levels
+
 ```typescript
 // Free tier users get slower, lower quality
 // Paid users get premium providers
@@ -485,6 +505,7 @@ Cost to you: Negotiate wholesale rates with providers
 ```
 
 ### Strategy 3: Batch Processing
+
 ```typescript
 // Don't use realtime Deepgram for everything
 // Use cheaper async options for non-critical
@@ -497,6 +518,7 @@ Cost: 50-70% reduction for batch workloads
 ```
 
 ### Strategy 4: Cache Responses
+
 ```typescript
 // Store frequently used TTS responses
 // Reuse audio for common responses
@@ -514,6 +536,7 @@ Savings: Huge for common phrases
 ## 10. REVENUE MODELS TO OFFSET COSTS
 
 ### Option A: Freemium Model
+
 ```
 Free Tier:
   - 10 minutes voice/month
@@ -533,6 +556,7 @@ Your revenue covers costs:
 ```
 
 ### Option B: Enterprise License
+
 ```
 Per-deployment pricing:
   - Single user: free
@@ -548,6 +572,7 @@ Example:
 ```
 
 ### Option C: Pay-as-you-go
+
 ```
 Users pay for usage:
   - 30 minutes voice: $0.99
@@ -567,6 +592,7 @@ Your costs are usage-based:
 ### At 10,000 users (20% active using voice):
 
 **Scenario: Balanced Setup**
+
 ```
 2,000 active users
   - Average 30 min/week voice = 2,600 hours/month
@@ -690,15 +716,15 @@ Helix positioning:
 
 ## 15. BOTTOM LINE
 
-| Question | Answer |
-|----------|--------|
-| **Can you have voice features for free?** | YES (Whisper Local + System TTS = $0) |
-| **What's the minimum for good experience?** | $50-70/month (Deepgram + Claude) |
-| **What's needed for premium quality?** | $200-250/month (all premium providers) |
-| **Is it profitable?** | YES, 75-90% margins with freemium model |
-| **Does it scale affordably?** | YES, costs stay proportional to usage |
-| **Biggest cost driver?** | Claude Realtime API (but still cheap per conversation) |
-| **Easiest cost to cut?** | TTS (switch from ElevenLabs to Edge for $99→$0/month) |
+| Question                                    | Answer                                                 |
+| ------------------------------------------- | ------------------------------------------------------ |
+| **Can you have voice features for free?**   | YES (Whisper Local + System TTS = $0)                  |
+| **What's the minimum for good experience?** | $50-70/month (Deepgram + Claude)                       |
+| **What's needed for premium quality?**      | $200-250/month (all premium providers)                 |
+| **Is it profitable?**                       | YES, 75-90% margins with freemium model                |
+| **Does it scale affordably?**               | YES, costs stay proportional to usage                  |
+| **Biggest cost driver?**                    | Claude Realtime API (but still cheap per conversation) |
+| **Easiest cost to cut?**                    | TTS (switch from ElevenLabs to Edge for $99→$0/month)  |
 
 ---
 
@@ -707,6 +733,7 @@ Helix positioning:
 ### Choose based on your constraints:
 
 **If you want: Minimum viable product**
+
 ```
 Budget: $0/month
 Use: Whisper Local + System TTS
@@ -714,6 +741,7 @@ Suitable for: Personal/hobby, offline-first
 ```
 
 **If you want: Good production experience**
+
 ```
 Budget: $50-100/month
 Use: Deepgram + Edge TTS + Claude
@@ -721,6 +749,7 @@ Suitable for: Startup launch, small user base
 ```
 
 **If you want: Premium user experience**
+
 ```
 Budget: $200-300/month
 Use: Deepgram + ElevenLabs + Claude
@@ -728,6 +757,7 @@ Suitable for: Funded startup, enterprise
 ```
 
 **If you want: Cost-conscious scale**
+
 ```
 Budget: $100-500/month (scales with users)
 Use: Hybrid (Deepgram + Edge free tier)
@@ -739,25 +769,29 @@ Suitable for: SaaS business model
 ## 17. NEGOTIATING WITH PROVIDERS
 
 **Deepgram:**
+
 - Startup rate: ~50% off list price
 - Volume discounts: 30-40% at $1K+/month
 - Contact sales for custom deal
 
 **ElevenLabs:**
+
 - Wholesale rates available for products
 - Volume-based pricing
 - Can negotiate API rates vs subscription
 
 **Claude API:**
+
 - No volume discounts (flat per-token rate)
 - But tokens are very cheap for audio
 - Focus on optimization, not negotiation
 
 **Twilio/Telnyx:**
+
 - Startup program: $500 credit
 - Volume: negotiate at 1M+ units
 
 ---
 
-*Voice Features Cost Analysis | February 2, 2026*
-*Phase 4.1 Implementation: Budget-Friendly & Profitable*
+_Voice Features Cost Analysis | February 2, 2026_
+_Phase 4.1 Implementation: Budget-Friendly & Profitable_

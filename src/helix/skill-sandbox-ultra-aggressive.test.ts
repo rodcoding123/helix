@@ -54,11 +54,9 @@ describe('Skill Sandbox Ultra-Aggressive - Execution Paths', () => {
 
     const signedData = `${code}|${metadata.name}|${metadata.version}|${metadata.author}|${metadata.signedAt}`;
     const dataHash = crypto.createHash('sha256').update(signedData).digest('hex');
-    const signature = crypto
-      .createHash('sha256')
-      .update(`${trustedKey}:${dataHash}`)
-      .digest('hex')
-      .slice(0, 16) + '-valid';
+    const signature =
+      crypto.createHash('sha256').update(`${trustedKey}:${dataHash}`).digest('hex').slice(0, 16) +
+      '-valid';
 
     metadata.signature = signature;
 
@@ -257,13 +255,7 @@ describe('Skill Sandbox Ultra-Aggressive - Execution Paths', () => {
       trustedSigners: ['trusted-key'],
     };
 
-    const result = await executeSkillSandboxed(
-      'return 1;',
-      metadata,
-      {},
-      'session-123',
-      config
-    );
+    const result = await executeSkillSandboxed('return 1;', metadata, {}, 'session-123', config);
 
     expect(result.success).toBe(false);
     expect(result.error).toContain('verification failed');
@@ -278,13 +270,7 @@ describe('Skill Sandbox Ultra-Aggressive - Execution Paths', () => {
     };
 
     const config = { ...DEFAULT_SKILL_SANDBOX_CONFIG, requireSignature: false };
-    const result = await executeSkillSandboxed(
-      'return 1;',
-      metadata,
-      {},
-      'session-123',
-      config
-    );
+    const result = await executeSkillSandboxed('return 1;', metadata, {}, 'session-123', config);
 
     expect(result.success).toBe(false);
     expect(result.error).toContain('Missing required metadata');
@@ -299,13 +285,7 @@ describe('Skill Sandbox Ultra-Aggressive - Execution Paths', () => {
     };
 
     const config = { ...DEFAULT_SKILL_SANDBOX_CONFIG, requireSignature: false };
-    const result = await executeSkillSandboxed(
-      'return 1;',
-      metadata,
-      {},
-      'session-123',
-      config
-    );
+    const result = await executeSkillSandboxed('return 1;', metadata, {}, 'session-123', config);
 
     expect(result.success).toBe(false);
   });
@@ -319,13 +299,7 @@ describe('Skill Sandbox Ultra-Aggressive - Execution Paths', () => {
     };
 
     const config = { ...DEFAULT_SKILL_SANDBOX_CONFIG, requireSignature: false };
-    const result = await executeSkillSandboxed(
-      'return 1;',
-      metadata,
-      {},
-      'session-123',
-      config
-    );
+    const result = await executeSkillSandboxed('return 1;', metadata, {}, 'session-123', config);
 
     expect(result.success).toBe(false);
   });
@@ -453,13 +427,7 @@ describe('Skill Sandbox Ultra-Aggressive - Execution Paths', () => {
       throw new Error('Skill error');
     `;
 
-    const result = await executeSkillSandboxed(
-      code,
-      metadata,
-      {},
-      'session-123',
-      config
-    );
+    const result = await executeSkillSandboxed(code, metadata, {}, 'session-123', config);
 
     expect(result.success).toBe(false);
     expect(result.error).toContain('Skill error');
@@ -475,13 +443,7 @@ describe('Skill Sandbox Ultra-Aggressive - Execution Paths', () => {
     };
 
     const config = { ...DEFAULT_SKILL_SANDBOX_CONFIG, requireSignature: false };
-    const result = await executeSkillSandboxed(
-      '42',
-      metadata,
-      {},
-      'session-123',
-      config
-    );
+    const result = await executeSkillSandboxed('42', metadata, {}, 'session-123', config);
 
     expect(result.success).toBe(true);
     expect(result.output).toBe(42);

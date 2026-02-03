@@ -2,10 +2,7 @@
   "timestamp": "2026-02-02T21:44:40.111Z",
   "version": "1.0.0",
   "resources": {
-    "found": [
-      "helix-runtime (sibling project)",
-      "helix-runtime/dist (built)"
-    ],
+    "found": ["helix-runtime (sibling project)", "helix-runtime/dist (built)"],
     "missing": []
   },
   "nodeRuntime": {

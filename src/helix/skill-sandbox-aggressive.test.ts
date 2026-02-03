@@ -335,11 +335,9 @@ describe('Skill Sandbox - Aggressive Coverage: Validation', () => {
     const trustedKey = 'test-key-123';
     const signedData = `${code}|${metadata.name}|${metadata.version}|${metadata.author}|${metadata.signedAt}`;
     const dataHash = crypto.createHash('sha256').update(signedData).digest('hex');
-    const signature = crypto
-      .createHash('sha256')
-      .update(`${trustedKey}:${dataHash}`)
-      .digest('hex')
-      .slice(0, 16) + '-valid';
+    const signature =
+      crypto.createHash('sha256').update(`${trustedKey}:${dataHash}`).digest('hex').slice(0, 16) +
+      '-valid';
 
     metadata.signature = signature;
 
@@ -376,9 +374,6 @@ describe('Skill Sandbox - Aggressive Coverage: Validation', () => {
     expect(result).toBe(false);
   });
 
-
-
-
   it('should fail execution without signature when required', async () => {
     const metadata: SkillMetadata = {
       name: 'unsigned-fail',
@@ -408,13 +403,7 @@ describe('Skill Sandbox - Aggressive Coverage: Validation', () => {
     };
 
     const config = { ...DEFAULT_SKILL_SANDBOX_CONFIG, requireSignature: false };
-    const result = await executeSkillSandboxed(
-      'return 1;',
-      metadata,
-      {},
-      'session',
-      config
-    );
+    const result = await executeSkillSandboxed('return 1;', metadata, {}, 'session', config);
 
     expect(result.success).toBe(false);
     expect(result.error).toBeDefined();
@@ -571,5 +560,4 @@ describe('Skill Sandbox - Aggressive Coverage: Validation', () => {
 
     expect(result.valid).toBe(true);
   });
-
 });

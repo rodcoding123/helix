@@ -9,6 +9,7 @@
 ## Executive Summary
 
 OpenClaw has a **production-ready, sophisticated voice system** that handles:
+
 - ✅ Audio input/output across platforms (Windows/macOS/Linux)
 - ✅ Multiple STT providers (Whisper, Deepgram, AssemblyAI)
 - ✅ Multiple TTS providers (ElevenLabs, OpenAI, Edge, System)
@@ -17,7 +18,7 @@ OpenClaw has a **production-ready, sophisticated voice system** that handles:
 - ✅ Real-time WebRTC streaming
 - ✅ Gateway RPC integration for remote control
 
-**What's missing:** The *actual real-time conversational layer* - i.e., having Claude listen and respond to speech in real-time during active conversation. This is Phase 4.1.
+**What's missing:** The _actual real-time conversational layer_ - i.e., having Claude listen and respond to speech in real-time during active conversation. This is Phase 4.1.
 
 ---
 
@@ -360,6 +361,7 @@ Calling Flow:
 ## 6. CURRENT STATE: The Missing Piece
 
 ### ✅ What Exists
+
 - Audio input/output
 - Wake word detection
 - Multiple STT providers
@@ -369,7 +371,9 @@ Calling Flow:
 - Gateway RPC control
 
 ### ❌ What's Missing (Phase 4.1 Scope)
+
 **Real-time interactive conversation mode** where:
+
 1. User speaks
 2. Claude receives **streaming partial transcripts** (not just final transcripts)
 3. Claude can **interrupt** the user's speech with a response
@@ -482,6 +486,7 @@ This requires parallel bi-directional audio flow.
 ### C. Three Implementation Approaches
 
 **Option 1: Claude Realtime API (Recommended)**
+
 - Uses OpenAI's Realtime API v1
 - Already integrated in voice-call plugin
 - Supports voice input/output natively
@@ -490,6 +495,7 @@ This requires parallel bi-directional audio flow.
 - **Effort:** 40-60 hours
 
 **Option 2: Custom Streaming (Maximum Control)**
+
 - Build custom streaming protocol
 - Use Claude API with server-sent events
 - Custom audio synchronization
@@ -497,6 +503,7 @@ This requires parallel bi-directional audio flow.
 - **Effort:** 80-120 hours
 
 **Option 3: Hybrid (Best of Both)**
+
 - Use Claude Realtime for audio handling
 - Custom orchestration for Helix memory/context
 - Combine with memory synthesis
@@ -556,7 +563,7 @@ async function recordVoiceConversationMemory(sessionId: string) {
     sessionId,
     transcript,
     patterns: analysis,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   });
 }
 ```
@@ -630,30 +637,40 @@ CREATE TABLE voice_commands (
 ## 10. KEY TECHNICAL DECISIONS FOR PHASE 4.1
 
 ### Decision 1: Streaming Protocol
+
 **Option A:** Use Claude Realtime API (audio ↔️ audio)
+
 - Pros: Native voice support, low latency, proven
 - Cons: Less flexible for custom logic
 - **Recommendation: YES** - This is the right tool
 
 ### Decision 2: Memory Integration Timing
+
 **Option A:** Inject memory before conversation starts
 **Option B:** Stream memory context during conversation
 **Option C:** Post-process memory from conversation transcript
+
 - **Recommendation: Option A + Option C** (inject patterns at start, analyze after)
 
 ### Decision 3: Interruption Handling
+
 **Option A:** User can interrupt anytime (true bi-directional)
 **Option B:** Claude finishes current utterance before accepting input
 **Option C:** Timeout-based switching (who speaks first wins)
+
 - **Recommendation: Option A** (natural conversation)
 
 ### Decision 4: Audio Quality vs Latency
+
 **Option A:** High quality (44.1kHz, streaming MP3)
 **Option B:** Optimized (16kHz PCM, minimal buffering)
+
 - **Recommendation: Option B** - Latency critical for conversation
 
 ### Decision 5: Fallback Strategy
+
 If Claude Realtime API unavailable:
+
 - **Option A:** Fall back to turn-based (classic mode)
 - **Option B:** Use streaming API + custom synthesis
 - **Recommendation: Option A** - Graceful degradation
@@ -663,14 +680,16 @@ If Claude Realtime API unavailable:
 ## 11. PHASE 4.1 DELIVERABLES
 
 ### Backend (helix-runtime)
+
 1. **Voice Conversation Manager** - Orchestrate realtime sessions
 2. **Claude Realtime Integration** - Connect to audio streaming API
 3. **Memory Context Injection** - Pass psychological patterns to Claude
 4. **Session State Persistence** - Save conversations and metadata
-5. **Gateway RPC Methods** - voiceconv.* family
+5. **Gateway RPC Methods** - voiceconv.\* family
 6. **Database Migrations** - New tables for conversations/memos/commands
 
 ### Frontend (helix-desktop)
+
 1. **Voice Conversation Component** - Real-time UI
 2. **Transcript Display** - Streaming + final text
 3. **Audio Waveform Visualizer** - Real-time level indicator
@@ -681,6 +700,7 @@ If Claude Realtime API unavailable:
 8. **Memory Integration UI** - View patterns from conversations
 
 ### Documentation
+
 1. **Voice Conversation Guide** - How to use
 2. **Voice Architecture Reference** - Technical deep-dive
 3. **API Documentation** - Gateway RPC methods
@@ -690,39 +710,43 @@ If Claude Realtime API unavailable:
 
 ## 12. SUCCESS METRICS FOR PHASE 4.1
 
-| Metric | Target | Why It Matters |
-|--------|--------|---|
-| **Response Latency** | <800ms avg | Natural conversation speed |
-| **Interruption Success Rate** | >95% | Smooth back-and-forth |
-| **Transcript Accuracy** | >90% | Understanding user intent |
-| **Memory Integration** | <50ms overhead | Doesn't slow down conversation |
-| **Session Uptime** | >99.5% | Reliability for long conversations |
-| **Audio Quality** | 16kHz, clear | Sufficient for speech |
-| **Concurrency** | 10+ simultaneous | Desktop can handle many conversations |
+| Metric                        | Target           | Why It Matters                        |
+| ----------------------------- | ---------------- | ------------------------------------- |
+| **Response Latency**          | <800ms avg       | Natural conversation speed            |
+| **Interruption Success Rate** | >95%             | Smooth back-and-forth                 |
+| **Transcript Accuracy**       | >90%             | Understanding user intent             |
+| **Memory Integration**        | <50ms overhead   | Doesn't slow down conversation        |
+| **Session Uptime**            | >99.5%           | Reliability for long conversations    |
+| **Audio Quality**             | 16kHz, clear     | Sufficient for speech                 |
+| **Concurrency**               | 10+ simultaneous | Desktop can handle many conversations |
 
 ---
 
 ## 13. TIMELINE & EFFORT ESTIMATE (If You Proceed)
 
 ### Week 1: Claude Realtime Integration (40 hours)
+
 - [ ] Study Claude Realtime API (4h)
 - [ ] Implement voice session manager (16h)
 - [ ] Build audio streaming layer (12h)
 - [ ] Create gateway RPC methods (8h)
 
 ### Week 2: Memory & Persistence (40 hours)
+
 - [ ] Design database schema (8h)
 - [ ] Apply migrations (4h)
 - [ ] Implement memory context injection (12h)
 - [ ] Build conversation storage (16h)
 
 ### Week 3: UI & Integration (40 hours)
+
 - [ ] VoiceConversation component (16h)
 - [ ] Waveform visualizer (12h)
 - [ ] Settings & controls (8h)
 - [ ] History & replay (4h)
 
 ### Week 4: Testing & Polish (24 hours)
+
 - [ ] End-to-end testing (12h)
 - [ ] Error scenarios (6h)
 - [ ] Documentation (4h)
@@ -734,13 +758,13 @@ If Claude Realtime API unavailable:
 
 ## 14. RISK ASSESSMENT
 
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|-----------|
-| Claude Realtime API rate limits | Medium | High | Implement queuing, fallback to classic |
-| Audio latency spikes | Medium | High | Client-side buffering, network monitoring |
-| Memory context too large | Low | Medium | Implement context pruning |
-| Concurrent session limits | Low | High | Load testing, resource pooling |
-| STT transcription errors | High | Low | Confidence scoring, user confirmation |
+| Risk                            | Probability | Impact | Mitigation                                |
+| ------------------------------- | ----------- | ------ | ----------------------------------------- |
+| Claude Realtime API rate limits | Medium      | High   | Implement queuing, fallback to classic    |
+| Audio latency spikes            | Medium      | High   | Client-side buffering, network monitoring |
+| Memory context too large        | Low         | Medium | Implement context pruning                 |
+| Concurrent session limits       | Low         | High   | Load testing, resource pooling            |
+| STT transcription errors        | High        | Low    | Confidence scoring, user confirmation     |
 
 ---
 
@@ -773,5 +797,5 @@ The architecture OpenClaw has built provides all the pieces. Phase 4.1 is about 
 
 ---
 
-*Voice Architecture Strategy | February 2, 2026*
-*Ready for Phase 4.1 Implementation*
+_Voice Architecture Strategy | February 2, 2026_
+_Ready for Phase 4.1 Implementation_

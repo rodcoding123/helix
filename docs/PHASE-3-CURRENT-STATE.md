@@ -11,6 +11,7 @@
 ### **Secrets Management** (Complete on Web, In Progress on Desktop)
 
 **Web Implementation:**
+
 - [x] SecretsPage.tsx - Dashboard UI
 - [x] CreateSecretModal - Add new secrets
 - [x] RotateSecretModal - Rotate existing secrets
@@ -20,6 +21,7 @@
 - **Status:** PRODUCTION-READY
 
 **Desktop Implementation:**
+
 - [x] Secrets API client
 - [x] Tauri commands for keyring
 - [x] Real-time sync to web
@@ -33,6 +35,7 @@
 ### **Custom Tool Creation** (Complete on Web, Designed on Desktop)
 
 **Web Implementation:**
+
 - [x] CustomToolBuilder.tsx - Visual tool builder
 - [x] Custom tool execution in sandboxed environment
 - [x] Parameter definition UI
@@ -42,6 +45,7 @@
 - **Status:** PRODUCTION-READY
 
 **Desktop Implementation:**
+
 - [x] Component structure designed
 - [x] Database schema identical to web
 - **Status:** WAITING FOR TAURI COMMAND IMPLEMENTATION
@@ -53,6 +57,7 @@
 ### **Skill Composition (Tool Chaining)** (Designed, DB Schema Ready)
 
 **Architecture:**
+
 - [x] Database schema created (migration_016)
 - [x] Execution engine service designed
 - [x] Step-by-step workflow execution pattern defined
@@ -60,6 +65,7 @@
 - [x] Input mapping via JSONPath
 
 **Implementation Status:**
+
 - Components: NOT YET BUILT
 - Service layer: DESIGNED BUT NOT IMPLEMENTED
 - **Status:** DESIGN PHASE COMPLETE, READY FOR IMPLEMENTATION
@@ -71,6 +77,7 @@
 ### **Agent Templates** (Web UI Complete)
 
 **Web Implementation:**
+
 - [x] AgentTemplates.tsx - Template browser
 - [x] Template search and filtering
 - [x] Template cloning functionality
@@ -79,6 +86,7 @@
 - **Status:** PRODUCTION-READY
 
 **Desktop Implementation:**
+
 - [x] Component structure exists
 - **Status:** UI NEEDS CONNECTION TO WEB DATA
 
@@ -89,6 +97,7 @@
 ### **Marketplace** (Web UI Complete)
 
 **Web Implementation:**
+
 - [x] Marketplace.tsx - Main marketplace page
 - [x] Resource browsing with filters
 - [x] Clone/fork functionality
@@ -98,6 +107,7 @@
 - **Status:** PRODUCTION-READY
 
 **Desktop Implementation:**
+
 - [x] Component structure exists
 - **Status:** UI NEEDS CONNECTION TO WEB DATA
 
@@ -108,6 +118,7 @@
 ### **Memory Synthesis** (Architecture Ready, Implementation Starting)
 
 **Architecture:**
+
 - [x] Database schema (migration_017): synthesis jobs + pattern detection
 - [x] Seven-layer analysis algorithms designed
 - [x] Emotional pattern detection logic
@@ -116,6 +127,7 @@
 - [x] Scheduled synthesis with cron support
 
 **Implementation Status:**
+
 - Web UI: STARTING (synthesis insights viewer)
 - Service layer: SERVICE DESIGNED, ALGORITHMS READY
 - **Status:** 10% IMPLEMENTATION COMPLETE
@@ -126,13 +138,13 @@
 
 ## What's In Progress 🔄
 
-| Feature | Component | Status | Completion |
-|---------|-----------|--------|-----------|
-| Desktop Secrets UI | SecretsPage + modals | In Progress | 50% |
-| Desktop Custom Tools UI | CustomToolBuilder | Designed | 20% |
-| Desktop Skill Composition | CompositeSkillBuilder | Designed | 0% |
-| Memory Synthesis UI | SynthesisInsightsViewer | Designed | 10% |
-| Memory Synthesis Service | Synthesis algorithms | Implemented | 40% |
+| Feature                   | Component               | Status      | Completion |
+| ------------------------- | ----------------------- | ----------- | ---------- |
+| Desktop Secrets UI        | SecretsPage + modals    | In Progress | 50%        |
+| Desktop Custom Tools UI   | CustomToolBuilder       | Designed    | 20%        |
+| Desktop Skill Composition | CompositeSkillBuilder   | Designed    | 0%         |
+| Memory Synthesis UI       | SynthesisInsightsViewer | Designed    | 10%        |
+| Memory Synthesis Service  | Synthesis algorithms    | Implemented | 40%        |
 
 ---
 
@@ -159,34 +171,37 @@ These features were documented in PRODUCT-FEATURES.md as Phase 2 but were skippe
 
 ## Database Schema Status
 
-| Migration | Feature | Status |
-|-----------|---------|--------|
-| 010 | Agents | ✅ Complete |
-| 011 | Autonomy | ✅ Complete |
-| 012 | Analytics | ✅ Complete |
-| 013 | Channels | ✅ Complete |
-| 014 | Secrets (User) | ✅ Complete |
-| 015 | Custom Tools | ✅ Complete |
-| 016 | Composite Skills | ✅ Complete |
-| 017 | Memory Synthesis | ✅ Complete |
+| Migration | Feature          | Status      |
+| --------- | ---------------- | ----------- |
+| 010       | Agents           | ✅ Complete |
+| 011       | Autonomy         | ✅ Complete |
+| 012       | Analytics        | ✅ Complete |
+| 013       | Channels         | ✅ Complete |
+| 014       | Secrets (User)   | ✅ Complete |
+| 015       | Custom Tools     | ✅ Complete |
+| 016       | Composite Skills | ✅ Complete |
+| 017       | Memory Synthesis | ✅ Complete |
 
 ---
 
 ## Technology Stack
 
 **Frontend:**
+
 - React 18 with Vite
 - Tailwind CSS for styling
 - React Markdown for rendering guides
 - Lucide React for icons
 
 **Backend:**
+
 - Node.js 22+ with TypeScript
 - Supabase for database + auth
 - Tauri for desktop integration
 - OpenClaw gateway for agent execution
 
 **Testing:**
+
 - Vitest for unit tests
 - Playwright for integration tests
 - 135+ integration test cases for Phase 3 features
@@ -196,21 +211,25 @@ These features were documented in PRODUCT-FEATURES.md as Phase 2 but were skippe
 ## Next Steps (Priority Order)
 
 ### **Week 1: Desktop UI Completion**
+
 1. ✅ Secrets Management UI (60% → 100%)
 2. 🔄 Custom Tools UI (0% → 80%)
 3. ⏳ Agent Templates UI (0% → 80%)
 
 ### **Week 2: Skill Composition Implementation**
+
 1. 🔄 Service layer implementation
 2. 🔄 UI component development
 3. 🔄 Integration testing
 
 ### **Week 3: Memory Synthesis Completion**
+
 1. 🔄 Algorithm implementation (40% → 100%)
 2. 🔄 UI development (10% → 80%)
 3. 🔄 Integration with psychology layers
 
 ### **Week 4: Polish & Deployment**
+
 1. ✅ Documentation updates
 2. ✅ Testing and bug fixes
 3. ✅ Production deployment readiness
@@ -220,16 +239,19 @@ These features were documented in PRODUCT-FEATURES.md as Phase 2 but were skippe
 ## Known Issues & Gaps
 
 ### **Platform Parity**
+
 - Web has full Phase 3 feature set
 - Desktop UI lags behind (mostly component stubs)
 - Services tier is well-designed, ready for desktop implementation
 
 ### **Integration Gaps**
+
 - Desktop Secrets UI not connected to web API
 - Desktop Agent Templates not synced with marketplace
 - Skill Composition execution engine not connected to UI
 
 ### **Missing Features**
+
 - Voice input (was Phase 2, deprioritized)
 - Calendar/Email integration (was Phase 2, deprioritized)
 - Scheduled tasks (was Phase 2, deprioritized)
@@ -239,30 +261,33 @@ These features were documented in PRODUCT-FEATURES.md as Phase 2 but were skippe
 
 ## Success Metrics (Phase 3)
 
-| Metric | Target | Current |
-|--------|--------|---------|
-| Custom Tools Created | 50 | 0 (UI ready) |
-| Skills Composed | 100 | 0 (UI pending) |
-| Memory Patterns Detected | 200/user | 0 (service starting) |
-| Agent Templates Downloaded | 500 | 0 (web ready) |
-| Marketplace Resources | 1000 | 0 (web ready) |
-| Desktop UI Feature Parity | 85% | 60% |
+| Metric                     | Target   | Current              |
+| -------------------------- | -------- | -------------------- |
+| Custom Tools Created       | 50       | 0 (UI ready)         |
+| Skills Composed            | 100      | 0 (UI pending)       |
+| Memory Patterns Detected   | 200/user | 0 (service starting) |
+| Agent Templates Downloaded | 500      | 0 (web ready)        |
+| Marketplace Resources      | 1000     | 0 (web ready)        |
+| Desktop UI Feature Parity  | 85%      | 60%                  |
 
 ---
 
 ## Related Documentation
 
 **Active Planning Documents:**
+
 - [Desktop Phase 3 Secrets API](/docs/plans/2026-02-02-desktop-phase3-secrets-api.md)
 - [Per-User Secrets Architecture](/docs/plans/2026-02-02-per-user-secrets-architecture.md)
 - [Phase 3 Frontend Secrets Dashboard](/docs/plans/2026-02-02-phase3-frontend-secrets-dashboard.md)
 
 **Architectural References:**
+
 - [HELIX_TECHNICAL_SPEC.md](/docs/HELIX_TECHNICAL_SPEC.md) - System architecture
 - [HELIX_AUTONOMOUS_BLUEPRINT.md](/docs/HELIX_AUTONOMOUS_BLUEPRINT.md) - Autonomy layer
 - [LIVING_AI_ARCHITECTURE_v1.md](/docs/LIVING_AI_ARCHITECTURE_v1.md) - 7-layer psychology
 
 **User Documentation:**
+
 - [Custom Tools Guide](/web/docs/knowledge-base/extended/custom-tools.md)
 - [Skill Composition Guide](/web/docs/knowledge-base/extended/skill-composition.md)
 - [Memory Synthesis Guide](/web/docs/knowledge-base/extended/memory-synthesis.md)

@@ -89,6 +89,7 @@ These 5 comprehensive guides cover the extended capabilities system:
 ### Web Application
 
 Users access the knowledge base via:
+
 - **Sidebar link:** "Help" or "Documentation" menu
 - **Direct URL:** `/help`
 - **Keyboard shortcut:** `?` (optional)
@@ -97,6 +98,7 @@ Users access the knowledge base via:
 ### Desktop Application
 
 Users access the knowledge base via:
+
 - **Sidebar link:** "Help & Documentation"
 - **Direct URL route:** `/help`
 - **Keyboard shortcut:** `?` (optional)
@@ -119,6 +121,7 @@ The knowledge base is organized in a **dedicated, protected structure** to preve
 ### Components
 
 **KnowledgeBase.tsx** (Web & Desktop)
+
 - Displays guide list in left sidebar
 - Renders markdown content with proper styling
 - Search functionality (case-insensitive)
@@ -174,11 +177,13 @@ The knowledge base is organized in a **dedicated, protected structure** to preve
 ### For Web Developers
 
 1. Import the component:
+
    ```typescript
    import { KnowledgeBase } from '@/components/knowledge-base';
    ```
 
 2. Add route:
+
    ```typescript
    { path: '/help', element: <KnowledgeBasePage /> }
    ```
@@ -193,6 +198,7 @@ See `web/docs/knowledge-base/INTEGRATION.md` for detailed instructions.
 ### For Desktop Developers
 
 Same process in `helix-desktop/`:
+
 1. Import from desktop components
 2. Add route to desktop router
 3. Add sidebar or menu link
@@ -243,25 +249,27 @@ User can switch to another guide or go back
 
 ## 📊 Statistics
 
-| Metric | Value |
-|--------|-------|
-| Total Guides | 5 |
-| Total Words | 43,000+ |
-| Code Examples | 20+ |
-| Troubleshooting Tips | 50+ |
-| Features Documented | All Path D features |
-| Responsive Design | Yes |
-| Dark Theme | Yes |
-| Search Enabled | Yes |
+| Metric               | Value               |
+| -------------------- | ------------------- |
+| Total Guides         | 5                   |
+| Total Words          | 43,000+             |
+| Code Examples        | 20+                 |
+| Troubleshooting Tips | 50+                 |
+| Features Documented  | All Path D features |
+| Responsive Design    | Yes                 |
+| Dark Theme           | Yes                 |
+| Search Enabled       | Yes                 |
 
 ## 🎓 Educational Value
 
 The guides are designed for:
+
 - **Beginners:** Step-by-step instructions with examples
 - **Intermediate:** Advanced features and patterns
 - **Advanced:** Power-user techniques and optimization
 
 Each guide can be read:
+
 - Sequentially from start to finish
 - By jumping to specific sections
 - By searching for keywords
@@ -289,6 +297,7 @@ Each guide can be read:
 ## 📞 Support
 
 Users can access help:
+
 1. **In-app Knowledge Base** (this system)
 2. **GitHub Issues** (bug reports)
 3. **Community Discussions** (questions)
@@ -297,6 +306,7 @@ Users can access help:
 ## ✅ Quality Assurance
 
 All guides have been:
+
 - ✓ Written comprehensively
 - ✓ Tested for accuracy
 - ✓ Formatted consistently

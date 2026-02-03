@@ -33,21 +33,25 @@ Think of it like building a recipe: combine steps (tools) in the right order to 
 Create a skill when you:
 
 **Repeat the same sequence**
+
 - "Every day, collect → analyze → report"
 - "Always validate → transform → export"
 - You do these steps in the same order repeatedly
 
 **Need conditional logic**
+
 - "Only process if validation passes"
 - "Skip step 2 if data is empty"
 - Different paths based on results
 
 **Want to automate workflows**
+
 - "Run this pipeline every morning"
 - "Trigger when new files arrive"
 - Automation options coming soon
 
 **Examples of useful skills:**
+
 - ✓ Daily standup generator (meetings → notes → summary)
 - ✓ Code review workflow (lint → test → review)
 - ✓ Invoice processor (parse → validate → file)
@@ -66,23 +70,27 @@ Create a skill when you:
 Fill in:
 
 **Name** (required)
+
 - What is this workflow called?
 - Examples: "Daily Report", "Email Processor", "Code Review"
 - ✓ Good: "Invoice Processing Workflow"
 - ✗ Bad: "skill1" or "workflow"
 
 **Description** (required)
+
 - What does this skill do?
 - What's the end result?
 - Example: "Processes invoices: validates format, extracts data, files by customer"
 
 **Icon** (optional)
+
 - Single emoji for quick identification
 - 📋 for document workflows
 - 🔄 for processing pipelines
 - 🤖 for automation
 
 **Visibility** (required)
+
 - **Private** - Only you
 - **Public** - Share in Marketplace
 
@@ -93,6 +101,7 @@ Click **Add Step** to add tools to your workflow.
 **For each step, configure:**
 
 **Tool Selection**
+
 ```
 Tool Name: "Email Validator"
 Tool Type: Custom (your tools)
@@ -101,6 +110,7 @@ Tool Type: Custom (your tools)
 ```
 
 **Input Mapping**
+
 ```
 Where does this step get its input?
 
@@ -117,6 +127,7 @@ Example:
 ```
 
 **Error Handling**
+
 ```
 What happens if this step fails?
 
@@ -171,6 +182,7 @@ Step 3: Send Confirmation
 ```
 
 **Supported conditions:**
+
 - **equals** - Value equals something
   ```
   If status == "approved" → Continue
@@ -203,6 +215,7 @@ Before saving:
 5. Check final result
 
 **Testing Output:**
+
 ```
 Step 1: Receive text "hello"
   Status: ✓ Success
@@ -226,6 +239,7 @@ Keep refining until results look correct.
 Click **Save Skill**
 
 Your skill is now:
+
 - ✓ Saved to your account
 - ✓ Ready to execute
 - ✓ Available in Marketplace (if public)
@@ -486,12 +500,14 @@ Note: This doesn't affect past execution records.
 ### Keep Steps Simple
 
 **✓ Good workflow:**
+
 - Each step does one thing
 - Clear input/output
 - Easy to debug
 - Easy to modify
 
 **✗ Bad workflow:**
+
 - Steps do multiple things
 - Complex transformations
 - Hard to understand
@@ -500,6 +516,7 @@ Note: This doesn't affect past execution records.
 ### Use Clear Step Names
 
 **✓ Good:**
+
 ```
 Step 1: Parse Email
 Step 2: Extract Date
@@ -507,6 +524,7 @@ Step 3: Create Calendar Event
 ```
 
 **✗ Bad:**
+
 ```
 Step 1: Tool1
 Step 2: Processor
@@ -516,6 +534,7 @@ Step 3: Output
 ### Test Each Step
 
 Before saving, test:
+
 1. Test with valid input
 2. Test with invalid input
 3. Test edge cases
@@ -524,6 +543,7 @@ Before saving, test:
 ### Plan the Flow
 
 Before building:
+
 ```
 Input → Step A → Step B → Step C → Output
         (Check)  (Check)  (Check)
@@ -551,6 +571,7 @@ Sketch it out first!
 
 **Problem:** Getting "invalid workflow" error
 **Solution:**
+
 - Check all steps have tool selected
 - Verify input mappings are valid
 - Test with simple input first
@@ -560,6 +581,7 @@ Sketch it out first!
 
 **Problem:** Step fails but workflow continues
 **Solution:**
+
 - Check error handling isn't "Continue"
 - Change to "Stop" for debugging
 - Look at step output in execution history
@@ -569,6 +591,7 @@ Sketch it out first!
 
 **Problem:** Step gets wrong input
 **Solution:**
+
 - Click step to see input mapping
 - Verify path is correct: `$.step1.output`
 - Check previous step's actual output
@@ -578,6 +601,7 @@ Sketch it out first!
 
 **Problem:** Workflow takes too long
 **Solution:**
+
 - Remove unnecessary steps
 - Check for long-running tools
 - Look for retry loops (keep retrying)
@@ -587,6 +611,7 @@ Sketch it out first!
 
 **Problem:** Output format doesn't match next step's input
 **Solution:**
+
 - Check what Step A outputs
 - Check what Step B expects
 - Use intermediate tool to transform
@@ -597,6 +622,7 @@ Sketch it out first!
 ### Manual Execution
 
 Run skill on demand:
+
 ```
 You: "Execute my report skill"
 Skill runs immediately
@@ -606,6 +632,7 @@ Result displayed
 ### Scheduled Execution
 
 Run on a schedule (coming soon):
+
 ```
 Every day at 9 AM:
   → Run Daily Report skill
@@ -615,6 +642,7 @@ Every day at 9 AM:
 ### Triggered Execution
 
 Run when events happen (coming soon):
+
 ```
 When email arrives:
   → Run Email Processor skill
@@ -641,12 +669,14 @@ Optimize the slowest steps first!
 ### Resource Usage
 
 Each tool uses resources:
+
 - File I/O (filesystem steps)
 - Network (API calls)
 - Computation (transformations)
 - Memory (data processing)
 
 Monitor and optimize:
+
 - Avoid large file operations
 - Cache results when possible
 - Use batch operations
@@ -701,6 +731,7 @@ Skill Composition lets you:
 ✓ Share automation knowledge
 
 **Workflow:**
+
 1. Plan the steps
 2. Add tools in order
 3. Configure input mapping
@@ -711,6 +742,7 @@ Skill Composition lets you:
 8. Share if helpful
 
 **Next steps:**
+
 1. Identify a process you repeat
 2. Break it into steps
 3. Create a skill for it

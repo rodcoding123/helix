@@ -5,14 +5,17 @@ Complete user documentation for all Helix features.
 ## Getting Started
 
 ### Path A: Core Features
+
 - [Authentication & Setup](./core/authentication.md)
 - [Chat Interface Basics](./core/chat-interface.md)
 
 ### Path B: Extended Features
+
 - [Agent Templates](./extended/agent-templates.md)
 - [Marketplace](./extended/marketplace.md)
 
 ### Path D: Advanced Capabilities
+
 - [Custom Tools](./extended/custom-tools.md)
 - [Skill Composition](./extended/skill-composition.md)
 - [Memory Synthesis](./extended/memory-synthesis.md)
@@ -24,6 +27,7 @@ Use the **Help** menu in the sidebar to access this knowledge base anytime.
 ## Search
 
 Looking for something specific? Try searching by keyword:
+
 - Tools
 - Templates
 - Workflows
@@ -33,6 +37,7 @@ Looking for something specific? Try searching by keyword:
 ## Quick Links
 
 **Most Popular:**
+
 1. [How to Create a Custom Tool](./extended/custom-tools.md#creating-a-tool)
 2. [Building Multi-Step Workflows](./extended/skill-composition.md#creating-a-skill)
 3. [Understanding Your Patterns](./extended/memory-synthesis.md#understanding-your-patterns)
@@ -40,6 +45,7 @@ Looking for something specific? Try searching by keyword:
 5. [Publishing to Marketplace](./extended/marketplace.md#publishing-your-resources)
 
 **Troubleshooting:**
+
 - [Custom Tools FAQ](./extended/custom-tools.md#troubleshooting)
 - [Skill Composition FAQ](./extended/skill-composition.md#troubleshooting)
 - [Memory Synthesis FAQ](./extended/memory-synthesis.md#troubleshooting)

@@ -14,27 +14,30 @@ Follow these steps to configure Vercel for production deployment with 1Password 
 
 Go to **Project Settings → Environment Variables** and add:
 
-| Variable | Value | Environment |
-|----------|-------|-------------|
-| `SUPABASE_URL` | Your Supabase project URL | Production, Preview, Development |
+| Variable                    | Value                          | Environment                      |
+| --------------------------- | ------------------------------ | -------------------------------- |
+| `SUPABASE_URL`              | Your Supabase project URL      | Production, Preview, Development |
 | `SUPABASE_SERVICE_ROLE_KEY` | Your Supabase service role key | Production, Preview, Development |
-| `HELIX_SECRETS_SOURCE` | `1password` | Production, Preview, Development |
+| `HELIX_SECRETS_SOURCE`      | `1password`                    | Production, Preview, Development |
 
 **Where to find these values:**
 
 **SUPABASE_URL**:
+
 - Log in to [app.supabase.com](https://app.supabase.com)
 - Select your project
 - Go to **Settings → API**
 - Copy the "Project URL"
 
 **SUPABASE_SERVICE_ROLE_KEY**:
+
 - From 1Password vault "Helix"
 - Item: "Supabase Service Role"
 - Field: "password"
 - OR from Supabase API page (copy "service_role" key - keep it secret!)
 
 **HELIX_SECRETS_SOURCE**:
+
 - Always set to: `1password`
 - This tells Helix to load secrets from 1Password instead of environment
 
@@ -59,12 +62,14 @@ vercel env ls
 ### Step 4: Deploy
 
 Option A: Push to GitHub (auto-deploy)
+
 ```bash
 git push origin main
 # Vercel will automatically deploy on push
 ```
 
 Option B: Manual deployment
+
 ```bash
 vercel deploy --prod
 ```
@@ -110,6 +115,7 @@ If you see errors about missing environment variables:
 ### "SUPABASE_URL is undefined"
 
 Make sure:
+
 - The variable is set in **all environments** (Production, Preview, Development)
 - No typos in the variable name
 - Redeploy after setting: `vercel deploy --prod`
