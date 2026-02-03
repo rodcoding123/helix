@@ -143,11 +143,4 @@ export function enforceSecureGateway(config: GatewayBindConfig): void {
   if (!validation.valid) {
     throw new Error(`Gateway configuration insecure: ${validation.errors.join('; ')}`);
   }
-
-  // Warn about exposed binding
-  if (config.host === '0.0.0.0' && !config.authRequired) {
-    throw new Error(
-      'Cannot bind to 0.0.0.0 without authentication - this would expose the gateway publicly'
-    );
-  }
 }
