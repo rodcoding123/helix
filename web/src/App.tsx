@@ -25,6 +25,7 @@ const SecretsPage = lazy(() => import('@/pages/SecretsPage').then(m => ({ defaul
 const Voice = lazy(() => import('@/pages/Voice').then(m => ({ default: m.Voice })));
 const Email = lazy(() => import('@/pages/Email').then(m => ({ default: m.Email })));
 const Calendar = lazy(() => import('@/pages/Calendar').then(m => ({ default: m.CalendarPage })));
+const Tasks = lazy(() => import('@/pages/Tasks').then(m => ({ default: m.TasksPage })));
 
 // Loading fallback component
 function LoadingFallback() {
@@ -174,6 +175,16 @@ export function App() {
                   <Suspense fallback={<LoadingFallback />}>
                     <ProtectedRoute>
                       <Calendar />
+                    </ProtectedRoute>
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/tasks"
+                element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <ProtectedRoute>
+                      <Tasks />
                     </ProtectedRoute>
                   </Suspense>
                 }
