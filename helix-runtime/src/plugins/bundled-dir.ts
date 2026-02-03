@@ -2,6 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+// HELIX: Isolation mode constant (must match entry.ts)
+const ISOLATED_MODE_VALUE = "1";
+
 export function resolveBundledPluginsDir(): string | undefined {
   const override = process.env.OPENCLAW_BUNDLED_PLUGINS_DIR?.trim();
   if (override) {
@@ -9,7 +12,7 @@ export function resolveBundledPluginsDir(): string | undefined {
   }
 
   // HELIX: In isolated mode, stop directory tree walking
-  if (process.env.HELIX_ISOLATED_MODE === "1") {
+  if (process.env.HELIX_ISOLATED_MODE === ISOLATED_MODE_VALUE) {
     const thisModuleDir = path.dirname(fileURLToPath(import.meta.url));
     const projectRoot = path.resolve(thisModuleDir, "..", "..");
     const candidate = path.join(projectRoot, "extensions");

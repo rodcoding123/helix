@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
@@ -11,6 +12,11 @@ import { attachChildProcessBridge } from "./process/child-process-bridge.js";
 process.title = "openclaw";
 installProcessWarningFilter();
 normalizeEnv();
+
+// HELIX: Isolation mode constant
+// Used to signal plugin discovery that we're in Helix desktop app context
+const ISOLATED_MODE_VALUE = "1";
+const DEBUG_ISOLATION = process.env.HELIX_DEBUG_ISOLATION === "1";
 
 // HELIX: Force isolated mode - prevent loading global OpenClaw plugins
 // This is hardcoded because Helix is a desktop app, not a CLI tool.
@@ -26,10 +32,26 @@ if (!process.env.HELIX_ISOLATED_MODE) {
   const runtimeRoot = pathModule.dirname(srcDir);
   const helixRoot = pathModule.dirname(runtimeRoot);
 
+  // Validate helixRoot exists
+  if (!fs.existsSync(helixRoot)) {
+    if (DEBUG_ISOLATION) {
+      console.warn(
+        `[helix-isolation] Warning: calculated helix root does not exist: ${helixRoot}`,
+      );
+    }
+  }
+
   // Force Helix-specific paths
-  process.env.HELIX_ISOLATED_MODE = "1";
+  process.env.HELIX_ISOLATED_MODE = ISOLATED_MODE_VALUE;
   process.env.OPENCLAW_STATE_DIR = pathModule.join(helixRoot, ".helix-state");
   process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = pathModule.join(runtimeRoot, "extensions");
+
+  if (DEBUG_ISOLATION) {
+    console.log(`[helix-isolation] Enabled - preventing global plugin discovery`);
+    console.log(`  Helix root: ${helixRoot}`);
+    console.log(`  State dir: ${process.env.OPENCLAW_STATE_DIR}`);
+    console.log(`  Plugins dir: ${process.env.OPENCLAW_BUNDLED_PLUGINS_DIR}`);
+  }
 }
 
 if (process.argv.includes("--no-color")) {

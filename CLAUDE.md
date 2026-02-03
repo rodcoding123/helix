@@ -175,6 +175,35 @@ Seven channels for comprehensive logging:
 
 `helix-runtime/` is the OpenClaw engine **integrated into Helix**, not a separate dependency. When working on OpenClaw code, you're working on Helix's core runtime.
 
+### Plugin Isolation Strategy
+
+Helix runs OpenClaw in **isolated mode** to prevent conflicts with global OpenClaw installations. This is critical because users may have OpenClaw installed globally for other projects.
+
+#### How It Works
+
+1. **Hardcoded Isolation** (`helix-runtime/src/entry.ts`):
+   - Sets `HELIX_ISOLATED_MODE=1` and `OPENCLAW_STATE_DIR=.helix-state/` at startup
+   - This happens BEFORE any plugin discovery code runs
+   - Cannot be overridden by users or environment variables
+
+2. **Dual-Layer Plugin Gating**:
+   - **Directory walking prevention** (`bundled-dir.ts`): In isolated mode, stops directory tree walking that would find global npm installations
+   - **Global directory skip** (`discovery.ts`): Explicitly skips `~/.openclaw/extensions/` when isolated
+
+3. **Backward Compatibility**:
+   - Legacy plugins using `clawdbot/plugin-sdk` imports still work via Jiti alias
+   - Global OpenClaw installations are unaffected
+
+#### Debug Mode
+
+Enable debug logging during isolation setup:
+
+```bash
+HELIX_DEBUG_ISOLATION=1 node helix-runtime/openclaw.mjs doctor
+```
+
+Output shows calculated paths and isolation status.
+
 ### Hook System
 
 ```typescript

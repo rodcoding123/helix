@@ -195,6 +195,28 @@ export function useCustomTools() {
   );
 
   /**
+   * Execute a tool with given parameters
+   */
+  const executeTool = useCallback(
+    async (userId: string, toolId: string, params: Record<string, any>) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const service = getService();
+        const result = await service.executeTool(userId, toolId, params);
+        return result;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to execute tool';
+        setError(message);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [getService]
+  );
+
+  /**
    * Get tool usage history
    */
   const getUsageHistory = useCallback(
@@ -228,6 +250,7 @@ export function useCustomTools() {
     updateTool,
     deleteTool,
     clonePublicTool,
+    executeTool,
     getUsageHistory,
   };
 }

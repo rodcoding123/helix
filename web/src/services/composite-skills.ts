@@ -421,6 +421,38 @@ export class CompositeSkillsService {
   }
 
   /**
+   * Execute a composite skill via the gateway RPC
+   */
+  async executeSkill(
+    userId: string,
+    skillId: string,
+    input: Record<string, any>
+  ): Promise<{ success: boolean; output: any; executionTimeMs: number; error?: string }> {
+    try {
+      const { getGatewayRPCClient } = await import('@/lib/gateway-rpc-client');
+      const client = getGatewayRPCClient();
+
+      const startTime = Date.now();
+      const result = await client.executeCompositeSkill(skillId, userId, input);
+      const executionTimeMs = Date.now() - startTime;
+
+      return {
+        success: result.success,
+        output: result.finalOutput,
+        executionTimeMs,
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        success: false,
+        output: null,
+        executionTimeMs: 0,
+        error: message,
+      };
+    }
+  }
+
+  /**
    * Save skill execution to database
    */
   async saveExecution(

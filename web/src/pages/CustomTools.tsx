@@ -1,10 +1,12 @@
 import { FC, useEffect, useState } from 'react';
-import { Plus, Search, Zap, Loader } from 'lucide-react';
+import { Plus, Search, Zap, Loader, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCustomTools } from '@/hooks/useCustomTools';
 import type { CustomToolDefinition, ToolParameter } from '@/lib/types/custom-tools';
+import type { CustomTool } from '@/lib/types/custom-tools';
 import { CustomToolCard } from '@/components/tools/CustomToolCard';
 import { ToolCapabilityBadge } from '@/components/tools/ToolCapabilityBadge';
+import { CustomToolExecutor } from '@/components/tools/CustomToolExecutor';
 
 /**
  * Custom Tools Page: Create, manage, and execute custom tools
@@ -22,11 +24,14 @@ export const CustomToolsPage: FC = () => {
     loadPublicTools,
     createCustomTool,
     validateCode,
+    executeTool,
   } = useCustomTools();
 
   const [activeTab, setActiveTab] = useState<'my-tools' | 'marketplace'>('my-tools');
   const [searchQuery, setSearchQuery] = useState('');
   const [showBuilder, setShowBuilder] = useState(false);
+  const [showExecutor, setShowExecutor] = useState(false);
+  const [selectedTool, setSelectedTool] = useState<CustomTool | null>(null);
 
   // Builder form state
   const [name, setName] = useState('');
@@ -58,6 +63,17 @@ export const CustomToolsPage: FC = () => {
 
   const handleValidateCode = () => {
     validateCode(code, selectedCapabilities);
+  };
+
+  const handleExecuteTool = async (tool: CustomTool) => {
+    if (!user?.id) return;
+    setSelectedTool(tool);
+    setShowExecutor(true);
+  };
+
+  const handleRunToolExecution = async (params: Record<string, any>) => {
+    if (!user?.id || !selectedTool) return;
+    return await executeTool(user.id, selectedTool.id, params);
   };
 
   const handleAddParameter = () => {
@@ -481,7 +497,11 @@ export const CustomToolsPage: FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {displayTools.map((tool) => (
-              <CustomToolCard key={tool.id} tool={tool} />
+              <CustomToolCard
+                key={tool.id}
+                tool={tool}
+                onExecute={handleExecuteTool}
+              />
             ))}
           </div>
         )}
@@ -489,6 +509,45 @@ export const CustomToolsPage: FC = () => {
         {error && (
           <div className="mt-6 p-4 rounded bg-red-500/10 border border-red-500/50 text-red-400">
             {error}
+          </div>
+        )}
+
+        {/* Tool Executor Modal */}
+        {showExecutor && selectedTool && user && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="w-full max-w-2xl bg-slate-900 rounded-lg p-6 border border-slate-700 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-slate-100">
+                  {selectedTool.icon} Execute: {selectedTool.name}
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowExecutor(false);
+                    setSelectedTool(null);
+                  }}
+                  className="p-1 hover:bg-slate-800 rounded"
+                >
+                  <X size={20} className="text-slate-400" />
+                </button>
+              </div>
+
+              <CustomToolExecutor
+                tool={selectedTool}
+                userId={user.id}
+                onExecute={handleRunToolExecution}
+                isExecuting={isLoading}
+              />
+
+              <button
+                onClick={() => {
+                  setShowExecutor(false);
+                  setSelectedTool(null);
+                }}
+                className="mt-6 w-full px-4 py-2 rounded border border-slate-700 text-slate-300 hover:bg-slate-800"
+              >
+                Close
+              </button>
+            </div>
           </div>
         )}
       </div>

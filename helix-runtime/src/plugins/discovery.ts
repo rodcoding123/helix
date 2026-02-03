@@ -12,6 +12,9 @@ import type { PluginDiagnostic, PluginOrigin } from "./types.js";
 
 const EXTENSION_EXTS = new Set([".ts", ".js", ".mts", ".cts", ".mjs", ".cjs"]);
 
+// HELIX: Isolation mode constant (must match entry.ts and bundled-dir.ts)
+const ISOLATED_MODE_VALUE = "1";
+
 export type PluginCandidate = {
   idHint: string;
   source: string;
@@ -342,7 +345,7 @@ export function discoverOpenClawPlugins(params: {
   }
 
   // HELIX: Skip global directory in isolated mode
-  const isolatedMode = process.env.HELIX_ISOLATED_MODE === "1";
+  const isolatedMode = process.env.HELIX_ISOLATED_MODE === ISOLATED_MODE_VALUE;
   if (!isolatedMode) {
     const globalDir = path.join(resolveConfigDir(), "extensions");
     discoverInDirectory({

@@ -428,6 +428,51 @@ export class CustomToolsService {
   }
 
   /**
+   * Execute a custom tool via the gateway RPC
+   */
+  async executeTool(
+    userId: string,
+    toolId: string,
+    params: Record<string, any>
+  ): Promise<{ output: any; executionTimeMs: number; success: boolean; error?: string }> {
+    try {
+      const { getGatewayRPCClient } = await import('@/lib/gateway-rpc-client');
+      const client = getGatewayRPCClient();
+
+      const startTime = Date.now();
+      const result = await client.executeCustomTool(toolId, userId, params);
+      const executionTimeMs = Date.now() - startTime;
+
+      // Log the execution
+      await this.logToolUsage(toolId, userId, params, result.output, 'success', executionTimeMs);
+
+      return {
+        output: result.output,
+        executionTimeMs,
+        success: true,
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      await this.logToolUsage(
+        toolId,
+        userId,
+        params,
+        null,
+        'failure',
+        0,
+        message
+      );
+
+      return {
+        output: null,
+        executionTimeMs: 0,
+        success: false,
+        error: message,
+      };
+    }
+  }
+
+  /**
    * Get tool usage history
    */
   async getToolUsageHistory(toolId: string, limit: number = 50): Promise<any[]> {

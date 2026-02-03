@@ -156,7 +156,7 @@ export function useCompositeSkills() {
   );
 
   /**
-   * Execute skill
+   * Execute skill via gateway RPC
    */
   const executeSkill = useCallback(
     async (
@@ -164,24 +164,33 @@ export function useCompositeSkills() {
       userId: string,
       inputParams: Record<string, any>,
       onProgress?: (stepResult: any) => void
-    ): Promise<CompositeSkillExecution> => {
+    ): Promise<{ success: boolean; output: any; executionTimeMs: number; error?: string }> => {
       setIsLoading(true);
       setError(null);
       try {
         const service = getService();
 
-        // Simulate execution
-        const execution = await service.simulateSkillExecution(
-          skill,
-          inputParams,
-          onProgress
-        );
+        // Execute via real gateway RPC
+        const result = await service.executeSkill(userId, skill.id, inputParams);
 
-        // Save to database
-        await service.saveExecution(userId, execution);
+        if (result.success) {
+          setCurrentExecution({
+            id: `exec-${Date.now()}`,
+            composite_skill_id: skill.id,
+            user_id: userId,
+            input_params: inputParams,
+            steps_executed: [],
+            final_output: result.output,
+            status: 'completed',
+            error_message: null,
+            execution_time_ms: result.executionTimeMs,
+            steps_completed: 0,
+            total_steps: skill.steps.length,
+            created_at: new Date().toISOString(),
+          });
+        }
 
-        setCurrentExecution(execution);
-        return execution;
+        return result;
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to execute skill';
         setError(message);
