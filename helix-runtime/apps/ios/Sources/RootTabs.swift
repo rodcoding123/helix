@@ -22,16 +22,20 @@ struct RootTabs: View {
                 .tabItem { Label("Email", systemImage: "envelope") }
                 .tag(2)
 
+            CalendarTab()
+                .tabItem { Label("Calendar", systemImage: "calendar") }
+                .tag(3)
+
             SettingsTab()
                 .tabItem { Label("Settings", systemImage: "gearshape") }
-                .tag(3)
+                .tag(4)
         }
         .overlay(alignment: .topLeading) {
             StatusPill(
                 gateway: self.gatewayStatus,
                 voiceWakeEnabled: self.voiceWakeEnabled,
                 activity: self.statusActivity,
-                onTap: { self.selectedTab = 3 })
+                onTap: { self.selectedTab = 4 })
                 .padding(.leading, 10)
                 .safeAreaPadding(.top, 10)
         }
