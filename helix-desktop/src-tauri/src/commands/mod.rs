@@ -8,6 +8,7 @@ pub mod files;
 pub mod system;
 pub mod discord;
 pub mod psychology;
+pub mod scheduler;
 
 // Phase C: Desktop Features
 pub mod clipboard;

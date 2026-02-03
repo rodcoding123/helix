@@ -125,6 +125,20 @@ pub fn run() {
             config::watcher::stop_config_watcher,
             config::watcher::is_config_watcher_active,
 
+            // Scheduler commands (Layer 5 jobs)
+            commands::scheduler::get_scheduler_config,
+            commands::scheduler::set_scheduler_config,
+            commands::scheduler::get_scheduled_jobs,
+            commands::scheduler::get_job,
+            commands::scheduler::create_job,
+            commands::scheduler::pause_job,
+            commands::scheduler::resume_job,
+            commands::scheduler::delete_job,
+            commands::scheduler::trigger_job,
+            commands::scheduler::complete_job,
+            commands::scheduler::fail_job,
+            commands::scheduler::get_scheduler_health,
+
             // Phase C: Clipboard operations
             commands::clipboard::copy_to_clipboard,
             commands::clipboard::paste_from_clipboard,
