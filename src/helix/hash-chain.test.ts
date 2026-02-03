@@ -1208,7 +1208,8 @@ describe('Hash Chain - Discord Verification', () => {
           ],
         },
       ],
-    } as Response);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
 
     const result = await verifyAgainstDiscord();
 
@@ -1350,7 +1351,8 @@ describe('Hash Chain - Discord Verification', () => {
           ],
         },
       ],
-    } as Response);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
 
     const result = await verifyAgainstDiscord();
 
@@ -1422,7 +1424,8 @@ describe('Hash Chain - Discord Verification', () => {
           ],
         },
       ],
-    } as Response);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
 
     const result = await verifyAgainstDiscord();
 
@@ -1466,7 +1469,8 @@ describe('Hash Chain - Discord Verification', () => {
           ],
         },
       ],
-    } as Response);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
 
     const result = await verifyAgainstDiscord();
 
@@ -1506,7 +1510,8 @@ describe('Hash Chain - Discord Verification', () => {
           ],
         },
       ],
-    } as Response);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
 
     const result = await verifyAgainstDiscord();
 
