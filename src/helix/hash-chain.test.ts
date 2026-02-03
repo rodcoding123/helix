@@ -1572,4 +1572,33 @@ describe('Hash Chain - Discord Verification', () => {
       message: expect.stringContaining('Discord unreachable'),
     });
   });
+
+  it('should silently return false when webhook not configured in non-fail-closed mode', async () => {
+    // This test covers lines 98: the !failClosedMode code path
+    // When webhook is missing AND fail-closed mode is disabled, sendToDiscord returns false
+    setHashChainFailClosedMode(false);
+
+    // Ensure webhook is NOT configured
+    delete process.env.DISCORD_WEBHOOK_HASH_CHAIN;
+
+    // Mock fs for readFile - return Buffer
+    vi.mocked(fs.readFile).mockResolvedValue(
+      Buffer.from(
+        JSON.stringify({
+          sequence: 0,
+          lastHash: 'GENESIS',
+          entries: 0,
+        })
+      )
+    );
+
+    // Attempt to create a hash chain entry
+    // Should succeed (not throw) because fail-closed is disabled
+    const entry = await createHashChainEntry();
+    expect(entry).toBeDefined();
+    expect(entry.entryHash).toBeDefined();
+
+    // Re-enable fail-closed for other tests
+    setHashChainFailClosedMode(true);
+  });
 });

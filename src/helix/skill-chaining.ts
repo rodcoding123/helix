@@ -385,7 +385,7 @@ export async function executeCompositeSkill(
 
   const totalExecutionTimeMs = Date.now() - startTime;
 
-  return {
+  const result: CompositeSkillExecutionResult = {
     success: !skillFailed,
     skillId: skill.id,
     userId: skill.userId,
@@ -398,6 +398,8 @@ export async function executeCompositeSkill(
     stepsCompleted,
     totalSteps: skill.steps.length,
   };
+
+  return result;
 }
 
 /**

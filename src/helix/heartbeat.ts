@@ -32,11 +32,12 @@ async function sendWebhook(embed: DiscordEmbed): Promise<boolean> {
   }
 
   try {
-    const response = await fetch(DISCORD_WEBHOOK, {
+    const options = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ embeds: [embed] }),
-    });
+    };
+    const response = await fetch(DISCORD_WEBHOOK, options);
     return response.ok;
   } catch (error) {
     console.error('[Helix] Heartbeat webhook failed:', error);
