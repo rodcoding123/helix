@@ -237,6 +237,9 @@ export type {
 /**
  * Helix initialization options
  */
+// Module-level state for active schedulers
+let auditSchedulerInterval: NodeJS.Timeout | null = null;
+
 export interface HelixInitOptions {
   /** OpenClaw workspace directory */
   workspaceDir?: string;
@@ -258,6 +261,9 @@ export interface HelixInitOptions {
 
   /** Skip security validation at startup (NOT RECOMMENDED) */
   skipSecurityValidation?: boolean;
+
+  /** Enable 1Password audit scheduler (default: true) */
+  enableAuditScheduler?: boolean;
 }
 
 /**
@@ -305,25 +311,16 @@ export async function preloadSecrets(): Promise<void> {
 
     // Log to hash chain (Phase 1B.1)
     try {
-      const { createHashChainEntry } = await import('./hash-chain.js');
-      await createHashChainEntry(
-        'secret_preload',
-        {
-          secretCount,
-          source: process.env.HELIX_SECRETS_SOURCE || '1password',
-          durationMs,
-          cacheVersion: secretsCache.getKeyVersion(),
-        },
-        {
-          title: '🔐 Secrets Preloaded',
-          color: 0x2ecc71, // Green
-          fields: [
-            { name: 'Secrets Loaded', value: `${secretCount}`, inline: true },
-            { name: 'Duration', value: `${durationMs}ms`, inline: true },
-            { name: 'Source', value: process.env.HELIX_SECRETS_SOURCE || '1password', inline: true },
-          ],
-        }
-      );
+      const { logSecretOperation } = await import('./hash-chain.js');
+      await logSecretOperation({
+        operation: 'preload',
+        source: process.env.HELIX_SECRETS_SOURCE === 'env' ? 'env' : '1password',
+        success: true,
+        timestamp: new Date().toISOString(),
+        durationMs,
+        keyVersion: secretsCache.getKeyVersion(),
+        details: `Preloaded ${secretCount} secrets`,
+      });
     } catch (logError) {
       // Don't fail if hash chain logging fails
       console.warn(
@@ -355,6 +352,7 @@ export async function initializeHelix(options: HelixInitOptions = {}): Promise<v
     enableHeartbeat = true,
     failClosedMode = true,
     skipSecurityValidation = false,
+    enableAuditScheduler = true,
   } = options;
 
   console.log('[Helix] Initializing logging system...');
@@ -443,6 +441,21 @@ export async function initializeHelix(options: HelixInitOptions = {}): Promise<v
     startHashChainScheduler(hashChainInterval);
   }
 
+  // 5b. Start 1Password audit scheduler (if not skipped)
+  if (enableAuditScheduler) {
+    try {
+      const { startOnePasswordAuditScheduler } = await import('../lib/1password-audit.js');
+      auditSchedulerInterval = await startOnePasswordAuditScheduler();
+      console.log('[Helix] 1Password audit scheduler started');
+    } catch (error) {
+      // Don't fail if audit scheduler can't start
+      console.warn(
+        '[Helix] Failed to start 1Password audit scheduler:',
+        error instanceof Error ? error.message : String(error)
+      );
+    }
+  }
+
   // 6. Start heartbeat (proof of life every 60 seconds)
   if (enableHeartbeat) {
     startHeartbeat();
@@ -469,6 +482,13 @@ export async function shutdownHelix(reason: string = 'graceful'): Promise<void> 
   // Stop hash chain scheduler
   const { stopHashChainScheduler } = await import('./hash-chain.js');
   stopHashChainScheduler();
+
+  // Stop 1Password audit scheduler
+  if (auditSchedulerInterval) {
+    const { stopOnePasswordAuditScheduler } = await import('../lib/1password-audit.js');
+    stopOnePasswordAuditScheduler(auditSchedulerInterval);
+    auditSchedulerInterval = null;
+  }
 
   // Final hash chain entry
   const { createHashChainEntry } = await import('./hash-chain.js');

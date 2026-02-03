@@ -13,6 +13,13 @@
 
 import { globalSanitizer } from './log-sanitizer.js';
 
+// Extend Console interface to include raw property
+declare global {
+  interface Console {
+    raw?: typeof console;
+  }
+}
+
 // Preserve original console methods
 const originalConsole = { ...console };
 

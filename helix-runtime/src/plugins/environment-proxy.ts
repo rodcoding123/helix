@@ -7,6 +7,8 @@
  * SECURITY: Plugins should use api.env instead of process.env
  */
 
+import { logSecretOperation } from '../../src/helix/hash-chain.js';
+
 // Environment variables that plugins are allowed to read
 const ALLOWED_ENV_VARS = new Set([
   'NODE_ENV',
@@ -145,16 +147,16 @@ function logPluginSecretAccess(pluginId: string, variableName: string): void {
     `[Plugin Security] Plugin "${pluginId}" attempted to access restricted environment variable: ${variableName}`
   );
 
-  // TODO: Phase 1B.1 - Log to hash chain
-  // This will be implemented when hash chain integration is complete
-  // await logSecretOperation({
-  //   operation: 'plugin_attempt',
-  //   pluginId,
-  //   secretName: variableName,
-  //   source: 'env',
-  //   success: false,
-  //   timestamp: new Date().toISOString(),
-  // });
+  // Fire-and-forget logging to hash chain for security audit
+  logSecretOperation({
+    operation: 'plugin_attempt',
+    pluginId,
+    secretName: variableName,
+    source: 'env',
+    success: false,
+    timestamp: new Date().toISOString(),
+    details: `Plugin attempted unauthorized access to ${variableName}`,
+  }).catch(err => console.error('[Plugin Security] Failed to log access attempt:', err));
 }
 
 /**

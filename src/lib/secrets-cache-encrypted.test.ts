@@ -1,13 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { EncryptedSecretsCache } from './secrets-cache-encrypted.js';
-import { existsSync, rmSync, readFileSync } from 'node:fs';
-import { homedir } from 'node:os';
-import { join } from 'node:path';
 import { decryptWithKey } from './encryption/symmetric.js';
-
-const STATE_DIR = join(homedir(), '.helix-state');
-const SALT_FILE = join(STATE_DIR, 'secrets-cache-salt.bin');
-const KEY_VERSION_FILE = join(STATE_DIR, 'secrets-cache-keyversion.json');
 
 describe('EncryptedSecretsCache', () => {
   let cache: EncryptedSecretsCache;

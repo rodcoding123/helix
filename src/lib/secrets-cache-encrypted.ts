@@ -9,10 +9,9 @@
  * Failure mode: Fail-closed (throw on initialization failure)
  */
 
-import { createWriteStream, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir, cpus, hostname, platform } from 'node:os';
 import { join } from 'node:path';
-import { createHash } from 'node:crypto';
 import { deriveEncryptionKey, generateSalt } from './encryption/key-derivation.js';
 import { encryptWithKey, decryptWithKey, generateNonce } from './encryption/symmetric.js';
 
@@ -74,7 +73,6 @@ export class EncryptedSecretsCache {
 
       // Load previous key if still in grace period
       if (this.rotationMetadata.previousKeyExpiredAt && this.rotationMetadata.previousKeyExpiredAt > Date.now()) {
-        const previousEntropy = this.generateMachineEntropy(); // Same entropy, different logic could be added
         this.previousMasterKey = this.masterKey; // In production, could reload from versioned derivation
         this.previousKeyExpiredAt = this.rotationMetadata.previousKeyExpiredAt;
       }

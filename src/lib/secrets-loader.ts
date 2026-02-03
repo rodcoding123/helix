@@ -19,6 +19,7 @@ import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import { EncryptedSecretsCache } from './secrets-cache-encrypted.js';
+import { logSecretOperation } from '../helix/hash-chain.js';
 
 export type SecretField = 'password' | 'notes' | 'username' | 'email' | 'url';
 
@@ -60,68 +61,150 @@ initializeCache().catch((error) => {
  * @throws Error if secret not found or 1Password CLI fails
  */
 export function loadSecret(itemName: string, field: SecretField = 'password'): string {
-  // Check encrypted cache first
+  const startTime = Date.now();
   const cacheKey = `${itemName}:${field}`;
+
   try {
-    if (SECRETS_CACHE.has(cacheKey)) {
-      return SECRETS_CACHE.get(cacheKey)!;
-    }
-  } catch (error) {
-    // Cache operation failed, continue with loading
-    console.error(
-      `Warning: Cache operation failed for "${itemName}", reloading from source`,
-      error instanceof Error ? error.message : String(error)
-    );
-  }
-
-  // Try 1Password first
-  const useOnePassword = process.env.HELIX_SECRETS_SOURCE !== 'env';
-
-  if (useOnePassword) {
+    // Check encrypted cache first
     try {
-      const secret = loadSecretFrom1Password(itemName, field);
-      try {
-        SECRETS_CACHE.set(cacheKey, secret);
-      } catch (cacheError) {
-        console.error(
-          `Warning: Could not cache "${itemName}", using plaintext temporary`,
-          cacheError instanceof Error ? cacheError.message : String(cacheError)
-        );
+      if (SECRETS_CACHE.has(cacheKey)) {
+        const durationMs = Date.now() - startTime;
+        // Fire-and-forget logging
+        logSecretOperation({
+          operation: 'access',
+          secretName: itemName,
+          source: 'cache',
+          success: true,
+          timestamp: new Date().toISOString(),
+          durationMs,
+        }).catch(err => console.error('[Helix] Failed to log secret access:', err));
+        return SECRETS_CACHE.get(cacheKey)!;
       }
-      return secret;
     } catch (error) {
-      // Fall back to .env if 1Password fails
-      console.warn(`Warning: Could not load "${itemName}" from 1Password. Trying .env fallback.`);
-      const secret = loadSecretFromEnv(itemName);
-      if (secret) {
+      // Cache operation failed, continue with loading
+      console.error(
+        `Warning: Cache operation failed for "${itemName}", reloading from source`,
+        error instanceof Error ? error.message : String(error)
+      );
+    }
+
+    // Try 1Password first
+    const useOnePassword = process.env.HELIX_SECRETS_SOURCE !== 'env';
+
+    if (useOnePassword) {
+      try {
+        const secret = loadSecretFrom1Password(itemName, field);
         try {
           SECRETS_CACHE.set(cacheKey, secret);
         } catch (cacheError) {
           console.error(
-            `Warning: Could not cache .env secret "${itemName}"`,
+            `Warning: Could not cache "${itemName}", using plaintext temporary`,
             cacheError instanceof Error ? cacheError.message : String(cacheError)
           );
         }
+        const durationMs = Date.now() - startTime;
+        // Fire-and-forget logging
+        logSecretOperation({
+          operation: 'access',
+          secretName: itemName,
+          source: '1password',
+          success: true,
+          timestamp: new Date().toISOString(),
+          durationMs,
+        }).catch(err => console.error('[Helix] Failed to log secret access:', err));
         return secret;
+      } catch (error) {
+        // Fall back to .env if 1Password fails
+        console.warn(`Warning: Could not load "${itemName}" from 1Password. Trying .env fallback.`);
+        const secret = loadSecretFromEnv(itemName);
+        if (secret) {
+          try {
+            SECRETS_CACHE.set(cacheKey, secret);
+          } catch (cacheError) {
+            console.error(
+              `Warning: Could not cache .env secret "${itemName}"`,
+              cacheError instanceof Error ? cacheError.message : String(cacheError)
+            );
+          }
+          const durationMs = Date.now() - startTime;
+          // Fire-and-forget logging
+          logSecretOperation({
+            operation: 'access',
+            secretName: itemName,
+            source: 'env',
+            success: true,
+            timestamp: new Date().toISOString(),
+            durationMs,
+            details: '1Password failed, fell back to .env',
+          }).catch(err => console.error('[Helix] Failed to log secret access:', err));
+          return secret;
+        }
+        const errorMsg = `Secret "${itemName}" not found in 1Password or .env`;
+        const durationMs = Date.now() - startTime;
+        // Fire-and-forget failure logging
+        logSecretOperation({
+          operation: 'failure',
+          secretName: itemName,
+          source: '1password',
+          success: false,
+          timestamp: new Date().toISOString(),
+          durationMs,
+          details: errorMsg,
+        }).catch(err => console.error('[Helix] Failed to log secret failure:', err));
+        throw new Error(errorMsg);
       }
-      throw new Error(`Secret "${itemName}" not found in 1Password or .env`);
     }
-  }
 
-  // Dev mode: load from .env
-  const secret = loadSecretFromEnv(itemName);
-  if (!secret) {
-    throw new Error(`Secret "${itemName}" not found in .env (dev mode)`);
+    // Dev mode: load from .env
+    const secret = loadSecretFromEnv(itemName);
+    if (!secret) {
+      const errorMsg = `Secret "${itemName}" not found in .env (dev mode)`;
+      const durationMs = Date.now() - startTime;
+      // Fire-and-forget failure logging
+      logSecretOperation({
+        operation: 'failure',
+        secretName: itemName,
+        source: 'env',
+        success: false,
+        timestamp: new Date().toISOString(),
+        durationMs,
+        details: errorMsg,
+      }).catch(err => console.error('[Helix] Failed to log secret failure:', err));
+      throw new Error(errorMsg);
+    }
+    try {
+      SECRETS_CACHE.set(cacheKey, secret);
+    } catch (cacheError) {
+      console.error(
+        `Warning: Could not cache .env secret "${itemName}"`,
+        cacheError instanceof Error ? cacheError.message : String(cacheError)
+      );
+    }
+    const durationMs = Date.now() - startTime;
+    // Fire-and-forget logging
+    logSecretOperation({
+      operation: 'access',
+      secretName: itemName,
+      source: 'env',
+      success: true,
+      timestamp: new Date().toISOString(),
+      durationMs,
+    }).catch(err => console.error('[Helix] Failed to log secret access:', err));
+    return secret;
+  } catch (error) {
+    // Outer catch for any unexpected errors
+    const durationMs = Date.now() - startTime;
+    logSecretOperation({
+      operation: 'failure',
+      secretName: itemName,
+      source: 'cache',
+      success: false,
+      timestamp: new Date().toISOString(),
+      durationMs,
+      details: error instanceof Error ? error.message : String(error),
+    }).catch(err => console.error('[Helix] Failed to log secret failure:', err));
+    throw error;
   }
-  try {
-    SECRETS_CACHE.set(cacheKey, secret);
-  } catch (cacheError) {
-    console.error(
-      `Warning: Could not cache .env secret "${itemName}"`,
-      cacheError instanceof Error ? cacheError.message : String(cacheError)
-    );
-  }
-  return secret;
 }
 
 /**

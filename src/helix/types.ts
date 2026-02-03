@@ -31,7 +31,8 @@ export type HelixSecurityErrorCode =
   | 'LOGGING_FAILED'
   | 'HASH_CHAIN_BROKEN'
   | 'DISCORD_UNREACHABLE'
-  | 'SECURITY_CONFIG_INVALID';
+  | 'SECURITY_CONFIG_INVALID'
+  | 'SECRETS_PRELOAD_FAILED';
 
 /**
  * Webhook health check result
@@ -158,6 +159,22 @@ export interface HashChainEntry {
   logStates: Record<string, string>;
   entryHash: string;
   sequence?: number;
+}
+
+/**
+ * Secret operation entry for audit logging
+ * Logs all secret management operations (preload, access, rotation, plugin attempts, failures)
+ */
+export interface SecretOperationEntry {
+  operation: 'preload' | 'access' | 'rotation' | 'plugin_attempt' | 'failure';
+  secretName?: string;  // Sanitized name only, never the actual secret value
+  pluginId?: string;    // If operation involves plugin access attempt
+  source: '1password' | 'env' | 'cache';
+  success: boolean;
+  timestamp: string;
+  durationMs?: number;
+  keyVersion?: number;
+  details?: string;     // Additional context, can be sanitized error message
 }
 
 /**
