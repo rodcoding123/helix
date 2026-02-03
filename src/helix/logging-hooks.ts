@@ -12,6 +12,7 @@ import crypto from 'node:crypto';
 import type { InternalHookEvent, WebhookHealthStatus, SecurityConfigStatus } from './types.js';
 import { HelixSecurityError, REQUIRED_WEBHOOKS, OPTIONAL_WEBHOOKS } from './types.js';
 import { loadSecret } from '../lib/secrets-loader.js';
+import { globalSanitizer } from '../lib/log-sanitizer.js';
 
 // Discord webhook URLs - loaded at initialization
 let WEBHOOKS = {
@@ -39,9 +40,11 @@ export function initializeDiscordWebhooks(): void {
     };
     console.log('[Helix] Discord webhooks initialized from 1Password');
   } catch (error) {
+    // SECURITY: Sanitize error to prevent secret leakage in logs
+    const sanitizedError = globalSanitizer.sanitizeError(error);
     console.warn(
       '[Helix] Failed to load webhooks from 1Password, using environment fallback:',
-      error
+      sanitizedError
     );
     // .env fallback is already loaded above
   }
@@ -141,7 +144,9 @@ async function sendToDiscord(
       );
     }
 
-    console.error('[Helix] Discord webhook failed:', error);
+    // SECURITY: Sanitize error to prevent secret leakage in logs
+    const sanitizedError = globalSanitizer.sanitizeError(error);
+    console.error('[Helix] Discord webhook failed:', sanitizedError);
     return false;
   }
 }

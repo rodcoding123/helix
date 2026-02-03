@@ -18,6 +18,7 @@ import {
 import { initializeGlobalHookRunner } from "./hook-runner-global.js";
 import { clearPluginCommands } from "./commands.js";
 import { createPluginRegistry, type PluginRecord, type PluginRegistry } from "./registry.js";
+import { createPluginEnvironment } from "./environment-proxy.js";
 import { createPluginRuntime } from "./runtime/index.js";
 import { setActivePluginRegistry } from "./runtime.js";
 import { validateJsonSchemaValue } from "./schema-validator.js";
@@ -408,6 +409,7 @@ export function loadOpenClawPlugins(options: PluginLoadOptions = {}): PluginRegi
     const api = createApi(record, {
       config: cfg,
       pluginConfig: validatedConfig.value,
+      env: createPluginEnvironment(record.id),
     });
 
     try {

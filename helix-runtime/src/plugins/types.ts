@@ -240,6 +240,7 @@ export type OpenClawPluginApi = {
   source: string;
   config: OpenClawConfig;
   pluginConfig?: Record<string, unknown>;
+  env?: Record<string, string>;
   runtime: PluginRuntime;
   logger: PluginLogger;
   registerTool: (

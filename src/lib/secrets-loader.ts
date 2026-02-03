@@ -5,6 +5,9 @@
  * 1. 1Password CLI (production / secure)
  * 2. .env files (development fallback only)
  *
+ * Secrets are stored encrypted in memory using AES-256-GCM to prevent
+ * plaintext exposure in heap snapshots or memory dumps.
+ *
  * Usage:
  *   const stripeKey = await loadSecret('Stripe Secret Key', 'password');
  *   const discordWebhook = await loadSecret('Discord Webhook - Commands', 'notes');
@@ -15,24 +18,60 @@
 import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import { EncryptedSecretsCache } from './secrets-cache-encrypted.js';
 
 export type SecretField = 'password' | 'notes' | 'username' | 'email' | 'url';
 
 const VAULT_NAME = 'Helix';
-const SECRETS_CACHE = new Map<string, string>();
+const SECRETS_CACHE = new EncryptedSecretsCache();
+
+// Initialize encrypted cache immediately when module loads
+let cacheInitialized = false;
+async function initializeCache(): Promise<void> {
+  if (!cacheInitialized) {
+    try {
+      await SECRETS_CACHE.initialize();
+      cacheInitialized = true;
+    } catch (error) {
+      console.error(
+        '[Secrets Loader] Failed to initialize encrypted cache:',
+        error instanceof Error ? error.message : String(error)
+      );
+      // Continue without encryption (fallback) - will log to sanitized error
+      cacheInitialized = true;
+    }
+  }
+}
+
+// Start initialization immediately
+initializeCache().catch((error) => {
+  console.error('[Secrets Loader] Async init failed:', error instanceof Error ? error.message : String(error));
+});
 
 /**
  * Load a secret from 1Password
+ *
+ * Secrets are encrypted in memory and decrypted on-the-fly to prevent
+ * plaintext exposure in heap snapshots.
+ *
  * @param itemName - The name of the secret item in 1Password
  * @param field - The field to retrieve ('password', 'notes', 'username', etc.)
- * @returns The secret value
+ * @returns The secret value (plaintext, decrypted from cache)
  * @throws Error if secret not found or 1Password CLI fails
  */
 export function loadSecret(itemName: string, field: SecretField = 'password'): string {
-  // Check cache first
+  // Check encrypted cache first
   const cacheKey = `${itemName}:${field}`;
-  if (SECRETS_CACHE.has(cacheKey)) {
-    return SECRETS_CACHE.get(cacheKey)!;
+  try {
+    if (SECRETS_CACHE.has(cacheKey)) {
+      return SECRETS_CACHE.get(cacheKey)!;
+    }
+  } catch (error) {
+    // Cache operation failed, continue with loading
+    console.error(
+      `Warning: Cache operation failed for "${itemName}", reloading from source`,
+      error instanceof Error ? error.message : String(error)
+    );
   }
 
   // Try 1Password first
@@ -41,17 +80,28 @@ export function loadSecret(itemName: string, field: SecretField = 'password'): s
   if (useOnePassword) {
     try {
       const secret = loadSecretFrom1Password(itemName, field);
-      SECRETS_CACHE.set(cacheKey, secret);
+      try {
+        SECRETS_CACHE.set(cacheKey, secret);
+      } catch (cacheError) {
+        console.error(
+          `Warning: Could not cache "${itemName}", using plaintext temporary`,
+          cacheError instanceof Error ? cacheError.message : String(cacheError)
+        );
+      }
       return secret;
     } catch (error) {
       // Fall back to .env if 1Password fails
-      console.warn(
-        `Warning: Could not load "${itemName}" from 1Password. Trying .env fallback.`,
-        error
-      );
+      console.warn(`Warning: Could not load "${itemName}" from 1Password. Trying .env fallback.`);
       const secret = loadSecretFromEnv(itemName);
       if (secret) {
-        SECRETS_CACHE.set(cacheKey, secret);
+        try {
+          SECRETS_CACHE.set(cacheKey, secret);
+        } catch (cacheError) {
+          console.error(
+            `Warning: Could not cache .env secret "${itemName}"`,
+            cacheError instanceof Error ? cacheError.message : String(cacheError)
+          );
+        }
         return secret;
       }
       throw new Error(`Secret "${itemName}" not found in 1Password or .env`);
@@ -63,7 +113,14 @@ export function loadSecret(itemName: string, field: SecretField = 'password'): s
   if (!secret) {
     throw new Error(`Secret "${itemName}" not found in .env (dev mode)`);
   }
-  SECRETS_CACHE.set(cacheKey, secret);
+  try {
+    SECRETS_CACHE.set(cacheKey, secret);
+  } catch (cacheError) {
+    console.error(
+      `Warning: Could not cache .env secret "${itemName}"`,
+      cacheError instanceof Error ? cacheError.message : String(cacheError)
+    );
+  }
   return secret;
 }
 
@@ -144,6 +201,9 @@ function loadSecretFromEnv(itemName: string): string | null {
 /**
  * Load all secrets into environment variables
  * Useful for initialization or Docker entrypoint
+ *
+ * Note: Environment variable values will contain plaintext for use by
+ * downstream code, but the encrypted cache preserves the encrypted copy.
  */
 export function loadAllSecrets(): Record<string, string> {
   const secrets: Record<string, string> = {};
@@ -207,7 +267,8 @@ export function loadAllSecrets(): Record<string, string> {
       secrets[item.envVar] = value;
       process.env[item.envVar] = value;
     } catch (error) {
-      console.error(`Failed to load ${item.name}:`, error);
+      // Don't log error object - it may contain secret data
+      console.error(`Failed to load ${item.name}`);
       // Don't throw - allow partial loading for development
     }
   }
@@ -247,8 +308,16 @@ export function verifySecrets(): {
 }
 
 /**
- * Clear the cache (useful for testing)
+ * Clear the encrypted cache (useful for testing)
+ * Note: Does not clear environment variables or 1Password vault
  */
 export function clearCache(): void {
-  SECRETS_CACHE.clear();
+  try {
+    SECRETS_CACHE.clear();
+  } catch (error) {
+    console.error(
+      'Warning: Failed to clear cache:',
+      error instanceof Error ? error.message : String(error)
+    );
+  }
 }

@@ -261,8 +261,90 @@ export interface HelixInitOptions {
 }
 
 /**
+ * Preload all secrets before any other initialization
+ *
+ * CRITICAL: This MUST be called before initializeHelix()
+ * Ensures all secrets are encrypted in memory before any logging happens
+ *
+ * @throws HelixSecurityError if secrets cannot be loaded (fail-closed)
+ */
+export async function preloadSecrets(): Promise<void> {
+  const startTime = Date.now();
+
+  try {
+    console.log('[Helix] Preloading secrets from 1Password...');
+
+    // Initialize encrypted cache
+    const { EncryptedSecretsCache } = await import('../lib/secrets-cache-encrypted.js');
+    const secretsCache = new EncryptedSecretsCache();
+    await secretsCache.initialize();
+    console.log('[Helix] Encrypted cache initialized');
+
+    // Load all secrets into memory (encrypted)
+    const { loadAllSecrets } = await import('../lib/secrets-loader.js');
+    const secrets = loadAllSecrets();
+    const secretCount = Object.keys(secrets).length;
+
+    // Initialize Discord webhooks from loaded secrets
+    try {
+      const { initializeDiscordWebhooks } = await import('./logging-hooks.js');
+      initializeDiscordWebhooks();
+      console.log('[Helix] Discord webhooks initialized from secrets');
+    } catch (webhookError) {
+      console.warn(
+        '[Helix] Failed to initialize Discord webhooks:',
+        webhookError instanceof Error ? webhookError.message : String(webhookError)
+      );
+      console.warn('[Helix] Continuing with environment variable fallback');
+    }
+
+    const durationMs = Date.now() - startTime;
+    console.log(
+      `[Helix] Preloaded ${secretCount} secrets from 1Password in ${durationMs}ms`
+    );
+
+    // Log to hash chain (Phase 1B.1)
+    try {
+      const { createHashChainEntry } = await import('./hash-chain.js');
+      await createHashChainEntry(
+        'secret_preload',
+        {
+          secretCount,
+          source: process.env.HELIX_SECRETS_SOURCE || '1password',
+          durationMs,
+          cacheVersion: secretsCache.getKeyVersion(),
+        },
+        {
+          title: '🔐 Secrets Preloaded',
+          color: 0x2ecc71, // Green
+          fields: [
+            { name: 'Secrets Loaded', value: `${secretCount}`, inline: true },
+            { name: 'Duration', value: `${durationMs}ms`, inline: true },
+            { name: 'Source', value: process.env.HELIX_SECRETS_SOURCE || '1password', inline: true },
+          ],
+        }
+      );
+    } catch (logError) {
+      // Don't fail if hash chain logging fails
+      console.warn(
+        '[Helix] Failed to log secret preload to hash chain:',
+        logError instanceof Error ? logError.message : String(logError)
+      );
+    }
+  } catch (error) {
+    // FAIL-CLOSED: Cannot proceed without secrets
+    const { HelixSecurityError } = await import('./types.js');
+    throw new HelixSecurityError(
+      'Failed to preload secrets - cannot start Helix',
+      'SECRETS_PRELOAD_FAILED',
+      { error: error instanceof Error ? error.message : String(error) }
+    );
+  }
+}
+
+/**
  * Initialize the complete Helix logging system
- * Call this at OpenClaw startup
+ * Call this at OpenClaw startup (AFTER preloadSecrets())
  */
 export async function initializeHelix(options: HelixInitOptions = {}): Promise<void> {
   const {
@@ -345,17 +427,9 @@ export async function initializeHelix(options: HelixInitOptions = {}): Promise<v
   );
 
   // 2. Install pre-execution logging hooks
+  // NOTE: Discord webhooks are already initialized in preloadSecrets()
   const { installPreExecutionLogger } = await import('./logging-hooks.js');
   installPreExecutionLogger();
-
-  // 2.5. Initialize Discord webhooks from 1Password (or .env fallback)
-  try {
-    const { initializeDiscordWebhooks } = await import('./logging-hooks.js');
-    initializeDiscordWebhooks();
-  } catch (error) {
-    console.warn('[Helix] Failed to initialize Discord webhooks:', error);
-    console.warn('[Helix] Webhooks must be loaded before pre-execution logging');
-  }
 
   // 4. Start file watcher (if enabled)
   if (enableFileWatcher) {

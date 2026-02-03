@@ -622,7 +622,11 @@ describe('LoggingHooks', () => {
 
       await sendAlert('Non-critical', 'Should log error', 'info');
 
-      expect(consoleSpy).toHaveBeenCalledWith('[Helix] Discord webhook failed:', expect.any(Error));
+      // Error is now sanitized before logging, so we expect a string
+      expect(consoleSpy).toHaveBeenCalledWith(
+        '[Helix] Discord webhook failed:',
+        expect.stringContaining('Test error')
+      );
 
       consoleSpy.mockRestore();
     });
