@@ -783,12 +783,16 @@ describe('Hash Chain - Environment Configuration', () => {
     const originalEnv = process.env.HELIX_LOG_FILES;
     process.env.HELIX_LOG_FILES = '/custom/log1.log,/custom/log2.log';
 
-    vi.mocked(fs.readFile).mockImplementation(((path: unknown) => {
-      if (String(path).includes('hash_chain.log')) {
-        return Promise.reject(new Error('ENOENT'));
-      }
-      return Promise.resolve(Buffer.from('test log content'));
-    }) as any);
+    vi.mocked(fs.readFile).mockImplementation(
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      ((path: unknown) => {
+        if (String(path).includes('hash_chain.log')) {
+          return Promise.reject(new Error('ENOENT'));
+        }
+        return Promise.resolve(Buffer.from('test log content'));
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      }) as any
+    );
 
     const states = await hashLogFiles();
 
@@ -1294,5 +1298,223 @@ describe('Hash Chain - Discord Verification', () => {
 
     // Should handle gracefully
     expect(result.verified).toBe(false);
+  });
+
+  it('should verify successfully when all hashes match in Discord', async () => {
+    process.env.DISCORD_BOT_TOKEN = 'test-bot-token';
+    process.env.DISCORD_HASH_CHAIN_CHANNEL_ID = '123456789';
+
+    // Hashes must be at least 32 chars and use only valid hex (0-9, a-f)
+    // per line 434 (only first 32 are used) and regex /`([a-f0-9]+)\.\.\./
+    const fullHash1 = 'abc123def456fed789abc012def34567890123456';
+    const fullHash2 = 'fedcba9876543210fedcba9876543210fedcba9876';
+    const comparisonHash1 = fullHash1.slice(0, 32); // First 32 chars: abc123def456fed789abc012def345
+    const comparisonHash2 = fullHash2.slice(0, 32);
+
+    const entry1 = {
+      timestamp: '2024-01-15T10:00:00.000Z',
+      previousHash: 'GENESIS',
+      logStates: { 'a.log': 'hash1' },
+      entryHash: fullHash1,
+      sequence: 0,
+    };
+
+    const entry2 = {
+      timestamp: '2024-01-15T10:05:00.000Z',
+      previousHash: fullHash1,
+      logStates: { 'a.log': 'hash2' },
+      entryHash: fullHash2,
+      sequence: 1,
+    };
+
+    const chainContent = JSON.stringify(entry1) + '\n' + JSON.stringify(entry2) + '\n';
+    vi.mocked(fs.readFile).mockResolvedValue(chainContent);
+
+    // Mock Discord API response with matching hashes (first 32 chars only)
+    mockFetch.mockResolvedValue({
+      ok: true,
+      // eslint-disable-next-line @typescript-eslint/require-await
+      json: async (): Promise<unknown[]> => [
+        {
+          embeds: [
+            {
+              fields: [{ name: 'Entry Hash', value: `\`${comparisonHash1}...\`` }],
+            },
+          ],
+        },
+        {
+          embeds: [
+            {
+              fields: [{ name: 'Entry Hash', value: `\`${comparisonHash2}...\`` }],
+            },
+          ],
+        },
+      ],
+    } as Response);
+
+    const result = await verifyAgainstDiscord();
+
+    // Should verify successfully
+    expect(result.verified).toBe(true);
+    // Line 483: success message should be set
+    expect(result.message).toContain('Verified');
+    expect(result.message).toContain('2 entries');
+    expect(result.discordEntries).toBe(2);
+    expect(result.mismatches).toHaveLength(0);
+  });
+
+  it('should process multiple Discord messages and extract all hashes', async () => {
+    process.env.DISCORD_BOT_TOKEN = 'test-bot-token';
+    process.env.DISCORD_HASH_CHAIN_CHANNEL_ID = '123456789';
+
+    // Use 32+ char hex hash for comparison (line 434 uses first 32 chars)
+    const fullHash = 'abc123def456fed789abc012def345678901234abcdef';
+    const comparisonHash = fullHash.slice(0, 32);
+
+    const entry = {
+      timestamp: '2024-01-15T10:00:00.000Z',
+      previousHash: 'GENESIS',
+      logStates: { 'a.log': 'hash1' },
+      entryHash: fullHash,
+      sequence: 0,
+    };
+
+    vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(entry));
+
+    // Mock Discord API response with 5 messages (tests line 461 loop)
+    mockFetch.mockResolvedValue({
+      ok: true,
+      // eslint-disable-next-line @typescript-eslint/require-await
+      json: async (): Promise<unknown[]> => [
+        {
+          embeds: [
+            {
+              fields: [{ name: 'Entry Hash', value: '`aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...`' }],
+            },
+          ],
+        },
+        {
+          embeds: [
+            {
+              fields: [{ name: 'Entry Hash', value: '`bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb...`' }],
+            },
+          ],
+        },
+        {
+          embeds: [
+            {
+              fields: [{ name: 'Entry Hash', value: `\`${comparisonHash}...\`` }],
+            },
+          ],
+        },
+        {
+          embeds: [
+            {
+              fields: [{ name: 'Entry Hash', value: '`cccccccccccccccccccccccccccccc...`' }],
+            },
+          ],
+        },
+        {
+          embeds: [
+            {
+              fields: [{ name: 'Entry Hash', value: '`dddddddddddddddddddddddddddddd...`' }],
+            },
+          ],
+        },
+      ],
+    } as Response);
+
+    const result = await verifyAgainstDiscord();
+
+    // Should process all messages
+    expect(result.discordEntries).toBe(5);
+    // Our local hash should be found
+    expect(result.verified).toBe(true);
+  });
+
+  it('should correctly extract hex hashes from Discord embed fields with regex', async () => {
+    process.env.DISCORD_BOT_TOKEN = 'test-bot-token';
+    process.env.DISCORD_HASH_CHAIN_CHANNEL_ID = '123456789';
+
+    // Test various hex hash formats (32+ chars for comparison, lines 468-469)
+    const validHash = 'deadbeefcafe123456789abcdef0123456789abc012';
+    const comparisonHash = validHash.slice(0, 32); // First 32 chars
+
+    const entry = {
+      timestamp: '2024-01-15T10:00:00.000Z',
+      previousHash: 'GENESIS',
+      logStates: { 'a.log': 'hash1' },
+      entryHash: validHash,
+      sequence: 0,
+    };
+
+    vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(entry));
+
+    // Test regex pattern matching (lines 468-469)
+    mockFetch.mockResolvedValue({
+      ok: true,
+      // eslint-disable-next-line @typescript-eslint/require-await
+      json: async (): Promise<unknown[]> => [
+        {
+          embeds: [
+            {
+              fields: [
+                // Standard format: `hash...` - Discord message with matching hash
+                { name: 'Entry Hash', value: `\`${comparisonHash}...\`` },
+              ],
+            },
+          ],
+        },
+      ],
+    } as Response);
+
+    const result = await verifyAgainstDiscord();
+
+    // Verify the hash was extracted and matched
+    expect(result.verified).toBe(true);
+    expect(result.mismatches).toHaveLength(0);
+    // This ensures line 468-469 (if match) was executed
+    expect(result.message).toContain('Verified');
+  });
+
+  it('should set failure message when mismatches found in verification', async () => {
+    process.env.DISCORD_BOT_TOKEN = 'test-bot-token';
+    process.env.DISCORD_HASH_CHAIN_CHANNEL_ID = '123456789';
+
+    const localHash = 'abc123def456ghi789jkl012mno345678901234abcd';
+
+    const entry = {
+      timestamp: '2024-01-15T10:00:00.000Z',
+      previousHash: 'GENESIS',
+      logStates: { 'a.log': 'hash1' },
+      entryHash: localHash,
+      sequence: 0,
+    };
+
+    vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(entry));
+
+    // Discord has different hash (doesn't match first 32 chars)
+    mockFetch.mockResolvedValue({
+      ok: true,
+      // eslint-disable-next-line @typescript-eslint/require-await
+      json: async (): Promise<unknown[]> => [
+        {
+          embeds: [
+            {
+              fields: [{ name: 'Entry Hash', value: '`differenthash123456789abcdefgh...`' }],
+            },
+          ],
+        },
+      ],
+    } as Response);
+
+    const result = await verifyAgainstDiscord();
+
+    // Should have mismatches
+    expect(result.verified).toBe(false);
+    // Tests line 483 - the false branch of ternary
+    expect(result.message).toContain('Found');
+    expect(result.message).toContain('mismatches');
+    expect(result.message).toContain('tampering');
   });
 });
