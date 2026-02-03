@@ -9,10 +9,16 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
     exclude: ['e2e/**', 'node_modules/**'],
+    alias: {
+      '@tauri-apps/api/tauri': path.resolve(__dirname, './src/__mocks__/tauri.ts'),
+      '@tauri-apps/api': path.resolve(__dirname, './src/__mocks__/tauri-api.ts'),
+    },
   },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@tauri-apps/api/tauri': path.resolve(__dirname, './src/__mocks__/tauri.ts'),
+      '@tauri-apps/api': path.resolve(__dirname, './src/__mocks__/tauri-api.ts'),
     },
   },
 });
