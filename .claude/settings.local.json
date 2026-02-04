@@ -11,7 +11,8 @@
       "Bash(do npx supabase migration repair --status applied $i)",
       "Read(//c/Users/Specter/Desktop/Helix/**)",
       "Bash(git restore:*)",
-      "WebFetch(domain:www.volcengine.com)"
+      "WebFetch(domain:www.volcengine.com)",
+      "Bash(xcodegen generate:*)"
     ]
   },
   "contextInclude": ["c:/Users/Specter/Desktop/Helix"]
