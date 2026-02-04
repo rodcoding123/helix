@@ -17,7 +17,7 @@ vi.mock('@supabase/supabase-js', () => {
     eq: vi.fn(function () {
       return this;
     }) as any,
-    single: vi.fn(async () => ({ data: {}, error: null })),
+    single: vi.fn(() => Promise.resolve({ data: {}, error: null })),
     insert: vi.fn(function () {
       return this;
     }) as any,
@@ -29,7 +29,7 @@ vi.mock('@supabase/supabase-js', () => {
   return {
     createClient: vi.fn(() => ({
       from: vi.fn(() => mockQueryBuilder),
-      rpc: vi.fn(async () => ({ data: {}, error: null })),
+      rpc: vi.fn(() => Promise.resolve({ data: {}, error: null })),
     })),
   };
 });
@@ -327,6 +327,28 @@ describe('AIOperationRouter', () => {
     it('provides access to batch engine', () => {
       const batchEngine = router.getBatchEngine();
       expect(batchEngine).toBeDefined();
+    });
+  });
+
+  describe('Phase 5 Advanced Features', () => {
+    it('provides access to priority queue', () => {
+      const queue = router.getPriorityQueue();
+      expect(queue).toBeDefined();
+    });
+
+    it('provides access to cost predictor', () => {
+      const predictor = router.getCostPredictor();
+      expect(predictor).toBeDefined();
+    });
+
+    it('provides access to retry manager', () => {
+      const retryManager = router.getRetryManager();
+      expect(retryManager).toBeDefined();
+    });
+
+    it('provides access to observability metrics', () => {
+      const metrics = router.getObservabilityMetrics();
+      expect(metrics).toBeDefined();
     });
   });
 });
