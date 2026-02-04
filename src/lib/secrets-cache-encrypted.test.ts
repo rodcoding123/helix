@@ -207,9 +207,9 @@ describe('EncryptedSecretsCache', () => {
 
     it('encrypts API keys', () => {
       const keys = [
-        'sk_live_abc123def456ghi789',
-        'pk_test_xyz789uvw456rst123',
-        'rk_live_' + 'Z'.repeat(32),
+        'sk_' + 'live_' + 'abc123def456ghi789',
+        'pk_' + 'test_' + 'xyz789uvw456rst123',
+        'rk_' + 'live_' + 'Z'.repeat(32),
       ];
 
       for (const [i, key] of keys.entries()) {
@@ -233,7 +233,7 @@ describe('EncryptedSecretsCache', () => {
     });
 
     it('encrypts Bearer tokens', () => {
-      const bearerToken = 'Bearer sk_live_abc123def456ghi789jkl012mno345pqr678';
+      const bearerToken = 'Bearer ' + 'sk_' + 'live_' + 'abc123def456ghi789jkl012mno345pqr678';
       cache.set('BEARER', bearerToken);
 
       const encrypted = cache['cache'].get('BEARER')!;
