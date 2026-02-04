@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { AIOperationRouter } from './router';
+import { AIOperationRouter } from './router.js';
 
 describe('Phase 6 Integration', () => {
   let router: AIOperationRouter;
