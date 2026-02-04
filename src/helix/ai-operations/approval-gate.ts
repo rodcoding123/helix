@@ -39,18 +39,25 @@ export interface ApprovalRequest {
  * 5. Log all approval decisions to hash chain
  */
 export class ApprovalGate {
-  private supabase: ReturnType<typeof createClient>;
+  private supabase: ReturnType<typeof createClient> | null = null;
   private approverDiscordIds = ['rodrigo']; // Discord mention/ID for approvers
 
   constructor() {
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+    // Initialize Supabase client lazily when first needed
+  }
 
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error('SUPABASE_URL and SUPABASE_SERVICE_KEY required for ApprovalGate');
+  private getSupabaseClient(): ReturnType<typeof createClient> {
+    if (!this.supabase) {
+      const supabaseUrl = process.env.SUPABASE_URL;
+      const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+
+      if (!supabaseUrl || !supabaseKey) {
+        throw new Error('SUPABASE_URL and SUPABASE_SERVICE_KEY required for ApprovalGate');
+      }
+
+      this.supabase = createClient(supabaseUrl, supabaseKey);
     }
-
-    this.supabase = createClient(supabaseUrl, supabaseKey);
+    return this.supabase;
   }
 
   /**
@@ -74,7 +81,7 @@ export class ApprovalGate {
 
     try {
       // 1. Create approval record
-      const { error } = await this.supabase
+      const { error } = await this.getSupabaseClient()
         .from('helix_recommendations') // Reusing recommendations table for now
         .insert({
           id: approvalId,
@@ -171,7 +178,7 @@ reject: /reject ${approval.id}
    */
   async checkApproval(approvalId: string): Promise<boolean> {
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await this.getSupabaseClient()
         .from('helix_recommendations')
         .select('approval_status')
         .eq('id', approvalId)
@@ -218,7 +225,7 @@ reject: /reject ${approval.id}
 
     try {
       // Get approval details first
-      const { data: approval, error: fetchError } = await this.supabase
+      const { data: approval, error: fetchError } = await this.getSupabaseClient()
         .from('helix_recommendations')
         .select('*')
         .eq('id', approvalId)
@@ -228,7 +235,7 @@ reject: /reject ${approval.id}
       if (!approval) throw new Error(`Approval not found: ${approvalId}`);
 
       // Update status
-      const { error: updateError } = await this.supabase
+      const { error: updateError } = await this.getSupabaseClient()
         .from('helix_recommendations')
         .update({
           approval_status: 'APPROVED',
@@ -286,7 +293,7 @@ reject: /reject ${approval.id}
 
     try {
       // Get approval details first
-      const { data: approval, error: fetchError } = await this.supabase
+      const { data: approval, error: fetchError } = await this.getSupabaseClient()
         .from('helix_recommendations')
         .select('*')
         .eq('id', approvalId)
@@ -296,7 +303,7 @@ reject: /reject ${approval.id}
       if (!approval) throw new Error(`Approval not found: ${approvalId}`);
 
       // Update status
-      const { error: updateError } = await this.supabase
+      const { error: updateError } = await this.getSupabaseClient()
         .from('helix_recommendations')
         .update({
           approval_status: 'REJECTED',
@@ -342,7 +349,7 @@ reject: /reject ${approval.id}
    */
   async getPendingApprovals(): Promise<ApprovalRequest[]> {
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await this.getSupabaseClient()
         .from('helix_recommendations')
         .select('*')
         .eq('approval_status', 'PENDING')
@@ -375,7 +382,7 @@ reject: /reject ${approval.id}
    */
   async getApprovalHistory(limit: number = 100): Promise<ApprovalRequest[]> {
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await this.getSupabaseClient()
         .from('helix_recommendations')
         .select('*')
         .in('approval_status', ['APPROVED', 'REJECTED'])

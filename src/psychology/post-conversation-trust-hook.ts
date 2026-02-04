@@ -297,7 +297,6 @@ export async function batchProcessConversations(
   let offset = 0;
 
   try {
-    // eslint-disable-next-line no-constant-condition
     while (true) {
       // Fetch batch of conversations
       const { data: conversations, error } = await supabase

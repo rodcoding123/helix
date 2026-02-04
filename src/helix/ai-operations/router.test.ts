@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * AIOperationRouter Tests
  *
@@ -5,7 +6,34 @@
  * budget enforcement, and approval gates.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+// Mock Supabase before importing AIOperationRouter
+vi.mock('@supabase/supabase-js', () => {
+  const mockQueryBuilder = {
+    select: vi.fn(function () {
+      return this;
+    }) as any,
+    eq: vi.fn(function () {
+      return this;
+    }) as any,
+    single: vi.fn(async () => ({ data: {}, error: null })),
+    insert: vi.fn(function () {
+      return this;
+    }) as any,
+    update: vi.fn(function () {
+      return this;
+    }) as any,
+  };
+
+  return {
+    createClient: vi.fn(() => ({
+      from: vi.fn(() => mockQueryBuilder),
+      rpc: vi.fn(async () => ({ data: {}, error: null })),
+    })),
+  };
+});
+
 import { AIOperationRouter, RouteConfig, CostBudget } from './router.js';
 
 describe('AIOperationRouter', () => {

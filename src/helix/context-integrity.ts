@@ -21,11 +21,14 @@ import { sendAlert } from './logging-hooks.js';
 export interface ContextIntegrityManifest {
   version: string;
   generatedAt: string;
-  files: Record<string, {
-    hash: string;
-    size: number;
-    lastVerified: string;
-  }>;
+  files: Record<
+    string,
+    {
+      hash: string;
+      size: number;
+      lastVerified: string;
+    }
+  >;
 }
 
 /**
@@ -60,9 +63,9 @@ export async function verifyFileIntegrity(
     await sendAlert(
       '🚨 CRITICAL: Context File Tampering Detected',
       `File: ${filePath}\n` +
-      `Expected Hash: ${expectedHash}\n` +
-      `Actual Hash: ${actualHash}\n` +
-      `This file has been modified since it was last verified.`,
+        `Expected Hash: ${expectedHash}\n` +
+        `Actual Hash: ${actualHash}\n` +
+        `This file has been modified since it was last verified.`,
       'critical'
     );
 
@@ -139,7 +142,9 @@ export async function saveIntegrityManifest(
 ): Promise<void> {
   await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2), 'utf-8');
 
-  console.debug(`Integrity manifest created: ${manifestPath} with ${Object.keys(manifest.files).length} files`);
+  console.debug(
+    `Integrity manifest created: ${manifestPath} with ${Object.keys(manifest.files).length} files`
+  );
 }
 
 /**
@@ -258,7 +263,10 @@ export function sanitizeContextFileContent(content: string): string {
 /**
  * Audit context file for security issues
  */
-export async function auditContextFile(filePath: string, content: string): Promise<{
+export async function auditContextFile(
+  filePath: string,
+  content: string
+): Promise<{
   file: string;
   safe: boolean;
   issues: string[];

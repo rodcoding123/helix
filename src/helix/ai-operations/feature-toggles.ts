@@ -48,19 +48,26 @@ const CRITICAL_TOGGLES = {
  * 5. Provide admin UI with current states
  */
 export class FeatureToggles {
-  private supabase: ReturnType<typeof createClient>;
+  private supabase: ReturnType<typeof createClient> | null = null;
   private toggleCache: Map<string, { toggle: FeatureToggle; timestamp: number }> = new Map();
   private cacheTTL = 5 * 60 * 1000; // 5 minutes
 
   constructor() {
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+    // Initialize Supabase client lazily when first needed
+  }
 
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error('SUPABASE_URL and SUPABASE_SERVICE_KEY required for FeatureToggles');
+  private getSupabaseClient(): ReturnType<typeof createClient> {
+    if (!this.supabase) {
+      const supabaseUrl = process.env.SUPABASE_URL;
+      const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+
+      if (!supabaseUrl || !supabaseKey) {
+        throw new Error('SUPABASE_URL and SUPABASE_SERVICE_KEY required for FeatureToggles');
+      }
+
+      this.supabase = createClient(supabaseUrl, supabaseKey);
     }
-
-    this.supabase = createClient(supabaseUrl, supabaseKey);
+    return this.supabase;
   }
 
   /**
@@ -138,7 +145,7 @@ export class FeatureToggles {
     }
 
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await this.getSupabaseClient()
         .from('feature_toggles')
         .select('*')
         .eq('toggle_name', toggleName)
@@ -187,7 +194,7 @@ export class FeatureToggles {
    */
   async getAllToggles(): Promise<FeatureToggle[]> {
     try {
-      const { data, error } = await this.supabase.from('feature_toggles').select('*');
+      const { data, error } = await this.getSupabaseClient().from('feature_toggles').select('*');
 
       if (error) throw error;
 

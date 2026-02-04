@@ -5,12 +5,29 @@
  * Discord notifications, and decision tracking.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+// Mock Supabase before importing ApprovalGate
+vi.mock('@supabase/supabase-js', () => {
+  const mockQueryBuilder = {
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    single: vi.fn(async () => ({ data: {}, error: null })),
+    insert: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
+  };
+
+  return {
+    createClient: vi.fn(() => ({
+      from: vi.fn(() => mockQueryBuilder),
+      rpc: vi.fn(async () => ({ data: {}, error: null })),
+    })),
+  };
+});
+
 import { ApprovalGate, ApprovalRequest } from './approval-gate.js';
 
 describe('ApprovalGate', () => {
-  let gate: ApprovalGate;
-
   const mockApprovalRequest: ApprovalRequest = {
     id: 'approval-12345',
     operation_id: 'chat_message',
@@ -22,25 +39,24 @@ describe('ApprovalGate', () => {
     status: 'pending',
   };
 
-  beforeEach(() => {
-    gate = new ApprovalGate();
-    process.env.SUPABASE_URL = 'https://test.supabase.co';
-    process.env.SUPABASE_SERVICE_KEY = 'test-key';
-  });
-
   describe('Initialization', () => {
     it('should create approval gate with Supabase credentials', () => {
+      const gate = new ApprovalGate();
       expect(gate).toBeDefined();
     });
 
     it('should throw if SUPABASE_URL missing', () => {
+      const savedUrl = process.env.SUPABASE_URL;
       delete process.env.SUPABASE_URL;
-      expect(() => new ApprovalGate()).toThrow();
+      expect(() => new ApprovalGate().requestApproval('test', 'test', 10, 'test')).toThrow();
+      process.env.SUPABASE_URL = savedUrl;
     });
 
     it('should throw if SUPABASE_SERVICE_KEY missing', () => {
+      const savedKey = process.env.SUPABASE_SERVICE_KEY;
       delete process.env.SUPABASE_SERVICE_KEY;
-      expect(() => new ApprovalGate()).toThrow();
+      expect(() => new ApprovalGate().requestApproval('test', 'test', 10, 'test')).toThrow();
+      process.env.SUPABASE_SERVICE_KEY = savedKey;
     });
   });
 

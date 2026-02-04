@@ -5,6 +5,51 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+// Mock Supabase with Phase 8 operation routes before importing router
+vi.mock('@supabase/supabase-js', () => {
+  const mockRoutes: Record<string, any> = {
+    'email-compose': { operation_id: 'email-compose', operation_name: 'Email Composition Assistance', primary_model: 'claude_sonnet_4', cost_criticality: 'LOW', enabled: true },
+    'email-classify': { operation_id: 'email-classify', operation_name: 'Email Classification', primary_model: 'gemini_flash', cost_criticality: 'LOW', enabled: true },
+    'email-respond': { operation_id: 'email-respond', operation_name: 'Email Response Synthesis', primary_model: 'claude_sonnet_4', cost_criticality: 'LOW', enabled: true },
+    'calendar-prep': { operation_id: 'calendar-prep', operation_name: 'Calendar Preparation', primary_model: 'deepseek_v3', cost_criticality: 'LOW', enabled: true },
+    'calendar-time': { operation_id: 'calendar-time', operation_name: 'Calendar Time Optimization', primary_model: 'gemini_flash', cost_criticality: 'LOW', enabled: true },
+    'task-prioritize': { operation_id: 'task-prioritize', operation_name: 'Task Prioritization', primary_model: 'deepseek_v3', cost_criticality: 'LOW', enabled: true },
+    'task-breakdown': { operation_id: 'task-breakdown', operation_name: 'Task Breakdown', primary_model: 'deepseek_v3', cost_criticality: 'LOW', enabled: true },
+    'analytics-summary': { operation_id: 'analytics-summary', operation_name: 'Analytics Summary', primary_model: 'gemini_flash', cost_criticality: 'MEDIUM', enabled: true },
+    'analytics-anomaly': { operation_id: 'analytics-anomaly', operation_name: 'Analytics Anomaly Detection', primary_model: 'deepseek_v3', cost_criticality: 'LOW', enabled: true },
+  };
+
+  return {
+    createClient: vi.fn(() => ({
+      from: vi.fn((table: string) => {
+        let filterOp = '';
+        let filterVal = '';
+
+        const builder = {
+          select: vi.fn(function () { return this; }),
+          eq: vi.fn(function (field: string, value: any) {
+            filterOp = field;
+            filterVal = value;
+            return this;
+          }) as any,
+          single: vi.fn(async () => {
+            if (table === 'ai_model_routes' && filterOp === 'operation_id') {
+              const data = mockRoutes[filterVal];
+              return { data, error: data ? null : new Error('Not found') };
+            }
+            return { data: {}, error: null };
+          }),
+          insert: vi.fn(function () { return this; }),
+          update: vi.fn(function () { return this; }),
+        };
+        return builder as any;
+      }),
+      rpc: vi.fn(async () => ({ data: {}, error: null })),
+    })),
+  };
+});
+
 import { AIOperationRouter } from './router.js';
 import type { RoutingRequest } from './router.js';
 

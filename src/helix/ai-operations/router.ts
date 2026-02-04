@@ -16,6 +16,10 @@ import { ProviderHealthMonitor } from './provider-health.js';
 import { ProviderOrchestrator } from './provider-orchestrator.js';
 import { OperationScheduler } from './operation-scheduler.js';
 import { BatchOperationEngine } from './batch-engine.js';
+import { RequestPriorityQueue } from './priority-queue.js';
+import { CostPredictor } from './cost-predictor.js';
+import { RetryManager } from './retry-manager.js';
+import { ObservabilityMetrics } from './observability-metrics.js';
 
 // Type definitions
 export interface RoutingRequest {
@@ -74,7 +78,7 @@ export interface FeatureToggle {
  * 5. Log all routing decisions to database
  */
 export class AIOperationRouter {
-  private supabase: ReturnType<typeof createClient>;
+  private supabase: ReturnType<typeof createClient> | null = null;
   private routeCache: Map<string, { config: RouteConfig; timestamp: number }> = new Map();
   private toggleCache: Map<string, { toggle: FeatureToggle; timestamp: number }> = new Map();
   private cacheTTL = 5 * 60 * 1000; // 5 minutes
@@ -82,22 +86,37 @@ export class AIOperationRouter {
   private orchestrator: ProviderOrchestrator;
   private scheduler: OperationScheduler;
   private batchEngine: BatchOperationEngine;
+  private priorityQueue: RequestPriorityQueue;
+  private costPredictor: CostPredictor;
+  private retryManager: RetryManager;
+  private observabilityMetrics: ObservabilityMetrics;
 
   constructor() {
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
-
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error('SUPABASE_URL and SUPABASE_SERVICE_KEY required for AIOperationRouter');
-    }
-
-    this.supabase = createClient(supabaseUrl, supabaseKey);
-
     // Initialize Phase 4 orchestration
     this.healthMonitor = new ProviderHealthMonitor();
     this.orchestrator = new ProviderOrchestrator(this.healthMonitor);
     this.scheduler = new OperationScheduler();
     this.batchEngine = new BatchOperationEngine();
+
+    // Initialize Phase 5 advanced features
+    this.priorityQueue = new RequestPriorityQueue();
+    this.costPredictor = new CostPredictor();
+    this.retryManager = new RetryManager();
+    this.observabilityMetrics = new ObservabilityMetrics();
+  }
+
+  private getSupabaseClient(): ReturnType<typeof createClient> {
+    if (!this.supabase) {
+      const supabaseUrl = process.env.SUPABASE_URL;
+      const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+
+      if (!supabaseUrl || !supabaseKey) {
+        throw new Error('SUPABASE_URL and SUPABASE_SERVICE_KEY required for AIOperationRouter');
+      }
+
+      this.supabase = createClient(supabaseUrl, supabaseKey);
+    }
+    return this.supabase;
   }
 
   /**
@@ -207,7 +226,7 @@ export class AIOperationRouter {
     }
 
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await this.getSupabaseClient()
         .from('ai_model_routes')
         .select('*')
         .eq('operation_id', operationId)
@@ -351,7 +370,7 @@ export class AIOperationRouter {
    * Get user's daily budget
    */
   private async getBudget(userId: string): Promise<CostBudget> {
-    const { data, error } = await this.supabase
+    const { data, error } = await this.getSupabaseClient()
       .from('cost_budgets')
       .select('*')
       .eq('user_id', userId)
@@ -400,7 +419,7 @@ export class AIOperationRouter {
     }
 
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await this.getSupabaseClient()
         .from('feature_toggles')
         .select('*')
         .eq('toggle_name', toggleName)
@@ -461,7 +480,7 @@ export class AIOperationRouter {
    */
   async getRegisteredOperations(): Promise<RouteConfig[]> {
     try {
-      const { data, error } = await this.supabase.from('model_routes').select('*');
+      const { data, error } = await this.getSupabaseClient().from('model_routes').select('*');
 
       if (error) throw error;
       return (data || []) as RouteConfig[];
@@ -501,6 +520,34 @@ export class AIOperationRouter {
    */
   getBatchEngine(): BatchOperationEngine {
     return this.batchEngine;
+  }
+
+  /**
+   * Get priority queue for operation prioritization
+   */
+  getPriorityQueue(): RequestPriorityQueue {
+    return this.priorityQueue;
+  }
+
+  /**
+   * Get cost predictor for budget management
+   */
+  getCostPredictor(): CostPredictor {
+    return this.costPredictor;
+  }
+
+  /**
+   * Get retry manager for failure handling
+   */
+  getRetryManager(): RetryManager {
+    return this.retryManager;
+  }
+
+  /**
+   * Get observability metrics for monitoring
+   */
+  getObservabilityMetrics(): ObservabilityMetrics {
+    return this.observabilityMetrics;
   }
 }
 

@@ -5,7 +5,26 @@
  * daily reset logic, and anomaly detection.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+// Mock Supabase before importing CostTracker
+vi.mock('@supabase/supabase-js', () => {
+  const mockQueryBuilder = {
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    single: vi.fn(async () => ({ data: {}, error: null })),
+    insert: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
+  };
+
+  return {
+    createClient: vi.fn(() => ({
+      from: vi.fn(() => mockQueryBuilder),
+      rpc: vi.fn(async () => ({ data: {}, error: null })),
+    })),
+  };
+});
+
 import { CostTracker, OperationLog } from './cost-tracker.js';
 
 describe('CostTracker', () => {

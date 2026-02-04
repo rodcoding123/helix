@@ -350,7 +350,7 @@ export class Layer5TrustIntegration {
     return {
       userId: row.user_id,
       compositeTrust: row.composite_trust,
-      attachmentStage: row.attachment_stage as any,
+      attachmentStage: row.attachment_stage,
       salienceMultiplier: row.salience_multiplier,
       totalInteractions: row.total_interactions,
       highSalienceInteractions: row.high_salience_interactions,

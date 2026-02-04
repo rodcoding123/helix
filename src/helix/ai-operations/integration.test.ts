@@ -5,7 +5,26 @@
  * Tests the full flow: routing → cost tracking → approval gates → logging
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+// Mock Supabase before importing
+vi.mock('@supabase/supabase-js', () => {
+  const mockQueryBuilder = {
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    single: vi.fn(async () => ({ data: {}, error: null })),
+    insert: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
+  };
+
+  return {
+    createClient: vi.fn(() => ({
+      from: vi.fn(() => mockQueryBuilder),
+      rpc: vi.fn(async () => ({ data: {}, error: null })),
+    })),
+  };
+});
+
 import { router } from './router.js';
 import { approvalGate } from './approval-gate.js';
 

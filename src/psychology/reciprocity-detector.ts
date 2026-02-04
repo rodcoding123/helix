@@ -175,8 +175,8 @@ export class ReciprocityDetector {
     }
   ): ReciprocityAnalysis {
     // Separate user and Helix messages
-    const userMessages = messages.filter(m => m.role === 'user') as UserMessage[];
-    const helixMessages = messages.filter(m => m.role === 'assistant') as HelixMessage[];
+    const userMessages = messages.filter(m => m.role === 'user');
+    const helixMessages = messages.filter(m => m.role === 'assistant');
 
     // Calculate disclosure depths
     const userDepth = this.calculateUserDisclosureDepth(userMessages, userEmotionalAnalysis);

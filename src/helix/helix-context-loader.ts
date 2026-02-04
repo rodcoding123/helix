@@ -91,7 +91,10 @@ export async function loadHelixContextFiles(workspaceDir: string): Promise<Embed
         // Check for injection patterns
         const injectionCheck = detectContextFileInjection(content);
         if (!injectionCheck.safe) {
-          console.warn(`⚠️ Context file ${relativePath} has potential injection vectors:`, injectionCheck.issues);
+          console.warn(
+            `⚠️ Context file ${relativePath} has potential injection vectors:`,
+            injectionCheck.issues
+          );
         }
 
         // Add layer metadata as comment for JSON files

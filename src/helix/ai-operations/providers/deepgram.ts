@@ -48,7 +48,6 @@ export async function getDeepgramClient(): Promise<unknown> {
 
   // Lazy-load Deepgram SDK using dynamic import
   if (deepgramModule === null) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     // @ts-ignore - @deepgram/sdk optional dependency
     deepgramModule = await import('@deepgram/sdk');
   }

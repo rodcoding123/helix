@@ -110,7 +110,7 @@ export class TrustProfileManager {
    */
   async getOrCreateProfile(userId: string, email?: string): Promise<TrustProfile> {
     // Try database first
-    let profile = await this.getFromDatabase(userId);
+    const profile = await this.getFromDatabase(userId);
 
     if (profile) {
       return profile;
@@ -190,7 +190,7 @@ export class TrustProfileManager {
       const { error } = await this.supabase.from('user_trust_profiles').upsert({
         user_id: profile.userId,
         email: profile.email,
-        role: profile.role as 'creator' | 'user',
+        role: profile.role,
 
         competence: profile.trustDimensions.competence,
         integrity: profile.trustDimensions.integrity,

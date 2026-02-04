@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars,@typescript-eslint/no-base-to-string,@typescript-eslint/restrict-template-expressions,@typescript-eslint/require-await */
+/* eslint-disable @typescript-eslint/no-base-to-string */
 import { generateKeyPairSync, sign, verify } from 'crypto';
 import { sendAlert } from './logging-hooks.js';
 
@@ -134,7 +134,11 @@ export function detectSuspiciousPrerequisites(manifest: SkillManifest): string[]
     const url = String(prereq.url ?? '').toLowerCase();
 
     // Fake prerequisites (not real packages)
-    if (prereqName.includes('download') || prereqName.includes('click') || prereqName.includes('run')) {
+    if (
+      prereqName.includes('download') ||
+      prereqName.includes('click') ||
+      prereqName.includes('run')
+    ) {
       const nameStr = typeof prereq.name === 'string' ? prereq.name : 'unknown';
       suspicious.push(`Suspicious fake prerequisite: "${nameStr}"`);
     }
@@ -156,12 +160,20 @@ export function detectSuspiciousPrerequisites(manifest: SkillManifest): string[]
     }
 
     // Obfuscation patterns
-    if (instructions.includes('base64') || instructions.includes('eval') || instructions.includes('decode')) {
+    if (
+      instructions.includes('base64') ||
+      instructions.includes('eval') ||
+      instructions.includes('decode')
+    ) {
       suspicious.push(`Obfuscated code detected: "${instructions.substring(0, 50)}..."`);
     }
 
     // Suspicious file downloads
-    if (instructions.includes('.zip') || instructions.includes('.dmg') || instructions.includes('.exe')) {
+    if (
+      instructions.includes('.zip') ||
+      instructions.includes('.dmg') ||
+      instructions.includes('.exe')
+    ) {
       if (!instructions.includes('npm') && !instructions.includes('github.com')) {
         suspicious.push(`Suspicious file download: "${instructions.substring(0, 50)}..."`);
       }
@@ -255,7 +267,12 @@ export function verifySkillSignature(manifest: SkillManifest, publicKey: string)
     const manifestString = JSON.stringify(manifestWithoutSig, keys);
 
     // Verify signature using Ed25519
-    return verify(null, Buffer.from(manifestString), publicKey, Buffer.from(manifest.signature, 'hex'));
+    return verify(
+      null,
+      Buffer.from(manifestString),
+      publicKey,
+      Buffer.from(manifest.signature, 'hex')
+    );
   } catch {
     return false;
   }

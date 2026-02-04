@@ -49,18 +49,25 @@ export interface DailyMetrics {
  * 5. Detect anomalies and budget overruns
  */
 export class CostTracker {
-  private supabase: ReturnType<typeof createClient>;
+  private supabase: ReturnType<typeof createClient> | null = null;
   private dailyMetricsCache: Map<string, DailyMetrics> = new Map();
 
   constructor() {
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+    // Initialize Supabase client lazily when first needed
+  }
 
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error('SUPABASE_URL and SUPABASE_SERVICE_KEY required for CostTracker');
+  private getSupabaseClient(): ReturnType<typeof createClient> {
+    if (!this.supabase) {
+      const supabaseUrl = process.env.SUPABASE_URL;
+      const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+
+      if (!supabaseUrl || !supabaseKey) {
+        throw new Error('SUPABASE_URL and SUPABASE_SERVICE_KEY required for CostTracker');
+      }
+
+      this.supabase = createClient(supabaseUrl, supabaseKey);
     }
-
-    this.supabase = createClient(supabaseUrl, supabaseKey);
+    return this.supabase;
   }
 
   /**
@@ -79,7 +86,7 @@ export class CostTracker {
 
     try {
       // 1. Insert operation log (immutable)
-      const { error: insertError } = await this.supabase.from('ai_operation_log').insert({
+      const { error: insertError } = await this.getSupabaseClient().from('ai_operation_log').insert({
         operation_type: operation.operation_type,
         operation_id: operation.operation_id,
         model_used: operation.model_used,
@@ -188,7 +195,7 @@ export class CostTracker {
       const newSpend = budget.current_spend_today + costUsd;
       const newOperations = budget.operations_today + 1;
 
-      const { error } = await this.supabase
+      const { error } = await this.getSupabaseClient()
         .from('cost_budgets')
         .update({
           current_spend_today: newSpend,
@@ -219,7 +226,7 @@ export class CostTracker {
    */
   async getDailyBudget(userId: string): Promise<any> {
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await this.getSupabaseClient()
         .from('cost_budgets')
         .select('*')
         .eq('user_id', userId)
@@ -252,7 +259,7 @@ export class CostTracker {
    * Default: $50/day limit, $25/day warning threshold
    */
   private async createDefaultBudget(userId: string): Promise<void> {
-    const { error } = await this.supabase.from('cost_budgets').insert({
+    const { error } = await this.getSupabaseClient().from('cost_budgets').insert({
       user_id: userId,
       daily_limit_usd: 50.0,
       warning_threshold_usd: 25.0,
@@ -285,7 +292,7 @@ export class CostTracker {
 
       if (userId) {
         // Reset single user
-        const { error } = await this.supabase
+        const { error } = await this.getSupabaseClient()
           .from('cost_budgets')
           .update({
             current_spend_today: 0,
@@ -306,7 +313,7 @@ export class CostTracker {
         });
       } else {
         // Reset all users (called by cron job)
-        const { error } = await this.supabase.from('cost_budgets').update({
+        const { error } = await this.getSupabaseClient().from('cost_budgets').update({
           current_spend_today: 0,
           operations_today: 0,
           last_checked: timestamp,
@@ -360,7 +367,7 @@ export class CostTracker {
     try {
       const targetDate = date || new Date().toISOString().split('T')[0];
 
-      const { data, error } = await this.supabase
+      const { data, error } = await this.getSupabaseClient()
         .from('v_daily_cost_summary')
         .select('*')
         .eq('date', targetDate);
@@ -386,7 +393,7 @@ export class CostTracker {
    */
   async getUserSpendingHistory(userId: string, days: number = 7): Promise<any[]> {
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await this.getSupabaseClient()
         .from('v_cost_by_user')
         .select('*')
         .eq('user_id', userId)

@@ -169,7 +169,9 @@ export function verifySkillSignature(
     } catch (e) {
       // Continue to next signer on error
       // Could log verification attempt failure for audit
-      console.debug(`Signature verification failed for signer: ${e instanceof Error ? e.message : String(e)}`);
+      console.debug(
+        `Signature verification failed for signer: ${e instanceof Error ? e.message : String(e)}`
+      );
     }
   }
 
