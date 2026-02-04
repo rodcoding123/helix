@@ -87,10 +87,16 @@ export function requiresTokenVerification(
   }
 
   // Private IP ranges require verification
+  // Check RFC 1918 private ranges
   const isPrivateIP =
     host.startsWith('10.') ||
-    host.startsWith('172.16.') ||
     host.startsWith('192.168.') ||
+    // RFC 1918: 172.16.0.0/12 means 172.16.0.0 - 172.31.255.255
+    (host.startsWith('172.') &&
+      ((): boolean => {
+        const secondOctet = parseInt(host.split('.')[1], 10);
+        return secondOctet >= 16 && secondOctet <= 31;
+      })()) ||
     host.startsWith('fc00:') ||
     host.startsWith('fe80:');
 
@@ -228,16 +234,27 @@ export function rateLimitTokenAttempts(clientId: string): RateLimitStatus {
 }
 
 /**
- * Enforce token verification for gateway access
- * Throws if access should be blocked
+ * Enforce gateway token verification for network bindings
+ * Applies rate limiting, format validation, and constant-time verification
+ *
+ * Throws error if access should be blocked
+ * Sends Discord alerts for security violations
+ *
+ * @param host - Gateway binding host
+ * @param environment - deployment environment
+ * @param providedToken - Token from request
+ * @param storedToken - Stored gateway token
+ * @param clientId - Client identifier for rate limiting (IP address)
+ * @throws Error if verification fails or rate limited
  */
 export function enforceTokenVerification(
   host: string,
   environment: 'development' | 'production',
   providedToken: string,
-  storedToken: string
+  storedToken: string,
+  clientId: string
 ): void {
-  // Loopback always allowed
+  // Loopback is OS-isolated, no verification needed
   if (isLoopbackBinding(host)) {
     return;
   }
@@ -245,27 +262,44 @@ export function enforceTokenVerification(
   // Production rejects 0.0.0.0 entirely
   if (environment === 'production' && host === '0.0.0.0') {
     void sendAlert(
-      'Gateway Security Violation',
-      `Production rejected 0.0.0.0 binding attempt`,
+      '🚨 Gateway Security Violation',
+      `Production rejected 0.0.0.0 binding attempt from ${clientId}`,
       'critical'
     );
     throw new Error('Production environment rejects 0.0.0.0 gateway binding');
   }
 
-  // Network bindings require token verification
+  // Network binding requires verification
   if (requiresTokenVerification(host, environment)) {
-    // Validate token format first
+    // 1. Check rate limit FIRST (before validation)
+    const rateLimit = rateLimitTokenAttempts(clientId);
+    if (!rateLimit.allowed) {
+      void sendAlert(
+        '⚠️ Gateway Rate Limit Exceeded',
+        `Client: ${clientId}\nHost: ${host}\nBackoff: ${rateLimit.backoffDelayMs}ms`,
+        'warning'
+      );
+      throw new Error(
+        `Gateway token verification rate limited. Retry in ${Math.ceil((rateLimit.backoffDelayMs || 0) / 1000)}s`
+      );
+    }
+
+    // 2. Validate token format
     if (!validateTokenFormat(providedToken)) {
-      void sendAlert('Gateway Token Error', `Invalid token format from ${host}`, 'warning');
+      void sendAlert(
+        '⚠️ Gateway Token Format Invalid',
+        `Client: ${clientId}\nHost: ${host}`,
+        'warning'
+      );
       throw new Error('Invalid gateway token format');
     }
 
-    // Verify token with constant-time comparison
+    // 3. Verify token (constant-time comparison)
     const result = verifyGatewayToken(providedToken, storedToken);
     if (!result.valid) {
       void sendAlert(
-        'Gateway Authentication Failed',
-        `Failed token verification from ${host}`,
+        '🚨 Gateway Token Verification Failed',
+        `Client: ${clientId}\nHost: ${host}\nReason: ${result.errorMessage}`,
         'critical'
       );
       throw new Error('Gateway token verification failed');

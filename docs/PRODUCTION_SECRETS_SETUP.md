@@ -39,13 +39,16 @@ All items must exist in the "Helix" vault:
 | Stripe Publishable Key          | password | Secret | pk*live*...                          |
 | DeepSeek API Key                | password | Secret | sk-...                               |
 | Gemini API Key                  | password | Secret | AIzaSy...                            |
-| Discord Webhook - Commands      | notes    | Text   | https://discord.com/api/webhooks/... |
-| Discord Webhook - API           | notes    | Text   | https://discord.com/api/webhooks/... |
-| Discord Webhook - Heartbeat     | notes    | Text   | https://discord.com/api/webhooks/... |
-| Discord Webhook - Alerts        | notes    | Text   | https://discord.com/api/webhooks/... |
-| Discord Webhook - Consciousness | notes    | Text   | https://discord.com/api/webhooks/... |
-| Discord Webhook - File Changes  | notes    | Text   | https://discord.com/api/webhooks/... |
-| Discord Webhook - Hash Chain    | notes    | Text   | https://discord.com/api/webhooks/... |
+| Anthropic API Key               | password | Secret | sk-ant-...                           |
+| Deepgram API Key                | password | Secret | (Deepgram key format)                |
+| ElevenLabs API Key              | password | Secret | (ElevenLabs key format)              |
+| Discord Webhook - Commands      | notes    | Text   | (Discord webhook URL)                |
+| Discord Webhook - API           | notes    | Text   | (Discord webhook URL)                |
+| Discord Webhook - Heartbeat     | notes    | Text   | (Discord webhook URL)                |
+| Discord Webhook - Alerts        | notes    | Text   | (Discord webhook URL)                |
+| Discord Webhook - Consciousness | notes    | Text   | (Discord webhook URL)                |
+| Discord Webhook - File Changes  | notes    | Text   | (Discord webhook URL)                |
+| Discord Webhook - Hash Chain    | notes    | Text   | (Discord webhook URL)                |
 
 ## Vercel Setup
 
@@ -83,6 +86,131 @@ vercel env ls
 # ✓ SUPABASE_URL (Production, Preview, Development)
 # ✓ SUPABASE_SERVICE_ROLE_KEY (Production, Preview, Development)
 # ✓ HELIX_SECRETS_SOURCE (Production, Preview, Development)
+```
+
+## Phase 3: Provider API Keys Setup
+
+Phase 3 introduces integration with multiple AI providers for specialized operations. Each provider requires an API key obtained from their respective platform.
+
+### Anthropic Claude API
+
+**Purpose**: Agent Execution and Email Analysis operations
+
+**Setup Steps**:
+
+1. Go to [https://console.anthropic.com/](https://console.anthropic.com/)
+2. Sign in with your Anthropic account (create one if needed)
+3. Navigate to **API Keys** section
+4. Click **Create Key**
+5. Copy the generated key (format: `sk-ant-[alphanumeric]`)
+6. Add to 1Password vault as "Anthropic API Key"
+
+**Environment Variable**: `ANTHROPIC_API_KEY`
+
+**Testing**:
+```bash
+curl -X POST https://api.anthropic.com/v1/messages \
+  -H "x-api-key: $ANTHROPIC_API_KEY" \
+  -H "content-type: application/json" \
+  -d '{
+    "model": "claude-opus-4-1",
+    "max_tokens": 1024,
+    "messages": [{"role": "user", "content": "Say hello"}]
+  }'
+```
+
+### Google Generative AI (Gemini 2.0)
+
+**Purpose**: Video Understanding operation
+
+**Setup Steps**:
+
+1. Go to [https://aistudio.google.com/](https://aistudio.google.com/)
+2. Click **Get API Key** (top left)
+3. Create a new project if needed
+4. Click **Create API Key in new project**
+5. Copy the generated key (format: `AIza[alphanumeric]`)
+6. Add to 1Password vault as "Gemini API Key" (or separate from Phase 1 Gemini if using different models)
+
+**Environment Variable**: `GOOGLE_API_KEY`
+
+**Important Notes**:
+- Google Gemini API provides free tier with rate limits
+- For production, enable billing in Google Cloud Console
+- Video Understanding uses Gemini 2.0 vision capabilities
+
+**Testing**:
+```bash
+curl -X POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [{"parts": [{"text": "Describe this image"}]}]
+  }' \
+  -H "x-goog-api-key: $GOOGLE_API_KEY"
+```
+
+### Deepgram API
+
+**Purpose**: Audio Transcription operation
+
+**Setup Steps**:
+
+1. Go to [https://console.deepgram.com/](https://console.deepgram.com/)
+2. Sign up or log in
+3. Navigate to **API Keys** in the left sidebar
+4. Click **Create a New API Key**
+5. Select scope: **Scopes** → Check "Usage" and "All" for full access
+6. Copy the key
+7. Add to 1Password vault as "Deepgram API Key"
+
+**Environment Variable**: `DEEPGRAM_API_KEY`
+
+**Important Notes**:
+- Deepgram offers a free tier: 50,000 minutes/month of transcription
+- Production usage requires payment method on file
+- Supports 99+ languages and accents
+- Real-time and batch transcription available
+
+**Testing**:
+```bash
+curl -X POST https://api.deepgram.com/v1/listen \
+  -H "Authorization: Token $DEEPGRAM_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://example.com/audio.mp3"}'
+```
+
+### ElevenLabs API
+
+**Purpose**: Text-to-Speech operation
+
+**Setup Steps**:
+
+1. Go to [https://elevenlabs.io/](https://elevenlabs.io/)
+2. Sign up or log in
+3. Go to **Account** → **Account Settings**
+4. Scroll to **API Key** section
+5. Click **Get API Key** or copy your existing key
+6. Add to 1Password vault as "ElevenLabs API Key"
+
+**Environment Variable**: `ELEVENLABS_API_KEY`
+
+**Important Notes**:
+- ElevenLabs offers a **free tier**: 10,000 characters/month
+- Production usage requires subscription ($5-99/month depending on volume)
+- 32 AI voices available with natural prosody
+- Supports 29 languages
+- Low latency (< 500ms for streaming)
+
+**Testing**:
+```bash
+curl -X POST https://api.elevenlabs.io/v1/text-to-speech/default \
+  -H "xi-api-key: $ELEVENLABS_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "Hello, this is a test",
+    "model_id": "eleven_monolingual_v1"
+  }' \
+  --output audio.mp3
 ```
 
 ## Supabase Setup (Optional - if using Edge Functions)

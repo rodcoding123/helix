@@ -51,6 +51,28 @@ describe('requiresTokenVerification', () => {
   });
 });
 
+describe('requiresTokenVerification - RFC 1918 Private IP Ranges', () => {
+  it('should require auth for 172.16.x.x (start of RFC 1918 range)', () => {
+    expect(requiresTokenVerification('172.16.1.1', 'development')).toBe(true);
+  });
+
+  it('should require auth for 172.24.x.x (middle of RFC 1918 range)', () => {
+    expect(requiresTokenVerification('172.24.1.1', 'development')).toBe(true);
+  });
+
+  it('should require auth for 172.31.x.x (end of RFC 1918 range)', () => {
+    expect(requiresTokenVerification('172.31.255.254', 'development')).toBe(true);
+  });
+
+  it('should NOT require auth for 172.32.x.x (outside RFC 1918 range)', () => {
+    expect(requiresTokenVerification('172.32.1.1', 'development')).toBe(false);
+  });
+
+  it('should NOT require auth for 172.15.x.x (outside RFC 1918 range)', () => {
+    expect(requiresTokenVerification('172.15.1.1', 'development')).toBe(false);
+  });
+});
+
 describe('validateTokenFormat', () => {
   it('should validate correct token format (256 character hex string)', () => {
     const validToken = 'a'.repeat(256);
@@ -167,7 +189,7 @@ describe('enforceTokenVerification', () => {
     const token = generateGatewayToken();
 
     expect(() => {
-      enforceTokenVerification('192.168.1.1', 'development', token, token);
+      enforceTokenVerification('192.168.1.1', 'development', token, token, 'test-client');
     }).not.toThrow();
   });
 
@@ -177,37 +199,40 @@ describe('enforceTokenVerification', () => {
         '192.168.1.1',
         'development',
         'short',
-        'valid-token-here-256-chars-minimum'
+        'valid-token-here-256-chars-minimum',
+        'test-client'
       );
     }).toThrow();
   });
 
-  it('should integrate rate limiting and block after 5 failures', () => {
+  it('should integrate rate limiting and block after 5 failed attempts', () => {
+    const clientId = 'test-rate-limit';
     const wrongToken = 'a'.repeat(256);
+    const correctToken = 'b'.repeat(256);
 
-    // 5 failed attempts should be blocked on 6th by rate limiting
+    // 5 failed attempts should all throw verification error
     for (let i = 0; i < 5; i++) {
       expect(() => {
-        enforceTokenVerification('192.168.1.1', 'development', wrongToken, 'b'.repeat(256));
-      }).toThrow();
+        enforceTokenVerification('192.168.1.1', 'development', wrongToken, correctToken, clientId);
+      }).toThrow('Gateway token verification failed');
     }
 
-    // 6th attempt should be blocked by rate limit or verification
+    // 6th attempt should be blocked by rate limiting (different error message)
     expect(() => {
-      enforceTokenVerification('192.168.1.1', 'development', wrongToken, 'b'.repeat(256));
-    }).toThrow();
+      enforceTokenVerification('192.168.1.1', 'development', wrongToken, correctToken, clientId);
+    }).toThrow('rate limited');
   });
 
   it('should allow loopback without token', () => {
     expect(() => {
-      enforceTokenVerification('127.0.0.1', 'development', '', '');
+      enforceTokenVerification('127.0.0.1', 'development', '', '', 'test-client');
     }).not.toThrow();
   });
 
   it('should reject 0.0.0.0 in production regardless of token', () => {
     const validToken = generateGatewayToken();
     expect(() => {
-      enforceTokenVerification('0.0.0.0', 'production', validToken, validToken);
+      enforceTokenVerification('0.0.0.0', 'production', validToken, validToken, 'test-client');
     }).toThrow();
   });
 });
