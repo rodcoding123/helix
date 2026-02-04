@@ -89,9 +89,7 @@ export class Layer5TrustIntegration {
   async synthesizeDailyTrustMetrics(): Promise<TrustSynthesisMetrics> {
     try {
       // Fetch all user trust profiles
-      const { data: profiles, error } = await this.supabase
-        .from('user_trust_profiles')
-        .select('*');
+      const { data: profiles, error } = await this.supabase.from('user_trust_profiles').select('*');
 
       if (error) {
         throw error;
@@ -102,7 +100,7 @@ export class Layer5TrustIntegration {
       }
 
       // Convert DB rows to TrustProfile objects
-      const trustProfiles = profiles.map((row) => this.rowToProfile(row)) as TrustProfile[];
+      const trustProfiles = profiles.map(row => this.rowToProfile(row)) as TrustProfile[];
 
       // Calculate metrics
       const metrics: TrustSynthesisMetrics = {
@@ -160,7 +158,7 @@ export class Layer5TrustIntegration {
 
       const eventsByType: Record<string, number> = {};
 
-      for (const event of events || []) {
+      for (const event of (events as TrustEventRow[]) || []) {
         // Count by type
         eventsByType[event.event_type] = (eventsByType[event.event_type] || 0) + 1;
 
@@ -205,7 +203,10 @@ export class Layer5TrustIntegration {
 
       let updated = 0;
 
-      for (const profile of profiles || []) {
+      for (const profile of (profiles as Pick<
+        TrustProfileRow,
+        'id' | 'user_id' | 'attachment_stage'
+      >[]) || []) {
         // Get multiplier for this stage
         const multiplier = this.getSalienceMultiplierForStage(profile.attachment_stage);
 
@@ -284,13 +285,15 @@ export class Layer5TrustIntegration {
     return dist;
   }
 
-  private async calculateGrowthRate(profiles: TrustProfile[]): Promise<number> {
+  private async calculateGrowthRate(_profiles: TrustProfile[]): Promise<number> {
     // This would require historical data - placeholder for now
     // In real implementation, compare with yesterday's profiles
     return 0.01; // 1% average daily growth
   }
 
-  private async calculateEmotionalCorrelations(): Promise<TrustSynthesisMetrics['emotionalTrustCorrelations']> {
+  private async calculateEmotionalCorrelations(): Promise<
+    TrustSynthesisMetrics['emotionalTrustCorrelations']
+  > {
     // This would correlate emotional analysis with trust changes
     // Placeholder - requires more data
     return {
@@ -300,10 +303,7 @@ export class Layer5TrustIntegration {
     };
   }
 
-  private generateInsights(
-    analysis: any,
-    eventsByType: Record<string, number>
-  ): string[] {
+  private generateInsights(analysis: any, eventsByType: Record<string, number>): string[] {
     const insights: string[] = [];
 
     if (analysis.stageProgressions > 0) {
@@ -318,7 +318,9 @@ export class Layer5TrustIntegration {
 
     const violationEvents = eventsByType['violation'] || 0;
     if (violationEvents > 0) {
-      insights.push(`${violationEvents} trust violations detected - may indicate unmet expectations`);
+      insights.push(
+        `${violationEvents} trust violations detected - may indicate unmet expectations`
+      );
     }
 
     const reciprocityEvents = eventsByType['reciprocity_detected'] || 0;
@@ -386,7 +388,10 @@ export async function synthesizeTrustAndMemory(): Promise<void> {
 
     // 1. Synthesize trust metrics
     const metrics = await layer5TrustIntegration.synthesizeDailyTrustMetrics();
-    console.log('[LAYER5] Trust metrics:', { users: metrics.totalUsers, avgTrust: metrics.averageTrust.toFixed(2) });
+    console.log('[LAYER5] Trust metrics:', {
+      users: metrics.totalUsers,
+      avgTrust: metrics.averageTrust.toFixed(2),
+    });
 
     // 2. Update salience multipliers
     const updated = await layer5TrustIntegration.updateAllSalienceMultipliers();

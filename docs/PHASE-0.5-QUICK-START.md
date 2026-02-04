@@ -1,4 +1,5 @@
 # PHASE 0.5: QUICK START GUIDE
+
 ## For picking up implementation at any point
 
 **READ THIS FIRST** when resuming work.
@@ -18,6 +19,7 @@
 ## QUICK REFERENCE: WHAT'S BEEN DONE?
 
 ### Strategic Documents (COMPLETED ✅)
+
 - ✅ [AI-OPERATIONS-CONTROL-PLANE-MASTER-PLAN.md](./AI-OPERATIONS-CONTROL-PLANE-MASTER-PLAN.md) - Full strategy (15,000 words)
 - ✅ [AI-OPS-ONE-PAGE-SUMMARY.md](./AI-OPS-ONE-PAGE-SUMMARY.md) - Visual overview
 - ✅ [PHASE-0.5-IMPLEMENTATION-ROADMAP.md](./PHASE-0.5-IMPLEMENTATION-ROADMAP.md) - Day-by-day breakdown
@@ -28,6 +30,7 @@
 ## HOW TO RESUME
 
 ### Step 1: Read Progress File (2 min)
+
 ```bash
 # Check what's been done
 cat docs/PHASE-0.5-PROGRESS.md
@@ -39,11 +42,13 @@ cat docs/PHASE-0.5-PROGRESS.md
 ```
 
 ### Step 2: Check Last Daily Standup (1 min)
+
 Look for latest date at bottom of PHASE-0.5-PROGRESS.md
 
 What was in progress? Continue that.
 
 ### Step 3: Pick Up Where You Left Off (depends)
+
 - **If at database schema:** Follow PHASE-0.5-IMPLEMENTATION-ROADMAP.md Day 1-2
 - **If at router:** Follow PHASE-0.5-IMPLEMENTATION-ROADMAP.md Day 2-3
 - **If at migrations:** Follow PHASE-0.5-IMPLEMENTATION-ROADMAP.md Day 1 Week 2
@@ -51,6 +56,7 @@ What was in progress? Continue that.
 - **If at tests:** Follow PHASE-0.5-IMPLEMENTATION-ROADMAP.md Day 4-5 Week 2
 
 ### Step 4: Update Progress Before Finishing
+
 ```bash
 # At end of your session, update:
 # 1. PHASE-0.5-PROGRESS.md (what you completed)
@@ -69,18 +75,19 @@ What was in progress? Continue that.
 
 All must go through the central router:
 
-| # | Operation | File | Current Model | New Model | Priority |
-|---|-----------|------|---------------|-----------|----------|
-| 1 | Chat messages | `helix-runtime/src/gateway/http-routes/chat.ts` | Sonnet | DeepSeek | P0 |
-| 2 | Agent execution | `helix-runtime/src/gateway/server-methods/agent.ts` | Sonnet | DeepSeek | P0 |
-| 3 | Memory synthesis | `helix-runtime/src/gateway/server-methods/memory-synthesis.ts` | Sonnet | Gemini Flash | P1 |
-| 4 | Sentiment analysis | `web/src/pages/api/sentiment-analyze.ts` | Sonnet | Gemini Flash | P1 |
-| 5 | Video understanding | `helix-runtime/src/media-understanding/providers/google/video.ts` | Gemini | Gemini Flash | P2 |
-| 6 | Audio transcription | `helix-runtime/src/media-understanding/providers/deepgram/audio.ts` | Deepgram | Deepgram | P2 |
-| 7 | Text-to-speech | `helix-runtime/src/helix/voice/text-to-speech.ts` | ElevenLabs | Edge-TTS | P2 |
-| 8 | Email analysis | `helix-runtime/src/gateway/server-methods/email.ts` | None | Gemini Flash | P3 |
+| #   | Operation           | File                                                                | Current Model | New Model    | Priority |
+| --- | ------------------- | ------------------------------------------------------------------- | ------------- | ------------ | -------- |
+| 1   | Chat messages       | `helix-runtime/src/gateway/http-routes/chat.ts`                     | Sonnet        | DeepSeek     | P0       |
+| 2   | Agent execution     | `helix-runtime/src/gateway/server-methods/agent.ts`                 | Sonnet        | DeepSeek     | P0       |
+| 3   | Memory synthesis    | `helix-runtime/src/gateway/server-methods/memory-synthesis.ts`      | Sonnet        | Gemini Flash | P1       |
+| 4   | Sentiment analysis  | `web/src/pages/api/sentiment-analyze.ts`                            | Sonnet        | Gemini Flash | P1       |
+| 5   | Video understanding | `helix-runtime/src/media-understanding/providers/google/video.ts`   | Gemini        | Gemini Flash | P2       |
+| 6   | Audio transcription | `helix-runtime/src/media-understanding/providers/deepgram/audio.ts` | Deepgram      | Deepgram     | P2       |
+| 7   | Text-to-speech      | `helix-runtime/src/helix/voice/text-to-speech.ts`                   | ElevenLabs    | Edge-TTS     | P2       |
+| 8   | Email analysis      | `helix-runtime/src/gateway/server-methods/email.ts`                 | None          | Gemini Flash | P3       |
 
 **Migration Pattern (use for each):**
+
 ```typescript
 // OLD
 const response = await claudeClient.messages.create(...)
@@ -142,23 +149,28 @@ await costTracker.logOperation(userId, {
 ## KEY FILES TO KNOW
 
 **Configuration (Database-backed):**
+
 - `supabase/migrations/001_ai_operations.sql` - Database schema
 
 **Core Components:**
+
 - `src/helix/ai-operations/router.ts` - Main router class
 - `src/helix/ai-operations/cost-tracker.ts` - Cost logging
 - `src/helix/ai-operations/approval-gate.ts` - Approval workflow
 - `src/helix/ai-operations/feature-toggles.ts` - Safety toggles
 
 **Admin Panel:**
+
 - `web/src/admin/dashboard.tsx` - Tier 1: View spend
 - `web/src/admin/controls.tsx` - Tier 2: Manual control
 - `web/src/admin/intelligence.tsx` - Tier 3: Helix suggestions
 
 **Migrations (update 10 files):**
+
 - See "The 10 AI Operations" table above
 
 **Tests:**
+
 - `src/helix/ai-operations/*.test.ts` - Unit tests
 - `web/src/admin/*.test.tsx` - Component tests
 
@@ -167,17 +179,20 @@ await costTracker.logOperation(userId, {
 ## CRITICAL DECISIONS (Already Made ✅)
 
 **Model Strategy:**
+
 - Chat/Agents: DeepSeek v3.2 (99% savings vs Sonnet)
 - Analysis tasks: Gemini Flash (95% savings)
 - TTS: Edge-TTS (100% free)
 - BYOK users: Full autonomy (no margin impact)
 
 **Safety Guardrails:**
+
 - Anything affecting margins: Requires Rodrigo approval
 - Hardcoded toggles: Helix cannot bypass
 - Helix can only: Analyze, recommend, suggest
 
 **Admin Panel:**
+
 - Tier 1: View-only observability
 - Tier 2: Manual control (approval gates for money)
 - Tier 3: Helix intelligence (can't execute)
@@ -211,6 +226,7 @@ Once Phase 0.5 complete:
 ✅ Safety guardrails in place
 
 **Then:** Phase 0 begins (Orchestration Foundation)
+
 - Conductor loop (autonomous operation)
 - Context formatter
 - Goal evaluator
@@ -221,21 +237,25 @@ Once Phase 0.5 complete:
 ## DEBUGGING TIPS
 
 **Router not routing?**
+
 1. Check database has operation_id in ai_model_routes
 2. Check cache is working (5min TTL)
 3. Check feature toggles not blocking
 
 **Cost not tracking?**
+
 1. Verify ai_operation_log table exists
 2. Check costTracker.logOperation() being called
 3. Verify budget table updates
 
 **Admin UI blank?**
+
 1. Check admin dashboard component renders
 2. Verify database connection
 3. Check browser console for errors
 
 **Tests failing?**
+
 1. Run `npm run test src/helix/ai-operations/`
 2. Check mocked models returning correct format
 3. Verify database seeded with test data
@@ -255,6 +275,7 @@ Once Phase 0.5 complete:
 2. Add daily standup (template in PHASE-0.5-PROGRESS.md)
 
 3. Commit with clear message:
+
    ```
    git commit -m "docs: Phase 0.5 progress - [component] complete"
    ```
@@ -274,11 +295,13 @@ Once Phase 0.5 complete:
 ## COMMUNICATION
 
 **If stuck:**
+
 - Check PHASE-0.5-IMPLEMENTATION-ROADMAP.md for detailed code samples
 - Check AI-OPERATIONS-CONTROL-PLANE-MASTER-PLAN.md for architecture
 - Document blocker in PHASE-0.5-PROGRESS.md before stopping
 
 **If questions arise:**
+
 - Design: AI-OPERATIONS-CONTROL-PLANE-MASTER-PLAN.md
 - Implementation: PHASE-0.5-IMPLEMENTATION-ROADMAP.md
 - Architecture: AI-OPS-ONE-PAGE-SUMMARY.md
@@ -324,4 +347,3 @@ Then next week: Migrations + admin UI
 **Architecture Clarity:** Clear ✅
 
 BEGIN PHASE 0.5 IMPLEMENTATION → [SEE PHASE-0.5-IMPLEMENTATION-ROADMAP.md FOR DAY 1 DETAILS]
-

@@ -1,6 +1,7 @@
 # HELIX AI OPERATIONS - ONE PAGE SUMMARY
 
 ## The Problem (Current)
+
 - 10+ AI operations scattered across codebase
 - Inconsistent model choices (Sonnet everywhere = expensive)
 - Zero visibility into spending
@@ -39,19 +40,20 @@
 
 ## Model Routing (Smart & Cheap)
 
-| Operation | Current | New | Savings | Why |
-|-----------|---------|-----|---------|-----|
-| Chat | Sonnet | DeepSeek | 99% | Just as good, 1/200th cost |
-| Memory Synthesis | Sonnet $12.50/day | Gemini Flash | 95% | Routine analysis |
-| Sentiment | Sonnet | Gemini Flash | 90% | Simple classification |
-| TTS | ElevenLabs | Edge-TTS | 100% | Free alternatives exist |
-| Audio Transcription | Multiple | Deepgram | No change | Already optimal |
+| Operation           | Current           | New          | Savings   | Why                        |
+| ------------------- | ----------------- | ------------ | --------- | -------------------------- |
+| Chat                | Sonnet            | DeepSeek     | 99%       | Just as good, 1/200th cost |
+| Memory Synthesis    | Sonnet $12.50/day | Gemini Flash | 95%       | Routine analysis           |
+| Sentiment           | Sonnet            | Gemini Flash | 90%       | Simple classification      |
+| TTS                 | ElevenLabs        | Edge-TTS     | 100%      | Free alternatives exist    |
+| Audio Transcription | Multiple          | Deepgram     | No change | Already optimal            |
 
 **Total Monthly Savings: $350-400 (70% reduction)**
 
 ## The Three-Tier Admin Panel
 
 ### Tier 1: Observability (View-Only)
+
 ```
 TODAY:  $8.43 / $50 daily budget
 TREND:  $247/month (↓ 35% from optimization)
@@ -60,6 +62,7 @@ QUALITY: 0.91 avg
 ```
 
 ### Tier 2: Control (Approve Changes)
+
 ```
 [ ] Switch memory synthesis: Gemini → DeepSeek
     └─ Savings: $358/month ✓
@@ -73,6 +76,7 @@ QUALITY: 0.91 avg
 ```
 
 ### Tier 3: Intelligence (Helix Recommends)
+
 ```
 🤖 HELIX: "I've analyzed 3 days of operations.
    Here are my recommendations for you to approve:"
@@ -104,23 +108,24 @@ RULE: Any decision affecting margins requires Rodrigo's approval
 
 ## Implementation Timeline
 
-| Phase | Duration | Focus | Outcome |
-|-------|----------|-------|---------|
-| **0.5** | Weeks 1-2 | Unified control plane | All 10 ops routed through router |
-| **0** | Weeks 3-4 | Conductor foundation | Autonomous operation ready |
-| **1-5** | Weeks 5-12 | Orchestration, interface, coordination | Full system operational |
+| Phase   | Duration   | Focus                                  | Outcome                          |
+| ------- | ---------- | -------------------------------------- | -------------------------------- |
+| **0.5** | Weeks 1-2  | Unified control plane                  | All 10 ops routed through router |
+| **0**   | Weeks 3-4  | Conductor foundation                   | Autonomous operation ready       |
+| **1-5** | Weeks 5-12 | Orchestration, interface, coordination | Full system operational          |
 
 ## Cost Projections (Optimized)
 
-| Users | Monthly | Per User | Margin |
-|-------|---------|----------|--------|
-| 100 | $25 | $0.25 | 99% |
-| 1,000 | $65 | $0.065 | 98% |
-| 10,000 | $400 | $0.04 | 99% |
+| Users  | Monthly | Per User | Margin |
+| ------ | ------- | -------- | ------ |
+| 100    | $25     | $0.25    | 99%    |
+| 1,000  | $65     | $0.065   | 98%    |
+| 10,000 | $400    | $0.04    | 99%    |
 
 ## For BYOK Users (No Margin Impact)
 
 BYOK users can:
+
 - ✅ Override any model
 - ✅ Increase spending (they pay)
 - ✅ Enable full Helix autonomy
@@ -130,13 +135,13 @@ Does NOT affect Helix's margins.
 
 ## The Key Difference from Before
 
-| Before | After |
-|--------|-------|
-| Hardcoded: chat→Sonnet ($0.015/msg) | Configured: chat→DeepSeek ($0.00003/msg) |
-| No visibility into spending | Real-time dashboard |
-| No approval process | Money decisions blocked without approval |
-| Can't optimize autonomously | Helix recommends optimizations (you approve) |
-| User has no control | BYOK users get full autonomy |
+| Before                              | After                                        |
+| ----------------------------------- | -------------------------------------------- |
+| Hardcoded: chat→Sonnet ($0.015/msg) | Configured: chat→DeepSeek ($0.00003/msg)     |
+| No visibility into spending         | Real-time dashboard                          |
+| No approval process                 | Money decisions blocked without approval     |
+| Can't optimize autonomously         | Helix recommends optimizations (you approve) |
+| User has no control                 | BYOK users get full autonomy                 |
 
 ## Launch Readiness
 
@@ -159,4 +164,3 @@ Does NOT affect Helix's margins.
 3. **Phase 0.5**: Highest priority (build this first, then orchestration)?
 4. **Safety**: Hardcoded toggles prevent Helix override (acceptable)?
 5. **BYOK**: Users can do whatever they want (no margin impact - yes?)?
-

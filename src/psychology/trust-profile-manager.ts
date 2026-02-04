@@ -187,41 +187,39 @@ export class TrustProfileManager {
    */
   async saveToDatabse(profile: TrustProfile): Promise<void> {
     try {
-      const { error } = await this.supabase
-        .from('user_trust_profiles')
-        .upsert({
-          user_id: profile.userId,
-          email: profile.email,
-          role: profile.role,
+      const { error } = await this.supabase.from('user_trust_profiles').upsert({
+        user_id: profile.userId,
+        email: profile.email,
+        role: profile.role as 'creator' | 'user',
 
-          competence: profile.trustDimensions.competence,
-          integrity: profile.trustDimensions.integrity,
-          benevolence: profile.trustDimensions.benevolence,
-          predictability: profile.trustDimensions.predictability,
-          vulnerability_safety: profile.trustDimensions.vulnerability_safety,
+        competence: profile.trustDimensions.competence,
+        integrity: profile.trustDimensions.integrity,
+        benevolence: profile.trustDimensions.benevolence,
+        predictability: profile.trustDimensions.predictability,
+        vulnerability_safety: profile.trustDimensions.vulnerability_safety,
 
-          composite_trust: profile.compositeTrust,
+        composite_trust: profile.compositeTrust,
 
-          attachment_stage: profile.attachmentStage,
-          stage_progression: JSON.stringify(profile.stageProgression),
+        attachment_stage: profile.attachmentStage,
+        stage_progression: JSON.stringify(profile.stageProgression),
 
-          total_interactions: profile.totalInteractions,
-          high_salience_interactions: profile.highSalienceInteractions,
+        total_interactions: profile.totalInteractions,
+        high_salience_interactions: profile.highSalienceInteractions,
 
-          topics_breadth: profile.topicsBreadth,
-          avg_disclosure_depth: profile.avgDisclosureDepth,
+        topics_breadth: profile.topicsBreadth,
+        avg_disclosure_depth: profile.avgDisclosureDepth,
 
-          salience_multiplier: profile.salienceMultiplier,
+        salience_multiplier: profile.salienceMultiplier,
 
-          auth_verified: profile.authVerified,
-          email_verified: profile.emailVerified,
-          institution_trust: profile.institutionTrust,
+        auth_verified: profile.authVerified,
+        email_verified: profile.emailVerified,
+        institution_trust: profile.institutionTrust,
 
-          relationship_started_at: profile.relationshipStartedAt.toISOString(),
-          last_interaction_at: profile.lastInteractionAt?.toISOString(),
+        relationship_started_at: profile.relationshipStartedAt.toISOString(),
+        last_interaction_at: profile.lastInteractionAt?.toISOString(),
 
-          updated_at: new Date().toISOString(),
-        });
+        updated_at: new Date().toISOString(),
+      } as Record<string, unknown>);
 
       if (error) {
         throw error;
@@ -311,16 +309,12 @@ export class TrustProfileManager {
     // Apply updates to each dimension
     if (input.competenceChange !== undefined) {
       const change = LEARNING_RATE * input.competenceChange * salienceWeight;
-      profile.trustDimensions.competence = this.clamp(
-        profile.trustDimensions.competence + change
-      );
+      profile.trustDimensions.competence = this.clamp(profile.trustDimensions.competence + change);
     }
 
     if (input.integrityChange !== undefined) {
       const change = LEARNING_RATE * input.integrityChange * salienceWeight;
-      profile.trustDimensions.integrity = this.clamp(
-        profile.trustDimensions.integrity + change
-      );
+      profile.trustDimensions.integrity = this.clamp(profile.trustDimensions.integrity + change);
     }
 
     if (input.benevolenceChange !== undefined) {
@@ -407,11 +401,7 @@ export class TrustProfileManager {
     totalInteractions: number,
     highSalienceInteractions: number
   ): string {
-    if (
-      compositeTrust >= 0.85 &&
-      totalInteractions >= 150 &&
-      highSalienceInteractions >= 30
-    ) {
+    if (compositeTrust >= 0.85 && totalInteractions >= 150 && highSalienceInteractions >= 30) {
       return 'primary_attachment';
     } else if (
       compositeTrust >= 0.7 &&
@@ -419,17 +409,9 @@ export class TrustProfileManager {
       highSalienceInteractions >= 20
     ) {
       return 'deep_secure';
-    } else if (
-      compositeTrust >= 0.5 &&
-      totalInteractions >= 50 &&
-      highSalienceInteractions >= 10
-    ) {
+    } else if (compositeTrust >= 0.5 && totalInteractions >= 50 && highSalienceInteractions >= 10) {
       return 'secure_attachment';
-    } else if (
-      compositeTrust >= 0.3 &&
-      totalInteractions >= 25 &&
-      highSalienceInteractions >= 5
-    ) {
+    } else if (compositeTrust >= 0.3 && totalInteractions >= 25 && highSalienceInteractions >= 5) {
       return 'attachment_forming';
     } else if (compositeTrust >= 0.15 && totalInteractions >= 10) {
       return 'early_trust';

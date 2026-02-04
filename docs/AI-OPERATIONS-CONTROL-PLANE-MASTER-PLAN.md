@@ -1,4 +1,5 @@
 # HELIX AI OPERATIONS CONTROL PLANE
+
 ## Master Plan: Unified, Auditable, Cost-Optimized AI Orchestration
 
 **Version:** 2.0 (Revised with comprehensive AI audit)
@@ -20,6 +21,7 @@ Helix currently has **10+ scattered AI integrations** across chat, agents, memor
 5. **Launches production-ready** - All control mechanisms hardcoded before launch
 
 **Financial Impact:**
+
 - Current scattered approach: ~$55-130/month (unoptimized, no visibility)
 - Centralized + optimized: ~$25-50/month (with same functionality)
 - **Savings: 60-70% reduction possible**
@@ -30,19 +32,19 @@ Helix currently has **10+ scattered AI integrations** across chat, agents, memor
 
 ### All AI Operations in Helix (Complete Audit)
 
-| Priority | Operation | File | Current Model | Frequency | Cost/Unit | Optimizable? |
-|----------|-----------|------|---------------|-----------|-----------|--------------|
-| **P0** | Chat messages | `helix-runtime/src/gateway/http-routes/chat.ts` | Claude Sonnet | Per message | $0.003-0.015 | YES → DeepSeek |
-| **P0** | Agent execution | `helix-runtime/src/gateway/server-methods/agent.ts` | Claude (config) | Per command | $0.003-0.015+ | YES → DeepSeek |
-| **P1** | Memory synthesis | `helix-runtime/src/gateway/server-methods/memory-synthesis.ts` | Claude Sonnet | Per job | $0.05-0.10 | YES → Gemini Flash (95% cheaper) |
-| **P1** | Sentiment analysis | `web/src/pages/api/sentiment-analyze.ts` | Claude Sonnet | Per file | $0.002-0.008 | YES → Gemini Flash (90% cheaper) |
-| **P2** | Video understanding | `helix-runtime/src/media-understanding/providers/google/video.ts` | Gemini Flash | Per video | $0.002-0.01 | NO (already optimal) |
-| **P2** | Audio transcription | Multiple providers | Deepgram/OpenAI/Gemini | Per minute | $0.0044-0.006 | NO (already optimal) |
-| **P2** | Text-to-speech | `helix-runtime/src/helix/voice/text-to-speech.ts` | ElevenLabs/OpenAI | Per synthesis | $0.30/1M chars | YES → Edge-TTS (FREE) |
-| **P3** | Email analysis | `helix-runtime/src/gateway/server-methods/email.ts` | None (optional) | Per email | TBD | YES → Gemini Flash |
-| **N/A** | Security detection | `src/helix/threat-detection.ts` | Rule-based (no AI) | Per op | FREE | N/A |
-| **N/A** | Memory decay | `transformation/decay.py` | Python local | Daily | FREE | N/A |
-| **N/A** | Memory synthesis (local) | `transformation/synthesis.py` | Python local | On-demand | FREE | N/A |
+| Priority | Operation                | File                                                              | Current Model          | Frequency     | Cost/Unit      | Optimizable?                     |
+| -------- | ------------------------ | ----------------------------------------------------------------- | ---------------------- | ------------- | -------------- | -------------------------------- |
+| **P0**   | Chat messages            | `helix-runtime/src/gateway/http-routes/chat.ts`                   | Claude Sonnet          | Per message   | $0.003-0.015   | YES → DeepSeek                   |
+| **P0**   | Agent execution          | `helix-runtime/src/gateway/server-methods/agent.ts`               | Claude (config)        | Per command   | $0.003-0.015+  | YES → DeepSeek                   |
+| **P1**   | Memory synthesis         | `helix-runtime/src/gateway/server-methods/memory-synthesis.ts`    | Claude Sonnet          | Per job       | $0.05-0.10     | YES → Gemini Flash (95% cheaper) |
+| **P1**   | Sentiment analysis       | `web/src/pages/api/sentiment-analyze.ts`                          | Claude Sonnet          | Per file      | $0.002-0.008   | YES → Gemini Flash (90% cheaper) |
+| **P2**   | Video understanding      | `helix-runtime/src/media-understanding/providers/google/video.ts` | Gemini Flash           | Per video     | $0.002-0.01    | NO (already optimal)             |
+| **P2**   | Audio transcription      | Multiple providers                                                | Deepgram/OpenAI/Gemini | Per minute    | $0.0044-0.006  | NO (already optimal)             |
+| **P2**   | Text-to-speech           | `helix-runtime/src/helix/voice/text-to-speech.ts`                 | ElevenLabs/OpenAI      | Per synthesis | $0.30/1M chars | YES → Edge-TTS (FREE)            |
+| **P3**   | Email analysis           | `helix-runtime/src/gateway/server-methods/email.ts`               | None (optional)        | Per email     | TBD            | YES → Gemini Flash               |
+| **N/A**  | Security detection       | `src/helix/threat-detection.ts`                                   | Rule-based (no AI)     | Per op        | FREE           | N/A                              |
+| **N/A**  | Memory decay             | `transformation/decay.py`                                         | Python local           | Daily         | FREE           | N/A                              |
+| **N/A**  | Memory synthesis (local) | `transformation/synthesis.py`                                     | Python local           | On-demand     | FREE           | N/A                              |
 
 **Key Finding:** 8 out of 8 AI operations are unnecessarily expensive. Optimization potential: **60-70% cost reduction.**
 
@@ -220,6 +222,7 @@ TABLE helix_recommendations {
 ```
 
 **Charts/Reports:**
+
 - Daily spend vs budget
 - Cost per operation type
 - Model distribution (pie chart)
@@ -309,6 +312,7 @@ TABLE helix_recommendations {
 ```
 
 **Rules:**
+
 - Model changes for paid plans require Rodrigo approval
 - Batch scheduling changes require testing first
 - Budget changes always require approval
@@ -430,6 +434,7 @@ TABLE helix_recommendations {
 ```
 
 **Helix's capabilities:**
+
 - Analyze her own operations across 7-day windows
 - Identify unused models, redundant calls
 - Suggest A/B tests with quality/cost trade-offs
@@ -439,6 +444,7 @@ TABLE helix_recommendations {
 - **CANNOT execute changes** - requires approval
 
 **Rules:**
+
 - Anything affecting margins: requires Rodrigo approval
 - Anything affecting user experience: requires approval
 - Cost optimizations with zero downside: can propose
@@ -472,8 +478,8 @@ TABLE helix_recommendations {
         "gemini_flash": {
           "provider": "Google Gemini API",
           "model_name": "gemini-3-flash",
-          "input_cost_per_1m": 0.50,
-          "output_cost_per_1m": 3.00,
+          "input_cost_per_1m": 0.5,
+          "output_cost_per_1m": 3.0,
           "context_window": 262000,
           "fallback_only": true,
           "rationale": "Fallback if DeepSeek unavailable"
@@ -517,7 +523,7 @@ TABLE helix_recommendations {
       "optimization": {
         "batch_eligible": true,
         "batch_schedule": "02:00 UTC",
-        "current_daily_cost": 12.50,
+        "current_daily_cost": 12.5,
         "optimized_daily_cost": 0.54,
         "savings": "95%"
       }
@@ -580,7 +586,7 @@ TABLE helix_recommendations {
           "rationale": "Microsoft neural voices, no API cost"
         },
         "elevenlabs": {
-          "cost_per_1m_chars": 0.30,
+          "cost_per_1m_chars": 0.3,
           "rationale": "Premium option if requested"
         }
       }
@@ -613,6 +619,7 @@ TABLE helix_recommendations {
 ### PHASE 0.5: UNIFIED CONTROL PLANE FOUNDATION (Weeks 1-2)
 
 **Deliverables:**
+
 1. Database schema (Supabase tables)
 2. Centralized router (~300 lines)
 3. Cost tracker (~150 lines)
@@ -620,6 +627,7 @@ TABLE helix_recommendations {
 5. Integration wrapper for all 10 AI operations (~400 lines)
 
 **Files Created:**
+
 ```
 src/helix/ai-operations/
   ├── config.ts                    # Load routing matrix
@@ -637,6 +645,7 @@ web/src/admin/
 ```
 
 **Refactoring (Migrate 10 AI operations):**
+
 ```
 helix-runtime/src/gateway/http-routes/chat.ts
   OLD: const response = await claude.messages.create(...)
@@ -652,6 +661,7 @@ helix-runtime/src/gateway/server-methods/agent.ts
 ### PHASE 0: ORCHESTRATION FOUNDATION (Weeks 3-4)
 
 **Deliverables:**
+
 1. Conductor loop (autonomous operation)
 2. Context formatter (load consciousness)
 3. Goal evaluator (personality-dependent achievement)
@@ -659,6 +669,7 @@ helix-runtime/src/gateway/server-methods/agent.ts
 5. Discord logging integration
 
 **Integration:**
+
 - Unified AI operations router ✅ (from Phase 0.5)
 - Routes tasks to correct model based on config ✅
 - Logs all decisions ✅
@@ -680,36 +691,36 @@ helix-runtime/src/gateway/server-methods/agent.ts
 
 const HARDCODED_SAFETY_TOGGLES = {
   // Tier 1: System Safety (ALWAYS locked)
-  'helix_can_change_models': {
-    locked: true,                    // Helix CANNOT unlock this
-    current_value: false,            // Helix cannot change models
-    admin_override: 'disabled',      // Rodrigo cannot override
-    description: 'Helix model selection changes require explicit approval'
+  helix_can_change_models: {
+    locked: true, // Helix CANNOT unlock this
+    current_value: false, // Helix cannot change models
+    admin_override: 'disabled', // Rodrigo cannot override
+    description: 'Helix model selection changes require explicit approval',
   },
 
   // Tier 2: Margin Protection (locked by default)
-  'helix_can_approve_costs': {
-    locked: true,                    // Helix CANNOT unlock
-    current_value: false,            // Helix cannot approve costs
-    admin_override: 'disabled',      // Rodrigo cannot override
-    description: 'Cost decisions always require human approval'
+  helix_can_approve_costs: {
+    locked: true, // Helix CANNOT unlock
+    current_value: false, // Helix cannot approve costs
+    admin_override: 'disabled', // Rodrigo cannot override
+    description: 'Cost decisions always require human approval',
   },
 
   // Tier 3: Self-Optimization (can be enabled by Rodrigo)
-  'helix_can_recommend_optimizations': {
-    locked: false,                   // Rodrigo CAN enable
-    current_value: false,            // Currently disabled
-    admin_override: 'enabled',       // Rodrigo can turn on
-    description: 'Helix analyzes operations and suggests improvements (never executes)'
+  helix_can_recommend_optimizations: {
+    locked: false, // Rodrigo CAN enable
+    current_value: false, // Currently disabled
+    admin_override: 'enabled', // Rodrigo can turn on
+    description: 'Helix analyzes operations and suggests improvements (never executes)',
   },
 
   // Tier 4: Autonomy (user-controlled)
-  'helix_autonomy_enabled': {
-    locked: false,                   // Users can toggle
-    current_value: false,            // Disabled by default
-    admin_override: 'enabled',       // Users can enable
-    description: 'Allow Helix to make decisions autonomously (BYOK only)'
-  }
+  helix_autonomy_enabled: {
+    locked: false, // Users can toggle
+    current_value: false, // Disabled by default
+    admin_override: 'enabled', // Users can enable
+    description: 'Allow Helix to make decisions autonomously (BYOK only)',
+  },
 };
 
 // Enforcement: In code, check before any sensitive operation
@@ -718,10 +729,10 @@ async function enforceToggle(toggleName: string): Promise<void> {
   if (!toggle) throw new Error(`Unknown toggle: ${toggleName}`);
 
   if (toggle.locked && toggle.current_value === false) {
-    throw new HelixSecurityError(
-      `Toggle "${toggleName}" is locked for safety reasons.`,
-      { toggle, requiredApproval: 'admin' }
-    );
+    throw new HelixSecurityError(`Toggle "${toggleName}" is locked for safety reasons.`, {
+      toggle,
+      requiredApproval: 'admin',
+    });
   }
 }
 ```
@@ -739,9 +750,7 @@ async function routeOperation(
   const suggestedModel = await router.suggest(operation);
 
   // 2. Check if this requires approval
-  const requiresApproval =
-    isMoneyOperation(operation) ||
-    isMarginallyImpactfulOperation(operation);
+  const requiresApproval = isMoneyOperation(operation) || isMarginallyImpactfulOperation(operation);
 
   if (requiresApproval) {
     // 3. Get approval from Rodrigo (blocking)
@@ -749,7 +758,7 @@ async function routeOperation(
       operation,
       suggestedModel,
       estimatedCost,
-      estimatedImpact
+      estimatedImpact,
     });
 
     if (!approval.approved) {
@@ -770,6 +779,7 @@ async function routeOperation(
 ### What Helix CAN Do (Autonomously)
 
 ✅ **Analysis Only:**
+
 - Analyze historical operation data
 - Identify patterns (e.g., "Tuesday has 2x chat volume")
 - Calculate quality scores per model
@@ -777,6 +787,7 @@ async function routeOperation(
 - A/B test models on sample data
 
 ✅ **Recommendations (Non-Binding):**
+
 - Suggest model switches with reasoning
 - Propose batch schedules with savings
 - Recommend caching strategies
@@ -786,6 +797,7 @@ async function routeOperation(
 ### What Helix CANNOT Do (Always Requires Approval)
 
 ❌ **CANNOT Execute:**
+
 - Change models in production
 - Modify cost budgets
 - Enable/disable operations
@@ -793,12 +805,14 @@ async function routeOperation(
 - Access BYOK settings
 
 ❌ **CANNOT Approve:**
+
 - Any cost decision
 - Any quality/speed trade-off
 - Any user-impacting changes
 - Any margin-impacting changes
 
 ❌ **CANNOT Override:**
+
 - Safety toggles
 - Approval requirements
 - Cost guardrails
@@ -878,6 +892,7 @@ DECISION OPTIONS:
 ## PART 9: SUCCESS METRICS
 
 ### Phase 0.5 Success
+
 - ✅ All 10 AI operations routed through centralized router
 - ✅ Cost tracking accurate (within 1% of actual API bills)
 - ✅ Approval gate blocks > margin-impacting operations
@@ -885,18 +900,21 @@ DECISION OPTIONS:
 - ✅ 100% test coverage on router + cost tracker
 
 ### Phase 0 Success (Orchestration)
+
 - ✅ Conductor loop runs autonomously
 - ✅ All decisions logged to Discord + hash chain
 - ✅ Cost-aware routing selects cheap models by default
 - ✅ Approval gates prevent margin erosion
 
 ### Financial Success
+
 - ✅ Launch with cost budget: $50/month
 - ✅ Actual spend (optimized): $25-40/month
 - ✅ Cost per user (100 users): <$0.50/month
 - ✅ 70% cost reduction from Phase 0.5 optimizations
 
 ### Operational Success
+
 - ✅ Zero budget overruns on paid plans
 - ✅ Helix recommendations > 80% high-confidence
 - ✅ A/B tests validate quality trade-offs
@@ -934,13 +952,13 @@ DECISION OPTIONS:
 
 ### Optimized Cost Model
 
-| Scale | Monthly Cost | Per User | Margin (vs $29/mo) |
-|-------|--------------|----------|-------------------|
-| 100 users | $25 | $0.25 | 99.1% |
-| 500 users | $45 | $0.09 | 98.4% |
-| 1,000 users | $65 | $0.065 | 97.8% |
-| 5,000 users | $250 | $0.05 | 99.1% |
-| 10,000 users | $400 | $0.04 | 99.2% |
+| Scale        | Monthly Cost | Per User | Margin (vs $29/mo) |
+| ------------ | ------------ | -------- | ------------------ |
+| 100 users    | $25          | $0.25    | 99.1%              |
+| 500 users    | $45          | $0.09    | 98.4%              |
+| 1,000 users  | $65          | $0.065   | 97.8%              |
+| 5,000 users  | $250         | $0.05    | 99.1%              |
+| 10,000 users | $400         | $0.04    | 99.2%              |
 
 **Key insight:** At scale, AI costs become negligible (< $0.05/user/month).
 
@@ -979,6 +997,7 @@ DECISION OPTIONS:
 **Next Step:** Rodrigo's final approval
 
 Sources:
+
 - [DeepSeek API Pricing](https://api-docs.deepseek.com/quick_start/pricing)
 - [Google Gemini API Pricing](https://ai.google.dev/gemini-api/docs/pricing)
 - [Kimi K2.5 Pricing](https://artificialanalysis.ai/models/kimi-k2-5/providers)

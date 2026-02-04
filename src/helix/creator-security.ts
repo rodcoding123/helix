@@ -27,7 +27,10 @@ const RODRIGO_TRUST_LEVEL = parseFloat(process.env.RODRIGO_TRUST_LEVEL || '1.0')
 // ============================================================================
 
 export class CreatorSecurityError extends Error {
-  constructor(message: string, public context?: Record<string, any>) {
+  constructor(
+    message: string,
+    public context?: Record<string, any>
+  ) {
     super(message);
     this.name = 'CreatorSecurityError';
   }
@@ -143,9 +146,7 @@ export function handleThanosModeTrigger(triggerPhrase: string): ThanosAuthResult
 /**
  * Verify API key and grant creator access
  */
-export async function verifyCreatorApiKey(
-  providedKey: string
-): Promise<ThanosAuthResult> {
+export async function verifyCreatorApiKey(providedKey: string): Promise<ThanosAuthResult> {
   // 1. Get stored hash from environment
   const storedHash = process.env.RODRIGO_API_KEY_HASH;
   const salt = process.env.RODRIGO_API_KEY_SALT;
@@ -261,13 +262,10 @@ async function logSuccessfulAuth(sessionToken: string): Promise<void> {
 export function verifyCreatorSecurityConfiguration(): void {
   // Check Rodrigo trust is 1.0
   if (RODRIGO_TRUST_LEVEL !== 1.0) {
-    throw new CreatorSecurityError(
-      'STARTUP_ERROR: Creator trust is not 1.0',
-      {
-        actualValue: RODRIGO_TRUST_LEVEL,
-        environment: 'RODRIGO_TRUST_LEVEL',
-      }
-    );
+    throw new CreatorSecurityError('STARTUP_ERROR: Creator trust is not 1.0', {
+      actualValue: RODRIGO_TRUST_LEVEL,
+      environment: 'RODRIGO_TRUST_LEVEL',
+    });
   }
 
   // Check API key hash is configured

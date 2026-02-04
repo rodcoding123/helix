@@ -115,9 +115,7 @@ describe('CostTracker', () => {
         { ...mockOperation, success: true },
       ];
 
-      const failed = [
-        { ...mockOperation, success: false },
-      ];
+      const failed = [{ ...mockOperation, success: false }];
 
       expect(successful.filter(op => op.success).length).toBe(2);
       expect(failed.filter(op => !op.success).length).toBe(1);
@@ -141,7 +139,8 @@ describe('CostTracker', () => {
         { ...mockOperation, quality_score: 1.0 },
       ];
 
-      const avgQuality = operations.reduce((sum, op) => sum + (op.quality_score || 0), 0) / operations.length;
+      const avgQuality =
+        operations.reduce((sum, op) => sum + (op.quality_score || 0), 0) / operations.length;
       expect(avgQuality).toBeCloseTo(0.95, 2);
     });
   });
@@ -247,10 +246,12 @@ describe('CostTracker', () => {
 
   describe('Real-world Scenarios', () => {
     it('should track high-volume day', () => {
-      const operations = Array(500).fill(mockOperation).map(op => ({
-        ...op,
-        cost_usd: 0.02,
-      }));
+      const operations = Array(500)
+        .fill(mockOperation)
+        .map(op => ({
+          ...op,
+          cost_usd: 0.02,
+        }));
 
       const totalCost = operations.reduce((sum, op) => sum + op.cost_usd, 0);
       expect(totalCost).toBe(10.0);
@@ -268,10 +269,12 @@ describe('CostTracker', () => {
 
     it('should show daily cost under limit', () => {
       const dailyLimit = 50.0;
-      const operations = Array(200).fill(mockOperation).map(op => ({
-        ...op,
-        cost_usd: 0.15,
-      }));
+      const operations = Array(200)
+        .fill(mockOperation)
+        .map(op => ({
+          ...op,
+          cost_usd: 0.15,
+        }));
 
       const dailyTotal = operations.reduce((sum, op) => sum + op.cost_usd, 0);
       expect(dailyTotal).toBe(30.0);
@@ -280,10 +283,12 @@ describe('CostTracker', () => {
 
     it('should show daily cost near limit', () => {
       const dailyLimit = 50.0;
-      const operations = Array(400).fill(mockOperation).map(op => ({
-        ...op,
-        cost_usd: 0.12,
-      }));
+      const operations = Array(400)
+        .fill(mockOperation)
+        .map(op => ({
+          ...op,
+          cost_usd: 0.12,
+        }));
 
       const dailyTotal = operations.reduce((sum, op) => sum + op.cost_usd, 0);
       expect(dailyTotal).toBe(48.0);
@@ -292,10 +297,12 @@ describe('CostTracker', () => {
 
     it('should show daily cost exceeding limit', () => {
       const dailyLimit = 50.0;
-      const operations = Array(500).fill(mockOperation).map(op => ({
-        ...op,
-        cost_usd: 0.11,
-      }));
+      const operations = Array(500)
+        .fill(mockOperation)
+        .map(op => ({
+          ...op,
+          cost_usd: 0.11,
+        }));
 
       const dailyTotal = operations.reduce((sum, op) => sum + op.cost_usd, 0);
       expect(dailyTotal).toBe(55.0);
@@ -309,17 +316,21 @@ describe('CostTracker', () => {
     });
 
     it('should track cost savings with model switch', () => {
-      const deepseekCost = Array(100).fill(mockOperation).map(op => ({
-        ...op,
-        model_used: 'deepseek',
-        cost_usd: 0.025,
-      }));
+      const deepseekCost = Array(100)
+        .fill(mockOperation)
+        .map(op => ({
+          ...op,
+          model_used: 'deepseek',
+          cost_usd: 0.025,
+        }));
 
-      const geminiCost = Array(100).fill(mockOperation).map(op => ({
-        ...op,
-        model_used: 'gemini_flash',
-        cost_usd: 0.0001,
-      }));
+      const geminiCost = Array(100)
+        .fill(mockOperation)
+        .map(op => ({
+          ...op,
+          model_used: 'gemini_flash',
+          cost_usd: 0.0001,
+        }));
 
       const deepseekTotal = deepseekCost.reduce((sum, op) => sum + op.cost_usd, 0);
       const geminiTotal = geminiCost.reduce((sum, op) => sum + op.cost_usd, 0);

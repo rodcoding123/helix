@@ -533,24 +533,11 @@ describe('FileWatcher', () => {
       // Should not throw
       expect(() => _startFileWatcher()).not.toThrow();
     });
-
-    it.skip('initializes hash cache for watched directories', () => {
-      vi.mocked(fs.existsSync).mockReturnValue(true);
-      // Skip due to Dirent type issues in Node types
-    });
   });
 
   describe('initializeHashCache', () => {
     beforeEach(() => {
       stopFileWatcher();
-    });
-
-    it.skip('walks directory tree recursively', () => {
-      // Skip due to Dirent type issues in Node types
-    });
-
-    it.skip('skips ignored files during initialization', () => {
-      // Skip due to Dirent type issues in Node types
     });
 
     it('handles readdir errors gracefully', () => {
@@ -561,14 +548,6 @@ describe('FileWatcher', () => {
 
       // Should not throw
       expect(() => _startFileWatcher()).not.toThrow();
-    });
-
-    it.skip('caches hashes for all files', () => {
-      // Skip due to Dirent type issues in Node types
-    });
-
-    it.skip('handles null hash from hashFile', () => {
-      // Skip due to Dirent type issues in Node types
     });
   });
 
@@ -586,14 +565,6 @@ describe('FileWatcher', () => {
     afterEach(() => {
       process.env.DISCORD_WEBHOOK_FILE_CHANGES = originalWebhookEnv;
       stopFileWatcher();
-    });
-
-    it.skip('ignores null filename', async () => {
-      // Skip due to fs.watch mock signature issues
-    });
-
-    it.skip('ignores files matching ignore patterns', async () => {
-      // Skip due to fs.watch mock signature issues
     });
 
     it('detects file creation', async () => {
@@ -627,22 +598,6 @@ describe('FileWatcher', () => {
 
       // Should call webhook for new file
       expect(mockFetch).toHaveBeenCalled();
-    });
-
-    it.skip('detects file modification', async () => {
-      // Skip due to Dirent and fs.watch mock signature issues
-    });
-
-    it.skip('skips events when file content unchanged', async () => {
-      // Skip due to Dirent and fs.watch mock signature issues
-    });
-
-    it.skip('detects file deletion', async () => {
-      // Skip due to Dirent and fs.watch mock signature issues
-    });
-
-    it.skip('handles errors in file event processing', async () => {
-      // Skip due to fs.watch mock signature issues
     });
   });
 });

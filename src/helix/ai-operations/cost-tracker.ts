@@ -305,13 +305,11 @@ export class CostTracker {
         });
       } else {
         // Reset all users (called by cron job)
-        const { error } = await this.supabase
-          .from('cost_budgets')
-          .update({
-            current_spend_today: 0,
-            operations_today: 0,
-            last_checked: timestamp,
-          });
+        const { error } = await this.supabase.from('cost_budgets').update({
+          current_spend_today: 0,
+          operations_today: 0,
+          last_checked: timestamp,
+        });
 
         if (error) throw error;
 
@@ -440,7 +438,9 @@ export class CostTracker {
 
       // Check anomalies
       if (todaySpend > avgSpend * 2) {
-        alerts.push(`Spending 2x higher than average: $${todaySpend.toFixed(2)} vs $${avgSpend.toFixed(2)}`);
+        alerts.push(
+          `Spending 2x higher than average: $${todaySpend.toFixed(2)} vs $${avgSpend.toFixed(2)}`
+        );
       }
 
       if (todayOps > avgOps * 3) {

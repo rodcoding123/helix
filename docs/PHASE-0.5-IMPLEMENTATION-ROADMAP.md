@@ -1,4 +1,5 @@
 # PHASE 0.5: UNIFIED AI OPERATIONS CONTROL PLANE
+
 ## Detailed Implementation Roadmap (Weeks 1-2)
 
 **Goal:** Migrate all 10 scattered AI operations to centralized router with cost tracking, approval gates, and admin control.
@@ -12,6 +13,7 @@
 ### Day 1-2: Database Schema (Supabase)
 
 **Files to Create:**
+
 - `supabase/migrations/001_ai_operations.sql`
 
 ```sql
@@ -146,9 +148,7 @@ export class AIOperationRouter {
     if (this.requiresApproval(route, operation)) {
       const approval = await this.checkApproval(operation);
       if (!approval) {
-        throw new ApprovalRequiredError(
-          `Operation ${operation.operationId} requires approval`
-        );
+        throw new ApprovalRequiredError(`Operation ${operation.operationId} requires approval`);
       }
     }
 
@@ -160,21 +160,23 @@ export class AIOperationRouter {
       type: 'ai_operation_routing',
       operationId: operation.operationId,
       suggestedModel: route.primary_model,
-      cost: await this.estimateCost(route.primary_model, operation.input)
+      cost: await this.estimateCost(route.primary_model, operation.input),
     });
 
     // 5. Return routing decision
     return {
       model: route.primary_model,
       cost: await this.estimateCost(route.primary_model, operation.input),
-      rationale: `Routed to ${route.primary_model} per configuration`
+      rationale: `Routed to ${route.primary_model} per configuration`,
     };
   }
 
   private async getRoute(operationId: string) {
     // Check cache
-    if (this.routeCache.has(operationId) &&
-        Date.now() - this.lastCacheRefresh < this.CACHE_TTL_MS) {
+    if (
+      this.routeCache.has(operationId) &&
+      Date.now() - this.lastCacheRefresh < this.CACHE_TTL_MS
+    ) {
       return this.routeCache.get(operationId);
     }
 
@@ -230,10 +232,10 @@ export class AIOperationRouter {
   private async estimateCost(model: string, input: any): Promise<number> {
     // Estimate based on input size
     const modelCosts = {
-      'deepseek': { inputRate: 0.0027 / 1000000, outputRate: 0.0108 / 1000000 },
-      'gemini_flash': { inputRate: 0.50 / 1000000, outputRate: 3.00 / 1000000 },
-      'deepgram': { inputRate: 0.0044 / 60 }, // Per minute
-      'edge_tts': { inputRate: 0 }, // FREE
+      deepseek: { inputRate: 0.0027 / 1000000, outputRate: 0.0108 / 1000000 },
+      gemini_flash: { inputRate: 0.5 / 1000000, outputRate: 3.0 / 1000000 },
+      deepgram: { inputRate: 0.0044 / 60 }, // Per minute
+      edge_tts: { inputRate: 0 }, // FREE
     };
 
     const cost = modelCosts[model];
@@ -274,28 +276,23 @@ export interface OperationMetrics {
 }
 
 export class CostTracker {
-  async logOperation(
-    userId: string | undefined,
-    metrics: OperationMetrics
-  ): Promise<void> {
+  async logOperation(userId: string | undefined, metrics: OperationMetrics): Promise<void> {
     // Insert into log
-    const { error: logError } = await supabase
-      .from('ai_operation_log')
-      .insert([
-        {
-          operation_type: metrics.operationType,
-          model_used: metrics.modelUsed,
-          user_id: userId,
-          input_tokens: metrics.inputTokens,
-          output_tokens: metrics.outputTokens,
-          cost_usd: metrics.costUsd,
-          latency_ms: metrics.latencyMs,
-          quality_score: metrics.qualityScore,
-          success: metrics.success,
-          error_message: metrics.errorMessage,
-          created_at: new Date().toISOString()
-        }
-      ]);
+    const { error: logError } = await supabase.from('ai_operation_log').insert([
+      {
+        operation_type: metrics.operationType,
+        model_used: metrics.modelUsed,
+        user_id: userId,
+        input_tokens: metrics.inputTokens,
+        output_tokens: metrics.outputTokens,
+        cost_usd: metrics.costUsd,
+        latency_ms: metrics.latencyMs,
+        quality_score: metrics.qualityScore,
+        success: metrics.success,
+        error_message: metrics.errorMessage,
+        created_at: new Date().toISOString(),
+      },
+    ]);
 
     if (logError) {
       console.error('Failed to log operation:', logError);
@@ -316,7 +313,7 @@ export class CostTracker {
           .update({
             current_spend_today: budget.current_spend_today + metrics.costUsd,
             operations_today: budget.operations_today + 1,
-            last_checked: new Date().toISOString()
+            last_checked: new Date().toISOString(),
           })
           .eq('user_id', userId);
 
@@ -349,13 +346,11 @@ export class CostTracker {
 
   async resetDailyMetrics(): Promise<void> {
     // Run daily at midnight
-    const { error } = await supabase
-      .from('cost_budgets')
-      .update({
-        current_spend_today: 0,
-        operations_today: 0,
-        last_checked: new Date().toISOString()
-      });
+    const { error } = await supabase.from('cost_budgets').update({
+      current_spend_today: 0,
+      operations_today: 0,
+      last_checked: new Date().toISOString(),
+    });
 
     if (error) {
       console.error('Failed to reset daily metrics:', error);
@@ -377,6 +372,7 @@ export const costTracker = new CostTracker();
 **Priority Order (migrate sequentially):**
 
 1. `helix-runtime/src/gateway/http-routes/chat.ts` - **HIGHEST IMPACT**
+
    ```typescript
    // OLD
    const response = await claude.messages.create(...)
@@ -436,20 +432,22 @@ export class ApprovalGate {
       type: 'approval_required',
       operation: request.operationId,
       change: request.change,
-      estimatedImpact: request.estimatedImpact
+      estimatedImpact: request.estimatedImpact,
     });
 
     // Store in DB
     const { data } = await supabase
       .from('helix_recommendations')
-      .insert([{
-        operation_id: request.operationId,
-        recommendation_type: request.change,
-        current_config: request.current,
-        proposed_config: request.proposed,
-        approval_status: 'PENDING',
-        created_at: new Date().toISOString()
-      }])
+      .insert([
+        {
+          operation_id: request.operationId,
+          recommendation_type: request.change,
+          current_config: request.current,
+          proposed_config: request.proposed,
+          approval_status: 'PENDING',
+          created_at: new Date().toISOString(),
+        },
+      ])
       .select('id')
       .single();
 
@@ -484,7 +482,10 @@ export const approvalGate = new ApprovalGate();
 import { supabase } from '@/lib/supabase';
 
 class FeatureToggleError extends Error {
-  constructor(message: string, public toggle: string) {
+  constructor(
+    message: string,
+    public toggle: string
+  ) {
     super(message);
   }
 }
@@ -546,6 +547,7 @@ export const featureToggles = new FeatureToggles();
 ### Day 4-5: Admin Dashboard (Web UI)
 
 **Files:**
+
 - `web/src/admin/dashboard.tsx` - Tier 1: Observability (~300 lines)
 - `web/src/admin/controls.tsx` - Tier 2: Control (~400 lines)
 - `web/src/admin/intelligence.tsx` - Tier 3: Helix Recs (~300 lines)
@@ -570,7 +572,7 @@ describe('AI Operations Router', () => {
   it('routes chat to deepseek by default', async () => {
     const decision = await router.route({
       operationId: 'chat_message',
-      input: { message: 'hello' }
+      input: { message: 'hello' },
     });
     expect(decision.model).toBe('deepseek');
   });
@@ -578,7 +580,7 @@ describe('AI Operations Router', () => {
   it('routes memory_synthesis to gemini_flash', async () => {
     const decision = await router.route({
       operationId: 'memory_synthesis',
-      input: { data: 'test' }
+      input: { data: 'test' },
     });
     expect(decision.model).toBe('gemini_flash');
   });
@@ -590,7 +592,7 @@ describe('AI Operations Router', () => {
     expect(async () => {
       await router.route({
         operationId: 'chat_message',
-        user: 'test_user'
+        user: 'test_user',
       });
     }).rejects.toThrow('Daily budget exceeded');
   });
@@ -603,7 +605,7 @@ describe('AI Operations Router', () => {
       outputTokens: 50,
       costUsd: 0.0015,
       latencyMs: 423,
-      success: true
+      success: true,
     });
 
     const spend = await costTracker.getDailySpend('test_user');
@@ -664,6 +666,7 @@ describe('Approval Gate', () => {
 ## Summary: Phase 0.5 Deliverables
 
 ### Code (Total: ~2,500 lines)
+
 ```
 Database Schema:         ~300 lines (SQL)
 Router:                  ~300 lines (TS)
@@ -678,6 +681,7 @@ TOTAL:                   ~2,850 lines
 ```
 
 ### Outcomes
+
 ✅ All 10 AI operations unified under one router
 ✅ Every AI call logged and tracked
 ✅ Cost transparency (real-time dashboard)
@@ -687,6 +691,7 @@ TOTAL:                   ~2,850 lines
 ✅ Ready for Phase 0 orchestration
 
 ### Effort Estimate
+
 - **Total: 60-75 hours (2-3 weeks with 1 engineer)**
 - Database: 1 day
 - Router/Core: 3 days
@@ -700,6 +705,7 @@ TOTAL:                   ~2,850 lines
 ## Next: Phase 0 (Orchestration Foundation)
 
 Once Phase 0.5 complete, begin Phase 0:
+
 - Conductor loop (autonomous operation)
 - Context formatter (consciousness loading)
 - Goal evaluator (achievement detection)
@@ -707,4 +713,3 @@ Once Phase 0.5 complete, begin Phase 0:
 - Discord logging integration
 
 This builds on Phase 0.5's unified routing to add orchestration logic.
-

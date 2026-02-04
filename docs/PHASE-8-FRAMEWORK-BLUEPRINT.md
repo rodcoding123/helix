@@ -25,11 +25,13 @@ Helix Phase 8 transforms the system into an **intelligence-aware autonomous agen
 ### 1.1 Router Purpose & Scope
 
 **What it is:**
+
 - Unified provider abstraction layer for all intelligence features
 - Separate from existing Helix router (which handles other tasks)
 - Code-focused and architecture-agnostic (ready for future models)
 
 **What it's NOT:**
+
 - Not a replacement for existing router
 - Not a single decision-maker (user/recommendation hybrid)
 - Not opinionated about providers (supports all)
@@ -40,26 +42,34 @@ Helix Phase 8 transforms the system into an **intelligence-aware autonomous agen
 // web/src/services/llm-router/types.ts
 
 interface LLMProviderConfig {
-  id: string;                           // 'deepseek' | 'gemini' | 'claude' | 'openai' | 'ollama'
-  name: string;                         // Display name
-  apiKey?: string;                      // User-provided (BYOK) or undefined (managed)
-  baseUrl?: string;                     // Custom endpoint for self-hosted
+  id: string; // 'deepseek' | 'gemini' | 'claude' | 'openai' | 'ollama'
+  name: string; // Display name
+  apiKey?: string; // User-provided (BYOK) or undefined (managed)
+  baseUrl?: string; // Custom endpoint for self-hosted
   enabled: boolean;
   isDefault: boolean;
 }
 
 interface RoleConfig {
-  role: 'email-compose' | 'email-classify' | 'email-respond' |
-        'calendar-prep' | 'calendar-time' |
-        'task-prioritize' | 'task-breakdown' |
-        'analytics-summary' | 'analytics-anomaly' |
-        'code-analyze' | 'code-implement' | 'code-review';
+  role:
+    | 'email-compose'
+    | 'email-classify'
+    | 'email-respond'
+    | 'calendar-prep'
+    | 'calendar-time'
+    | 'task-prioritize'
+    | 'task-breakdown'
+    | 'analytics-summary'
+    | 'analytics-anomaly'
+    | 'code-analyze'
+    | 'code-implement'
+    | 'code-review';
 
-  primaryProvider: string;              // 'deepseek' | 'gemini' | 'claude' | etc.
-  fallbackProvider?: string;            // If primary unavailable
-  model: string;                        // 'deepseek-v3.2' | 'gemini-2.0-flash' | 'claude-opus-4.5'
+  primaryProvider: string; // 'deepseek' | 'gemini' | 'claude' | etc.
+  fallbackProvider?: string; // If primary unavailable
+  model: string; // 'deepseek-v3.2' | 'gemini-2.0-flash' | 'claude-opus-4.5'
   complexity: 'simple' | 'medium' | 'complex';
-  estimatedTokens: number;              // For cost calculation
+  estimatedTokens: number; // For cost calculation
   useStreaming: boolean;
 }
 
@@ -67,7 +77,7 @@ interface UserLLMSettings {
   userId: string;
 
   // Provider management
-  providers: Record<string, LLMProviderConfig>;  // Map of provider configs
+  providers: Record<string, LLMProviderConfig>; // Map of provider configs
 
   // Role routing
   roleConfigs: Record<string, RoleConfig>;
@@ -76,13 +86,13 @@ interface UserLLMSettings {
   budget: {
     monthlyLimitUSD?: number;
     currentMonthSpentUSD: number;
-    autoDowngradeOnBudget: boolean;   // If budget exceeded, use cheaper model
+    autoDowngradeOnBudget: boolean; // If budget exceeded, use cheaper model
   };
 
   // Preferences
   preferStreamingResponses: boolean;
-  enableLocalFallback: boolean;          // Use local Ollama if API fails
-  logAllRequests: boolean;               // For auditability
+  enableLocalFallback: boolean; // Use local Ollama if API fails
+  logAllRequests: boolean; // For auditability
 }
 
 interface LLMRequest {
@@ -136,11 +146,7 @@ export class LLMRouter {
 
     // 3. Try primary provider
     try {
-      const response = await this.callProvider(
-        roleConfig.primaryProvider,
-        request,
-        roleConfig
-      );
+      const response = await this.callProvider(roleConfig.primaryProvider, request, roleConfig);
 
       // Track cost
       this.costsTracker.track({
@@ -148,7 +154,7 @@ export class LLMRouter {
         role: request.role,
         provider: roleConfig.primaryProvider,
         tokens: response.inputTokens + response.outputTokens,
-        cost: response.cost
+        cost: response.cost,
       });
 
       return response;
@@ -169,10 +175,7 @@ export class LLMRouter {
     }
   }
 
-  private async routeToFallback(
-    request: LLMRequest,
-    roleConfig: RoleConfig
-  ): Promise<LLMResponse> {
+  private async routeToFallback(request: LLMRequest, roleConfig: RoleConfig): Promise<LLMResponse> {
     const fallback = roleConfig.fallbackProvider || this.findCheapestProvider();
     const response = await this.callProvider(fallback, request, roleConfig);
     response.fallbackUsed = true;
@@ -196,9 +199,9 @@ export class LLMRouter {
       systemPrompt: request.systemPrompt,
       model: roleConfig.model,
       maxTokens: roleConfig.maxTokens,
-      temperature: roleConfig.complexity === 'simple' ? 0.1 :
-                  roleConfig.complexity === 'medium' ? 0.7 : 1.0,
-      stream: roleConfig.useStreaming
+      temperature:
+        roleConfig.complexity === 'simple' ? 0.1 : roleConfig.complexity === 'medium' ? 0.7 : 1.0,
+      stream: roleConfig.useStreaming,
     });
 
     return {
@@ -209,16 +212,16 @@ export class LLMRouter {
       outputTokens: response.outputTokens,
       cost: response.cost,
       latency: Date.now() - startTime,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
   private findCheapestProvider(): string {
     // Return provider with lowest cost per token
     const costs: Record<string, number> = {
-      'gemini': 0.038,    // $0.038 / 1M input tokens (Flash)
-      'deepseek': 0.10,   // $0.10 / 1M input tokens (v3.2)
-      'claude': 0.80,     // $0.80 / 1M input tokens (Haiku)
+      gemini: 0.038, // $0.038 / 1M input tokens (Flash)
+      deepseek: 0.1, // $0.10 / 1M input tokens (v3.2)
+      claude: 0.8, // $0.80 / 1M input tokens (Haiku)
     };
 
     return Object.entries(costs)
@@ -228,8 +231,7 @@ export class LLMRouter {
 
   private isOverBudget(): boolean {
     if (!this.settings.budget.monthlyLimitUSD) return false;
-    return this.settings.budget.currentMonthSpentUSD >=
-           this.settings.budget.monthlyLimitUSD;
+    return this.settings.budget.currentMonthSpentUSD >= this.settings.budget.monthlyLimitUSD;
   }
 
   private async routeToOllama(request: LLMRequest): Promise<LLMResponse> {
@@ -243,13 +245,13 @@ export class LLMRouter {
       messages: request.messages,
       model: 'mistral', // Default local model
       maxTokens: request.maxTokens,
-      stream: false
+      stream: false,
     });
 
     return {
       ...response,
       provider: 'ollama',
-      cost: 0 // Local execution = free
+      cost: 0, // Local execution = free
     };
   }
 }
@@ -275,8 +277,8 @@ export class DeepSeekProvider implements LLMProvider {
     const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${this.apiKey}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         model: config.model,
@@ -284,8 +286,8 @@ export class DeepSeekProvider implements LLMProvider {
         system: config.systemPrompt,
         max_tokens: config.maxTokens,
         temperature: config.temperature,
-        stream: config.stream
-      })
+        stream: config.stream,
+      }),
     });
 
     const data = await response.json();
@@ -293,19 +295,19 @@ export class DeepSeekProvider implements LLMProvider {
       text: data.choices[0].message.content,
       inputTokens: data.usage.prompt_tokens,
       outputTokens: data.usage.completion_tokens,
-      cost: this.calculateCost(data.usage.prompt_tokens, data.usage.completion_tokens)
+      cost: this.calculateCost(data.usage.prompt_tokens, data.usage.completion_tokens),
     };
   }
 
   private calculateCost(inputTokens: number, outputTokens: number): number {
     // DeepSeek v3.2: $0.10 / 1M input, $0.40 / 1M output
-    return (inputTokens * 0.10 + outputTokens * 0.40) / 1_000_000;
+    return (inputTokens * 0.1 + outputTokens * 0.4) / 1_000_000;
   }
 
   async validateCredentials(): Promise<boolean> {
     try {
       const response = await fetch('https://api.deepseek.com/v1/models', {
-        headers: { 'Authorization': `Bearer ${this.apiKey}` }
+        headers: { Authorization: `Bearer ${this.apiKey}` },
       });
       return response.ok;
     } catch {
@@ -347,16 +349,16 @@ export class OllamaProvider implements LLMProvider {
       body: JSON.stringify({
         model: config.model,
         messages: config.messages,
-        stream: false
-      })
+        stream: false,
+      }),
     });
 
     const data = await response.json();
     return {
       text: data.message.content,
-      inputTokens: 0,     // Ollama doesn't track token counts
+      inputTokens: 0, // Ollama doesn't track token counts
       outputTokens: 0,
-      cost: 0             // Local = free
+      cost: 0, // Local = free
     };
   }
 }
@@ -383,98 +385,109 @@ const ROLE_RECOMMENDATIONS: Record<string, RoleRecommendation> = {
   'email-compose': {
     role: 'email-compose',
     complexity: 'medium',
-    recommendedFramework: 'mini-swe',  // Simple task, fast response needed
+    recommendedFramework: 'mini-swe', // Simple task, fast response needed
     estimatedTokens: 200,
-    reasoning: 'Email composition is straightforward. Mini-SWE simplicity sufficient. DeepSeek v3.2 or Gemini Flash good fit.'
+    reasoning:
+      'Email composition is straightforward. Mini-SWE simplicity sufficient. DeepSeek v3.2 or Gemini Flash good fit.',
   },
 
   'email-classify': {
     role: 'email-classify',
     complexity: 'simple',
-    recommendedFramework: 'none',  // Direct LLM call, no framework needed
+    recommendedFramework: 'none', // Direct LLM call, no framework needed
     estimatedTokens: 150,
-    reasoning: 'Classification is pattern-matching. Direct API call fastest. Gemini Flash recommended (cheapest).'
+    reasoning:
+      'Classification is pattern-matching. Direct API call fastest. Gemini Flash recommended (cheapest).',
   },
 
   'email-respond': {
     role: 'email-respond',
     complexity: 'medium',
-    recommendedFramework: 'trae',  // Needs tool access (calendar, existing emails)
+    recommendedFramework: 'trae', // Needs tool access (calendar, existing emails)
     estimatedTokens: 300,
-    reasoning: 'Response suggestions need calendar context + email history. TRAE excellent at multi-tool orchestration.'
+    reasoning:
+      'Response suggestions need calendar context + email history. TRAE excellent at multi-tool orchestration.',
   },
 
   'calendar-prep': {
     role: 'calendar-prep',
     complexity: 'complex',
-    recommendedFramework: 'lingxi',  // Needs semantic search + synthesis
+    recommendedFramework: 'lingxi', // Needs semantic search + synthesis
     estimatedTokens: 800,
-    reasoning: 'Meeting prep requires synthesizing emails, tasks, documents. Lingxi semantic search (ChromaDB) finds relevant context efficiently.'
+    reasoning:
+      'Meeting prep requires synthesizing emails, tasks, documents. Lingxi semantic search (ChromaDB) finds relevant context efficiently.',
   },
 
   'calendar-time': {
     role: 'calendar-time',
     complexity: 'medium',
-    recommendedFramework: 'swe-agent',  // Needs history management + optimization
+    recommendedFramework: 'swe-agent', // Needs history management + optimization
     estimatedTokens: 250,
-    reasoning: 'Time blocking benefits from SWE-agent history optimization and cost caching. Can reuse calendar analysis across requests.'
+    reasoning:
+      'Time blocking benefits from SWE-agent history optimization and cost caching. Can reuse calendar analysis across requests.',
   },
 
   'task-prioritize': {
     role: 'task-prioritize',
     complexity: 'complex',
-    recommendedFramework: 'lingxi',  // Multi-agent: analyzer → planner → reviewer
+    recommendedFramework: 'lingxi', // Multi-agent: analyzer → planner → reviewer
     estimatedTokens: 600,
-    reasoning: 'Prioritization benefits from Lingxi multi-agent approach: analyze tasks → create priority plan → verify against dependencies.'
+    reasoning:
+      'Prioritization benefits from Lingxi multi-agent approach: analyze tasks → create priority plan → verify against dependencies.',
   },
 
   'task-breakdown': {
     role: 'task-breakdown',
     complexity: 'medium',
-    recommendedFramework: 'mini-swe',  // Simple linear decomposition
+    recommendedFramework: 'mini-swe', // Simple linear decomposition
     estimatedTokens: 400,
-    reasoning: 'Task breakdown is systematic. Mini-SWE simplicity ideal. No complex loops needed.'
+    reasoning: 'Task breakdown is systematic. Mini-SWE simplicity ideal. No complex loops needed.',
   },
 
   'analytics-summary': {
     role: 'analytics-summary',
     complexity: 'complex',
-    recommendedFramework: 'swe-agent',  // Needs history trimming + summarization
+    recommendedFramework: 'swe-agent', // Needs history trimming + summarization
     estimatedTokens: 1200,
-    reasoning: 'Weekly summaries have large input (7 days of data). SWE-agent history processors trim context intelligently.'
+    reasoning:
+      'Weekly summaries have large input (7 days of data). SWE-agent history processors trim context intelligently.',
   },
 
   'analytics-anomaly': {
     role: 'analytics-anomaly',
     complexity: 'medium',
-    recommendedFramework: 'trae',  // Needs tool access (database queries, 1Password audit)
+    recommendedFramework: 'trae', // Needs tool access (database queries, 1Password audit)
     estimatedTokens: 300,
-    reasoning: 'Anomaly detection needs tool orchestration: fetch metrics → compare baselines → generate alerts. TRAE handles this.'
+    reasoning:
+      'Anomaly detection needs tool orchestration: fetch metrics → compare baselines → generate alerts. TRAE handles this.',
   },
 
   'code-analyze': {
     role: 'code-analyze',
     complexity: 'complex',
-    recommendedFramework: 'swe-agent',  // Full SWE-agent for GitHub issues
+    recommendedFramework: 'swe-agent', // Full SWE-agent for GitHub issues
     estimatedTokens: 2000,
-    reasoning: 'Code analysis (GitHub issues) is SWE-agent primary use case. Full history management + error recovery critical.'
+    reasoning:
+      'Code analysis (GitHub issues) is SWE-agent primary use case. Full history management + error recovery critical.',
   },
 
   'code-implement': {
     role: 'code-implement',
     complexity: 'complex',
-    recommendedFramework: 'lingxi',  // Multi-specialist: analyzer → implementer → reviewer
+    recommendedFramework: 'lingxi', // Multi-specialist: analyzer → implementer → reviewer
     estimatedTokens: 3000,
-    reasoning: 'Implementation benefits from Lingxi multi-agent: problem decoder → solution mapper → problem solver → reviewer.'
+    reasoning:
+      'Implementation benefits from Lingxi multi-agent: problem decoder → solution mapper → problem solver → reviewer.',
   },
 
   'code-review': {
     role: 'code-review',
     complexity: 'complex',
-    recommendedFramework: 'mini-swe',  // Simpler than implementation
+    recommendedFramework: 'mini-swe', // Simpler than implementation
     estimatedTokens: 1500,
-    reasoning: 'Code review: read file → identify issues → suggest fixes. Mini-SWE transparency ideal for audit trails.'
-  }
+    reasoning:
+      'Code review: read file → identify issues → suggest fixes. Mini-SWE transparency ideal for audit trails.',
+  },
 };
 ```
 
@@ -531,7 +544,7 @@ export class FrameworkRouter {
     const agent = new MiniSWEAgent({
       userId: task.userId,
       role: task.role,
-      maxSteps: 5
+      maxSteps: 5,
     });
 
     return agent.execute(task.input);
@@ -545,7 +558,7 @@ export class FrameworkRouter {
     const agent = new TraeAgent({
       userId: task.userId,
       role: task.role,
-      tools: this.selectTools(task.role)
+      tools: this.selectTools(task.role),
     });
 
     return agent.execute(task.input);
@@ -559,7 +572,7 @@ export class FrameworkRouter {
     const workflow = new LingxiWorkflow({
       userId: task.userId,
       role: task.role,
-      agents: this.selectAgents(task.role)
+      agents: this.selectAgents(task.role),
     });
 
     return workflow.execute(task.input);
@@ -573,7 +586,7 @@ export class FrameworkRouter {
     const agent = new SWEAgentController({
       userId: task.userId,
       role: task.role,
-      historyProcessors: this.selectHistoryProcessors(task.role)
+      historyProcessors: this.selectHistoryProcessors(task.role),
     });
 
     return agent.execute(task.input);
@@ -590,7 +603,7 @@ export class FrameworkRouter {
       role: task.role,
       messages: buildMessages(task.input),
       maxTokens: recommendation.estimatedTokens,
-      userId: task.userId
+      userId: task.userId,
     });
 
     return {
@@ -598,7 +611,7 @@ export class FrameworkRouter {
       framework: 'none',
       provider: response.provider,
       cost: response.cost,
-      latency: response.latency
+      latency: response.latency,
     };
   }
 
@@ -606,7 +619,7 @@ export class FrameworkRouter {
     // Based on role, select which tools are available
     const toolsByRole: Record<string, string[]> = {
       'email-respond': ['calendar', 'email-history', 'user-preferences'],
-      'analytics-anomaly': ['database', '1password-audit', 'metrics']
+      'analytics-anomaly': ['database', '1password-audit', 'metrics'],
     };
     return toolsByRole[role] || [];
   }
@@ -615,7 +628,7 @@ export class FrameworkRouter {
     // For Lingxi multi-agent workflows, select which specialized agents
     const agentsByRole: Record<string, string[]> = {
       'task-prioritize': ['analyzer', 'planner', 'reviewer'],
-      'code-implement': ['problem-decoder', 'solution-mapper', 'problem-solver', 'reviewer']
+      'code-implement': ['problem-decoder', 'solution-mapper', 'problem-solver', 'reviewer'],
     };
     return agentsByRole[role] || [];
   }
@@ -624,7 +637,7 @@ export class FrameworkRouter {
     // For SWE-Agent, select history processors
     const processorsByRole: Record<string, string[]> = {
       'analytics-summary': ['last-n-observations', 'cache-control'],
-      'code-analyze': ['cache-control', 'file-window-tracking']
+      'code-analyze': ['cache-control', 'file-window-tracking'],
     };
     return processorsByRole[role] || [];
   }
@@ -717,6 +730,7 @@ interface RecommendationPanel {
 ### 3.2 Settings UI Components
 
 **Web (React + Tailwind):**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  Helix Intelligence Settings                        ⚙️     │
@@ -784,6 +798,7 @@ interface RecommendationPanel {
 ```
 
 **iOS (SwiftUI):**
+
 ```swift
 struct IntelligenceSettingsView: View {
   @ObservedObject var settings: UserLLMSettings
@@ -861,6 +876,7 @@ struct IntelligenceSettingsView: View {
 ```
 
 **Android (Jetpack Compose):**
+
 ```kotlin
 @Composable
 fun IntelligenceSettingsScreen(
@@ -934,11 +950,11 @@ interface CodeToolConfig {
 
   // Code-specific settings
   codeSettings: {
-    executeInContainer: boolean;        // Docker isolation
-    maxStepsPerTask: number;            // Safety limit
+    executeInContainer: boolean; // Docker isolation
+    maxStepsPerTask: number; // Safety limit
     autoCommitOn: 'success' | 'manual' | 'never';
     gitHubIntegration: boolean;
-    costPerRequest?: number;            // Premium tier pricing
+    costPerRequest?: number; // Premium tier pricing
   };
 }
 
@@ -966,6 +982,7 @@ interface CodeResponse {
 ### 4.2 Code Tool Invocation (Native Integration)
 
 **Via CLI/PowerShell:**
+
 ```bash
 # Users can invoke Claude Code or Copilot directly
 claude code --project ./my-project --task "refactor login page"
@@ -977,6 +994,7 @@ codex --analyze "src/auth.ts" --suggestions
 ```
 
 **Via Web UI:**
+
 ```
 ┌──────────────────────────────────────────────────┐
 │ Code Tool                               💎 Premium │
@@ -1041,7 +1059,7 @@ export class CodeToolRouter {
       userRepository: request.repository,
       containerExecution: config.codeSettings.executeInContainer,
       maxSteps: config.codeSettings.maxStepsPerTask,
-      gitHubIntegration: config.codeSettings.gitHubIntegration
+      gitHubIntegration: config.codeSettings.gitHubIntegration,
     });
 
     const startTime = Date.now();
@@ -1053,7 +1071,7 @@ export class CodeToolRouter {
       task: request.input,
       status: 'completed',
       cost: result.cost,
-      executionTime: Date.now() - startTime
+      executionTime: Date.now() - startTime,
     });
 
     return result;
@@ -1090,9 +1108,12 @@ export class RecommendationEngine {
           title: `${roleConfig.name} rarely used`,
           description: `You've only used this ${roleUsage.monthlyCount}x this month. Suggest downgrading to cheaper model.`,
           current: { provider: roleConfig.primaryProvider, cost: roleUsage.estimatedCost },
-          suggested: { provider: this.findCheapestModel(roleId), cost: roleUsage.estimatedCost * 0.3 },
+          suggested: {
+            provider: this.findCheapestModel(roleId),
+            cost: roleUsage.estimatedCost * 0.3,
+          },
           savings: roleUsage.estimatedCost * 0.7,
-          action: { label: 'Accept', handler: () => this.applyRecommendation(userId, roleId) }
+          action: { label: 'Accept', handler: () => this.applyRecommendation(userId, roleId) },
         });
       }
 
@@ -1106,8 +1127,11 @@ export class RecommendationEngine {
           title: `${roleConfig.name} has quality issues`,
           description: `Error rate ${(roleUsage.errorRate * 100).toFixed(0)}% suggests model is underpowered.`,
           current: { provider: roleConfig.primaryProvider, performance: 'poor' },
-          suggested: { provider: ROLE_RECOMMENDATIONS[roleId].recommendedFramework, performance: 'expected' },
-          action: { label: 'Upgrade', handler: () => this.upgradeRole(userId, roleId) }
+          suggested: {
+            provider: ROLE_RECOMMENDATIONS[roleId].recommendedFramework,
+            performance: 'expected',
+          },
+          action: { label: 'Upgrade', handler: () => this.upgradeRole(userId, roleId) },
         });
       }
     }
@@ -1122,7 +1146,7 @@ export class RecommendationEngine {
         title: `Batch ${batchableRoles.length} similar tasks`,
         description: `Batching email classifications would reduce API calls by 40% and cost by 35%.`,
         savings: 0.15,
-        action: { label: 'Learn More', handler: () => openBatchingGuide() }
+        action: { label: 'Learn More', handler: () => openBatchingGuide() },
       });
     }
 
@@ -1155,7 +1179,7 @@ export class RecommendationEngine {
       userId,
       roleId,
       newProvider,
-      estimatedSavings: roleConfig.estimatedCost * 0.7
+      estimatedSavings: roleConfig.estimatedCost * 0.7,
     });
   }
 }
@@ -1207,6 +1231,7 @@ interface IntelligenceDashboard {
 ### Phase 8A: Foundation (Weeks 13-14)
 
 **Week 13: LLM Router Infrastructure**
+
 - [ ] Multi-provider abstraction (DeepSeek, Gemini, Claude, Ollama)
 - [ ] Provider credential management (BYOK support)
 - [ ] Role configuration data model
@@ -1214,6 +1239,7 @@ interface IntelligenceDashboard {
 - [ ] Unit tests (provider implementations)
 
 **Week 14: Settings UI**
+
 - [ ] Web settings page (React + Tailwind)
 - [ ] iOS settings view (SwiftUI)
 - [ ] Android settings screen (Compose)
@@ -1223,6 +1249,7 @@ interface IntelligenceDashboard {
 ### Phase 8B: Intelligence Features (Weeks 15-17)
 
 **Week 15: Email Intelligence**
+
 - [ ] Email composition (direct LLM)
 - [ ] Email classification (direct LLM)
 - [ ] Response suggestions (TRAE routing)
@@ -1230,6 +1257,7 @@ interface IntelligenceDashboard {
 - [ ] Tests
 
 **Week 16: Calendar & Tasks**
+
 - [ ] Calendar prep (Lingxi routing)
 - [ ] Time blocking (SWE-Agent routing)
 - [ ] Task prioritization (Lingxi routing)
@@ -1237,6 +1265,7 @@ interface IntelligenceDashboard {
 - [ ] Tests
 
 **Week 17: Analytics**
+
 - [ ] Weekly summary (SWE-Agent routing)
 - [ ] Anomaly detection (TRAE routing)
 - [ ] Cost tracking dashboard
@@ -1246,6 +1275,7 @@ interface IntelligenceDashboard {
 ### Phase 8C: Multi-Framework Integration (Weeks 18-19)
 
 **Week 18: Framework Integration**
+
 - [ ] Mini-SWE-Agent integration
 - [ ] TRAE integration
 - [ ] Lingxi integration
@@ -1253,6 +1283,7 @@ interface IntelligenceDashboard {
 - [ ] Framework routing logic
 
 **Week 19: Mobile Implementation**
+
 - [ ] iOS intelligence features
 - [ ] Android intelligence features
 - [ ] Cross-platform consistency
@@ -1261,6 +1292,7 @@ interface IntelligenceDashboard {
 ### Phase 8D: Production & Code Tool (Week 20)
 
 **Week 20: Production Readiness**
+
 - [ ] Error handling & fallbacks
 - [ ] Cost alerting
 - [ ] Performance optimization
@@ -1268,6 +1300,7 @@ interface IntelligenceDashboard {
 - [ ] Production deployment
 
 **Future: Code Tool (Phase 9)**
+
 - [ ] Separate code-focused provider setup
 - [ ] CLI invocation (claude code, codex)
 - [ ] Native terminal integration
@@ -1277,22 +1310,23 @@ interface IntelligenceDashboard {
 
 ## Summary: Framework Selection Rationale
 
-| Role | Framework | Why |
-|------|-----------|-----|
-| Email Compose | Direct LLM | Simple, fast |
-| Email Classify | Direct LLM | Pattern matching, no framework overhead |
-| Email Response | TRAE | Multi-tool (calendar + history) |
-| Calendar Prep | Lingxi | Semantic search + synthesis |
-| Calendar Time | SWE-Agent | History optimization + caching |
-| Task Prioritize | Lingxi | Multi-agent analysis → plan → review |
-| Task Breakdown | Mini-SWE | Simple decomposition, transparency |
-| Analytics Summary | SWE-Agent | Large input, history trimming |
-| Analytics Anomaly | TRAE | Tool orchestration (db + 1password) |
-| Code Analyze | SWE-Agent | Primary use case (GitHub issues) |
-| Code Implement | Lingxi | Multi-specialist workflow |
-| Code Review | Mini-SWE | Simplicity, audit trails |
+| Role              | Framework  | Why                                     |
+| ----------------- | ---------- | --------------------------------------- |
+| Email Compose     | Direct LLM | Simple, fast                            |
+| Email Classify    | Direct LLM | Pattern matching, no framework overhead |
+| Email Response    | TRAE       | Multi-tool (calendar + history)         |
+| Calendar Prep     | Lingxi     | Semantic search + synthesis             |
+| Calendar Time     | SWE-Agent  | History optimization + caching          |
+| Task Prioritize   | Lingxi     | Multi-agent analysis → plan → review    |
+| Task Breakdown    | Mini-SWE   | Simple decomposition, transparency      |
+| Analytics Summary | SWE-Agent  | Large input, history trimming           |
+| Analytics Anomaly | TRAE       | Tool orchestration (db + 1password)     |
+| Code Analyze      | SWE-Agent  | Primary use case (GitHub issues)        |
+| Code Implement    | Lingxi     | Multi-specialist workflow               |
+| Code Review       | Mini-SWE   | Simplicity, audit trails                |
 
 This architecture enables:
+
 - ✅ User freedom (choose providers per role)
 - ✅ Cost optimization (cheaper models for simple tasks)
 - ✅ Framework specialization (right tool per task)

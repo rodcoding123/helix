@@ -26,6 +26,7 @@ Phase 8 adds **intelligent assistance** to Helix via LLM routing, while maintain
 ### 1.1 Router Design (Leveraging Existing Infrastructure)
 
 Helix already has (`/helix-runtime/src/agents/models-config.ts`):
+
 - Multi-provider support (Anthropic, OpenAI, Google, AWS Bedrock)
 - Model discovery and merging
 - Token counting and cost tracking
@@ -64,7 +65,7 @@ export class LLMRouter {
         latency: performance.now() - startTime,
         success: true,
         framework: request.framework || 'direct',
-        taskType: request.taskType
+        taskType: request.taskType,
       });
 
       // 5. Log to Discord (pre-execution logging per CLAUDE.md)
@@ -74,7 +75,7 @@ export class LLMRouter {
         provider: provider.id,
         cost: response.cost,
         latency: performance.now() - startTime,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       return response;
@@ -86,17 +87,14 @@ export class LLMRouter {
         provider: provider.id,
         success: false,
         error: error.message,
-        latency: performance.now() - startTime
+        latency: performance.now() - startTime,
       });
 
       throw error;
     }
   }
 
-  private async resolveProvider(
-    userId: string,
-    role: string
-  ): Promise<LLMProvider> {
+  private async resolveProvider(userId: string, role: string): Promise<LLMProvider> {
     const settings = await getUserLLMSettings(userId);
     const roleConfig = settings.roleConfigs[role];
 
@@ -142,7 +140,7 @@ export class CostTracker {
       role: data.role,
       success: data.success,
       timestamp: new Date(),
-      month: getMonth(new Date())
+      month: getMonth(new Date()),
     });
 
     // Update user's monthly total
@@ -151,14 +149,14 @@ export class CostTracker {
 
   private calculateCost(provider: string, input: number, output: number): number {
     const rates: Record<string, { input: number; output: number }> = {
-      'deepseek': { input: 0.10 / 1_000_000, output: 0.40 / 1_000_000 },
-      'gemini': { input: 0.038 / 1_000_000, output: 0.15 / 1_000_000 },
-      'claude': { input: 0.80 / 1_000_000, output: 4.00 / 1_000_000 },
-      'openai': { input: 0.50 / 1_000_000, output: 1.50 / 1_000_000 }
+      deepseek: { input: 0.1 / 1_000_000, output: 0.4 / 1_000_000 },
+      gemini: { input: 0.038 / 1_000_000, output: 0.15 / 1_000_000 },
+      claude: { input: 0.8 / 1_000_000, output: 4.0 / 1_000_000 },
+      openai: { input: 0.5 / 1_000_000, output: 1.5 / 1_000_000 },
     };
 
     const rate = rates[provider];
-    return (input * rate.input) + (output * rate.output);
+    return input * rate.input + output * rate.output;
   }
 }
 ```
@@ -178,63 +176,63 @@ export const INTELLIGENCE_ROLES = {
     description: 'AI-assisted email drafting',
     complexity: 'simple',
     taskType: 'generation',
-    estimatedTokens: 200
+    estimatedTokens: 200,
   },
   'email-classify': {
     name: 'Email Classification',
     description: 'Auto-categorize and extract metadata',
     complexity: 'simple',
     taskType: 'classification',
-    estimatedTokens: 150
+    estimatedTokens: 150,
   },
   'email-respond': {
     name: 'Email Response Suggestions',
     description: 'Smart reply suggestions with context',
     complexity: 'medium',
     taskType: 'generation',
-    estimatedTokens: 300
+    estimatedTokens: 300,
   },
   'calendar-prep': {
     name: 'Meeting Preparation',
     description: 'Synthesize context before meetings',
     complexity: 'complex',
     taskType: 'synthesis',
-    estimatedTokens: 800
+    estimatedTokens: 800,
   },
   'calendar-time': {
     name: 'Time Blocking',
     description: 'Suggest optimal meeting times',
     complexity: 'medium',
     taskType: 'reasoning',
-    estimatedTokens: 250
+    estimatedTokens: 250,
   },
   'task-prioritize': {
     name: 'Task Prioritization',
     description: 'AI-reorder tasks by impact',
     complexity: 'complex',
     taskType: 'reasoning',
-    estimatedTokens: 600
+    estimatedTokens: 600,
   },
   'task-breakdown': {
     name: 'Task Breakdown',
     description: 'Suggest subtasks for projects',
     complexity: 'medium',
     taskType: 'generation',
-    estimatedTokens: 400
+    estimatedTokens: 400,
   },
   'analytics-summary': {
     name: 'Weekly Summary',
     description: 'Generate insights from past week',
     complexity: 'complex',
     taskType: 'synthesis',
-    estimatedTokens: 1200
+    estimatedTokens: 1200,
   },
   'analytics-anomaly': {
     name: 'Anomaly Detection',
     description: 'Identify unusual patterns',
     complexity: 'medium',
     taskType: 'analysis',
-    estimatedTokens: 300
+    estimatedTokens: 300,
   },
   // Code Tool roles
   'code-analyze': {
@@ -242,22 +240,22 @@ export const INTELLIGENCE_ROLES = {
     description: 'Analyze code for issues',
     complexity: 'complex',
     taskType: 'analysis',
-    estimatedTokens: 2000
+    estimatedTokens: 2000,
   },
   'code-implement': {
     name: 'Code Implementation',
     description: 'Generate code solutions',
     complexity: 'complex',
     taskType: 'generation',
-    estimatedTokens: 3000
+    estimatedTokens: 3000,
   },
   'code-review': {
     name: 'Code Review',
     description: 'Review code for improvements',
     complexity: 'complex',
     taskType: 'analysis',
-    estimatedTokens: 1500
-  }
+    estimatedTokens: 1500,
+  },
 } as const;
 ```
 
@@ -277,9 +275,7 @@ export class FrameworkRouter {
 
     // 1. Task type → suggested framework
     const roleConfig = INTELLIGENCE_ROLES[role];
-    const suggestedFramework = this.suggestFrameworkForTaskType(
-      roleConfig.taskType
-    );
+    const suggestedFramework = this.suggestFrameworkForTaskType(roleConfig.taskType);
 
     // 2. Historical success rates → adjust recommendation
     if (analytics.successRate < 0.8) {
@@ -302,19 +298,17 @@ export class FrameworkRouter {
     return {
       framework: suggestedFramework,
       provider: 'auto-select',
-      reasoning: `Optimized for ${roleConfig.taskType}. Success: ${(analytics.successRate * 100).toFixed(0)}%`
+      reasoning: `Optimized for ${roleConfig.taskType}. Success: ${(analytics.successRate * 100).toFixed(0)}%`,
     };
   }
 
-  private suggestFrameworkForTaskType(
-    taskType: string
-  ): string {
+  private suggestFrameworkForTaskType(taskType: string): string {
     const mapping: Record<string, string> = {
-      'generation': 'direct',         // Simple LLM call
-      'classification': 'direct',     // Pattern matching
-      'synthesis': 'multi-agent',     // Lingxi multi-specialist
-      'reasoning': 'optimizer',       // SWE-Agent history optimization
-      'analysis': 'orchestrator'      // TRAE multi-tool
+      generation: 'direct', // Simple LLM call
+      classification: 'direct', // Pattern matching
+      synthesis: 'multi-agent', // Lingxi multi-specialist
+      reasoning: 'optimizer', // SWE-Agent history optimization
+      analysis: 'orchestrator', // TRAE multi-tool
     };
     return mapping[taskType] || 'direct';
   }
@@ -336,7 +330,7 @@ export class FrameworkRouter {
         best = {
           combo,
           rate,
-          avgCost: sum(requests.map(r => r.cost)) / requests.length
+          avgCost: sum(requests.map(r => r.cost)) / requests.length,
         };
       }
     }
@@ -345,7 +339,7 @@ export class FrameworkRouter {
     return {
       framework,
       provider,
-      reasoning: `Best performer: ${(best.rate * 100).toFixed(0)}% success, $${best.avgCost.toFixed(3)}/request`
+      reasoning: `Best performer: ${(best.rate * 100).toFixed(0)}% success, $${best.avgCost.toFixed(3)}/request`,
     };
   }
 
@@ -376,7 +370,7 @@ export class FrameworkRouter {
     return {
       framework,
       provider,
-      reasoning: `Cost optimized: $${cheapest.costPerSuccess.toFixed(4)}/success`
+      reasoning: `Cost optimized: $${cheapest.costPerSuccess.toFixed(4)}/success`,
     };
   }
 
@@ -399,7 +393,7 @@ export class FrameworkRouter {
     return {
       framework,
       provider,
-      reasoning: `Fastest: ${(fastest.latency / 1000).toFixed(2)}s avg`
+      reasoning: `Fastest: ${(fastest.latency / 1000).toFixed(2)}s avg`,
     };
   }
 }
@@ -432,16 +426,16 @@ export interface CodeToolMetadata {
   userId: string;
   type: 'analyze' | 'implement' | 'review' | 'debug' | 'refactor';
   language?: string;
-  category?: string;              // Inferred category (e.g., 'auth', 'api', 'ui')
+  category?: string; // Inferred category (e.g., 'auth', 'api', 'ui')
   inputTokens: number;
   outputTokens: number;
   cost: number;
   latency: number;
   success: boolean;
-  errorType?: string;             // If failed
+  errorType?: string; // If failed
   provider: string;
   model: string;
-  framework?: string;             // Which framework was used
+  framework?: string; // Which framework was used
   timestamp: Date;
   month: string;
 }
@@ -458,35 +452,44 @@ export interface CodeToolAnalytics {
     avgCostPerSuccess: number;
 
     // Breakdown by task type
-    byType: Record<'analyze' | 'implement' | 'review' | 'debug' | 'refactor', {
-      count: number;
-      successRate: number;
-      avgCost: number;
-      avgLatency: number;
-    }>;
+    byType: Record<
+      'analyze' | 'implement' | 'review' | 'debug' | 'refactor',
+      {
+        count: number;
+        successRate: number;
+        avgCost: number;
+        avgLatency: number;
+      }
+    >;
 
     // Breakdown by provider
-    byProvider: Record<string, {
-      count: number;
-      successRate: number;
-      avgCost: number;
-      avgLatency: number;
-    }>;
+    byProvider: Record<
+      string,
+      {
+        count: number;
+        successRate: number;
+        avgCost: number;
+        avgLatency: number;
+      }
+    >;
 
     // Breakdown by language
-    byLanguage: Record<string, {
-      count: number;
-      successRate: number;
-      avgCost: number;
-    }>;
+    byLanguage: Record<
+      string,
+      {
+        count: number;
+        successRate: number;
+        avgCost: number;
+      }
+    >;
 
     // KPIs
     kpis: {
-      promptEfficiency: number;         // Tokens used per successful task
-      costEfficiency: number;           // Cost per successful task
-      speedScore: number;               // Latency score (lower = better)
-      reliabilityScore: number;         // Success rate
-      overallQualityScore: number;      // Weighted KPI
+      promptEfficiency: number; // Tokens used per successful task
+      costEfficiency: number; // Cost per successful task
+      speedScore: number; // Latency score (lower = better)
+      reliabilityScore: number; // Success rate
+      overallQualityScore: number; // Weighted KPI
     };
   };
 }
@@ -499,9 +502,7 @@ Integrates as a **Gateway RPC Method** (not generic plugin) for direct access to
 ```typescript
 // helix-runtime/src/gateway/server-methods/code-tool.ts
 
-export async function registerCodeToolMethods(
-  server: GatewayServer
-): Promise<void> {
+export async function registerCodeToolMethods(server: GatewayServer): Promise<void> {
   server.registerMethod('code.execute', async (ctx, params) => {
     const { type, code, language, context, userId } = params;
 
@@ -526,7 +527,7 @@ export async function registerCodeToolMethods(
       userId,
       language,
       timestamp: new Date().toISOString(),
-      status: 'pending'
+      status: 'pending',
     });
 
     try {
@@ -537,7 +538,7 @@ export async function registerCodeToolMethods(
         code,
         language,
         context,
-        userId
+        userId,
       });
 
       // 5. Store METADATA ONLY (never code content)
@@ -556,7 +557,7 @@ export async function registerCodeToolMethods(
         model: config.primaryProvider.model,
         framework: framework.name,
         timestamp: new Date(),
-        month: getMonth(new Date())
+        month: getMonth(new Date()),
       };
 
       await db.codeToolMetadata.insert(metadata);
@@ -570,7 +571,7 @@ export async function registerCodeToolMethods(
         requestId,
         status: 'success',
         cost: response.cost,
-        latency: response.latency
+        latency: response.latency,
       });
 
       // 8. Return RESULT ONLY (never store code)
@@ -581,8 +582,8 @@ export async function registerCodeToolMethods(
           cost: response.cost,
           latency: response.latency,
           inputTokens: response.inputTokens,
-          outputTokens: response.outputTokens
-        }
+          outputTokens: response.outputTokens,
+        },
       };
     } catch (error) {
       // Store failure metadata
@@ -600,7 +601,7 @@ export async function registerCodeToolMethods(
         provider: config.primaryProvider.id,
         model: config.primaryProvider.model,
         timestamp: new Date(),
-        month: getMonth(new Date())
+        month: getMonth(new Date()),
       };
 
       await db.codeToolMetadata.insert(metadata);
@@ -609,7 +610,7 @@ export async function registerCodeToolMethods(
       await logToDiscord('#helix-alerts', {
         type: 'code_tool_error',
         requestId,
-        error: error.message
+        error: error.message,
       });
 
       throw error;
@@ -634,11 +635,11 @@ export async function registerCodeToolMethods(
         promptEfficiency: analytics.metrics.kpis.promptEfficiency,
         costPerSuccess: analytics.metrics.kpis.costEfficiency,
         speedScore: analytics.metrics.kpis.speedScore,
-        reliabilityScore: analytics.metrics.kpis.reliabilityScore
+        reliabilityScore: analytics.metrics.kpis.reliabilityScore,
       },
       byType: analytics.metrics.byType,
       byProvider: analytics.metrics.byProvider,
-      byLanguage: analytics.metrics.byLanguage
+      byLanguage: analytics.metrics.byLanguage,
     };
   });
 
@@ -656,14 +657,15 @@ export async function registerCodeToolMethods(
         id: config.primaryProvider.id,
         name: config.primaryProvider.name,
         connected: true,
-        modelsAvailable: config.availableModels.length
+        modelsAvailable: config.availableModels.length,
       },
       settings: {
         executeInContainer: config.executeInContainer,
         maxStepsPerTask: config.maxStepsPerTask,
-        autoCommitOn: config.autoCommitOn
+        autoCommitOn: config.autoCommitOn,
       },
-      privacyStatement: 'Your code is never stored. We only track: request type, tokens used, success rate, cost.'
+      privacyStatement:
+        'Your code is never stored. We only track: request type, tokens used, success rate, cost.',
     };
   });
 }
@@ -844,7 +846,7 @@ export class EmailIntelligence {
       userId: this.userId,
       messages: buildPrompt(subject, start),
       maxTokens: 300,
-      taskType: 'generation'
+      taskType: 'generation',
     });
 
     return response.content;
@@ -856,7 +858,7 @@ export class EmailIntelligence {
       userId: this.userId,
       messages: buildClassificationPrompt(email),
       maxTokens: 200,
-      taskType: 'classification'
+      taskType: 'classification',
     });
 
     return parseJSON(response.content);
@@ -872,7 +874,7 @@ export class EmailIntelligence {
       messages: buildResponsePrompt(email, this.userContext),
       maxTokens: 500,
       taskType: 'generation',
-      framework: framework.name
+      framework: framework.name,
     });
 
     return parseJSON(response.content);
@@ -898,14 +900,14 @@ export class CalendarIntelligence {
       messages: buildMeetingPrepPrompt(event, context),
       maxTokens: 1000,
       taskType: 'synthesis',
-      framework: framework.name
+      framework: framework.name,
     });
 
     return {
       talkingPoints: extractTalkingPoints(response.content),
       questions: extractQuestions(response.content),
       decisions: extractDecisions(response.content),
-      generatedAt: new Date()
+      generatedAt: new Date(),
     };
   }
 
@@ -918,7 +920,7 @@ export class CalendarIntelligence {
       messages: buildTimeBlockingPrompt(requester, duration, this.userCalendar),
       maxTokens: 400,
       taskType: 'reasoning',
-      framework: framework.name
+      framework: framework.name,
     });
 
     return parseJSON(response.content);
@@ -953,7 +955,7 @@ export class IntelligenceObserver {
     await observatory.db.insert('intelligence_requests', {
       ...data,
       timestamp: new Date(),
-      month: getMonth(new Date())
+      month: getMonth(new Date()),
     });
   }
 
@@ -969,7 +971,7 @@ export class IntelligenceObserver {
   }> {
     const requests = await observatory.db.query('intelligence_requests', {
       userId,
-      month: getMonth(new Date())
+      month: getMonth(new Date()),
     });
 
     // Analyze patterns
@@ -980,7 +982,7 @@ export class IntelligenceObserver {
     const mostEffective = Object.entries(bySetup)
       .map(([setup, reqs]) => ({
         setup,
-        successRate: reqs.filter(r => r.success).length / reqs.length
+        successRate: reqs.filter(r => r.success).length / reqs.length,
       }))
       .sort((a, b) => b.successRate - a.successRate)[0];
 
@@ -993,9 +995,9 @@ export class IntelligenceObserver {
       mostEffectiveSetup: {
         framework: mostEffective.setup.split('/')[0],
         provider: mostEffective.setup.split('/')[1],
-        successRate: mostEffective.successRate
+        successRate: mostEffective.successRate,
       },
-      recommendations: generateRecommendations(requests)
+      recommendations: generateRecommendations(requests),
     };
   }
 }
@@ -1081,6 +1083,7 @@ export class IntelligenceObserver {
 ### Phase 8A: Foundation (Weeks 13-14)
 
 **Week 13: LLM Router**
+
 - [ ] Multi-provider abstraction (reuse Helix models-config)
 - [ ] Cost tracking integration
 - [ ] Role definitions
@@ -1088,6 +1091,7 @@ export class IntelligenceObserver {
 - [ ] Unit & integration tests
 
 **Week 14: Settings UI**
+
 - [ ] Web settings page (React)
 - [ ] iOS settings (SwiftUI)
 - [ ] Android settings (Compose)
@@ -1096,18 +1100,21 @@ export class IntelligenceObserver {
 ### Phase 8B: Intelligence Features (Weeks 15-17)
 
 **Week 15: Email Intelligence**
+
 - [ ] Email composition
 - [ ] Email classification
 - [ ] Response suggestions
 - [ ] Component integration
 
 **Week 16: Calendar & Tasks**
+
 - [ ] Calendar prep
 - [ ] Time blocking
 - [ ] Task prioritization
 - [ ] Task breakdown
 
 **Week 17: Analytics**
+
 - [ ] Weekly summary
 - [ ] Anomaly detection
 - [ ] Cost dashboard
@@ -1116,12 +1123,14 @@ export class IntelligenceObserver {
 ### Phase 8C: Code Tool (Weeks 18-19)
 
 **Week 18: Code Tool Gateway Method**
+
 - [ ] Register RPC methods (code.execute, code.getAnalytics)
 - [ ] Analytics collection (metadata-only)
 - [ ] Discord logging integration
 - [ ] Fallback/error handling
 
 **Week 19: Code Tool UI + Analytics**
+
 - [ ] Web dashboard
 - [ ] Mobile interface
 - [ ] Observatory analytics
@@ -1130,6 +1139,7 @@ export class IntelligenceObserver {
 ### Phase 8D: Production (Week 20)
 
 **Week 20: Testing & Deployment**
+
 - [ ] End-to-end tests
 - [ ] Performance optimization
 - [ ] Security review (code privacy)
@@ -1152,6 +1162,7 @@ export class IntelligenceObserver {
 ## Files to Create/Modify
 
 **New:**
+
 - `web/src/services/llm-router/router.ts` (300 lines)
 - `web/src/services/llm-router/cost-tracker.ts` (100 lines)
 - `web/src/services/intelligence/framework-router.ts` (400 lines)
@@ -1161,12 +1172,14 @@ export class IntelligenceObserver {
 - `web/src/pages/Observatory/CodeToolAnalytics.tsx` (500 lines)
 
 **Modify:**
+
 - `/helix-runtime/src/entry.ts` - Initialize code tool
 - `/helix-runtime/src/gateway/server.impl.ts` - Register RPC methods
 - `/web/src/lib/gateway-rpc-client.ts` - Add code tool methods
 - `/src/helix/logging-hooks.ts` - Add intelligence logging
 
 **Database Migrations:**
+
 - `llm_costs` table
 - `code_tool_metadata` table
 - `code_tool_analytics` table
@@ -1177,24 +1190,28 @@ export class IntelligenceObserver {
 ## Success Criteria
 
 ✅ **Phase 8A (Foundation):**
+
 - LLM router handles all provider types
 - Settings UI works cross-platform
 - Cost tracking accurate
 - Zero secrets in logs
 
 ✅ **Phase 8B (Intelligence):**
+
 - Email: 90% user approval on composition
 - Calendar: Meeting prep 30 seconds before meeting
 - Tasks: 85% of suggestions accepted
 - Analytics: Generated every Sunday 6pm
 
 ✅ **Phase 8C (Code Tool):**
+
 - Code never stored (audit verification)
 - Analytics show which setups work best
 - Privacy statement visible and clear
 - Success rate tracked per provider
 
 ✅ **Phase 8D (Production):**
+
 - 99.5% uptime
 - All logging to Discord before execution
 - Hash chain integrity verified

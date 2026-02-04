@@ -32,7 +32,8 @@ export interface TrustLogContext {
 // Discord Webhook Configuration
 // ============================================================================
 
-const DISCORD_WEBHOOK_TRUST = process.env.DISCORD_WEBHOOK_TRUST || process.env.DISCORD_WEBHOOK_ALERTS;
+const DISCORD_WEBHOOK_TRUST =
+  process.env.DISCORD_WEBHOOK_TRUST || process.env.DISCORD_WEBHOOK_ALERTS;
 const DISCORD_WEBHOOK_RODRIGO_INTEGRITY = process.env.DISCORD_WEBHOOK_RODRIGO_INTEGRITY;
 
 // ============================================================================
@@ -227,7 +228,7 @@ function buildFieldsFromDetails(details: Record<string, any>): DiscordEmbedField
       name: key
         .replace(/_/g, ' ')
         .split(' ')
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
         .join(' '),
       value: formattedValue.slice(0, 1024), // Discord limit
       inline: formattedValue.length < 50,
@@ -290,7 +291,10 @@ function formatDelta(delta: number): string {
  * Send payload to Discord webhook
  * SECURITY: Throws if webhook unreachable (fail-closed)
  */
-async function sendToDiscord(webhookUrl: string | undefined, payload: DiscordPayload): Promise<string> {
+async function sendToDiscord(
+  webhookUrl: string | undefined,
+  payload: DiscordPayload
+): Promise<string> {
   if (!webhookUrl) {
     throw new Error('Discord webhook not configured for trust logging');
   }
@@ -318,7 +322,9 @@ async function sendToDiscord(webhookUrl: string | undefined, payload: DiscordPay
     return entryId;
   } catch (error) {
     // SECURITY: Fail-closed - propagate error
-    throw new Error(`Trust logging failed (Discord unreachable): ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Trust logging failed (Discord unreachable): ${error instanceof Error ? error.message : String(error)}`
+    );
   }
 }
 

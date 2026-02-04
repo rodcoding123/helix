@@ -144,6 +144,7 @@ interface HashChainEntry {
 ### Overview
 
 Comprehensive security hardening addressing four critical vulnerabilities:
+
 1. **Memory Exposure (CRITICAL)**: Secrets stored as plaintext in memory
 2. **Log Leakage (CRITICAL)**: 300+ console.error() calls without sanitization
 3. **Startup Race (HIGH)**: Secrets loaded mid-initialization, not first
@@ -158,10 +159,12 @@ Comprehensive security hardening addressing four critical vulnerabilities:
 **Solution**: AES-256-GCM encryption with machine-specific key derivation
 
 **Files**:
+
 - `src/lib/secrets-cache-encrypted.ts` - Encrypted in-memory cache
 - `src/lib/secrets-cache-encrypted.test.ts` - 34 comprehensive tests
 
 **Key Features**:
+
 - Machine entropy: CPU count + hostname + platform + Node version
 - PBKDF2 key derivation with 600,000 iterations (OWASP-compliant)
 - 7-day key rotation with 24-hour grace period
@@ -170,10 +173,11 @@ Comprehensive security hardening addressing four critical vulnerabilities:
 - Fail-closed: throws on initialization failure
 
 **Usage**:
+
 ```typescript
 const cache = new EncryptedSecretsCache();
 await cache.initialize();
-cache.set('api_key', 'secret_value');  // Encrypted in memory
+cache.set('api_key', 'secret_value'); // Encrypted in memory
 const decrypted = cache.get('api_key'); // Decrypted on retrieval
 ```
 
@@ -186,13 +190,15 @@ const decrypted = cache.get('api_key'); // Decrypted on retrieval
 **Solution**: Global log sanitization with pattern-based redaction
 
 **Files**:
+
 - `src/lib/log-sanitizer.ts` - Central redaction engine (25+ patterns)
 - `src/lib/log-sanitizer.test.ts` - 46 comprehensive pattern tests
 - `src/lib/safe-console.ts` - Global console wrapper
 - `src/lib/safe-console.test.ts` - 15 functionality tests
 
 **Supported Patterns**:
-- Stripe keys (sk_live_, sk_test_, pk_live_, pk_test_, rk_live_, rk_test_)
+
+- Stripe keys (sk*live*, sk*test*, pk*live*, pk*test*, rk*live*, rk*test*)
 - Discord webhooks
 - JWT tokens (eyJ... format)
 - Bearer tokens and Authorization headers
@@ -205,16 +211,17 @@ const decrypted = cache.get('api_key'); // Decrypted on retrieval
 **Hash-based Redaction**: `[REDACTED:CATEGORY_HASH]` for audit tracking
 
 **Console Integration**:
+
 ```typescript
 // Import early in startup
 import './lib/safe-console.js';
 
 // All logs now automatically sanitized
-console.log('API key: sk_live_abc123...');  // → "API key: [REDACTED:STRIPE_SK_LIVE_xxxxx]"
-console.error(error);                        // → Error message sanitized, stack trace sanitized
+console.log('API key: sk_live_abc123...'); // → "API key: [REDACTED:STRIPE_SK_LIVE_xxxxx]"
+console.error(error); // → Error message sanitized, stack trace sanitized
 
 // Access original console if needed
-console.raw.log('unsanitized');              // Bypasses sanitization (debug only)
+console.raw.log('unsanitized'); // Bypasses sanitization (debug only)
 ```
 
 **Performance**: < 1ms per log line (tested with real secrets)
@@ -226,15 +233,18 @@ console.raw.log('unsanitized');              // Bypasses sanitization (debug onl
 **Solution**: Preload all secrets BEFORE any other initialization
 
 **Files Modified**:
+
 - `src/helix/index.ts` - preloadSecrets() function
 - `helix-runtime/src/entry.ts` - Call preloadSecrets() first
 
 **Initialization Order**:
+
 1. **FIRST**: preloadSecrets() - Load & encrypt all secrets
 2. Then: initializeHelix() - All other initialization
 3. Result: All logging has secrets available before first log
 
 **Implementation**:
+
 ```typescript
 export async function preloadSecrets(): Promise<void> {
   // 1. Initialize encrypted cache
@@ -266,33 +276,37 @@ export async function preloadSecrets(): Promise<void> {
 **Solution**: Virtual environment proxy with allowlist and pattern blocking
 
 **Files**:
+
 - `helix-runtime/src/plugins/environment-proxy.ts` - Proxy implementation
 - `helix-runtime/src/plugins/environment-proxy.test.ts` - 50+ test cases
 - `helix-runtime/src/plugins/loader.ts` - Integrated into plugin loading
 
 **Allowed Variables**:
+
 - Standard: NODE_ENV, PATH, HOME, USER, LANG, TZ, SHELL, etc.
 - Platform-specific: USERPROFILE (Windows), USERNAME (Windows)
 - Version info: NODE_VERSION, NPM_VERSION
 
 **Blocked Patterns** (16 categories):
-- DISCORD_WEBHOOK_*
-- SUPABASE_*
-- STRIPE_*
-- DEEPSEEK_*, GEMINI_*, OPENAI_*, ANTHROPIC_*
-- *API_KEY
-- *SECRET, *TOKEN, *PASSWORD, *CREDENTIAL, *AUTH
-- AWS_*, GITHUB_*, GITLAB_*
-- *PRIVATE_KEY
+
+- DISCORD*WEBHOOK*\*
+- SUPABASE\_\*
+- STRIPE\_\*
+- DEEPSEEK*\*, GEMINI*_, OPENAI\__, ANTHROPIC\_\*
+- \*API_KEY
+- *SECRET, *TOKEN, *PASSWORD, *CREDENTIAL, \*AUTH
+- AWS*\*, GITHUB*_, GITLAB\__
+- \*PRIVATE_KEY
 
 **Usage in Plugins**:
+
 ```typescript
 // OLD (blocked): Process env access
-const key = process.env.STRIPE_SECRET_KEY;  // Returns undefined (blocked)
+const key = process.env.STRIPE_SECRET_KEY; // Returns undefined (blocked)
 
 // NEW (allowed): Use api.env
-const key = api.env.STRIPE_SECRET_KEY;      // Returns undefined (blocked, logged)
-const nodeEnv = api.env.NODE_ENV;           // Returns value (allowed)
+const key = api.env.STRIPE_SECRET_KEY; // Returns undefined (blocked, logged)
+const nodeEnv = api.env.NODE_ENV; // Returns value (allowed)
 ```
 
 **Logging**: All blocked access attempts logged to hash chain for audit
@@ -302,11 +316,12 @@ const nodeEnv = api.env.NODE_ENV;           // Returns value (allowed)
 #### 1B.1 - Hash Chain Integration
 
 **New Types**:
+
 ```typescript
 interface SecretOperationEntry {
   operation: 'preload' | 'access' | 'rotation' | 'plugin_attempt' | 'failure';
-  secretName?: string;      // Sanitized name, never value
-  pluginId?: string;        // If plugin-related
+  secretName?: string; // Sanitized name, never value
+  pluginId?: string; // If plugin-related
   source: '1password' | 'env' | 'cache';
   success: boolean;
   timestamp: string;
@@ -316,12 +331,14 @@ interface SecretOperationEntry {
 ```
 
 **Logging Integration**:
+
 - `loadSecret()` logs each access with duration
 - `preloadSecrets()` logs preload event with count
 - Environment proxy logs all blocked attempts
 - Key rotation logs to hash chain
 
 **Usage**:
+
 ```typescript
 await logSecretOperation({
   operation: 'access',
@@ -340,14 +357,17 @@ await logSecretOperation({
 **Solution**: Scheduled audit with anomaly detection
 
 **Files**:
+
 - `src/lib/1password-audit.ts` - Audit scheduler and detection
 
 **Detection Rules**:
+
 1. **Excessive Access**: > 100 accesses/day
 2. **Burst Pattern**: 10+ accesses in < 1 minute
 3. **Off-Hours Access**: Access between 3am-5am
 
 **Scheduler**:
+
 ```typescript
 // Start hourly audit checks
 const intervalId = await startOnePasswordAuditScheduler();
@@ -358,11 +378,13 @@ const intervalId = await startOnePasswordAuditScheduler();
 ```
 
 **Alert Examples**:
+
 - "Stripe Key accessed 150 times in 24 hours (> 100)"
 - "Discord Webhook accessed 10 times in 45 seconds (burst)"
 - "Database Credentials accessed at 3:47 AM (off-hours)"
 
 **Integration**:
+
 - Integrated into initializeHelix()
 - Runs every hour by default
 - Graceful failure (doesn't block system startup)
@@ -371,6 +393,7 @@ const intervalId = await startOnePasswordAuditScheduler();
 ### Test Results
 
 **All Tests Passing**: 1055 tests ✅
+
 - 34 EncryptedSecretsCache tests
 - 46 LogSanitizer tests
 - 15 SafeConsole tests

@@ -186,9 +186,7 @@ export class FeatureToggles {
    */
   async getAllToggles(): Promise<FeatureToggle[]> {
     try {
-      const { data, error } = await this.supabase
-        .from('feature_toggles')
-        .select('*');
+      const { data, error } = await this.supabase.from('feature_toggles').select('*');
 
       if (error) throw error;
 

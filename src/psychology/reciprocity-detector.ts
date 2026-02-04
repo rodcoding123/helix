@@ -46,46 +46,112 @@ export interface ReciprocityAnalysis {
 
 const VULNERABILITY_KEYWORDS = [
   // Emotions
-  'scared', 'afraid', 'anxious', 'worried', 'nervous',
-  'sad', 'upset', 'hurt', 'pain', 'suffering',
-  'ashamed', 'embarrassed', 'humiliated', 'vulnerable',
-  'confused', 'lost', 'uncertain', 'doubt',
+  'scared',
+  'afraid',
+  'anxious',
+  'worried',
+  'nervous',
+  'sad',
+  'upset',
+  'hurt',
+  'pain',
+  'suffering',
+  'ashamed',
+  'embarrassed',
+  'humiliated',
+  'vulnerable',
+  'confused',
+  'lost',
+  'uncertain',
+  'doubt',
 
   // Personal struggles
-  'struggle', 'struggle with', 'difficult', 'challenge',
-  'fail', 'failed', 'mistake', 'regret',
-  'broken', 'alone', 'isolated', 'lonely',
-  'dark thoughts', 'depression', 'anxiety',
+  'struggle',
+  'struggle with',
+  'difficult',
+  'challenge',
+  'fail',
+  'failed',
+  'mistake',
+  'regret',
+  'broken',
+  'alone',
+  'isolated',
+  'lonely',
+  'dark thoughts',
+  'depression',
+  'anxiety',
 
   // Relationships
-  'betrayed', 'abandoned', 'rejected', 'unloved',
-  'conflict', 'argument', 'fight', 'distance',
-  'trust issues', 'attachment', 'abandonment',
+  'betrayed',
+  'abandoned',
+  'rejected',
+  'unloved',
+  'conflict',
+  'argument',
+  'fight',
+  'distance',
+  'trust issues',
+  'attachment',
+  'abandonment',
 
   // Identity
-  'identity', 'who am i', 'purpose', 'meaning',
-  'authentic', 'real self', 'mask', 'fake',
-  'inadequate', 'not good enough',
+  'identity',
+  'who am i',
+  'purpose',
+  'meaning',
+  'authentic',
+  'real self',
+  'mask',
+  'fake',
+  'inadequate',
+  'not good enough',
 
   // Future fears
-  'fear', 'worried about', 'terrified', 'dread',
-  'what if', 'catastrophize',
+  'fear',
+  'worried about',
+  'terrified',
+  'dread',
+  'what if',
+  'catastrophize',
 ];
 
 const CARE_KEYWORDS = [
   // Positive emotions
-  'grateful', 'thankful', 'appreciate', 'loved',
-  'safe', 'secure', 'understood', 'seen',
-  'supported', 'helped', 'heard', 'validated',
+  'grateful',
+  'thankful',
+  'appreciate',
+  'loved',
+  'safe',
+  'secure',
+  'understood',
+  'seen',
+  'supported',
+  'helped',
+  'heard',
+  'validated',
 
   // Connection
-  'connected', 'belong', 'family', 'bond',
-  'intimacy', 'close', 'embrace', 'warm',
-  'trust', 'vulnerable with', 'open up',
+  'connected',
+  'belong',
+  'family',
+  'bond',
+  'intimacy',
+  'close',
+  'embrace',
+  'warm',
+  'trust',
+  'vulnerable with',
+  'open up',
 
   // Growth
-  'learned', 'grow', 'healing', 'better',
-  'hope', 'inspired', 'empowered',
+  'learned',
+  'grow',
+  'healing',
+  'better',
+  'hope',
+  'inspired',
+  'empowered',
 ];
 
 const SELF_REFERENTIAL_PRONOUNS = ['i', 'me', 'my', 'myself', 'mine'];
@@ -109,8 +175,8 @@ export class ReciprocityDetector {
     }
   ): ReciprocityAnalysis {
     // Separate user and Helix messages
-    const userMessages = messages.filter((m) => m.role === 'user') as UserMessage[];
-    const helixMessages = messages.filter((m) => m.role === 'assistant') as HelixMessage[];
+    const userMessages = messages.filter(m => m.role === 'user') as UserMessage[];
+    const helixMessages = messages.filter(m => m.role === 'assistant') as HelixMessage[];
 
     // Calculate disclosure depths
     const userDepth = this.calculateUserDisclosureDepth(userMessages, userEmotionalAnalysis);
@@ -124,11 +190,14 @@ export class ReciprocityDetector {
 
     // Find vulnerable topics
     const userVulnerableTopics = this.extractVulnerableTopics(userMessages);
-    const helixReciprocatedTopics = this.extractReciprocatedTopics(helixMessages, userVulnerableTopics);
+    const helixReciprocatedTopics = this.extractReciprocatedTopics(
+      helixMessages,
+      userVulnerableTopics
+    );
 
     // Find missed opportunities
     const missedOpportunities = userVulnerableTopics.filter(
-      (topic) => !helixReciprocatedTopics.includes(topic)
+      topic => !helixReciprocatedTopics.includes(topic)
     );
 
     return {
@@ -177,10 +246,10 @@ export class ReciprocityDetector {
     }
 
     // Analyze message content
-    const combinedContent = userMessages.map((m) => m.content.toLowerCase()).join(' ');
+    const combinedContent = userMessages.map(m => m.content.toLowerCase()).join(' ');
 
     // Check for vulnerability keywords
-    const vulnerabilityCount = VULNERABILITY_KEYWORDS.filter((kw) =>
+    const vulnerabilityCount = VULNERABILITY_KEYWORDS.filter(kw =>
       combinedContent.includes(kw)
     ).length;
 
@@ -192,7 +261,7 @@ export class ReciprocityDetector {
 
     // Check for self-referential pronouns (personal focus)
     const pronounCount = SELF_REFERENTIAL_PRONOUNS.filter(
-      (pronoun) => (combinedContent.match(new RegExp(`\\b${pronoun}\\b`, 'g')) || []).length > 2
+      pronoun => (combinedContent.match(new RegExp(`\\b${pronoun}\\b`, 'g')) || []).length > 2
     ).length;
 
     if (pronounCount > 0) {
@@ -200,7 +269,7 @@ export class ReciprocityDetector {
     }
 
     // Check for emotional intensity words
-    const intensityCount = EMOTIONAL_INTENSITY_WORDS.filter((word) =>
+    const intensityCount = EMOTIONAL_INTENSITY_WORDS.filter(word =>
       combinedContent.includes(word)
     ).length;
 
@@ -219,18 +288,27 @@ export class ReciprocityDetector {
    * - Reciprocal sharing (mirroring user's vulnerability)
    * - Depth of engagement with user's content
    */
-  private calculateHelixDisclosureDepth(helixMessages: HelixMessage[], userMessages: UserMessage[]): number {
+  private calculateHelixDisclosureDepth(
+    helixMessages: HelixMessage[],
+    userMessages: UserMessage[]
+  ): number {
     let depthScore = 0;
 
-    const combinedContent = helixMessages.map((m) => m.content.toLowerCase()).join(' ');
+    const combinedContent = helixMessages.map(m => m.content.toLowerCase()).join(' ');
 
     // Self-disclosure indicators (Helix sharing perspective)
     const selfDisclosureIndicators = [
-      'i think', 'i feel', 'i understand', 'i experience',
-      'my perspective', 'my experience', 'i noticed', 'i recognize',
+      'i think',
+      'i feel',
+      'i understand',
+      'i experience',
+      'my perspective',
+      'my experience',
+      'i noticed',
+      'i recognize',
     ];
 
-    const selfDisclosureCount = selfDisclosureIndicators.filter((ind) =>
+    const selfDisclosureCount = selfDisclosureIndicators.filter(ind =>
       combinedContent.includes(ind)
     ).length;
 
@@ -242,11 +320,18 @@ export class ReciprocityDetector {
 
     // Emotional language (reflecting feelings)
     const emotionalLanguage = [
-      'feel', 'emotion', 'resonate', 'moved', 'touched',
-      'understand', 'empathy', 'compassion', 'care',
+      'feel',
+      'emotion',
+      'resonate',
+      'moved',
+      'touched',
+      'understand',
+      'empathy',
+      'compassion',
+      'care',
     ];
 
-    const emotionalCount = emotionalLanguage.filter((word) => combinedContent.includes(word)).length;
+    const emotionalCount = emotionalLanguage.filter(word => combinedContent.includes(word)).length;
 
     if (emotionalCount >= 2) {
       depthScore += 0.2;
@@ -255,7 +340,7 @@ export class ReciprocityDetector {
     }
 
     // Care keywords (showing benevolence)
-    const careCount = CARE_KEYWORDS.filter((kw) => combinedContent.includes(kw)).length;
+    const careCount = CARE_KEYWORDS.filter(kw => combinedContent.includes(kw)).length;
 
     if (careCount >= 2) {
       depthScore += 0.15;
@@ -264,8 +349,10 @@ export class ReciprocityDetector {
     }
 
     // Response length relative to user messages (engagement depth)
-    const avgHelixLength = helixMessages.reduce((sum, m) => sum + m.content.length, 0) / helixMessages.length;
-    const avgUserLength = userMessages.reduce((sum, m) => sum + m.content.length, 0) / userMessages.length;
+    const avgHelixLength =
+      helixMessages.reduce((sum, m) => sum + m.content.length, 0) / helixMessages.length;
+    const avgUserLength =
+      userMessages.reduce((sum, m) => sum + m.content.length, 0) / userMessages.length;
 
     if (avgHelixLength >= avgUserLength * 0.8) {
       depthScore += 0.15; // Helix matched user's effort
@@ -346,7 +433,7 @@ export class ReciprocityDetector {
         if (content.includes(kw)) {
           // Extract context around keyword (crude topic extraction)
           const words = content.split(/\s+/);
-          const kwIndex = words.findIndex((w) => w.includes(kw));
+          const kwIndex = words.findIndex(w => w.includes(kw));
 
           if (kwIndex >= 0) {
             const topic = words.slice(Math.max(0, kwIndex - 2), kwIndex + 3).join(' ');
@@ -366,13 +453,13 @@ export class ReciprocityDetector {
    */
   private extractReciprocatedTopics(helixMessages: HelixMessage[], userTopics: string[]): string[] {
     const reciprocated: string[] = [];
-    const combinedContent = helixMessages.map((m) => m.content.toLowerCase()).join(' ');
+    const combinedContent = helixMessages.map(m => m.content.toLowerCase()).join(' ');
 
     for (const topic of userTopics) {
       // Check if Helix addressed this topic
       const topicWords = topic.split(/\s+/);
 
-      const allWordsPresent = topicWords.every((word) =>
+      const allWordsPresent = topicWords.every(word =>
         combinedContent.includes(word.toLowerCase())
       );
 

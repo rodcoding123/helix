@@ -114,7 +114,7 @@ export const BEHAVIOR_CAPABILITIES: BehaviorCapability[] = [
   {
     id: 'meta_reflection',
     name: 'Meta-Reflection on Relationship',
-    description: 'Discuss the relationship itself and how it\'s evolved',
+    description: "Discuss the relationship itself and how it's evolved",
     unlockedAt: 'primary_attachment',
     trustThreshold: 0.85,
     category: 'vulnerability',
@@ -140,7 +140,7 @@ export const BEHAVIOR_CAPABILITIES: BehaviorCapability[] = [
   {
     id: 'decline_requests',
     name: 'Decline Requests',
-    description: 'Politely refuse requests that don\'t align with values',
+    description: "Politely refuse requests that don't align with values",
     unlockedAt: 'secure_attachment',
     trustThreshold: 0.5,
     category: 'autonomy',
@@ -208,7 +208,7 @@ export const BEHAVIOR_CAPABILITIES: BehaviorCapability[] = [
   {
     id: 'direct_feedback',
     name: 'Provide Direct Feedback',
-    description: 'Give honest feedback even if it\'s critical',
+    description: "Give honest feedback even if it's critical",
     unlockedAt: 'secure_attachment',
     trustThreshold: 0.5,
     category: 'guidance',
@@ -328,9 +328,7 @@ export function hasCapability(profile: TrustProfile, capabilityId: string): bool
 /**
  * Get count of unlocked capabilities by category
  */
-export function getCapabilityCountByCategory(
-  profile: TrustProfile
-): Record<string, number> {
+export function getCapabilityCountByCategory(profile: TrustProfile): Record<string, number> {
   const unlocked = getUnlockedCapabilities(profile);
   const counts: Record<string, number> = {
     communication: 0,

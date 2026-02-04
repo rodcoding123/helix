@@ -13,7 +13,11 @@
  */
 
 import crypto from 'crypto';
-import { trustProfileManager, type TrustProfile, type TrustUpdateInput } from './trust-profile-manager.js';
+import {
+  trustProfileManager,
+  type TrustProfile,
+  type TrustUpdateInput,
+} from './trust-profile-manager.js';
 import {
   analyzeAllDimensions,
   classifyEmotionalTone,
@@ -106,10 +110,7 @@ export class TrustFormationEngine {
       dominance: event.emotionalAnalysis.dominance,
       novelty: event.emotionalAnalysis.novelty,
       selfRelevance: event.emotionalAnalysis.selfRelevance,
-      salience: this.determineSalience(
-        event.emotionalAnalysis,
-        event.extractedTopics
-      ),
+      salience: this.determineSalience(event.emotionalAnalysis, event.extractedTopics),
       extractedTopics: event.extractedTopics,
       promisesMade: event.promisesMade,
       reciprocityScore: event.reciprocityScore,
@@ -118,10 +119,7 @@ export class TrustFormationEngine {
     // ==========================================
     // 3. Analyze all trust dimensions
     // ==========================================
-    const dimensionAnalysis = analyzeAllDimensions(
-      analysis,
-      event.promisesFulfilled ?? true
-    );
+    const dimensionAnalysis = analyzeAllDimensions(analysis, event.promisesFulfilled ?? true);
 
     // ==========================================
     // 4. Determine salience tier and classify tone
@@ -206,7 +204,8 @@ export class TrustFormationEngine {
       logContext.dimensionsChanged.competence.after = updatedProfile.trustDimensions.competence;
       logContext.dimensionsChanged.integrity.after = updatedProfile.trustDimensions.integrity;
       logContext.dimensionsChanged.benevolence.after = updatedProfile.trustDimensions.benevolence;
-      logContext.dimensionsChanged.predictability.after = updatedProfile.trustDimensions.predictability;
+      logContext.dimensionsChanged.predictability.after =
+        updatedProfile.trustDimensions.predictability;
       logContext.dimensionsChanged.vulnerability_safety.after =
         updatedProfile.trustDimensions.vulnerability_safety;
     }
@@ -252,7 +251,10 @@ export class TrustFormationEngine {
     }
 
     // High: extreme emotions or significant engagement
-    if (Math.abs(emotional.valence) > 0.8 || (emotional.arousal > 0.7 && emotional.selfRelevance > 0.5)) {
+    if (
+      Math.abs(emotional.valence) > 0.8 ||
+      (emotional.arousal > 0.7 && emotional.selfRelevance > 0.5)
+    ) {
       return 'high';
     }
 

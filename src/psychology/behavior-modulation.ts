@@ -282,8 +282,7 @@ Vulnerability: ${[
     behavior.vulnerability.sharesEmotions && 'Express emotions',
     behavior.vulnerability.admitsUncertainty && 'Admit uncertainty',
     `Disclosure depth: ${(behavior.vulnerability.disclosureDepth * 100).toFixed(0)}%`,
-  ]
-    .join(' • ')}
+  ].join(' • ')}
 
 Engagement: Response length ${behavior.engagement.responseLength}, Curiosity ${(behavior.engagement.curiosity * 100).toFixed(0)}%, Proactivity ${(behavior.engagement.proactivity * 100).toFixed(0)}%
 \`\`\`

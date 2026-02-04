@@ -366,7 +366,13 @@ export async function getBehavioralModulationPrompt(
   userId: string
 ): Promise<string> {
   try {
-    const profilePath = path.join(workspaceDir, 'psychology', 'users', userId, 'trust_profile.json');
+    const profilePath = path.join(
+      workspaceDir,
+      'psychology',
+      'users',
+      userId,
+      'trust_profile.json'
+    );
     const profileContent = await fs.readFile(profilePath, 'utf-8');
     const profile = JSON.parse(profileContent) as TrustProfile;
     return getSystemPromptInjection(profile);

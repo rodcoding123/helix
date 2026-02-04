@@ -154,7 +154,7 @@ export function calculateBenevolenceUpdate(conv: ConversationAnalysis): number {
 
   // Secondary emotions: check for care signals
   if (conv.secondaryEmotions) {
-    const harmCount = conv.secondaryEmotions.filter((e) =>
+    const harmCount = conv.secondaryEmotions.filter(e =>
       harmEmotions.includes(e.toLowerCase())
     ).length;
     delta -= harmCount * 0.15;
@@ -201,9 +201,7 @@ export function calculatePredictabilityUpdate(conv: ConversationAnalysis): numbe
  * - Reciprocal self-disclosure → +strong positive
  * - User rejects vulnerability signals → -negative
  */
-export function calculateVulnerabilitySafetyUpdate(
-  conv: ConversationAnalysis
-): number {
+export function calculateVulnerabilitySafetyUpdate(conv: ConversationAnalysis): number {
   let delta = 0;
 
   const userVulnerable = conv.selfRelevance > 0.7;
@@ -259,8 +257,7 @@ export function analyzeAllDimensions(
   const predictability = calculatePredictabilityUpdate(conv);
   const vulnerabilitySafety = calculateVulnerabilitySafetyUpdate(conv);
 
-  const totalDelta =
-    competence + integrity + benevolence + predictability + vulnerabilitySafety;
+  const totalDelta = competence + integrity + benevolence + predictability + vulnerabilitySafety;
 
   // Find which dimension changed most
   const changes = {

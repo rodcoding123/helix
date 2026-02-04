@@ -61,28 +61,28 @@ export interface FeatureToggle {
 // Model cost configuration (USD)
 const MODEL_COSTS = {
   deepseek: {
-    input: 0.0027,    // $0.0027 per 1K input tokens
-    output: 0.0108,   // $0.0108 per 1K output tokens
+    input: 0.0027, // $0.0027 per 1K input tokens
+    output: 0.0108, // $0.0108 per 1K output tokens
   },
   gemini_flash: {
-    input: 0.000050,  // $0.05 per 1M input tokens = $0.00005 per 1K
-    output: 0.00015,  // $0.15 per 1M output tokens = $0.00015 per 1K
+    input: 0.00005, // $0.05 per 1M input tokens = $0.00005 per 1K
+    output: 0.00015, // $0.15 per 1M output tokens = $0.00015 per 1K
   },
   deepgram: {
-    input: 0.0059,    // Per minute of audio
+    input: 0.0059, // Per minute of audio
     output: 0,
   },
   edge_tts: {
-    input: 0,         // Free
+    input: 0, // Free
     output: 0,
   },
   openai: {
-    input: 0.003,     // Fallback cost estimate
+    input: 0.003, // Fallback cost estimate
     output: 0.006,
   },
   elevenlabs: {
     input: 0,
-    output: 0.03,     // Per character
+    output: 0.03, // Per character
   },
 } as const;
 
@@ -326,9 +326,9 @@ export class AIOperationRouter {
 
         throw new Error(
           `Budget limit exceeded for user ${userId}. ` +
-          `Current: $${budget.current_spend_today.toFixed(2)}, ` +
-          `Estimated: $${estimatedCost.toFixed(2)}, ` +
-          `Limit: $${budget.daily_limit_usd.toFixed(2)}`
+            `Current: $${budget.current_spend_today.toFixed(2)}, ` +
+            `Estimated: $${estimatedCost.toFixed(2)}, ` +
+            `Limit: $${budget.daily_limit_usd.toFixed(2)}`
         );
       }
 
@@ -339,7 +339,10 @@ export class AIOperationRouter {
           type: 'budget_warning',
           userId,
           operation: operationId,
-          spendLevel: ((budget.current_spend_today + estimatedCost) / budget.daily_limit_usd * 100).toFixed(1),
+          spendLevel: (
+            ((budget.current_spend_today + estimatedCost) / budget.daily_limit_usd) *
+            100
+          ).toFixed(1),
         });
       }
     } catch (error) {
@@ -373,8 +376,8 @@ export class AIOperationRouter {
         return {
           id: '',
           user_id: userId,
-          daily_limit_usd: 50.00,
-          warning_threshold_usd: 25.00,
+          daily_limit_usd: 50.0,
+          warning_threshold_usd: 25.0,
           current_spend_today: 0,
           operations_today: 0,
           last_checked: new Date().toISOString(),

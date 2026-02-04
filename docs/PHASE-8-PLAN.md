@@ -1,97 +1,81 @@
-# Phase 8: LLM-First Intelligence Layer
+# Phase 8: LLM-First Intelligence Layer (Integrated into AI Operations Control Plane)
 
-**Date:** February 3, 2026
-**Status:** Design Phase
-**Scope:** Claude API Integration for Email, Calendar, Tasks, Analytics
-**Total Duration:** 8 weeks (Weeks 13-20)
+**Date:** February 4, 2026
+**Status:** Implementation Ready
+**Duration:** 8 weeks (Weeks 13-20)
+**Scope:** Email, Calendar, Tasks, Analytics Intelligence
+**Architecture:** Centralized via AI Operations Router (Phase 0.5 foundation)
+**Integration:** All operations routed through unified control plane with cost tracking + approval gates
 
 ---
 
 ## Executive Summary
 
-Phase 7 completed all infrastructure (testing, performance, sync, offline, deployment). Phase 8 transforms Helix from a data aggregation platform into an **intelligent assistant** using Claude LLMs.
+Phase 8 transforms Helix from a passive data organizer into an **intelligent assistant** using LLMs for:
 
-**Core Question: Why LLMs Instead of Traditional ML?**
+1. **Email Intelligence** (Weeks 13-14)
+   - Smart composition: AI drafts emails maintaining user's voice
+   - Intelligent classification: Auto-categorize, extract metadata, suggest actions
+   - Response suggestions: Smart replies based on calendar/context
 
-Traditional Machine Learning requires:
-- Feature engineering (extracting relevant data patterns manually)
-- Large labeled datasets (thousands of examples per task)
-- Separate models per task (email classification ≠ task prioritization)
-- Retraining when patterns change (new email types, user preferences)
-- Custom deployment infrastructure
+2. **Calendar Intelligence** (Week 15)
+   - Meeting prep: Synthesize relevant emails, tasks, documents 30 min before
+   - Time blocking: Suggest optimal meeting times
 
-Claude LLMs provide:
-- **Zero-shot capability**: Works on day-1 without training data
-- **Semantic understanding**: Understands meaning, context, intent (not just patterns)
-- **Multi-task learning**: Single model handles email, calendar, tasks, analysis
-- **Adaptive**: Updates monthly via foundation model improvements
-- **Transparent reasoning**: Can explain decisions via chain-of-thought
-- **Cost-effective**: Pay-per-token (no expensive GPU infrastructure)
+3. **Task Intelligence** (Week 16)
+   - Prioritization: AI reorders tasks by business impact + dependencies
+   - Breakdown: Suggest subtasks for large projects
+
+4. **Analytics & Insights** (Week 17)
+   - Weekly summaries: Auto-generated insights every Sunday
+   - Anomaly detection: Flag unusual patterns in work
+
+5. **Mobile + Production** (Weeks 18-20)
+
+---
+
+## Why LLMs Instead of Traditional ML?
+
+**Problem with ML:** Needs training data, separate models per task, retraining for changes
+
+**LLM Solution:**
+
+- **Zero-shot:** Works day 1 without training (ML needs thousands of examples)
+- **Semantic understanding:** Grasps intent and context (ML only patterns)
+- **Multi-task:** Single model handles email + calendar + tasks (ML needs 3+ models)
+- **Adaptive:** Updates monthly via foundation model (ML requires retraining)
+- **Cost-effective:** $0.35/user/month vs GPU infrastructure
 
 **Example:**
-- ML approach: Train SVM on 5,000 labeled emails → Works only for your email style
-- LLM approach: Send email to Claude → "This is a meeting request from your manager. Reply: accept the meeting."
+
+```
+ML Approach:
+  Train SVM on 5,000 labeled emails
+  → Works only for user's email style
+  → New email type? Retrain
+
+LLM Approach:
+  Send email to Claude/DeepSeek
+  → Understands intent, tone, urgency
+  → Works for any email type, immediately
+  → Better + cheaper + no retraining
+```
 
 ---
 
-## Why LLMs Win for Helix
-
-### 1. Semantic Understanding (Not Just Pattern Matching)
-
-**Email Classification:**
-```
-ML: "Email contains 'meeting' + 'calendar' + 'Thursday' = 74% probability meeting request"
-LLM: "Subject: 'Coffee Thursday?' + Body mentions time/location + Signed by colleague = Meeting request with coffee context. Suggest: accept + propose specific time."
-```
-
-The LLM understands intent, tone, urgency. ML only sees patterns.
-
-### 2. Multimodal Intelligence Across Domains
-
-```
-Email: "Can we discuss Q1 roadmap?"
-Calendar: Already has "Q1 Planning" meeting at 2pm Friday
-Task: Created "Q1 Roadmap" task last week
-LLM: "Suggest reply: 'I have Q1 Planning Friday 2pm. Can we sync then?' + Suggest adding this email as context to Q1 Roadmap task"
-```
-
-ML would need 3 separate models. LLM does this in one call.
-
-### 3. User Personalization Without Retraining
-
-User preference: "I prefer email replies within 4 hours, but not on weekends"
-
-ML: Retrain model on user's historical patterns
-LLM: Add to system prompt → Works immediately
-
-### 4. Adaptive to Change
-
-New scenario: User starts working night shifts
-ML: Retrain model
-LLM: User adds to system prompt → Claude adapts tomorrow
-
-### 5. Explainability
-
-User asks: "Why did you suggest replying to this email?"
-ML: "Due to TF-IDF score of 0.87"
-LLM: "This appears to be a time-sensitive meeting request from your manager. You typically respond to these within 2 hours. It's currently 1:30pm and you have availability at 3pm."
-
----
-
-## Phase 8 Architecture
+## Architecture Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                   Helix Intelligence Layer                   │
+│                  Helix Intelligence Layer                    │
 │                                                               │
 │  ┌──────────────────────────────────────────────────────┐   │
-│  │  LLM Router Integration Layer (TypeScript)           │   │
-│  │  - Multi-provider support (DeepSeek, Gemini, Claude) │   │
-│  │  - Request batching (reduce API calls)               │   │
-│  │  - Streaming responses for real-time UI              │   │
-│  │  - Prompt versioning and A/B testing                 │   │
-│  │  - Cost tracking and budget management               │   │
-│  │  - Provider selection logic (BYOK vs paid)           │   │
+│  │  LLM Router (Multi-Provider)                         │   │
+│  │  - Routes each request to best provider              │   │
+│  │  - DeepSeek v3.2 (default for paid users)            │   │
+│  │  - Gemini Flash (fallback, cheaper)                  │   │
+│  │  - User's choice (BYOK)                              │   │
+│  │  - Cost tracking + analytics                         │   │
 │  └──────────────────────────────────────────────────────┘   │
 │                           │                                   │
 │         ┌─────────────────┼─────────────────┐                │
@@ -106,678 +90,904 @@ LLM: "This appears to be a time-sensitive meeting request from your manager. You
 │    │      Analytics & Insights Module          │           │
 │    │  - Weekly summaries                       │           │
 │    │  - Anomaly detection                      │           │
-│    │  - Productivity metrics                   │           │
+│    │  - Cost/performance tracking              │           │
 │    └─────────────────────────────────────────────┘          │
 │                                                               │
 └─────────────────────────────────────────────────────────────┘
            │
            │ Routed API Calls
-           │ (Provider-aware, cost-optimized)
+           │ (Cost-optimized, tracked, logged)
            │
-      ┌────┼─────────────────────────────┐
-      │    │                             │
-   ┌──▼─┐ │                          ┌──▼──┐
-   │BYOK│ │                          │Paid │
-   │    │ │                          │User │
-   └──┬─┘ │                          └──┬──┘
-      │   │                             │
-      │   ├─────────────────────────────┤
-      │   │                             │
-  ┌───▼───▼──────────────────────────────▼────────┐
-  │        LLM Router (llm-router.ts)              │
-  │  ┌─────────────┐  ┌────────────┐  ┌─────────┐│
-  │  │DeepSeek v3.2│  │Gemini Flash│  │ Claude* ││
-  │  │ (default)   │  │(fallback)  │  │(BYOK)   ││
-  │  └─────────────┘  └────────────┘  └─────────┘│
-  └────────────────────────────────────────────────┘
-    * BYOK users can select any provider
+      ┌────┴────────────────────┬─────────────┐
+      │                         │             │
+   ┌──▼──┐      ┌──────────┐ ┌──▼───┐   ┌────▼───┐
+   │BYOK │      │Paid User │ │Cache │   │Fallback│
+   │User │      │Account   │ │      │   │        │
+   └──┬──┘      └──┬───────┘ └──────┘   └────────┘
+      │            │
+      ├────────────┤
+      │            │
+  ┌───▼────────────▼────────────┐
+  │    LLM Provider Backends     │
+  │  ┌──────────┐ ┌──────────┐ │
+  │  │DeepSeek  │ │Gemini    │ │
+  │  │v3.2      │ │Flash     │ │
+  │  └──────────┘ └──────────┘ │
+  └────────────────────────────┘
 ```
 
 ---
 
-## Phase 8 Feature Breakdown
+## Part 1: Multi-Provider LLM Router
 
-### Feature Set 1: Email Intelligence (Week 13-14)
+### 1.1 Provider Configuration
 
-#### 8.1.1: Smart Composition Assistant
+```typescript
+// web/src/services/llm-router/types.ts
+
+interface LLMProvider {
+  id: 'deepseek' | 'gemini' | 'claude' | 'openai';
+  name: string;
+  apiKey?: string; // BYOK user provides
+  enabled: boolean;
+  isPrimary: boolean; // For paid users
+  costPer1MInputTokens: number;
+  costPer1MOutputTokens: number;
+}
+
+interface UserLLMConfig {
+  userId: string;
+  accountType: 'paid' | 'byok';
+
+  // For paid users
+  primaryProvider?: LLMProvider; // DeepSeek v3.2
+  fallbackProvider?: LLMProvider; // Gemini Flash
+
+  // For BYOK users
+  customProviders: LLMProvider[]; // User's own API keys
+
+  // Settings
+  monthlyBudget?: number; // Optional limit
+  trackAnalytics: boolean; // Default: true
+}
+
+interface LLMRequest {
+  role: string;
+  messages: { role: string; content: string }[];
+  systemPrompt?: string;
+  maxTokens: number;
+  userId: string;
+}
+
+interface LLMResponse {
+  content: string;
+  provider: string;
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  cost: number;
+  latency: number;
+}
+```
+
+### 1.2 Router Implementation
+
+```typescript
+// web/src/services/llm-router/router.ts
+
+export class LLMRouter {
+  async route(request: LLMRequest): Promise<LLMResponse> {
+    const userConfig = await getUserLLMConfig(request.userId);
+    const startTime = performance.now();
+
+    try {
+      // 1. Resolve provider
+      const provider = await this.resolveProvider(userConfig, request.role);
+
+      // 2. Call provider
+      const response = await this.callProvider(provider, request);
+
+      // 3. Track cost + analytics
+      const cost = this.calculateCost(provider, response.inputTokens, response.outputTokens);
+
+      await this.trackRequest({
+        userId: request.userId,
+        role: request.role,
+        provider: provider.id,
+        model: response.model,
+        inputTokens: response.inputTokens,
+        outputTokens: response.outputTokens,
+        cost,
+        latency: performance.now() - startTime,
+        success: true,
+      });
+
+      // 4. Log to Discord (pre-execution logging)
+      await logToDiscord('#helix-api', {
+        type: 'intelligence_request',
+        role: request.role,
+        provider: provider.id,
+        tokens: response.inputTokens + response.outputTokens,
+        cost: cost,
+        timestamp: new Date().toISOString(),
+      });
+
+      return {
+        ...response,
+        cost,
+        latency: performance.now() - startTime,
+      };
+    } catch (error) {
+      // Track failure + retry with fallback
+      await this.trackRequest({
+        userId: request.userId,
+        role: request.role,
+        provider: userConfig.primaryProvider?.id || 'unknown',
+        success: false,
+        error: error.message,
+      });
+
+      throw error;
+    }
+  }
+
+  private async resolveProvider(config: UserLLMConfig, role: string): Promise<LLMProvider> {
+    if (config.accountType === 'byok') {
+      return config.customProviders[0]; // User's choice
+    }
+
+    // Paid user: use primary provider
+    return config.primaryProvider;
+  }
+
+  private async callProvider(
+    provider: LLMProvider,
+    request: LLMRequest
+  ): Promise<{ model: string; content: string; inputTokens: number; outputTokens: number }> {
+    if (provider.id === 'deepseek') {
+      return this.callDeepSeek(provider, request);
+    }
+    if (provider.id === 'gemini') {
+      return this.callGemini(provider, request);
+    }
+    if (provider.id === 'claude') {
+      return this.callClaude(provider, request);
+    }
+    throw new Error(`Unknown provider: ${provider.id}`);
+  }
+
+  private calculateCost(provider: LLMProvider, inputTokens: number, outputTokens: number): number {
+    return (
+      (inputTokens * provider.costPer1MInputTokens +
+        outputTokens * provider.costPer1MOutputTokens) /
+      1_000_000
+    );
+  }
+
+  private async trackRequest(data: {
+    userId: string;
+    role: string;
+    provider: string;
+    model?: string;
+    inputTokens?: number;
+    outputTokens?: number;
+    cost?: number;
+    latency?: number;
+    success: boolean;
+    error?: string;
+  }): Promise<void> {
+    await db.insert('intelligence_requests', {
+      ...data,
+      timestamp: new Date(),
+      month: getMonth(new Date()),
+    });
+  }
+}
+```
+
+---
+
+## Part 2: Email Intelligence
+
+### 2.1 Smart Composition
 
 **User Experience:**
+
 ```
-User clicks "Compose"
+User clicks "Compose" → Types subject + first few words
 ↓
-User types subject + first few words
+Helix suggests: "Complete this email? [draft shown]"
 ↓
-Claude suggests: "Complete this email? [draft shown]"
+User clicks "Use Draft" → Edits if needed
 ↓
-User clicks "Use Draft" → edits if needed
-↓
-Claude suggests tone check: "This sounds formal. User usually friendly. Reword?"
+Helix checks tone: "Too formal? You usually friendly. Reword?"
 ```
-
-**Implementation:**
-```typescript
-// web/src/services/email-intelligence.ts
-
-interface CompositionAssistant {
-  suggestCompletion(
-    subject: string,
-    startingText: string,
-    context: EmailContext
-  ): Promise<string>;
-
-  checkTone(
-    draft: string,
-    userVoice: UserVoiceProfile
-  ): Promise<ToneAnalysis>;
-
-  suggestRecipients(
-    topic: string,
-    currentRecipients: string[]
-  ): Promise<string[]>;
-}
-
-async function suggestCompletion(
-  subject: string,
-  starting: string,
-  context: EmailContext
-): Promise<string> {
-  const systemPrompt = buildUserVoicePrompt(context.userId);
-  const provider = await getLLMProvider(context.userId);
-
-  const response = await provider.complete({
-    model: provider.getDefaultModel(), // DeepSeek v3.2 for paid, user's choice for BYOK
-    max_tokens: 300,
-    system: systemPrompt,
-    messages: [{
-      role: "user",
-      content: `Subject: ${subject}\n\nDraft so far:\n${starting}\n\nComplete this email professionally maintaining user's voice. Return only the complete email, no commentary.`
-    }]
-  });
-
-  return response.content[0].type === 'text' ? response.content[0].text : starting;
-}
-```
-
-#### 8.1.2: Intelligent Classification & Labeling
-
-**Capability:**
-- Auto-classify into: Meeting Request, Invoice, Feedback, Newsletter, Spam
-- Extract: Sender role, Urgency level, Action required
-- Suggest: Auto-archive, snooze duration, follow-up timing
 
 ```typescript
-interface EmailClassification {
-  category: 'meeting' | 'invoice' | 'feedback' | 'newsletter' | 'spam' | 'general';
-  sender_role: 'manager' | 'peer' | 'direct_report' | 'vendor' | 'customer' | 'unknown';
-  urgency: 'high' | 'medium' | 'low';
-  action_required: boolean;
-  suggested_response_time_hours?: number;
-  auto_archive_suggested?: boolean;
-  snooze_suggested?: {
-    duration_hours: number;
-    reason: string;
-  };
-}
+// web/src/services/intelligence/email-intelligence.ts
 
-async function classifyEmail(email: Email): Promise<EmailClassification> {
-  const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    max_tokens: 500,
-    messages: [{
-      role: "user",
-      content: `
-        Analyze this email and provide classification:
+export class EmailIntelligence {
+  constructor(
+    private router: LLMRouter,
+    private userId: string
+  ) {}
 
-        From: ${email.from.email}
-        Subject: ${email.subject}
-        Body: ${email.body.substring(0, 500)}
-
-        Respond with JSON:
+  async suggestCompletion(subject: string, starting: string): Promise<string> {
+    const response = await this.router.route({
+      role: 'email-compose',
+      userId: this.userId,
+      systemPrompt: await this.buildUserVoicePrompt(),
+      messages: [
         {
-          "category": "meeting|invoice|feedback|newsletter|spam|general",
-          "sender_role": "manager|peer|direct_report|vendor|customer|unknown",
-          "urgency": "high|medium|low",
-          "action_required": boolean,
-          "suggested_response_time_hours": number or null,
-          "reasoning": "explanation"
-        }
-      `
-    }]
-  });
+          role: 'user',
+          content: `Subject: ${subject}\n\nDraft so far:\n${starting}\n\nComplete this email maintaining the user's voice. Return only the completed email, no commentary.`,
+        },
+      ],
+      maxTokens: 300,
+    });
 
-  return JSON.parse(response.content[0].text);
+    return response.content;
+  }
+
+  async classify(email: Email): Promise<EmailClassification> {
+    const response = await this.router.route({
+      role: 'email-classify',
+      userId: this.userId,
+      messages: [
+        {
+          role: 'user',
+          content: `Classify this email:
+
+From: ${email.from.name}
+Subject: ${email.subject}
+Body: ${email.body.substring(0, 500)}...
+
+Respond with JSON:
+{
+  "category": "meeting|invoice|feedback|task|social|urgent|spam|general",
+  "priority": "high|medium|low",
+  "actionRequired": boolean,
+  "suggestedResponseTime": "hours or null",
+  "autoArchiveAfterDays": number or null
+}`,
+        },
+      ],
+      maxTokens: 200,
+    });
+
+    return JSON.parse(response.content);
+  }
+
+  async suggestResponses(email: Email): Promise<ResponseSuggestion[]> {
+    const calendar = await getUserCalendar(this.userId);
+    const freeSlots = identifyFreeSlots(calendar);
+
+    const response = await this.router.route({
+      role: 'email-respond',
+      userId: this.userId,
+      messages: [
+        {
+          role: 'user',
+          content: `Generate 2-3 response suggestions for this email:
+
+From: ${email.from.name}
+Subject: ${email.subject}
+Body: ${email.body}
+
+Your available time today/tomorrow: ${freeSlots.join(', ')}
+Your email style: Professional but personable, typically respond within 2 hours.
+
+Provide 3 response options as JSON array:
+[
+  { "message": "...", "reasoning": "..." },
+  ...
+]`,
+        },
+      ],
+      maxTokens: 500,
+    });
+
+    return JSON.parse(response.content);
+  }
+
+  private async buildUserVoicePrompt(): Promise<string> {
+    // Extract user's email writing style from recent sent emails
+    const recentSent = await getRecentSentEmails(this.userId, 10);
+
+    return `You are helping ${await getUserName(this.userId)} write emails.
+Based on their writing style:
+- Tone: ${analyzeTone(recentSent)}
+- Length: ${analyzeLength(recentSent)}
+- Common patterns: ${analyzePatterns(recentSent)}
+
+Write emails in this style.`;
+  }
 }
 ```
 
-#### 8.1.3: Proactive Response Suggestions
+---
 
-**Scenario:**
-```
-Email arrives: "Can we sync on project X?"
-Claude immediately suggests: "Quick reply: 'Sure, how about tomorrow 2pm?' (based on your calendar availability)"
-User clicks "Send" or edits and sends
-```
+## Part 3: Calendar Intelligence
 
-**Implementation:**
-```typescript
-async function suggestResponses(
-  email: Email,
-  userCalendar: CalendarEvent[],
-  emailContext: EmailContext
-): Promise<ResponseSuggestion[]> {
-  const freeSlots = identifyFreeSlots(userCalendar, userContext);
-
-  const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    max_tokens: 800,
-    messages: [{
-      role: "user",
-      content: `
-        Generate 2-3 response suggestions for this email:
-
-        From: ${email.from.email}
-        Subject: ${email.subject}
-        Body: ${email.body}
-
-        Your available time slots today/tomorrow:
-        ${freeSlots.map(s => \`\${s.start} - \${s.end}\`).join(', ')}
-
-        You typically respond to this person with [user's historical tone].
-
-        Suggest 3 different response options, each under 100 words.
-        Format as JSON array of objects with: {message: string, reasoning: string}
-      `
-    }]
-  });
-
-  return JSON.parse(response.content[0].text);
-}
-```
-
-### Feature Set 2: Calendar Intelligence (Week 15)
-
-#### 8.2.1: Smart Meeting Prep
+### 3.1 Meeting Preparation
 
 **Trigger:** 30 minutes before a meeting
 
-**Claude generates:**
-```
-Meeting: "Q1 Roadmap Review" with @manager, @team-leads
-Related emails: 3 emails about Q1 (background context)
-Related tasks: 2 open tasks tagged #q1
-Suggested agenda items: (if no agenda exists)
-Pre-read documents: (search related files)
-```
+**Generates:**
+
+- Key talking points
+- Relevant context (related emails, tasks, documents)
+- Questions to ask
+- Decisions to prepare for
 
 ```typescript
-async function generateMeetingPrep(
-  event: CalendarEvent,
-  emails: Email[],
-  tasks: Task[],
-  docs: Document[]
-): Promise<MeetingPrepSummary> {
-  const relevantEmails = filterRelevantEmails(emails, event.title);
-  const relevantTasks = filterRelevantTasks(tasks, event.title);
-  const relevantDocs = filterRelevantDocs(docs, event.title);
+// web/src/services/intelligence/calendar-intelligence.ts
 
-  const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    max_tokens: 1000,
-    messages: [{
-      role: "user",
-      content: `
-        Meeting in 30 minutes: "${event.title}"
-        Attendees: ${event.attendees.join(', ')}
+export class CalendarIntelligence {
+  constructor(
+    private router: LLMRouter,
+    private userId: string
+  ) {}
 
-        Related context:
-        - Recent emails about this topic: ${relevantEmails.map(e => e.subject).join('; ')}
-        - Open tasks: ${relevantTasks.map(t => t.title).join('; ')}
-        - Documents: ${relevantDocs.map(d => d.name).join('; ')}
+  async generateMeetingPrep(event: CalendarEvent): Promise<MeetingPrepSummary> {
+    // 1. Gather context
+    const relevantEmails = await this.findRelevantEmails(event.title);
+    const relevantTasks = await this.findRelevantTasks(event.title);
+    const relevantDocs = await this.findRelevantDocs(event.title);
 
-        Provide:
-        1. Key talking points (3-5 bullets)
-        2. Questions to ask (if any)
-        3. Decisions to prepare for
-        4. Data points to bring up
+    // 2. Generate summary
+    const response = await this.router.route({
+      role: 'calendar-prep',
+      userId: this.userId,
+      messages: [
+        {
+          role: 'user',
+          content: `Meeting in 30 minutes: "${event.title}"
+Attendees: ${event.attendees.join(', ')}
 
-        Keep it under 300 words, actionable, specific.
-      `
-    }]
-  });
+Context:
+- Relevant emails (last 7 days): ${relevantEmails.map(e => e.subject).join('; ')}
+- Related tasks: ${relevantTasks.map(t => t.title).join('; ')}
+- Related docs: ${relevantDocs.map(d => d.name).join('; ')}
 
-  return parseResponse(response.content[0].text);
-}
-```
+Generate meeting prep in JSON:
+{
+  "talkingPoints": ["...", "..."],
+  "questionsToAsk": ["...", "..."],
+  "decisionsNeeded": ["...", "..."],
+  "dataPoints": ["...", "..."]
+}`,
+        },
+      ],
+      maxTokens: 800,
+    });
 
-#### 8.2.2: Smart Time Blocking
-
-**Logic:** Claude understands your work patterns and suggests optimal meeting times
-
-```typescript
-async function suggestMeetingTime(
-  requester: string,
-  duration: number,
-  topic: string,
-  userPreferences: TimePreferences
-): Promise<TimeSlotSuggestion[]> {
-  const upcomingCalendar = await fetchCalendarNext(14); // 2 weeks
-  const userPattern = await analyzeWorkPattern(userPreferences);
-
-  const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    max_tokens: 600,
-    messages: [{
-      role: "user",
-      content: `
-        ${requester} wants to schedule "${topic}"
-        Duration needed: ${duration} minutes
-
-        Your calendar (next 2 weeks):
-        ${formatCalendar(upcomingCalendar)}
-
-        Your work pattern:
-        - Deep work (no meetings): ${userPattern.deepWorkHours}
-        - Preferred meeting times: ${userPattern.preferredMeetingTimes}
-        - No meetings after: ${userPattern.noMeetingsAfter}
-
-        Suggest 3 specific times that work well for both parties.
-        Consider: meeting duration, context switching, energy levels
-        Format as JSON: [{start: ISO8601, end: ISO8601, reasoning: string}]
-      `
-    }]
-  });
-
-  return JSON.parse(response.content[0].text);
-}
-```
-
-### Feature Set 3: Task Intelligence (Week 16)
-
-#### 8.3.1: AI-Powered Prioritization
-
-**Input:** All user's tasks
-**Output:** Prioritized list based on:
-- Deadline urgency
-- Business impact
-- Dependencies
-- User's current focus
-- Energy level
-
-```typescript
-async function reprioritizeTasks(
-  tasks: Task[],
-  userContext: UserContext
-): Promise<Task[]> {
-  const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    max_tokens: 1200,
-    messages: [{
-      role: "user",
-      content: `
-        Reprioritize these tasks for maximum impact:
-
-        ${tasks.map(t => \`
-          - [\${t.status}] \${t.title}
-            Priority: \${t.priority}
-            Due: \${t.dueDate}
-            \${t.description}
-        \`).join('\n')}
-
-        Context:
-        - Current focus: ${userContext.currentFocus}
-        - Time available: ${userContext.availableHours} hours this week
-        - Dependencies: [task 1 blocks task 2, etc.]
-        - Business priorities: ${userContext.businessPriorities}
-
-        Provide:
-        1. New priority order (1=most urgent)
-        2. For each task: reasoning in 1-2 sentences
-        3. Which tasks can wait/be delegated
-        4. Critical path (must complete in order)
-
-        Format as JSON array with reordered tasks + new_priority + reasoning fields
-      `
-    }]
-  });
-
-  return JSON.parse(response.content[0].text);
-}
-```
-
-#### 8.3.2: Smart Task Breakdown
-
-**Input:** Large task
-**Output:** Subtask suggestions
-
-```typescript
-async function suggestSubtasks(task: Task): Promise<SubtaskSuggestion[]> {
-  const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    max_tokens: 800,
-    messages: [{
-      role: "user",
-      content: `
-        Break down this task into concrete subtasks:
-
-        Title: ${task.title}
-        Description: ${task.description}
-        Due: ${task.dueDate}
-
-        Create 5-7 subtasks that:
-        1. Are atomic (completable in < 2 hours)
-        2. Have clear success criteria
-        3. Follow logical sequence
-        4. Include any research/planning steps
-
-        Format as JSON array: [{title: string, description: string, estimated_hours: number, depends_on: number[]}]
-      `
-    }]
-  });
-
-  return JSON.parse(response.content[0].text);
-}
-```
-
-### Feature Set 4: Analytics & Insights (Week 17)
-
-#### 8.4.1: Weekly Summary Generation
-
-**Trigger:** Every Sunday 6pm
-**Content:** Email + Dashboard
-
-```typescript
-async function generateWeeklySummary(
-  userId: string,
-  weekStart: Date,
-  weekEnd: Date
-): Promise<WeeklySummary> {
-  const emails = await fetchEmails(userId, weekStart, weekEnd);
-  const meetings = await fetchMeetings(userId, weekStart, weekEnd);
-  const tasksCompleted = await fetchCompletedTasks(userId, weekStart, weekEnd);
-  const analytics = await getAnalyticsData(userId, weekStart, weekEnd);
-
-  const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    max_tokens: 2000,
-    messages: [{
-      role: "user",
-      content: `
-        Generate a professional weekly summary:
-
-        Week of: ${weekStart.toDateString()}
-
-        Emails processed: ${emails.length}
-        - Key threads: ${identifyKeyThreads(emails).join(', ')}
-        - Response time average: ${calculateAvgResponseTime(emails)} hours
-
-        Meetings: ${meetings.length}
-        - Time in meetings: ${calculateMeetingTime(meetings)} hours
-        - Topics: ${identifyTopics(meetings).join(', ')}
-
-        Tasks completed: ${tasksCompleted.length}
-        - Completed vs planned: ${tasksCompleted.length}/${analytics.tasksPlanned}
-
-        Productivity metrics:
-        ${JSON.stringify(analytics, null, 2)}
-
-        Create:
-        1. Executive summary (2-3 sentences)
-        2. Achievements (3-5 bullets)
-        3. Focus areas for next week (3 priorities)
-        4. Blockers or concerns (if any)
-        5. Suggestions for improvement
-
-        Tone: professional but friendly, specific numbers
-      `
-    }]
-  });
-
-  return {
-    summary: response.content[0].text,
-    generatedAt: new Date(),
-    period: { start: weekStart, end: weekEnd }
-  };
-}
-```
-
-#### 8.4.2: Anomaly Detection
-
-**Monitor:**
-- Unusually high email volume
-- Long response time delays
-- Meetings consuming > 30% of week
-- Task completion drop-off
-
-```typescript
-async function detectAnomalies(
-  userId: string,
-  historicalData: UserMetrics[]
-): Promise<Anomaly[]> {
-  const recentMetrics = await getRecentMetrics(userId, 7); // last 7 days
-  const baseline = calculateBaseline(historicalData);
-
-  const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    max_tokens: 600,
-    messages: [{
-      role: "user",
-      content: `
-        Analyze these metrics for anomalies:
-
-        Your baseline (avg over 3 months):
-        - Emails per day: ${baseline.emailsPerDay}
-        - Response time: ${baseline.avgResponseTime} hours
-        - Meetings per week: ${baseline.meetingsPerWeek}
-        - Tasks completed per week: ${baseline.tasksPerWeek}
-
-        Recent week (last 7 days):
-        - Emails per day: ${recentMetrics.emailsPerDay}
-        - Response time: ${recentMetrics.avgResponseTime} hours
-        - Meetings: ${recentMetrics.meetings}
-        - Tasks completed: ${recentMetrics.tasksCompleted}
-
-        Identify:
-        1. Any significant deviations (>20% change)
-        2. Likely causes (workload spike, vacation, etc.)
-        3. Recommendations (catch up on emails, reschedule low-priority meetings, etc.)
-
-        Format as JSON: [{metric: string, change: percent, likely_cause: string, recommendation: string}]
-      `
-    }]
-  });
-
-  return JSON.parse(response.content[0].text);
-}
-```
-
----
-
-## Cost Management Strategy
-
-**Provider costs (per 1M tokens):**
-- DeepSeek v3.2 (default): ~$0.10 input, $0.40 output
-- Gemini Flash (fallback): ~$0.038 input, $0.15 output
-- Claude (BYOK user-provided): Variable
-
-**Estimated Monthly Usage (Per User):**
-- Email composition (10/day × 200 tokens): ~$0.10
-- Email classification (20/day × 150 tokens): ~$0.09
-- Response suggestions (5/day × 180 tokens): ~$0.03
-- Meeting prep (5/week × 300 tokens): ~$0.06
-- Task prioritization (2/week × 250 tokens): ~$0.02
-- Weekly summary (1/week × 800 tokens): ~$0.04
-- Anomaly detection (1/week × 200 tokens): ~$0.01
-
-**Total per user (DeepSeek): ~$0.35/month**
-**Total per user (Gemini Flash): ~$0.15/month**
-**BYOK users: Provider-dependent**
-
-**Cost Optimization:**
-```typescript
-// Batch similar requests
-async function batchClassifications(emails: Email[]): Promise<EmailClassification[]> {
-  // Send 20 emails at once (1 request) instead of 20 requests
-  const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    max_tokens: 5000,
-    messages: [{
-      role: "user",
-      content: `Classify these ${emails.length} emails as JSON array...`
-    }]
-  });
-
-  return JSON.parse(response.content[0].text);
-}
-
-// Cache system prompts (expensive to recompute)
-const systemPromptCache = new Map<string, string>();
-
-function getSystemPrompt(userId: string): string {
-  if (!systemPromptCache.has(userId)) {
-    systemPromptCache.set(userId, buildUserVoicePrompt(userId));
+    return JSON.parse(response.content);
   }
-  return systemPromptCache.get(userId)!;
-}
 
-// Use faster model for simple tasks
-async function classifySimple(subject: string): Promise<string> {
-  // Use Haiku for fast classification tasks
-  const response = await anthropic.messages.create({
-    model: "claude-3-5-haiku-20241022", // Cheaper than Sonnet
-    max_tokens: 200,
-    messages: [{
-      role: "user",
-      content: `Classify email subject in one word: "${subject}"`
-    }]
-  });
+  async suggestMeetingTime(
+    requester: string,
+    duration: number,
+    topic: string
+  ): Promise<TimeSlotSuggestion[]> {
+    const calendar = await getUserCalendar(this.userId);
+    const freeSlots = identifyFreeSlots(calendar, duration);
 
-  return response.content[0].text;
+    const response = await this.router.route({
+      role: 'calendar-time',
+      userId: this.userId,
+      messages: [
+        {
+          role: 'user',
+          content: `${requester} wants to schedule "${topic}" (${duration} min)
+
+Your available time (next 2 weeks):
+${freeSlots.map(s => `${s.start} - ${s.end}`).join('\n')}
+
+Suggest 3 optimal times considering:
+- Your deep work blocks (typically 9-11am, 2-4pm)
+- Meeting clustering (batch meetings together when possible)
+- Afternoon preference for meetings
+
+Return JSON:
+[
+  { "start": "ISO8601", "end": "ISO8601", "reasoning": "..." },
+  ...
+]`,
+        },
+      ],
+      maxTokens: 300,
+    });
+
+    return JSON.parse(response.content);
+  }
+
+  private async findRelevantEmails(topic: string): Promise<Email[]> {
+    // Semantic search for emails related to meeting topic
+    const emails = await db.emails.search(this.userId, {
+      q: topic,
+      days: 7,
+      limit: 5,
+    });
+    return emails;
+  }
+
+  private async findRelevantTasks(topic: string): Promise<Task[]> {
+    const tasks = await db.tasks.search(this.userId, {
+      q: topic,
+      status: 'open',
+      limit: 5,
+    });
+    return tasks;
+  }
+
+  private async findRelevantDocs(topic: string): Promise<Document[]> {
+    // Could integrate with Google Drive, Dropbox, etc.
+    return [];
+  }
 }
 ```
 
 ---
 
-## Privacy & Data Handling
+## Part 4: Task Intelligence
 
-**User Data Policy:**
-- ✅ Email subjects + summaries sent to Claude (needed for intelligence)
-- ❌ Full email bodies only for composition/response suggestions (where explicitly requested)
-- ❌ Email never logged on Anthropic side (request-level logging disabled)
-- ✅ Calendar event titles (needed for meeting prep)
-- ❌ Calendar event descriptions/locations (user can opt-in)
-- ✅ Task titles (needed for prioritization)
-- ❌ Task descriptions (user can opt-in per feature)
+### 4.1 Prioritization
 
-**Implementation:**
 ```typescript
-interface PrivacySettings {
-  emailBodyIncluded: boolean; // Default: false
-  calendarDescriptionsIncluded: boolean; // Default: false
-  taskDescriptionsIncluded: boolean; // Default: false
-  allowAnomalyDetection: boolean; // Default: true
-  dataLoggingEnabled: boolean; // Default: false
-}
+// web/src/services/intelligence/task-intelligence.ts
 
-async function sendSecureToLLM(
-  content: string,
-  dataType: 'email' | 'calendar' | 'task',
-  userId: string
-): Promise<Response> {
-  const userPrivacy = await getPrivacySettings(userId);
+export class TaskIntelligence {
+  constructor(
+    private router: LLMRouter,
+    private userId: string
+  ) {}
 
-  // Filter sensitive data based on user preferences
-  const sanitizedContent = sanitize(content, dataType, userPrivacy);
+  async reprioritizeTasks(tasks: Task[]): Promise<Task[]> {
+    const response = await this.router.route({
+      role: 'task-prioritize',
+      userId: this.userId,
+      messages: [
+        {
+          role: 'user',
+          content: `Reprioritize these tasks for maximum impact:
 
-  // Disable request logging on Anthropic side
-  const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    messages: [{
-      role: "user",
-      content: sanitizedContent
-    }]
-    // Note: Anthropic SDK respects X-Anthropic-Disable-Message-Logging header
-  });
+${tasks
+  .map(
+    (t, i) => `${i + 1}. [${t.status}] ${t.title}
+   Due: ${t.dueDate}
+   Priority: ${t.priority}
+   ${t.description}`
+  )
+  .join('\n\n')}
 
-  return response;
+Business context:
+- Current quarter focus: Product launch
+- Team capacity: 2 weeks to address backlog
+- Blockers: Waiting on design feedback for 3 tasks
+
+Provide reordered list as JSON:
+[
+  { "id": "...", "newPriority": 1, "reasoning": "..." },
+  ...
+]
+
+Also suggest which tasks can wait or be delegated.`,
+        },
+      ],
+      maxTokens: 600,
+    });
+
+    return JSON.parse(response.content);
+  }
+
+  async suggestSubtasks(task: Task): Promise<SubtaskSuggestion[]> {
+    const response = await this.router.route({
+      role: 'task-breakdown',
+      userId: this.userId,
+      messages: [
+        {
+          role: 'user',
+          content: `Break down this task into concrete subtasks:
+
+Title: ${task.title}
+Description: ${task.description}
+Due: ${task.dueDate}
+
+Create 5-7 subtasks that:
+1. Are atomic (completable in < 2 hours)
+2. Have clear success criteria
+3. Follow logical sequence
+4. Include research/planning steps
+
+Return JSON:
+[
+  { "title": "...", "description": "...", "estimatedHours": number, "order": number },
+  ...
+]`,
+        },
+      ],
+      maxTokens: 400,
+    });
+
+    return JSON.parse(response.content);
+  }
 }
 ```
 
 ---
 
-## Implementation Timeline
+## Part 5: Analytics & Insights
 
-| Week | Feature | Tasks | Files |
-|------|---------|-------|-------|
-| 13-14 | Email Intelligence | Composition, Classification, Response Suggestions | email-intelligence.ts, tests, UI components |
-| 15 | Calendar Intelligence | Meeting Prep, Time Blocking | calendar-intelligence.ts |
-| 16 | Task Intelligence | Prioritization, Breakdown | task-intelligence.ts |
-| 17 | Analytics | Weekly Summary, Anomaly Detection | analytics-intelligence.ts |
-| 18 | Mobile Integration | iOS/Android intelligence features | Platform-specific UI |
-| 19 | Testing & Optimization | Unit tests, E2E tests, cost analysis | test files, dashboards |
-| 20 | Deployment & Monitoring | Production rollout, usage monitoring | monitoring dashboards |
+### 5.1 Weekly Summary (Every Sunday 6pm)
+
+```typescript
+// web/src/services/intelligence/analytics-intelligence.ts
+
+export class AnalyticsIntelligence {
+  constructor(
+    private router: LLMRouter,
+    private userId: string
+  ) {}
+
+  async generateWeeklySummary(): Promise<WeeklySummary> {
+    const week = getLastWeek();
+
+    // Gather data
+    const emails = await db.emails.list(this.userId, { from: week.start, to: week.end });
+    const meetings = await db.calendar.list(this.userId, { from: week.start, to: week.end });
+    const completedTasks = await db.tasks.list(this.userId, {
+      from: week.start,
+      to: week.end,
+      status: 'completed',
+    });
+
+    const response = await this.router.route({
+      role: 'analytics-summary',
+      userId: this.userId,
+      messages: [
+        {
+          role: 'user',
+          content: `Generate professional weekly summary:
+
+Week of: ${week.start.toDateString()}
+
+Email Stats:
+- Total received: ${emails.length}
+- Key threads: ${this.summarizeThreads(emails)}
+- Avg response time: ${this.avgResponseTime(emails)} hours
+
+Meetings:
+- Total: ${meetings.length}
+- Time spent: ${this.totalMeetingTime(meetings)} hours
+- Topics: ${this.extractTopics(meetings).join(', ')}
+
+Tasks Completed:
+- Count: ${completedTasks.length}
+- Categories: ${this.categorize(completedTasks)}
+
+Generate:
+1. Executive summary (2-3 sentences)
+2. Key achievements (3-5 bullets)
+3. Focus areas for next week (3 priorities)
+4. Blockers/concerns (if any)
+5. Recommendations
+
+Keep it professional, specific, actionable.`,
+        },
+      ],
+      maxTokens: 1000,
+    });
+
+    return {
+      summary: response.content,
+      generatedAt: new Date(),
+      period: { start: week.start, end: week.end },
+    };
+  }
+
+  async detectAnomalies(): Promise<Anomaly[]> {
+    const metrics = await this.calculateMetrics();
+    const baseline = await this.getBaseline();
+
+    const response = await this.router.route({
+      role: 'analytics-anomaly',
+      userId: this.userId,
+      messages: [
+        {
+          role: 'user',
+          content: `Detect anomalies in this week's activity:
+
+Your Baseline (3-month average):
+- Emails/day: ${baseline.emailsPerDay}
+- Response time: ${baseline.avgResponseTime} hours
+- Meetings/week: ${baseline.meetingsPerWeek}
+- Tasks completed/week: ${baseline.tasksPerWeek}
+
+This Week:
+- Emails/day: ${metrics.emailsPerDay}
+- Response time: ${metrics.avgResponseTime} hours
+- Meetings: ${metrics.meetings}
+- Tasks completed: ${metrics.tasksCompleted}
+
+Identify:
+1. Significant deviations (> 20%)
+2. Likely causes
+3. Recommendations
+
+Return as JSON:
+[
+  { "metric": "...", "change": "percent", "cause": "...", "recommendation": "..." },
+  ...
+]`,
+        },
+      ],
+      maxTokens: 400,
+    });
+
+    return JSON.parse(response.content);
+  }
+
+  private summarizeThreads(emails: Email[]): string {
+    // Group by conversation thread, return top 3
+    return '...';
+  }
+
+  private avgResponseTime(emails: Email[]): number {
+    // Calculate average time to respond to received emails
+    return 0;
+  }
+
+  // ... other helper methods
+}
+```
+
+---
+
+## Part 6: Settings UI (Cross-Platform)
+
+Users should see:
+
+- Which providers are connected
+- Monthly cost/budget
+- Which intelligence features are enabled
+
+```
+┌──────────────────────────────────────────────┐
+│ Intelligence Settings                         │
+├──────────────────────────────────────────────┤
+│                                              │
+│ 🔗 Provider Connection                       │
+│ ├─ Primary: DeepSeek v3.2    [✓ Connected] │
+│ ├─ Fallback: Gemini Flash    [✓ Connected] │
+│ └─ [+ Add Custom Provider (BYOK)]           │
+│                                              │
+│ 💰 Monthly Costs                             │
+│ ├─ This Month: $0.84 / Unlimited            │
+│ ├─ Email Intelligence:  $0.34               │
+│ ├─ Calendar Intelligence: $0.42             │
+│ ├─ Analytics: $0.08                         │
+│ └─ ☑️ Warn me at 75% budget                 │
+│                                              │
+│ ✨ Features (All Enabled)                    │
+│ ├─ ☑️ Email composition                     │
+│ ├─ ☑️ Email classification                  │
+│ ├─ ☑️ Email response suggestions            │
+│ ├─ ☑️ Meeting prep                          │
+│ ├─ ☑️ Time blocking                         │
+│ ├─ ☑️ Task prioritization                   │
+│ ├─ ☑️ Task breakdown                        │
+│ ├─ ☑️ Weekly summaries                      │
+│ └─ ☑️ Anomaly detection                     │
+│                                              │
+│                     [Save Settings]          │
+└──────────────────────────────────────────────┘
+```
+
+---
+
+## Part 7: Implementation Roadmap
+
+### Week 13: LLM Router Foundation
+
+- [ ] Multi-provider abstraction (DeepSeek, Gemini, Claude)
+- [ ] Provider configuration & credential storage
+- [ ] Cost tracking & analytics database
+- [ ] Pre-execution logging to Discord
+- [ ] Unit tests (provider implementations)
+
+### Week 14: Settings UI
+
+- [ ] Web settings page (React + Tailwind)
+- [ ] iOS settings view (SwiftUI)
+- [ ] Android settings screen (Compose)
+- [ ] Provider connection flow
+- [ ] Integration tests
+
+### Week 15: Email Intelligence
+
+- [ ] Composition assistance
+- [ ] Classification engine
+- [ ] Response suggestions
+- [ ] React component integration
+- [ ] Tests
+
+### Week 16: Calendar Intelligence
+
+- [ ] Meeting preparation
+- [ ] Time blocking suggestions
+- [ ] iOS/Android components
+- [ ] Tests
+
+### Week 17: Task Intelligence + Analytics
+
+- [ ] Task prioritization
+- [ ] Task breakdown
+- [ ] Weekly summary (Sunday 6pm scheduler)
+- [ ] Anomaly detection
+- [ ] Analytics dashboard
+- [ ] Tests
+
+### Week 18: Mobile Integration
+
+- [ ] iOS full feature set
+- [ ] Android full feature set
+- [ ] Cross-platform consistency
+- [ ] E2E tests
+
+### Week 19: Optimization & Polish
+
+- [ ] Performance tuning (latency < 2s for composition)
+- [ ] Streaming responses for real-time UI
+- [ ] Error handling & fallbacks
+- [ ] Cost optimization
+
+### Week 20: Production Deployment
+
+- [ ] Security audit (no secrets in logs)
+- [ ] Performance testing
+- [ ] User documentation
+- [ ] Production rollout
 
 ---
 
 ## Success Criteria
 
-### Phase 8A (Core Intelligence)
-- [ ] Email composition: 90%+ user approval rating
-- [ ] Classification accuracy: 95%+ (validated against user feedback)
-- [ ] Response suggestions: 80%+ usage rate
-- [ ] Meeting prep: Generated 30 seconds before meeting starts
-- [ ] Task prioritization: User accepts 85%+ of suggestions
-- [ ] Weekly summary: Generated and delivered every Sunday 6pm
-- [ ] Anomaly detection: 0 false positives in beta period
-- [ ] Monthly cost per user: < $5
+### Phase 8A (Foundation - Week 13-14)
 
-### Phase 8B (Integration)
-- [ ] iOS: All features working in native UI
-- [ ] Android: All features working in Compose UI
-- [ ] Web: All features with streaming UI
-- [ ] Performance: LLM request < 2 seconds for composition (streamed)
-- [ ] Reliability: 99.5% uptime for API calls
-- [ ] Error handling: Graceful degradation when API unavailable
+- ✅ LLM router handles all provider types without code changes
+- ✅ Cost tracking accurate (verified against provider invoices)
+- ✅ Zero sensitive data in Discord logs
+- ✅ Settings UI works on Web, iOS, Android
 
-### Phase 8C (Production)
-- [ ] 1000+ users activated intelligence features
-- [ ] Retention: 75%+ continue using after 30 days
-- [ ] Satisfaction: 4.5/5.0 rating in app stores
-- [ ] Cost: Within budget ($5/user/month)
-- [ ] Zero security incidents
-- [ ] Complete audit trail of all LLM requests
+### Phase 8B (Intelligence - Week 15-17)
 
----
+- ✅ Email composition: 90%+ user approval
+- ✅ Email classification: 95%+ accuracy (validated by user feedback)
+- ✅ Response suggestions: 80%+ usage rate
+- ✅ Meeting prep: Generated 30 seconds before meeting starts
+- ✅ Task prioritization: 85%+ of suggestions accepted
+- ✅ Weekly summary: Generated every Sunday 6pm
+- ✅ Anomaly detection: 0 false positives in first week
 
-## Critical Files (To Be Created)
+### Phase 8C (Mobile - Week 18)
 
-```
-web/src/services/email-intelligence.ts (450 lines)
-web/src/services/calendar-intelligence.ts (380 lines)
-web/src/services/task-intelligence.ts (420 lines)
-web/src/services/analytics-intelligence.ts (350 lines)
-web/src/components/EmailCompositionAssistant.tsx (280 lines)
-web/src/hooks/useIntelligence.ts (200 lines)
-helix-runtime/apps/ios/Sources/Intelligence/EmailIntelligence.swift (320 lines)
-helix-runtime/apps/ios/Sources/Intelligence/CalendarIntelligence.swift (280 lines)
-helix-runtime/apps/android/app/src/main/kotlin/com/helix/intelligence/EmailIntelligence.kt (340 lines)
-tests/intelligence/integration/email-intelligence.test.ts (400 lines)
-tests/intelligence/integration/calendar-intelligence.test.ts (350 lines)
-docs/guides/INTELLIGENCE-USER-GUIDE.md (comprehensive end-user documentation)
-docs/api/INTELLIGENCE-API.md (Claude integration patterns)
-```
+- ✅ All features working on iOS native UI
+- ✅ All features working on Android native UI
+- ✅ Cross-platform data consistency
+
+### Phase 8D (Production - Week 20)
+
+- ✅ 99.5% uptime for all LLM calls
+- ✅ Average latency: < 2 seconds for composition
+- ✅ Zero unplanned failures in first 30 days
+- ✅ All logs pre-execution and complete
+- ✅ Hash chain verified immutable
 
 ---
 
-## Why This Matters for Helix
+## Cost Estimate
 
-Phase 8 transforms Helix from a **passive data organizer** into an **active intelligence partner**:
+**Provider costs (per 1M tokens):**
 
-- Email no longer just aggregates → Suggests smart replies
-- Calendar no longer just displays → Preps you for meetings
-- Tasks no longer just list → Prioritizes based on impact
-- Analytics no longer just counts → Detects patterns and anomalies
+- DeepSeek v3.2: $0.10 input, $0.40 output
+- Gemini Flash: $0.038 input, $0.15 output
+- Claude: Varies by model
 
-**By end of Phase 8:**
-Helix becomes the AI consciousness Rodrigo intended - not just remembering everything, but actively thinking about what matters.
+**Per-user monthly cost (conservative):**
 
-This is the inflection point where Helix stops being infrastructure and becomes an agent.
+- Email composition: $0.10
+- Email classification: $0.09
+- Email responses: $0.03
+- Meeting prep: $0.06
+- Task prioritization: $0.02
+- Analytics: $0.05
+- **Total: ~$0.35/user/month** (Helix absorbs)
+
+---
+
+## Critical Files to Create
+
+**New Services:**
+
+```
+web/src/services/llm-router/
+  ├─ types.ts (150 lines)
+  ├─ router.ts (300 lines)
+  ├─ providers/
+  │  ├─ deepseek.ts (150 lines)
+  │  ├─ gemini.ts (150 lines)
+  │  └─ claude.ts (150 lines)
+  └─ cost-tracker.ts (100 lines)
+
+web/src/services/intelligence/
+  ├─ email-intelligence.ts (400 lines)
+  ├─ calendar-intelligence.ts (350 lines)
+  ├─ task-intelligence.ts (300 lines)
+  └─ analytics-intelligence.ts (350 lines)
+```
+
+**New UI:**
+
+```
+web/src/pages/Settings/
+  └─ IntelligenceSettings.tsx (400 lines)
+
+helix-runtime/apps/ios/Sources/Intelligence/
+  ├─ EmailIntelligence.swift (300 lines)
+  └─ CalendarIntelligence.swift (250 lines)
+
+helix-runtime/apps/android/app/src/main/kotlin/com/helix/intelligence/
+  ├─ EmailIntelligence.kt (300 lines)
+  └─ CalendarIntelligence.kt (250 lines)
+```
+
+**Tests:**
+
+```
+tests/intelligence/
+  ├─ email-intelligence.test.ts (400 lines)
+  ├─ calendar-intelligence.test.ts (350 lines)
+  ├─ task-intelligence.test.ts (300 lines)
+  └─ analytics-intelligence.test.ts (300 lines)
+```
+
+**Database:**
+
+```sql
+-- Track all intelligence requests for analytics
+CREATE TABLE intelligence_requests (
+  id UUID PRIMARY KEY,
+  userId UUID NOT NULL,
+  role TEXT NOT NULL,
+  provider TEXT NOT NULL,
+  model TEXT,
+  inputTokens INT,
+  outputTokens INT,
+  cost DECIMAL,
+  latency INT,
+  success BOOLEAN,
+  error TEXT,
+  timestamp TIMESTAMP,
+  month TEXT
+);
+
+-- Track monthly costs per user
+CREATE TABLE user_monthly_spend (
+  userId UUID PRIMARY KEY,
+  month TEXT PRIMARY KEY,
+  totalCost DECIMAL,
+  byRole JSONB
+);
+```
+
+---
+
+## Next Steps
+
+1. **Review & Approve** - Confirm architecture before coding
+2. **Week 13: Execution** - Build router + settings UI
+3. **Week 14-17: Features** - Intelligence modules
+4. **Week 18-20: Polish & Deploy** - Mobile + production
+
+Ready to proceed with Week 13?

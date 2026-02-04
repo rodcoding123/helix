@@ -76,15 +76,12 @@ export class PostConversationTrustHook {
       // ==========================================
       // 2. Detect reciprocity in messages
       // ==========================================
-      const reciprocityAnalysis = reciprocityDetector.analyzeConversation(
-        conversation.messages,
-        {
-          valence: conversation.valence || 0,
-          arousal: conversation.arousal || 0,
-          selfRelevance: conversation.self_relevance || 0,
-          novelty: conversation.novelty || 0,
-        }
-      );
+      const reciprocityAnalysis = reciprocityDetector.analyzeConversation(conversation.messages, {
+        valence: conversation.valence || 0,
+        arousal: conversation.arousal || 0,
+        selfRelevance: conversation.self_relevance || 0,
+        novelty: conversation.novelty || 0,
+      });
 
       // ==========================================
       // 3. Build ConversationEvent for trust engine
@@ -92,7 +89,7 @@ export class PostConversationTrustHook {
       const event: ConversationEvent = {
         conversationId: conversation.id,
         userId: conversation.user_id,
-        content: conversation.messages.map((m) => m.content).join('\n'),
+        content: conversation.messages.map(m => m.content).join('\n'),
 
         emotionalAnalysis: {
           primaryEmotion: conversation.primary_emotion,
@@ -128,11 +125,14 @@ export class PostConversationTrustHook {
       // ==========================================
       // 6. Log success
       // ==========================================
-      console.log(`[TRUST_UPDATE] Conversation ${conversationId} processed for user ${conversation.user_id}`, {
-        reciprocityScore: reciprocityAnalysis.reciprocityScore,
-        trustDelta: result.trustDelta,
-        attachmentStage: result.attachmentStageAfter,
-      });
+      console.log(
+        `[TRUST_UPDATE] Conversation ${conversationId} processed for user ${conversation.user_id}`,
+        {
+          reciprocityScore: reciprocityAnalysis.reciprocityScore,
+          trustDelta: result.trustDelta,
+          attachmentStage: result.attachmentStageAfter,
+        }
+      );
     } catch (error) {
       console.error(`Failed to process conversation ${conversationId}:`, error);
       throw error; // Propagate to caller
@@ -193,7 +193,7 @@ export class PostConversationTrustHook {
             processedAt: new Date().toISOString(),
           }),
           updated_at: new Date().toISOString(),
-        })
+        } as Record<string, unknown>)
         .eq('id', conversationId);
 
       if (error) {
@@ -236,13 +236,13 @@ export async function subscribeToConversationUpdates(): Promise<void> {
         schema: 'public',
         table: 'conversations',
       },
-      async (payload) => {
+      async payload => {
         try {
           const conversationId = payload.new.id;
           console.log(`[REALTIME] New conversation detected: ${conversationId}`);
 
           // Process trust asynchronously (don't wait)
-          postConversationTrustHook.processConversation(conversationId).catch((error) => {
+          postConversationTrustHook.processConversation(conversationId).catch(error => {
             console.error(`Failed to process conversation in realtime: ${conversationId}`, error);
           });
         } catch (error) {
@@ -250,7 +250,7 @@ export async function subscribeToConversationUpdates(): Promise<void> {
         }
       }
     )
-    .subscribe((status) => {
+    .subscribe(status => {
       if (status === 'SUBSCRIBED') {
         console.log('[REALTIME] Trust update subscription active');
       } else if (status === 'CLOSED') {
@@ -332,7 +332,7 @@ export async function batchProcessConversations(
       console.log(`[BATCH_PROCESS] Processed: ${processed}, Failed: ${failed}, Offset: ${offset}`);
 
       // Give the system a break between batches
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
     return { processed, failed };

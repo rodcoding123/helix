@@ -4,13 +4,13 @@ This document provides step-by-step procedures for rolling back the Phase 1A & 1
 
 ## Quick Reference
 
-| Scenario | Action | Time |
-|----------|--------|------|
-| Disable all hardening | Set `HELIX_FEATURE_PRELOAD_SECRETS=false` | Immediate |
-| Disable log sanitization | Remove `import './lib/safe-console.js'` | 1 min |
-| Disable plugin isolation | Set `DISABLE_PLUGIN_ENV_PROXY=true` | 1 min |
-| Disable 1Password audit | Set `enableAuditScheduler=false` in initializeHelix() | 1 min |
-| Full rollback | Revert git commits | 5 min |
+| Scenario                 | Action                                                | Time      |
+| ------------------------ | ----------------------------------------------------- | --------- |
+| Disable all hardening    | Set `HELIX_FEATURE_PRELOAD_SECRETS=false`             | Immediate |
+| Disable log sanitization | Remove `import './lib/safe-console.js'`               | 1 min     |
+| Disable plugin isolation | Set `DISABLE_PLUGIN_ENV_PROXY=true`                   | 1 min     |
+| Disable 1Password audit  | Set `enableAuditScheduler=false` in initializeHelix() | 1 min     |
+| Full rollback            | Revert git commits                                    | 5 min     |
 
 ## Level 1: Feature Flags (Immediate, No Code Changes)
 
@@ -26,12 +26,14 @@ node helix-runtime/openclaw.mjs
 ```
 
 **Result**:
+
 - Discord webhooks NOT initialized before logging
 - Secrets loaded on-demand via loadSecret()
 - No EncryptedSecretsCache initialization
 - Reverts to original plaintext storage in Map
 
 **Testing**:
+
 ```bash
 HELIX_FEATURE_PRELOAD_SECRETS=false npm run test
 # Should pass - preloadSecrets() is not called
@@ -42,24 +44,28 @@ HELIX_FEATURE_PRELOAD_SECRETS=false npm run test
 **Impact**: Console logs not sanitized (secrets may leak)
 
 **Option A**: Disable safe-console import
+
 ```bash
 # In helix-runtime/src/entry.ts, comment out:
 // import './lib/safe-console.js';
 ```
 
 **Option B**: Keep import but bypass sanitization
+
 ```bash
 export NODE_OPTIONS="--disable-warning=ExperimentalWarning"
 # safe-console is still imported but logs directly to console.raw
 ```
 
 **Result**:
+
 - All logs bypass LogSanitizer
 - Secrets appear in plaintext in Discord
 - Error messages not redacted
 - Performance improves slightly (no regex matching)
 
 **Testing**:
+
 ```bash
 npm run test -- src/lib/log-sanitizer.test.ts
 # Tests will pass (logSanitizer still works)
@@ -71,12 +77,13 @@ npm run test -- src/lib/log-sanitizer.test.ts
 **Impact**: Plugins have full process.env access
 
 **In helix-runtime/src/plugins/loader.ts**, revert the injection:
+
 ```typescript
 // OLD: With isolation
 const api = createApi(record, {
   config: cfg,
   pluginConfig: validatedConfig.value,
-  env: createPluginEnvironment(record.id),  // REMOVE THIS
+  env: createPluginEnvironment(record.id), // REMOVE THIS
 });
 
 // NEW: Without isolation
@@ -88,12 +95,14 @@ const api = createApi(record, {
 ```
 
 **Result**:
-- Plugins can access DISCORD_WEBHOOK_*, STRIPE_KEY, etc.
+
+- Plugins can access DISCORD*WEBHOOK*\*, STRIPE_KEY, etc.
 - No blocked access attempts
 - No logging of plugin access violations
 - Plugin environment tests fail (as expected)
 
 **Testing**:
+
 ```bash
 npm run test -- helix-runtime/src/plugins/environment-proxy.test.ts
 # Tests fail (expected - proxy not used)
@@ -102,11 +111,12 @@ npm run test -- helix-runtime/src/plugins/environment-proxy.test.ts
 ### 4. Disable 1Password Audit Scheduler
 
 **In src/helix/index.ts**, disable in initializeHelix():
+
 ```typescript
 export async function initializeHelix(options: HelixInitOptions = {}): Promise<void> {
   const {
     // ... other options
-    enableAuditScheduler = false,  // CHANGE FROM true TO false
+    enableAuditScheduler = false, // CHANGE FROM true TO false
   } = options;
 
   // ... rest of code unchanged
@@ -114,12 +124,14 @@ export async function initializeHelix(options: HelixInitOptions = {}): Promise<v
 ```
 
 **Result**:
+
 - No hourly 1Password access pattern analysis
 - No anomaly detection
 - No Discord alerts for unusual access
 - Audit scheduler never starts
 
 **Testing**:
+
 ```bash
 npm run test -- src/lib/1password-audit.test.ts
 # Tests pass (audit system still works, just not scheduled)
@@ -132,6 +144,7 @@ npm run test -- src/lib/1password-audit.test.ts
 Keep all other hardening, but store secrets plaintext in memory:
 
 **In src/lib/secrets-loader.ts**, revert to original Map:
+
 ```typescript
 // OLD: With encryption
 const SECRETS_CACHE = new EncryptedSecretsCache();
@@ -141,6 +154,7 @@ const SECRETS_CACHE = new Map<string, string>();
 ```
 
 **Result**:
+
 - Secrets stored plaintext in memory (vulnerable to heap dumps)
 - Log sanitization still active
 - Plugin isolation still active
@@ -149,6 +163,7 @@ const SECRETS_CACHE = new Map<string, string>();
 **Impact**: ⚠️ HIGH - Secrets exposed in memory dumps/heap snapshots
 
 **Testing**:
+
 ```bash
 # Revert in secrets-loader.ts and run tests:
 npm run test -- src/lib/secrets-loader.test.ts
@@ -166,6 +181,7 @@ strings heapsnapshot.heapsnapshot | grep "sk_live_"
 Keep encryption and plugin isolation:
 
 **In src/lib/secrets-loader.ts**, remove sanitization:
+
 ```typescript
 // Remove this line:
 import { logSecretOperation } from '../helix/hash-chain.js';
@@ -174,18 +190,21 @@ import { logSecretOperation } from '../helix/hash-chain.js';
 ```
 
 **In src/helix/index.ts**, keep preloadSecrets() but remove logging:
+
 ```typescript
 // Keep preloadSecrets() function, but remove:
 await logSecretOperation({ ... });
 ```
 
 **Result**:
+
 - Secrets still encrypted in memory
 - Plugin isolation still active
 - But no audit trail for secret operations
 - Secrets still sanitized from console output
 
 **Testing**:
+
 ```bash
 npm run test -- src/helix/hash-chain.test.ts
 # Tests pass (hash chain still works, just not used for secrets)
@@ -236,6 +255,7 @@ rm src/lib/1password-audit.ts
 ### Revert Modified Files
 
 See git diff for exact changes:
+
 ```bash
 git diff HEAD~20 -- src/lib/secrets-loader.ts | head -100
 git checkout HEAD~20 -- src/lib/secrets-loader.ts
@@ -346,20 +366,21 @@ git stash pop
 
 ## Rollback Decision Matrix
 
-| Issue | Symptom | Rollback Level | Why |
-|-------|---------|-----------------|-----|
-| Secrets not loading | preloadSecrets() timeout | Feature flag | Isolate startup issue |
-| Log spam | Too much redaction | Partial | Disable sanitization |
-| Plugin failures | Blocked env access | Partial | Disable isolation only |
-| Memory issues | Encryption overhead | Partial | Revert encryption |
-| Audit spam | Too many alerts | Feature flag | Disable scheduler |
-| Complete failure | System won't start | Full | Comprehensive problem |
+| Issue               | Symptom                  | Rollback Level | Why                    |
+| ------------------- | ------------------------ | -------------- | ---------------------- |
+| Secrets not loading | preloadSecrets() timeout | Feature flag   | Isolate startup issue  |
+| Log spam            | Too much redaction       | Partial        | Disable sanitization   |
+| Plugin failures     | Blocked env access       | Partial        | Disable isolation only |
+| Memory issues       | Encryption overhead      | Partial        | Revert encryption      |
+| Audit spam          | Too many alerts          | Feature flag   | Disable scheduler      |
+| Complete failure    | System won't start       | Full           | Comprehensive problem  |
 
 ## Post-Rollback Security Considerations
 
 ### If Rolling Back Encryption
 
 ⚠️ **HIGH RISK** - Secrets now exposed in memory. Mitigations:
+
 - Immediately rotate all secrets (1Password)
 - Check Discord logs for leaked secrets in error messages
 - Monitor process.env access from plugins
@@ -368,6 +389,7 @@ git stash pop
 ### If Rolling Back Log Sanitization
 
 ⚠️ **MEDIUM RISK** - Secrets may appear in console output. Mitigations:
+
 - Check Discord logs for plaintext secrets
 - Rotate any exposed API keys
 - Keep safe-console.ts for future re-deployment
@@ -376,6 +398,7 @@ git stash pop
 ### If Rolling Back Plugin Isolation
 
 ⚠️ **MEDIUM RISK** - Plugins can access secrets. Mitigations:
+
 - Audit all plugins for unauthorized access
 - Check hash chain for plugin_attempt logs
 - Consider disabling untrusted plugins
@@ -384,6 +407,7 @@ git stash pop
 ### If Rolling Back Completely
 
 ⚠️ **CRITICAL RISK** - All security hardening removed. Mitigations:
+
 - Rotate ALL secrets immediately
 - Perform security audit
 - Check Discord logs for leaks

@@ -206,7 +206,7 @@ Knowledge Base in /web/docs/knowledge-base/ Protected (43K+ words)
 ### 3. Documentation Was Aspirational Not Descriptive
 
 - PRODUCT-FEATURES.md listed what _could_ be
-- HELIX_TECHNICAL_SPEC.md designed what _should_ be
+- HELIX*TECHNICAL_SPEC.md designed what \_should* be
 - Neither described what _actually is_
 - New docs fix this: they describe reality
 
