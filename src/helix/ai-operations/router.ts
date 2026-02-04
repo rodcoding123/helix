@@ -21,6 +21,7 @@ import { CostPredictor } from './cost-predictor.js';
 import { RetryManager } from './retry-manager.js';
 import { ObservabilityMetrics } from './observability-metrics.js';
 import { UsageQuotaManager } from './usage-quota.js';
+import { RateLimiter } from './rate-limiter.js';
 
 // Type definitions
 export interface RoutingRequest {
@@ -92,6 +93,7 @@ export class AIOperationRouter {
   private retryManager: RetryManager;
   private observabilityMetrics: ObservabilityMetrics;
   private quotaManager: UsageQuotaManager;
+  private rateLimiter: RateLimiter;
 
   constructor() {
     // Initialize Phase 4 orchestration
@@ -108,6 +110,7 @@ export class AIOperationRouter {
 
     // Initialize Phase 6 multi-tenant support
     this.quotaManager = new UsageQuotaManager();
+    this.rateLimiter = new RateLimiter();
   }
 
   private getSupabaseClient(): ReturnType<typeof createClient> {
@@ -560,6 +563,13 @@ export class AIOperationRouter {
    */
   getQuotaManager(): UsageQuotaManager {
     return this.quotaManager;
+  }
+
+  /**
+   * Get rate limiter for enforcing per-user request limits
+   */
+  getRateLimiter(): RateLimiter {
+    return this.rateLimiter;
   }
 }
 
