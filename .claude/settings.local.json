@@ -12,7 +12,8 @@
       "Read(//c/Users/Specter/Desktop/Helix/**)",
       "Bash(git restore:*)",
       "WebFetch(domain:www.volcengine.com)",
-      "Bash(xcodegen generate:*)"
+      "Bash(xcodegen generate:*)",
+      "Bash(xcodebuild test:*)"
     ]
   },
   "contextInclude": ["c:/Users/Specter/Desktop/Helix"]
