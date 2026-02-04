@@ -278,7 +278,8 @@ export function validatePackageName(name: string): { valid: boolean; reason?: st
   if (!/^(@[a-z0-9_-]+\/)?[a-z0-9_-]+$/i.test(name)) {
     return {
       valid: false,
-      reason: 'Package name contains invalid characters (only a-z, 0-9, hyphen, underscore allowed)',
+      reason:
+        'Package name contains invalid characters (only a-z, 0-9, hyphen, underscore allowed)',
     };
   }
 
@@ -446,11 +447,7 @@ export async function monitorSupplyChainThreats(): Promise<void> {
     // - Unexpected dependency updates
 
     // Log monitoring activity
-    await sendAlert(
-      'Supply Chain Monitor',
-      'Supply chain threat monitoring completed',
-      'info'
-    );
+    await sendAlert('Supply Chain Monitor', 'Supply chain threat monitoring completed', 'info');
   } catch (error) {
     // Fail gracefully - monitoring error doesn't block system
     const errorMessage = error instanceof Error ? error.message : String(error);

@@ -105,8 +105,8 @@ describe('Privilege Escalation Prevention (RBAC)', () => {
     });
 
     it('should reject invalid roles', () => {
-      expect(matrix.canPerform('superuser' as any, 'read')).toBe(false);
-      expect(matrix.canPerform('guest' as any, 'read')).toBe(false);
+      expect(matrix.canPerform('superuser' as unknown as SystemRole, 'read')).toBe(false);
+      expect(matrix.canPerform('guest' as unknown as SystemRole, 'read')).toBe(false);
     });
 
     it('should reject invalid capabilities', () => {

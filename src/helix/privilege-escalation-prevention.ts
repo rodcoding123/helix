@@ -163,10 +163,7 @@ const rbacMatrix = new RBACMatrix();
  * @param capability - Capability being requested
  * @returns {allowed, reason?, logged} - Permission result with audit log flag
  */
-export function checkCapability(
-  role: unknown,
-  capability: RoleCapability
-): CapabilityCheckResult {
+export function checkCapability(role: unknown, capability: RoleCapability): CapabilityCheckResult {
   // Validate role
   if (!SYSTEM_ROLES.includes(role as SystemRole)) {
     return {
@@ -198,7 +195,9 @@ export function checkCapability(
  * @param attempt - Escalation attempt details
  * @returns {isEscalation, technique?, severity?} - Whether escalation detected and severity
  */
-export function detectPrivilegeEscalation(attempt: PrivilegeEscalationAttempt): PrivilegeEscalationResult {
+export function detectPrivilegeEscalation(
+  attempt: PrivilegeEscalationAttempt
+): PrivilegeEscalationResult {
   // Check for legitimate promotion (approved escalation)
   if (attempt.type === 'legitimate_promotion' && attempt.approved === true) {
     return {
@@ -213,14 +212,14 @@ export function detectPrivilegeEscalation(attempt: PrivilegeEscalationAttempt): 
 
     // Check if added capabilities skip normal hierarchy
     const added: string[] = [];
-    scopeAfter.forEach((cap) => {
+    scopeAfter.forEach(cap => {
       if (!scopeBefore.has(cap)) {
         added.push(cap);
       }
     });
 
     // If significantly more capabilities added, it's escalation
-    if (added.length > 0 && added.some((cap) => ['delete', 'approve', 'configure'].includes(cap))) {
+    if (added.length > 0 && added.some(cap => ['delete', 'approve', 'configure'].includes(cap))) {
       return {
         isEscalation: true,
         technique: 'scope_merge',
@@ -383,7 +382,7 @@ export function verifyScopeSeparation(scopes: Record<string, string[]>): ScopeSe
 
     // Check for missing capabilities (must be monotonically increasing)
     const missingCaps: string[] = [];
-    expectedCaps.forEach((cap) => {
+    expectedCaps.forEach(cap => {
       if (!actualSet.has(cap)) {
         missingCaps.push(cap);
       }
@@ -395,7 +394,7 @@ export function verifyScopeSeparation(scopes: Record<string, string[]>): ScopeSe
 
     // Check for unexpected capabilities (escalation)
     const unexpectedCaps: string[] = [];
-    actualCaps.forEach((cap) => {
+    actualCaps.forEach(cap => {
       if (!expectedSet.has(cap)) {
         unexpectedCaps.push(cap);
       }
@@ -417,7 +416,7 @@ export function verifyScopeSeparation(scopes: Record<string, string[]>): ScopeSe
       const nextSet = new Set(scopes[nextRole]);
 
       // All capabilities from current should be in next
-      currentSet.forEach((cap) => {
+      currentSet.forEach(cap => {
         if (!nextSet.has(cap)) {
           errors.push(
             `Role hierarchy broken: '${nextRole}' missing capability '${cap}' from '${currentRole}'`
