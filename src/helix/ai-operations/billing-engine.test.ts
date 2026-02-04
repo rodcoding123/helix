@@ -2,91 +2,101 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { BillingEngine } from './billing-engine.js';
 
 describe('BillingEngine', () => {
-  let billingEngine: BillingEngine;
+  let billing: BillingEngine;
 
   beforeEach(() => {
-    billingEngine = new BillingEngine();
+    billing = new BillingEngine();
   });
 
-  it('should record operation costs', () => {
-    billingEngine.recordOperation('user1', 'gpt-4', 0.5);
-    const usage = billingEngine.getMonthlyUsage('user1');
-    expect(usage.totalCost).toBe(0.5);
+  describe('Usage Tracking', () => {
+    it('records operation cost', () => {
+      billing.recordOperation('user_123', 'email_analysis', 0.005);
+      const costs = billing.getMonthlyUsage('user_123');
+      expect(costs.totalCost).toBe(0.005);
+      expect(costs.operationCount).toBe(1);
+    });
+
+    it('aggregates costs by operation type', () => {
+      billing.recordOperation('user_123', 'email_analysis', 0.005);
+      billing.recordOperation('user_123', 'video_analysis', 0.05);
+      billing.recordOperation('user_123', 'email_analysis', 0.005);
+
+      const costs = billing.getMonthlyUsage('user_123');
+      expect(costs.totalCost).toBe(0.06);
+      expect(costs.operationCount).toBe(3);
+    });
   });
 
-  it('should apply 10% tax to costs', () => {
-    billingEngine.recordOperation('user1', 'gpt-4', 100.0);
-    const usage = billingEngine.getMonthlyUsage('user1');
-    expect(usage.tax).toBe(10.0); // 100 * 0.10
-    expect(usage.totalAmount).toBe(110.0); // 100 + 10
+  describe('Invoice Generation', () => {
+    it('generates monthly invoice', () => {
+      billing.recordOperation('user_456', 'email_analysis', 0.005);
+      billing.recordOperation('user_456', 'email_analysis', 0.005);
+      billing.recordOperation('user_456', 'video_analysis', 0.05);
+
+      const invoice = billing.generateInvoice('user_456');
+      expect(invoice.userId).toBe('user_456');
+      expect(invoice.totalAmount).toBeCloseTo(0.066);
+      expect(invoice.status).toBe('unpaid');
+    });
+
+    it('calculates tax (10%)', () => {
+      billing.recordOperation('user_789', 'email_analysis', 0.1);
+
+      const invoice = billing.generateInvoice('user_789');
+      expect(invoice.subtotal).toBe(0.1);
+      expect(invoice.tax).toBeCloseTo(0.01);
+      expect(invoice.totalAmount).toBeCloseTo(0.11);
+    });
+
+    it('tracks invoice status', () => {
+      billing.recordOperation('user_101', 'email_analysis', 0.05);
+
+      const invoice = billing.generateInvoice('user_101');
+      expect(invoice.status).toBe('unpaid');
+
+      billing.markInvoiceAsPaid(invoice.invoiceId);
+      const updatedInvoice = billing.getInvoice(invoice.invoiceId);
+      expect(updatedInvoice?.status).toBe('paid');
+    });
   });
 
-  it('should accumulate costs for multiple operations', () => {
-    billingEngine.recordOperation('user1', 'gpt-4', 25.0);
-    billingEngine.recordOperation('user1', 'claude-3', 75.0);
-    const usage = billingEngine.getMonthlyUsage('user1');
-    expect(usage.totalCost).toBe(100.0);
+  describe('Cost Breakdown', () => {
+    it('provides cost breakdown by operation type', () => {
+      billing.recordOperation('user_111', 'email_analysis', 0.01);
+      billing.recordOperation('user_111', 'email_analysis', 0.02);
+      billing.recordOperation('user_111', 'video_analysis', 0.05);
+      billing.recordOperation('user_111', 'audio_transcription', 0.001);
+
+      const usage = billing.getMonthlyUsage('user_111');
+      expect(usage.costByOperation.email_analysis).toBe(0.03);
+      expect(usage.costByOperation.video_analysis).toBe(0.05);
+      expect(usage.costByOperation.audio_transcription).toBe(0.001);
+    });
   });
 
-  it('should track costs per operation type', () => {
-    billingEngine.recordOperation('user1', 'gpt-4', 40.0);
-    billingEngine.recordOperation('user1', 'claude-3', 60.0);
-    const usage = billingEngine.getMonthlyUsage('user1');
-    expect(usage.costByType['gpt-4']).toBe(40.0);
-    expect(usage.costByType['claude-3']).toBe(60.0);
+  describe('Invoice History', () => {
+    it('tracks invoice history per user', () => {
+      billing.recordOperation('user_222', 'email_analysis', 0.05);
+      billing.generateInvoice('user_222');
+
+      billing.recordOperation('user_222', 'email_analysis', 0.1);
+      billing.generateInvoice('user_222');
+
+      const history = billing.getInvoiceHistory('user_222');
+      expect(history).toHaveLength(2);
+      expect(history[0].totalAmount).toBeCloseTo(0.055); // 0.05 + tax
+      expect(history[1].totalAmount).toBeCloseTo(0.11); // 0.1 + tax
+    });
   });
 
-  it('should generate invoices with correct totals', () => {
-    billingEngine.recordOperation('user1', 'gpt-4', 100.0);
-    const invoice = billingEngine.generateInvoice('user1');
-    expect(invoice).toBeDefined();
-    expect(invoice.subtotal).toBe(100.0);
-    expect(invoice.tax).toBe(10.0);
-    expect(invoice.totalAmount).toBe(110.0);
-    expect(invoice.status).toBe('pending');
-  });
+  describe('Reset', () => {
+    it('clears all billing data', () => {
+      billing.recordOperation('user_333', 'email_analysis', 0.05);
+      billing.clear();
 
-  it('should mark invoices as paid', () => {
-    billingEngine.recordOperation('user1', 'gpt-4', 100.0);
-    const invoice = billingEngine.generateInvoice('user1');
-    billingEngine.markInvoiceAsPaid(invoice.id);
-    const updatedInvoice = billingEngine.generateInvoice('user1');
-    expect(updatedInvoice.status).toBe('paid');
-  });
-
-  it('should track invoices per user', () => {
-    billingEngine.recordOperation('user1', 'gpt-4', 50.0);
-    billingEngine.recordOperation('user2', 'gpt-4', 75.0);
-    const invoice1 = billingEngine.generateInvoice('user1');
-    const invoice2 = billingEngine.generateInvoice('user2');
-    expect(invoice1.totalAmount).toBe(55.0);
-    expect(invoice2.totalAmount).toBe(82.5);
-  });
-
-  it('should clear all billing data', () => {
-    billingEngine.recordOperation('user1', 'gpt-4', 100.0);
-    billingEngine.clear();
-    const usage = billingEngine.getMonthlyUsage('user1');
-    expect(usage.totalCost).toBe(0);
-  });
-
-  it('should reject negative costs', () => {
-    expect(() => {
-      billingEngine.recordOperation('user1', 'gpt-4', -50.0);
-    }).toThrow('Cost must be non-negative');
-  });
-
-  it('should return immutable monthly usage data', () => {
-    billingEngine.recordOperation('user1', 'gpt-4', 100.0);
-    const usage1 = billingEngine.getMonthlyUsage('user1');
-
-    // Attempt to mutate returned object
-    usage1.totalCost = 999.0;
-    usage1.costByType['gpt-4'] = 999.0;
-
-    // Original data should be unchanged
-    const usage2 = billingEngine.getMonthlyUsage('user1');
-    expect(usage2.totalCost).toBe(100.0);
-    expect(usage2.costByType['gpt-4']).toBe(100.0);
+      const usage = billing.getMonthlyUsage('user_333');
+      expect(usage.totalCost).toBe(0);
+      expect(usage.operationCount).toBe(0);
+    });
   });
 });

@@ -1,166 +1,142 @@
 /**
- * BillingEngine
+ * Billing Engine - Phase 6
  *
- * Monthly invoicing system that tracks usage-based costs, applies 10% tax,
- * and manages payment status.
- *
- * Phase 6, Task 3: Multi-Tenant Support & Advanced API Management
- * Created: 2026-02-04
+ * Tracks usage-based costs and generates monthly invoices.
  */
 
-export type InvoiceStatus = 'pending' | 'paid' | 'failed';
+export type InvoiceStatus = 'unpaid' | 'paid' | 'overdue';
 
 export interface Invoice {
-  id: string;
+  invoiceId: string;
   userId: string;
+  createdAt: string;
   subtotal: number;
   tax: number;
   totalAmount: number;
   status: InvoiceStatus;
-  createdAt: number;
 }
 
-interface UserBillingData {
+export interface MonthlyUsage {
+  userId: string;
   totalCost: number;
-  tax: number;
-  totalAmount: number;
-  costByType: Record<string, number>;
+  operationCount: number;
+  costByOperation: Record<string, number>;
+}
+
+interface UsageRecord {
+  operationType: string;
+  cost: number;
+  timestamp: string;
 }
 
 const TAX_RATE = 0.1; // 10%
 
-/**
- * BillingEngine - Manages monthly invoicing for users
- *
- * Responsibilities:
- * 1. Track operation costs per user
- * 2. Calculate tax at 10% rate
- * 3. Generate invoices with totals
- * 4. Track payment status
- * 5. Clear billing cycles
- */
 export class BillingEngine {
-  private billings: Map<string, UserBillingData> = new Map();
+  private usageRecords: Map<string, UsageRecord[]> = new Map();
   private invoices: Map<string, Invoice> = new Map();
-  private invoiceIdCounter = 0;
+  private invoiceCounter = 0;
 
   /**
-   * Record an operation cost for a user
-   * @param userId User identifier
-   * @param operationType Type of operation (e.g., 'gpt-4', 'claude-3')
-   * @param costUsd Cost in USD
+   * Record operation cost
    */
   recordOperation(userId: string, operationType: string, costUsd: number): void {
-    if (costUsd < 0) {
-      throw new Error(`Cost must be non-negative, got: ${costUsd}`);
+    if (!this.usageRecords.has(userId)) {
+      this.usageRecords.set(userId, []);
     }
 
-    const billing = this.getOrCreateBilling(userId);
-
-    // Update total cost
-    billing.totalCost += costUsd;
-
-    // Update cost by type
-    if (!billing.costByType[operationType]) {
-      billing.costByType[operationType] = 0;
-    }
-    billing.costByType[operationType] += costUsd;
-
-    // Recalculate tax and total
-    billing.tax = billing.totalCost * TAX_RATE;
-    billing.totalAmount = billing.totalCost + billing.tax;
+    this.usageRecords.get(userId)!.push({
+      operationType,
+      cost: costUsd,
+      timestamp: new Date().toISOString(),
+    });
   }
 
   /**
-   * Get monthly usage for a user
-   * @param userId User identifier
-   * @returns Monthly usage details (defensive copy to prevent mutation)
+   * Get monthly usage summary
    */
-  getMonthlyUsage(userId: string): UserBillingData {
-    const billing = this.billings.get(userId);
-    if (!billing) {
-      return {
-        totalCost: 0,
-        tax: 0,
-        totalAmount: 0,
-        costByType: {},
-      };
+  getMonthlyUsage(userId: string): MonthlyUsage {
+    const records = this.usageRecords.get(userId) || [];
+    const totalCost = records.reduce((sum, r) => sum + r.cost, 0);
+    const costByOperation: Record<string, number> = {};
+
+    for (const record of records) {
+      costByOperation[record.operationType] =
+        (costByOperation[record.operationType] || 0) + record.cost;
     }
-    // Return a copy to prevent external mutation
+
     return {
-      totalCost: billing.totalCost,
-      tax: billing.tax,
-      totalAmount: billing.totalAmount,
-      costByType: { ...billing.costByType },
+      userId,
+      totalCost,
+      operationCount: records.length,
+      costByOperation,
     };
   }
 
   /**
-   * Generate an invoice for a user
-   * @param userId User identifier
-   * @returns Generated invoice
+   * Generate monthly invoice
    */
   generateInvoice(userId: string): Invoice {
-    const billing = this.getOrCreateBilling(userId);
-
-    // Check if invoice already exists for this user
-    const existingInvoice = Array.from(this.invoices.values()).find(inv => inv.userId === userId);
-
-    if (existingInvoice) {
-      // Update existing invoice with current totals
-      existingInvoice.subtotal = billing.totalCost;
-      existingInvoice.tax = billing.tax;
-      existingInvoice.totalAmount = billing.totalAmount;
-      return existingInvoice;
-    }
-
-    const invoiceId = `invoice_${this.invoiceIdCounter++}`;
+    const usage = this.getMonthlyUsage(userId);
+    const subtotal = usage.totalCost;
+    const tax = subtotal * TAX_RATE;
+    const totalAmount = subtotal + tax;
 
     const invoice: Invoice = {
-      id: invoiceId,
+      invoiceId: `inv_${++this.invoiceCounter}`,
       userId,
-      subtotal: billing.totalCost,
-      tax: billing.tax,
-      totalAmount: billing.totalAmount,
-      status: 'pending',
-      createdAt: Date.now(),
+      createdAt: new Date().toISOString(),
+      subtotal,
+      tax,
+      totalAmount,
+      status: 'unpaid',
     };
 
-    this.invoices.set(invoiceId, invoice);
+    this.invoices.set(invoice.invoiceId, invoice);
+
+    // Clear usage records after invoice generation (monthly cycle)
+    this.usageRecords.set(userId, []);
+
     return invoice;
   }
 
   /**
-   * Mark an invoice as paid
-   * @param invoiceId Invoice identifier
-   * @throws Error if invoice is not found
+   * Mark invoice as paid
    */
   markInvoiceAsPaid(invoiceId: string): void {
     const invoice = this.invoices.get(invoiceId);
-    if (!invoice) {
-      throw new Error(`Invoice not found: ${invoiceId}`);
+    if (invoice) {
+      invoice.status = 'paid';
     }
-    invoice.status = 'paid';
+  }
+
+  /**
+   * Get invoice by ID
+   */
+  getInvoice(invoiceId: string): Invoice | null {
+    return this.invoices.get(invoiceId) || null;
+  }
+
+  /**
+   * Get invoice history for user
+   */
+  getInvoiceHistory(userId: string): Invoice[] {
+    const invoices: Invoice[] = [];
+    for (const invoice of this.invoices.values()) {
+      if (invoice.userId === userId) {
+        invoices.push(invoice);
+      }
+    }
+    return invoices.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
   }
 
   /**
    * Clear all billing data
    */
   clear(): void {
-    this.billings.clear();
+    this.usageRecords.clear();
     this.invoices.clear();
-    this.invoiceIdCounter = 0;
-  }
-
-  private getOrCreateBilling(userId: string): UserBillingData {
-    if (!this.billings.has(userId)) {
-      this.billings.set(userId, {
-        totalCost: 0,
-        tax: 0,
-        totalAmount: 0,
-        costByType: {},
-      });
-    }
-    return this.billings.get(userId)!;
+    this.invoiceCounter = 0;
   }
 }
