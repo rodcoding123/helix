@@ -22,6 +22,7 @@ import { RetryManager } from './retry-manager.js';
 import { ObservabilityMetrics } from './observability-metrics.js';
 import { UsageQuotaManager } from './usage-quota.js';
 import { RateLimiter } from './rate-limiter.js';
+import { BillingEngine } from './billing-engine.js';
 
 // Type definitions
 export interface RoutingRequest {
@@ -94,6 +95,7 @@ export class AIOperationRouter {
   private observabilityMetrics: ObservabilityMetrics;
   private quotaManager: UsageQuotaManager;
   private rateLimiter: RateLimiter;
+  private billingEngine: BillingEngine;
 
   constructor() {
     // Initialize Phase 4 orchestration
@@ -111,6 +113,7 @@ export class AIOperationRouter {
     // Initialize Phase 6 multi-tenant support
     this.quotaManager = new UsageQuotaManager();
     this.rateLimiter = new RateLimiter();
+    this.billingEngine = new BillingEngine();
   }
 
   private getSupabaseClient(): ReturnType<typeof createClient> {
@@ -570,6 +573,13 @@ export class AIOperationRouter {
    */
   getRateLimiter(): RateLimiter {
     return this.rateLimiter;
+  }
+
+  /**
+   * Get billing engine for monthly invoicing
+   */
+  getBillingEngine(): BillingEngine {
+    return this.billingEngine;
   }
 }
 
