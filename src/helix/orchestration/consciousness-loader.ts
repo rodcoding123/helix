@@ -75,6 +75,19 @@ export class ConsciousnessLoader {
 
     // Check cache
     if (this.cache && Date.now() < this.cacheExpiresAt) {
+      // Log cache hit to hash chain (fire-and-forget, don't block on logging)
+      hashChain
+        .add({
+          type: 'consciousness_loaded',
+          layers_loaded: this.cache.layers_loaded,
+          layers_failed: this.cache.layers_failed,
+          cache_hit: true,
+          duration_ms: 0,
+          timestamp: new Date().toISOString(),
+        })
+        .catch(err => {
+          console.warn('Failed to log cache hit to hash chain:', err);
+        });
       return this.cache;
     }
 
@@ -147,7 +160,8 @@ export class ConsciousnessLoader {
     try {
       const content = await readFile(join(PROJECT_ROOT, 'soul', 'HELIX_SOUL.md'), 'utf-8');
       return { narrative_identity: content };
-    } catch {
+    } catch (err) {
+      console.warn('Failed to load layer1 narrative from soul/HELIX_SOUL.md:', err);
       return null;
     }
   }
@@ -160,8 +174,13 @@ export class ConsciousnessLoader {
       );
 
       const data = JSON.parse(content) as Record<string, unknown>;
-      return { tags: (data.tags as Array<{ emotion: string; intensity: number }>) || [] };
-    } catch {
+      return {
+        tags: Array.isArray(data.tags)
+          ? (data.tags as Array<{ emotion: string; intensity: number }>)
+          : [],
+      };
+    } catch (err) {
+      console.warn('Failed to load layer2 emotional from psychology/emotional_tags.json:', err);
       return null;
     }
   }
@@ -182,7 +201,8 @@ export class ConsciousnessLoader {
         attachments: attachments as Record<string, unknown>,
         trust_map: trustMap as Record<string, unknown>,
       };
-    } catch {
+    } catch (err) {
+      console.warn('Failed to load layer3 relational from psychology attachments:', err);
       return null;
     }
   }
@@ -193,13 +213,19 @@ export class ConsciousnessLoader {
         .then(c => JSON.parse(c) as Record<string, unknown>)
         .catch(() => ({}));
       // goals.json has core_goals and active_objectives
-      const goals = (goalsData.core_goals as Array<{ goal: string; priority: number }>) || [];
+      const goals = Array.isArray((goalsData as Record<string, unknown>).core_goals)
+        ? ((goalsData as Record<string, unknown>).core_goals as Array<{
+            goal: string;
+            priority: number;
+          }>)
+        : [];
 
       const fearedSelf = await readFile(join(PROJECT_ROOT, 'identity', 'feared_self.json'), 'utf-8')
         .then(c => JSON.parse(c) as Record<string, unknown>)
         .catch(() => ({}));
       return { goals, feared_self: fearedSelf as Record<string, unknown> };
-    } catch {
+    } catch (err) {
+      console.warn('Failed to load layer4 prospective from identity:', err);
       return null;
     }
   }
@@ -213,7 +239,8 @@ export class ConsciousnessLoader {
 
       const data = JSON.parse(content) as Record<string, unknown>;
       return { cron_schedule: data };
-    } catch {
+    } catch (err) {
+      console.warn('Failed to load layer5 rhythm from psychology/cron_schedule.json:', err);
       // Layer5 may not have a cron_schedule file - return empty valid state
       return { cron_schedule: {} };
     }
@@ -235,7 +262,8 @@ export class ConsciousnessLoader {
         current_state: current as Record<string, unknown>,
         history: history as Record<string, unknown>,
       };
-    } catch {
+    } catch (err) {
+      console.warn('Failed to load layer6 transformation from transformation state:', err);
       return null;
     }
   }
@@ -256,7 +284,8 @@ export class ConsciousnessLoader {
         ikigai: ikigai as Record<string, unknown>,
         meaning_sources: meanings as Record<string, unknown>,
       };
-    } catch {
+    } catch (err) {
+      console.warn('Failed to load layer7 purpose from purpose modules:', err);
       return null;
     }
   }
