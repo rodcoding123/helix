@@ -17,6 +17,7 @@ import {
 import { ErrorCodes, errorShape } from "../protocol/index.js";
 import { formatForLog } from "../ws-log.js";
 import type { GatewayRequestHandlers } from "./types.js";
+import { OperationContext, executeWithRouting } from "../ai-operation-integration.js";
 
 export const ttsHandlers: GatewayRequestHandlers = {
   "tts.status": async ({ respond }) => {
@@ -76,10 +77,23 @@ export const ttsHandlers: GatewayRequestHandlers = {
       );
       return;
     }
+
+    // Create operation context for AI operation tracking
+    const opContext = new OperationContext("tts.convert", "text_to_speech");
+
     try {
-      const cfg = loadConfig();
-      const channel = typeof params.channel === "string" ? params.channel.trim() : undefined;
-      const result = await textToSpeech({ text, cfg, channel });
+      // Execute with router integration for cost tracking and approval gating
+      const result = await executeWithRouting(opContext, async () => {
+        const cfg = loadConfig();
+        const channel = typeof params.channel === "string" ? params.channel.trim() : undefined;
+        const ttsResult = await textToSpeech({ text, cfg, channel });
+
+        // Track cost (MEDIUM cost operation)
+        opContext.costUsd = 0.015;
+
+        return ttsResult;
+      });
+
       if (result.success && result.audioPath) {
         respond(true, {
           audioPath: result.audioPath,

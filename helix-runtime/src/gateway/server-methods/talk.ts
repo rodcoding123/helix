@@ -5,6 +5,7 @@ import {
   validateTalkModeParams,
 } from "../protocol/index.js";
 import type { GatewayRequestHandlers } from "./types.js";
+import { OperationContext, executeWithCostTracking } from "../ai-operation-integration.js";
 
 export const talkHandlers: GatewayRequestHandlers = {
   "talk.mode": ({ params, respond, context, client, isWebchatConnect }) => {
@@ -27,12 +28,35 @@ export const talkHandlers: GatewayRequestHandlers = {
       );
       return;
     }
-    const payload = {
-      enabled: (params as { enabled: boolean }).enabled,
-      phase: (params as { phase?: string }).phase ?? null,
-      ts: Date.now(),
-    };
-    context.broadcast("talk.mode", payload, { dropIfSlow: true });
-    respond(true, payload, undefined);
+
+    // Create operation context for cost tracking (LOW cost operation)
+    const opContext = new OperationContext("talk.mode", "talk_mode_update", client?.connect?.client?.id);
+
+    // Execute with cost tracking
+    executeWithCostTracking(opContext, async () => {
+      const payload = {
+        enabled: (params as { enabled: boolean }).enabled,
+        phase: (params as { phase?: string }).phase ?? null,
+        ts: Date.now(),
+      };
+
+      // Track cost (MINIMAL cost operation)
+      opContext.costUsd = 0.0;
+
+      context.broadcast("talk.mode", payload, { dropIfSlow: true });
+      respond(true, payload, undefined);
+
+      return payload;
+    }).catch((err) => {
+      // Log error but still respond to avoid breaking the client
+      respond(
+        false,
+        undefined,
+        errorShape(
+          ErrorCodes.UNAVAILABLE,
+          "Failed to update talk mode: " + (err instanceof Error ? err.message : String(err)),
+        ),
+      );
+    });
   },
 };

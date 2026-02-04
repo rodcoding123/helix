@@ -43,6 +43,7 @@ import {
 import { stripEnvelopeFromMessages } from "../chat-sanitize.js";
 import { formatForLog } from "../ws-log.js";
 import type { GatewayRequestContext, GatewayRequestHandlers } from "./types.js";
+import { OperationContext, executeWithRouting } from "../ai-operation-integration.js";
 
 type TranscriptAppendResult = {
   ok: boolean;
@@ -500,25 +501,35 @@ export const chatHandlers: GatewayRequestHandlers = {
       });
 
       let agentRunStarted = false;
-      void dispatchInboundMessage({
-        ctx,
-        cfg,
-        dispatcher,
-        replyOptions: {
-          runId: clientRunId,
-          abortSignal: abortController.signal,
-          images: parsedImages.length > 0 ? parsedImages : undefined,
-          disableBlockStreaming: true,
-          onAgentRunStart: () => {
-            agentRunStarted = true;
+
+      // Create operation context for AI operation tracking
+      const opContext = new OperationContext("chat.send", "chat_message", clientInfo?.id);
+
+      // Execute with router integration for cost tracking and approval gating
+      void executeWithRouting(opContext, async (selectedModel) => {
+        return dispatchInboundMessage({
+          ctx,
+          cfg,
+          dispatcher,
+          replyOptions: {
+            runId: clientRunId,
+            abortSignal: abortController.signal,
+            images: parsedImages.length > 0 ? parsedImages : undefined,
+            disableBlockStreaming: true,
+            onAgentRunStart: () => {
+              agentRunStarted = true;
+            },
+            onModelSelected: (modelCtx) => {
+              prefixContext.provider = modelCtx.provider;
+              prefixContext.model = extractShortModelName(modelCtx.model);
+              prefixContext.modelFull = `${modelCtx.provider}/${modelCtx.model}`;
+              prefixContext.thinkingLevel = modelCtx.thinkLevel ?? "off";
+
+              // Track model selection for cost tracking
+              opContext.costUsd = 0.01; // Placeholder - will be updated by router
+            },
           },
-          onModelSelected: (ctx) => {
-            prefixContext.provider = ctx.provider;
-            prefixContext.model = extractShortModelName(ctx.model);
-            prefixContext.modelFull = `${ctx.provider}/${ctx.model}`;
-            prefixContext.thinkingLevel = ctx.thinkLevel ?? "off";
-          },
-        },
+        });
       })
         .then(() => {
           if (!agentRunStarted) {

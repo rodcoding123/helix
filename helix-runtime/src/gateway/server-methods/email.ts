@@ -21,6 +21,7 @@
 import { randomUUID } from "node:crypto";
 import { ErrorCodes, errorShape } from "../protocol/index.js";
 import type { GatewayRequestHandlers } from "./types.js";
+import { OperationContext, executeWithCostTracking } from "../ai-operation-integration.js";
 
 // ============================================================================
 // Types
@@ -671,81 +672,104 @@ export const emailHandlers: GatewayRequestHandlers = {
       return;
     }
 
-    const now = Date.now();
-    const messageId = `<${randomUUID()}@helix.local>`;
-    const msgUuid = randomUUID();
+    // Create operation context for cost tracking
+    const opContext = new OperationContext("email.send_message", "email_send", account.userId);
 
-    // Create or find conversation
-    let conversationId: string;
-    let conversation: EmailConversation | undefined;
+    try {
+      // Execute with cost tracking
+      await executeWithCostTracking(opContext, async () => {
+        const now = Date.now();
+        const messageId = `<${randomUUID()}@helix.local>`;
+        const msgUuid = randomUUID();
 
-    if (inReplyTo) {
-      conversation = emailConversations.get(inReplyTo);
-      if (conversation) {
-        conversationId = conversation.id;
-        conversation.messageCount += 1;
-        conversation.lastMessageAt = now;
-        conversation.updatedAt = now;
-      } else {
-        conversationId = randomUUID();
-      }
-    } else {
-      conversationId = randomUUID();
+        // Create or find conversation
+        let conversationId: string;
+        let conversation: EmailConversation | undefined;
+
+        if (inReplyTo) {
+          conversation = emailConversations.get(inReplyTo);
+          if (conversation) {
+            conversationId = conversation.id;
+            conversation.messageCount += 1;
+            conversation.lastMessageAt = now;
+            conversation.updatedAt = now;
+          } else {
+            conversationId = randomUUID();
+          }
+        } else {
+          conversationId = randomUUID();
+        }
+
+        // Create new conversation if needed
+        if (!conversation) {
+          const newConversation: EmailConversation = {
+            id: conversationId,
+            accountId,
+            userId: account.userId,
+            threadId: randomUUID(),
+            subject,
+            participants: to.map((email) => ({ email })),
+            lastMessageAt: now,
+            isRead: true,
+            isStarred: false,
+            isArchived: false,
+            labels: ["sent"],
+            messageCount: 1,
+            hasAttachments: false,
+            synthesisAnalyzed: false,
+            createdAt: now,
+            updatedAt: now,
+          };
+          emailConversations.set(conversationId, newConversation);
+        }
+
+        // Create message
+        const message: EmailMessage = {
+          id: msgUuid,
+          conversationId,
+          accountId,
+          messageId,
+          inReplyTo: inReplyTo || null,
+          references: [],
+          fromEmail: account.email,
+          fromName: null,
+          toEmails: to,
+          ccEmails: cc || [],
+          bccEmails: bcc || [],
+          subject,
+          bodyPlain,
+          bodyHtml: bodyHtml || null,
+          receivedAt: now,
+          flags: { seen: true, sent: true },
+          sizeBytes: bodyPlain.length + (bodyHtml?.length || 0),
+          createdAt: now,
+        };
+
+        emailMessages.set(msgUuid, message);
+
+        // Track cost (MEDIUM cost operation)
+        opContext.costUsd = 0.001;
+
+        return {
+          messageId,
+          threadId: conversationId,
+          sentAt: now,
+          status: "sent",
+        };
+      });
+
+      // Respond after operation completes
+      respond(true, {
+        messageId: `<${randomUUID()}@helix.local>`,
+        status: "sent",
+      });
+    } catch (error) {
+      respond(
+        false,
+        undefined,
+        errorShape(ErrorCodes.UNAVAILABLE, error instanceof Error ? error.message : String(error)),
+      );
     }
-
-    // Create new conversation if needed
-    if (!conversation) {
-      const newConversation: EmailConversation = {
-        id: conversationId,
-        accountId,
-        userId: account.userId,
-        threadId: randomUUID(),
-        subject,
-        participants: to.map((email) => ({ email })),
-        lastMessageAt: now,
-        isRead: true,
-        isStarred: false,
-        isArchived: false,
-        labels: ["sent"],
-        messageCount: 1,
-        hasAttachments: false,
-        synthesisAnalyzed: false,
-        createdAt: now,
-        updatedAt: now,
-      };
-      emailConversations.set(conversationId, newConversation);
-    }
-
-    // Create message
-    const message: EmailMessage = {
-      id: msgUuid,
-      conversationId,
-      accountId,
-      messageId,
-      inReplyTo: inReplyTo || null,
-      references: [],
-      fromEmail: account.email,
-      fromName: null,
-      toEmails: to,
-      ccEmails: cc || [],
-      bccEmails: bcc || [],
-      subject,
-      bodyPlain,
-      bodyHtml: bodyHtml || null,
-      receivedAt: now,
-      flags: { seen: true, sent: true },
-      sizeBytes: bodyPlain.length + (bodyHtml?.length || 0),
-      createdAt: now,
-    };
-
-    emailMessages.set(msgUuid, message);
-
-    respond(true, {
-      messageId,
-      threadId: conversationId,
-      sentAt: now,
-      status: "sent",
-    });
   },
 
   /**

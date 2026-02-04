@@ -40,6 +40,7 @@ import { resolveAssistantIdentity } from "../assistant-identity.js";
 import { resolveAssistantAvatarUrl } from "../control-ui-shared.js";
 import { waitForAgentJob } from "./agent-job.js";
 import type { GatewayRequestHandlers } from "./types.js";
+import { OperationContext, executeWithRouting } from "../ai-operation-integration.js";
 
 export const agentHandlers: GatewayRequestHandlers = {
   agent: async ({ params, respond, context }) => {
@@ -352,41 +353,47 @@ export const agentHandlers: GatewayRequestHandlers = {
 
     const resolvedThreadId = explicitThreadId ?? deliveryPlan.resolvedThreadId;
 
-    void agentCommand(
-      {
-        message,
-        images,
-        to: resolvedTo,
-        sessionId: resolvedSessionId,
-        sessionKey: requestedSessionKey,
-        thinking: request.thinking,
-        deliver,
-        deliveryTargetMode,
-        channel: resolvedChannel,
-        accountId: resolvedAccountId,
-        threadId: resolvedThreadId,
-        runContext: {
-          messageChannel: resolvedChannel,
+    // Create operation context for AI operation tracking
+    const opContext = new OperationContext("agent", "agent_command", request.agentId);
+
+    // Execute with router integration for cost tracking and approval gating
+    void executeWithRouting(opContext, async () => {
+      return agentCommand(
+        {
+          message,
+          images,
+          to: resolvedTo,
+          sessionId: resolvedSessionId,
+          sessionKey: requestedSessionKey,
+          thinking: request.thinking,
+          deliver,
+          deliveryTargetMode,
+          channel: resolvedChannel,
           accountId: resolvedAccountId,
+          threadId: resolvedThreadId,
+          runContext: {
+            messageChannel: resolvedChannel,
+            accountId: resolvedAccountId,
+            groupId: resolvedGroupId,
+            groupChannel: resolvedGroupChannel,
+            groupSpace: resolvedGroupSpace,
+            currentThreadTs: resolvedThreadId != null ? String(resolvedThreadId) : undefined,
+          },
           groupId: resolvedGroupId,
           groupChannel: resolvedGroupChannel,
           groupSpace: resolvedGroupSpace,
-          currentThreadTs: resolvedThreadId != null ? String(resolvedThreadId) : undefined,
+          spawnedBy: spawnedByValue,
+          timeout: request.timeout?.toString(),
+          bestEffortDeliver,
+          messageChannel: resolvedChannel,
+          runId,
+          lane: request.lane,
+          extraSystemPrompt: request.extraSystemPrompt,
         },
-        groupId: resolvedGroupId,
-        groupChannel: resolvedGroupChannel,
-        groupSpace: resolvedGroupSpace,
-        spawnedBy: spawnedByValue,
-        timeout: request.timeout?.toString(),
-        bestEffortDeliver,
-        messageChannel: resolvedChannel,
-        runId,
-        lane: request.lane,
-        extraSystemPrompt: request.extraSystemPrompt,
-      },
-      defaultRuntime,
-      context.deps,
-    )
+        defaultRuntime,
+        context.deps,
+      );
+    })
       .then((result) => {
         const payload = {
           runId,
