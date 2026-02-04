@@ -20,6 +20,7 @@ import { RequestPriorityQueue } from './priority-queue.js';
 import { CostPredictor } from './cost-predictor.js';
 import { RetryManager } from './retry-manager.js';
 import { ObservabilityMetrics } from './observability-metrics.js';
+import { UsageQuotaManager } from './usage-quota.js';
 
 // Type definitions
 export interface RoutingRequest {
@@ -90,6 +91,7 @@ export class AIOperationRouter {
   private costPredictor: CostPredictor;
   private retryManager: RetryManager;
   private observabilityMetrics: ObservabilityMetrics;
+  private quotaManager: UsageQuotaManager;
 
   constructor() {
     // Initialize Phase 4 orchestration
@@ -103,6 +105,9 @@ export class AIOperationRouter {
     this.costPredictor = new CostPredictor();
     this.retryManager = new RetryManager();
     this.observabilityMetrics = new ObservabilityMetrics();
+
+    // Initialize Phase 6 multi-tenant support
+    this.quotaManager = new UsageQuotaManager();
   }
 
   private getSupabaseClient(): ReturnType<typeof createClient> {
@@ -548,6 +553,13 @@ export class AIOperationRouter {
    */
   getObservabilityMetrics(): ObservabilityMetrics {
     return this.observabilityMetrics;
+  }
+
+  /**
+   * Get quota manager for usage limits
+   */
+  getQuotaManager(): UsageQuotaManager {
+    return this.quotaManager;
   }
 }
 
