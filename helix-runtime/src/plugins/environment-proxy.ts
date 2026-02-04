@@ -32,6 +32,9 @@ const ALLOWED_ENV_VARS = new Set([
 
 // Regex patterns that indicate sensitive environment variables
 const SENSITIVE_PATTERNS = [
+  /^HELIX_/,  // Block all Helix internal variables
+  /^RODRIGO_/,  // Block creator security variables
+  /^THANOS_/,  // Block THANOS_MODE variables
   /^DISCORD_WEBHOOK_/,
   /^SUPABASE_/,
   /^STRIPE_/,

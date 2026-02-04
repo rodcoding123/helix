@@ -11,7 +11,8 @@
  * Authentication: THANOS_MODE with API key verification
  */
 
-import crypto from 'crypto';
+import * as crypto from 'node:crypto';
+import bcrypt from 'bcrypt';
 
 // ============================================================================
 // Constants (Hardcoded at Module Load)
@@ -149,35 +150,42 @@ export function handleThanosModeTrigger(triggerPhrase: string): ThanosAuthResult
 export async function verifyCreatorApiKey(providedKey: string): Promise<ThanosAuthResult> {
   // 1. Get stored hash from environment
   const storedHash = process.env.RODRIGO_API_KEY_HASH;
-  const salt = process.env.RODRIGO_API_KEY_SALT;
 
-  if (!storedHash || !salt) {
+  if (!storedHash) {
     return {
       success: false,
       message: 'Creator authentication not configured',
     };
   }
 
-  // 2. Hash provided key with same salt
-  // Note: bcrypt comparison happens in actual implementation
-  // This is pseudocode - real implementation uses bcrypt.compare()
-  const hashedProvided = await hashWithBcrypt(providedKey, salt);
+  // 2. Use bcrypt.compare() for secure comparison
+  // bcrypt.compare handles timing attack prevention automatically
+  try {
+    const matches = await bcrypt.compare(providedKey, storedHash);
 
-  // 3. Constant-time comparison (prevents timing attacks)
-  if (!constantTimeEqual(hashedProvided, storedHash)) {
-    // Log failed attempt
+    if (!matches) {
+      // Log failed attempt
+      await logFailedAuthAttempt();
+
+      return {
+        success: false,
+        message: 'Invalid API key',
+      };
+    }
+  } catch (e) {
+    // bcrypt threw an error (invalid hash format, etc.)
     await logFailedAuthAttempt();
 
     return {
       success: false,
-      message: 'Invalid API key',
+      message: 'Authentication system error',
     };
   }
 
-  // 4. Verification successful
+  // 3. Verification successful
   const sessionToken = generateSessionToken();
 
-  // 5. Log successful verification
+  // 4. Log successful verification
   await logSuccessfulAuth(sessionToken);
 
   return {
@@ -217,15 +225,12 @@ export function generateSessionToken(): string {
 }
 
 /**
- * Hash password with bcrypt (placeholder - implement with bcrypt module)
+ * Hash password with bcrypt using provided salt
+ * Real bcrypt implementation prevents rainbow table attacks
  */
 async function hashWithBcrypt(password: string, salt: string): Promise<string> {
-  // In real implementation:
-  // const bcrypt = require('bcrypt');
-  // return bcrypt.hash(password, salt);
-
-  // Placeholder for now
-  return crypto.createHmac('sha256', salt).update(password).digest('hex');
+  // Use actual bcrypt hashing with the provided salt
+  return bcrypt.hash(password, salt);
 }
 
 /**

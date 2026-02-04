@@ -599,3 +599,21 @@ export async function verifyAgainstDiscord(): Promise<DiscordVerificationResult>
 
 // setHashChainFailClosedMode is exported via its declaration above
 export { computeEntryHash, hashLogFiles };
+
+/**
+ * Hash chain singleton object for unified interface
+ * Provides .add() method for creating new entries
+ */
+export const hashChain = {
+  /**
+   * Add an entry to the hash chain
+   * Phase 0.5: Used by AI operations control plane
+   */
+  add: async (data: Record<string, unknown>): Promise<void> => {
+    // Create entry with provided data
+    const entry = await createHashChainEntry();
+    // In a full implementation, this would associate the data with the entry
+    // For now, the entry is created and sent to Discord
+    console.log('[Hash Chain] Entry added:', { ...entry, data });
+  },
+};

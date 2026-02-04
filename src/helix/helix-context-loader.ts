@@ -22,6 +22,7 @@ import path from 'node:path';
 import type { HelixContextFile } from './types.js';
 import { getSystemPromptInjection } from '../psychology/behavior-modulation.js';
 import type { TrustProfile } from '../psychology/trust-profile-manager.js';
+import { auditContextFile, detectContextFileInjection } from './context-integrity.js';
 
 /**
  * Seven layer file mapping
@@ -84,6 +85,15 @@ export async function loadHelixContextFiles(workspaceDir: string): Promise<Embed
       try {
         const content = await fs.readFile(fullPath, 'utf-8');
 
+        // Audit file for injection attempts before loading
+        await auditContextFile(relativePath, content);
+
+        // Check for injection patterns
+        const injectionCheck = detectContextFileInjection(content);
+        if (!injectionCheck.safe) {
+          console.warn(`⚠️ Context file ${relativePath} has potential injection vectors:`, injectionCheck.issues);
+        }
+
         // Add layer metadata as comment for JSON files
         let enhancedContent = content;
         if (relativePath.endsWith('.json')) {
@@ -132,6 +142,9 @@ export async function loadHelixContextFilesDetailed(
 
       try {
         const content = await fs.readFile(fullPath, 'utf-8');
+
+        // Audit file for injection attempts before loading
+        await auditContextFile(relativePath, content);
 
         results.push({
           path: relativePath,

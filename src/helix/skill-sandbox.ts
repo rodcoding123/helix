@@ -134,6 +134,7 @@ const skillAuditLog: SkillAuditEntry[] = [];
 
 /**
  * Verify skill signature using Ed25519
+ * Uses Node.js built-in crypto module with Ed25519 keys
  */
 export function verifySkillSignature(
   skillCode: string,
@@ -146,24 +147,29 @@ export function verifySkillSignature(
 
   // The signature should be over: code + name + version + author + signedAt
   const signedData = `${skillCode}|${metadata.name}|${metadata.version}|${metadata.author}|${metadata.signedAt}`;
-  const dataHash = crypto.createHash('sha256').update(signedData).digest('hex');
 
   // For each trusted signer, try to verify the signature
-  for (const signerPublicKey of trustedSigners) {
+  for (const signerPublicKeyPem of trustedSigners) {
     try {
-      // Note: In production, use actual Ed25519 verification
-      // This is a placeholder that checks if the signature matches expected format
-      const expectedSigPrefix = crypto
-        .createHash('sha256')
-        .update(`${signerPublicKey}:${dataHash}`)
-        .digest('hex')
-        .slice(0, 16);
+      // Create verifier using Ed25519 public key (PEM format expected)
+      // The signature should be base64-encoded
+      const signatureBuffer = Buffer.from(metadata.signature, 'base64');
 
-      if (metadata.signature.startsWith(expectedSigPrefix)) {
+      // Verify signature using Ed25519
+      const verify = crypto.createVerify('Ed25519');
+      verify.update(signedData);
+      verify.end();
+
+      // Check if signature is valid
+      const isValid = verify.verify(signerPublicKeyPem, signatureBuffer);
+
+      if (isValid) {
         return true;
       }
-    } catch {
-      // Continue to next signer
+    } catch (e) {
+      // Continue to next signer on error
+      // Could log verification attempt failure for audit
+      console.debug(`Signature verification failed for signer: ${e instanceof Error ? e.message : String(e)}`);
     }
   }
 

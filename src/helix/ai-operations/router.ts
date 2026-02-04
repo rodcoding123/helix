@@ -258,7 +258,7 @@ export class AIOperationRouter {
    * 4. Helix feature toggle says "cannot change models"
    */
   async requiresApproval(
-    operationId: string,
+    _operationId: string,
     config: RouteConfig,
     estimatedCostUsd: number,
     userId?: string
