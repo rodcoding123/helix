@@ -25,3 +25,10 @@ export {
   type GeminiVideoAnalysisOptions,
   type GeminiVideoAnalysisResult,
 } from './gemini.js';
+
+export {
+  getDeepgramClient,
+  transcribeWithDeepgram,
+  type DeepgramTranscriptionOptions,
+  type DeepgramTranscriptionResult,
+} from './deepgram.js';
