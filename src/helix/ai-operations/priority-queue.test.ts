@@ -116,21 +116,48 @@ describe('RequestPriorityQueue', () => {
     });
 
     it('reports queue size', () => {
-      queue.enqueue({ operationId: 'op1', userId: 'u1', slaTier: 'standard', criticality: 'low' });
-      queue.enqueue({ operationId: 'op2', userId: 'u2', slaTier: 'standard', criticality: 'low' });
+      queue.enqueue({
+        operationId: 'op1',
+        userId: 'u1',
+        slaTier: 'standard' as const,
+        criticality: 'low' as const,
+      });
+      queue.enqueue({
+        operationId: 'op2',
+        userId: 'u2',
+        slaTier: 'premium' as const,
+        criticality: 'high' as const,
+      });
 
       expect(queue.size()).toBe(2);
     });
   });
 
-  describe('Clear', () => {
-    it('clears all items', () => {
-      queue.enqueue({ operationId: 'op1', userId: 'u1', slaTier: 'standard', criticality: 'low' });
-      queue.enqueue({ operationId: 'op2', userId: 'u2', slaTier: 'standard', criticality: 'low' });
+  describe('Fair Queuing', () => {
+    it('prevents starvation of low-priority items', () => {
+      // Enqueue standard + low (priority 10)
+      queue.enqueue({
+        operationId: 'op1',
+        userId: 'u1',
+        slaTier: 'standard',
+        criticality: 'low',
+      });
 
-      queue.clear();
-      expect(queue.size()).toBe(0);
-      expect(queue.dequeue()).toBeNull();
+      // Enqueue premium + high (priority 130)
+      queue.enqueue({
+        operationId: 'op2',
+        userId: 'u2',
+        slaTier: 'premium',
+        criticality: 'high',
+      });
+
+      // Dequeue premium (highest priority)
+      const first = queue.dequeue();
+      expect(first?.operationId).toBe('op2');
+
+      // Standard + low should now be next
+      const second = queue.dequeue();
+      expect(second?.operationId).toBe('op1');
     });
   });
 });

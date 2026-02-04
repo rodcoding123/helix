@@ -1,8 +1,8 @@
 /**
  * Request Priority Queue - Phase 5
  *
- * Manages operation execution order based on SLA tier and criticality.
- * Implements aging mechanism to prevent starvation of low-priority items.
+ * Manages request execution order based on SLA tier, criticality, and age.
+ * Prevents starvation of low-priority items through age-based bonus.
  */
 
 export type SlaTier = 'premium' | 'standard';
@@ -13,8 +13,8 @@ export interface QueueItem {
   userId: string;
   slaTier: SlaTier;
   criticality: Criticality;
-  enqueuedAt?: number;
   ageMinutes?: number;
+  enqueuedAt?: number;
 }
 
 interface InternalQueueItem extends QueueItem {
@@ -22,27 +22,32 @@ interface InternalQueueItem extends QueueItem {
   enqueuedAt: number;
 }
 
-const SLA_TIER_WEIGHT = 100;
-const CRITICALITY_WEIGHTS = { low: 10, medium: 20, high: 30 };
-const AGE_BONUS_PER_MINUTE = 1;
+const SLA_TIER_WEIGHTS = {
+  premium: 100,
+  standard: 0,
+};
+
+const CRITICALITY_WEIGHTS = {
+  high: 30,
+  medium: 20,
+  low: 10,
+};
 
 export class RequestPriorityQueue {
   private items: InternalQueueItem[] = [];
 
   /**
-   * Enqueue an item with calculated priority
+   * Enqueue item with calculated priority
    */
   enqueue(item: QueueItem): void {
-    const enqueuedAt = Date.now();
     const priority = this.calculatePriority(item);
-
     const internalItem: InternalQueueItem = {
       ...item,
       priority,
-      enqueuedAt,
+      enqueuedAt: Date.now(),
     };
 
-    // Insert in sorted order (highest priority first)
+    // Insert in priority order (highest priority first)
     let inserted = false;
     for (let i = 0; i < this.items.length; i++) {
       if (priority > this.items[i].priority) {
@@ -61,48 +66,46 @@ export class RequestPriorityQueue {
    * Dequeue highest priority item
    */
   dequeue(): QueueItem | null {
-    if (this.items.length === 0) {
-      return null;
-    }
-
-    const item = this.items.shift();
-    return item || null;
+    return this.items.shift() || null;
   }
 
   /**
    * Peek at highest priority item without removing
    */
   peek(): QueueItem | null {
-    if (this.items.length === 0) {
-      return null;
-    }
-
-    return this.items[0];
+    return this.items[0] || null;
   }
 
   /**
-   * Get current queue size
+   * Get queue size
    */
   size(): number {
     return this.items.length;
   }
 
   /**
-   * Clear all items
+   * Calculate priority for item
+   * Formula: (sla_tier * 100) + (criticality * 10) + age_bonus
+   */
+  calculatePriority(item: QueueItem): number {
+    const slaTierWeight = SLA_TIER_WEIGHTS[item.slaTier];
+    const criticalityWeight = CRITICALITY_WEIGHTS[item.criticality];
+    const ageBonus = item.ageMinutes || 0;
+
+    return slaTierWeight + criticalityWeight + ageBonus;
+  }
+
+  /**
+   * Clear queue
    */
   clear(): void {
     this.items = [];
   }
 
   /**
-   * Calculate priority for an item
-   * Priority = (SLA Tier Weight) + (Criticality Weight) + (Age Bonus)
+   * Get all items in queue (for debugging)
    */
-  calculatePriority(item: QueueItem): number {
-    const tierWeight = item.slaTier === 'premium' ? SLA_TIER_WEIGHT : 0;
-    const criticalityWeight = CRITICALITY_WEIGHTS[item.criticality];
-    const ageBonus = (item.ageMinutes || 0) * AGE_BONUS_PER_MINUTE;
-
-    return tierWeight + criticalityWeight + ageBonus;
+  getAllItems(): InternalQueueItem[] {
+    return [...this.items];
   }
 }
