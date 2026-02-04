@@ -279,4 +279,26 @@ describe('AIOperationRouter', () => {
       expect(validControlTypes).toContain('ADMIN_ONLY');
     });
   });
+
+  describe('Phase 4 Integration', () => {
+    it('provides access to health monitor', () => {
+      const monitor = router.getHealthMonitor();
+      expect(monitor).toBeDefined();
+    });
+
+    it('provides access to orchestrator', () => {
+      const orchestrator = router.getOrchestrator();
+      expect(orchestrator).toBeDefined();
+    });
+
+    it('provides access to scheduler', () => {
+      const scheduler = router.getScheduler();
+      expect(scheduler).toBeDefined();
+    });
+
+    it('provides access to batch engine', () => {
+      const batchEngine = router.getBatchEngine();
+      expect(batchEngine).toBeDefined();
+    });
+  });
 });
