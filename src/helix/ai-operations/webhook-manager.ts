@@ -1,72 +1,59 @@
 /**
- * WebhookManager
+ * Webhook Manager - Phase 6
  *
- * Real-time event delivery system with exponential backoff retry logic for webhook
- * callbacks to third-party integrations.
- *
- * Phase 6: Multi-Tenant Support & Advanced API Management
- * Task 5: Webhook Manager implementation
- * Created: 2026-02-04
+ * Manages webhook subscriptions and real-time event delivery with retry logic.
  */
 
+export type EventType = 'operation_start' | 'operation_complete' | 'operation_failed';
 export type DeliveryStatus = 'pending' | 'delivered' | 'failed';
 
 export interface Webhook {
   id: string;
   userId: string;
   url: string;
-  eventTypes: string[];
-  createdAt: number;
+  eventTypes: EventType[];
+  createdAt: string;
 }
 
-export interface WebhookDelivery {
+export interface WebhookEvent {
+  eventType: EventType;
+  userId: string;
+  data: Record<string, unknown>;
+}
+
+export interface Delivery {
   id: string;
   webhookId: string;
-  eventType: string;
+  eventType: EventType;
   payload: Record<string, unknown>;
   status: DeliveryStatus;
-  attempts: number;
-  nextRetryTime: number;
-  createdAt: number;
+  retryCount: number;
+  nextRetryTime?: string;
+  timestamp: string;
 }
 
 const MAX_RETRIES = 5;
 const INITIAL_BACKOFF_MS = 1000; // 1 second
 const MAX_BACKOFF_MS = 32000; // 32 seconds
 
-/**
- * WebhookManager - Real-time event delivery for third-party integrations
- *
- * Features:
- * 1. Webhook registration per user
- * 2. Event-based delivery filtering
- * 3. Exponential backoff retry logic
- * 4. Delivery status tracking
- * 5. Multi-event support per webhook
- */
 export class WebhookManager {
   private webhooks: Map<string, Webhook> = new Map();
-  private deliveries: Map<string, WebhookDelivery> = new Map();
-  private userWebhooks: Map<string, string[]> = new Map(); // userId -> webhookIds
-  private webhookIdCounter = 0;
-  private deliveryIdCounter = 0;
+  private deliveries: Map<string, Delivery> = new Map();
+  private userWebhooks: Map<string, string[]> = new Map();
+  private webhookCounter = 0;
+  private deliveryCounter = 0;
 
   /**
-   * Register a webhook for a user
-   * @param userId User identifier
-   * @param url Webhook URL
-   * @param eventTypes Event types to subscribe to
-   * @returns Registered webhook
+   * Register webhook endpoint
    */
-  registerWebhook(userId: string, url: string, eventTypes: string[]): Webhook {
-    const webhookId = `webhook_${this.webhookIdCounter++}`;
-
+  registerWebhook(userId: string, url: string, eventTypes: EventType[]): string {
+    const webhookId = `webhook_${++this.webhookCounter}`;
     const webhook: Webhook = {
       id: webhookId,
       userId,
       url,
       eventTypes,
-      createdAt: Date.now(),
+      createdAt: new Date().toISOString(),
     };
 
     this.webhooks.set(webhookId, webhook);
@@ -76,102 +63,99 @@ export class WebhookManager {
     }
     this.userWebhooks.get(userId)!.push(webhookId);
 
-    return webhook;
+    return webhookId;
   }
 
   /**
-   * Unregister a webhook
-   * @param webhookId Webhook identifier
+   * Unregister webhook
    */
   unregisterWebhook(webhookId: string): void {
     const webhook = this.webhooks.get(webhookId);
     if (webhook) {
-      const userWebhooks = this.userWebhooks.get(webhook.userId);
-      if (userWebhooks) {
-        const index = userWebhooks.indexOf(webhookId);
-        if (index !== -1) {
-          userWebhooks.splice(index, 1);
-        }
+      const userHooks = this.userWebhooks.get(webhook.userId) || [];
+      const index = userHooks.indexOf(webhookId);
+      if (index > -1) {
+        userHooks.splice(index, 1);
       }
       this.webhooks.delete(webhookId);
     }
   }
 
   /**
-   * Get webhooks for a user
-   * @param userId User identifier
-   * @returns User's webhooks
+   * Get webhooks for user
    */
   getUserWebhooks(userId: string): Webhook[] {
     const webhookIds = this.userWebhooks.get(userId) || [];
-    return webhookIds
-      .map(id => this.webhooks.get(id))
-      .filter((webhook): webhook is Webhook => webhook !== undefined);
+    return webhookIds.map(id => this.webhooks.get(id)!).filter(Boolean);
   }
 
   /**
-   * Queue an event for webhook delivery
-   * @param eventType Event type
-   * @param payload Event payload
+   * Queue event for delivery
    */
-  queueEvent(eventType: string, payload: Record<string, unknown>): void {
-    // Find all webhooks subscribed to this event type
-    for (const webhook of this.webhooks.values()) {
-      if (webhook.eventTypes.includes(eventType)) {
-        const deliveryId = `delivery_${this.deliveryIdCounter++}`;
+  queueEvent(eventType: EventType, data: Record<string, unknown>): void {
+    const userId = data.userId as string;
+    const userHooks = this.getUserWebhooks(userId);
 
-        const delivery: WebhookDelivery = {
+    for (const webhook of userHooks) {
+      if (webhook.eventTypes.includes(eventType)) {
+        const deliveryId = `delivery_${++this.deliveryCounter}`;
+        const delivery: Delivery = {
           id: deliveryId,
           webhookId: webhook.id,
           eventType,
-          payload,
+          payload: data,
           status: 'pending',
-          attempts: 0,
-          nextRetryTime: Date.now(),
-          createdAt: Date.now(),
+          retryCount: 0,
+          timestamp: new Date().toISOString(),
         };
-
         this.deliveries.set(deliveryId, delivery);
       }
     }
   }
 
   /**
-   * Get pending deliveries for a webhook
-   * @param webhookId Webhook identifier
-   * @returns Pending deliveries
+   * Get pending deliveries for webhook
    */
-  getPendingDeliveries(webhookId: string): WebhookDelivery[] {
-    return Array.from(this.deliveries.values()).filter(
-      delivery => delivery.webhookId === webhookId && delivery.status === 'pending'
-    );
+  getPendingDeliveries(webhookId: string): Delivery[] {
+    const pending: Delivery[] = [];
+    for (const delivery of this.deliveries.values()) {
+      if (delivery.webhookId === webhookId && delivery.status === 'pending') {
+        pending.push(delivery);
+      }
+    }
+    return pending;
   }
 
   /**
-   * Mark a delivery attempt (success or failure)
-   * @param deliveryId Delivery identifier
-   * @param success Whether the attempt succeeded
+   * Mark delivery attempt (success or failure)
    */
   markDeliveryAttempt(deliveryId: string, success: boolean): void {
     const delivery = this.deliveries.get(deliveryId);
     if (!delivery) return;
 
-    delivery.attempts += 1;
-
     if (success) {
       delivery.status = 'delivered';
     } else {
-      if (delivery.attempts >= MAX_RETRIES) {
+      delivery.retryCount++;
+
+      if (delivery.retryCount >= MAX_RETRIES) {
         delivery.status = 'failed';
       } else {
-        // Calculate exponential backoff: 1000ms * 2^(attempts-1), capped at MAX_BACKOFF_MS
+        // Calculate exponential backoff
         const backoffMs = Math.min(
-          INITIAL_BACKOFF_MS * Math.pow(2, delivery.attempts - 1),
+          INITIAL_BACKOFF_MS * Math.pow(2, delivery.retryCount - 1),
           MAX_BACKOFF_MS
         );
-        delivery.nextRetryTime = Date.now() + backoffMs;
+        delivery.nextRetryTime = new Date(Date.now() + backoffMs).toISOString();
       }
     }
+  }
+
+  /**
+   * Get delivery by ID
+   */
+  getDelivery(deliveryId: string): Delivery | null {
+    return this.deliveries.get(deliveryId) || null;
   }
 
   /**
@@ -181,7 +165,7 @@ export class WebhookManager {
     this.webhooks.clear();
     this.deliveries.clear();
     this.userWebhooks.clear();
-    this.webhookIdCounter = 0;
-    this.deliveryIdCounter = 0;
+    this.webhookCounter = 0;
+    this.deliveryCounter = 0;
   }
 }

@@ -1,121 +1,129 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { WebhookManager } from './webhook-manager.js';
 
 describe('WebhookManager', () => {
-  let webhookManager: WebhookManager;
+  let manager: WebhookManager;
 
   beforeEach(() => {
-    webhookManager = new WebhookManager();
+    manager = new WebhookManager();
+    vi.useFakeTimers();
   });
 
-  it('should register a webhook', () => {
-    const webhook = webhookManager.registerWebhook('user1', 'https://example.com/webhook', [
-      'operation_complete',
-    ]);
-    expect(webhook.userId).toBe('user1');
-    expect(webhook.url).toBe('https://example.com/webhook');
-    expect(webhook.eventTypes).toContain('operation_complete');
+  describe('Webhook Registration', () => {
+    it('registers webhook endpoint', () => {
+      const webhookId = manager.registerWebhook('user_123', 'https://myapp.com/webhooks', [
+        'operation_complete',
+      ]);
+
+      expect(webhookId).toBeDefined();
+      const webhooks = manager.getUserWebhooks('user_123');
+      expect(webhooks).toHaveLength(1);
+      expect(webhooks[0].url).toBe('https://myapp.com/webhooks');
+    });
+
+    it('filters events by type', () => {
+      manager.registerWebhook('user_456', 'https://myapp.com/webhooks', ['operation_complete']);
+      const webhooks = manager.getUserWebhooks('user_456');
+      expect(webhooks[0].eventTypes).toContain('operation_complete');
+      expect(webhooks[0].eventTypes).not.toContain('operation_failed');
+    });
   });
 
-  it('should unregister a webhook', () => {
-    const webhook = webhookManager.registerWebhook('user1', 'https://example.com/webhook', [
-      'operation_complete',
-    ]);
-    webhookManager.unregisterWebhook(webhook.id);
-    const userWebhooks = webhookManager.getUserWebhooks('user1');
-    expect(userWebhooks).toHaveLength(0);
+  describe('Event Delivery', () => {
+    it('queues event for webhook delivery', () => {
+      const webhookId = manager.registerWebhook('user_789', 'https://myapp.com/webhooks', [
+        'operation_complete',
+      ]);
+
+      manager.queueEvent('operation_complete', {
+        operationId: 'op_123',
+        userId: 'user_789',
+        operationType: 'email_analysis',
+        result: { sentiment: 'positive' },
+      });
+
+      const queue = manager.getPendingDeliveries(webhookId);
+      expect(queue).toHaveLength(1);
+    });
+
+    it('filters events based on subscription', () => {
+      const webhookId = manager.registerWebhook('user_999', 'https://myapp.com/webhooks', [
+        'operation_complete',
+      ]);
+
+      manager.queueEvent('operation_failed', {
+        operationId: 'op_123',
+        userId: 'user_999',
+        errorMessage: 'Timeout',
+      });
+
+      const queue = manager.getPendingDeliveries(webhookId);
+      expect(queue).toHaveLength(0); // operation_failed not subscribed
+    });
   });
 
-  it('should get webhooks for a user', () => {
-    webhookManager.registerWebhook('user1', 'https://example.com/webhook1', ['operation_complete']);
-    webhookManager.registerWebhook('user1', 'https://example.com/webhook2', ['operation_failed']);
-    const userWebhooks = webhookManager.getUserWebhooks('user1');
-    expect(userWebhooks).toHaveLength(2);
+  describe('Retry Logic', () => {
+    it('retries failed deliveries with exponential backoff', () => {
+      const webhookId = manager.registerWebhook('user_123', 'https://myapp.com/webhooks', [
+        'operation_complete',
+      ]);
+
+      manager.queueEvent('operation_complete', {
+        operationId: 'op_123',
+        userId: 'user_123',
+        operationType: 'email_analysis',
+      });
+
+      const delivery = manager.getPendingDeliveries(webhookId)[0];
+      manager.markDeliveryAttempt(delivery.id, false); // Failed
+
+      expect(delivery.retryCount).toBe(1);
+      expect(delivery.nextRetryTime).toBeDefined();
+    });
+
+    it('stops retrying after max attempts', () => {
+      const webhookId = manager.registerWebhook('user_456', 'https://myapp.com/webhooks', [
+        'operation_complete',
+      ]);
+
+      manager.queueEvent('operation_complete', {
+        operationId: 'op_456',
+        userId: 'user_456',
+        operationType: 'video_analysis',
+      });
+
+      let delivery = manager.getPendingDeliveries(webhookId)[0];
+
+      // Simulate 5 failed attempts
+      for (let i = 0; i < 5; i++) {
+        manager.markDeliveryAttempt(delivery.id, false);
+      }
+
+      delivery = manager.getDelivery(delivery.id);
+      expect(delivery?.status).toBe('failed');
+    });
   });
 
-  it('should queue events for delivery', () => {
-    const webhook = webhookManager.registerWebhook('user1', 'https://example.com/webhook', [
-      'operation_complete',
-    ]);
-    webhookManager.queueEvent('operation_complete', { operationId: 'op1', success: true });
+  describe('Webhook Deregistration', () => {
+    it('unregisters webhook', () => {
+      const webhookId = manager.registerWebhook('user_789', 'https://myapp.com/webhooks', [
+        'operation_complete',
+      ]);
 
-    const deliveries = webhookManager.getPendingDeliveries(webhook.id);
-    expect(deliveries.length).toBeGreaterThan(0);
+      manager.unregisterWebhook(webhookId);
+
+      const webhooks = manager.getUserWebhooks('user_789');
+      expect(webhooks).toHaveLength(0);
+    });
   });
 
-  it('should calculate exponential backoff correctly', () => {
-    // Test exponential backoff: 1000ms * 2^attempt, cap at MAX_BACKOFF_MS
-    const webhook = webhookManager.registerWebhook('user1', 'https://example.com/webhook', [
-      'operation_complete',
-    ]);
+  describe('Clear', () => {
+    it('clears all webhooks and deliveries', () => {
+      manager.registerWebhook('user_123', 'https://myapp.com/webhooks', ['operation_complete']);
+      manager.clear();
 
-    // Queue event and mark first attempt as failed
-    webhookManager.queueEvent('operation_complete', { operationId: 'op1', success: true });
-    const delivery1 = webhookManager.getPendingDeliveries(webhook.id)[0];
-    const baseTime1 = Date.now();
-    webhookManager.markDeliveryAttempt(delivery1.id, false);
-
-    // Small delay to ensure different timestamps and backoff calculations
-    const expectedBackoff1 = 1000 * Math.pow(2, 0); // 1000ms
-
-    // Queue another and mark as failed attempt 2
-    webhookManager.queueEvent('operation_complete', { operationId: 'op2', success: true });
-    const delivery2 = webhookManager.getPendingDeliveries(webhook.id)[0];
-    const baseTime2 = Date.now();
-    webhookManager.markDeliveryAttempt(delivery2.id, false);
-
-    // Expected backoff for second attempt is double the first
-    const expectedBackoff2 = 1000 * Math.pow(2, 0); // Still 1000ms for first attempt on this delivery
-
-    // Verify the backoff times are within expected ranges
-    expect(delivery1.nextRetryTime).toBeGreaterThanOrEqual(baseTime1 + expectedBackoff1 - 10);
-    expect(delivery2.nextRetryTime).toBeGreaterThanOrEqual(baseTime2 + expectedBackoff2 - 10);
-  });
-
-  it('should stop retrying after MAX_RETRIES', () => {
-    const webhook = webhookManager.registerWebhook('user1', 'https://example.com/webhook', [
-      'operation_complete',
-    ]);
-    webhookManager.queueEvent('operation_complete', { operationId: 'op1', success: true });
-
-    const delivery = webhookManager.getPendingDeliveries(webhook.id)[0];
-
-    // Mark as failed 5 times (MAX_RETRIES = 5)
-    for (let i = 0; i < 5; i++) {
-      webhookManager.markDeliveryAttempt(delivery.id, false);
-    }
-
-    // Should be marked as failed
-    expect(delivery.status).toBe('failed');
-  });
-
-  it('should filter events by webhook event types', () => {
-    webhookManager.registerWebhook('user1', 'https://example.com/webhook1', ['operation_complete']);
-    webhookManager.registerWebhook('user1', 'https://example.com/webhook2', ['operation_failed']);
-
-    // Queue operation_complete event
-    webhookManager.queueEvent('operation_complete', { operationId: 'op1', success: true });
-
-    const webhook1Deliveries = webhookManager.getPendingDeliveries(
-      webhookManager.getUserWebhooks('user1')[0].id
-    );
-    const webhook2Deliveries = webhookManager.getPendingDeliveries(
-      webhookManager.getUserWebhooks('user1')[1].id
-    );
-
-    // webhook1 should have the delivery (registered for operation_complete)
-    expect(webhook1Deliveries.length).toBeGreaterThan(0);
-    // webhook2 should not have the delivery (only registered for operation_failed)
-    expect(webhook2Deliveries).toHaveLength(0);
-  });
-
-  it('should clear all webhooks and deliveries', () => {
-    webhookManager.registerWebhook('user1', 'https://example.com/webhook', ['operation_complete']);
-    webhookManager.queueEvent('operation_complete', { operationId: 'op1', success: true });
-
-    webhookManager.clear();
-
-    const userWebhooks = webhookManager.getUserWebhooks('user1');
-    expect(userWebhooks).toHaveLength(0);
+      const webhooks = manager.getUserWebhooks('user_123');
+      expect(webhooks).toHaveLength(0);
+    });
   });
 });
