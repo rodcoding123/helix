@@ -19,14 +19,6 @@ export interface FailoverRecord {
 const MAX_FAILOVER_ATTEMPTS = 5;
 const FAILOVER_RESET_WINDOW = 60 * 60 * 1000; // 1 hour
 
-// Map provider names to model names for cost calculation
-const PROVIDER_MODEL_MAP: Record<ProviderName, string> = {
-  anthropic: 'claude-3-5-sonnet-20241022',
-  gemini: 'gemini-2-0-flash',
-  deepgram: 'nova-2',
-  elevenlabs: 'eleven_turbo_v2_5',
-};
-
 export class ProviderOrchestrator {
   private healthMonitor: ProviderHealthMonitor;
   private failoverHistory: Map<string, FailoverRecord[]> = new Map();
@@ -40,7 +32,7 @@ export class ProviderOrchestrator {
    * Select best provider from options (primary, secondary, tertiary)
    */
   selectProvider(
-    operationId: string,
+    _operationId: string,
     primaryProvider: ProviderName,
     secondaryProvider?: ProviderName,
     tertiaryProvider?: ProviderName
@@ -73,7 +65,7 @@ export class ProviderOrchestrator {
    * Select provider based on cost optimization
    */
   selectProviderByCost(
-    operationId: string,
+    _operationId: string,
     candidates: ProviderName[],
     inputTokens: number,
     outputTokens: number
@@ -167,10 +159,10 @@ export class ProviderOrchestrator {
     outputTokens: number
   ): ProviderName {
     let cheapest = candidates[0];
-    let cheapestCost = this.getCost(cheapest, inputTokens, outputTokens);
+    let cheapestCost = this.getCostForProvider(cheapest, inputTokens, outputTokens);
 
     for (const candidate of candidates.slice(1)) {
-      const cost = this.getCost(candidate, inputTokens, outputTokens);
+      const cost = this.getCostForProvider(candidate, inputTokens, outputTokens);
       if (cost < cheapestCost) {
         cheapest = candidate;
         cheapestCost = cost;
@@ -180,8 +172,19 @@ export class ProviderOrchestrator {
     return cheapest;
   }
 
-  private getCost(provider: ProviderName, inputTokens: number, outputTokens: number): number {
-    const model = PROVIDER_MODEL_MAP[provider];
+  private getCostForProvider(
+    provider: ProviderName,
+    inputTokens: number,
+    outputTokens: number
+  ): number {
+    // Map provider names to model names for cost calculation
+    const modelMap: Record<ProviderName, string> = {
+      anthropic: 'claude-3-5-sonnet-20241022',
+      gemini: 'gemini-2-0-flash',
+      deepgram: 'nova-2',
+      elevenlabs: 'eleven_turbo_v2_5',
+    };
+    const model = modelMap[provider];
     return calculateProviderCost(model, inputTokens, outputTokens);
   }
 }
