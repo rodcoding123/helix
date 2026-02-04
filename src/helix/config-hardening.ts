@@ -16,6 +16,7 @@
 import crypto from 'node:crypto';
 import { EncryptedSecretsCache } from '../lib/secrets-cache-encrypted.js';
 import { sendAlert } from './logging-hooks.js';
+import '../lib/safe-console.js'; // Sanitize console output
 
 /**
  * Protected keys that require audit reason for any modification
@@ -132,35 +133,39 @@ export function createConfigAuditEntry(
 
 /**
  * Audit a configuration change
- * Logs the change to the audit trail and sends alert to Discord
- *
- * CRITICAL: This logs BEFORE any config change is applied (fail-closed principle)
+ * Logs the change to Discord BEFORE adding to audit trail (fail-closed principle)
  *
  * @param key - Configuration key
  * @param oldValue - Previous value
  * @param newValue - New value
  * @param auditReason - Reason for the change
+ * @throws Error if Discord logging fails
  */
-export function auditConfigChange(
+export async function auditConfigChange(
   key: string,
   oldValue: unknown,
   newValue: unknown,
   auditReason: string
-): void {
+): Promise<void> {
   // Create audit entry
   const entry = createConfigAuditEntry(key, oldValue, newValue, auditReason);
 
-  // Add to audit log
-  CONFIG_AUDIT_LOG.push(entry);
-
-  // Send alert to Discord (async, non-blocking)
-  void sendAlert(
+  // CRITICAL: Send to Discord BEFORE adding to local audit log (pre-execution logging)
+  const success = await sendAlert(
     `Configuration Changed: ${key}`,
     `**Key**: ${key}\n**Reason**: ${auditReason}\n**Timestamp**: ${entry.timestamp}`,
     'info'
-  ).catch(error => {
-    console.error('[Config Hardening] Failed to send audit alert:', error);
-  });
+  );
+
+  // Fail-closed: Block operation if Discord logging failed
+  if (!success) {
+    throw new Error(
+      `Cannot audit config change for '${key}' - Discord logging failed. Change blocked.`
+    );
+  }
+
+  // ONLY AFTER successful Discord logging - add to local audit log
+  CONFIG_AUDIT_LOG.push(entry);
 }
 
 /**
@@ -226,8 +231,9 @@ export class EncryptedConfigStore {
    * @param key - Token identifier
    * @param newValue - New token value
    * @returns {oldToken} - Previous token value
+   * @throws Error if audit logging fails
    */
-  rotateToken(key: string, newValue: string): { oldToken: string | undefined } {
+  async rotateToken(key: string, newValue: string): Promise<{ oldToken: string | undefined }> {
     if (!this.initialized) {
       throw new Error('[Config Store] Store not initialized - call initialize() first');
     }
@@ -235,11 +241,11 @@ export class EncryptedConfigStore {
     // Get old token
     const oldToken = this.cache.get(key);
 
-    // Store new token
-    this.cache.set(key, newValue);
+    // CRITICAL: Audit BEFORE rotation (pre-execution logging, fail-closed)
+    await auditConfigChange(key, oldToken || 'undefined', newValue, 'Token rotation');
 
-    // Log rotation (async, non-blocking)
-    auditConfigChange(key, oldToken || 'undefined', newValue, 'Token rotation');
+    // ONLY AFTER successful audit - store new token
+    this.cache.set(key, newValue);
 
     return { oldToken };
   }

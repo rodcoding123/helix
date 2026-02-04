@@ -10,7 +10,7 @@
  * - SHA-256 hash chain for tamper detection
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   PROTECTED_KEYS,
   validateConfigChange,
@@ -22,6 +22,7 @@ import {
   CONFIG_AUDIT_LOG,
 } from './config-hardening.js';
 import { setFailClosedMode } from './logging-hooks.js';
+import * as loggingHooks from './logging-hooks.js';
 
 describe('Config Hardening', () => {
   beforeEach(() => {
@@ -29,11 +30,14 @@ describe('Config Hardening', () => {
     CONFIG_AUDIT_LOG.length = 0;
     // Disable fail-closed mode for testing
     setFailClosedMode(false);
+    // Mock sendAlert to always return true in tests
+    vi.spyOn(loggingHooks, 'sendAlert').mockResolvedValue(true);
   });
 
   afterEach(() => {
     // Reset to production state
     setFailClosedMode(true);
+    vi.restoreAllMocks();
   });
 
   describe('PROTECTED_KEYS', () => {
@@ -115,19 +119,29 @@ describe('Config Hardening', () => {
   });
 
   describe('auditConfigChange', () => {
-    it('should log config change to audit trail', () => {
+    it('should log config change to audit trail', async () => {
       CONFIG_AUDIT_LOG.length = 0;
-      auditConfigChange('setting', 'false', 'true', 'Feature enabled');
+      await auditConfigChange('setting', 'false', 'true', 'Feature enabled');
 
       expect(CONFIG_AUDIT_LOG.length).toBe(1);
       expect(CONFIG_AUDIT_LOG[0].key).toBe('setting');
       expect(CONFIG_AUDIT_LOG[0].auditReason).toBe('Feature enabled');
     });
 
-    it('should create hash chain entry for each change', () => {
+    it('should include hash chain in audit entry', async () => {
       CONFIG_AUDIT_LOG.length = 0;
-      auditConfigChange('key1', 'old', 'new', 'Change 1');
-      auditConfigChange('key2', 'old', 'new', 'Change 2');
+      await auditConfigChange('apiKey', 'old', 'new', 'Key rotation');
+
+      const entry = CONFIG_AUDIT_LOG[0];
+      expect(entry).toBeDefined();
+      expect(entry?.hash).toBeDefined();
+      expect(entry?.previousHash).toBe('genesis');
+    });
+
+    it('should create hash chain entry for each change', async () => {
+      CONFIG_AUDIT_LOG.length = 0;
+      await auditConfigChange('key1', 'old', 'new', 'Change 1');
+      await auditConfigChange('key2', 'old', 'new', 'Change 2');
 
       expect(CONFIG_AUDIT_LOG.length).toBe(2);
       expect(CONFIG_AUDIT_LOG[1].previousHash).toBe(CONFIG_AUDIT_LOG[0].hash);
@@ -170,17 +184,23 @@ describe('Config Hardening', () => {
       expect(stored).toBe(token);
     });
 
-    it('should support token rotation', () => {
+    it('should support token rotation with audit logging', async () => {
       const token1 = 'old_token_123';
       const token2 = 'new_token_456';
 
       store.setToken('gatewayToken', token1);
       expect(store.getToken('gatewayToken')).toBe(token1);
 
-      // Rotate the token
-      const { oldToken } = store.rotateToken('gatewayToken', token2);
+      // Rotate the token (now async with audit)
+      const { oldToken } = await store.rotateToken('gatewayToken', token2);
       expect(oldToken).toBe(token1);
       expect(store.getToken('gatewayToken')).toBe(token2);
+
+      // Verify audit entry was created
+      const auditEntry = CONFIG_AUDIT_LOG[CONFIG_AUDIT_LOG.length - 1];
+      expect(auditEntry).toBeDefined();
+      expect(auditEntry?.key).toBe('gatewayToken');
+      expect(auditEntry?.auditReason).toBe('Token rotation');
     });
 
     it('should clear all tokens', () => {
@@ -193,8 +213,8 @@ describe('Config Hardening', () => {
       expect(store.getToken('token2')).toBeUndefined();
     });
 
-    it('should handle rotation of non-existent token', () => {
-      const { oldToken } = store.rotateToken('nonExistent', 'newValue');
+    it('should handle rotation of non-existent token', async () => {
+      const { oldToken } = await store.rotateToken('nonExistent', 'newValue');
       expect(oldToken).toBeUndefined();
     });
 
@@ -302,30 +322,30 @@ describe('Config Hardening', () => {
       expect(result.errors.length).toBe(0);
     });
 
-    it('should verify single entry audit trail', () => {
+    it('should verify single entry audit trail', async () => {
       CONFIG_AUDIT_LOG.length = 0;
-      auditConfigChange('key1', 'old', 'new', 'Reason 1');
+      await auditConfigChange('key1', 'old', 'new', 'Reason 1');
 
       const result = verifyAuditTrailIntegrity();
       expect(result.valid).toBe(true);
       expect(result.errors.length).toBe(0);
     });
 
-    it('should verify hash chain integrity', () => {
+    it('should verify hash chain integrity', async () => {
       CONFIG_AUDIT_LOG.length = 0;
-      auditConfigChange('key1', 'old1', 'new1', 'Reason 1');
-      auditConfigChange('key2', 'old2', 'new2', 'Reason 2');
-      auditConfigChange('key3', 'old3', 'new3', 'Reason 3');
+      await auditConfigChange('key1', 'old1', 'new1', 'Reason 1');
+      await auditConfigChange('key2', 'old2', 'new2', 'Reason 2');
+      await auditConfigChange('key3', 'old3', 'new3', 'Reason 3');
 
       const result = verifyAuditTrailIntegrity();
       expect(result.valid).toBe(true);
       expect(result.errors.length).toBe(0);
     });
 
-    it('should detect hash chain tampering', () => {
+    it('should detect hash chain tampering', async () => {
       CONFIG_AUDIT_LOG.length = 0;
-      auditConfigChange('key1', 'old1', 'new1', 'Reason 1');
-      auditConfigChange('key2', 'old2', 'new2', 'Reason 2');
+      await auditConfigChange('key1', 'old1', 'new1', 'Reason 1');
+      await auditConfigChange('key2', 'old2', 'new2', 'Reason 2');
 
       // Tamper with an entry
       if (CONFIG_AUDIT_LOG[0]) {
@@ -337,10 +357,10 @@ describe('Config Hardening', () => {
       expect(result.errors.length).toBeGreaterThan(0);
     });
 
-    it('should detect broken previous hash links', () => {
+    it('should detect broken previous hash links', async () => {
       CONFIG_AUDIT_LOG.length = 0;
-      auditConfigChange('key1', 'old1', 'new1', 'Reason 1');
-      auditConfigChange('key2', 'old2', 'new2', 'Reason 2');
+      await auditConfigChange('key1', 'old1', 'new1', 'Reason 1');
+      await auditConfigChange('key2', 'old2', 'new2', 'Reason 2');
 
       // Break the link
       if (CONFIG_AUDIT_LOG[1]) {
@@ -352,10 +372,10 @@ describe('Config Hardening', () => {
       expect(result.errors.length).toBeGreaterThan(0);
     });
 
-    it('should report errors for integrity violations', () => {
+    it('should report errors for integrity violations', async () => {
       CONFIG_AUDIT_LOG.length = 0;
-      auditConfigChange('key1', 'old1', 'new1', 'Reason 1');
-      auditConfigChange('key2', 'old2', 'new2', 'Reason 2');
+      await auditConfigChange('key1', 'old1', 'new1', 'Reason 1');
+      await auditConfigChange('key2', 'old2', 'new2', 'Reason 2');
 
       // Tamper with both
       if (CONFIG_AUDIT_LOG[0]) {
@@ -393,7 +413,7 @@ describe('Config Hardening', () => {
       expect(validation.allowed).toBe(true);
 
       // Audit the change
-      auditConfigChange(
+      await auditConfigChange(
         'gatewayToken',
         initialToken,
         'new_gateway_token_abc',
@@ -402,7 +422,7 @@ describe('Config Hardening', () => {
       expect(CONFIG_AUDIT_LOG.length).toBe(1);
 
       // Update the token
-      const { oldToken } = store.rotateToken('gatewayToken', 'new_gateway_token_abc');
+      const { oldToken } = await store.rotateToken('gatewayToken', 'new_gateway_token_abc');
       expect(oldToken).toBe(initialToken);
 
       // Verify audit trail
