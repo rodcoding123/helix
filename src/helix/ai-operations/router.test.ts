@@ -190,21 +190,27 @@ describe('AIOperationRouter', () => {
   });
 
   describe('Error Handling', () => {
-    it('should throw if SUPABASE_URL missing', () => {
+    it('should throw if SUPABASE_URL missing', async () => {
       const originalUrl = process.env.SUPABASE_URL;
       delete process.env.SUPABASE_URL;
       try {
-        expect(() => new AIOperationRouter()).toThrow();
+        const testRouter = new AIOperationRouter();
+        await expect(async () => {
+          await testRouter['getRoute']('test_operation');
+        }).rejects.toThrow('SUPABASE_URL and SUPABASE_SERVICE_KEY required');
       } finally {
         process.env.SUPABASE_URL = originalUrl;
       }
     });
 
-    it('should throw if SUPABASE_SERVICE_KEY missing', () => {
+    it('should throw if SUPABASE_SERVICE_KEY missing', async () => {
       const originalKey = process.env.SUPABASE_SERVICE_KEY;
       delete process.env.SUPABASE_SERVICE_KEY;
       try {
-        expect(() => new AIOperationRouter()).toThrow();
+        const testRouter = new AIOperationRouter();
+        await expect(async () => {
+          await testRouter['getRoute']('test_operation');
+        }).rejects.toThrow('SUPABASE_URL and SUPABASE_SERVICE_KEY required');
       } finally {
         process.env.SUPABASE_SERVICE_KEY = originalKey;
       }

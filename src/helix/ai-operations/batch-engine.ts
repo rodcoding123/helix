@@ -161,13 +161,13 @@ export class BatchOperationEngine {
           .then(() => {
             item.status = 'completed';
             successful++;
-            void itemResults.push({ itemId: item.id, success: true });
+            itemResults.push({ itemId: item.id, success: true });
           })
           .catch(error => {
             item.status = 'failed';
             item.error = error as Error;
             failed++;
-            void itemResults.push({
+            itemResults.push({
               itemId: item.id,
               success: false,
               error: (error as Error).message,

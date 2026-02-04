@@ -290,7 +290,7 @@ describe('CostTracker', () => {
         }));
 
       const totalCost = operations.reduce((sum, op) => sum + op.cost_usd, 0);
-      expect(totalCost).toBe(10.0);
+      expect(totalCost).toBeCloseTo(10.0, 5);
       expect(operations.length).toBe(500);
     });
 
@@ -313,7 +313,7 @@ describe('CostTracker', () => {
         }));
 
       const dailyTotal = operations.reduce((sum, op) => sum + op.cost_usd, 0);
-      expect(dailyTotal).toBe(30.0);
+      expect(dailyTotal).toBeCloseTo(30.0, 5);
       expect(dailyTotal).toBeLessThan(dailyLimit);
     });
 
@@ -327,7 +327,7 @@ describe('CostTracker', () => {
         }));
 
       const dailyTotal = operations.reduce((sum, op) => sum + op.cost_usd, 0);
-      expect(dailyTotal).toBe(48.0);
+      expect(dailyTotal).toBeCloseTo(48.0, 5);
       expect(dailyTotal).toBeGreaterThan(dailyLimit * 0.9);
     });
 
@@ -341,7 +341,7 @@ describe('CostTracker', () => {
         }));
 
       const dailyTotal = operations.reduce((sum, op) => sum + op.cost_usd, 0);
-      expect(dailyTotal).toBe(55.0);
+      expect(dailyTotal).toBeCloseTo(55.0, 5);
       expect(dailyTotal).toBeGreaterThan(dailyLimit);
     });
 

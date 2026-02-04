@@ -10,83 +10,125 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 vi.mock('@supabase/supabase-js', () => {
   const mockRoutes: Record<string, any> = {
     'email-compose': {
+      id: '1',
       operation_id: 'email-compose',
       operation_name: 'Email Composition Assistance',
-      primary_model: 'claude_sonnet_4',
+      primary_model: 'claude-3-5-sonnet-20241022',
+      fallback_model: 'gemini-2-0-flash',
       cost_criticality: 'LOW',
       enabled: true,
+      created_at: '2026-02-04T00:00:00Z',
+      updated_at: '2026-02-04T00:00:00Z',
     },
     'email-classify': {
+      id: '2',
       operation_id: 'email-classify',
-      operation_name: 'Email Classification',
-      primary_model: 'gemini_flash',
+      operation_name: 'Email Classification & Metadata',
+      primary_model: 'gemini-2-0-flash',
+      fallback_model: 'claude-3-5-haiku-20241022',
       cost_criticality: 'LOW',
       enabled: true,
+      created_at: '2026-02-04T00:00:00Z',
+      updated_at: '2026-02-04T00:00:00Z',
     },
     'email-respond': {
+      id: '3',
       operation_id: 'email-respond',
-      operation_name: 'Email Response Synthesis',
-      primary_model: 'claude_sonnet_4',
+      operation_name: 'Email Response Suggestions',
+      primary_model: 'claude-3-5-sonnet-20241022',
+      fallback_model: 'gemini-2-0-flash',
       cost_criticality: 'LOW',
       enabled: true,
+      created_at: '2026-02-04T00:00:00Z',
+      updated_at: '2026-02-04T00:00:00Z',
     },
     'calendar-prep': {
+      id: '4',
       operation_id: 'calendar-prep',
-      operation_name: 'Calendar Preparation',
-      primary_model: 'deepseek_v3',
+      operation_name: 'Meeting Preparation Generator',
+      primary_model: 'deepseek-reasoner',
+      fallback_model: 'gemini-2-0-flash',
       cost_criticality: 'LOW',
       enabled: true,
+      created_at: '2026-02-04T00:00:00Z',
+      updated_at: '2026-02-04T00:00:00Z',
     },
     'calendar-time': {
+      id: '5',
       operation_id: 'calendar-time',
-      operation_name: 'Calendar Time Optimization',
-      primary_model: 'gemini_flash',
+      operation_name: 'Optimal Meeting Time Suggestions',
+      primary_model: 'gemini-2-0-flash',
+      fallback_model: 'deepseek-reasoner',
       cost_criticality: 'LOW',
       enabled: true,
+      created_at: '2026-02-04T00:00:00Z',
+      updated_at: '2026-02-04T00:00:00Z',
     },
     'task-prioritize': {
+      id: '6',
       operation_id: 'task-prioritize',
-      operation_name: 'Task Prioritization',
-      primary_model: 'deepseek_v3',
+      operation_name: 'Task Prioritization & Reordering',
+      primary_model: 'deepseek-reasoner',
+      fallback_model: 'claude-3-5-haiku-20241022',
       cost_criticality: 'LOW',
       enabled: true,
+      created_at: '2026-02-04T00:00:00Z',
+      updated_at: '2026-02-04T00:00:00Z',
     },
     'task-breakdown': {
+      id: '7',
       operation_id: 'task-breakdown',
-      operation_name: 'Task Breakdown',
-      primary_model: 'deepseek_v3',
+      operation_name: 'Task Breakdown & Subtask Generation',
+      primary_model: 'deepseek-reasoner',
+      fallback_model: 'claude-3-5-sonnet-20241022',
       cost_criticality: 'LOW',
       enabled: true,
+      created_at: '2026-02-04T00:00:00Z',
+      updated_at: '2026-02-04T00:00:00Z',
     },
     'analytics-summary': {
+      id: '8',
       operation_id: 'analytics-summary',
-      operation_name: 'Analytics Summary',
-      primary_model: 'gemini_flash',
+      operation_name: 'Weekly Analytics Summary',
+      primary_model: 'gemini-2-0-flash',
+      fallback_model: 'deepseek-reasoner',
       cost_criticality: 'MEDIUM',
       enabled: true,
+      created_at: '2026-02-04T00:00:00Z',
+      updated_at: '2026-02-04T00:00:00Z',
     },
     'analytics-anomaly': {
+      id: '9',
       operation_id: 'analytics-anomaly',
-      operation_name: 'Analytics Anomaly Detection',
-      primary_model: 'deepseek_v3',
+      operation_name: 'Analytics Pattern Anomaly Detection',
+      primary_model: 'deepseek-reasoner',
+      fallback_model: 'gemini-2-0-flash',
       cost_criticality: 'LOW',
       enabled: true,
+      created_at: '2026-02-04T00:00:00Z',
+      updated_at: '2026-02-04T00:00:00Z',
     },
   };
 
   const createMockQueryBuilder = (table: string) => {
     let filterOp = '';
     let filterVal = '';
+    let selectAll = false;
 
-    const builder = {
-      select: () => builder,
+    const baseBuilder = {
+      select: (columns?: string) => {
+        if (columns === '*' || !columns) {
+          selectAll = true;
+        }
+        return baseBuilder;
+      },
       eq: (field: string, value: any) => {
         filterOp = field;
         filterVal = value;
-        return builder;
+        return baseBuilder;
       },
       single: async () => {
-        if (table === 'ai_model_routes' && filterOp === 'operation_id') {
+        if ((table === 'ai_model_routes' || table === 'model_routes') && filterOp === 'operation_id') {
           const data = mockRoutes[filterVal];
           return { data, error: data ? null : new Error('Not found') };
         }
@@ -94,9 +136,21 @@ vi.mock('@supabase/supabase-js', () => {
       },
       insert: async () => ({ data: {}, error: null }),
       update: async () => ({ data: {}, error: null }),
-      delete: () => builder,
+      delete: () => baseBuilder,
     };
-    return builder;
+
+    // Return a Promise-like object that also has builder methods
+    const promise = Promise.resolve().then(() => {
+      if (selectAll && (table === 'ai_model_routes' || table === 'model_routes')) {
+        // Return all routes as an array
+        const data = Object.values(mockRoutes);
+        return { data, error: null };
+      }
+      return { data: [], error: null };
+    });
+
+    // Merge builder methods with promise
+    return Object.assign(promise, baseBuilder);
   };
 
   return {

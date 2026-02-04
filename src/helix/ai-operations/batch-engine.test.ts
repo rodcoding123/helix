@@ -92,14 +92,15 @@ describe('BatchOperationEngine', () => {
       const batch = engine.createBatch('email_analysis', 5);
       const results: string[] = [];
 
-      const executor = async (item: unknown): Promise<void> => {
-        const data = item as Record<string, unknown>;
-        const id = data.emailId as string;
-        if (id === 'email2') {
-          throw new Error('Failed to process email2');
-        }
-        results.push(id);
-        await Promise.resolve();
+      const executor = (item: unknown): Promise<void> => {
+        return Promise.resolve().then(() => {
+          const data = item as Record<string, unknown>;
+          const id = data.emailId as string;
+          if (id === 'email2') {
+            throw new Error('Failed to process email2');
+          }
+          results.push(id);
+        });
       };
 
       engine.addToBatch(batch.id, { emailId: 'email1' });

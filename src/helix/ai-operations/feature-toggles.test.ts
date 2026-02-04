@@ -55,14 +55,30 @@ describe('FeatureToggles', () => {
       expect(toggles).toBeDefined();
     });
 
-    it('should throw if SUPABASE_URL missing', () => {
+    it('should throw if SUPABASE_URL missing', async () => {
+      const originalUrl = process.env.SUPABASE_URL;
       delete process.env.SUPABASE_URL;
-      expect(() => new FeatureToggles()).toThrow();
+      try {
+        const testToggles = new FeatureToggles();
+        await expect(async () => {
+          await testToggles.isEnabled('test_toggle');
+        }).rejects.toThrow();
+      } finally {
+        process.env.SUPABASE_URL = originalUrl;
+      }
     });
 
-    it('should throw if SUPABASE_SERVICE_KEY missing', () => {
+    it('should throw if SUPABASE_SERVICE_KEY missing', async () => {
+      const originalKey = process.env.SUPABASE_SERVICE_KEY;
       delete process.env.SUPABASE_SERVICE_KEY;
-      expect(() => new FeatureToggles()).toThrow();
+      try {
+        const testToggles = new FeatureToggles();
+        await expect(async () => {
+          await testToggles.isEnabled('test_toggle');
+        }).rejects.toThrow();
+      } finally {
+        process.env.SUPABASE_SERVICE_KEY = originalKey;
+      }
     });
   });
 

@@ -257,6 +257,7 @@ export class FeatureToggles {
   async getAdminInstructions(): Promise<string> {
     return `
 CRITICAL: Feature toggles can only be changed via direct database access.
+You cannot change them through this API.
 
 To change a toggle state:
 1. Connect to Supabase console (https://supabase.com/dashboard)
