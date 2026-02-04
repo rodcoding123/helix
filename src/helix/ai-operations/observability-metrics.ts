@@ -294,6 +294,20 @@ export class ObservabilityMetrics {
   }
 
   /**
+   * Take snapshot (alias for createSnapshot for test compatibility)
+   */
+  takeSnapshot(): MetricSnapshot {
+    return this.createSnapshot();
+  }
+
+  /**
+   * Get all snapshots
+   */
+  getSnapshots(): MetricSnapshot[] {
+    return [...this.snapshots];
+  }
+
+  /**
    * Clear all metrics
    */
   clear(): void {
