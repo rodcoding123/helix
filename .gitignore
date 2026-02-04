@@ -62,3 +62,6 @@ INSTALL*.md
 SETUP*.md
 download-*.ps1
 install-*.ps1
+
+# Git worktrees (isolated development branches)
+.worktrees/
