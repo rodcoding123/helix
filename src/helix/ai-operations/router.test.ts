@@ -314,21 +314,29 @@ describe('AIOperationRouter', () => {
     it('provides access to health monitor', () => {
       const monitor = router.getHealthMonitor();
       expect(monitor).toBeDefined();
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(monitor.getProviderHealth).toBeDefined();
     });
 
     it('provides access to orchestrator', () => {
       const orchestrator = router.getOrchestrator();
       expect(orchestrator).toBeDefined();
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(orchestrator.selectProvider).toBeDefined();
     });
 
     it('provides access to scheduler', () => {
       const scheduler = router.getScheduler();
       expect(scheduler).toBeDefined();
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(scheduler.registerSchedule).toBeDefined();
     });
 
     it('provides access to batch engine', () => {
       const batchEngine = router.getBatchEngine();
       expect(batchEngine).toBeDefined();
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(batchEngine.createBatch).toBeDefined();
     });
   });
 
