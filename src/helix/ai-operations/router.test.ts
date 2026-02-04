@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/explicit-function-return-type,@typescript-eslint/require-await */
 /**
  * AIOperationRouter Tests
  *
@@ -10,27 +10,23 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock Supabase before importing AIOperationRouter
 vi.mock('@supabase/supabase-js', () => {
-  const mockQueryBuilder = {
-    select: vi.fn(function () {
-      return this;
-    }) as any,
-    eq: vi.fn(function () {
-      return this;
-    }) as any,
-    single: vi.fn(() => Promise.resolve({ data: {}, error: null })),
-    insert: vi.fn(function () {
-      return this;
-    }) as any,
-    update: vi.fn(function () {
-      return this;
-    }) as any,
+  const createMockQueryBuilder = () => {
+    const builder = {
+      select: () => builder,
+      eq: () => builder,
+      single: async () => ({ data: {}, error: null }),
+      insert: async () => ({ data: {}, error: null }),
+      update: async () => ({ data: {}, error: null }),
+      delete: () => builder,
+    };
+    return builder;
   };
 
   return {
-    createClient: vi.fn(() => ({
-      from: vi.fn(() => mockQueryBuilder),
-      rpc: vi.fn(() => Promise.resolve({ data: {}, error: null })),
-    })),
+    createClient: () => ({
+      from: () => createMockQueryBuilder(),
+      rpc: async () => ({ data: {}, error: null }),
+    }),
   };
 });
 

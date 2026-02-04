@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type,@typescript-eslint/require-await */
 /**
  * ApprovalGate Tests
  *
@@ -9,19 +10,30 @@ import { describe, it, expect, vi } from 'vitest';
 
 // Mock Supabase before importing ApprovalGate
 vi.mock('@supabase/supabase-js', () => {
-  const mockQueryBuilder = {
-    select: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    single: vi.fn(async () => ({ data: {}, error: null })),
-    insert: vi.fn().mockReturnThis(),
-    update: vi.fn().mockReturnThis(),
+  // Create a query builder factory function that returns a chainable object
+  const createMockQueryBuilder = () => {
+    const builder = {
+      select: () => builder,
+      eq: () => builder,
+      single: async () => ({ data: {}, error: null }),
+      insert: async () => ({ data: {}, error: null }),
+      update: async () => ({ data: {}, error: null }),
+      delete: () => builder,
+    };
+    return builder;
   };
 
   return {
-    createClient: vi.fn(() => ({
-      from: vi.fn(() => mockQueryBuilder),
-      rpc: vi.fn(async () => ({ data: {}, error: null })),
-    })),
+    createClient: () => ({
+      from: () => createMockQueryBuilder(),
+      rpc: async () => ({ data: {}, error: null }),
+      auth: {
+        admin: {
+          createUser: vi.fn(),
+          deleteUser: vi.fn(),
+        },
+      },
+    }),
   };
 });
 

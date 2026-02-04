@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type,@typescript-eslint/require-await */
 /**
  * Phase 0.5 Integration Tests
  *
@@ -9,19 +10,23 @@ import { describe, it, expect, vi } from 'vitest';
 
 // Mock Supabase before importing
 vi.mock('@supabase/supabase-js', () => {
-  const mockQueryBuilder = {
-    select: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    single: vi.fn(async () => ({ data: {}, error: null })),
-    insert: vi.fn().mockReturnThis(),
-    update: vi.fn().mockReturnThis(),
+  const createMockQueryBuilder = () => {
+    const builder = {
+      select: () => builder,
+      eq: () => builder,
+      single: async () => ({ data: {}, error: null }),
+      insert: async () => ({ data: {}, error: null }),
+      update: async () => ({ data: {}, error: null }),
+      delete: () => builder,
+    };
+    return builder;
   };
 
   return {
-    createClient: vi.fn(() => ({
-      from: vi.fn(() => mockQueryBuilder),
-      rpc: vi.fn(async () => ({ data: {}, error: null })),
-    })),
+    createClient: () => ({
+      from: () => createMockQueryBuilder(),
+      rpc: async () => ({ data: {}, error: null }),
+    }),
   };
 });
 
