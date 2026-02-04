@@ -11,6 +11,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { logToDiscord } from '../logging.js';
 import { hashChain } from '../hash-chain.js';
+import { calculateProviderCost } from './providers/index.js';
 
 // Type definitions
 export interface RoutingRequest {
@@ -57,34 +58,6 @@ export interface FeatureToggle {
   locked: boolean;
   controlled_by: 'ADMIN_ONLY' | 'USER' | 'BOTH';
 }
-
-// Model cost configuration (USD)
-const MODEL_COSTS = {
-  deepseek: {
-    input: 0.0027, // $0.0027 per 1K input tokens
-    output: 0.0108, // $0.0108 per 1K output tokens
-  },
-  gemini_flash: {
-    input: 0.00005, // $0.05 per 1M input tokens = $0.00005 per 1K
-    output: 0.00015, // $0.15 per 1M output tokens = $0.00015 per 1K
-  },
-  deepgram: {
-    input: 0.0059, // Per minute of audio
-    output: 0,
-  },
-  edge_tts: {
-    input: 0, // Free
-    output: 0,
-  },
-  openai: {
-    input: 0.003, // Fallback cost estimate
-    output: 0.006,
-  },
-  elevenlabs: {
-    input: 0,
-    output: 0.03, // Per character
-  },
-} as const;
 
 /**
  * AIOperationRouter - Main routing engine
@@ -159,7 +132,7 @@ export class AIOperationRouter {
       );
 
       // 5. Log routing decision to Discord
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-api',
         type: 'operation_routed',
         operation: request.operationId,
@@ -178,7 +151,7 @@ export class AIOperationRouter {
       };
     } catch (error) {
       // Log error and attempt fallback
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-alerts',
         type: 'routing_error',
         operation: request.operationId,
@@ -236,7 +209,7 @@ export class AIOperationRouter {
     } catch (error) {
       // If cached exists but expired, return it anyway as fallback
       if (cached) {
-        await logToDiscord({
+        logToDiscord({
           channel: 'helix-alerts',
           type: 'cache_fallback',
           operation: operationId,
@@ -314,7 +287,7 @@ export class AIOperationRouter {
       const estimatedCost = this.estimateCost(model, estimatedInputTokens, 2000);
 
       if (budget.current_spend_today + estimatedCost > budget.daily_limit_usd) {
-        await logToDiscord({
+        logToDiscord({
           channel: 'helix-alerts',
           type: 'budget_limit_exceeded',
           userId,
@@ -334,7 +307,7 @@ export class AIOperationRouter {
 
       // Check if at warning threshold
       if (budget.current_spend_today + estimatedCost > budget.warning_threshold_usd) {
-        await logToDiscord({
+        logToDiscord({
           channel: 'helix-alerts',
           type: 'budget_warning',
           userId,
@@ -350,7 +323,7 @@ export class AIOperationRouter {
         throw error;
       }
       // Log but don't fail on budget lookup errors - fail-open for availability
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-alerts',
         type: 'budget_check_failed',
         userId,
@@ -392,21 +365,11 @@ export class AIOperationRouter {
   /**
    * Estimate cost of operation
    *
-   * Calculation:
-   * cost = (inputTokens * input_rate) + (outputTokens * output_rate)
+   * Uses real provider pricing from the centralized registry.
+   * All pricing decisions now use PROVIDER_PRICING constant.
    */
   estimateCost(model: string, inputTokens: number, outputTokens: number = 2000): number {
-    const costs = MODEL_COSTS[model as keyof typeof MODEL_COSTS];
-
-    if (!costs) {
-      // Unknown model, estimate conservatively
-      return (inputTokens * 0.005 + outputTokens * 0.01) / 1000;
-    }
-
-    const inputCost = (inputTokens * costs.input) / 1000;
-    const outputCost = (outputTokens * costs.output) / 1000;
-
-    return inputCost + outputCost;
+    return calculateProviderCost(model, inputTokens, outputTokens);
   }
 
   /**
@@ -449,7 +412,7 @@ export class AIOperationRouter {
 
       return toggle.enabled;
     } catch (error) {
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-alerts',
         type: 'toggle_check_failed',
         toggle: toggleName,
