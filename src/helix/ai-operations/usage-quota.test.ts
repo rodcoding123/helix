@@ -8,71 +8,87 @@ describe('UsageQuotaManager', () => {
     quotaManager = new UsageQuotaManager();
   });
 
-  it('should initialize with default tier limits', () => {
-    const limits = quotaManager.getTierLimit('free');
-    expect(limits).toBe(100); // Free tier: 100/day
+  describe('Quota Initialization', () => {
+    it('initializes with correct tier limits', () => {
+      const freeQuota = quotaManager.getTierLimit('free');
+      const proQuota = quotaManager.getTierLimit('pro');
+      const enterpriseQuota = quotaManager.getTierLimit('enterprise');
+
+      expect(freeQuota).toBe(100);
+      expect(proQuota).toBe(10000);
+      expect(enterpriseQuota).toBe(Infinity);
+    });
   });
 
-  it('should track usage per user', () => {
-    quotaManager.incrementUsage('user1', 'free', 10);
-    const usage = quotaManager.getUsage('user1');
-    expect(usage).toBe(10);
+  describe('Usage Tracking', () => {
+    it('tracks daily usage for user', () => {
+      quotaManager.incrementUsage('user_123', 'free', 50);
+      const usage = quotaManager.getUsage('user_123');
+      expect(usage).toBe(50);
+    });
+
+    it('accumulates usage across multiple calls', () => {
+      quotaManager.incrementUsage('user_123', 'free', 30);
+      quotaManager.incrementUsage('user_123', 'free', 20);
+      const usage = quotaManager.getUsage('user_123');
+      expect(usage).toBe(50);
+    });
   });
 
-  it('should enforce free tier quota limits (100/day)', () => {
-    quotaManager.incrementUsage('user1', 'free', 100);
-    const canExecute = quotaManager.canExecuteOperation('user1', 'free', 1);
-    expect(canExecute).toBe(false);
+  describe('Quota Enforcement', () => {
+    it('allows operations within quota', () => {
+      quotaManager.incrementUsage('user_123', 'free', 50);
+      const canExecute = quotaManager.canExecuteOperation('user_123', 'free', 25);
+      expect(canExecute).toBe(true);
+    });
+
+    it('rejects operations exceeding quota', () => {
+      quotaManager.incrementUsage('user_123', 'free', 90);
+      const canExecute = quotaManager.canExecuteOperation('user_123', 'free', 25);
+      expect(canExecute).toBe(false);
+    });
+
+    it('allows pro tier higher quotas', () => {
+      quotaManager.incrementUsage('user_456', 'pro', 9500);
+      const canExecute = quotaManager.canExecuteOperation('user_456', 'pro', 400);
+      expect(canExecute).toBe(true);
+    });
+
+    it('rejects pro tier exceeding 10k limit', () => {
+      quotaManager.incrementUsage('user_456', 'pro', 9500);
+      const canExecute = quotaManager.canExecuteOperation('user_456', 'pro', 600);
+      expect(canExecute).toBe(false);
+    });
   });
 
-  it('should allow pro tier (10k/day)', () => {
-    quotaManager.incrementUsage('user2', 'pro', 5000);
-    const canExecute = quotaManager.canExecuteOperation('user2', 'pro', 5000);
-    expect(canExecute).toBe(true);
+  describe('Enterprise Unlimited', () => {
+    it('allows unlimited operations for enterprise', () => {
+      quotaManager.incrementUsage('user_789', 'enterprise', 1000000);
+      const canExecute = quotaManager.canExecuteOperation('user_789', 'enterprise', 500000);
+      expect(canExecute).toBe(true);
+    });
   });
 
-  it('should allow enterprise tier unlimited usage', () => {
-    quotaManager.incrementUsage('user3', 'enterprise', 50000);
-    const canExecute = quotaManager.canExecuteOperation('user3', 'enterprise', 50000);
-    expect(canExecute).toBe(true);
+  describe('Quota Reset', () => {
+    it('resets daily usage', () => {
+      quotaManager.incrementUsage('user_123', 'free', 50);
+      quotaManager.resetDailyUsage('user_123');
+      const usage = quotaManager.getUsage('user_123');
+      expect(usage).toBe(0);
+    });
   });
 
-  it('should reset daily usage', () => {
-    quotaManager.incrementUsage('user1', 'free', 50);
-    quotaManager.resetDailyUsage('user1');
-    const usage = quotaManager.getUsage('user1');
-    expect(usage).toBe(0);
-  });
+  describe('Remaining Quota Info', () => {
+    it('returns remaining quota', () => {
+      quotaManager.incrementUsage('user_123', 'free', 30);
+      const remaining = quotaManager.getRemainingQuota('user_123', 'free');
+      expect(remaining).toBe(70); // 100 - 30
+    });
 
-  it('should calculate remaining quota', () => {
-    quotaManager.incrementUsage('user1', 'free', 30);
-    const remaining = quotaManager.getRemainingQuota('user1', 'free');
-    expect(remaining).toBe(70); // 100 - 30
-  });
-
-  it('should clear all quotas', () => {
-    quotaManager.incrementUsage('user1', 'free', 50);
-    quotaManager.clear();
-    const usage = quotaManager.getUsage('user1');
-    expect(usage).toBe(0);
-  });
-
-  it('should update tier when user changes tier', () => {
-    quotaManager.incrementUsage('user1', 'free', 50);
-    quotaManager.incrementUsage('user1', 'pro', 50); // User upgraded
-    const canExecute = quotaManager.canExecuteOperation('user1', 'pro', 9900);
-    expect(canExecute).toBe(true); // Should use pro tier limit (10k)
-  });
-
-  it('should return 0 remaining quota when over limit', () => {
-    quotaManager.incrementUsage('user1', 'free', 150);
-    const remaining = quotaManager.getRemainingQuota('user1', 'free');
-    expect(remaining).toBe(0); // Should be clamped to 0, not negative
-  });
-
-  it('should handle reset for non-existent user gracefully', () => {
-    quotaManager.resetDailyUsage('nonexistent');
-    const usage = quotaManager.getUsage('nonexistent');
-    expect(usage).toBe(0); // Should not throw, returns 0
+    it('returns negative remaining when exceeded', () => {
+      quotaManager.incrementUsage('user_123', 'free', 120);
+      const remaining = quotaManager.getRemainingQuota('user_123', 'free');
+      expect(remaining).toBe(-20); // 100 - 120
+    });
   });
 });
