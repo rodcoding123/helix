@@ -43,7 +43,8 @@ export interface GoalEvaluationResult {
 export class GoalEvaluator {
   private personalityCache: PersonalityTraits | null = null;
   private goalsCache: Goal[] | null = null;
-  private cachedAt: number = 0;
+  private personalityCachedAt: number = 0;
+  private goalsCachedAt: number = 0;
   private readonly CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 
   async evaluate(): Promise<GoalEvaluationResult> {
@@ -99,7 +100,17 @@ export class GoalEvaluator {
 
   async getPersonalityTraits(): Promise<PersonalityTraits> {
     const now = Date.now();
-    if (this.personalityCache && now - this.cachedAt < this.CACHE_DURATION_MS) {
+    if (this.personalityCache && now - this.personalityCachedAt < this.CACHE_DURATION_MS) {
+      // Log cache hit
+      await hashChain
+        .add({
+          type: 'personality_traits_loaded',
+          cache_hit: true,
+          duration_ms: 0,
+          timestamp: new Date().toISOString(),
+        })
+        .catch(err => console.warn('Failed to log personality traits cache hit:', err));
+
       return this.personalityCache;
     }
 
@@ -125,7 +136,7 @@ export class GoalEvaluator {
         neuroticism:
           typeof data.neuroticism === 'number' ? Math.max(0, Math.min(1, data.neuroticism)) : 0.5,
       };
-      this.cachedAt = now;
+      this.personalityCachedAt = now;
 
       return this.personalityCache;
     } catch (err) {
@@ -143,7 +154,18 @@ export class GoalEvaluator {
 
   async getGoals(): Promise<Goal[]> {
     const now = Date.now();
-    if (this.goalsCache && now - this.cachedAt < this.CACHE_DURATION_MS) {
+    if (this.goalsCache && now - this.goalsCachedAt < this.CACHE_DURATION_MS) {
+      // Log cache hit
+      await hashChain
+        .add({
+          type: 'goals_loaded',
+          cache_hit: true,
+          goals_count: this.goalsCache.length,
+          duration_ms: 0,
+          timestamp: new Date().toISOString(),
+        })
+        .catch(err => console.warn('Failed to log goals cache hit:', err));
+
       return this.goalsCache;
     }
 
@@ -192,7 +214,7 @@ export class GoalEvaluator {
             typeof g.last_progress_update === 'string' ? g.last_progress_update : undefined,
         };
       });
-      this.cachedAt = now;
+      this.goalsCachedAt = now;
 
       return this.goalsCache;
     } catch (err) {
