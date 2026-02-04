@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/require-await */
 /**
  * Phase 8: Intelligence Operations Integration Tests
  * Tests all 9 Phase 8 intelligence operations with Phase 0.5 router
@@ -261,7 +262,9 @@ describe('Phase 8: Intelligence Operations Integration', () => {
 
       it('should be marked as medium criticality', async () => {
         const operations = await router.getRegisteredOperations();
-        const analyticsSummary = operations.find((op: any) => op.operation_id === 'analytics-summary');
+        const analyticsSummary = operations.find(
+          (op: any) => op.operation_id === 'analytics-summary'
+        );
 
         expect(analyticsSummary?.cost_criticality).toBe('MEDIUM');
       });
@@ -302,7 +305,9 @@ describe('Phase 8: Intelligence Operations Integration', () => {
 
     it('should have correct operation names', async () => {
       const operations = await router.getRegisteredOperations();
-      const operationMap = new Map(operations.map((op: any) => [op.operation_id, op.operation_name]));
+      const operationMap = new Map(
+        operations.map((op: any) => [op.operation_id, op.operation_name])
+      );
 
       expect(operationMap.get('email-compose')).toBe('Email Composition Assistance');
       expect(operationMap.get('email-classify')).toBe('Email Classification & Metadata');
@@ -376,7 +381,16 @@ describe('Phase 8: Intelligence Operations Integration', () => {
 
   describe('Budget Enforcement for Phase 8', () => {
     it('should not require approval for LOW criticality operations', async () => {
-      const operations = ['email-compose', 'email-classify', 'email-respond', 'calendar-prep', 'calendar-time', 'task-prioritize', 'task-breakdown', 'analytics-anomaly'];
+      const operations = [
+        'email-compose',
+        'email-classify',
+        'email-respond',
+        'calendar-prep',
+        'calendar-time',
+        'task-prioritize',
+        'task-breakdown',
+        'analytics-anomaly',
+      ];
 
       for (const opId of operations) {
         const request: RoutingRequest = {
@@ -396,7 +410,9 @@ describe('Phase 8: Intelligence Operations Integration', () => {
       // This would require setting up a user with high spend
       // For now, verify that analytics-summary is marked as MEDIUM
       const operations = await router.getRegisteredOperations();
-      const analyticsSummary = operations.find((op: any) => op.operation_id === 'analytics-summary');
+      const analyticsSummary = operations.find(
+        (op: any) => op.operation_id === 'analytics-summary'
+      );
 
       expect(analyticsSummary?.cost_criticality).toBe('MEDIUM');
     });

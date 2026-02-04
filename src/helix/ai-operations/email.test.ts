@@ -255,8 +255,9 @@ describe('Email Analysis Operations', () => {
       vi.mocked(router.route).mockResolvedValueOnce(mockRoutingDecision as any);
 
       const email = createBasicEmail();
-      const { userId, ...emailWithoutUserId } = email;
-      const emailForTest = emailWithoutUserId as any;
+      // Remove userId to test execution without user ID
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { userId, ...emailForTest } = email;
 
       const result = await analyzeEmail(emailForTest);
 

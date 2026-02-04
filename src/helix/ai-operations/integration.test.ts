@@ -48,7 +48,7 @@ describe('Phase 0.5 Integration Tests', () => {
   });
 
   describe('Cost Tracking Accuracy', () => {
-    it('should log operation with correct cost calculation', async () => {
+    it('should log operation with correct cost calculation', () => {
       const model = 'deepseek';
       const inputTokens = 1000;
       const outputTokens = 2000;
