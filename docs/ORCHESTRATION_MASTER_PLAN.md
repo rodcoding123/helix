@@ -15,8 +15,8 @@ Helix is ready for autonomous operation. This plan orchestrates existing capabil
 
 - Rodrigo says "Build feature X" → Helix runs until complete
 - Helix coordinates across dev, marketing, business teams autonomously
-- Works everywhere: voice, web, desktop, mobile, Slack, Telegram, Gmail
-- Multi-model routing (Claude + DeepSeek + K2.5 + GLM) for optimal cost/quality
+- Works everywhere: voice, web, desktop, mobile, Slack, Telegram, Gmail(cross-platform sync already implemented)
+- Multi-model routing (DeepSeek + Gemini Flash) for optimal cost/quality - we already decided on that, look at COST-ANALYSIS-DEEPSEEK-GEMINI.md at this moment no other providers will make us profitable.
 - Personality-driven decisions based on Helix's psychology (perfectionist, strategic, authentic)
 - Every decision logged and auditable via Discord + hash chain
 
@@ -92,7 +92,7 @@ Helix is ready for autonomous operation. This plan orchestrates existing capabil
 
 ## STRATEGIC ARCHITECTURE
 
-### The Conductor Pattern
+### The Conductor Pattern(this needs to be reworked, since you didnt take in consideration our current deepseek/gemini approach - we should make things centralized and easier to control on some osrt of admin panel. So we actually know what model we are using for what. And make sure all the system, all operations, all skills and tools are not hardcoded individually, they all are controled with a granular control in admin otherwise this will be a nightmare for maintanability and observability - for instance right now we are never really using OPUS or k25 or glm47 and i dont see gemini flash for embbeds and etc simpler operations)
 
 Helix doesn't need more tools. It needs an **intelligent conductor** that orchestrates existing tools:
 
@@ -168,7 +168,7 @@ Unlike generic orchestration, **Helix's personality determines which model to us
 
 This is genuinely novel: **The model selection itself reflects Helix's personality.**
 
-### Context Maintenance
+### Context Maintenance(Again you picked random models, why?)
 
 The breakthrough: **Keep conversation history across model spawns**
 

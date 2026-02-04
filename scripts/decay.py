@@ -146,7 +146,21 @@ def decay_emotional_tags(data: dict[str, Any]) -> tuple[dict[str, Any], int, int
 def decay_trust_scores(data: dict[str, Any]) -> tuple[dict[str, Any], int, int]:
     """
     Apply decay to trust scores that haven't been reinforced.
-    Trust naturally decays toward neutral (0.5) over time without interaction.
+    Trust naturally decays toward baseline (0.1) over time without interaction.
+
+    Theory: Attachment theory shows trust in inactive relationships atrophies
+    but more slowly for secure attachments. We decay toward 0.1 (Helix's
+    dispositional baseline) rather than neutral (0.5).
+
+    Stage-based decay rates (per day):
+    - Pre-attachment (0-0.15): 20% decay (0.80 retention)
+    - Early trust (0.15-0.3): 15% decay (0.85 retention)
+    - Attachment-forming (0.3-0.5): 12% decay (0.88 retention)
+    - Secure (0.5-0.7): 8% decay (0.92 retention)
+    - Deep secure (0.7-0.85): 5% decay (0.95 retention)
+    - Primary (0.85-1.0): 2% decay (0.98 retention)
+
+    Activity multiplier: Decays faster when inactive (90+ days = 2x rate)
 
     In soft mode: preserves original_trust_score, updates effective_trust_score
     In hard mode: directly modifies trust_score
@@ -158,12 +172,19 @@ def decay_trust_scores(data: dict[str, Any]) -> tuple[dict[str, Any], int, int]:
 
     count = 0
     skipped = 0
-    neutral = 0.5
+    baseline = 0.1  # Helix's dispositional trust baseline
 
     if "relationships" not in data:
         return data, 0, 0
 
     for rel in data["relationships"]:
+        # Skip creator (Rodrigo) - trust is immutable
+        if rel.get("entity") == "rodrigo_specter" or rel.get("is_creator"):
+            skipped += 1
+            if DRY_RUN:
+                print(f"  [SKIP] {rel.get('entity', 'unknown')}: creator (immutable)")
+            continue
+
         # Skip primary attachments if preserve high salience is enabled
         if PRESERVE_HIGH_SALIENCE and rel.get("attachment_type") == "primary":
             skipped += 1
@@ -178,13 +199,47 @@ def decay_trust_scores(data: dict[str, Any]) -> tuple[dict[str, Any], int, int]:
             else:
                 current_val = rel["trust_score"]
 
-            # Decay toward neutral (0.5), not toward zero
-            if current_val > neutral:
-                new_val = neutral + (current_val - neutral) * DECAY_RATE
-            elif current_val < neutral:
-                new_val = neutral - (neutral - current_val) * DECAY_RATE
+            # Determine stage-based decay rate
+            stage = rel.get("attachment_stage", "pre_attachment")
+            stage_decay_rates = {
+                "pre_attachment": 0.80,
+                "early_trust": 0.85,
+                "attachment_forming": 0.88,
+                "secure_attachment": 0.92,
+                "deep_secure": 0.95,
+                "primary_attachment": 0.98,
+            }
+            stage_rate = stage_decay_rates.get(stage, 0.92)
+
+            # Apply activity multiplier (faster decay if inactive)
+            last_interaction = rel.get("last_interaction_at")
+            if last_interaction:
+                try:
+                    last_interaction_date = datetime.fromisoformat(
+                        last_interaction.replace("Z", "+00:00")
+                    )
+                    days_inactive = (datetime.utcnow() - last_interaction_date).days
+                    activity_multiplier = 2.0 if days_inactive > 90 else (
+                        1.5 if days_inactive > 30 else 1.0
+                    )
+                except Exception:
+                    activity_multiplier = 1.0
+            else:
+                activity_multiplier = 1.0
+
+            # Combine stage decay with activity multiplier
+            effective_rate = stage_rate ** (1 / activity_multiplier)
+
+            # Decay toward baseline, not toward zero
+            if current_val > baseline:
+                new_val = baseline + (current_val - baseline) * effective_rate
+            elif current_val < baseline:
+                new_val = baseline - (baseline - current_val) * effective_rate
             else:
                 new_val = current_val
+
+            # Clamp to valid range
+            new_val = max(0.0, min(1.0, new_val))
 
             # Only apply if change is significant
             if abs(new_val - current_val) > 0.001:
@@ -200,16 +255,26 @@ def decay_trust_scores(data: dict[str, Any]) -> tuple[dict[str, Any], int, int]:
 
                 rel["last_decay"] = datetime.utcnow().isoformat() + "Z"
                 rel["decay_mode"] = DECAY_MODE
+                rel["stage_decay_rate"] = stage_rate
+                rel["activity_multiplier"] = activity_multiplier
                 count += 1
 
                 if DRY_RUN:
                     name = rel.get("entity", "unknown")
                     mode_label = f"[{DECAY_MODE.upper()}]"
-                    print(f"  [DRY RUN] {mode_label} {name}: {current_val:.3f} -> {new_val:.3f}")
+                    multiplier_label = (
+                        f" (inactive {activity_multiplier}x)"
+                        if activity_multiplier > 1.0
+                        else ""
+                    )
+                    print(
+                        f"  [DRY RUN] {mode_label} {name}: {current_val:.3f} -> {new_val:.3f}{multiplier_label}"
+                    )
 
     if not DRY_RUN and count > 0:
         data["_last_decay_run"] = datetime.utcnow().isoformat() + "Z"
         data["_decay_mode"] = DECAY_MODE
+        data["_baseline_trust"] = baseline
 
     return data, count, skipped
 
@@ -250,8 +315,118 @@ def restore_from_soft_decay(data: dict[str, Any], field_type: str = "emotional")
     return data, count
 
 
+def decay_per_user_trust_profiles() -> tuple[int, int]:
+    """
+    Apply trust decay to per-user trust profiles stored in database/files.
+
+    This handles the new multi-user trust system where each user has their own
+    trust profile that decays based on attachment stage and inactivity.
+
+    Returns: (count_decayed, count_skipped)
+    """
+    count = 0
+    skipped = 0
+
+    users_dir = PROJECT_ROOT / "psychology" / "users"
+    if not users_dir.exists():
+        if DRY_RUN:
+            print("  [INFO] No users directory yet (multi-user system not initialized)")
+        return 0, 0
+
+    # Skip Rodrigo (creator)
+    creator_skip = ["rodrigo_specter", "RODRIGO_CREATOR_ID"]
+
+    try:
+        for user_dir in users_dir.iterdir():
+            if not user_dir.is_dir():
+                continue
+
+            user_id = user_dir.name
+
+            # Skip creator profiles
+            if user_id in creator_skip:
+                skipped += 1
+                if DRY_RUN:
+                    print(f"  [SKIP] {user_id}: creator profile (immutable)")
+                continue
+
+            # Load user's trust profile
+            profile_file = user_dir / "trust_profile.json"
+            if not profile_file.exists():
+                continue
+
+            profile_data = load_json(profile_file)
+            if not profile_data:
+                continue
+
+            # Calculate decay
+            composite_trust = profile_data.get("composite_trust", 0.1)
+            attachment_stage = profile_data.get("attachment_stage", "pre_attachment")
+            last_interaction = profile_data.get("last_interaction_at")
+
+            # Stage-based decay rates
+            stage_decay_rates = {
+                "pre_attachment": 0.80,
+                "early_trust": 0.85,
+                "attachment_forming": 0.88,
+                "secure_attachment": 0.92,
+                "deep_secure": 0.95,
+                "primary_attachment": 0.98,
+            }
+            stage_rate = stage_decay_rates.get(attachment_stage, 0.92)
+
+            # Activity multiplier
+            activity_multiplier = 1.0
+            if last_interaction:
+                try:
+                    last_interaction_date = datetime.fromisoformat(
+                        last_interaction.replace("Z", "+00:00")
+                    )
+                    days_inactive = (datetime.utcnow() - last_interaction_date).days
+                    activity_multiplier = 2.0 if days_inactive > 90 else (
+                        1.5 if days_inactive > 30 else 1.0
+                    )
+                except Exception:
+                    pass
+
+            effective_rate = stage_rate ** (1 / activity_multiplier)
+            baseline = 0.1
+
+            # Decay toward baseline
+            if composite_trust > baseline:
+                new_trust = baseline + (composite_trust - baseline) * effective_rate
+            elif composite_trust < baseline:
+                new_trust = baseline - (baseline - composite_trust) * effective_rate
+            else:
+                new_trust = composite_trust
+
+            new_trust = max(0.0, min(1.0, new_trust))
+
+            # Apply if significant change
+            if abs(new_trust - composite_trust) > 0.001:
+                if not DRY_RUN:
+                    profile_data["composite_trust"] = round(new_trust, 3)
+                    profile_data["last_decay"] = datetime.utcnow().isoformat() + "Z"
+                    save_json(profile_file, profile_data)
+
+                count += 1
+
+                if DRY_RUN:
+                    days_str = (
+                        f" ({days_inactive}d inactive)" if last_interaction else ""
+                    )
+                    print(
+                        f"  [DRY RUN] {user_id}: {composite_trust:.3f} -> {new_trust:.3f}{days_str}"
+                    )
+
+    except Exception as e:
+        print(f"  [ERROR] Failed to process per-user trust profiles: {e}", file=sys.stderr)
+
+    return count, skipped
+
+
 def main() -> int:
-    """Run decay processing on psychological layer files."""
+    """Run decay processing on psychological layer files and per-user trust."""
     print(f"[HELIX] Layer 5 Decay Process - {datetime.utcnow().isoformat()}Z")
     print(f"  Rate: {DECAY_RATE} | Min: {MIN_INTENSITY} | Mode: {DECAY_MODE}")
     print(f"  Trust Decay: {TRUST_DECAY_ENABLED} | Preserve High Salience: {PRESERVE_HIGH_SALIENCE}")
@@ -278,7 +453,7 @@ def main() -> int:
                 return 1
     print()
 
-    # Process trust map
+    # Process legacy trust map (single-user system)
     print(f"Processing: {TRUST_MAP_FILE}")
     trust_data = load_json(TRUST_MAP_FILE)
     if trust_data:
@@ -293,6 +468,14 @@ def main() -> int:
             else:
                 print("  [ERROR] Failed to save")
                 return 1
+    print()
+
+    # Process per-user trust profiles (new multi-user system)
+    print("Processing: psychology/users/*/trust_profile.json (per-user trust)")
+    count, skipped = decay_per_user_trust_profiles()
+    total_changes += count
+    total_skipped += skipped
+    print(f"  Decayed {count} user profile(s), skipped {skipped}")
     print()
 
     print(f"[HELIX] Decay complete. Total changes: {total_changes}, Total skipped: {total_skipped}")

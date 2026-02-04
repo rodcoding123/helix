@@ -10,11 +10,18 @@
  * 5. Integration Rhythms - (cron scripts, not loaded into context)
  * 6. Transformation      - current_state.json, history.json
  * 7. Purpose Engine      - ikigai.json, wellness.json, meaning_sources.json
+ *
+ * Per-User Context:
+ * - Loads user-specific trust profiles and behavioral modulation
+ * - Injects stage-appropriate system prompts for relationship context
+ * - Supports multi-user system with independent relationship states
  */
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { HelixContextFile } from './types.js';
+import { getSystemPromptInjection } from '../psychology/behavior-modulation.js';
+import type { TrustProfile } from '../psychology/trust-profile-manager.js';
 
 /**
  * Seven layer file mapping
@@ -231,6 +238,7 @@ export async function ensureHelixDirectoryStructure(workspaceDir: string): Promi
   const directories = [
     'soul',
     'psychology',
+    'psychology/users',
     'identity',
     'transformation',
     'purpose',
@@ -245,6 +253,125 @@ export async function ensureHelixDirectoryStructure(workspaceDir: string): Promi
     } catch {
       // Directory may already exist
     }
+  }
+}
+
+/**
+ * Load per-user context with behavioral modulation
+ * Includes trust profile, relationship history, and stage-appropriate system prompt
+ *
+ * @param workspaceDir - The workspace directory
+ * @param userId - The user ID (Supabase UUID or identifier)
+ * @returns Context files for this user including behavioral modulation
+ */
+export async function loadPerUserContext(
+  workspaceDir: string,
+  userId: string
+): Promise<EmbeddedContextFile[]> {
+  const results: EmbeddedContextFile[] = [];
+  const userDir = path.join(workspaceDir, 'psychology', 'users', userId);
+
+  // Try to load user's trust profile for behavioral modulation
+  try {
+    const profilePath = path.join(userDir, 'trust_profile.json');
+    const profileContent = await fs.readFile(profilePath, 'utf-8');
+    const profile = JSON.parse(profileContent) as TrustProfile;
+
+    // Add behavioral modulation prompt
+    const behavioralPrompt = getSystemPromptInjection(profile);
+    results.push({
+      path: `psychology/users/${userId}/behavioral-modulation.txt`,
+      content: behavioralPrompt,
+    });
+
+    // Add trust profile as context
+    results.push({
+      path: `psychology/users/${userId}/trust_profile.json`,
+      content: profileContent,
+    });
+  } catch {
+    // Profile may not exist yet for new users
+  }
+
+  // Load user's interaction history
+  try {
+    const historyPath = path.join(userDir, 'interaction_history.json');
+    const historyContent = await fs.readFile(historyPath, 'utf-8');
+    results.push({
+      path: `psychology/users/${userId}/interaction_history.json`,
+      content: historyContent,
+    });
+  } catch {
+    // History may not exist yet
+  }
+
+  // Load user's emotional memory/tags
+  try {
+    const emotionalPath = path.join(userDir, 'emotional_memory.json');
+    const emotionalContent = await fs.readFile(emotionalPath, 'utf-8');
+    results.push({
+      path: `psychology/users/${userId}/emotional_memory.json`,
+      content: emotionalContent,
+    });
+  } catch {
+    // Emotional memory may not exist yet
+  }
+
+  // Load attachment state
+  try {
+    const attachmentPath = path.join(userDir, 'attachment_state.json');
+    const attachmentContent = await fs.readFile(attachmentPath, 'utf-8');
+    results.push({
+      path: `psychology/users/${userId}/attachment_state.json`,
+      content: attachmentContent,
+    });
+  } catch {
+    // Attachment state may not exist yet
+  }
+
+  return results;
+}
+
+/**
+ * Load complete context for a session (global + per-user)
+ *
+ * @param workspaceDir - The workspace directory
+ * @param userId - The user ID for per-user context
+ * @returns All context files (global seven layers + per-user)
+ */
+export async function loadCompleteSessionContext(
+  workspaceDir: string,
+  userId: string
+): Promise<EmbeddedContextFile[]> {
+  // Load global Helix context
+  const globalContext = await loadHelixContextFiles(workspaceDir);
+
+  // Load per-user context with behavioral modulation
+  const userContext = await loadPerUserContext(workspaceDir, userId);
+
+  // Combine: per-user context first (behavioral modulation takes precedence)
+  return [...userContext, ...globalContext];
+}
+
+/**
+ * Get behavioral modulation system prompt for a user
+ * Can be used to inject into prompt templates
+ *
+ * @param workspaceDir - The workspace directory
+ * @param userId - The user ID
+ * @returns The system prompt injection string, or empty string if profile not found
+ */
+export async function getBehavioralModulationPrompt(
+  workspaceDir: string,
+  userId: string
+): Promise<string> {
+  try {
+    const profilePath = path.join(workspaceDir, 'psychology', 'users', userId, 'trust_profile.json');
+    const profileContent = await fs.readFile(profilePath, 'utf-8');
+    const profile = JSON.parse(profileContent) as TrustProfile;
+    return getSystemPromptInjection(profile);
+  } catch {
+    return '';
   }
 }
 

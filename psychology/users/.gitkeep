@@ -1,0 +1,19 @@
+# Per-user trust profile storage directory
+# Each user gets a subdirectory with their UUID containing:
+# - trust_profile.json (psychological trust model)
+# - attachment_state.json (attachment stage history)
+# - interaction_history.json (key moments, trust events)
+# - emotional_memory.json (user-specific emotional tags)
+#
+# Example structure:
+# psychology/users/
+#   rodrigo_specter/
+#     trust_profile.json
+#     attachment_state.json
+#     interaction_history.json
+#   user_abc123/
+#     trust_profile.json
+#     attachment_state.json
+#     interaction_history.json
+#
+# This directory is auto-populated by TrustProfileManager class

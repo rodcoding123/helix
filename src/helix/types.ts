@@ -178,6 +178,48 @@ export interface SecretOperationEntry {
 }
 
 /**
+ * Trust update entry for user-agnostic trust formation logging
+ * Logs all trust changes to hash chain for immutable audit trail
+ * User IDs are hashed for privacy (pseudonymous logging)
+ */
+export interface TrustUpdateEntry {
+  operation:
+    | 'trust_increase'
+    | 'trust_decrease'
+    | 'violation'
+    | 'stage_progression'
+    | 'stage_regression'
+    | 'emotional_impact'
+    | 'reciprocity_detected';
+
+  userId: string; // SHA-256 hashed for privacy
+  userIdentifierHash: string; // First 8 chars of hash (pseudonymous ID)
+
+  trigger: string; // What triggered the update
+
+  trustBefore: number;
+  trustAfter: number;
+  trustDelta: number;
+
+  dimensionsChanged: {
+    competence?: { before: number; after: number };
+    integrity?: { before: number; after: number };
+    benevolence?: { before: number; after: number };
+    predictability?: { before: number; after: number };
+    vulnerability_safety?: { before: number; after: number };
+  };
+
+  conversationId?: string; // Reference to conversation that triggered update
+  salienceTier: 'critical' | 'high' | 'medium' | 'low';
+
+  attachmentStageBefore?: string;
+  attachmentStageAfter?: string;
+
+  timestamp: string;
+  durationMs?: number;
+}
+
+/**
  * Discord embed field
  */
 export interface DiscordEmbedField {
