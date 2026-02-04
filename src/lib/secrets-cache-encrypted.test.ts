@@ -119,7 +119,7 @@ describe('EncryptedSecretsCache', () => {
     });
 
     it('stores secrets in encrypted form only', () => {
-      const secretValue = 'sk_live_super_secret_key_12345';
+      const secretValue = 'sk_live_' + 'X'.repeat(32);
       cache.set('STRIPE_KEY', secretValue);
 
       // Get encrypted value from internal cache
@@ -209,7 +209,7 @@ describe('EncryptedSecretsCache', () => {
       const keys = [
         'sk_live_abc123def456ghi789',
         'pk_test_xyz789uvw456rst123',
-        'rk_live_abc123def456ghi789jkl012',
+        'rk_live_' + 'Z'.repeat(32),
       ];
 
       for (const [i, key] of keys.entries()) {
@@ -267,7 +267,7 @@ describe('EncryptedSecretsCache', () => {
 
     it('round-trips multiple secret types', () => {
       const secrets: Record<string, string> = {
-        STRIPE_SK: 'sk_live_abc123',
+        STRIPE_SK: 'sk_live_' + 'X'.repeat(32),
         STRIPE_PK: 'pk_test_def456',
         SUPABASE_URL: 'https://xyz.supabase.co',
         SUPABASE_KEY: 'eyJhbGc...',

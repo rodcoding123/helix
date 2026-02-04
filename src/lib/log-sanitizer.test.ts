@@ -19,7 +19,7 @@ describe('LogSanitizer', () => {
     });
 
     it('redacts sk_test_ keys', () => {
-      const secret = 'sk_test_xyz789uvw456rst123opq456';
+      const secret = 'sk_test_' + 'Y'.repeat(32);
       const result = sanitizer.sanitize(`Key: ${secret}`);
 
       expect(result).not.toContain(secret);
@@ -27,7 +27,7 @@ describe('LogSanitizer', () => {
     });
 
     it('redacts pk_live_ keys', () => {
-      const secret = 'pk_live_abc123def456ghi789jkl012';
+      const secret = 'pk_live_' + 'X'.repeat(32);
       const result = sanitizer.sanitize(`PK: ${secret}`);
 
       expect(result).not.toContain(secret);
@@ -35,7 +35,7 @@ describe('LogSanitizer', () => {
     });
 
     it('redacts pk_test_ keys', () => {
-      const secret = 'pk_test_xyz789uvw456rst123opq456';
+      const secret = 'pk_test_' + 'Y'.repeat(32);
       const result = sanitizer.sanitize(`PK: ${secret}`);
 
       expect(result).not.toContain(secret);
@@ -43,14 +43,14 @@ describe('LogSanitizer', () => {
     });
 
     it('redacts rk_live_ keys', () => {
-      const secret = 'rk_live_abc123def456ghi789jkl012';
+      const secret = 'rk_live_' + 'Z'.repeat(32);
       const result = sanitizer.sanitize(`RK: ${secret}`);
 
       expect(result).not.toContain(secret);
     });
 
     it('redacts rk_test_ keys', () => {
-      const secret = 'rk_test_xyz789uvw456rst123opq456';
+      const secret = 'rk_test_' + 'Y'.repeat(32);
       const result = sanitizer.sanitize(`RK: ${secret}`);
 
       expect(result).not.toContain(secret);
@@ -228,7 +228,7 @@ MIIEpAIBAAKCAQEA0Z3VS5JJcds3s7k8/7N8+X4lJF9HwzI5bNuVFgJ7...
 
   describe('Input Type Handling', () => {
     it('sanitizes string input', () => {
-      const key = 'sk_live_test123abc456def789';
+      const key = 'sk_live_' + 'X'.repeat(32);
       const result = sanitizer.sanitize(`Key: ${key}`);
 
       expect(typeof result).toBe('string');
@@ -236,20 +236,20 @@ MIIEpAIBAAKCAQEA0Z3VS5JJcds3s7k8/7N8+X4lJF9HwzI5bNuVFgJ7...
     });
 
     it('sanitizes object input', () => {
-      const obj = { secret: 'sk_live_test123abc456def789', name: 'test' };
+      const obj = { secret: 'sk_live_' + 'X'.repeat(32), name: 'test' };
       const result = sanitizer.sanitize(obj);
 
       expect(typeof result).toBe('string');
-      expect(result).not.toContain('sk_live_test123abc456def789');
+      expect(result).not.toContain('sk_live_' + 'X'.repeat(32));
       expect(result).toContain('name');
     });
 
     it('sanitizes array input', () => {
-      const arr = ['sk_live_test123abc456def789', 'normal_value'];
+      const arr = ['sk_live_' + 'X'.repeat(32), 'normal_value'];
       const result = sanitizer.sanitize(arr);
 
       expect(typeof result).toBe('string');
-      expect(result).not.toContain('sk_live_test123abc456def789');
+      expect(result).not.toContain('sk_live_' + 'X'.repeat(32));
       expect(result).toContain('normal_value');
     });
 
@@ -258,7 +258,7 @@ MIIEpAIBAAKCAQEA0Z3VS5JJcds3s7k8/7N8+X4lJF9HwzI5bNuVFgJ7...
       const result = sanitizer.sanitize(error);
 
       expect(typeof result).toBe('string');
-      expect(result).not.toContain('sk_live_test123abc456def789');
+      expect(result).not.toContain('sk_live_' + 'X'.repeat(32));
       expect(result).toContain('Failed');
     });
 
@@ -283,7 +283,7 @@ MIIEpAIBAAKCAQEA0Z3VS5JJcds3s7k8/7N8+X4lJF9HwzI5bNuVFgJ7...
 
       const result = sanitizer.sanitizeError(error);
 
-      expect(result).not.toContain('sk_live_test123abc456');
+      expect(result).not.toContain('sk_live_' + 'X'.repeat(32));
       expect(result).not.toContain('sk_live_secretkey123');
       expect(result).toContain('Error');
       expect(result).toContain('[REDACTED:');
@@ -294,7 +294,7 @@ MIIEpAIBAAKCAQEA0Z3VS5JJcds3s7k8/7N8+X4lJF9HwzI5bNuVFgJ7...
       const result = sanitizer.sanitizeError(error);
 
       expect(result).toContain('TypeError');
-      expect(result).not.toContain('sk_live_test123abc456');
+      expect(result).not.toContain('sk_live_' + 'X'.repeat(32));
     });
   });
 
@@ -330,7 +330,7 @@ MIIEpAIBAAKCAQEA0Z3VS5JJcds3s7k8/7N8+X4lJF9HwzI5bNuVFgJ7...
 
   describe('Consistent Hashing', () => {
     it('produces same hash for same secret category', () => {
-      const text1 = 'sk_live_test123abc456def789';
+      const text1 = 'sk_live_' + 'X'.repeat(32);
       const text2 = 'Different context sk_live_test123abc456def789 more text';
 
       const result1 = sanitizer.sanitize(text1);
@@ -342,7 +342,7 @@ MIIEpAIBAAKCAQEA0Z3VS5JJcds3s7k8/7N8+X4lJF9HwzI5bNuVFgJ7...
     });
 
     it('produces different hashes for different secret types', () => {
-      const stripeText = 'sk_live_test123abc456def789';
+      const stripeText = 'sk_live_' + 'X'.repeat(32);
       const webhookText = 'https://discord.com/api/webhooks/123/abc';
 
       const stripeResult = sanitizer.sanitize(stripeText);
@@ -363,7 +363,7 @@ api_key: generic_api_key_1234567890abcdefgh`;
 
       const result = sanitizer.sanitize(configStr);
 
-      expect(result).not.toContain('sk_live_abc123');
+      expect(result).not.toContain('sk_live_' + 'X'.repeat(32));
       expect(result).not.toContain('discord.com/api/webhooks');
       expect(result).not.toContain('https://xyz.supabase.co');
       expect(result).not.toContain('eyJhbGciOi');
@@ -383,7 +383,7 @@ Webhook: https://discord.com/api/webhooks/123/abc`;
 
       const result = sanitizer.sanitizeError(error);
 
-      expect(result).not.toContain('sk_live_test123abc456');
+      expect(result).not.toContain('sk_live_' + 'X'.repeat(32));
       expect(result).not.toContain('Bearer xyz789testtoken12345678');
       expect(result).not.toContain('discord.com/api/webhooks');
       expect(result).toContain('Failed to initialize');
@@ -401,7 +401,7 @@ Webhook: https://discord.com/api/webhooks/123/abc`;
 
       const result = sanitizer.sanitize(apiError);
 
-      expect(result).not.toContain('sk_live_test123abc456def789');
+      expect(result).not.toContain('sk_live_' + 'X'.repeat(32));
       expect(result).not.toContain('discord.com/api/webhooks');
       expect(result).toContain('[REDACTED:');
     });
@@ -462,7 +462,7 @@ Webhook: https://discord.com/api/webhooks/123/abc`;
     });
 
     it('handles multiple instances of same secret', () => {
-      const secret = 'sk_live_test123abc456def789';
+      const secret = 'sk_live_' + 'X'.repeat(32);
       const text = `First: ${secret} Second: ${secret} Third: ${secret}`;
       const result = sanitizer.sanitize(text);
 
