@@ -9,26 +9,24 @@
  * Log message to Discord
  * @param message Message object with channel, type, and data
  */
-export async function logToDiscord(message: {
+export function logToDiscord(message: {
   channel?: string;
   type?: string;
   [key: string]: unknown;
-}): Promise<void> {
+}): void {
   try {
     // For now, log to console
     console.log('[Discord Log]', JSON.stringify(message));
 
-    // TODO: In production, send to actual Discord webhook
-    // const webhookUrl = process.env[`DISCORD_WEBHOOK_${message.channel?.toUpperCase() || 'API'}`];
-    // if (!webhookUrl) return;
-    //
-    // await fetch(webhookUrl, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({
-    //     content: formatMessage(message)
-    //   })
-    // });
+    // TODO: In production, send to actual Discord webhook with fire-and-forget pattern
+    // const webhookUrl = process.env[`DISCORD_WEBHOOK_${String(message.channel || 'API').toUpperCase()}`];
+    // if (webhookUrl) {
+    //   fetch(webhookUrl, {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify({ content: formatMessage(message) }),
+    //   }).catch(err => console.error('Discord webhook failed:', err));
+    // }
   } catch (error) {
     console.error('Failed to log to Discord:', error);
   }
@@ -37,8 +35,8 @@ export async function logToDiscord(message: {
 /**
  * Format message for Discord
  */
-function formatMessage(message: Record<string, unknown>): string {
-  const type = message.type || 'log';
+export function formatMessage(message: Record<string, unknown>): string {
+  const type = String(message.type || 'log');
   const entries = Object.entries(message)
     .filter(([k]) => k !== 'channel' && k !== 'type')
     .map(([k, v]) => `**${k}**: ${JSON.stringify(v)}`)
