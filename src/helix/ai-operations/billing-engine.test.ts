@@ -69,4 +69,24 @@ describe('BillingEngine', () => {
     const usage = billingEngine.getMonthlyUsage('user1');
     expect(usage.totalCost).toBe(0);
   });
+
+  it('should reject negative costs', () => {
+    expect(() => {
+      billingEngine.recordOperation('user1', 'gpt-4', -50.0);
+    }).toThrow('Cost must be non-negative');
+  });
+
+  it('should return immutable monthly usage data', () => {
+    billingEngine.recordOperation('user1', 'gpt-4', 100.0);
+    const usage1 = billingEngine.getMonthlyUsage('user1');
+
+    // Attempt to mutate returned object
+    usage1.totalCost = 999.0;
+    usage1.costByType['gpt-4'] = 999.0;
+
+    // Original data should be unchanged
+    const usage2 = billingEngine.getMonthlyUsage('user1');
+    expect(usage2.totalCost).toBe(100.0);
+    expect(usage2.costByType['gpt-4']).toBe(100.0);
+  });
 });

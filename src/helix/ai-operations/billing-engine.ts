@@ -51,6 +51,10 @@ export class BillingEngine {
    * @param costUsd Cost in USD
    */
   recordOperation(userId: string, operationType: string, costUsd: number): void {
+    if (costUsd < 0) {
+      throw new Error(`Cost must be non-negative, got: ${costUsd}`);
+    }
+
     const billing = this.getOrCreateBilling(userId);
 
     // Update total cost
@@ -70,7 +74,7 @@ export class BillingEngine {
   /**
    * Get monthly usage for a user
    * @param userId User identifier
-   * @returns Monthly usage details
+   * @returns Monthly usage details (defensive copy to prevent mutation)
    */
   getMonthlyUsage(userId: string): UserBillingData {
     const billing = this.billings.get(userId);
@@ -82,7 +86,13 @@ export class BillingEngine {
         costByType: {},
       };
     }
-    return billing;
+    // Return a copy to prevent external mutation
+    return {
+      totalCost: billing.totalCost,
+      tax: billing.tax,
+      totalAmount: billing.totalAmount,
+      costByType: { ...billing.costByType },
+    };
   }
 
   /**
@@ -123,12 +133,14 @@ export class BillingEngine {
   /**
    * Mark an invoice as paid
    * @param invoiceId Invoice identifier
+   * @throws Error if invoice is not found
    */
   markInvoiceAsPaid(invoiceId: string): void {
     const invoice = this.invoices.get(invoiceId);
-    if (invoice) {
-      invoice.status = 'paid';
+    if (!invoice) {
+      throw new Error(`Invoice not found: ${invoiceId}`);
     }
+    invoice.status = 'paid';
   }
 
   /**
