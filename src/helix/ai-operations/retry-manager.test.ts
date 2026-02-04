@@ -46,7 +46,7 @@ describe('RetryManager', () => {
     });
 
     it('adds jitter variation', () => {
-      const delays = [];
+      const delays: number[] = [];
       for (let i = 0; i < 5; i++) {
         delays.push(retryManager.calculateBackoffMs(1));
       }

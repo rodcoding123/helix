@@ -17,8 +17,6 @@ export interface RetryHistory {
 const BASE_DELAY_MS = 100;
 const MAX_DELAY_MS = 10000;
 const MAX_RETRIES_TRANSIENT = 5;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const MAX_RETRIES_TERMINAL = 0;
 const JITTER_PERCENT = 0.2; // ±20%
 
 // Error keywords that indicate transient errors (retriable)
