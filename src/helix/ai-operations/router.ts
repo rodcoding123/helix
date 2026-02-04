@@ -23,6 +23,7 @@ import { ObservabilityMetrics } from './observability-metrics.js';
 import { UsageQuotaManager } from './usage-quota.js';
 import { RateLimiter } from './rate-limiter.js';
 import { BillingEngine } from './billing-engine.js';
+import { AnalyticsCollector } from './analytics-collector.js';
 
 // Type definitions
 export interface RoutingRequest {
@@ -96,6 +97,7 @@ export class AIOperationRouter {
   private quotaManager: UsageQuotaManager;
   private rateLimiter: RateLimiter;
   private billingEngine: BillingEngine;
+  private analyticsCollector: AnalyticsCollector;
 
   constructor() {
     // Initialize Phase 4 orchestration
@@ -114,6 +116,7 @@ export class AIOperationRouter {
     this.quotaManager = new UsageQuotaManager();
     this.rateLimiter = new RateLimiter();
     this.billingEngine = new BillingEngine();
+    this.analyticsCollector = new AnalyticsCollector();
   }
 
   private getSupabaseClient(): ReturnType<typeof createClient> {
@@ -580,6 +583,13 @@ export class AIOperationRouter {
    */
   getBillingEngine(): BillingEngine {
     return this.billingEngine;
+  }
+
+  /**
+   * Get analytics collector for operation metrics
+   */
+  getAnalyticsCollector(): AnalyticsCollector {
+    return this.analyticsCollector;
   }
 }
 
