@@ -22,3 +22,7 @@ process.env.DISCORD_WEBHOOK_ALERTS =
 // Set other required environment variables
 process.env.NODE_ENV = 'test';
 process.env.HELIX_ROOT = process.cwd();
+
+// Set Supabase environment variables for tests
+process.env.SUPABASE_URL = 'https://test.supabase.co';
+process.env.SUPABASE_SERVICE_KEY = 'test-service-key';

@@ -12,6 +12,10 @@ import { createClient } from '@supabase/supabase-js';
 import { logToDiscord } from '../logging.js';
 import { hashChain } from '../hash-chain.js';
 import { calculateProviderCost } from './providers/index.js';
+import { ProviderHealthMonitor } from './provider-health.js';
+import { ProviderOrchestrator } from './provider-orchestrator.js';
+import { OperationScheduler } from './operation-scheduler.js';
+import { BatchOperationEngine } from './batch-engine.js';
 
 // Type definitions
 export interface RoutingRequest {
@@ -74,6 +78,10 @@ export class AIOperationRouter {
   private routeCache: Map<string, { config: RouteConfig; timestamp: number }> = new Map();
   private toggleCache: Map<string, { toggle: FeatureToggle; timestamp: number }> = new Map();
   private cacheTTL = 5 * 60 * 1000; // 5 minutes
+  private healthMonitor: ProviderHealthMonitor;
+  private orchestrator: ProviderOrchestrator;
+  private scheduler: OperationScheduler;
+  private batchEngine: BatchOperationEngine;
 
   constructor() {
     const supabaseUrl = process.env.SUPABASE_URL;
@@ -84,6 +92,12 @@ export class AIOperationRouter {
     }
 
     this.supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Initialize Phase 4 orchestration
+    this.healthMonitor = new ProviderHealthMonitor();
+    this.orchestrator = new ProviderOrchestrator(this.healthMonitor);
+    this.scheduler = new OperationScheduler();
+    this.batchEngine = new BatchOperationEngine();
   }
 
   /**
@@ -447,9 +461,7 @@ export class AIOperationRouter {
    */
   async getRegisteredOperations(): Promise<RouteConfig[]> {
     try {
-      const { data, error } = await this.supabase
-        .from('model_routes')
-        .select('*');
+      const { data, error } = await this.supabase.from('model_routes').select('*');
 
       if (error) throw error;
       return (data || []) as RouteConfig[];
@@ -461,6 +473,34 @@ export class AIOperationRouter {
       });
       return [];
     }
+  }
+
+  /**
+   * Get health monitor for provider tracking
+   */
+  getHealthMonitor(): ProviderHealthMonitor {
+    return this.healthMonitor;
+  }
+
+  /**
+   * Get orchestrator for provider selection
+   */
+  getOrchestrator(): ProviderOrchestrator {
+    return this.orchestrator;
+  }
+
+  /**
+   * Get scheduler for operation scheduling
+   */
+  getScheduler(): OperationScheduler {
+    return this.scheduler;
+  }
+
+  /**
+   * Get batch engine for batch operations
+   */
+  getBatchEngine(): BatchOperationEngine {
+    return this.batchEngine;
   }
 }
 
