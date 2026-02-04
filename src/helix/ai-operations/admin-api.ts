@@ -169,9 +169,6 @@ export class AdminApi {
    * @returns Rate limit stats
    */
   private getRateLimitStats(): AdminApiResponse {
-    const rateLimiter = this.router.getRateLimiter();
-    void rateLimiter; // Use variable to satisfy linter
-
     return {
       success: true,
       data: {
