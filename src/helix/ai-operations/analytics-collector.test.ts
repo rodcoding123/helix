@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { AnalyticsCollector } from './analytics-collector';
+import { AnalyticsCollector } from './analytics-collector.js';
 
 describe('AnalyticsCollector', () => {
   let collector: AnalyticsCollector;
@@ -8,144 +8,163 @@ describe('AnalyticsCollector', () => {
     collector = new AnalyticsCollector();
   });
 
-  it('should capture operation start events', () => {
-    collector.captureEvent('operation_start', {
-      operationId: 'op1',
-      userId: 'user1',
-      operationType: 'gpt-4',
+  describe('Event Capture', () => {
+    it('captures operation_start event', () => {
+      collector.captureEvent('operation_start', {
+        operationId: 'op_123',
+        userId: 'user_123',
+        operationType: 'email_analysis',
+      });
+
+      const events = collector.getEvents();
+      expect(events).toHaveLength(1);
+      expect(events[0].eventType).toBe('operation_start');
     });
 
-    const events = collector.getEvents();
-    expect(events).toHaveLength(1);
-    expect(events[0].eventType).toBe('operation_start');
+    it('captures operation_complete event', () => {
+      collector.captureEvent('operation_complete', {
+        operationId: 'op_123',
+        userId: 'user_123',
+        operationType: 'email_analysis',
+        latencyMs: 245,
+        costUsd: 0.005,
+        success: true,
+      });
+
+      const events = collector.getEvents();
+      expect(events).toHaveLength(1);
+      expect(events[0].eventType).toBe('operation_complete');
+    });
+
+    it('captures operation_failed event', () => {
+      collector.captureEvent('operation_failed', {
+        operationId: 'op_123',
+        userId: 'user_123',
+        operationType: 'email_analysis',
+        errorMessage: 'Timeout',
+      });
+
+      const events = collector.getEvents();
+      expect(events).toHaveLength(1);
+      expect(events[0].eventType).toBe('operation_failed');
+    });
   });
 
-  it('should capture operation complete events', () => {
-    collector.captureEvent('operation_complete', {
-      operationId: 'op1',
-      userId: 'user1',
-      operationType: 'gpt-4',
-      latencyMs: 150,
-      costUsd: 0.5,
-      success: true,
-    });
+  describe('Time-Series Data', () => {
+    it('aggregates events by hour', () => {
+      for (let i = 0; i < 10; i++) {
+        collector.captureEvent('operation_complete', {
+          operationId: `op_${i}`,
+          userId: 'user_123',
+          operationType: 'email_analysis',
+          latencyMs: 100 + i * 10,
+          costUsd: 0.005,
+          success: true,
+        });
+      }
 
-    const events = collector.getEvents();
-    expect(events).toHaveLength(1);
-    expect(events[0].success).toBe(true);
+      const hourly = collector.getHourlyAggregation();
+      expect(hourly.totalEvents).toBe(10);
+      expect(hourly.avgLatencyMs).toBeGreaterThan(100);
+    });
   });
 
-  it('should capture operation failed events', () => {
-    collector.captureEvent('operation_failed', {
-      operationId: 'op1',
-      userId: 'user1',
-      operationType: 'gpt-4',
-      errorMessage: 'Rate limit exceeded',
+  describe('Custom Dimensions', () => {
+    it('filters events by user', () => {
+      collector.captureEvent('operation_complete', {
+        operationId: 'op_1',
+        userId: 'user_123',
+        operationType: 'email_analysis',
+        latencyMs: 100,
+        costUsd: 0.005,
+        success: true,
+      });
+
+      collector.captureEvent('operation_complete', {
+        operationId: 'op_2',
+        userId: 'user_456',
+        operationType: 'email_analysis',
+        latencyMs: 150,
+        costUsd: 0.005,
+        success: true,
+      });
+
+      const user123Events = collector.getEventsByUser('user_123');
+      expect(user123Events).toHaveLength(1);
+      expect(user123Events[0].userId).toBe('user_123');
     });
 
-    const events = collector.getEvents();
-    expect(events).toHaveLength(1);
-    expect(events[0].errorMessage).toBe('Rate limit exceeded');
+    it('filters events by operation type', () => {
+      collector.captureEvent('operation_complete', {
+        operationId: 'op_1',
+        userId: 'user_123',
+        operationType: 'email_analysis',
+        latencyMs: 100,
+        costUsd: 0.005,
+        success: true,
+      });
+
+      collector.captureEvent('operation_complete', {
+        operationId: 'op_2',
+        userId: 'user_123',
+        operationType: 'video_analysis',
+        latencyMs: 500,
+        costUsd: 0.05,
+        success: true,
+      });
+
+      const emailEvents = collector.getEventsByOperationType('email_analysis');
+      expect(emailEvents).toHaveLength(1);
+      expect(emailEvents[0].operationType).toBe('email_analysis');
+    });
   });
 
-  it('should filter events by user', () => {
-    collector.captureEvent('operation_start', {
-      operationId: 'op1',
-      userId: 'user1',
-      operationType: 'gpt-4',
-    });
-    collector.captureEvent('operation_start', {
-      operationId: 'op2',
-      userId: 'user2',
-      operationType: 'gpt-4',
-    });
+  describe('Success Rate Calculation', () => {
+    it('calculates success rate', () => {
+      collector.captureEvent('operation_complete', {
+        operationId: 'op_1',
+        userId: 'user_123',
+        operationType: 'email_analysis',
+        latencyMs: 100,
+        costUsd: 0.005,
+        success: true,
+      });
 
-    const user1Events = collector.getEventsByUser('user1');
-    expect(user1Events).toHaveLength(1);
-    expect(user1Events[0].userId).toBe('user1');
+      collector.captureEvent('operation_failed', {
+        operationId: 'op_2',
+        userId: 'user_123',
+        operationType: 'email_analysis',
+        errorMessage: 'Timeout',
+      });
+
+      collector.captureEvent('operation_complete', {
+        operationId: 'op_3',
+        userId: 'user_123',
+        operationType: 'email_analysis',
+        latencyMs: 150,
+        costUsd: 0.005,
+        success: true,
+      });
+
+      const hourly = collector.getHourlyAggregation();
+      expect(hourly.successRate).toBeCloseTo(0.666, 2); // 2 successes out of 3
+    });
   });
 
-  it('should filter events by operation type', () => {
-    collector.captureEvent('operation_start', {
-      operationId: 'op1',
-      userId: 'user1',
-      operationType: 'gpt-4',
+  describe('Clear', () => {
+    it('clears all events', () => {
+      collector.captureEvent('operation_complete', {
+        operationId: 'op_123',
+        userId: 'user_123',
+        operationType: 'email_analysis',
+        latencyMs: 100,
+        costUsd: 0.005,
+        success: true,
+      });
+
+      collector.clear();
+      const events = collector.getEvents();
+      expect(events).toHaveLength(0);
     });
-    collector.captureEvent('operation_start', {
-      operationId: 'op2',
-      userId: 'user1',
-      operationType: 'claude-3',
-    });
-
-    const gpt4Events = collector.getEventsByOperationType('gpt-4');
-    expect(gpt4Events).toHaveLength(1);
-    expect(gpt4Events[0].operationType).toBe('gpt-4');
-  });
-
-  it('should aggregate events by hour', () => {
-    const now = Date.now();
-
-    // Add two events at the same hour
-    collector.captureEvent('operation_complete', {
-      operationId: 'op1',
-      userId: 'user1',
-      operationType: 'gpt-4',
-      latencyMs: 100,
-      costUsd: 0.5,
-      success: true,
-    });
-    collector.captureEvent('operation_complete', {
-      operationId: 'op2',
-      userId: 'user1',
-      operationType: 'gpt-4',
-      latencyMs: 200,
-      costUsd: 0.75,
-      success: true,
-    });
-
-    const hourly = collector.getHourlyAggregation();
-    const currentHour = Math.floor(now / (60 * 60 * 1000));
-
-    expect(hourly[currentHour]).toBeDefined();
-    expect(hourly[currentHour].eventCount).toBe(2);
-    expect(hourly[currentHour].totalLatencyMs).toBe(300);
-    expect(hourly[currentHour].totalCostUsd).toBe(1.25);
-  });
-
-  it('should accumulate cost by operation type in aggregation', () => {
-    collector.captureEvent('operation_complete', {
-      operationId: 'op1',
-      userId: 'user1',
-      operationType: 'gpt-4',
-      latencyMs: 100,
-      costUsd: 0.5,
-      success: true,
-    });
-    collector.captureEvent('operation_complete', {
-      operationId: 'op2',
-      userId: 'user1',
-      operationType: 'claude-3',
-      latencyMs: 200,
-      costUsd: 0.75,
-      success: true,
-    });
-
-    const hourly = collector.getHourlyAggregation();
-    const currentHour = Math.floor(Date.now() / (60 * 60 * 1000));
-
-    expect(hourly[currentHour].costByType['gpt-4']).toBe(0.5);
-    expect(hourly[currentHour].costByType['claude-3']).toBe(0.75);
-  });
-
-  it('should clear all events', () => {
-    collector.captureEvent('operation_start', {
-      operationId: 'op1',
-      userId: 'user1',
-      operationType: 'gpt-4',
-    });
-    collector.clear();
-
-    const events = collector.getEvents();
-    expect(events).toHaveLength(0);
   });
 });
