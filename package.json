@@ -46,6 +46,7 @@
   "author": "Rodrigo Specter",
   "license": "MIT",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.72.1",
     "@supabase/supabase-js": "^2.93.3",
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.6.2",
