@@ -4,6 +4,7 @@
 
 export {
   getAnthropicClient,
+  getGeminiClient,
   PROVIDER_PRICING,
   calculateProviderCost,
   isProviderAvailable,
@@ -18,3 +19,9 @@ export {
   type AnthropicExecuteOptions,
   type AnthropicExecuteResult,
 } from './anthropic.js';
+
+export {
+  analyzeVideoWithGemini,
+  type GeminiVideoAnalysisOptions,
+  type GeminiVideoAnalysisResult,
+} from './gemini.js';

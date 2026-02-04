@@ -4,9 +4,11 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Lazy-loaded provider clients
 let anthropicClient: Anthropic | null = null;
+let geminiClient: GoogleGenerativeAI | null = null;
 
 /**
  * Get or initialize Anthropic client
@@ -20,6 +22,20 @@ export function getAnthropicClient(): Anthropic {
     anthropicClient = new Anthropic({ apiKey });
   }
   return anthropicClient;
+}
+
+/**
+ * Get or initialize Google Generative AI client
+ */
+export function getGeminiClient(): GoogleGenerativeAI {
+  if (!geminiClient) {
+    const apiKey = process.env.GOOGLE_API_KEY;
+    if (!apiKey) {
+      throw new Error('GOOGLE_API_KEY environment variable not set');
+    }
+    geminiClient = new GoogleGenerativeAI(apiKey);
+  }
+  return geminiClient;
 }
 
 /**
