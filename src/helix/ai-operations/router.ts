@@ -24,6 +24,7 @@ import { UsageQuotaManager } from './usage-quota.js';
 import { RateLimiter } from './rate-limiter.js';
 import { BillingEngine } from './billing-engine.js';
 import { AnalyticsCollector } from './analytics-collector.js';
+import { WebhookManager } from './webhook-manager.js';
 
 // Type definitions
 export interface RoutingRequest {
@@ -98,6 +99,7 @@ export class AIOperationRouter {
   private rateLimiter: RateLimiter;
   private billingEngine: BillingEngine;
   private analyticsCollector: AnalyticsCollector;
+  private webhookManager: WebhookManager;
 
   constructor() {
     // Initialize Phase 4 orchestration
@@ -117,6 +119,7 @@ export class AIOperationRouter {
     this.rateLimiter = new RateLimiter();
     this.billingEngine = new BillingEngine();
     this.analyticsCollector = new AnalyticsCollector();
+    this.webhookManager = new WebhookManager();
   }
 
   private getSupabaseClient(): ReturnType<typeof createClient> {
@@ -590,6 +593,13 @@ export class AIOperationRouter {
    */
   getAnalyticsCollector(): AnalyticsCollector {
     return this.analyticsCollector;
+  }
+
+  /**
+   * Get webhook manager for real-time event delivery
+   */
+  getWebhookManager(): WebhookManager {
+    return this.webhookManager;
   }
 }
 
