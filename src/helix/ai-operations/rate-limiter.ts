@@ -1,93 +1,99 @@
 /**
- * RateLimiter
+ * Rate Limiter - Phase 6
  *
- * Token-bucket rate limiting system for enforcing per-user request limits.
- * Each user gets a bucket that refills at a constant rate (REFILL_RATE tokens/second)
- * with a maximum capacity (BUCKET_CAPACITY).
- *
- * Phase 6: Multi-Tenant Support & Advanced API Management
- * Created: 2026-02-04
+ * Implements token-bucket rate limiting with sliding window tracking.
+ * Prevents API abuse and ensures fair resource allocation.
  */
 
-interface TokenBucket {
+interface TokenBucketState {
   tokens: number;
   lastRefillTime: number;
+  requestTimestamps: number[];
 }
 
-const REFILL_RATE = 100; // tokens per second
-const BUCKET_CAPACITY = 100; // maximum tokens in bucket
+const REFILL_RATE = 10000; // tokens per second (10 per millisecond)
+const BUCKET_CAPACITY = 300; // max tokens
+const SLIDING_WINDOW_MS = 60000; // 1 minute
+const SLIDING_WINDOW_LIMIT = 60; // max 60 requests per minute
 
-/**
- * Token-bucket rate limiter for enforcing per-user request limits
- *
- * Implementation:
- * - Each user has a bucket that starts full (100 tokens)
- * - When a request is made, tokens are consumed from the bucket
- * - Bucket refills at 100 tokens/second
- * - Requests are allowed only if enough tokens are available
- * - Token costs are flexible (default 1 token per request)
- */
 export class RateLimiter {
-  private buckets: Map<string, TokenBucket> = new Map();
+  private buckets: Map<string, TokenBucketState> = new Map();
 
   /**
-   * Allow a request if enough tokens are available
-   * @param userId User identifier
-   * @param tokensRequired Number of tokens required for this request
-   * @returns true if request allowed, false if rate limited
+   * Allow request if tokens available
    */
   allowRequest(userId: string, tokensRequired: number): boolean {
-    const bucket = this.getOrCreateBucket(userId);
-    this.refillBucket(bucket);
+    const now = Date.now();
+    let bucket = this.buckets.get(userId);
 
+    if (!bucket) {
+      bucket = {
+        tokens: BUCKET_CAPACITY,
+        lastRefillTime: now,
+        requestTimestamps: [],
+      };
+      this.buckets.set(userId, bucket);
+    }
+
+    // Clean up old timestamps outside the sliding window
+    bucket.requestTimestamps = bucket.requestTimestamps.filter(ts => now - ts < SLIDING_WINDOW_MS);
+
+    // Check sliding window limit (60 requests per minute)
+    if (bucket.requestTimestamps.length >= SLIDING_WINDOW_LIMIT) {
+      return false;
+    }
+
+    // Refill tokens based on elapsed time
+    const elapsedSeconds = (now - bucket.lastRefillTime) / 1000;
+    const tokensToAdd = elapsedSeconds * REFILL_RATE;
+    bucket.tokens = Math.min(bucket.tokens + tokensToAdd, BUCKET_CAPACITY);
+    bucket.lastRefillTime = now;
+
+    // Check if request can proceed with token bucket
     if (bucket.tokens >= tokensRequired) {
       bucket.tokens -= tokensRequired;
+      bucket.requestTimestamps.push(now);
       return true;
     }
+
     return false;
   }
 
   /**
-   * Calculate milliseconds to wait before retrying
-   * @param userId User identifier
-   * @param tokensRequired Number of tokens required
-   * @returns milliseconds to wait
+   * Get retry-after duration in milliseconds
    */
   getRetryAfterMs(userId: string, tokensRequired: number): number {
-    const bucket = this.getOrCreateBucket(userId);
-    this.refillBucket(bucket);
+    const bucket = this.buckets.get(userId);
+    if (!bucket) {
+      return 0;
+    }
 
+    const now = Date.now();
+
+    // Clean up old timestamps
+    bucket.requestTimestamps = bucket.requestTimestamps.filter(ts => now - ts < SLIDING_WINDOW_MS);
+
+    // If at sliding window limit, return time until oldest request expires
+    if (bucket.requestTimestamps.length >= SLIDING_WINDOW_LIMIT) {
+      const oldestTimestamp = bucket.requestTimestamps[0];
+      const retryTime = oldestTimestamp + SLIDING_WINDOW_MS;
+      return Math.max(0, retryTime - now);
+    }
+
+    // Otherwise check token bucket
     const tokensNeeded = tokensRequired - bucket.tokens;
-    if (tokensNeeded <= 0) return 0;
+    if (tokensNeeded <= 0) {
+      return 0;
+    }
 
-    // Calculate time needed to accumulate required tokens
-    const secondsNeeded = tokensNeeded / REFILL_RATE;
-    return Math.ceil(secondsNeeded * 1000);
+    // Calculate how long to wait for required tokens
+    return Math.ceil((tokensNeeded / REFILL_RATE) * 1000);
   }
 
   /**
-   * Clear all rate limit buckets
+   * Clear all rate limit state
    */
   clear(): void {
     this.buckets.clear();
-  }
-
-  private getOrCreateBucket(userId: string): TokenBucket {
-    if (!this.buckets.has(userId)) {
-      this.buckets.set(userId, {
-        tokens: BUCKET_CAPACITY,
-        lastRefillTime: Date.now(),
-      });
-    }
-    return this.buckets.get(userId)!;
-  }
-
-  private refillBucket(bucket: TokenBucket): void {
-    const now = Date.now();
-    const timeSinceRefill = (now - bucket.lastRefillTime) / 1000; // convert to seconds
-    const tokensToAdd = timeSinceRefill * REFILL_RATE;
-
-    bucket.tokens = Math.min(BUCKET_CAPACITY, bucket.tokens + tokensToAdd);
-    bucket.lastRefillTime = now;
   }
 }
