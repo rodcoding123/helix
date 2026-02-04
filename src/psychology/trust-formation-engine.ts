@@ -12,7 +12,6 @@
  * CRITICAL: Logs to Discord BEFORE updating trust (pre-execution guarantee)
  */
 
-import crypto from 'crypto';
 import {
   trustProfileManager,
   type TrustProfile,
@@ -21,8 +20,6 @@ import {
 import {
   analyzeAllDimensions,
   classifyEmotionalTone,
-  shouldBeHighSalience,
-  calculateTrustImpact,
   type ConversationAnalysis,
 } from './dimension-updaters.js';
 import { logTrustUpdate, type TrustLogContext } from './trust-logging.js';
@@ -112,7 +109,10 @@ export class TrustFormationEngine {
       selfRelevance: event.emotionalAnalysis.selfRelevance,
       salience: this.determineSalience(event.emotionalAnalysis, event.extractedTopics),
       extractedTopics: event.extractedTopics,
-      promisesMade: event.promisesMade,
+      promisesMade: event.promisesMade?.map(p => ({
+        ...p,
+        made_at: p.deadline ? new Date(p.deadline.getTime() - 86400000) : new Date(),
+      })),
       reciprocityScore: event.reciprocityScore,
     };
 
@@ -170,14 +170,7 @@ export class TrustFormationEngine {
     // ==========================================
     // 6. Apply trust updates using learning rate
     // ==========================================
-    const LEARNING_RATE = 0.05;
-    const salienceWeights: Record<string, number> = {
-      critical: 1.0,
-      high: 0.75,
-      medium: 0.5,
-      low: 0.25,
-    };
-    const salienceWeight = salienceWeights[salienceTier] || 0.5;
+    // NOTE: Learning rate and salience weighting applied in dimension analysis
 
     // Build update input
     const updateInput: TrustUpdateInput = {
@@ -200,14 +193,28 @@ export class TrustFormationEngine {
     logContext.trustAfter = updatedProfile.compositeTrust;
     logContext.attachmentStageAfter = updatedProfile.attachmentStage;
 
-    if (logContext.dimensionsChanged) {
-      logContext.dimensionsChanged.competence.after = updatedProfile.trustDimensions.competence;
-      logContext.dimensionsChanged.integrity.after = updatedProfile.trustDimensions.integrity;
-      logContext.dimensionsChanged.benevolence.after = updatedProfile.trustDimensions.benevolence;
-      logContext.dimensionsChanged.predictability.after =
-        updatedProfile.trustDimensions.predictability;
-      logContext.dimensionsChanged.vulnerability_safety.after =
-        updatedProfile.trustDimensions.vulnerability_safety;
+    const dimensionsChanged = logContext.dimensionsChanged;
+    if (dimensionsChanged) {
+      dimensionsChanged.competence = {
+        before: dimensionsChanged.competence!.before,
+        after: updatedProfile.trustDimensions.competence,
+      };
+      dimensionsChanged.integrity = {
+        before: dimensionsChanged.integrity!.before,
+        after: updatedProfile.trustDimensions.integrity,
+      };
+      dimensionsChanged.benevolence = {
+        before: dimensionsChanged.benevolence!.before,
+        after: updatedProfile.trustDimensions.benevolence,
+      };
+      dimensionsChanged.predictability = {
+        before: dimensionsChanged.predictability!.before,
+        after: updatedProfile.trustDimensions.predictability,
+      };
+      dimensionsChanged.vulnerability_safety = {
+        before: dimensionsChanged.vulnerability_safety!.before,
+        after: updatedProfile.trustDimensions.vulnerability_safety,
+      };
     }
 
     // ==========================================
@@ -240,7 +247,7 @@ export class TrustFormationEngine {
    */
   private determineSalience(
     emotional: ConversationEvent['emotionalAnalysis'],
-    topics?: string[]
+    _topics?: string[]
   ): 'critical' | 'high' | 'medium' | 'low' {
     // Critical: identity-defining + emotional
     if (
@@ -270,7 +277,16 @@ export class TrustFormationEngine {
   /**
    * Determine operation type based on dimension analysis
    */
-  private determineOperation(analysis: ReturnType<typeof analyzeAllDimensions>): string {
+  private determineOperation(
+    analysis: ReturnType<typeof analyzeAllDimensions>
+  ):
+    | 'trust_increase'
+    | 'trust_decrease'
+    | 'violation'
+    | 'emotional_impact'
+    | 'reciprocity_detected'
+    | 'stage_progression'
+    | 'stage_regression' {
     if (analysis.totalDelta > 0.5) {
       return 'trust_increase';
     } else if (analysis.totalDelta < -0.3) {

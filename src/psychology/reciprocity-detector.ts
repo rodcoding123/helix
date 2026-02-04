@@ -225,7 +225,7 @@ export class ReciprocityDetector {
    */
   private calculateUserDisclosureDepth(
     userMessages: UserMessage[],
-    emotionalAnalysis: any
+    emotionalAnalysis: { valence: number; arousal: number; selfRelevance: number; novelty: number }
   ): number {
     let depthScore = 0;
 
@@ -400,7 +400,11 @@ export class ReciprocityDetector {
   /**
    * Classify match quality
    */
-  private classifyMatch(reciprocityScore: number, userDepth: number, helixDepth: number): string {
+  private classifyMatch(
+    reciprocityScore: number,
+    userDepth: number,
+    helixDepth: number
+  ): 'perfect' | 'good' | 'adequate' | 'poor' | 'asymmetric' {
     // If user very vulnerable but Helix superficial = critical miss
     if (userDepth > 0.7 && helixDepth < 0.3) {
       return 'asymmetric';

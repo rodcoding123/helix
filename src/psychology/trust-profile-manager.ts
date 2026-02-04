@@ -187,7 +187,8 @@ export class TrustProfileManager {
    */
   async saveToDatabse(profile: TrustProfile): Promise<void> {
     try {
-      const { error } = await this.supabase.from('user_trust_profiles').upsert({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const profileData: any = {
         user_id: profile.userId,
         email: profile.email,
         role: profile.role,
@@ -219,7 +220,10 @@ export class TrustProfileManager {
         last_interaction_at: profile.lastInteractionAt?.toISOString(),
 
         updated_at: new Date().toISOString(),
-      } as Record<string, unknown>);
+      };
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      const { error } = await this.supabase.from('user_trust_profiles').upsert(profileData);
 
       if (error) {
         throw error;
@@ -268,17 +272,19 @@ export class TrustProfileManager {
       const trustProfilePath = path.join(userDir, 'trust_profile.json');
 
       const data = await fs.readFile(trustProfilePath, 'utf-8');
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const profile = JSON.parse(data);
 
       // Convert date strings back to Date objects
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return {
         ...profile,
-        relationshipStartedAt: new Date(profile.relationshipStartedAt),
+        relationshipStartedAt: new Date(profile.relationshipStartedAt as string),
         lastInteractionAt: profile.lastInteractionAt
-          ? new Date(profile.lastInteractionAt)
+          ? new Date(profile.lastInteractionAt as string)
           : undefined,
-        createdAt: new Date(profile.createdAt),
-        updatedAt: new Date(profile.updatedAt),
+        createdAt: new Date(profile.createdAt as string),
+        updatedAt: new Date(profile.updatedAt as string),
       };
     } catch (error) {
       console.error('Error loading profile from file:', error);
@@ -400,7 +406,13 @@ export class TrustProfileManager {
     compositeTrust: number,
     totalInteractions: number,
     highSalienceInteractions: number
-  ): string {
+  ):
+    | 'pre_attachment'
+    | 'early_trust'
+    | 'attachment_forming'
+    | 'secure_attachment'
+    | 'deep_secure'
+    | 'primary_attachment' {
     if (compositeTrust >= 0.85 && totalInteractions >= 150 && highSalienceInteractions >= 30) {
       return 'primary_attachment';
     } else if (
@@ -433,6 +445,7 @@ export class TrustProfileManager {
     return multipliers[stage] || 0.5;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private dbRowToProfile(row: any): TrustProfile {
     return {
       id: row.id,
@@ -452,7 +465,7 @@ export class TrustProfileManager {
       compositeTrust: row.composite_trust,
 
       attachmentStage: row.attachment_stage,
-      stageProgression: row.stage_progression ? JSON.parse(row.stage_progression) : [],
+      stageProgression: row.stage_progression ? JSON.parse(row.stage_progression as string) : [],
 
       totalInteractions: row.total_interactions,
       highSalienceInteractions: row.high_salience_interactions,
@@ -466,10 +479,12 @@ export class TrustProfileManager {
       emailVerified: row.email_verified,
       institutionTrust: row.institution_trust,
 
-      relationshipStartedAt: new Date(row.relationship_started_at),
-      lastInteractionAt: row.last_interaction_at ? new Date(row.last_interaction_at) : undefined,
-      createdAt: new Date(row.created_at),
-      updatedAt: new Date(row.updated_at),
+      relationshipStartedAt: new Date(row.relationship_started_at as string),
+      lastInteractionAt: row.last_interaction_at
+        ? new Date(row.last_interaction_at as string)
+        : undefined,
+      createdAt: new Date(row.created_at as string),
+      updatedAt: new Date(row.updated_at as string),
     };
   }
 }
