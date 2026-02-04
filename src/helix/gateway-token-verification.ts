@@ -17,7 +17,7 @@ import { sendAlert } from './logging-hooks.js';
  * Token verification result
  */
 export interface TokenVerificationResult {
-  verified: boolean;
+  valid: boolean;
   timingResistant: boolean;
   errorMessage?: string;
 }
@@ -45,8 +45,8 @@ const rateLimitState = new Map<
 
 const RATE_LIMIT_WINDOW_MS = 60000; // 1 minute window
 const MAX_ATTEMPTS_PER_WINDOW = 5;
-const INITIAL_BACKOFF_MS = 100;
-const MAX_BACKOFF_MS = 30000;
+const INITIAL_BACKOFF_MS = 60000; // 1 minute
+const MAX_BACKOFF_MS = 240000; // 4 minutes
 
 /**
  * Check if a host binding is loopback (exempt from authentication)
@@ -138,7 +138,7 @@ export function verifyGatewayToken(
     // First, quick length check (non-critical, timing doesn't matter)
     if (providedToken.length !== storedToken.length) {
       return {
-        verified: false,
+        valid: false,
         timingResistant: false,
         errorMessage: 'Token length mismatch',
       };
@@ -153,13 +153,13 @@ export function verifyGatewayToken(
     const isEqual = crypto.timingSafeEqual(providedBuffer, storedBuffer);
 
     return {
-      verified: isEqual,
+      valid: isEqual,
       timingResistant: true,
     };
   } catch (error) {
     // timingSafeEqual throws on invalid input - treat as verification failure
     return {
-      verified: false,
+      valid: false,
       timingResistant: true, // Still timing-resistant (exception path is constant)
       errorMessage: error instanceof Error ? error.message : 'Token verification failed',
     };
@@ -262,7 +262,7 @@ export function enforceTokenVerification(
 
     // Verify token with constant-time comparison
     const result = verifyGatewayToken(providedToken, storedToken);
-    if (!result.verified) {
+    if (!result.valid) {
       void sendAlert(
         'Gateway Authentication Failed',
         `Failed token verification from ${host}`,

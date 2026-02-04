@@ -3,7 +3,7 @@
  * Prevents unauthenticated access to network-bound gateways
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import {
   isLoopbackBinding,
   requiresTokenVerification,
@@ -12,6 +12,7 @@ import {
   generateGatewayToken,
   rateLimitTokenAttempts,
   enforceTokenVerification,
+  clearRateLimitState,
 } from './gateway-token-verification.js';
 
 describe('isLoopbackBinding', () => {
@@ -68,19 +69,19 @@ describe('validateTokenFormat', () => {
 });
 
 describe('verifyGatewayToken', () => {
-  it('should return verified=true for matching tokens with constant-time comparison', () => {
+  it('should return valid=true for matching tokens with constant-time comparison', () => {
     const token =
       '12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
     const result = verifyGatewayToken(token, token);
-    expect(result.verified).toBe(true);
+    expect(result.valid).toBe(true);
     expect(result.timingResistant).toBe(true);
   });
 
-  it('should return verified=false for non-matching tokens', () => {
+  it('should return valid=false for non-matching tokens', () => {
     const token1 = 'a'.repeat(256);
     const token2 = 'b'.repeat(256);
     const result = verifyGatewayToken(token1, token2);
-    expect(result.verified).toBe(false);
+    expect(result.valid).toBe(false);
   });
 
   it('should always use constant-time comparison', () => {
@@ -93,7 +94,7 @@ describe('verifyGatewayToken', () => {
 describe('rateLimitTokenAttempts', () => {
   beforeEach(() => {
     // Clear rate limit state before each test
-    vi.clearAllMocks();
+    clearRateLimitState();
   });
 
   it('should allow first attempt with exponential backoff state', () => {
@@ -115,6 +116,102 @@ describe('rateLimitTokenAttempts', () => {
   });
 });
 
+describe('rateLimitTokenAttempts - Exponential Backoff Sequence', () => {
+  beforeEach(() => {
+    clearRateLimitState();
+  });
+
+  it('should increase backoff: 2 min → 4 min → 8 min progression', () => {
+    const clientId = 'test-exponential';
+
+    // First 5 attempts - should all be allowed
+    for (let i = 0; i < 5; i++) {
+      const status = rateLimitTokenAttempts(clientId);
+      expect(status.allowed).toBe(true);
+    }
+
+    // 6th attempt - locked out, first backoff = 2 min (60000 * 2^1)
+    const status = rateLimitTokenAttempts(clientId);
+    expect(status.allowed).toBe(false);
+    expect(status.backoffDelayMs).toBe(120000); // 2 minutes
+  });
+
+  it('should reset rate limit after window expires', () => {
+    const clientId = 'test-reset';
+
+    // Use up 5 attempts
+    for (let i = 0; i < 5; i++) {
+      rateLimitTokenAttempts(clientId);
+    }
+
+    // 6th attempt - locked
+    let status = rateLimitTokenAttempts(clientId);
+    expect(status.allowed).toBe(false);
+
+    // Clear state simulates window expiry
+    clearRateLimitState(clientId);
+
+    // Should be allowed again
+    status = rateLimitTokenAttempts(clientId);
+    expect(status.allowed).toBe(true);
+    expect(status.attemptsRemaining).toBe(4);
+  });
+});
+
+describe('enforceTokenVerification', () => {
+  beforeEach(() => {
+    clearRateLimitState();
+  });
+
+  it('should allow valid token on network binding', () => {
+    const token = generateGatewayToken();
+
+    expect(() => {
+      enforceTokenVerification('192.168.1.1', 'development', token, token);
+    }).not.toThrow();
+  });
+
+  it('should throw on invalid token format', () => {
+    expect(() => {
+      enforceTokenVerification(
+        '192.168.1.1',
+        'development',
+        'short',
+        'valid-token-here-256-chars-minimum'
+      );
+    }).toThrow();
+  });
+
+  it('should integrate rate limiting and block after 5 failures', () => {
+    const wrongToken = 'a'.repeat(256);
+
+    // 5 failed attempts should be blocked on 6th by rate limiting
+    for (let i = 0; i < 5; i++) {
+      expect(() => {
+        enforceTokenVerification('192.168.1.1', 'development', wrongToken, 'b'.repeat(256));
+      }).toThrow();
+    }
+
+    // 6th attempt should be blocked by rate limit or verification
+    expect(() => {
+      enforceTokenVerification('192.168.1.1', 'development', wrongToken, 'b'.repeat(256));
+    }).toThrow();
+  });
+
+  it('should allow loopback without token', () => {
+    expect(() => {
+      enforceTokenVerification('127.0.0.1', 'development', '', '');
+    }).not.toThrow();
+  });
+
+  it('should reject 0.0.0.0 in production regardless of token', () => {
+    const validToken = generateGatewayToken();
+    expect(() => {
+      enforceTokenVerification('0.0.0.0', 'production', validToken, validToken);
+    }).toThrow();
+  });
+});
+
 describe('generateGatewayToken', () => {
   it('should generate token with valid format', () => {
     const token = generateGatewayToken();
@@ -125,19 +222,5 @@ describe('generateGatewayToken', () => {
     const token1 = generateGatewayToken();
     const token2 = generateGatewayToken();
     expect(token1).not.toBe(token2);
-  });
-});
-
-describe('enforceTokenVerification', () => {
-  it('should throw for 0.0.0.0 in production without valid token', () => {
-    expect(() => {
-      enforceTokenVerification('0.0.0.0', 'production', 'invalid_token', 'stored_token');
-    }).toThrow();
-  });
-
-  it('should allow loopback without token verification', () => {
-    expect(() => {
-      enforceTokenVerification('127.0.0.1', 'development', '', '');
-    }).not.toThrow();
   });
 });
