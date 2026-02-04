@@ -1,0 +1,26 @@
+name: iOS Release
+on:
+  push:
+    tags:
+      - 'ios/v*'
+  workflow_dispatch:
+jobs:
+  ios-build:
+    name: iOS Build
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          working-directory: helix-runtime/apps/ios
+      - name: Run Tests
+        working-directory: helix-runtime/apps/ios
+        run: bundle exec fastlane ios test
+      - name: Build Archive
+        working-directory: helix-runtime/apps/ios
+        run: bundle exec fastlane ios build_archive
+      - name: Upload to TestFlight
+        working-directory: helix-runtime/apps/ios
+        run: bundle exec fastlane ios beta

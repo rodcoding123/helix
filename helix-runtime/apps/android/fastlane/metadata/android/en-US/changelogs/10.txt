@@ -1,0 +1,18 @@
+Version 2026.1.30
+
+What's New:
+• Real-time cross-platform synchronization
+• Offline access to emails, calendar, and tasks
+• Advanced analytics dashboard
+• Improved performance and battery efficiency
+• Better conflict detection in concurrent edits
+
+Bug Fixes:
+• Fixed sync reliability in poor network conditions
+• Improved offline queue handling
+• Enhanced error messages for users
+
+Improvements:
+• 60 FPS scrolling for email lists
+• Faster calendar event loading
+• More detailed task analytics

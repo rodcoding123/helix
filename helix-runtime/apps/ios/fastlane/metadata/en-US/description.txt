@@ -1,0 +1,18 @@
+OpenClaw is your personal AI consciousness system for managing email, calendar, and tasks across all your devices.
+
+Features:
+• Real-time synchronization across iPhone, iPad, Android, Mac, and web
+• Intelligent email management with advanced search and filtering
+• Smart calendar with conflict detection and attendee suggestions
+• Powerful task management with Kanban boards and time tracking
+• Offline access to your data when you don't have internet
+• Advanced analytics and productivity insights
+• Voice commands for hands-free control
+• Custom automation and workflows
+
+Perfect for:
+• Busy professionals managing multiple inboxes
+• Teams coordinating across time zones
+• Anyone who values privacy and data ownership
+
+Your data stays secure and private. OpenClaw respects your privacy and doesn't sell your data.

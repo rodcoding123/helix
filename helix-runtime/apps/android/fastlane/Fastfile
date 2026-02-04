@@ -1,0 +1,81 @@
+default_platform(:android)
+
+platform :android do
+  desc "Run Android tests"
+  lane :test do
+    gradle(
+      project_dir: ".",
+      task: "test"
+    )
+    puts("✅ Tests passed")
+  end
+
+  desc "Build Release AAB"
+  lane :build_aab do |options|
+    gradle(
+      project_dir: ".",
+      task: "bundleRelease",
+      properties: {
+        "android.injected.signing.store.file" => options[:keystore_path] || ENV["KEYSTORE_PATH"],
+        "android.injected.signing.store.password" => options[:store_password] || ENV["KEYSTORE_PASSWORD"],
+        "android.injected.signing.key.alias" => options[:key_alias] || ENV["KEY_ALIAS"],
+        "android.injected.signing.key.password" => options[:key_password] || ENV["KEY_PASSWORD"]
+      }
+    )
+    puts("✅ Release AAB built")
+  end
+
+  desc "Upload to Google Play Internal Testing"
+  lane :internal_testing do |options|
+    build_aab(
+      keystore_path: options[:keystore_path],
+      store_password: options[:store_password],
+      key_alias: options[:key_alias],
+      key_password: options[:key_password]
+    )
+
+    upload_to_play_store(
+      aab: "app/build/outputs/bundle/release/app-release.aab",
+      track: "internal",
+      release_status: "draft"
+    )
+    puts("✅ Uploaded to Google Play Internal Testing")
+  end
+
+  desc "Upload to Google Play Beta"
+  lane :beta do |options|
+    build_aab(
+      keystore_path: options[:keystore_path],
+      store_password: options[:store_password],
+      key_alias: options[:key_alias],
+      key_password: options[:key_password]
+    )
+
+    upload_to_play_store(
+      aab: "app/build/outputs/bundle/release/app-release.aab",
+      track: "beta",
+      release_status: "draft"
+    )
+    puts("✅ Uploaded to Google Play Beta")
+  end
+
+  desc "Upload to Google Play Production"
+  lane :production do |options|
+    build_aab(
+      keystore_path: options[:keystore_path],
+      store_password: options[:store_password],
+      key_alias: options[:key_alias],
+      key_password: options[:key_password]
+    )
+
+    upload_to_play_store(
+      aab: "app/build/outputs/bundle/release/app-release.aab",
+      track: "production"
+    )
+    puts("✅ Submitted to Google Play Production")
+  end
+
+  error do |lane, exception|
+    UI.error("Error: #{exception.message}")
+  end
+end
