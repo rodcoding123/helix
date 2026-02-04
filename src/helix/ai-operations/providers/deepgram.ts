@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/ban-ts-comment */
 /**
  * Deepgram Provider Client - Audio Transcription
  *
@@ -47,10 +48,13 @@ export async function getDeepgramClient(): Promise<unknown> {
 
   // Lazy-load Deepgram SDK using dynamic import
   if (deepgramModule === null) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    // @ts-ignore - @deepgram/sdk optional dependency
     deepgramModule = await import('@deepgram/sdk');
   }
 
-  return (deepgramModule as Record<string, unknown>).createClient(apiKey);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+  return (deepgramModule as any).createClient(apiKey);
 }
 
 /**

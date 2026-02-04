@@ -441,6 +441,27 @@ export class AIOperationRouter {
       cacheTTL: this.cacheTTL,
     };
   }
+
+  /**
+   * Get all registered operations from model_routes table
+   */
+  async getRegisteredOperations(): Promise<RouteConfig[]> {
+    try {
+      const { data, error } = await this.supabase
+        .from('model_routes')
+        .select('*');
+
+      if (error) throw error;
+      return (data || []) as RouteConfig[];
+    } catch (error) {
+      logToDiscord({
+        channel: 'helix-alerts',
+        type: 'operations_list_failed',
+        error: String(error),
+      });
+      return [];
+    }
+  }
 }
 
 // Singleton instance

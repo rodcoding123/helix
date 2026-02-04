@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-return,@typescript-eslint/require-await */
 /**
  * Migration Template for AI Operations
  *
@@ -17,7 +18,6 @@
 import { router } from './router.js';
 import { costTracker } from './cost-tracker.js';
 import { approvalGate } from './approval-gate.js';
-import { featureToggles } from './feature-toggles.js';
 
 /**
  * BEFORE MIGRATION
@@ -90,15 +90,12 @@ export async function migratedChatMessage(
       throw new Error(`Model client not available: ${model}`);
     }
 
-    const startExecution = Date.now();
     const response = await modelClient.messages.create({
       model: getModelId(model),
       messages,
       max_tokens: 1024,
       system: 'You are Helix, a helpful and thoughtful AI assistant.',
     });
-
-    const executionTime = Date.now() - startExecution;
     const responseText =
       response.content[0]?.type === 'text'
         ? response.content[0].text

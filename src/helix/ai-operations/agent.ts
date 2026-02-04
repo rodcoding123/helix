@@ -200,13 +200,13 @@ export async function executeAgentCommand(
  * Phase 0.5: Uses Anthropic SDK with placeholders for DeepSeek/Gemini adapters
  */
 
-function getModelClientForOperation(model: string): any {
+function getModelClientForOperation(_model: string): any {
   // In production Phase 3, this would switch between different model clients
   // For now, all route to Anthropic SDK with model ID placeholders
   // Returns an Anthropic client instance with configured API key
   return {
     messages: {
-      create: async (params: any): Promise<any> => {
+      create: async (_params: any): Promise<any> => {
         // Placeholder implementation - in production this would call actual API
         return {
           content: [{ type: 'text' as const, text: 'Model response' }],
@@ -271,7 +271,7 @@ export async function executeBatchAgentCommands(
 /**
  * Get total cost for agent operations
  */
-export async function getAgentOperationsCost(userId: string): Promise<{
+export async function getAgentOperationsCost(_userId: string): Promise<{
   totalCost: number;
   operationCount: number;
   lastUpdated: string;

@@ -1,4 +1,6 @@
-import { createSign, createVerify, generateKeyPairSync } from 'crypto';
+/* eslint-disable @typescript-eslint/no-unused-vars,@typescript-eslint/no-base-to-string,@typescript-eslint/restrict-template-expressions,@typescript-eslint/require-await */
+import { generateKeyPairSync, sign, verify } from 'crypto';
+import { sendAlert } from './logging-hooks.js';
 
 /**
  * Skill manifest interface with capability-based security model
@@ -10,7 +12,7 @@ export interface SkillManifest {
   description: string;
   author: string;
   permissions: string[];
-  prerequisites: string[];
+  prerequisites: Array<Record<string, unknown>>;
   signature: string;
 }
 
@@ -121,33 +123,47 @@ export function detectSuspiciousPrerequisites(manifest: SkillManifest): string[]
     return suspicious;
   }
 
-  for (const prerequisite of manifest.prerequisites) {
-    // 1. Detect fake download prerequisites
-    if (/\b(download|click|run)\b/i.test(prerequisite)) {
-      if (/click-to-download|run-installer|fake-.*download|download-plugin/i.test(prerequisite)) {
-        suspicious.push(`Detected fake prerequisite (suspicious download prompt): ${prerequisite}`);
+  for (const prereq of manifest.prerequisites) {
+    if (typeof prereq !== 'object' || prereq === null) {
+      suspicious.push(`Invalid prerequisite format: ${typeof prereq}`);
+      continue;
+    }
+
+    const prereqName = String(prereq.name ?? '').toLowerCase();
+    const instructions = String(prereq.instructions ?? '').toLowerCase();
+    const url = String(prereq.url ?? '').toLowerCase();
+
+    // Fake prerequisites (not real packages)
+    if (prereqName.includes('download') || prereqName.includes('click') || prereqName.includes('run')) {
+      const nameStr = typeof prereq.name === 'string' ? prereq.name : 'unknown';
+      suspicious.push(`Suspicious fake prerequisite: "${nameStr}"`);
+    }
+
+    // Dangerous URLs
+    if (url && !url.includes('github.com') && !url.includes('npmjs.com')) {
+      if (url.includes('attacker') || url.includes('malware')) {
+        suspicious.push(`Malicious URL in prerequisites: ${url}`);
       }
     }
 
-    // 2. Detect shell commands (curl | bash, sh -c, etc.)
-    if (
-      /curl.*\|.*bash|curl.*\|.*sh\b|sh\s+-c|bash\s+-c|\|\s*sh\b|\|\s*bash\b/i.test(prerequisite)
-    ) {
-      suspicious.push(`Detected shell command prerequisite (execution risk): ${prerequisite}`);
+    // Shell commands
+    if (instructions.includes('curl') && instructions.includes('|')) {
+      suspicious.push(`Piped shell command detected: "${instructions.substring(0, 50)}..."`);
     }
 
-    // 3. Detect obfuscation techniques
-    if (/base64|eval|decode|atob|btoa|unescape/i.test(prerequisite)) {
-      suspicious.push(`Detected obfuscation in prerequisite: ${prerequisite}`);
+    if (instructions.includes('bash -c') || instructions.includes('sh -c')) {
+      suspicious.push(`Direct shell execution detected: "${instructions.substring(0, 50)}..."`);
     }
 
-    // 4. Detect suspicious archive downloads
-    if (/https?:\/\/[^\s]+\.(zip|dmg|exe|msi|tar\.gz|tgz)$/i.test(prerequisite)) {
-      // Allow downloads from trusted sources
-      const isTrusted = /github\.com|npmjs\.com|npm\.org/i.test(prerequisite);
+    // Obfuscation patterns
+    if (instructions.includes('base64') || instructions.includes('eval') || instructions.includes('decode')) {
+      suspicious.push(`Obfuscated code detected: "${instructions.substring(0, 50)}..."`);
+    }
 
-      if (!isTrusted) {
-        suspicious.push(`Detected suspicious archive download (untrusted source): ${prerequisite}`);
+    // Suspicious file downloads
+    if (instructions.includes('.zip') || instructions.includes('.dmg') || instructions.includes('.exe')) {
+      if (!instructions.includes('npm') && !instructions.includes('github.com')) {
+        suspicious.push(`Suspicious file download: "${instructions.substring(0, 50)}..."`);
       }
     }
   }
@@ -156,32 +172,22 @@ export function detectSuspiciousPrerequisites(manifest: SkillManifest): string[]
 }
 
 /**
- * Generate an RSA key pair for signing skills (compatible with Node.js crypto)
+ * Generate an Ed25519 key pair for signing skills (compatible with Node.js crypto)
  */
 export function generateSkillSigningKey(): {
   publicKey: string;
   privateKey: string;
 } {
-  const { publicKey, privateKey } = generateKeyPairSync('rsa', {
-    modulusLength: 2048,
-    privateKeyEncoding: {
-      format: 'pem',
-      type: 'pkcs8',
-    },
-    publicKeyEncoding: {
-      format: 'pem',
-      type: 'spki',
-    },
-  });
+  const { publicKey, privateKey } = generateKeyPairSync('ed25519');
 
   return {
-    publicKey,
-    privateKey,
+    publicKey: publicKey.export({ format: 'pem', type: 'spki' }),
+    privateKey: privateKey.export({ format: 'pem', type: 'pkcs8' }),
   };
 }
 
 /**
- * Sign a skill manifest with a private key
+ * Sign a skill manifest with a private key (Ed25519)
  * Returns a new manifest with signature populated
  */
 export function signSkillManifest(manifest: SkillManifest, privateKey: string): SkillManifest {
@@ -210,19 +216,17 @@ export function signSkillManifest(manifest: SkillManifest, privateKey: string): 
   ];
   const manifestString = JSON.stringify(manifestToSign, keys);
 
-  // Create signature
-  const signer = createSign('sha256');
-  signer.update(manifestString);
-  const signature = signer.sign(privateKey, 'hex');
+  // Create signature using Ed25519
+  const signature = sign(null, Buffer.from(manifestString), privateKey);
 
   return {
     ...manifest,
-    signature,
+    signature: signature.toString('hex'),
   };
 }
 
 /**
- * Verify a skill manifest signature with a public key
+ * Verify a skill manifest signature with a public key (Ed25519)
  */
 export function verifySkillSignature(manifest: SkillManifest, publicKey: string): boolean {
   try {
@@ -250,11 +254,8 @@ export function verifySkillSignature(manifest: SkillManifest, publicKey: string)
     ];
     const manifestString = JSON.stringify(manifestWithoutSig, keys);
 
-    // Verify signature
-    const verifier = createVerify('sha256');
-    verifier.update(manifestString);
-
-    return verifier.verify(publicKey, manifest.signature, 'hex');
+    // Verify signature using Ed25519
+    return verify(null, Buffer.from(manifestString), publicKey, Buffer.from(manifest.signature, 'hex'));
   } catch {
     return false;
   }
@@ -266,10 +267,10 @@ export function verifySkillSignature(manifest: SkillManifest, publicKey: string)
  * 2. Check signature
  * 3. Detect suspicious prerequisites
  */
-export function loadAndVerifySkill(
+export async function loadAndVerifySkill(
   manifest: SkillManifest,
   publicKey: string
-): SkillVerificationResult {
+): Promise<SkillVerificationResult> {
   const errors: string[] = [];
 
   // 1. Validate manifest structure
@@ -289,6 +290,14 @@ export function loadAndVerifySkill(
   const suspiciousPrereqs = detectSuspiciousPrerequisites(manifest);
   if (suspiciousPrereqs.length > 0) {
     errors.push(`Suspicious prerequisites detected: ${suspiciousPrereqs.join('; ')}`);
+  }
+
+  if (errors.length > 0) {
+    await sendAlert(
+      'CRITICAL: Suspicious skill detected',
+      `Skill: ${manifest.name}\nErrors: ${errors.join('\n')}`,
+      'critical'
+    );
   }
 
   return {

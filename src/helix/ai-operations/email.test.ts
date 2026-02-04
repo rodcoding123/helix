@@ -255,9 +255,10 @@ describe('Email Analysis Operations', () => {
       vi.mocked(router.route).mockResolvedValueOnce(mockRoutingDecision as any);
 
       const email = createBasicEmail();
-      delete email.userId;
+      const { userId, ...emailWithoutUserId } = email;
+      const emailForTest = emailWithoutUserId as any;
 
-      const result = await analyzeEmail(email as any);
+      const result = await analyzeEmail(emailForTest);
 
       expect(result.success).toBe(true);
       expect(costTracker.logOperation).toHaveBeenCalledWith('system', expect.any(Object));
