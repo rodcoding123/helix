@@ -56,4 +56,23 @@ describe('UsageQuotaManager', () => {
     const usage = quotaManager.getUsage('user1');
     expect(usage).toBe(0);
   });
+
+  it('should update tier when user changes tier', () => {
+    quotaManager.incrementUsage('user1', 'free', 50);
+    quotaManager.incrementUsage('user1', 'pro', 50); // User upgraded
+    const canExecute = quotaManager.canExecuteOperation('user1', 'pro', 9900);
+    expect(canExecute).toBe(true); // Should use pro tier limit (10k)
+  });
+
+  it('should return 0 remaining quota when over limit', () => {
+    quotaManager.incrementUsage('user1', 'free', 150);
+    const remaining = quotaManager.getRemainingQuota('user1', 'free');
+    expect(remaining).toBe(0); // Should be clamped to 0, not negative
+  });
+
+  it('should handle reset for non-existent user gracefully', () => {
+    quotaManager.resetDailyUsage('nonexistent');
+    const usage = quotaManager.getUsage('nonexistent');
+    expect(usage).toBe(0); // Should not throw, returns 0
+  });
 });

@@ -51,15 +51,16 @@ export class UsageQuotaManager {
    * Increment usage for a user
    *
    * Creates new quota entry if not exists, updates existing entry otherwise.
+   * Updates tier if user changes tiers (e.g., free → pro).
    */
   incrementUsage(userId: string, tier: QuotaTier, amount: number): void {
-    const key = userId;
-    const existing = this.quotas.get(key);
+    const existing = this.quotas.get(userId);
 
     if (existing) {
       existing.usage += amount;
+      existing.tier = tier; // Update tier when user changes tiers
     } else {
-      this.quotas.set(key, {
+      this.quotas.set(userId, {
         userId,
         tier,
         usage: amount,
