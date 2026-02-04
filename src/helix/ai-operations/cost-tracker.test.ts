@@ -60,14 +60,26 @@ describe('CostTracker', () => {
       expect(tracker).toBeDefined();
     });
 
-    it('should throw if SUPABASE_URL missing', () => {
+    it('should throw if SUPABASE_URL missing', async () => {
+      const savedUrl = process.env.SUPABASE_URL;
       delete process.env.SUPABASE_URL;
-      expect(() => new CostTracker()).toThrow();
+      const newTracker = new CostTracker();
+
+      await expect(async () => {
+        await newTracker.logOperation(mockOperation);
+      }).rejects.toThrow();
+      process.env.SUPABASE_URL = savedUrl;
     });
 
-    it('should throw if SUPABASE_SERVICE_KEY missing', () => {
+    it('should throw if SUPABASE_SERVICE_KEY missing', async () => {
+      const savedKey = process.env.SUPABASE_SERVICE_KEY;
       delete process.env.SUPABASE_SERVICE_KEY;
-      expect(() => new CostTracker()).toThrow();
+      const newTracker = new CostTracker();
+
+      await expect(async () => {
+        await newTracker.logOperation(mockOperation);
+      }).rejects.toThrow();
+      process.env.SUPABASE_SERVICE_KEY = savedKey;
     });
 
     it('should validate operation log structure', () => {
