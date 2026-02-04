@@ -361,4 +361,31 @@ describe('AIOperationRouter', () => {
       expect(metrics).toBeDefined();
     });
   });
+
+  describe('Phase 6 Multi-Tenant Features', () => {
+    it('provides access to quota manager', () => {
+      const quotaManager = router.getQuotaManager();
+      expect(quotaManager).toBeDefined();
+    });
+
+    it('provides access to rate limiter', () => {
+      const rateLimiter = router.getRateLimiter();
+      expect(rateLimiter).toBeDefined();
+    });
+
+    it('provides access to billing engine', () => {
+      const billingEngine = router.getBillingEngine();
+      expect(billingEngine).toBeDefined();
+    });
+
+    it('provides access to analytics collector', () => {
+      const analyticsCollector = router.getAnalyticsCollector();
+      expect(analyticsCollector).toBeDefined();
+    });
+
+    it('provides access to webhook manager', () => {
+      const webhookManager = router.getWebhookManager();
+      expect(webhookManager).toBeDefined();
+    });
+  });
 });

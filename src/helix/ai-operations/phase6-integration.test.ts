@@ -1,103 +1,135 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { AIOperationRouter } from './router.js';
+import { describe, it, expect } from 'vitest';
+import { UsageQuotaManager } from './usage-quota.js';
+import { RateLimiter } from './rate-limiter.js';
+import { BillingEngine } from './billing-engine.js';
+import { AnalyticsCollector } from './analytics-collector.js';
+import { WebhookManager } from './webhook-manager.js';
 
-describe('Phase 6 Integration', () => {
-  let router: AIOperationRouter;
+describe('Phase 6: Multi-Tenant SaaS Integration', () => {
+  describe('Quota + Billing Integration', () => {
+    it('enforces quotas and tracks billing together', () => {
+      const quota = new UsageQuotaManager();
+      const billing = new BillingEngine();
 
-  beforeEach(() => {
-    router = new AIOperationRouter();
-  });
+      // User has 100 ops/day quota
+      const canExecute = quota.canExecuteOperation('user_123', 'free', 50);
+      expect(canExecute).toBe(true);
 
-  it('should have all phase 6 managers available', () => {
-    expect(router.getQuotaManager()).toBeDefined();
-    expect(router.getRateLimiter()).toBeDefined();
-    expect(router.getBillingEngine()).toBeDefined();
-    expect(router.getAnalyticsCollector()).toBeDefined();
-    expect(router.getWebhookManager()).toBeDefined();
-  });
+      // Execute and record cost
+      quota.incrementUsage('user_123', 'free', 50);
+      billing.recordOperation('user_123', 'email_analysis', 0.05);
 
-  it('should track operations through quota manager', () => {
-    const quotaManager = router.getQuotaManager();
-    quotaManager.incrementUsage('user1', 'free', 50);
-    expect(quotaManager.getUsage('user1')).toBe(50);
-  });
+      const usage = quota.getUsage('user_123');
+      const monthlyUsage = billing.getMonthlyUsage('user_123');
 
-  it('should apply rate limiting to users', () => {
-    const rateLimiter = router.getRateLimiter();
-    const allowed1 = rateLimiter.allowRequest('user1', 50);
-    expect(allowed1).toBe(true);
-  });
-
-  it('should bill users for operations', () => {
-    const billingEngine = router.getBillingEngine();
-    billingEngine.recordOperation('user1', 'gpt-4', 10.0);
-    const usage = billingEngine.getMonthlyUsage('user1');
-    expect(usage.totalCost).toBe(10.0);
-  });
-
-  it('should collect analytics events', () => {
-    const analyticsCollector = router.getAnalyticsCollector();
-    analyticsCollector.captureEvent('operation_start', {
-      operationId: 'op1',
-      userId: 'user1',
-      operationType: 'gpt-4',
+      expect(usage).toBe(50);
+      expect(monthlyUsage.totalCost).toBe(0.05);
     });
-    expect(analyticsCollector.getEvents()).toHaveLength(1);
   });
 
-  it('should manage webhooks for real-time integration', () => {
-    const webhookManager = router.getWebhookManager();
-    const webhook = webhookManager.registerWebhook('user1', 'https://example.com/webhook', [
-      'operation_complete',
-    ]);
-    expect(webhook.userId).toBe('user1');
+  describe('Rate Limiting + Analytics', () => {
+    it('tracks rate limited requests in analytics', () => {
+      const limiter = new RateLimiter();
+      const analytics = new AnalyticsCollector();
+
+      // Allow 3 requests
+      limiter.allowRequest('user_456', 100);
+      limiter.allowRequest('user_456', 100);
+      limiter.allowRequest('user_456', 100);
+
+      // Capture events
+      for (let i = 0; i < 3; i++) {
+        analytics.captureEvent('operation_complete', {
+          operationId: `op_${i}`,
+          userId: 'user_456',
+          operationType: 'email_analysis',
+          latencyMs: 100,
+          costUsd: 0.005,
+          success: true,
+        });
+      }
+
+      const hourly = analytics.getHourlyAggregation();
+      expect(hourly.totalEvents).toBe(3);
+      expect(hourly.successRate).toBe(1.0);
+    });
   });
 
-  it('should integrate all managers for complete operation flow', () => {
-    const quotaManager = router.getQuotaManager();
-    const rateLimiter = router.getRateLimiter();
-    const billingEngine = router.getBillingEngine();
-    const analyticsCollector = router.getAnalyticsCollector();
-    const webhookManager = router.getWebhookManager();
+  describe('Webhook + Billing', () => {
+    it('sends billing events via webhook', () => {
+      const webhooks = new WebhookManager();
+      const billing = new BillingEngine();
 
-    // Register webhook
-    webhookManager.registerWebhook('user1', 'https://example.com/webhook', ['operation_complete']);
+      // Register webhook for completion events
+      const webhookId = webhooks.registerWebhook('user_789', 'https://myapp.com/webhooks', [
+        'operation_complete',
+      ]);
 
-    // Check quota
-    const canExecute = quotaManager.canExecuteOperation('user1', 'free', 10);
-    expect(canExecute).toBe(true);
+      // Process operation
+      billing.recordOperation('user_789', 'email_analysis', 0.01);
 
-    // Check rate limit
-    const allowed = rateLimiter.allowRequest('user1', 10);
-    expect(allowed).toBe(true);
+      // Send webhook event
+      webhooks.queueEvent('operation_complete', {
+        userId: 'user_789',
+        operationId: 'op_123',
+        operationType: 'email_analysis',
+        costUsd: 0.01,
+      });
 
-    // Track usage and cost
-    quotaManager.incrementUsage('user1', 'free', 10);
-    billingEngine.recordOperation('user1', 'gpt-4', 5.0);
+      const pending = webhooks.getPendingDeliveries(webhookId);
+      expect(pending).toHaveLength(1);
 
-    // Capture analytics
-    analyticsCollector.captureEvent('operation_complete', {
-      operationId: 'op1',
-      userId: 'user1',
-      operationType: 'gpt-4',
-      latencyMs: 150,
-      costUsd: 5.0,
-      success: true,
+      const invoice = billing.generateInvoice('user_789');
+      expect(invoice.totalAmount).toBeCloseTo(0.011); // 0.01 + 10% tax
     });
+  });
 
-    // Queue webhook event
-    analyticsCollector.captureEvent('operation_complete', {
-      operationId: 'op1',
-      userId: 'user1',
-      operationType: 'gpt-4',
-      latencyMs: 150,
-      costUsd: 5.0,
-      success: true,
+  describe('End-to-End Multi-Tenant Workflow', () => {
+    it('executes complete Phase 6 workflow', () => {
+      const quota = new UsageQuotaManager();
+      const limiter = new RateLimiter();
+      const billing = new BillingEngine();
+      const analytics = new AnalyticsCollector();
+      const webhooks = new WebhookManager();
+
+      // 1. Register webhook
+      const webhookId = webhooks.registerWebhook('user_multi', 'https://myapp.com/webhooks', [
+        'operation_complete',
+      ]);
+
+      // 2. Check quota
+      expect(quota.canExecuteOperation('user_multi', 'pro', 100)).toBe(true);
+
+      // 3. Check rate limit
+      expect(limiter.allowRequest('user_multi', 100)).toBe(true);
+
+      // 4. Execute operation (simulated)
+      quota.incrementUsage('user_multi', 'pro', 100);
+      billing.recordOperation('user_multi', 'email_analysis', 0.025);
+
+      // 5. Capture analytics
+      analytics.captureEvent('operation_complete', {
+        operationId: 'op_multi',
+        userId: 'user_multi',
+        operationType: 'email_analysis',
+        latencyMs: 234,
+        costUsd: 0.025,
+        success: true,
+      });
+
+      // 6. Queue webhook
+      webhooks.queueEvent('operation_complete', {
+        userId: 'user_multi',
+        operationId: 'op_multi',
+        operationType: 'email_analysis',
+        costUsd: 0.025,
+      });
+
+      // Verify state
+      expect(quota.getUsage('user_multi')).toBe(100);
+      expect(billing.getMonthlyUsage('user_multi').totalCost).toBeCloseTo(0.025);
+      expect(analytics.getHourlyAggregation().totalCostUsd).toBeCloseTo(0.025);
+      expect(webhooks.getPendingDeliveries(webhookId)).toHaveLength(1);
     });
-
-    // Verify all data was captured
-    expect(quotaManager.getUsage('user1')).toBe(10);
-    expect(billingEngine.getMonthlyUsage('user1').totalCost).toBe(5.0);
-    expect(analyticsCollector.getEvents()).toHaveLength(2);
   });
 });
