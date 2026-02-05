@@ -103,6 +103,8 @@ const WRITE_METHODS = new Set([
   "skills.validate_composite",
   "skills.get_metadata",
   "skills.list_composite",
+  "skills.get_skill_metadata",
+  "skills.list_user_skills",
   // Phase 3 Memory Synthesis
   "memory.synthesize",
   "memory.synthesis_status",

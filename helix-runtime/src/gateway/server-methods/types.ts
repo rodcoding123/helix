@@ -119,3 +119,13 @@ export interface MemoryListPatternsParams {
   limit?: number;
   offset?: number;
 }
+
+export interface SkillMetadataParams {
+  skillId: string;
+}
+
+export interface ListUserSkillsParams {
+  enabled?: boolean;
+  limit?: number;
+  offset?: number;
+}

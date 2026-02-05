@@ -297,88 +297,148 @@ export const compositeSkillHandlers: GatewayRequestHandlers = {
    * }
    *
    * response: {
-   *   id: string
+   *   skillId: string
    *   name: string
    *   description: string
-   *   stepsCount: number
-   *   version: string
+   *   trigger: string
+   *   actions: unknown
+   *   enabled: boolean
+   *   executionCount: number
    *   createdAt: string (ISO)
-   *   lastExecuted: string (ISO) | null
+   *   updatedAt: string (ISO)
    * }
    */
-  'skills.get_metadata': async ({ params, respond }) => {
+  'skills.get_skill_metadata': async ({ params, respond, context, client }) => {
+    const { skillId } = params as Record<string, unknown>;
+
+    if (!client?.connect?.userId) {
+      respond(false, undefined, { code: 'UNAUTHORIZED', message: 'User not authenticated' });
+      return;
+    }
+
+    if (!skillId || typeof skillId !== 'string') {
+      respond(false, undefined, { code: 'INVALID_REQUEST', message: 'skillId is required' });
+      return;
+    }
+
     try {
-      if (!params || typeof params !== 'object') {
-        respond(false, undefined, {
-          code: 'INVALID_REQUEST',
-          message: 'Invalid parameters',
-        });
+      const { data: skill, error } = await context.supabaseClient
+        .from('composite_skills')
+        .select('*')
+        .eq('id', skillId)
+        .eq('user_id', client.connect.userId)
+        .single();
+
+      if (error || !skill) {
+        respond(false, undefined, { code: 'NOT_FOUND', message: 'Skill not found' });
         return;
       }
 
-      const { skillId } = params as { skillId?: string };
-
-      if (!skillId) {
-        respond(false, undefined, {
-          code: 'INVALID_REQUEST',
-          message: 'skillId is required',
-        });
-        return;
-      }
-
-      // TODO: Implement database lookup
       respond(true, {
-        id: skillId,
-        name: 'placeholder-skill',
-        description: 'Database not yet initialized',
-        stepsCount: 0,
-        version: '1.0.0',
-        createdAt: new Date().toISOString(),
-        lastExecuted: null,
+        skillId: skill.id,
+        name: skill.name,
+        description: skill.description,
+        trigger: skill.trigger,
+        actions: skill.actions,
+        enabled: skill.enabled,
+        executionCount: skill.execution_count,
+        createdAt: skill.created_at,
+        updatedAt: skill.updated_at,
       });
-
     } catch (error) {
-      respond(false, undefined, {
-        code: 'LOOKUP_ERROR',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      });
+      context.logGateway.error?.('Failed to fetch skill metadata', { error, skillId });
+      respond(false, undefined, { code: 'INTERNAL_ERROR', message: 'Failed to fetch skill metadata' });
     }
   },
 
   /**
    * List user's composite skills
    *
-   * params: {} (no parameters)
+   * params: {
+   *   enabled?: boolean
+   *   limit?: number (1-100, default 50)
+   *   offset?: number (default 0)
+   * }
    *
    * response: {
    *   skills: Array<{
    *     id: string
    *     name: string
    *     description: string
-   *     stepsCount: number
-   *     version: string
+   *     trigger: string
+   *     actions: unknown
+   *     enabled: boolean
    *     executionCount: number
-   *     lastExecuted: string (ISO) | null
+   *     createdAt: string (ISO)
+   *     updatedAt: string (ISO)
    *   }>
+   *   total: number
+   *   limit: number
+   *   offset: number
    * }
    */
-  'skills.list_composite': async ({ respond, context, client }) => {
+  'skills.list_user_skills': async ({ params, respond, context, client }) => {
+    const { enabled = true, limit = 50, offset = 0 } = params as Record<string, unknown>;
+
+    if (!client?.connect?.userId) {
+      respond(false, undefined, { code: 'UNAUTHORIZED', message: 'User not authenticated' });
+      return;
+    }
+
+    if (typeof limit !== 'number' || limit < 1 || limit > 100) {
+      respond(false, undefined, { code: 'INVALID_REQUEST', message: 'limit must be between 1 and 100' });
+      return;
+    }
+
+    if (typeof offset !== 'number' || offset < 0) {
+      respond(false, undefined, { code: 'INVALID_REQUEST', message: 'offset must be >= 0' });
+      return;
+    }
+
     try {
-      // TODO: Implement database query
-      context.logGateway.info?.('Listing composite skills', {
-        userId: client?.connect?.userId,
+      let query = context.supabaseClient
+        .from('composite_skills')
+        .select('*', { count: 'exact' })
+        .eq('user_id', client.connect.userId)
+        .order('execution_count', { ascending: false })
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+
+      if (enabled !== undefined && typeof enabled === 'boolean') {
+        query = query.eq('enabled', enabled);
+      }
+
+      const { data: skills, error, count } = await query;
+
+      if (error) {
+        throw error;
+      }
+
+      context.logGateway.info?.('Listed user skills', {
+        userId: client.connect.userId,
+        enabled,
+        count: skills?.length || 0,
       });
 
       respond(true, {
-        skills: [],
-        total: 0,
+        skills: (skills || []).map(skill => ({
+          skillId: skill.id,
+          name: skill.name,
+          description: skill.description,
+          trigger: skill.trigger,
+          actions: skill.actions,
+          enabled: skill.enabled,
+          executionCount: skill.execution_count,
+          createdAt: skill.created_at,
+          updatedAt: skill.updated_at,
+        })),
+        total: count || 0,
+        limit,
+        offset,
       });
-
     } catch (error) {
-      respond(false, undefined, {
-        code: 'LIST_ERROR',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      });
+      context.logGateway.error?.('Failed to list user skills', { error });
+      respond(false, undefined, { code: 'INTERNAL_ERROR', message: 'Failed to list skills' });
     }
   },
 };
