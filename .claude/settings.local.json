@@ -17,7 +17,5 @@
       "Bash(git update-index:*)"
     ]
   },
-  "contextInclude": [
-    "c:/Users/Specter/Desktop/Helix"
-  ]
+  "contextInclude": ["c:/Users/Specter/Desktop/Helix"]
 }

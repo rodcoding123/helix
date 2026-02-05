@@ -11,7 +11,7 @@ import { describe, it, expect, vi } from 'vitest';
 // Mock Supabase before importing
 vi.mock('@supabase/supabase-js', () => {
   const mockOperations: Record<string, any> = {
-    'chat_message': {
+    chat_message: {
       id: '1',
       operation_id: 'chat_message',
       operation_name: 'Chat Message',
@@ -22,7 +22,7 @@ vi.mock('@supabase/supabase-js', () => {
       created_at: '2026-02-04T00:00:00Z',
       updated_at: '2026-02-04T00:00:00Z',
     },
-    'sentiment_analysis': {
+    sentiment_analysis: {
       id: '2',
       operation_id: 'sentiment_analysis',
       operation_name: 'Sentiment Analysis',
@@ -72,7 +72,10 @@ vi.mock('@supabase/supabase-js', () => {
         return builder;
       },
       single: async () => {
-        if ((table === 'ai_model_routes' || table === 'model_routes') && filterOp === 'operation_id') {
+        if (
+          (table === 'ai_model_routes' || table === 'model_routes') &&
+          filterOp === 'operation_id'
+        ) {
           const data = mockOperations[filterVal];
           return { data, error: data ? null : new Error('Not found') };
         }

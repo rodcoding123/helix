@@ -86,20 +86,22 @@ export class CostTracker {
 
     try {
       // 1. Insert operation log (immutable)
-      const { error: insertError } = await this.getSupabaseClient().from('ai_operation_log').insert({
-        operation_type: operation.operation_type,
-        operation_id: operation.operation_id,
-        model_used: operation.model_used,
-        user_id: userId,
-        input_tokens: operation.input_tokens,
-        output_tokens: operation.output_tokens,
-        cost_usd: operation.cost_usd,
-        latency_ms: operation.latency_ms,
-        quality_score: operation.quality_score,
-        success: operation.success,
-        error_message: operation.error_message,
-        created_at: timestamp,
-      });
+      const { error: insertError } = await this.getSupabaseClient()
+        .from('ai_operation_log')
+        .insert({
+          operation_type: operation.operation_type,
+          operation_id: operation.operation_id,
+          model_used: operation.model_used,
+          user_id: userId,
+          input_tokens: operation.input_tokens,
+          output_tokens: operation.output_tokens,
+          cost_usd: operation.cost_usd,
+          latency_ms: operation.latency_ms,
+          quality_score: operation.quality_score,
+          success: operation.success,
+          error_message: operation.error_message,
+          created_at: timestamp,
+        });
 
       if (insertError) throw insertError;
 

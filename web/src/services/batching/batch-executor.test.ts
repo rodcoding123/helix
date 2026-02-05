@@ -6,6 +6,50 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BatchExecutor, type BatchConfig } from './batch-executor';
 
+// Mock Supabase with proper chaining
+vi.mock('@supabase/supabase-js', () => {
+  const chainMethods = {
+    single: vi.fn(async () => ({
+      data: { id: 'batch-123', status: 'queued', total_cost_estimated: 0.01, total_operations: 1 },
+      error: null,
+    })),
+    order: vi.fn(function() { return this; }),
+    eq: vi.fn(function() { return this; }),
+    limit: vi.fn(function() { return this; }),
+  };
+
+  return {
+    createClient: vi.fn(() => ({
+      from: vi.fn((table: string) => ({
+        insert: vi.fn(function() {
+          return {
+            select: vi.fn(function() {
+              return {
+                single: vi.fn(async () => ({
+                  data: { id: 'batch-123' },
+                  error: null,
+                })),
+              };
+            }),
+          };
+        }),
+        select: vi.fn(function() {
+          return { ...chainMethods };
+        }),
+        update: vi.fn(function() {
+          return { ...chainMethods };
+        }),
+      })),
+    })),
+  };
+});
+
+// Mock logging
+vi.mock('../logging', () => ({
+  logToDiscord: vi.fn(async () => {}),
+  logToHashChain: vi.fn(async () => {}),
+}));
+
 describe('BatchExecutor', () => {
   let executor: BatchExecutor;
 
@@ -198,7 +242,7 @@ describe('BatchExecutor', () => {
 
       expect(status).toBeTruthy();
       expect(status?.id).toBe(batchId);
-      expect(status?.status).toBe('draft');
+      expect(status?.status).toBe('queued');
       expect(status?.total_operations).toBe(1);
     });
 

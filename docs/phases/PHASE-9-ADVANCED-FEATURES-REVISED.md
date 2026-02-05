@@ -6,6 +6,7 @@
 **Foundation:** Phase 8 (LLM-First Intelligence Layer - 9 operations registered in Phase 0.5)
 
 **REVISIONS FROM ORIGINAL PLAN:**
+
 - ✅ Replaced in-memory cron with PostgreSQL `pg_cron` (persistent, distributed)
 - ✅ Webhook secret management via 1Password rotation (secure)
 - ✅ Batch execution race conditions fixed (Promise.allSettled pattern)
@@ -38,13 +39,13 @@ Phase 9 extends Phase 8's LLM-First Intelligence Layer with production-grade adv
 
 **Why pg_cron instead of Node.js setTimeout?**
 
-| Feature | setTimeout | pg_cron |
-|---------|-----------|---------|
-| **Persistence** | Lost on server restart ❌ | Persists in database ✅ |
-| **Distributed** | Single instance only ❌ | Works across replicas ✅ |
-| **Fail-Safe** | Manual recovery needed ❌ | Built-in recovery ✅ |
-| **Timing Accuracy** | Process lag affects it ❌ | PostgreSQL guarantees ✅ |
-| **Scalability** | 100+ jobs = memory issues ❌ | Handles 10,000+ jobs ✅ |
+| Feature             | setTimeout                   | pg_cron                  |
+| ------------------- | ---------------------------- | ------------------------ |
+| **Persistence**     | Lost on server restart ❌    | Persists in database ✅  |
+| **Distributed**     | Single instance only ❌      | Works across replicas ✅ |
+| **Fail-Safe**       | Manual recovery needed ❌    | Built-in recovery ✅     |
+| **Timing Accuracy** | Process lag affects it ❌    | PostgreSQL guarantees ✅ |
+| **Scalability**     | 100+ jobs = memory issues ❌ | Handles 10,000+ jobs ✅  |
 
 ---
 
@@ -384,7 +385,9 @@ export class ScheduleManager {
         // 5. Check cost limits
         const monthCost = await this.getMonthCost(schedule.user_id, schedule.operation_id);
         if (monthCost + costEstimate.mid > (schedule.max_cost_per_month || Infinity)) {
-          throw new Error(`Monthly cost limit exceeded: $${monthCost} + $${costEstimate.mid} > $${schedule.max_cost_per_month}`);
+          throw new Error(
+            `Monthly cost limit exceeded: $${monthCost} + $${costEstimate.mid} > $${schedule.max_cost_per_month}`
+          );
         }
 
         // 6. Execute operation via Phase 0.5 router
@@ -451,11 +454,7 @@ export class ScheduleManager {
    * - Log all verification attempts
    * - Immediate return (202 Accepted), async processing
    */
-  async handleWebhook(
-    scheduleId: string,
-    payload: string,
-    signature: string
-  ): Promise<void> {
+  async handleWebhook(scheduleId: string, payload: string, signature: string): Promise<void> {
     try {
       // 1. Get schedule config
       const { data: schedule } = await db
@@ -543,9 +542,9 @@ export class ScheduleManager {
     const baseTokens = 1000; // Varies by operation
 
     return {
-      low: (baseTokens * 0.8) / 1_000_000 * 0.003,  // 80% of tokens, cheapest model
-      mid: (baseTokens * 1.0) / 1_000_000 * 0.003,  // Expected tokens, mid-tier model
-      high: (baseTokens * 1.2) / 1_000_000 * 0.003, // 120% of tokens, expensive model
+      low: ((baseTokens * 0.8) / 1_000_000) * 0.003, // 80% of tokens, cheapest model
+      mid: ((baseTokens * 1.0) / 1_000_000) * 0.003, // Expected tokens, mid-tier model
+      high: ((baseTokens * 1.2) / 1_000_000) * 0.003, // 120% of tokens, expensive model
     };
   }
 
@@ -604,10 +603,9 @@ serve(async (req: Request) => {
     const manager = new ScheduleManager();
     manager.handleWebhook(scheduleId, payload, signature).catch(console.error);
 
-    return new Response(
-      JSON.stringify({ accepted: true, schedule_id: scheduleId }),
-      { status: 202 }
-    );
+    return new Response(JSON.stringify({ accepted: true, schedule_id: scheduleId }), {
+      status: 202,
+    });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
@@ -1080,10 +1078,7 @@ export class BatchExecutor extends EventEmitter {
 
       this.emit('batch:completed', { batchId, totalCost });
     } catch (error) {
-      await db
-        .from('operation_batches')
-        .update({ status: 'failed' })
-        .eq('id', batchId);
+      await db.from('operation_batches').update({ status: 'failed' }).eq('id', batchId);
 
       this.emit('batch:failed', { batchId, error });
 
@@ -1118,10 +1113,7 @@ export class BatchExecutor extends EventEmitter {
    * FIXED: Use Promise.allSettled instead of Promise.race
    * This properly handles concurrent execution without race conditions
    */
-  private async executeParallel(
-    batchId: string,
-    operations: any[]
-  ): Promise<void> {
+  private async executeParallel(batchId: string, operations: any[]): Promise<void> {
     const maxConcurrent = 5;
     const queue = [...operations];
     const executing: Promise<any>[] = [];
@@ -1150,10 +1142,7 @@ export class BatchExecutor extends EventEmitter {
     }
   }
 
-  private async executeSequential(
-    batchId: string,
-    operations: any[]
-  ): Promise<void> {
+  private async executeSequential(batchId: string, operations: any[]): Promise<void> {
     for (const op of operations) {
       // Check if batch was cancelled
       const { data: batch } = await db
@@ -1163,10 +1152,7 @@ export class BatchExecutor extends EventEmitter {
         .single();
 
       if (batch?.status === 'cancelled') {
-        await db
-          .from('batch_operations')
-          .update({ status: 'skipped' })
-          .eq('id', op.id);
+        await db.from('batch_operations').update({ status: 'skipped' }).eq('id', op.id);
         continue;
       }
 
@@ -1174,10 +1160,7 @@ export class BatchExecutor extends EventEmitter {
     }
   }
 
-  private async executeConditional(
-    batchId: string,
-    operations: any[]
-  ): Promise<void> {
+  private async executeConditional(batchId: string, operations: any[]): Promise<void> {
     const results = new Map<string, any>();
 
     for (const op of operations) {
@@ -1189,10 +1172,7 @@ export class BatchExecutor extends EventEmitter {
         .single();
 
       if (batch?.status === 'cancelled') {
-        await db
-          .from('batch_operations')
-          .update({ status: 'skipped' })
-          .eq('id', op.id);
+        await db.from('batch_operations').update({ status: 'skipped' }).eq('id', op.id);
         continue;
       }
 
@@ -1201,10 +1181,7 @@ export class BatchExecutor extends EventEmitter {
         const parentResult = results.get(op.depends_on);
         if (!parentResult?.success) {
           // Skip this operation if dependency failed
-          await db
-            .from('batch_operations')
-            .update({ status: 'skipped' })
-            .eq('id', op.id);
+          await db.from('batch_operations').update({ status: 'skipped' }).eq('id', op.id);
           continue;
         }
       }
@@ -1221,10 +1198,7 @@ export class BatchExecutor extends EventEmitter {
     const executionId = op.id;
 
     try {
-      await db
-        .from('batch_operations')
-        .update({ status: 'running' })
-        .eq('id', executionId);
+      await db.from('batch_operations').update({ status: 'running' }).eq('id', executionId);
 
       const result = await this.aiRouter.execute(op.operation_id, op.parameters);
       const cost = await this.aiRouter.estimateCost(op.operation_id, op.parameters);
@@ -1531,27 +1505,27 @@ describe('BatchExecutor (FIXED)', () => {
 
 ## PHASE 9C: CUSTOMIZATION & SETTINGS (Weeks 25-26)
 
-*Database schema and UI components similar to original plan, but with per-user preferences properly isolated via RLS*
+_Database schema and UI components similar to original plan, but with per-user preferences properly isolated via RLS_
 
 ---
 
 ## PHASE 9D: ADVANCED ANALYTICS & REPORTING (Weeks 27-28)
 
-*Analytics dashboard with cost breakdown, usage trends, model performance comparison, and optimization recommendations*
+_Analytics dashboard with cost breakdown, usage trends, model performance comparison, and optimization recommendations_
 
 ---
 
 ## SUMMARY OF CRITICAL FIXES
 
-| Issue | Original | REVISED |
-|-------|----------|---------|
-| Cron Job Storage | `Map<string, NodeJS.Timeout>` (lost on restart) | PostgreSQL `pg_cron` (persistent) |
-| Webhook Secrets | Hardcoded in code | Loaded from 1Password at runtime |
-| Batch Parallel Execution | `Promise.race()` with race condition | `Promise.allSettled()` with proper tracking |
-| Execution Deduplication | Missing | Added `schedule_is_running()` check |
-| Webhook Timeout | Blocking handler | Async queue, return 202 immediately |
-| Cost Estimation | Single point estimate | Confidence range (low/mid/high) |
-| Batch Cancellation | Not supported | Added cancel support with skip logic |
+| Issue                    | Original                                        | REVISED                                     |
+| ------------------------ | ----------------------------------------------- | ------------------------------------------- |
+| Cron Job Storage         | `Map<string, NodeJS.Timeout>` (lost on restart) | PostgreSQL `pg_cron` (persistent)           |
+| Webhook Secrets          | Hardcoded in code                               | Loaded from 1Password at runtime            |
+| Batch Parallel Execution | `Promise.race()` with race condition            | `Promise.allSettled()` with proper tracking |
+| Execution Deduplication  | Missing                                         | Added `schedule_is_running()` check         |
+| Webhook Timeout          | Blocking handler                                | Async queue, return 202 immediately         |
+| Cost Estimation          | Single point estimate                           | Confidence range (low/mid/high)             |
+| Batch Cancellation       | Not supported                                   | Added cancel support with skip logic        |
 
 ---
 
@@ -1573,6 +1547,7 @@ Week 28: Analytics tests, optimization recommendations, final polish
 ## SUCCESS CRITERIA (UPDATED)
 
 ### Phase 9A (Scheduling)
+
 - ✅ pg_cron handles 1000+ simultaneous schedules
 - ✅ Execution deduplication prevents duplicate runs
 - ✅ Webhook secret rotation via 1Password verified
@@ -1581,6 +1556,7 @@ Week 28: Analytics tests, optimization recommendations, final polish
 - ✅ Monthly cost limits enforced
 
 ### Phase 9B (Batch Operations)
+
 - ✅ 5 concurrent operations execute without race conditions
 - ✅ Promise.allSettled properly tracks all operations
 - ✅ Partial failure handling (continue on individual failures)
@@ -1589,11 +1565,13 @@ Week 28: Analytics tests, optimization recommendations, final polish
 - ✅ Sequential batches execute in strict order
 
 ### Phase 9C (Customization)
+
 - ✅ Per-operation model selection respected
 - ✅ Budget limits enforced per operation
 - ✅ Theme preferences persist across sessions
 
 ### Phase 9D (Analytics)
+
 - ✅ Cost breakdown by operation accurate
 - ✅ Trend analysis shows correct patterns
 - ✅ Model comparison metrics correct

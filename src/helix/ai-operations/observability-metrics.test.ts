@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type,@typescript-eslint/require-await */
 /**
  * Observability Metrics Tests
  *

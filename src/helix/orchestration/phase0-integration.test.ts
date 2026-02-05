@@ -8,7 +8,7 @@
  * Created: 2026-02-04
  */
 
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
 import { ConsciousnessLoader } from './consciousness-loader.js';
 import { GoalEvaluator } from './goal-evaluator.js';
 import { ModelSpawner } from './model-spawner.js';
@@ -31,7 +31,7 @@ describe('Phase 0 Integration Tests', () => {
     conductorLoop = new ConductorLoop();
   });
 
-  afterAll(async () => {
+  afterAll(() => {
     conductorLoop.stop();
   });
 
@@ -537,7 +537,7 @@ describe('Phase 0 Integration Tests', () => {
       loopInstance.stop();
     });
 
-    it('should allow runtime configuration updates', async () => {
+    it('should allow runtime configuration updates', () => {
       const loopInstance = new ConductorLoop();
       const newBudget = 25;
 
@@ -583,7 +583,7 @@ describe('Phase 0 Integration Tests', () => {
 
       if (evaluation.recommended_operations.length > 0) {
         const operation = evaluation.recommended_operations[0];
-        const spawnResult = await modelSpawner.spawn('test_user', operation, 100);
+        await modelSpawner.spawn('test_user', operation, 100);
 
         // Wait for execution to complete
         await new Promise(resolve => setTimeout(resolve, 150));
@@ -593,7 +593,7 @@ describe('Phase 0 Integration Tests', () => {
       }
     });
 
-    it('should provide active model count', async () => {
+    it('should provide active model count', () => {
       const initialCount = modelSpawner.getActiveModelCount();
       expect(typeof initialCount === 'number').toBe(true);
       expect(initialCount).toBeGreaterThanOrEqual(0);

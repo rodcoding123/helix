@@ -12,7 +12,6 @@ import type {
   AutomationTrigger,
   AutomationExecution,
   WorkflowAction,
-  TemplateVariables,
   AutomationContext,
   TriggerCondition,
 } from './automation.types.js';
@@ -374,8 +373,8 @@ export class AutomationOrchestrator {
    * Evaluate trigger condition against context
    */
   private async evaluateCondition(
-    condition: TriggerCondition,
-    context: AutomationContext
+    _condition: TriggerCondition,
+    _context: AutomationContext
   ): Promise<boolean> {
     // This will be implemented by specific condition evaluators
     // For now, return true (condition always matches)
@@ -388,7 +387,7 @@ export class AutomationOrchestrator {
   private async executeActions(
     actions: WorkflowAction[],
     context: AutomationContext,
-    options: ExecutionOptions = {}
+    _options: ExecutionOptions = {}
   ): Promise<Record<string, any>> {
     const results: Record<string, any> = {};
 
@@ -432,8 +431,8 @@ export class AutomationOrchestrator {
    * Execute a single action
    */
   private async executeAction(
-    action: WorkflowAction,
-    context: AutomationContext
+    _action: WorkflowAction,
+    _context: AutomationContext
   ): Promise<any> {
     // This will be implemented by specific action handlers
     // For now, return empty result

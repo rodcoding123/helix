@@ -147,7 +147,10 @@ vi.mock('@supabase/supabase-js', () => {
         return builder;
       },
       single: async () => {
-        if ((table === 'ai_model_routes' || table === 'model_routes') && filterOp === 'operation_id') {
+        if (
+          (table === 'ai_model_routes' || table === 'model_routes') &&
+          filterOp === 'operation_id'
+        ) {
           const data = mockRoutes[filterVal];
           return { data, error: data ? null : new Error('Not found') };
         }

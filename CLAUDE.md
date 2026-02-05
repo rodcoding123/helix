@@ -292,10 +292,10 @@ export async function preloadSecrets(): Promise<void> {
 - DISCORD*WEBHOOK*\*
 - SUPABASE\_\*
 - STRIPE\_\*
-- DEEPSEEK*\*, GEMINI*_, OPENAI\__, ANTHROPIC\_\*
+- DEEPSEEK*\*, GEMINI*\_, OPENAI\_\_, ANTHROPIC\_\*
 - \*API_KEY
 - *SECRET, *TOKEN, *PASSWORD, *CREDENTIAL, \*AUTH
-- AWS*\*, GITHUB*_, GITLAB\__
+- AWS*\*, GITHUB*\_, GITLAB\_\_
 - \*PRIVATE_KEY
 
 **Usage in Plugins**:

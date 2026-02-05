@@ -92,7 +92,7 @@ describe('WebhookManager', () => {
         operationType: 'video_analysis',
       });
 
-      let delivery = manager.getPendingDeliveries(webhookId)[0];
+      const delivery = manager.getPendingDeliveries(webhookId)[0];
 
       // Simulate 5 failed attempts
       for (let i = 0; i < 5; i++) {

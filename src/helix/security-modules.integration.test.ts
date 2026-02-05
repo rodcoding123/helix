@@ -533,7 +533,13 @@ describe('Phase 2: Gateway Token Verification', () => {
     let failed = false;
     try {
       for (let i = 0; i < 3; i++) {
-        enforceTokenVerification('127.0.0.1', 'production', 'wrong-token', 'stored-token', 'client-1');
+        enforceTokenVerification(
+          '127.0.0.1',
+          'production',
+          'wrong-token',
+          'stored-token',
+          'client-1'
+        );
       }
     } catch (e) {
       failed = true;

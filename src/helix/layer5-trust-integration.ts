@@ -211,9 +211,8 @@ export class Layer5TrustIntegration {
         const multiplier = this.getSalienceMultiplierForStage(profile.attachment_stage);
 
         // Update profile
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error: updateError } = await (this.supabase
-          .from('user_trust_profiles') as any)
+
+        const { error: updateError } = await (this.supabase.from('user_trust_profiles') as any)
           .update({ salience_multiplier: multiplier })
           .eq('id', profile.id);
 

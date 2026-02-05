@@ -9,7 +9,7 @@
  * Created: 2026-02-04
  */
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any */
 import { createClient } from '@supabase/supabase-js';
 import { logToDiscord } from '../logging.js';
 import { hashChain } from '../hash-chain.js';
@@ -250,16 +250,16 @@ reject: /reject ${approval.id}
         channel: 'helix-api',
         type: 'approval_granted',
         approval_id: approvalId,
-        operation: (approval as any).operation_id,
+        operation: approval.operation_id,
         approved_by: approvedBy,
-        cost_impact: (approval as any).estimated_savings_usd,
+        cost_impact: approval.estimated_savings_usd,
       });
 
       // Add to hash chain
       await hashChain.add({
         type: 'approval_granted',
         approval_id: approvalId,
-        operation: (approval as any).operation_id,
+        operation: approval.operation_id,
         approved_by: approvedBy,
         timestamp,
       });
@@ -318,7 +318,7 @@ reject: /reject ${approval.id}
         channel: 'helix-api',
         type: 'approval_rejected',
         approval_id: approvalId,
-        operation: (approval as any).operation_id,
+        operation: approval.operation_id,
         rejected_by: rejectedBy,
         reason: rejectionReason,
       });
@@ -327,7 +327,7 @@ reject: /reject ${approval.id}
       await hashChain.add({
         type: 'approval_rejected',
         approval_id: approvalId,
-        operation: (approval as any).operation_id,
+        operation: approval.operation_id,
         rejected_by: rejectedBy,
         reason: rejectionReason,
         timestamp,
