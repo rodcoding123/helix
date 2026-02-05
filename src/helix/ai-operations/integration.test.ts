@@ -10,11 +10,90 @@ import { describe, it, expect, vi } from 'vitest';
 
 // Mock Supabase before importing
 vi.mock('@supabase/supabase-js', () => {
-  const createMockQueryBuilder = () => {
+  const mockOperations: Record<string, any> = {
+    'chat_message': {
+      id: '1',
+      operation_id: 'chat_message',
+      operation_name: 'Chat Message',
+      primary_model: 'deepseek',
+      fallback_model: 'gemini_flash',
+      cost_criticality: 'HIGH',
+      enabled: true,
+      created_at: '2026-02-04T00:00:00Z',
+      updated_at: '2026-02-04T00:00:00Z',
+    },
+    'sentiment_analysis': {
+      id: '2',
+      operation_id: 'sentiment_analysis',
+      operation_name: 'Sentiment Analysis',
+      primary_model: 'gemini_flash',
+      fallback_model: 'deepseek',
+      cost_criticality: 'LOW',
+      enabled: true,
+      created_at: '2026-02-04T00:00:00Z',
+      updated_at: '2026-02-04T00:00:00Z',
+    },
+  };
+
+  const defaultBudget = {
+    id: 'test-budget-1',
+    user_id: 'integration-test-user',
+    daily_limit_usd: 50.0,
+    warning_threshold_usd: 25.0,
+    current_spend_today: 0,
+    operations_today: 0,
+    last_checked: '2026-02-04T00:00:00Z',
+  };
+
+  const defaultToggle = {
+    id: 'test-toggle-1',
+    toggle_name: 'helix_can_change_models',
+    enabled: true,
+    locked: false,
+    controlled_by: 'BOTH',
+    updated_at: '2026-02-04T00:00:00Z',
+  };
+
+  const createMockQueryBuilder = (table: string) => {
+    let filterOp = '';
+    let filterVal = '';
+    let selectAll = false;
+
     const builder = {
-      select: () => builder,
-      eq: () => builder,
-      single: async () => ({ data: {}, error: null }),
+      select: (columns?: string) => {
+        if (columns === '*' || !columns) {
+          selectAll = true;
+        }
+        return builder;
+      },
+      eq: (field: string, value: any) => {
+        filterOp = field;
+        filterVal = value;
+        return builder;
+      },
+      single: async () => {
+        if ((table === 'ai_model_routes' || table === 'model_routes') && filterOp === 'operation_id') {
+          const data = mockOperations[filterVal];
+          return { data, error: data ? null : new Error('Not found') };
+        }
+        if (table === 'cost_budgets' && filterOp === 'user_id') {
+          const data = filterVal.startsWith('integration-test-user') ? defaultBudget : null;
+          return { data, error: data ? null : new Error('Not found') };
+        }
+        if (table === 'feature_toggles' && filterOp === 'toggle_name') {
+          const data = filterVal === 'helix_can_change_models' ? defaultToggle : null;
+          return { data, error: data ? null : new Error('Not found') };
+        }
+        return { data: null, error: new Error('Not found') };
+      },
+      then: async (resolve: (value: any) => void) => {
+        if (selectAll && (table === 'ai_model_routes' || table === 'model_routes')) {
+          const data = Object.values(mockOperations);
+          resolve({ data, error: null });
+        } else {
+          resolve({ data: [], error: null });
+        }
+      },
       insert: async () => ({ data: {}, error: null }),
       update: async () => ({ data: {}, error: null }),
       delete: () => builder,
@@ -24,11 +103,23 @@ vi.mock('@supabase/supabase-js', () => {
 
   return {
     createClient: () => ({
-      from: () => createMockQueryBuilder(),
+      from: (table: string) => createMockQueryBuilder(table),
       rpc: async () => ({ data: {}, error: null }),
     }),
   };
 });
+
+// Mock Discord logging
+vi.mock('../logging.js', () => ({
+  logToDiscord: vi.fn(async () => undefined),
+}));
+
+// Mock hash chain
+vi.mock('../hash-chain.js', () => ({
+  hashChain: {
+    add: vi.fn(async () => undefined),
+  },
+}));
 
 import { router } from './router.js';
 import { approvalGate } from './approval-gate.js';
