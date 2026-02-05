@@ -149,6 +149,16 @@ pub fn run() {
             commands::directories::get_app_dir,
             commands::directories::get_config_dir,
 
+            // Rust executables (Task 6)
+            commands::rust_executables::start_memory_synthesis,
+            commands::rust_executables::start_skill_sandbox,
+            commands::rust_executables::start_voice_pipeline,
+            commands::rust_executables::start_sync_coordinator,
+            commands::rust_executables::start_psychology_decay,
+            commands::rust_executables::get_rust_exe_status,
+            commands::rust_executables::stop_rust_exe,
+            commands::rust_executables::stop_all_rust_exes,
+
             // Updater commands (disabled until signing keys are configured)
             // updater::check_for_update,
             // updater::install_update,

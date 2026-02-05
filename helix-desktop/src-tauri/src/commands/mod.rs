@@ -9,6 +9,7 @@ pub mod system;
 pub mod discord;
 pub mod psychology;
 pub mod scheduler;
+pub mod rust_executables;
 
 // Phase C: Desktop Features
 pub mod clipboard;
