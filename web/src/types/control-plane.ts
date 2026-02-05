@@ -25,3 +25,17 @@ export interface OperationMetric {
   quality_score: number;
   created_at: string;
 }
+
+export interface PendingApproval {
+  id: string;
+  operation_id: string;
+  operation_type: string;
+  user_id: string;
+  estimated_cost: number;
+  reason: string;
+  created_at: string;
+  status: 'pending' | 'approved' | 'rejected';
+  approved_at?: string;
+  approved_by?: string;
+  rejection_reason?: string;
+}
