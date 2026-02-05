@@ -3,6 +3,16 @@ interface RateLimitRule {
   windowMs: number;
 }
 
+/**
+ * Token bucket for a single user/method combination
+ * O(1) complexity vs O(n) for sliding window
+ * Tokens refill at: maxRequests / windowMs per millisecond
+ */
+interface TokenBucket {
+  tokens: number;
+  lastRefill: number;
+}
+
 const RATE_LIMITS: Record<string, RateLimitRule> = {
   // Expensive AI operations
   'memory.synthesize': { maxRequests: 10, windowMs: 60_000 }, // 10/min
@@ -21,46 +31,69 @@ const RATE_LIMITS: Record<string, RateLimitRule> = {
   'default': { maxRequests: 200, windowMs: 60_000 },
 };
 
+/**
+ * Token bucket rate limiter
+ * O(1) complexity per check vs O(n) for sliding window
+ * Prevents CPU spikes under load, suitable for high-traffic gateways
+ */
 export class RateLimiter {
-  private requestCounts = new Map<string, number[]>();
+  private buckets = new Map<string, TokenBucket>();
+  private cleanupInterval: NodeJS.Timeout;
+
+  constructor() {
+    // Cleanup old buckets every 5 minutes
+    this.cleanupInterval = setInterval(() => {
+      this.cleanup();
+    }, 5 * 60 * 1000);
+  }
 
   checkLimit(userId: string, method: string): { allowed: boolean; retryAfterMs?: number } {
     const rule = RATE_LIMITS[method] || RATE_LIMITS.default;
     const userKey = `${userId}:${method}`;
     const now = Date.now();
 
-    // Get timestamps within window
-    const timestamps = this.requestCounts.get(userKey) || [];
-    const validTimestamps = timestamps.filter(ts => now - ts < rule.windowMs);
-
-    if (validTimestamps.length >= rule.maxRequests) {
-      const oldestRequest = Math.min(...validTimestamps);
-      const retryAfterMs = rule.windowMs - (now - oldestRequest);
-      return { allowed: false, retryAfterMs };
+    // Get or create bucket
+    let bucket = this.buckets.get(userKey);
+    if (!bucket) {
+      bucket = { tokens: rule.maxRequests, lastRefill: now };
+      this.buckets.set(userKey, bucket);
     }
 
-    // Record this request
-    validTimestamps.push(now);
-    this.requestCounts.set(userKey, validTimestamps);
+    // Calculate refill amount based on time elapsed
+    // tokens_per_ms = maxRequests / windowMs
+    const elapsedMs = now - bucket.lastRefill;
+    const refillRate = rule.maxRequests / rule.windowMs;
+    const tokensToAdd = elapsedMs * refillRate;
+    bucket.tokens = Math.min(rule.maxRequests, bucket.tokens + tokensToAdd);
+    bucket.lastRefill = now;
 
-    // Cleanup old entries
-    if (this.requestCounts.size > 10000) {
-      this.cleanup();
+    // Check if request allowed
+    if (bucket.tokens >= 1) {
+      bucket.tokens -= 1;
+      return { allowed: true };
     }
 
-    return { allowed: true };
+    // Calculate retry after
+    // Need 1 token, currently have bucket.tokens
+    // tokens_per_ms = maxRequests / windowMs
+    const tokenNeeded = 1 - bucket.tokens;
+    const msNeeded = tokenNeeded / refillRate;
+    return { allowed: false, retryAfterMs: Math.ceil(msNeeded) };
   }
 
   private cleanup(): void {
+    // Remove buckets that haven't been used for a full window
     const now = Date.now();
     const maxWindow = Math.max(...Object.values(RATE_LIMITS).map(r => r.windowMs));
-    for (const [key, timestamps] of this.requestCounts.entries()) {
-      const valid = timestamps.filter(ts => now - ts < maxWindow);
-      if (valid.length === 0) {
-        this.requestCounts.delete(key);
-      } else {
-        this.requestCounts.set(key, valid);
+
+    for (const [key, bucket] of this.buckets.entries()) {
+      if (now - bucket.lastRefill > maxWindow) {
+        this.buckets.delete(key);
       }
     }
+  }
+
+  destroy(): void {
+    clearInterval(this.cleanupInterval);
   }
 }
