@@ -234,12 +234,12 @@ describe('TeamMemberCard', () => {
     // Role options should appear
     await waitFor(() => {
       const roleOptions = [
-        screen.queryByText('Viewer'),
-        screen.queryByText('Member'),
-        screen.queryByText('Admin'),
-        screen.queryByText('Owner'),
+        screen.queryAllByText('Viewer'),
+        screen.queryAllByText('Member'),
+        screen.queryAllByText('Admin'),
+        screen.queryAllByText('Owner'),
       ];
-      const visibleOptions = roleOptions.filter(opt => opt !== null);
+      const visibleOptions = roleOptions.filter(opts => opts.length > 0);
       expect(visibleOptions.length).toBeGreaterThan(0);
     });
   });
