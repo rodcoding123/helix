@@ -223,9 +223,69 @@ if (!ensureExperimentalWarningSuppressed()) {
       );
     }
   };
+
+  // ============================================
+  // HELIX: Gateway Security Initialization
+  // CRITICAL: Initialize gateway security BEFORE starting OpenClaw gateway
+  // This validates bind config, token auth, and WebSocket security
+  // ============================================
+  const helixGatewayInit = async () => {
+    try {
+      // Check if this is a gateway-related command
+      const isGatewayCommand =
+        process.argv.includes("gateway") ||
+        process.argv.includes("start") ||
+        process.argv.includes("serve");
+
+      if (!isGatewayCommand) {
+        return; // Skip gateway init for non-gateway commands
+      }
+
+      console.log("[helix] Initializing gateway security...");
+
+      const { initializeHelixGateway } = await import("./helix/index.js");
+
+      // Parse gateway configuration from environment
+      const port = parseInt(process.env.OPENCLAW_GATEWAY_PORT || process.env.HELIX_GATEWAY_PORT || "18789", 10);
+      const bindHost = process.env.OPENCLAW_GATEWAY_HOST || process.env.HELIX_GATEWAY_HOST || "127.0.0.1";
+      const environment = process.env.NODE_ENV === "production" ? "production" : "development";
+
+      // Initialize gateway with security hardening
+      const gatewayConfig = await initializeHelixGateway({
+        port,
+        bindHost,
+        environment,
+      });
+
+      // Store config for OpenClaw gateway server to use
+      // This is read by the gateway server implementation
+      process.env.HELIX_GATEWAY_CONFIG = JSON.stringify(gatewayConfig);
+
+      console.log(`[helix] Gateway security ready: ${bindHost}:${port} (${environment})`);
+    } catch (err) {
+      // Gateway security failure is CRITICAL - fail-closed
+      console.error(
+        "[helix] Gateway security initialization failed:",
+        err instanceof Error ? err.message : String(err),
+      );
+
+      // For gateway commands, security failure should block startup
+      const isGatewayCommand =
+        process.argv.includes("gateway") ||
+        process.argv.includes("start") ||
+        process.argv.includes("serve");
+
+      if (isGatewayCommand) {
+        console.error("[helix] Cannot start gateway without security validation - exiting");
+        process.exit(1);
+      }
+    }
+  };
   // ============================================
 
+  // Initialize in sequence: logging first, then gateway security, then CLI
   helixInit()
+    .then(() => helixGatewayInit())
     .then(() => import("./cli/run-main.js"))
     .then(({ runCli }) => runCli(process.argv))
     .catch((error) => {

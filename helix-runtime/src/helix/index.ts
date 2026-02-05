@@ -109,6 +109,105 @@ export {
   showGhostModeUpgradePrompt,
 } from "./ghost-mode.js";
 
+/**
+ * Gateway security configuration result (mirrors main Helix module type)
+ */
+export interface GatewaySecurityConfig {
+  bindConfig: {
+    host: string;
+    port: number;
+    valid: boolean;
+    requiresAuth: boolean;
+  };
+  authConfig: {
+    mode: "token" | "none";
+    tokenValid: boolean;
+  };
+  websocketConfig: {
+    allowedOrigins: string[];
+    allowedGatewayUrls?: string[];
+    enforceHttpsInProduction: boolean;
+    requireOriginHeader: boolean;
+  };
+  environment: "development" | "production";
+}
+
+/**
+ * Initialize Helix gateway with security hardening
+ *
+ * This is a runtime wrapper that delegates to the main Helix module.
+ * The main module contains the actual security validation logic.
+ *
+ * CRITICAL: Must be called BEFORE starting the OpenClaw gateway server.
+ *
+ * @param options Gateway configuration options
+ * @returns Security configuration for OpenClaw gateway
+ * @throws Error if security validation fails (fail-closed design)
+ */
+export async function initializeHelixGateway(options: {
+  port: number;
+  bindHost: string;
+  environment: "development" | "production";
+}): Promise<GatewaySecurityConfig> {
+  // Dynamic import to avoid TypeScript rootDir issues
+  // The main Helix module is at the project root, outside helix-runtime
+  const mainHelixPath = "../../../src/helix/index.js";
+
+  try {
+    const mainHelix = await import(/* webpackIgnore: true */ mainHelixPath);
+
+    if (typeof mainHelix.initializeHelixGateway !== "function") {
+      throw new Error("initializeHelixGateway not found in main Helix module");
+    }
+
+    return mainHelix.initializeHelixGateway(options);
+  } catch (error) {
+    // If main module unavailable, provide minimal local implementation
+    log.warn("Main Helix module unavailable, using minimal gateway security", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+
+    // Minimal validation: only loopback is allowed without full security
+    const isLoopback =
+      options.bindHost === "127.0.0.1" ||
+      options.bindHost === "localhost" ||
+      options.bindHost === "::1";
+
+    if (!isLoopback) {
+      throw new Error(
+        `Network binding ${options.bindHost} requires full Helix security module. ` +
+          "Use 127.0.0.1 for local development or ensure main Helix module is available.",
+      );
+    }
+
+    // Return minimal config for loopback
+    return {
+      bindConfig: {
+        host: options.bindHost,
+        port: options.port,
+        valid: true,
+        requiresAuth: false,
+      },
+      authConfig: {
+        mode: "none",
+        tokenValid: true,
+      },
+      websocketConfig: {
+        allowedOrigins: [
+          "http://localhost:3000",
+          "http://localhost:5173",
+          "http://127.0.0.1:3000",
+          "http://127.0.0.1:5173",
+        ],
+        allowedGatewayUrls: ["ws://localhost:18789", "ws://127.0.0.1:18789"],
+        enforceHttpsInProduction: false,
+        requireOriginHeader: true,
+      },
+      environment: options.environment,
+    };
+  }
+}
+
 import type { TelemetryConfig } from "./telemetry-types.js";
 
 const log = createSubsystemLogger("helix");

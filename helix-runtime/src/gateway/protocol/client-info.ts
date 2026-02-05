@@ -68,3 +68,32 @@ export function normalizeGatewayClientMode(raw?: string | null): GatewayClientMo
     ? (normalized as GatewayClientMode)
     : undefined;
 }
+
+export const GATEWAY_CLIENT_CAPS = {
+  TOOL_EVENTS: "tool-events",
+} as const;
+
+export type GatewayClientCap = (typeof GATEWAY_CLIENT_CAPS)[keyof typeof GATEWAY_CLIENT_CAPS];
+
+export function hasGatewayClientCap(
+  caps?: string | string[] | Record<string, unknown>,
+  cap?: string,
+): boolean {
+  if (!cap) return false;
+  if (!caps) return false;
+
+  if (typeof caps === "string") {
+    return caps === cap;
+  }
+
+  if (Array.isArray(caps)) {
+    return caps.includes(cap);
+  }
+
+  // Handle object-based capability set
+  if (typeof caps === "object") {
+    return cap in caps && Boolean(caps[cap]);
+  }
+
+  return false;
+}

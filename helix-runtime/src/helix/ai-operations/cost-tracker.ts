@@ -17,10 +17,11 @@ export class CostTracker {
   async logOperation(_userId: string, _log: OperationLog): Promise<void>;
   async logOperation(_log: OperationLog): Promise<void>;
   async logOperation(_userIdOrLog: string | OperationLog, _log?: OperationLog): Promise<void> {
-    throw new Error('Not implemented in type stub');
+    // No-op in helix-runtime context (type stub)
   }
 
   async getTotalCost(): Promise<number> {
-    throw new Error('Not implemented in type stub');
+    // No-op in helix-runtime context (type stub)
+    return 0;
   }
 }

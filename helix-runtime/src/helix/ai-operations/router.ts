@@ -20,11 +20,19 @@ export interface RoutingResponse {
 }
 
 export class AIOperationRouter {
-  route(_request: RoutingRequest): Promise<RoutingResponse> {
-    throw new Error('Not implemented in type stub');
+  async route(_request: RoutingRequest): Promise<RoutingResponse> {
+    // No-op in helix-runtime context (type stub)
+    return {
+      selected: undefined,
+      model: undefined,
+      cost: undefined,
+      requiresApproval: undefined,
+      estimatedCostUsd: undefined,
+    };
   }
 
   estimateCost(_model: string, _inputTokens: number, _outputTokens: number): number {
-    throw new Error('Not implemented in type stub');
+    // No-op in helix-runtime context (type stub)
+    return 0;
   }
 }
