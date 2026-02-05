@@ -334,7 +334,9 @@ export class PatternDetectionService {
     // If a sequence of topics repeats, suggest workflow automation
     if (workflowPatterns.length > 0) {
       const topWorkflow = workflowPatterns[0];
-      const workflowName = `${topWorkflow.sequence[0]} → ${topWorkflow.sequence[1]} Workflow`;
+      const workflowName = this.capitalizeWords(
+        `${topWorkflow.sequence[0]} → ${topWorkflow.sequence[1]} Workflow`
+      );
 
       const reason = `I see you often go from discussing ${topWorkflow.sequence[0]} to ${topWorkflow.sequence[1]}. An agent could help streamline this workflow.`;
 

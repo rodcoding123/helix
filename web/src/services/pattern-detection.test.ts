@@ -1,6 +1,128 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { PatternDetectionService } from './pattern-detection';
 
+// Mock Supabase browser client with test data
+vi.mock('@/lib/supabase-browser', () => {
+  return {
+    getSupabaseBrowserClient: vi.fn(() => {
+      // Test conversation data (fresh for each client creation)
+      const conversationsDb = [
+        {
+          id: 'conv-1',
+          user_id: 'user-123',
+          extracted_topics: ['coding'],
+          primary_emotion: 'neutral',
+          created_at: '2026-02-01T10:00:00Z',
+        },
+        {
+          id: 'conv-2',
+          user_id: 'user-123',
+          extracted_topics: ['coding'],
+          primary_emotion: 'neutral',
+          created_at: '2026-02-02T10:00:00Z',
+        },
+        {
+          id: 'conv-3',
+          user_id: 'user-123',
+          extracted_topics: ['design'],
+          primary_emotion: 'neutral',
+          created_at: '2026-02-03T10:00:00Z',
+        },
+      ];
+
+      // In-memory database for persisted proposals (fresh for each client)
+      const proposalsDb: any[] = [];
+
+      return {
+        from: vi.fn((table: string) => {
+        const queryBuilder = {
+          _table: table,
+          _filters: {} as any,
+
+          select(cols?: string) {
+            this._filters.select = cols || '*';
+            return this;
+          },
+
+          eq(col: string, val: any) {
+            this._filters.eq = this._filters.eq || {};
+            this._filters.eq[col] = val;
+            return this;
+          },
+
+          order(col: string, opts?: any) {
+            this._filters.order = { col, opts };
+            return this;
+          },
+
+          limit(n: number) {
+            this._filters.limit = n;
+            return this;
+          },
+
+          insert(data: any) {
+            this._filters.insert = data;
+            return this;
+          },
+
+          then(onFulfilled?: any, onRejected?: any) {
+            try {
+              const result = this.execute();
+              return Promise.resolve(result).then(onFulfilled, onRejected);
+            } catch (e) {
+              return Promise.reject(e);
+            }
+          },
+
+          execute() {
+            const table = this._table;
+            const filters = this._filters;
+
+            // Handle conversations table
+            if (table === 'conversations') {
+              let data = conversationsDb;
+              if (filters.eq?.user_id) {
+                data = data.filter((c) => c.user_id === filters.eq.user_id);
+              }
+              return { data, error: null };
+            }
+
+            // Handle agents table
+            if (table === 'agents') {
+              let data: any[] = [];
+              if (filters.eq?.user_id) {
+                // No agents in test db
+              }
+              return { data, error: null };
+            }
+
+            // Handle agent_proposals table
+            if (table === 'agent_proposals') {
+              if (filters.insert) {
+                // Persist the inserted proposals
+                const dataToInsert = Array.isArray(filters.insert) ? filters.insert : [filters.insert];
+                const persisted = dataToInsert.map((item: any, idx: number) => ({
+                  id: `proposal-${Date.now()}-${idx}`,
+                  created_at: new Date().toISOString(),
+                  ...item,
+                }));
+                proposalsDb.push(...persisted);
+                return { data: persisted, error: null };
+              }
+              return { data: [], error: null };
+            }
+
+            return { data: [], error: null };
+          },
+        };
+
+        return queryBuilder;
+      }),
+      };
+    }),
+  };
+});
+
 // Mock Discord logger
 vi.mock('./discord-logger', () => {
   class MockDiscordLogger {
