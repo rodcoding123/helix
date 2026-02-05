@@ -114,7 +114,7 @@ export interface VoiceRecordingState {
   isRecording: boolean;
   isPaused: boolean;
   duration: number; // milliseconds
-  audioLevel: number; // 0-100
+  audioLevel?: number; // 0-100 (optional to allow extension)
   error?: string;
 }
 

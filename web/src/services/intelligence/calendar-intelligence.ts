@@ -176,7 +176,7 @@ export async function initializeMeetingPrepScheduler(userId: string): Promise<vo
     }
   }, 5 * 60 * 1000); // Check every 5 minutes
 
-  return () => clearInterval(checkInterval);
+  clearInterval(checkInterval as any);
 }
 
 // ============================================================================

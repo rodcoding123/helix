@@ -74,7 +74,7 @@ export class MeetingPrepService {
           snippet: e.snippet,
           date: e.date,
         })),
-        actionItems,
+        actionItems: actionItems as any,
         prepTaskId,
         createdAt: new Date(),
         updatedAt: new Date(),

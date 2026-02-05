@@ -25,6 +25,7 @@ export interface DashboardMetrics {
   operationId?: string;
   cost?: number;
   latency?: number;
+  avgLatency?: number;
   success?: boolean;
   errorRate?: number;
   p95Latency?: number;
@@ -33,6 +34,8 @@ export interface DashboardMetrics {
   message?: string;
   batchId?: string;
   progress?: number;
+  operationCount?: number;
+  totalCost?: number;
 }
 
 /**

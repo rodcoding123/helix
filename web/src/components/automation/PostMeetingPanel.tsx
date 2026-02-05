@@ -247,7 +247,7 @@ export function PostMeetingPanel({
                     <div className="mt-2 flex gap-2">
                       <select
                         value={item.priority || 'normal'}
-                        onChange={(e) => updateExtractedItem(index, { priority: e.target.value })}
+                        onChange={(e) => updateExtractedItem(index, { priority: e.target.value as any })}
                         className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
                         disabled={state.isSubmitting}
                       >

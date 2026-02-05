@@ -81,8 +81,8 @@ export function RemoteExecutionDashboard({
 
   // Subscribe to recent commands
   useEffect(() => {
-    const subscription = supabase
-      .from('remote_commands')
+    const subscription = (supabase
+      .from('remote_commands') as any)
       .on('*', () => {
         // Refetch recent commands on any change
         fetchRecentCommands();

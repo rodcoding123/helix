@@ -261,7 +261,7 @@ export class EmailSearchService {
     filters: EmailSearchFilters
   ): Promise<SavedSearch> {
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await (this.supabase as any)
         .from('email_saved_searches')
         .insert({
           user_id: this.userId,

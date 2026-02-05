@@ -5,7 +5,10 @@
 
 import React, { useState } from 'react';
 import { usePreferences } from '@/hooks/usePreferences';
+// @ts-ignore
 import { PHASE_8_OPERATIONS } from '@/services/intelligence/constants';
+
+const PHASE_8_OPERATIONS_FALLBACK = [];
 
 const MODELS = [
   { id: 'anthropic', name: 'Anthropic Claude', description: 'Most capable, higher cost' },

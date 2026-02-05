@@ -11,7 +11,7 @@
 
 import { FC, useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { Mic, MessageSquareVoice, MessageCircle, Settings } from 'lucide-react';
+import { Mic, MessageSquare, MessageCircle, Settings } from 'lucide-react';
 
 // Voice components
 import { VoiceMemoRecorder } from '@/components/voice/VoiceMemoRecorder';
@@ -99,7 +99,7 @@ export const Voice: FC = () => {
                   : 'border-transparent text-slate-400 hover:text-slate-300'
               }`}
             >
-              <MessageSquareVoice className="w-4 h-4 inline mr-2" />
+              <MessageSquare className="w-4 h-4 inline mr-2" />
               My Memos
             </button>
 
@@ -163,7 +163,7 @@ export const Voice: FC = () => {
             <div>
               <h2 className="text-xl font-semibold text-slate-100 mb-4">Record Voice Memo</h2>
               <VoiceMemoRecorder
-                onMemoSaved={() => {
+                onUploadComplete={() => {
                   // Switch to memos tab to show the new memo
                   setActiveTab('memos');
                 }}
@@ -188,7 +188,7 @@ export const Voice: FC = () => {
             <div>
               <h2 className="text-xl font-semibold text-slate-100 mb-4">My Voice Memos</h2>
               <VoiceMemoList
-                onMemoSelected={(memo) => {
+                onSelectMemo={(memo) => {
                   // Could open memo detail view
                   console.log('Selected memo:', memo);
                 }}

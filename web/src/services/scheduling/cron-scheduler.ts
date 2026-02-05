@@ -16,6 +16,9 @@ export interface ScheduleConfig {
   parameters?: Record<string, unknown>;
   enabled: boolean;
   max_cost_per_month?: number;
+  next_execution_at?: string;
+  last_execution_at?: string;
+  execution_count?: number;
 }
 
 export interface ScheduleExecution {

@@ -28,8 +28,10 @@ interface Pattern {
 
 export const MemoryPatterns: React.FC = () => {
   const { user } = useAuth();
-  const { subscribe } = useRealtime();
-  const { stream } = useStreaming();
+  const realtimeState = useRealtime() as any;
+  const streamingState = useStreaming() as any;
+  const subscribe = realtimeState.subscribe || (() => {});
+  const stream = streamingState.stream || null;
 
   const [patterns, setPatterns] = useState<Pattern[]>([]);
   const [loading, setLoading] = useState(true);

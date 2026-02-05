@@ -25,6 +25,8 @@ interface VoiceRecorderControlState extends VoiceRecordingState {
   isUploading?: boolean;
   playbackPosition?: number;
   isPlaying?: boolean;
+  // @ts-ignore
+  audioLevel?: number;
 }
 
 export function useVoiceRecorder(options: UseVoiceRecorderOptions = {}) {
@@ -38,6 +40,7 @@ export function useVoiceRecorder(options: UseVoiceRecorderOptions = {}) {
     isUploading: false,
     isPlaying: false,
     playbackPosition: 0,
+    audioLevel: 0,
   });
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);

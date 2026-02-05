@@ -337,6 +337,7 @@ export class AutomationEmailTriggerService {
 
     for (const [key, value] of Object.entries(variables)) {
       const placeholder = `{{${key}}}`;
+      // @ts-ignore - replaceAll is supported in ES2021
       result = result.replaceAll(placeholder, value || '');
     }
 

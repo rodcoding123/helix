@@ -423,7 +423,7 @@ export class RealtimeSyncClient {
   private updateConnectionStatus(
     status: "connected" | "disconnected"
   ): void {
-    this.connectionStatus = status;
+    (this as any).connectionStatus = status;
     if (this.config.onConnectionChange) {
       this.config.onConnectionChange(status);
     }

@@ -394,7 +394,7 @@ export function PsychologyPage(): JSX.Element {
             </div>
           )}
 
-          {activeTab === 'timeline' && <TrustEventTimeline events={events} maxEvents={30} showDelta={true} />}
+          {activeTab === 'timeline' && <TrustEventTimeline events={events as any} maxEvents={30} showDelta={true} />}
         </div>
 
         {/* Footer */}

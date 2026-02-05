@@ -64,10 +64,10 @@ export class LLMRouter {
 
     await logToDiscord({
       type: 'llm_router_init' as any,
-      timestamp: new Date().toISOString(),
+      timestamp: Date.now(),
       status: 'initialized' as any,
       operationsCount: this.operationsCache.size,
-    });
+    } as any);
 
     await logToHashChain({
       type: 'llm_router_initialized',
@@ -157,14 +157,14 @@ export class LLMRouter {
     if (!isEnabled) {
       return {
         operationId: request.operationId,
-        selectedModel: operation.primaryModel,
+        selectedModel: operation.primaryModel as any,
         estimatedCostUsd: operation.estimatedCostUsd,
         requiresApproval: false,
         approvalReason: 'Feature is disabled',
-        budgetStatus: 'ok',
+        budgetStatus: 'ok' as any,
         isFeatureEnabled: false,
         timestamp: new Date().toISOString(),
-      };
+      } as any;
     }
 
     // Select model (use primary by default)
@@ -197,6 +197,7 @@ export class LLMRouter {
     const decision: RoutingDecision = {
       operationId: request.operationId,
       selectedModel,
+      model: selectedModel, // Alias for compatibility
       estimatedCostUsd: operation.estimatedCostUsd,
       requiresApproval: approvalInfo.required,
       approvalReason: approvalInfo.reason,
@@ -208,12 +209,15 @@ export class LLMRouter {
     // Log decision to Discord
     await logToDiscord({
       type: 'routing_decision',
-      userId: request.userId,
-      operationId: request.operationId,
-      selectedModel,
-      requiresApproval: approvalInfo.required,
-      estimatedCost: operation.estimatedCostUsd,
-      timestamp: decision.timestamp,
+      content: `Routing ${request.operationId} to ${selectedModel}`,
+      metadata: {
+        userId: request.userId,
+        operationId: request.operationId,
+        selectedModel,
+        requiresApproval: approvalInfo.required,
+        estimatedCost: operation.estimatedCostUsd,
+      },
+      timestamp: Date.now(),
     });
 
     // Log to hash chain
@@ -246,13 +250,13 @@ export class LLMRouter {
     const toggleName = `phase8-${operationId}`;
 
     // Call database function to get user's effective feature status
-    const { data, error } = await this.supabase.rpc(
+    const { data, error } = await (this.supabase.rpc as any)(
       'get_user_feature_enabled',
       {
         p_user_id: userId,
         p_toggle_name: toggleName,
       }
-    ) as any;
+    );
 
     if (error) {
       // Default to true if error (feature enabled)
@@ -273,7 +277,9 @@ export class LLMRouter {
     handler: (model: LLMModel, context: ExecutionContext) => Promise<{
       inputTokens: number;
       outputTokens: number;
-      result: unknown;
+      result?: unknown;
+      content?: string;
+      stopReason?: string;
     }>
   ): Promise<ExecutionResult> {
     const startTime = Date.now();
@@ -292,10 +298,8 @@ export class LLMRouter {
       };
 
       // Execute with model
-      const { inputTokens, outputTokens, result } = await handler(
-        model,
-        context
-      );
+      const handlerResult = await handler(model, context);
+      const { inputTokens, outputTokens, result, content, stopReason } = handlerResult;
 
       const latencyMs = Date.now() - startTime;
 
@@ -323,20 +327,18 @@ export class LLMRouter {
         totalTokens: inputTokens + outputTokens,
         costUsd,
         latencyMs,
-        result,
+        result: result ?? content, // Use result if present, otherwise content
+        content,
+        stopReason,
       };
 
       // Log to Discord
       await logToDiscord({
-        type: 'operation_executed',
-        userId,
-        operationId: decision.operationId,
-        model: decision.selectedModel,
-        costUsd,
-        tokens: inputTokens + outputTokens,
-        latencyMs,
-        timestamp: new Date().toISOString(),
-      });
+        type: 'operation_executed' as any,
+        content: `Executed ${decision.operationId}`,
+        metadata: { userId, model: decision.selectedModel, costUsd, tokens: inputTokens + outputTokens, latencyMs },
+        timestamp: Date.now(),
+      } as any);
 
       // Log to hash chain
       await logToHashChain({
@@ -347,7 +349,7 @@ export class LLMRouter {
           model: decision.selectedModel,
           costUsd,
           latencyMs,
-          timestamp: new Date().toISOString(),
+          timestamp: Date.now(),
         }),
       });
 
@@ -359,14 +361,12 @@ export class LLMRouter {
 
       // Log error to Discord
       await logToDiscord({
-        type: 'operation_failed',
-        userId,
-        operationId: decision.operationId,
-        model: decision.selectedModel,
-        error: errorMessage,
-        latencyMs,
-        timestamp: new Date().toISOString(),
-      });
+        type: 'operation_failed' as any,
+        content: errorMessage,
+        metadata: { userId, operationId: decision.operationId, model: decision.selectedModel, latencyMs },
+        status: 'error',
+        timestamp: Date.now(),
+      } as any);
 
       // Log to hash chain
       await logToHashChain({
@@ -375,7 +375,7 @@ export class LLMRouter {
         data: JSON.stringify({
           operationId: decision.operationId,
           error: errorMessage,
-          timestamp: new Date().toISOString(),
+          timestamp: Date.now(),
         }),
       });
 

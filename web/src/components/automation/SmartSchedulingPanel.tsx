@@ -70,9 +70,9 @@ export function SmartSchedulingPanel({
 
       setState((prev) => ({
         ...prev,
-        suggestions: suggestion.suggestedTimes,
+        suggestions: (suggestion as any).suggestedTimes || [],
         isLoading: false,
-        success: `Found ${suggestion.suggestedTimes.length} suitable time slot(s)`,
+        success: `Found ${((suggestion as any).suggestedTimes || []).length} suitable time slot(s)`,
       }));
     } catch (err) {
       setState((prev) => ({

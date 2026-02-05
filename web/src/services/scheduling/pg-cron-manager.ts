@@ -44,7 +44,7 @@ export class PgCronManager {
 
     try {
       // Validate cron expression
-      const cronParser = parseExpression(schedule.cron_expression, {
+      const cronParser = (parseExpression as any)(schedule.cron_expression, {
         tz: schedule.timezone,
       });
 

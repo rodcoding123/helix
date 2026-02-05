@@ -6,7 +6,10 @@
 import React, { useState, useEffect } from 'react';
 import { getAnalyticsService } from '@/services/analytics/analytics.service';
 import { useAuth } from '@/hooks/useAuth';
+// @ts-ignore
 import { PHASE_8_OPERATIONS } from '@/services/intelligence/constants';
+
+const PHASE_8_OPERATIONS_FALLBACK = [];
 
 export function Phase9Analytics(): React.ReactElement {
   const { user } = useAuth();

@@ -171,7 +171,7 @@ export function useEmailClient(): EmailClientState & EmailClientActions {
         clearInterval(syncIntervalRef.current);
       }
       activityEvents.forEach(event => {
-        document.removeEventListener(event, handleActivity, { passive: true, capture: true });
+        document.removeEventListener(event, handleActivity, { passive: true, capture: true } as any);
       });
     };
   }, [selectedAccount?.id]);

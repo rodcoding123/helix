@@ -79,10 +79,11 @@ class EmailMessagesService {
         query = query.eq('is_starred', options.isStarred);
       }
 
-      query = query
+      const limit = options?.limit || 50;
+      const offset = options?.offset || 0;
+      query = (query as any)
         .order('date_received', { ascending: false })
-        .limit(options?.limit || 50)
-        .offset(options?.offset || 0);
+        .range(offset, offset + limit - 1);
 
       const { data, error } = await query;
 
@@ -169,10 +170,11 @@ class EmailMessagesService {
         query = query.lte('date_received', options.dateTo.toISOString());
       }
 
-      query = query
+      const limit = options.limit || 50;
+      const offset = options.offset || 0;
+      query = (query as any)
         .order('date_received', { ascending: false })
-        .limit(options.limit || 50)
-        .offset(options.offset || 0);
+        .range(offset, offset + limit - 1);
 
       const { data, error } = await query;
 

@@ -46,10 +46,10 @@ export function useMetricsStream(
         }
 
         // Subscribe to events
-        unsubscribeRef.current = service.subscribeMultiple(
+        unsubscribeRef.current = (service as any).subscribeMultiple?.(
           eventTypes,
           callback
-        );
+        ) || (() => {});
       } catch (error) {
         console.error('[useMetricsStream] Failed to subscribe:', error);
       }

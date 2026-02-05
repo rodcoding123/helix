@@ -84,10 +84,11 @@ class CalendarEventsService {
         query = query.lte('end_time', options.endDate.toISOString());
       }
 
-      query = query
+      const limit = options?.limit || 100;
+      const offset = options?.offset || 0;
+      query = (query as any)
         .order('start_time', { ascending: true })
-        .limit(options?.limit || 100)
-        .offset(options?.offset || 0);
+        .range(offset, offset + limit - 1);
 
       const { data, error } = await query;
 
@@ -169,10 +170,11 @@ class CalendarEventsService {
         query = query.eq('organizer_email', options.organizerEmail);
       }
 
-      query = query
+      const limit = options.limit || 100;
+      const offset = options.offset || 0;
+      query = (query as any)
         .order('start_time', { ascending: true })
-        .limit(options.limit || 100)
-        .offset(options.offset || 0);
+        .range(offset, offset + limit - 1);
 
       const { data, error } = await query;
 

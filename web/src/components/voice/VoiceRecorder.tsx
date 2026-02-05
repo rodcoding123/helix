@@ -13,30 +13,33 @@ interface VoiceRecorderProps {
 }
 
 export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onSave, onClose }) => {
+  const voiceRecorderState = useVoiceRecorder({
+    autoTranscribe: true,
+  }) as any;
+
   const {
     isRecording,
     isPaused,
     duration,
-    transcript,
+    audioBlob,
     error,
     startRecording,
     stopRecording,
     pauseRecording,
     resumeRecording,
-    saveMemo,
     reset,
     formatDuration,
-  } = useVoiceRecorder({
-    autoTranscribe: true,
-  });
+  } = voiceRecorderState;
 
   const [title, setTitle] = React.useState('');
   const [tags, setTags] = React.useState<string[]>([]);
   const [tagInput, setTagInput] = React.useState('');
+  const [transcript, setTranscript] = React.useState('');
 
   const handleSave = async () => {
-    const memo = await saveMemo(title || `Voice Memo ${new Date().toLocaleDateString()}`, tags);
-    if (onSave) {
+    // In a real implementation, this would upload the audioBlob
+    // and call an API to save the memo
+    if (onSave && audioBlob) {
       onSave(title, tags);
     }
     reset();

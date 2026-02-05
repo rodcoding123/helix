@@ -29,9 +29,10 @@ export class CostTracker {
     );
 
     await logToDiscord({
-      type: 'cost_tracker_init' as any,
-      timestamp: new Date().toISOString(),
-      status: 'initialized' as any,
+      type: 'cost_tracker_init',
+      content: 'Cost tracker initialized',
+      timestamp: Date.now(),
+      status: 'completed',
     });
   }
 
@@ -228,7 +229,7 @@ export class CostTracker {
     );
 
     // Call database function to log operation
-    const { data, error } = await this.supabase.rpc(
+    const { data, error } = await (this.supabase as any).rpc(
       'log_ai_operation',
       {
         p_user_id: userId,
@@ -249,13 +250,16 @@ export class CostTracker {
 
     // Log to Discord
     await logToDiscord({
-      type: 'operation_logged' as any,
-      userId,
-      operationId,
-      model,
-      costUsd,
-      tokens: inputTokens + outputTokens,
-      timestamp: new Date().toISOString(),
+      type: 'operation_logged',
+      content: `Operation ${operationId} logged: ${model} - $${costUsd.toFixed(4)}`,
+      metadata: {
+        userId,
+        operationId,
+        model,
+        costUsd,
+        tokens: inputTokens + outputTokens,
+      },
+      timestamp: Date.now(),
     });
 
     return data || '';

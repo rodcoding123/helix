@@ -30,7 +30,7 @@ export function useVoiceMemoRecorder(options: RecorderOptions = {}) {
     duration: 0,
   });
 
-  const [timerId, setTimerId] = useState<NodeJS.Timer | null>(null);
+  const [timerId, setTimerId] = useState<ReturnType<typeof setInterval> | null>(null);
   const lastSecondRef = useRef<number>(-1);
 
   /**
@@ -123,7 +123,7 @@ export function useVoiceMemoRecorder(options: RecorderOptions = {}) {
         isPaused: true,
       }));
       if (timerId) {
-        clearInterval(timerId);
+        clearInterval(timerId as any);
         setTimerId(null);
       }
     }
@@ -166,7 +166,7 @@ export function useVoiceMemoRecorder(options: RecorderOptions = {}) {
 
           // Clear timer
           if (timerId) {
-            clearInterval(timerId);
+            clearInterval(timerId as any);
             setTimerId(null);
           }
 
@@ -198,7 +198,7 @@ export function useVoiceMemoRecorder(options: RecorderOptions = {}) {
     }
 
     if (timerId) {
-      clearInterval(timerId);
+      clearInterval(timerId as any);
       setTimerId(null);
     }
 

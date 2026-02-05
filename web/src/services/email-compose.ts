@@ -92,7 +92,7 @@ export class EmailComposeService {
    * Create a new draft
    */
   async createDraft(accountId: string): Promise<string> {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('email_drafts')
       .insert({
         user_id: this.userId,
@@ -110,7 +110,7 @@ export class EmailComposeService {
       throw new Error(`Failed to create draft: ${error.message}`);
     }
 
-    return data.id;
+    return (data as any).id;
   }
 
   /**
@@ -142,7 +142,7 @@ export class EmailComposeService {
       last_saved: now,
     };
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('email_drafts')
       .upsert(payload, { onConflict: 'id' })
       .select()
@@ -257,7 +257,7 @@ export class EmailComposeService {
 
     const now = new Date().toISOString();
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('email_templates')
       .insert({
         user_id: this.userId,
@@ -327,7 +327,7 @@ export class EmailComposeService {
    * Update template usage stats (called when template is applied)
    */
   private async updateTemplateUsage(templateId: string): Promise<void> {
-    const { error } = await supabase.rpc('update_template_usage', {
+    const { error } = await (supabase as any).rpc('update_template_usage', {
       template_id: templateId,
     });
 
@@ -396,7 +396,7 @@ export class EmailComposeService {
 
     const now = new Date().toISOString();
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('email_signatures')
       .insert({
         user_id: this.userId,

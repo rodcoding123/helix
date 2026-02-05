@@ -193,7 +193,7 @@ export class StatusService {
       }
 
       const expectedBeats = 90 * 24 * 60;
-      const actualBeats = data.length;
+      const actualBeats = Array.isArray(data) ? (data as any).length : 0;
 
       return Math.min(100, (actualBeats / expectedBeats) * 100);
     } catch (error) {
@@ -204,17 +204,17 @@ export class StatusService {
 
   private async getRecentIncidents(days: number): Promise<Incident[]> {
     try {
-      const data = await getDb()
+      const { data, error } = await getDb()
         .from('incidents')
         .select('*')
         .gte('start_time', new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString())
         .order('start_time', { ascending: false });
 
-      if (!data) {
+      if (error || !data) {
         return [];
       }
 
-      return data as Incident[];
+      return (data as any) as Incident[];
     } catch (error) {
       console.error('[StatusService] Failed to get incidents:', error);
       return [];

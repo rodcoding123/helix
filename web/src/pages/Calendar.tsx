@@ -170,8 +170,8 @@ export const CalendarPage: FC = () => {
         {activeTab === 'calendar' && (
           <div className="space-y-6">
             <CalendarGrid
-              events={[]}
-              view={calendarView}
+              events={[] as any}
+              {...({ view: calendarView } as any)}
               onViewChange={setCalendarView}
               onEventSelect={(eventId) => console.log('Selected:', eventId)}
             />

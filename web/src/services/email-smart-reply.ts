@@ -171,10 +171,10 @@ export class EmailSmartReplyService {
       }
 
       return {
-        suggestions: data.suggestions as SmartReplySuggestion[],
-        tokenUsage: data.token_usage || 0,
-        modelUsed: data.model_used || 'claude-3-5-haiku-20241022',
-        generatedAt: new Date(data.generated_at),
+        suggestions: (data as any).suggestions as SmartReplySuggestion[],
+        tokenUsage: (data as any).token_usage || 0,
+        modelUsed: (data as any).model_used || 'claude-3-5-haiku-20241022',
+        generatedAt: new Date((data as any).generated_at),
       };
     } catch (error) {
       console.error('Error retrieving cache:', error);
@@ -196,7 +196,7 @@ export class EmailSmartReplyService {
     try {
       const expiresAt = new Date(Date.now() + CACHE_TTL_MS).toISOString();
 
-      await this.supabase.from('email_smart_reply_cache').upsert(
+      await (this.supabase as any).from('email_smart_reply_cache').upsert(
         {
           user_id: this.userId,
           email_hash: emailHash,
@@ -340,7 +340,7 @@ export class EmailSmartReplyService {
         throw error;
       }
 
-      return data?.length || 0;
+      return (data as any)?.length || 0;
     } catch (error) {
       console.error('Error clearing expired cache:', error);
       return 0;
@@ -366,7 +366,7 @@ export class EmailSmartReplyService {
         throw error;
       }
 
-      const items = data || [];
+      const items = (data || []) as any[];
       const validCached = items.filter((item) => new Date(item.expires_at) > new Date())
         .length;
       const totalTokensUsed = items.reduce((sum, item) => sum + (item.token_usage || 0), 0);

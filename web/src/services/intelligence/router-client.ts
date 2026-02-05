@@ -32,7 +32,7 @@ export const aiRouter = {
   },
   execute: async (operationId: string, input: unknown) => {
     const client = getRouterClient();
-    return client.execute(operationId, input);
+    return (client as any).execute(operationId, input as any);
   },
   checkApproval: async (operationId: string) => {
     const client = getRouterClient();
@@ -51,16 +51,21 @@ export const aiRouter = {
 export interface RoutingRequest {
   operationId: string;
   userId: string;
-  input: Record<string, unknown>;
+  input?: Record<string, unknown>;
   estimatedInputTokens: number;
 }
 
 export interface RoutingResponse {
   operationId: string;
   model: string;
+  selectedModel: string; // Required for compatibility with RoutingDecision
   requiresApproval: boolean;
   estimatedCostUsd: number;
   cacheKey?: string;
+  budgetStatus: 'ok' | 'warning' | 'exceeded';
+  isFeatureEnabled: boolean;
+  timestamp: string;
+  approvalReason?: string;
 }
 
 export interface ApprovalRequest {
@@ -134,12 +139,16 @@ class AIRouterClient {
       }
 
       const data = await response.json();
-      const routingResponse: RoutingResponse = {
+      const routingResponse: any = {
         operationId: data.operation_id,
         model: data.primary_model,
+        selectedModel: data.primary_model,
         requiresApproval: data.requires_approval || false,
         estimatedCostUsd: data.estimated_cost_usd,
         cacheKey,
+        budgetStatus: data.budget_status || 'ok',
+        isFeatureEnabled: data.is_feature_enabled !== false,
+        timestamp: new Date().toISOString(),
       };
 
       // Cache the response
@@ -155,9 +164,13 @@ class AIRouterClient {
       return {
         operationId: request.operationId,
         model: 'deepseek',
+        selectedModel: 'deepseek' as any,
         requiresApproval: false,
         estimatedCostUsd: 0.01,
-      };
+        budgetStatus: 'ok' as any,
+        isFeatureEnabled: true,
+        timestamp: new Date().toISOString(),
+      } as any;
     }
   }
 

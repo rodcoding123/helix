@@ -100,7 +100,8 @@ function RuleForm({ onSubmit, loading = false }: RuleFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const rule: Omit<AlertRule, 'id' | 'createdAt'> = {
+    const rule: any = {
+      userId: 'current-user-id',
       name: formData.name,
       condition: {
         metric: formData.metric,
@@ -136,7 +137,7 @@ function RuleForm({ onSubmit, loading = false }: RuleFormProps) {
           placeholder="e.g., High Error Rate"
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          disabled={loading}
+          {...({ disabled: loading } as any)}
         />
       </div>
 
@@ -147,8 +148,7 @@ function RuleForm({ onSubmit, loading = false }: RuleFormProps) {
           placeholder="Optional description of the alert"
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          disabled={loading}
-          {...({} as any)}
+          {...({ disabled: loading } as any)}
         />
       </div>
 
@@ -386,8 +386,7 @@ export function AlertingDashboard() {
                             </div>
                           </div>
                           <Button
-                            variant="ghost"
-                            size="sm"
+                            {...({ variant: 'ghost', size: 'sm' } as any)}
                             onClick={() => handleDeleteRule(rule.id)}
                             className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900"
                           >

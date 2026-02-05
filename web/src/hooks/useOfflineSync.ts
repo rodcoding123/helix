@@ -29,7 +29,7 @@ export function useOfflineSync() {
       try {
         const db = await openIndexedDB();
         const actions = await db.getAll('offlineQueue');
-        setQueue(actions);
+        setQueue(actions as any);
       } catch (error) {
         console.error('Failed to load offline queue:', error);
       }
@@ -76,7 +76,7 @@ export function useOfflineSync() {
       // Persist to IndexedDB
       try {
         const db = await openIndexedDB();
-        await db.put('offlineQueue', newAction);
+        await (db.put as any)('offlineQueue', newAction);
       } catch (error) {
         console.error('Failed to persist offline action:', error);
       }
@@ -113,7 +113,7 @@ export function useOfflineSync() {
 
           // Remove from IndexedDB
           const db = await openIndexedDB();
-          await db.delete('offlineQueue', action.id);
+          await (db.delete as any)('offlineQueue', action.id as any);
         } catch (error) {
           console.error(`Failed to sync action ${action.id}:`, error);
 
@@ -136,7 +136,7 @@ export function useOfflineSync() {
 
       try {
         const db = await openIndexedDB();
-        await db.delete('offlineQueue', actionId);
+        await (db.delete as any)('offlineQueue', actionId as any);
       } catch (error) {
         console.error('Failed to clear offline action:', error);
       }

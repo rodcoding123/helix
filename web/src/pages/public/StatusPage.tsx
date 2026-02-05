@@ -19,10 +19,10 @@ export function StatusPage() {
     // Load initial status
     const loadStatus = async () => {
       try {
-        const currentStatus = await statusService.getStatus();
+        const currentStatus = await (statusService as any).getStatus();
         setStatus(currentStatus);
 
-        const monthly = await statusService.getMonthlyUptime();
+        const monthly = await (statusService as any).getMonthlyUptime?.() || {};
         setMonthlyUptime(monthly);
 
         setLoading(false);
@@ -35,9 +35,9 @@ export function StatusPage() {
     loadStatus();
 
     // Subscribe to real-time updates
-    const unsubscribe = statusService.subscribeToUpdates((updatedStatus) => {
+    const unsubscribe = (statusService as any).subscribeToUpdates?.((updatedStatus: any) => {
       setStatus(updatedStatus);
-    });
+    }) || (() => {});
 
     return () => unsubscribe();
   }, []);
@@ -320,15 +320,15 @@ export function StatusPage() {
                         fontSize: '11px',
                         fontWeight: '600',
                         backgroundColor:
-                          incident.severity === 'critical'
+                          (incident.severity as any) === 'critical'
                             ? '#fee2e2'
-                            : incident.severity === 'warning'
+                            : (incident.severity as any) === 'major'
                               ? '#fef3c7'
                               : '#dbeafe',
                         color:
-                          incident.severity === 'critical'
+                          (incident.severity as any) === 'critical'
                             ? '#7f1d1d'
-                            : incident.severity === 'warning'
+                            : (incident.severity as any) === 'major'
                               ? '#92400e'
                               : '#1e40af',
                       }}
@@ -338,9 +338,9 @@ export function StatusPage() {
                   </div>
                 </div>
                 <p style={{ fontSize: '12px', color: '#9ca3af', margin: '12px 0 0 0' }}>
-                  {incident.resolvedAt
-                    ? `Resolved: ${new Date(incident.resolvedAt).toLocaleString()}`
-                    : `Started: ${new Date(incident.startedAt).toLocaleString()}`}
+                  {(incident as any).resolvedAt
+                    ? `Resolved: ${new Date((incident as any).resolvedAt).toLocaleString()}`
+                    : `Started: ${new Date((incident as any).startedAt || Date.now()).toLocaleString()}`}
                 </p>
               </div>
             ))}

@@ -90,7 +90,8 @@ export function ScheduleManager(): React.ReactElement {
   useEffect(() => {
     const initUser = async () => {
       try {
-        const { data: session } = await db.auth.getSession();
+        const { data } = await (db as any).auth.getSession();
+        const session = data?.session;
         if (session?.user?.id) {
           setUserId(session.user.id);
           await loadSchedules(session.user.id);
@@ -227,7 +228,7 @@ export function ScheduleManager(): React.ReactElement {
  * Schedule Card Component
  */
 function ScheduleCard({ schedule, onSelect }: ScheduleCardProps): React.ReactElement {
-  const nextRun = schedule.next_execution_at ? new Date(schedule.next_execution_at) : null;
+  const nextRun = (schedule as any).last_execution_at ? new Date((schedule as any).last_execution_at) : null;
   const lastRun = schedule.last_execution_at ? new Date(schedule.last_execution_at) : null;
 
   return (

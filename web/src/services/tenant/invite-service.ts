@@ -148,10 +148,10 @@ export class TenantInviteService {
       }
 
       // Get user details
-      const { data: user, error: userError } = await getDb()
+      const { data, error: userError } = await getDb()
         .auth.admin.getUserById(userId);
 
-      if (userError || !user) {
+      if (userError || !data?.user) {
         throw new Error('User not found');
       }
 
@@ -195,12 +195,13 @@ export class TenantInviteService {
       }));
 
       // Send notification
+      const user = (data as any).user;
       const logger = getDiscordLoggerForTenant(invitation.tenant_id);
       await logger.log({
         type: 'member_joined',
-        content: `${user.email} accepted invitation (${invitation.role})`,
+        content: `${(user as any).email} accepted invitation (${invitation.role})`,
         status: 'completed',
-        metadata: { email: user.email, userId, role: invitation.role },
+        metadata: { email: (user as any).email, userId, role: invitation.role },
       });
     } catch (error) {
       console.error('Failed to accept invitation:', error);
@@ -553,21 +554,22 @@ export class TenantInviteService {
   private async isUserMember(tenantId: string, email: string): Promise<boolean> {
     try {
       // Get user by email from auth
-      const { data: users } = await getDb()
+      const { data } = await getDb()
         .auth.admin.listUsers();
 
-      const user = users?.find(u => u.email === email);
+      const users = (data as any)?.users;
+      const user = Array.isArray(users) ? (users as any).find((u: any) => u.email === email) : null;
       if (!user) return false;
 
       // Check if user in tenant_members
-      const { data } = await getDb()
+      const { data: memberData } = await getDb()
         .from('tenant_members')
         .select('id')
         .eq('tenant_id', tenantId)
-        .eq('user_id', user.id)
+        .eq('user_id', (user as any).id)
         .single();
 
-      return !!data;
+      return !!memberData;
     } catch {
       return false;
     }

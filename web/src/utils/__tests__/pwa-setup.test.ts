@@ -281,24 +281,26 @@ describe('PWA Setup', () => {
   });
 
   describe('Event Dispatching', () => {
-    it('should dispatch online status change event', (done) => {
-      const listener = (event: CustomEvent) => {
-        expect(event.detail.isOnline).toBe(false);
-        window.removeEventListener('pwa-online-status-change', listener);
-        done();
-      };
+    it('should dispatch online status change event', async () => {
+      return new Promise<void>((resolve) => {
+        const listener = (event: CustomEvent) => {
+          expect(event.detail.isOnline).toBe(false);
+          window.removeEventListener('pwa-online-status-change', listener);
+          resolve();
+        };
 
-      window.addEventListener('pwa-online-status-change', listener);
+        window.addEventListener('pwa-online-status-change', listener);
 
-      const callback = (isOnline: boolean) => {
-        window.dispatchEvent(
-          new CustomEvent('pwa-online-status-change', {
-            detail: { isOnline },
-          })
-        );
-      };
+        const callback = (isOnline: boolean) => {
+          window.dispatchEvent(
+            new CustomEvent('pwa-online-status-change', {
+              detail: { isOnline },
+            })
+          );
+        };
 
-      callback(false);
+        callback(false);
+      });
     });
   });
 

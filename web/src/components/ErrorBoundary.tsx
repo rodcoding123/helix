@@ -114,17 +114,17 @@ export function ErrorBoundary({ children, fallback, onError }: ErrorBoundaryProp
 
   return (
     <SentryErrorBoundary
-      fallback={fallbackComponent}
-      onError={(error, errorInfo) => {
+      fallback={fallbackComponent as any}
+      onError={(error: any, errorInfo: any) => {
         // Log to Discord for critical errors
         console.error('[ErrorBoundary] React error:', error);
-        console.error('[ErrorBoundary] Component stack:', errorInfo.componentStack);
+        console.error('[ErrorBoundary] Component stack:', (errorInfo as any).componentStack);
 
         // Capture in Sentry with full context
         Sentry.captureException(error, {
           contexts: {
             react: {
-              componentStack: errorInfo.componentStack,
+              componentStack: (errorInfo as any).componentStack,
             },
           },
           level: 'fatal',
@@ -133,7 +133,7 @@ export function ErrorBoundary({ children, fallback, onError }: ErrorBoundaryProp
         // Call custom error handler if provided
         if (onError) {
           try {
-            onError(error, errorInfo);
+            onError(error as Error, errorInfo as React.ErrorInfo);
           } catch (handlerError) {
             console.error('[ErrorBoundary] Error handler failed:', handlerError);
           }

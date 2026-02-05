@@ -36,7 +36,8 @@ export interface RoutingRequest {
 
 export interface RoutingDecision {
   operationId: string;
-  selectedModel: LLMModel['id'];
+  selectedModel: LLMModel['id'] | string;
+  model: string; // Required for compatibility with RoutingResponse
   estimatedCostUsd: number;
   requiresApproval: boolean;
   approvalReason?: string;
@@ -64,6 +65,8 @@ export interface ExecutionResult {
   costUsd: number;
   latencyMs: number;
   result?: unknown;
+  content?: string;
+  stopReason?: string;
   error?: string;
 }
 
