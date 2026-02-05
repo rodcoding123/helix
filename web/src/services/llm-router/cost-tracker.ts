@@ -29,9 +29,9 @@ export class CostTracker {
     );
 
     await logToDiscord({
-      type: 'cost_tracker_init',
+      type: 'cost_tracker_init' as any,
       timestamp: new Date().toISOString(),
-      status: 'initialized',
+      status: 'initialized' as any,
     });
   }
 
@@ -122,15 +122,15 @@ export class CostTracker {
     }
 
     const budget: BudgetInfo = {
-      userId: data.user_id,
-      dailyLimitUsd: parseFloat(data.daily_limit_usd),
-      monthlyLimitUsd: parseFloat(data.monthly_limit_usd),
-      currentSpendToday: parseFloat(data.current_spend_today),
-      currentSpendMonth: parseFloat(data.current_spend_month),
-      operationsToday: data.operations_today,
-      operationsMonth: data.operations_month,
-      warningThresholdPercentage: data.warning_threshold_percentage,
-      budgetStatus: data.budget_status,
+      userId: (data as any)?.user_id,
+      dailyLimitUsd: parseFloat((data as any)?.daily_limit_usd),
+      monthlyLimitUsd: parseFloat((data as any)?.monthly_limit_usd),
+      currentSpendToday: parseFloat((data as any)?.current_spend_today),
+      currentSpendMonth: parseFloat((data as any)?.current_spend_month),
+      operationsToday: (data as any)?.operations_today,
+      operationsMonth: (data as any)?.operations_month,
+      warningThresholdPercentage: (data as any)?.warning_threshold_percentage,
+      budgetStatus: (data as any)?.budget_status,
     };
 
     // Cache it
@@ -238,7 +238,7 @@ export class CostTracker {
         p_output_tokens: outputTokens,
         p_cost_usd: costUsd,
       }
-    );
+    ) as any;
 
     if (error) {
       throw new Error(`Failed to log operation: ${error.message}`);
@@ -249,7 +249,7 @@ export class CostTracker {
 
     // Log to Discord
     await logToDiscord({
-      type: 'operation_logged',
+      type: 'operation_logged' as any,
       userId,
       operationId,
       model,
@@ -258,7 +258,7 @@ export class CostTracker {
       timestamp: new Date().toISOString(),
     });
 
-    return data;
+    return data || '';
   }
 
   /**

@@ -41,7 +41,7 @@ serve(async (req) => {
         if (session.mode === 'subscription' && session.subscription) {
           const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
           const priceId = subscription.items.data[0]?.price.id
-          const tier = PRICE_TO_TIER[priceId] || session.metadata?.tier || 'awaken'
+          const tier = PRICE_TO_TIER[priceId] || session.metadata?.tier || 'core'
 
           await supabase
             .from('subscriptions')
@@ -61,7 +61,7 @@ serve(async (req) => {
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription
         const priceId = subscription.items.data[0]?.price.id
-        const tier = PRICE_TO_TIER[priceId] || 'awaken'
+        const tier = PRICE_TO_TIER[priceId] || 'core'
 
         await supabase
           .from('subscriptions')
@@ -83,7 +83,7 @@ serve(async (req) => {
         await supabase
           .from('subscriptions')
           .update({
-            tier: 'awaken',
+            tier: 'core',
             stripe_subscription_id: null,
             stripe_price_id: null,
             current_period_start: null,

@@ -441,7 +441,7 @@ fn get_supabase_url() -> Result<String, String> {
 /// Log in with Supabase (email/password)
 ///
 /// Authenticates user via Supabase Auth and retrieves their subscription tier.
-/// Returns user_id, email, and tier (awaken, phantom, overseer, architect).
+/// Returns user_id, email, and tier (core, phantom, overseer, architect).
 #[tauri::command]
 pub async fn supabase_login(
     email: String,
@@ -505,12 +505,12 @@ pub async fn supabase_login(
             if let Ok(data) = resp.json::<Vec<SupabaseSubscription>>().await {
                 data.first()
                     .map(|s| s.tier.clone())
-                    .unwrap_or("awaken".to_string())
+                    .unwrap_or("core".to_string())
             } else {
-                "awaken".to_string()
+                "core".to_string()
             }
         }
-        Err(_) => "awaken".to_string(),
+        Err(_) => "core".to_string(),
     };
 
     Ok(SupabaseLoginResponse {
@@ -524,7 +524,7 @@ pub async fn supabase_login(
 
 /// Sign up with Supabase (email/password)
 ///
-/// Creates a new user account and auto-provisions with tier='awaken' (free).
+/// Creates a new user account and auto-provisions with tier='core' (free).
 /// Password must be at least 8 characters.
 #[tauri::command]
 pub async fn supabase_signup(
@@ -587,7 +587,7 @@ pub async fn supabase_signup(
         success: true,
         user_id: Some(user_id),
         email: Some(email),
-        tier: Some("awaken".to_string()),
+        tier: Some("core".to_string()),
         error: None,
     })
 }

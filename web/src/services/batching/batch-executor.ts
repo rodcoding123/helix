@@ -72,6 +72,21 @@ export interface BatchResult {
   cancel_reason?: string;
 }
 
+export type BatchStatusString = 'completed' | 'partial_failure' | 'cancelled' | 'pending' | 'running' | 'queued';
+
+export interface BatchStatus {
+  id: string;
+  user_id: string;
+  name: string;
+  batch_type: 'parallel' | 'sequential' | 'conditional';
+  status: BatchStatusString;
+  total_operations: number;
+  completed_operations?: number;
+  total_cost_actual?: number;
+  created_at?: string;
+  completed_at?: string;
+}
+
 export class BatchExecutor extends EventEmitter {
   /**
    * Create batch definition
@@ -123,29 +138,23 @@ export class BatchExecutor extends EventEmitter {
 
       await logToDiscord({
         type: 'batch_created',
-        batch_id: batch.id,
-        name: config.name,
-        batch_type: config.batch_type,
-        total_operations: config.operations.length,
-        cost_range: `$${costEstimate.low.toFixed(4)} - $${costEstimate.high.toFixed(4)}`,
-        timestamp: new Date().toISOString(),
-      });
+        content: `Batch created: ${config.name}`,
+        metadata: { batch_id: batch.id, batch_type: config.batch_type, total_operations: config.operations.length, cost_range: `$${costEstimate.low.toFixed(4)} - $${costEstimate.high.toFixed(4)}` },
+        timestamp: Date.now(),
+      } as any);
 
       await logToHashChain({
         type: 'batch_created',
-        batch_id: batch.id,
-        name: config.name,
-        batch_type: config.batch_type,
-        total_operations: config.operations.length,
+        data: JSON.stringify({ batch_id: batch.id, name: config.name, batch_type: config.batch_type, total_operations: config.operations.length }),
       });
 
       return batch.id;
     } catch (error) {
       await logToDiscord({
         type: 'batch_creation_failed',
-        error: error instanceof Error ? error.message : String(error),
-        timestamp: new Date().toISOString(),
-      });
+        content: error instanceof Error ? error.message : String(error),
+        timestamp: Date.now(),
+      } as any);
       throw error;
     }
   }
@@ -208,34 +217,24 @@ export class BatchExecutor extends EventEmitter {
 
       await logToDiscord({
         type: 'batch_executed',
-        batch_id: batchId,
-        batch_type: batch.batch_type,
-        total: operations.length,
-        completed: batchResult.completed,
-        failed: batchResult.failed,
-        skipped: batchResult.skipped,
-        total_cost: batchResult.total_cost_actual?.toFixed(4),
-        status: finalStatus,
-        timestamp: new Date().toISOString(),
-      });
+        content: `Batch executed: ${batchResult.completed}/${operations.length} completed`,
+        metadata: { batch_id: batchId, batch_type: batch.batch_type, failed: batchResult.failed, skipped: batchResult.skipped, total_cost: batchResult.total_cost_actual?.toFixed(4) },
+        timestamp: Date.now(),
+      } as any);
 
       await logToHashChain({
         type: 'batch_executed',
-        batch_id: batchId,
-        batch_type: batch.batch_type,
-        completed: batchResult.completed,
-        failed: batchResult.failed,
-        skipped: batchResult.skipped,
+        data: JSON.stringify({ batch_id: batchId, batch_type: batch.batch_type, completed: batchResult.completed, failed: batchResult.failed, skipped: batchResult.skipped }),
       });
 
       return batchResult;
     } catch (error) {
       await logToDiscord({
         type: 'batch_execution_failed',
-        batch_id: batchId,
-        error: error instanceof Error ? error.message : String(error),
-        timestamp: new Date().toISOString(),
-      });
+        content: error instanceof Error ? error.message : String(error),
+        metadata: { batch_id: batchId },
+        timestamp: Date.now(),
+      } as any);
       throw error;
     }
   }
@@ -496,25 +495,24 @@ export class BatchExecutor extends EventEmitter {
 
       await logToDiscord({
         type: 'batch_cancelled',
-        batch_id: batchId,
-        reason,
-        timestamp: now,
-      });
+        content: reason || 'Batch cancelled',
+        metadata: { batch_id: batchId },
+        timestamp: Date.now(),
+      } as any);
 
       await logToHashChain({
         type: 'batch_cancelled',
-        batch_id: batchId,
-        reason,
+        data: JSON.stringify({ batch_id: batchId, reason }),
       });
 
       this.emit('batch_cancelled', { batch_id: batchId, reason });
     } catch (error) {
       await logToDiscord({
         type: 'batch_cancellation_failed',
-        batch_id: batchId,
-        error: error instanceof Error ? error.message : String(error),
-        timestamp: new Date().toISOString(),
-      });
+        content: error instanceof Error ? error.message : String(error),
+        metadata: { batch_id: batchId },
+        timestamp: Date.now(),
+      } as any);
       throw error;
     }
   }

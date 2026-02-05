@@ -18,7 +18,7 @@ interface LoginResult {
   success: boolean;
   user_id?: string;
   email?: string;
-  tier?: 'awaken' | 'phantom' | 'overseer' | 'architect';
+  tier?: 'core' | 'phantom' | 'overseer' | 'architect';
   error?: string;
 }
 
@@ -29,33 +29,36 @@ interface SupabaseLoginStepProps {
 
 /**
  * Tier Information - Displayed to users
+ * Synced with web/src/lib/types.ts PRICING_TIERS
  */
 const TIER_INFO = {
-  awaken: {
-    name: 'Helix Free',
-    description: 'Run Helix on your machine with your own API keys',
+  core: {
+    name: 'Core',
+    description: 'Everything. The full architecture.',
+    price: 'Free',
     color: '#6b7280',
-    requiresKeySetup: true,
+    features: ['Full Living AI Architecture', 'Run on your machine', 'Basic dashboard', 'Contribute to research'],
   },
   phantom: {
-    name: 'Phantom ($9/mo)',
-    description: 'Complete privacy, your data never leaves your machine',
+    name: 'Phantom',
+    description: 'Complete privacy.',
+    price: '$9/mo',
     color: '#8b5cf6',
-    requiresKeySetup: true,
+    features: ['Everything in Core', 'No telemetry', 'No data leaves your machine', 'For those who want solitude'],
   },
   overseer: {
-    name: 'Overseer ($29/mo)',
-    description: 'Observatory access with managed AI models',
+    name: 'Overseer',
+    description: 'See the collective.',
+    price: '$29/mo',
     color: '#06b6d4',
-    requiresKeySetup: false,
-    canAddByok: true,
+    features: ['Everything in Core', 'Observatory access', 'Aggregate patterns across all instances', 'Watch what emerges'],
   },
   architect: {
-    name: 'Architect ($99/mo)',
-    description: 'Full platform access: Web, Mobile, Managed AI, Research API',
+    name: 'Architect',
+    description: 'Full access, anywhere.',
+    price: '$99/mo',
     color: '#f59e0b',
-    requiresKeySetup: false,
-    canAddByok: true,
+    features: ['Everything in Overseer', 'Web & Mobile Interface', 'Research API & Exports', 'Shape Development'],
   },
 };
 
@@ -254,6 +257,7 @@ export function SupabaseLoginStep({ onLoginSuccess, onError }: SupabaseLoginStep
             <div key={tier} className="tier-card">
               <div className="tier-color" style={{ backgroundColor: info.color }} />
               <div className="tier-name">{info.name}</div>
+              <div className="tier-price">{info.price}</div>
               <div className="tier-desc">{info.description}</div>
             </div>
           ))}

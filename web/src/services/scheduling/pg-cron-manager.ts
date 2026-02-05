@@ -5,7 +5,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { CronExpression, parseExpression } from 'cron-parser';
+import parseExpression from 'cron-parser';
 
 export interface ScheduleConfig {
   id: string;

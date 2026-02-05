@@ -44,7 +44,7 @@ const rateLimitState = new Map<
 >();
 
 const RATE_LIMIT_WINDOW_MS = 60000; // 1 minute window
-const MAX_ATTEMPTS_PER_WINDOW = 2; // Low threshold to test rate limiting quickly
+const MAX_ATTEMPTS_PER_WINDOW = 5;
 const INITIAL_BACKOFF_MS = 60000; // 1 minute
 const MAX_BACKOFF_MS = 240000; // 4 minutes
 

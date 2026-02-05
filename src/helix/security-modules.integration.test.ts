@@ -60,6 +60,7 @@ import {
   generateGatewayToken,
   verifyGatewayToken,
   enforceTokenVerification,
+  clearRateLimitState,
 } from './gateway-token-verification.js';
 import {
   type SkillManifest,
@@ -529,23 +530,30 @@ describe('Phase 2: Gateway Token Verification', () => {
   });
 
   it('should implement exponential backoff rate limiting', () => {
-    // Simulate multiple failed verification attempts
+    // Clear any previous rate limit state for this test
+    clearRateLimitState('client-1');
+
+    // Simulate multiple failed verification attempts on a network binding (not loopback)
+    // Use 0.0.0.0 which requires verification in development
     let failed = false;
     try {
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 6; i++) {
         enforceTokenVerification(
-          '127.0.0.1',
-          'production',
-          'wrong-token',
-          'stored-token',
+          '0.0.0.0',
+          'development',
+          'wrongtokenxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+          'storedtokenxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
           'client-1'
         );
       }
-    } catch (e) {
+    } catch {
       failed = true;
     }
-    // After multiple attempts, should fail or throw
+    // After 5+ attempts, should fail with rate limit
     expect(failed).toBe(true);
+
+    // Clean up for other tests
+    clearRateLimitState('client-1');
   });
 });
 

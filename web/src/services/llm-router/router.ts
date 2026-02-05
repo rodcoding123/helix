@@ -63,9 +63,9 @@ export class LLMRouter {
     await this.loadOperations();
 
     await logToDiscord({
-      type: 'llm_router_init',
+      type: 'llm_router_init' as any,
       timestamp: new Date().toISOString(),
-      status: 'initialized',
+      status: 'initialized' as any,
       operationsCount: this.operationsCache.size,
     });
 
@@ -86,7 +86,7 @@ export class LLMRouter {
     const { data, error } = await this.supabase
       .from('ai_model_routes')
       .select('*')
-      .eq('enabled', true);
+      .eq('enabled', true) as any;
 
     if (error) {
       throw new Error(`Failed to load operations: ${error.message}`);
@@ -252,7 +252,7 @@ export class LLMRouter {
         p_user_id: userId,
         p_toggle_name: toggleName,
       }
-    );
+    ) as any;
 
     if (error) {
       // Default to true if error (feature enabled)

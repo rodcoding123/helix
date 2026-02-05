@@ -4,7 +4,7 @@
  */
 
 export interface MetricsEvent {
-  type: 'operation_complete' | 'operation_failed' | 'cost_update' | 'sla_update' | 'error_rate' | 'latency_update';
+  type: 'operation_complete' | 'operation_failed' | 'cost_update' | 'sla_update' | 'error_rate' | 'latency_update' | 'batch_progress';
   timestamp: string;
   data: {
     operationId?: string;
@@ -16,7 +16,23 @@ export interface MetricsEvent {
     slaViolation?: boolean;
     severity?: 'info' | 'warning' | 'critical';
     message?: string;
+    batchId?: string;
+    progress?: number;
   };
+}
+
+export interface DashboardMetrics {
+  operationId?: string;
+  cost?: number;
+  latency?: number;
+  success?: boolean;
+  errorRate?: number;
+  p95Latency?: number;
+  slaViolation?: boolean;
+  severity?: 'info' | 'warning' | 'critical';
+  message?: string;
+  batchId?: string;
+  progress?: number;
 }
 
 /**

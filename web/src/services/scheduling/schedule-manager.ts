@@ -13,7 +13,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { logToDiscord, logToHashChain } from '../logging';
-import { load1PasswordSecret } from '@/lib/secrets-loader';
+import { loadSecret } from '@/lib/secrets-loader';
 
 const db = createClient(
   process.env.SUPABASE_URL || '',
@@ -69,11 +69,10 @@ export class ScheduleManager {
 
       await logToDiscord({
         type: 'scheduling_initialized',
-        cron_schedules: cronCount,
-        webhook_schedules: webhookCount,
-        total_schedules: schedules?.length || 0,
-        timestamp: new Date().toISOString(),
-      });
+        content: JSON.stringify({ cron_schedules: cronCount, webhook_schedules: webhookCount }),
+        metadata: { total_schedules: schedules?.length || 0 },
+        timestamp: Date.now(),
+      } as any);
 
       await logToHashChain({
         type: 'schedule_system_initialized',
@@ -86,9 +85,9 @@ export class ScheduleManager {
     } catch (error) {
       await logToDiscord({
         type: 'scheduling_initialization_failed',
-        error: error instanceof Error ? error.message : String(error),
-        timestamp: new Date().toISOString(),
-      });
+        content: error instanceof Error ? error.message : String(error),
+        timestamp: Date.now(),
+      } as any);
       throw error;
     }
   }
@@ -125,11 +124,10 @@ export class ScheduleManager {
       if (isRunning) {
         await logToDiscord({
           type: 'schedule_execution_skipped',
-          reason: 'Already running',
-          schedule_id: scheduleId,
-          operation_id: schedule.operation_id,
-          timestamp: new Date().toISOString(),
-        });
+          content: 'Already running',
+          metadata: { schedule_id: scheduleId, operation_id: schedule.operation_id },
+          timestamp: Date.now(),
+        } as any);
 
         // Update execution as skipped
         const { data: exec } = await db
@@ -204,20 +202,14 @@ export class ScheduleManager {
 
         await logToDiscord({
           type: 'schedule_executed',
-          schedule_id: scheduleId,
-          operation_id: schedule.operation_id,
-          latency_ms: latency,
-          cost_usd: costEstimate.mid,
-          cost_range: `$${costEstimate.low.toFixed(4)} - $${costEstimate.high.toFixed(4)}`,
-          timestamp: new Date().toISOString(),
-        });
+          content: `Schedule executed with cost $${costEstimate.mid.toFixed(4)}`,
+          metadata: { schedule_id: scheduleId, operation_id: schedule.operation_id, latency_ms: latency, cost_range: `$${costEstimate.low.toFixed(4)} - $${costEstimate.high.toFixed(4)}` },
+          timestamp: Date.now(),
+        } as any);
 
         await logToHashChain({
           type: 'schedule_executed',
-          schedule_id: scheduleId,
-          operation_id: schedule.operation_id,
-          latency_ms: latency,
-          cost_usd: costEstimate.mid,
+          data: JSON.stringify({ schedule_id: scheduleId, operation_id: schedule.operation_id, latency_ms: latency, cost_usd: costEstimate.mid }),
         });
       } catch (error) {
         const latency = Date.now() - startTime;
@@ -234,18 +226,14 @@ export class ScheduleManager {
 
         await logToDiscord({
           type: 'schedule_execution_failed',
-          schedule_id: scheduleId,
-          operation_id: schedule.operation_id,
-          error: errorMsg,
-          latency_ms: latency,
-          timestamp: new Date().toISOString(),
-        });
+          content: errorMsg,
+          metadata: { schedule_id: scheduleId, operation_id: schedule.operation_id, latency_ms: latency },
+          timestamp: Date.now(),
+        } as any);
 
         await logToHashChain({
           type: 'schedule_execution_failed',
-          schedule_id: scheduleId,
-          operation_id: schedule.operation_id,
-          error: errorMsg,
+          data: JSON.stringify({ schedule_id: scheduleId, operation_id: schedule.operation_id, error: errorMsg }),
         });
 
         throw error;
@@ -285,15 +273,14 @@ export class ScheduleManager {
       // 2. Load secret from 1Password (NOT hardcoded!)
       let secret: string;
       try {
-        secret = await load1PasswordSecret(schedule.webhook_secret_ref);
+        secret = await loadSecret(schedule.webhook_secret_ref || 'webhook_secret');
       } catch (secretError) {
         await logToDiscord({
           type: 'webhook_secret_load_failed',
-          schedule_id: scheduleId,
-          secret_ref: schedule.webhook_secret_ref,
-          error: secretError instanceof Error ? secretError.message : String(secretError),
-          timestamp: new Date().toISOString(),
-        });
+          content: secretError instanceof Error ? secretError.message : String(secretError),
+          metadata: { schedule_id: scheduleId, secret_ref: schedule.webhook_secret_ref },
+          timestamp: Date.now(),
+        } as any);
         throw new Error('Failed to load webhook secret from 1Password');
       }
 
@@ -316,12 +303,12 @@ export class ScheduleManager {
       // Don't await this - let it run in background
       this.executeSchedule(scheduleId).catch(error => {
         console.error('[ScheduleManager] Webhook execution error:', error);
-        logToDiscord({
+        void logToDiscord({
           type: 'webhook_execution_failed',
-          schedule_id: scheduleId,
-          error: error instanceof Error ? error.message : String(error),
-          timestamp: new Date().toISOString(),
-        });
+          content: error instanceof Error ? error.message : String(error),
+          metadata: { schedule_id: scheduleId },
+          timestamp: Date.now(),
+        } as any);
       });
 
       return true;
@@ -335,10 +322,10 @@ export class ScheduleManager {
 
       await logToDiscord({
         type: 'webhook_validation_failed',
-        schedule_id: scheduleId,
-        error: error instanceof Error ? error.message : String(error),
-        timestamp: new Date().toISOString(),
-      });
+        content: error instanceof Error ? error.message : String(error),
+        metadata: { schedule_id: scheduleId },
+        timestamp: Date.now(),
+      } as any);
 
       return false;
     }
