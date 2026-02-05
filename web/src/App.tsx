@@ -28,6 +28,8 @@ const Email = lazy(() => import('@/pages/Email').then(m => ({ default: m.Email }
 const Calendar = lazy(() => import('@/pages/Calendar').then(m => ({ default: m.CalendarPage })));
 const Tasks = lazy(() => import('@/pages/Tasks').then(m => ({ default: m.TasksPage })));
 const ControlPlane = lazy(() => import('@/pages/ControlPlane'));
+const TenantSettings = lazy(() => import('@/pages/TenantSettings'));
+const InvitationAccept = lazy(() => import('@/pages/InvitationAccept'));
 
 // Loading fallback component
 function LoadingFallback() {
@@ -199,6 +201,24 @@ export function App() {
                       <AdminGuard>
                         <ControlPlane />
                       </AdminGuard>
+                    </ProtectedRoute>
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/accept"
+                element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <InvitationAccept />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/settings/tenants"
+                element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <ProtectedRoute>
+                      <TenantSettings />
                     </ProtectedRoute>
                   </Suspense>
                 }
