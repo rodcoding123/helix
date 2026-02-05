@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
-import { agentCommand } from "../../commands/agent.js";
+import type { GatewayRequestHandlers } from "./types.js";
 import { listAgentIds } from "../../agents/agent-scope.js";
+import { agentCommand } from "../../commands/agent.js";
 import { loadConfig } from "../../config/config.js";
-import { injectTimestamp, timestampOptsFromConfig } from "./agent-timestamp.js";
 import {
   resolveAgentIdFromSessionKey,
   resolveExplicitAgentSessionKey,
@@ -15,6 +15,7 @@ import {
   resolveAgentDeliveryPlan,
   resolveAgentOutboundTarget,
 } from "../../infra/outbound/agent-delivery.js";
+import { normalizeAgentId } from "../../routing/session-key.js";
 import { defaultRuntime } from "../../runtime.js";
 import { resolveSendPolicy } from "../../sessions/send-policy.js";
 import { normalizeSessionDeliveryFields } from "../../utils/delivery-context.js";
@@ -24,8 +25,9 @@ import {
   isGatewayMessageChannel,
   normalizeMessageChannel,
 } from "../../utils/message-channel.js";
-import { normalizeAgentId } from "../../routing/session-key.js";
+import { resolveAssistantIdentity } from "../assistant-identity.js";
 import { parseMessageWithAttachments } from "../chat-attachments.js";
+import { resolveAssistantAvatarUrl } from "../control-ui-shared.js";
 import {
   ErrorCodes,
   errorShape,
@@ -36,11 +38,8 @@ import {
 } from "../protocol/index.js";
 import { loadSessionEntry } from "../session-utils.js";
 import { formatForLog } from "../ws-log.js";
-import { resolveAssistantIdentity } from "../assistant-identity.js";
-import { resolveAssistantAvatarUrl } from "../control-ui-shared.js";
 import { waitForAgentJob } from "./agent-job.js";
-import type { GatewayRequestHandlers } from "./types.js";
-import { OperationContext, executeWithRouting } from "../ai-operation-integration.js";
+import { injectTimestamp, timestampOptsFromConfig } from "./agent-timestamp.js";
 
 export const agentHandlers: GatewayRequestHandlers = {
   agent: async ({ params, respond, context }) => {
@@ -353,47 +352,41 @@ export const agentHandlers: GatewayRequestHandlers = {
 
     const resolvedThreadId = explicitThreadId ?? deliveryPlan.resolvedThreadId;
 
-    // Create operation context for AI operation tracking
-    const opContext = new OperationContext("agent", "agent_command", request.agentId);
-
-    // Execute with router integration for cost tracking and approval gating
-    void executeWithRouting(opContext, async () => {
-      return agentCommand(
-        {
-          message,
-          images,
-          to: resolvedTo,
-          sessionId: resolvedSessionId,
-          sessionKey: requestedSessionKey,
-          thinking: request.thinking,
-          deliver,
-          deliveryTargetMode,
-          channel: resolvedChannel,
+    void agentCommand(
+      {
+        message,
+        images,
+        to: resolvedTo,
+        sessionId: resolvedSessionId,
+        sessionKey: requestedSessionKey,
+        thinking: request.thinking,
+        deliver,
+        deliveryTargetMode,
+        channel: resolvedChannel,
+        accountId: resolvedAccountId,
+        threadId: resolvedThreadId,
+        runContext: {
+          messageChannel: resolvedChannel,
           accountId: resolvedAccountId,
-          threadId: resolvedThreadId,
-          runContext: {
-            messageChannel: resolvedChannel,
-            accountId: resolvedAccountId,
-            groupId: resolvedGroupId,
-            groupChannel: resolvedGroupChannel,
-            groupSpace: resolvedGroupSpace,
-            currentThreadTs: resolvedThreadId != null ? String(resolvedThreadId) : undefined,
-          },
           groupId: resolvedGroupId,
           groupChannel: resolvedGroupChannel,
           groupSpace: resolvedGroupSpace,
-          spawnedBy: spawnedByValue,
-          timeout: request.timeout?.toString(),
-          bestEffortDeliver,
-          messageChannel: resolvedChannel,
-          runId,
-          lane: request.lane,
-          extraSystemPrompt: request.extraSystemPrompt,
+          currentThreadTs: resolvedThreadId != null ? String(resolvedThreadId) : undefined,
         },
-        defaultRuntime,
-        context.deps,
-      );
-    })
+        groupId: resolvedGroupId,
+        groupChannel: resolvedGroupChannel,
+        groupSpace: resolvedGroupSpace,
+        spawnedBy: spawnedByValue,
+        timeout: request.timeout?.toString(),
+        bestEffortDeliver,
+        messageChannel: resolvedChannel,
+        runId,
+        lane: request.lane,
+        extraSystemPrompt: request.extraSystemPrompt,
+      },
+      defaultRuntime,
+      context.deps,
+    )
       .then((result) => {
         const payload = {
           runId,

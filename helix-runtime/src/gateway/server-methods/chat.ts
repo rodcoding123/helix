@@ -1,11 +1,11 @@
+import { CURRENT_SESSION_VERSION } from "@mariozechner/pi-coding-agent";
 import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-
-import { CURRENT_SESSION_VERSION } from "@mariozechner/pi-coding-agent";
+import type { MsgContext } from "../../auto-reply/templating.js";
+import type { GatewayRequestContext, GatewayRequestHandlers } from "./types.js";
 import { resolveSessionAgentId } from "../../agents/agent-scope.js";
 import { resolveEffectiveMessagesConfig, resolveIdentityName } from "../../agents/identity.js";
-import { injectTimestamp, timestampOptsFromConfig } from "./agent-timestamp.js";
 import { resolveThinkingDefault } from "../../agents/model-selection.js";
 import { resolveAgentTimeoutMs } from "../../agents/timeout.js";
 import { dispatchInboundMessage } from "../../auto-reply/dispatch.js";
@@ -14,7 +14,6 @@ import {
   extractShortModelName,
   type ResponsePrefixContext,
 } from "../../auto-reply/reply/response-prefix-template.js";
-import type { MsgContext } from "../../auto-reply/templating.js";
 import { resolveSendPolicy } from "../../sessions/send-policy.js";
 import { INTERNAL_MESSAGE_CHANNEL } from "../../utils/message-channel.js";
 import {
@@ -24,6 +23,7 @@ import {
   resolveChatRunExpiresAtMs,
 } from "../chat-abort.js";
 import { type ChatImageContent, parseMessageWithAttachments } from "../chat-attachments.js";
+import { stripEnvelopeFromMessages } from "../chat-sanitize.js";
 import {
   ErrorCodes,
   errorShape,
@@ -40,10 +40,8 @@ import {
   readSessionMessages,
   resolveSessionModelRef,
 } from "../session-utils.js";
-import { stripEnvelopeFromMessages } from "../chat-sanitize.js";
 import { formatForLog } from "../ws-log.js";
-import type { GatewayRequestContext, GatewayRequestHandlers } from "./types.js";
-import { OperationContext, executeWithRouting } from "../ai-operation-integration.js";
+import { injectTimestamp, timestampOptsFromConfig } from "./agent-timestamp.js";
 
 type TranscriptAppendResult = {
   ok: boolean;
@@ -501,35 +499,25 @@ export const chatHandlers: GatewayRequestHandlers = {
       });
 
       let agentRunStarted = false;
-
-      // Create operation context for AI operation tracking
-      const opContext = new OperationContext("chat.send", "chat_message", clientInfo?.id);
-
-      // Execute with router integration for cost tracking and approval gating
-      void executeWithRouting(opContext, async (selectedModel) => {
-        return dispatchInboundMessage({
-          ctx,
-          cfg,
-          dispatcher,
-          replyOptions: {
-            runId: clientRunId,
-            abortSignal: abortController.signal,
-            images: parsedImages.length > 0 ? parsedImages : undefined,
-            disableBlockStreaming: true,
-            onAgentRunStart: () => {
-              agentRunStarted = true;
-            },
-            onModelSelected: (modelCtx) => {
-              prefixContext.provider = modelCtx.provider;
-              prefixContext.model = extractShortModelName(modelCtx.model);
-              prefixContext.modelFull = `${modelCtx.provider}/${modelCtx.model}`;
-              prefixContext.thinkingLevel = modelCtx.thinkLevel ?? "off";
-
-              // Track model selection for cost tracking
-              opContext.costUsd = 0.01; // Placeholder - will be updated by router
-            },
+      void dispatchInboundMessage({
+        ctx,
+        cfg,
+        dispatcher,
+        replyOptions: {
+          runId: clientRunId,
+          abortSignal: abortController.signal,
+          images: parsedImages.length > 0 ? parsedImages : undefined,
+          disableBlockStreaming: true,
+          onAgentRunStart: () => {
+            agentRunStarted = true;
           },
-        });
+          onModelSelected: (ctx) => {
+            prefixContext.provider = ctx.provider;
+            prefixContext.model = extractShortModelName(ctx.model);
+            prefixContext.modelFull = `${ctx.provider}/${ctx.model}`;
+            prefixContext.thinkingLevel = ctx.thinkLevel ?? "off";
+          },
+        },
       })
         .then(() => {
           if (!agentRunStarted) {
