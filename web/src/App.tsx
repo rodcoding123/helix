@@ -33,6 +33,7 @@ const InvitationAccept = lazy(() => import('@/pages/InvitationAccept'));
 const OperationAnalytics = lazy(() => import('@/pages/OperationAnalytics').then(m => ({ default: m.OperationAnalytics })));
 const RealtimeMonitoringDashboard = lazy(() => import('@/pages/RealtimeMonitoringDashboard').then(m => ({ default: m.RealtimeMonitoringDashboard })));
 const AlertingDashboard = lazy(() => import('@/pages/AlertingDashboard').then(m => ({ default: m.AlertingDashboard })));
+const StatusPage = lazy(() => import('@/pages/StatusPage').then(m => ({ default: m.StatusPage })));
 
 // Loading fallback component
 function LoadingFallback() {
@@ -253,6 +254,14 @@ export function App() {
                     <ProtectedRoute>
                       <AlertingDashboard />
                     </ProtectedRoute>
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/status"
+                element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <StatusPage />
                   </Suspense>
                 }
               />
