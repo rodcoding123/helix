@@ -4,34 +4,18 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+// Mock Discord logging
+vi.mock('@/helix/logging', () => ({
+  logToDiscord: async () => {},
+}));
+
 import { getAutomationLearningEngine } from './automation-learning.js';
 import {
   createMockAutomationExecution,
   createMockAutomationTrigger,
   createMockTask,
 } from './__test-utils/automation-factory.js';
-
-// Mock Supabase
-vi.mock('@/lib/supabase', () => (
-  {
-    supabase: {
-      from: () => ({
-        select: () => ({
-          eq: () => ({
-            order: () => ({
-              limit: async () => ({ data: [], error: null }),
-            }),
-          }),
-        }),
-      }),
-    },
-  }
-));
-
-// Mock Discord logging
-vi.mock('@/helix/logging', () => ({
-  logToDiscord: async () => {},
-}));
 
 describe('AutomationLearningEngine', () => {
   let learningEngine: ReturnType<typeof getAutomationLearningEngine>;

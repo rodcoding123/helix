@@ -55,6 +55,8 @@ describe('PWA Setup', () => {
         active: null,
         scope: '/',
         addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        update: vi.fn(),
       };
 
       (navigator.serviceWorker.register as any).mockResolvedValue(
@@ -67,7 +69,9 @@ describe('PWA Setup', () => {
         '/service-worker.js',
         { scope: '/' }
       );
-      expect(result).toBe(mockRegistration);
+      expect(result).toBeDefined();
+      expect(result.registration).toBe(mockRegistration);
+      expect(typeof result.cleanup).toBe('function');
     });
 
     it('should handle service worker registration failure', async () => {
@@ -76,7 +80,9 @@ describe('PWA Setup', () => {
 
       const result = await setupPWA();
 
-      expect(result).toBeNull();
+      expect(result).toBeDefined();
+      expect(result.registration).toBeNull();
+      expect(typeof result.cleanup).toBe('function');
     });
 
     it('should return null if service workers not supported', async () => {
@@ -87,7 +93,9 @@ describe('PWA Setup', () => {
 
       const result = await setupPWA();
 
-      expect(result).toBeNull();
+      expect(result).toBeDefined();
+      expect(result.registration).toBeNull();
+      expect(typeof result.cleanup).toBe('function');
     });
   });
 

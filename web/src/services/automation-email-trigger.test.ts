@@ -4,41 +4,6 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { getEmailTriggerService } from './automation-email-trigger.js';
-import {
-  createMockAutomationTrigger,
-  createMockEmail,
-  createMockEmailTriggerCondition,
-  createMockCreateTaskAction,
-} from './__test-utils/automation-factory.js';
-
-// Mock Supabase
-vi.mock('@/lib/supabase', () => ({
-  supabase: {
-    from: () => ({
-      insert: () => ({
-        select: () => ({ single: async () => ({ data: { id: 'trigger-1' }, error: null }) }),
-      }),
-      select: () => ({
-        eq: () => ({
-          eq: () => ({
-            single: async () => ({ data: null, error: null }),
-          }),
-        }),
-      }),
-      update: () => ({
-        eq: () => ({
-          then: async (cb: any) => cb({ data: null, error: null }),
-        }),
-      }),
-      delete: () => ({
-        eq: () => ({
-          then: async (cb: any) => cb({ data: null, error: null }),
-        }),
-      }),
-    }),
-  },
-}));
 
 // Mock Discord logging
 vi.mock('@/helix/logging', () => ({
@@ -51,6 +16,14 @@ vi.mock('@/helix/hash-chain', () => ({
     add: async () => ({ hash: 'mock-hash', index: 1 }),
   },
 }));
+
+import { getEmailTriggerService } from './automation-email-trigger.js';
+import {
+  createMockAutomationTrigger,
+  createMockEmail,
+  createMockEmailTriggerCondition,
+  createMockCreateTaskAction,
+} from './__test-utils/automation-factory.js';
 
 describe('AutomationEmailTriggerService', () => {
   let emailTriggerService: ReturnType<typeof getEmailTriggerService>;

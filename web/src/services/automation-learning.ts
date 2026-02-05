@@ -39,7 +39,7 @@ export class AutomationLearningEngine {
       }
 
       // Detect patterns
-      const patterns = this.detectPatterns(executions);
+      const patterns = await this.detectPatterns(executions);
 
       // Calculate success rates
       const enrichedPatterns = patterns.map((pattern) => ({
@@ -78,11 +78,11 @@ export class AutomationLearningEngine {
   /**
    * Detect patterns in execution history
    */
-  private detectPatterns(executions: AutomationExecution[]): PatternAnalysis[] {
+  private async detectPatterns(executions: AutomationExecution[]): Promise<PatternAnalysis[]> {
     const patterns = new Map<string, { successes: number; failures: number; last: Date }>();
 
     for (const execution of executions) {
-      const pattern = this.extractPattern(execution);
+      const pattern = await this.extractPattern(execution);
 
       if (!patterns.has(pattern)) {
         patterns.set(pattern, { successes: 0, failures: 0, last: new Date() });
@@ -115,11 +115,11 @@ export class AutomationLearningEngine {
   /**
    * Extract pattern from execution
    */
-  private extractPattern(execution: AutomationExecution): string {
-    // Pattern format: "trigger_type:action_result"
-    const triggerType = execution.triggerId?.split('-')[0] || 'unknown';
+  async extractPattern(execution: AutomationExecution): Promise<string> {
+    // Pattern format: "trigger_id:action_result"
+    const triggerId = execution.triggerId || 'unknown';
     const success = execution.status === 'success' ? 'success' : 'failure';
-    return `${triggerType}:${success}`;
+    return `${triggerId}:${success}`;
   }
 
   /**

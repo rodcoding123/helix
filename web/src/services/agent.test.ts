@@ -2,62 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AgentService } from './agent';
 import type { AgentPersonality } from '@/lib/types/agents';
 
-// Mock Supabase
-vi.mock('@supabase/supabase-js', () => {
-  const mockData = {
-    id: 'agent-123',
-    user_id: 'user-123',
-    name: 'Test Agent',
-    role: 'Test Role',
-    description: 'Test Description',
-    narrative: { creation_reason: 'test', first_interaction: new Date() },
-    personality: {
-      verbosity: 0.5,
-      formality: 0.5,
-      creativity: 0.5,
-      proactivity: 0.5,
-      warmth: 0.5,
-    },
-    autonomy_level: 0,
-    created_by: 'system',
-    enabled: true,
-    goals: [],
-    scope: 'test scope',
-    created_at: new Date().toISOString(),
-    last_used: null,
-    conversation_count: 0,
-    updated_at: new Date().toISOString(),
-  };
-
-  const createChainable = (): any => ({
-    insert: vi.fn().mockReturnValue(createChainable()),
-    select: vi.fn().mockReturnValue(createChainable()),
-    eq: vi.fn().mockReturnValue(createChainable()),
-    update: vi.fn().mockReturnValue(createChainable()),
-    order: vi.fn().mockReturnValue(createChainable()),
-    single: vi.fn().mockResolvedValue({ data: mockData, error: null }),
-  });
-
-  return {
-    createClient: vi.fn(() => ({
-      from: vi.fn(() => createChainable()),
-    })),
-  };
-});
-
-// Mock secrets loader
-vi.mock('@/lib/secrets-loader', () => ({
-  loadSecret: vi.fn(async (secret: string) => {
-    if (secret === 'Supabase URL') {
-      return 'https://test.supabase.co';
-    }
-    if (secret === 'Supabase Anon Key') {
-      return 'test-key';
-    }
-    return 'test-secret';
-  }),
-}));
-
 // Mock Discord logger
 vi.mock('./discord-logger', () => {
   class MockDiscordLogger {
@@ -70,6 +14,63 @@ vi.mock('./discord-logger', () => {
   }
   return {
     DiscordLoggerService: MockDiscordLogger,
+  };
+});
+
+// Mock Supabase client
+vi.mock('@/lib/supabase-browser', () => {
+  let insertedData: any = null;
+
+  const createMockResponse = () => ({
+    select: vi.fn().mockReturnThis(),
+    insert: vi.fn(function(data: any[]) {
+      insertedData = { ...data[0], id: 'agent-123' };
+      return this;
+    }),
+    update: vi.fn(function(data: any) {
+      insertedData = { ...insertedData, ...data, id: 'agent-123' };
+      return this;
+    }),
+    eq: vi.fn().mockReturnThis(),
+    order: vi.fn().mockReturnThis(),
+    single: vi.fn().mockImplementation(() => {
+      const responseData = insertedData || {
+        id: 'agent-123',
+        user_id: 'user-123',
+        name: 'Test Agent',
+        role: 'Test Role',
+        description: 'Test Description',
+        personality: {
+          verbosity: 0.5,
+          formality: 0.5,
+          creativity: 0.5,
+          proactivity: 0.5,
+          warmth: 0.5,
+        },
+        autonomy_level: 0,
+        created_by: 'system',
+        narrative: {},
+        goals: [],
+        scope: '',
+        enabled: true,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+      insertedData = null; // Reset for next call
+      return Promise.resolve({
+        data: responseData,
+        error: null,
+      });
+    }),
+    range: vi.fn().mockReturnThis(),
+  });
+
+  const mockSupabase = {
+    from: vi.fn(() => createMockResponse()),
+  };
+
+  return {
+    getSupabaseBrowserClient: () => mockSupabase,
   };
 });
 
@@ -175,7 +176,7 @@ describe('AgentService', () => {
       );
 
       expect(agent).toBeDefined();
-      expect(agent.autonomy_level).toBe(0); // Mock returns 0, but the call was made
+      expect(agent.autonomy_level).toBe(2); // Mock returns the updated value
     });
 
     it('should accept autonomy levels 0-3', async () => {

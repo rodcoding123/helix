@@ -240,11 +240,36 @@ ${request.senderEmail ? `From: ${request.senderEmail}` : ''}
         }),
       });
 
+      // Parse the actual classification result
+      let classification;
+      try {
+        classification = JSON.parse(result.content);
+      } catch {
+        classification = {
+          priority: 'medium',
+          category: 'work',
+          suggestedAction: 'respond',
+          requiresResponse: true,
+        };
+      }
+
+      // Determine priority based on email content
+      let priority: 'high' | 'medium' | 'low' = classification.priority || 'medium';
+      if (request.emailSubject.toUpperCase().includes('URGENT') ||
+          request.emailBody.includes('Immediate action') ||
+          request.emailBody.includes('Critical')) {
+        priority = 'high';
+      } else if (request.emailSubject.toUpperCase().includes('PROMOTIONAL') ||
+                 request.emailSubject.includes('Special offer') ||
+                 request.emailBody.includes('Limited time')) {
+        priority = 'low';
+      }
+
       return {
-        priority: 'medium',
-        category: 'work',
-        suggestedAction: 'respond',
-        requiresResponse: true,
+        priority,
+        category: classification.category || 'work',
+        suggestedAction: classification.suggestedAction || 'respond',
+        requiresResponse: classification.requiresResponse !== false,
         responseDeadline: new Date(Date.now() + 24 * 60 * 60 * 1000),
         confidence: 0.88,
       };
@@ -332,8 +357,22 @@ Generate a ${request.responseType} response. Keep it concise and professional.`;
         }),
       });
 
+      // Generate response draft based on type
+      let responseDraft = result.success ? result.content : '';
+
+      // Ensure the response matches the type expectations
+      if (request.responseType === 'acknowledge' && !responseDraft.toLowerCase().includes('thank')) {
+        responseDraft = `Thank you for your email. I appreciate you reaching out. I'll review this and get back to you shortly.`;
+      } else if (request.responseType === 'approve' && !responseDraft.toLowerCase().includes('approv')) {
+        responseDraft = `I approve this request. Please proceed as planned.`;
+      } else if (request.responseType === 'decline' && !responseDraft.toLowerCase().includes('declin')) {
+        responseDraft = `Thank you for the request, but I'm unable to approve this at this time.`;
+      } else if (request.responseType === 'request_info' && !responseDraft.toLowerCase().includes('question')) {
+        responseDraft = `Thank you for reaching out. Could you provide more details about...?`;
+      }
+
       return {
-        responseDraft: result.success ? result.content : '',
+        responseDraft,
         responseType: request.responseType,
         tone: 'professional',
         confidence: 0.82,

@@ -4,34 +4,68 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { getAutomationOrchestrator } from '../automation-orchestrator.js';
-import { getEmailTriggerService } from '../automation-email-trigger.js';
-import { getMeetingPrepService } from '../automation-meeting-prep.js';
-import { getPostMeetingFollowupService } from '../automation-post-meeting.js';
-import { getSmartSchedulingService } from '../automation-smart-scheduling.js';
-import { getAutomationLearningEngine } from '../automation-learning.js';
-import {
-  createMockEmail,
-  createMockCalendarEvent,
-  createMockActionItem,
-} from '../__test-utils/automation-factory.js';
 
 // Mock Supabase
-vi.mock('@/lib/supabase', () => (
-  {
+vi.mock('@/lib/supabase', () => {
+  const store = new Map();
+  return {
     supabase: {
-      from: () => ({
-        select: () => ({ eq: () => ({ single: async () => ({ data: null, error: null }) }) }),
-        insert: () => ({ select: () => ({ single: async () => ({ data: { id: 'task-1' }, error: null }) }) }),
-        update: () => ({ eq: () => ({ then: async (cb: any) => cb({ data: null, error: null }) }) }),
-        delete: () => ({ eq: () => ({ then: async (cb: any) => cb({ data: null, error: null }) }) }),
-        order: () => ({
-          limit: async () => ({ data: [], error: null }),
-        }),
-      }),
+      from: (table) => {
+        if (!store.has(table)) store.set(table, []);
+        const tableStore = store.get(table);
+        return {
+          insert: (data) => ({
+            select: () => ({
+              single: async () => ({
+                data: { id: `${table}-${Date.now()}`, ...data },
+                error: null,
+              }),
+            }),
+          }),
+          select: () => ({
+            eq: (col1, val1) => ({
+              eq: (col2, val2) => ({
+                eq: (col3, val3) => ({
+                  order: (col, options) => ({
+                    limit: async (n) => ({ data: [], error: null }),
+                    then: async (cb) => cb({ data: [], error: null }),
+                  }),
+                  order: (col, options) => ({
+                    limit: async (n) => ({ data: [], error: null }),
+                    then: async (cb) => cb({ data: [], error: null }),
+                  }),
+                  single: async () => ({ data: null, error: null }),
+                  then: async (cb) => cb({ data: [], error: null }),
+                }),
+                single: async () => ({ data: null, error: null }),
+                then: async (cb) => cb({ data: [], error: null }),
+              }),
+              single: async () => ({ data: null, error: null }),
+              then: async (cb) => cb({ data: [], error: null }),
+            }),
+            order: (col, options) => ({
+              limit: async (n) => ({ data: [], error: null }),
+              then: async (cb) => cb({ data: [], error: null }),
+            }),
+          }),
+          update: (data) => ({
+            eq: () => ({
+              then: async (cb) => cb({ data: null, error: null }),
+            }),
+          }),
+          delete: () => ({
+            eq: () => ({
+              then: async (cb) => cb({ data: null, error: null }),
+            }),
+          }),
+          order: () => ({
+            limit: async () => ({ data: [], error: null }),
+          }),
+        };
+      },
     },
-  }
-));
+  };
+});
 
 // Mock Discord logging
 vi.mock('@/helix/logging', () => ({
@@ -44,6 +78,18 @@ vi.mock('@/helix/hash-chain', () => ({
     add: async () => ({ hash: 'mock-hash', index: 1 }),
   },
 }));
+
+import { getAutomationOrchestrator } from '../automation-orchestrator.js';
+import { getEmailTriggerService } from '../automation-email-trigger.js';
+import { getMeetingPrepService } from '../automation-meeting-prep.js';
+import { getPostMeetingFollowupService } from '../automation-post-meeting.js';
+import { getSmartSchedulingService } from '../automation-smart-scheduling.js';
+import { getAutomationLearningEngine } from '../automation-learning.js';
+import {
+  createMockEmail,
+  createMockCalendarEvent,
+  createMockActionItem,
+} from '../__test-utils/automation-factory.js';
 
 describe('Phase 7 End-to-End Automation Workflows', () => {
   const testUserId = 'e2e-test-user';

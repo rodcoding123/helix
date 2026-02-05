@@ -213,9 +213,13 @@ export function createMockActionItem(
  */
 export function createMockTimeSlot(overrides: Partial<TimeSlot> = {}): TimeSlot {
   const tomorrow = new Date(Date.now() + 86400000);
+  const start = new Date(tomorrow);
+  start.setHours(10, 0, 0, 0);
+  const end = new Date(tomorrow);
+  end.setHours(11, 0, 0, 0);
   return {
-    start: new Date(tomorrow.setHours(10, 0, 0, 0)),
-    end: new Date(tomorrow.setHours(11, 0, 0, 0)),
+    start,
+    end,
     attendeeCount: 3,
     score: 85,
     scoreBreakdown: {

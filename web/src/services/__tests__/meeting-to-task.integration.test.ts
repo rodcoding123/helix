@@ -4,26 +4,55 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { getMeetingPrepService } from '../automation-meeting-prep.js';
-import { getPostMeetingFollowupService } from '../automation-post-meeting.js';
-import {
-  createMockCalendarEvent,
-  createMockEmail,
-  createMockActionItem,
-} from '../__test-utils/automation-factory.js';
 
 // Mock Supabase
-vi.mock('@/lib/supabase', () => (
-  {
+vi.mock('@/lib/supabase', () => {
+  const store = new Map();
+  return {
     supabase: {
-      from: () => ({
-        select: () => ({ eq: () => ({ single: async () => ({ data: null, error: null }) }) }),
-        insert: () => ({ select: () => ({ single: async () => ({ data: { id: 'task-1' }, error: null }) }) }),
-        update: () => ({ eq: () => ({ then: async (cb: any) => cb({ data: null, error: null }) }) }),
-      }),
+      from: (table) => {
+        if (!store.has(table)) store.set(table, []);
+        const tableStore = store.get(table);
+        return {
+          insert: (data) => ({
+            select: () => ({
+              single: async () => ({
+                data: { id: `${table}-${Date.now()}`, ...data },
+                error: null,
+              }),
+            }),
+          }),
+          select: () => ({
+            eq: (col1, val1) => ({
+              eq: (col2, val2) => ({
+                gte: (col3, val3) => ({
+                  then: async (cb) => cb({ data: [], error: null }),
+                }),
+                single: async () => ({ data: null, error: null }),
+                then: async (cb) => cb({ data: [], error: null }),
+              }),
+              single: async () => ({ data: null, error: null }),
+              gte: (col, val) => ({
+                then: async (cb) => cb({ data: [], error: null }),
+              }),
+              then: async (cb) => cb({ data: [], error: null }),
+            }),
+          }),
+          update: (data) => ({
+            eq: () => ({
+              then: async (cb) => cb({ data: null, error: null }),
+            }),
+          }),
+          delete: () => ({
+            eq: () => ({
+              then: async (cb) => cb({ data: null, error: null }),
+            }),
+          }),
+        };
+      },
     },
-  }
-));
+  };
+});
 
 // Mock Discord logging
 vi.mock('@/helix/logging', () => ({
@@ -36,6 +65,14 @@ vi.mock('@/helix/hash-chain', () => ({
     add: async () => ({ hash: 'mock-hash', index: 1 }),
   },
 }));
+
+import { getMeetingPrepService } from '../automation-meeting-prep.js';
+import { getPostMeetingFollowupService } from '../automation-post-meeting.js';
+import {
+  createMockCalendarEvent,
+  createMockEmail,
+  createMockActionItem,
+} from '../__test-utils/automation-factory.js';
 
 describe('Meeting→Task Integration Workflow', () => {
   const testUserId = 'user-123';

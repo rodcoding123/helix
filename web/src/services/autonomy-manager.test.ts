@@ -1,44 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AutonomyManagerService } from './autonomy-manager';
 
-// Mock Supabase
-vi.mock('@supabase/supabase-js', () => ({
-  createClient: vi.fn(() => ({
-    from: vi.fn((_table) => ({
-      insert: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-      single: vi.fn().mockResolvedValue({
-        data: {
-          id: 'settings-123',
-          user_id: 'user-123',
-          helix_autonomy_level: 0,
-          auto_agent_creation: true,
-          agent_proposals_require_approval: true,
-          discord_approval_enabled: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        error: null,
-      }),
-      eq: vi.fn().mockReturnThis(),
-      update: vi.fn().mockReturnThis(),
-    })),
-  })),
-}));
-
-// Mock secrets loader
-vi.mock('@/lib/secrets-loader', () => ({
-  loadSecret: vi.fn(async (secret: string) => {
-    if (secret === 'Supabase URL') {
-      return 'https://test.supabase.co';
-    }
-    if (secret === 'Supabase Anon Key') {
-      return 'test-key';
-    }
-    return 'test-secret';
-  }),
-}));
-
 // Mock Discord logger
 vi.mock('./discord-logger', () => {
   class MockDiscordLogger {
@@ -51,6 +13,98 @@ vi.mock('./discord-logger', () => {
   }
   return {
     DiscordLoggerService: MockDiscordLogger,
+  };
+});
+
+// Mock OpenClaw Gateway
+vi.mock('./openclaw-gateway', () => {
+  class MockOpenClawGateway {
+    async executeAutonomousAction() {
+      return { success: true };
+    }
+  }
+  return {
+    OpenClawGatewayService: MockOpenClawGateway,
+  };
+});
+
+// Mock Agent Service
+vi.mock('./agent', () => {
+  class MockAgentService {
+    async getAgent() {
+      return null;
+    }
+  }
+  return {
+    AgentService: MockAgentService,
+  };
+});
+
+// Mock Supabase client
+vi.mock('@/lib/supabase-browser', () => {
+  const store: Record<string, any> = {};
+
+  const createMockResponse = (table: string) => ({
+    select: vi.fn().mockReturnThis(),
+    insert: vi.fn(function(data: any[]) {
+      store[table] = { ...data[0], id: table === 'autonomy_actions' ? 'action-123' : `settings_${data[0]?.user_id}` };
+      return this;
+    }),
+    update: vi.fn(function(data: any) {
+      if (store[table]) {
+        store[table] = { ...store[table], ...data };
+      } else {
+        store[table] = { ...data, id: table === 'autonomy_actions' ? 'action-123' : 'settings_user-123' };
+      }
+      return this;
+    }),
+    eq: vi.fn().mockReturnThis(),
+    order: vi.fn().mockReturnThis(),
+    single: vi.fn().mockImplementation(function() {
+      let responseData = store[table] || getDefaultData(table);
+      return Promise.resolve({
+        data: responseData,
+        error: null,
+      });
+    }),
+    range: vi.fn().mockReturnThis(),
+  });
+
+  const getDefaultData = (table: string) => {
+    if (table === 'autonomy_settings') {
+      return {
+        id: 'settings_user-123',
+        user_id: 'user-123',
+        helix_autonomy_level: 0,
+        auto_agent_creation: true,
+        agent_proposals_require_approval: true,
+        discord_approval_enabled: true,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+    } else {
+      return {
+        id: 'action-123',
+        user_id: 'user-123',
+        agent_id: undefined,
+        action_type: 'test_action',
+        action_description: 'Test action',
+        risk_level: 'low',
+        status: 'pending',
+        approval_method: 'web_ui',
+        discord_channel: '#helix-autonomy',
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+    }
+  };
+
+  const mockSupabase = {
+    from: vi.fn((table: string) => createMockResponse(table)),
+  };
+
+  return {
+    getSupabaseBrowserClient: () => mockSupabase,
   };
 });
 

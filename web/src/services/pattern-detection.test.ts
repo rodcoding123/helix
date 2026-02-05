@@ -1,61 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { PatternDetectionService } from './pattern-detection';
 
-// Mock Supabase
-vi.mock('@supabase/supabase-js', () => ({
-  createClient: vi.fn(() => ({
-    from: vi.fn((table) => ({
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockResolvedValue({
-        data:
-          table === 'conversations'
-            ? [
-                {
-                  id: 'conv-1',
-                  extracted_topics: ['coding', 'javascript'],
-                  primary_emotion: 'focused',
-                  emotional_dimensions: { valence: 0.6, arousal: 0.7 },
-                },
-                {
-                  id: 'conv-2',
-                  extracted_topics: ['coding', 'typescript'],
-                  primary_emotion: 'focused',
-                  emotional_dimensions: { valence: 0.5, arousal: 0.6 },
-                },
-                {
-                  id: 'conv-3',
-                  extracted_topics: ['design', 'ui'],
-                  primary_emotion: 'creative',
-                  emotional_dimensions: { valence: 0.7, arousal: 0.8 },
-                },
-              ]
-            : [],
-        error: null,
-      }),
-      insert: vi.fn().mockReturnThis(),
-      single: vi.fn().mockResolvedValue({
-        data: { id: 'proposal-123' },
-        error: null,
-      }),
-    })),
-  })),
-}));
-
-// Mock secrets loader
-vi.mock('@/lib/secrets-loader', () => ({
-  loadSecret: vi.fn(async (secret: string) => {
-    if (secret === 'Supabase URL') {
-      return 'https://test.supabase.co';
-    }
-    if (secret === 'Supabase Anon Key') {
-      return 'test-key';
-    }
-    return 'test-secret';
-  }),
-}));
-
 // Mock Discord logger
 vi.mock('./discord-logger', () => {
   class MockDiscordLogger {

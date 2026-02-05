@@ -102,7 +102,7 @@ export class PostMeetingFollowupService {
   /**
    * Extract action items from meeting notes/transcript
    */
-  private extractActionItemsFromText(text: string): ExtractedActionItem[] {
+  extractActionItemsFromText(text: string): ExtractedActionItem[] {
     const actionItems: ExtractedActionItem[] = [];
 
     // Patterns for action items
@@ -174,7 +174,7 @@ export class PostMeetingFollowupService {
   /**
    * Infer priority from action item text
    */
-  private inferPriority(text: string): 'low' | 'normal' | 'high' {
+  inferPriority(text: string): 'low' | 'normal' | 'high' {
     const lowerText = text.toLowerCase();
 
     if (
@@ -200,7 +200,7 @@ export class PostMeetingFollowupService {
   /**
    * Calculate confidence score for action item extraction
    */
-  private calculateConfidence(text: string): number {
+  calculateConfidence(text: string): number {
     let score = 0.5; // Base score
 
     // Boost for action keywords
@@ -229,7 +229,7 @@ export class PostMeetingFollowupService {
   /**
    * Extract due date from action item text
    */
-  private extractDueDate(text: string): Date | undefined {
+  extractDueDate(text: string): Date | null {
     const now = new Date();
 
     // Check for relative dates
@@ -255,7 +255,16 @@ export class PostMeetingFollowupService {
       return nextWeek;
     }
 
-    // Try to parse date
+    // Try to parse ISO date (YYYY-MM-DD)
+    const isoDateMatch = text.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if (isoDateMatch) {
+      const date = new Date(isoDateMatch[0]);
+      if (!isNaN(date.getTime()) && date > now) {
+        return date;
+      }
+    }
+
+    // Try to parse date (MM/DD)
     const dateMatch = text.match(/(\d{1,2})\/(\d{1,2})/);
     if (dateMatch) {
       const month = parseInt(dateMatch[1]) - 1;
@@ -266,13 +275,13 @@ export class PostMeetingFollowupService {
       }
     }
 
-    return undefined;
+    return null;
   }
 
   /**
    * Extract assignee from action item text
    */
-  private extractAssignee(text: string): string | undefined {
+  extractAssignee(text: string): string | null {
     // Look for @ mentions
     const mentionMatch = text.match(/@(\w+)/);
     if (mentionMatch) {
@@ -285,13 +294,13 @@ export class PostMeetingFollowupService {
       return nameMatch[1];
     }
 
-    return undefined;
+    return null;
   }
 
   /**
    * Create follow-up task from action item
    */
-  private async createFollowupTask(
+  async createFollowupTask(
     userId: string,
     actionItem: ExtractedActionItem,
     eventId: string
@@ -333,7 +342,7 @@ export class PostMeetingFollowupService {
   /**
    * Generate summary email from meeting notes
    */
-  private generateSummaryEmail(
+  generateSummaryEmail(
     eventId: string,
     notes: string,
     actionItems: ExtractedActionItem[],
@@ -348,7 +357,7 @@ export class PostMeetingFollowupService {
       email += 'Action Items:\n';
       for (const item of actionItems) {
         const dueDate = this.extractDueDate(item.title);
-        const dueStr = dueDate ? ` - Due: ${dueDate.toLocaleDateString()}` : '';
+        const dueStr = dueDate ? ` - Due: ${(dueDate as Date).toLocaleDateString()}` : '';
         email += `• ${item.title}${dueStr}\n`;
       }
       email += '\n';

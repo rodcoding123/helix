@@ -39,7 +39,10 @@ export class SmartSchedulingService {
   /**
    * Find best meeting times for all attendees
    */
-  async findBestMeetingTimes(params: SchedulingParams): Promise<TimeSlot[]> {
+  async findBestMeetingTimes(params: SchedulingParams): Promise<{
+    suggestedTimes: TimeSlot[];
+    bestTime: TimeSlot | null;
+  }> {
     try {
       // Get calendars for all attendees
       const calendars = await this.getAttendeesCalendars(params.attendeeEmails, params.dateRange);
@@ -69,7 +72,10 @@ export class SmartSchedulingService {
         timestamp: new Date().toISOString(),
       });
 
-      return sortedSlots.slice(0, 5); // Return top 5
+      return {
+        suggestedTimes: sortedSlots.slice(0, 5), // Top 5
+        bestTime: sortedSlots[0] || null,
+      };
     } catch (error) {
       await logToDiscord({
         channel: 'helix-alerts',
@@ -314,17 +320,17 @@ export class SmartSchedulingService {
    */
   async getSuggestion(params: SchedulingParams): Promise<SchedulingSuggestion | null> {
     try {
-      const slots = await this.findBestMeetingTimes(params);
+      const result = await this.findBestMeetingTimes(params);
 
-      if (slots.length === 0) {
+      if (!result.suggestedTimes || result.suggestedTimes.length === 0) {
         return null;
       }
 
       return {
         attendeeEmails: params.attendeeEmails,
         duration: params.duration,
-        suggestedSlots: slots,
-        bestSlot: slots[0],
+        suggestedSlots: result.suggestedTimes,
+        bestSlot: result.bestTime || undefined,
         timezone: params.preferences?.timezone || 'UTC',
         createdAt: new Date(),
       };

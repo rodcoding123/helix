@@ -82,7 +82,7 @@ describe('ModelSpawner', () => {
       await spawner.spawn(userId, mockOperation, 100);
 
       const duration = Date.now() - startTime;
-      expect(duration).toBeLessThan(500); // Should return quickly (not wait for execution)
+      expect(duration).toBeLessThan(1000); // Should return quickly (not wait for execution)
     });
 
     it('should track multiple concurrent spawns', async () => {

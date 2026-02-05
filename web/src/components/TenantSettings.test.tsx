@@ -39,10 +39,11 @@ describe('TenantSettings', () => {
 
     // Mock useTenant hook
     vi.spyOn(tenantContext, 'useTenant').mockReturnValue({
-      currentTenant: mockTenant,
-      setCurrentTenant: vi.fn(),
-      getTenantContext: vi.fn(),
-      tenants: [mockTenant],
+      tenant: mockTenant,
+      loading: false,
+      error: null,
+      switchTenant: vi.fn(),
+      createTenant: vi.fn(),
     } as any);
 
     // Mock invite service
@@ -157,10 +158,11 @@ describe('TenantSettings', () => {
 
   it('should handle no tenant selected', () => {
     vi.spyOn(tenantContext, 'useTenant').mockReturnValue({
-      currentTenant: null,
-      setCurrentTenant: vi.fn(),
-      getTenantContext: vi.fn(),
-      tenants: [],
+      tenant: null,
+      loading: false,
+      error: null,
+      switchTenant: vi.fn(),
+      createTenant: vi.fn(),
     } as any);
 
     render(<TenantSettings />);

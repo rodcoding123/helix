@@ -4,35 +4,46 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { getEmailTriggerService } from '../automation-email-trigger';
-import { createMockEmail, createMockAutomationTrigger } from '../__test-utils/automation-factory';
 
-vi.mock('@/lib/supabase', () => ({
-  supabase: {
-    from: () => ({
-      insert: () => ({
-        select: () => ({ single: async () => ({ data: { id: 'trigger-1' }, error: null }) }),
-      }),
-      select: () => ({
-        eq: () => ({
-          eq: () => ({
-            then: async (cb: any) => cb({ data: [], error: null }),
+vi.mock('@/lib/supabase', () => {
+  const store = new Map();
+  return {
+    supabase: {
+      from: (table) => {
+        if (!store.has(table)) store.set(table, []);
+        const tableStore = store.get(table);
+        return {
+          insert: (data) => ({
+            select: () => ({
+              single: async () => ({
+                data: { id: `${table}-${Date.now()}`, ...data },
+                error: null,
+              }),
+            }),
           }),
-        }),
-      }),
-      update: () => ({
-        eq: () => ({
-          then: async (cb: any) => cb({ data: null, error: null }),
-        }),
-      }),
-      delete: () => ({
-        eq: () => ({
-          then: async (cb: any) => cb({ data: null, error: null }),
-        }),
-      }),
-    }),
-  },
-}));
+          select: () => ({
+            eq: (col1, val1) => ({
+              eq: (col2, val2) => ({
+                then: async (cb) => cb({ data: [], error: null }),
+              }),
+              then: async (cb) => cb({ data: [], error: null }),
+            }),
+          }),
+          update: (data) => ({
+            eq: () => ({
+              then: async (cb) => cb({ data: null, error: null }),
+            }),
+          }),
+          delete: () => ({
+            eq: () => ({
+              then: async (cb) => cb({ data: null, error: null }),
+            }),
+          }),
+        };
+      },
+    },
+  };
+});
 
 vi.mock('@/helix/logging', () => ({
   logToDiscord: async () => {},
@@ -43,6 +54,9 @@ vi.mock('@/helix/hash-chain', () => ({
     add: async () => ({ hash: 'mock-hash', index: 1 }),
   },
 }));
+
+import { getEmailTriggerService } from '../automation-email-trigger';
+import { createMockEmail, createMockAutomationTrigger } from '../__test-utils/automation-factory';
 
 describe('Email-to-Task Integration', () => {
   let emailTriggerService: ReturnType<typeof getEmailTriggerService>;

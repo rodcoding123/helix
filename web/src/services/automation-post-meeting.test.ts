@@ -4,25 +4,6 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { getPostMeetingFollowupService } from './automation-post-meeting.js';
-import {
-  createMockCalendarEvent,
-  createMockActionItem,
-  createMockTask,
-} from './__test-utils/automation-factory.js';
-
-// Mock Supabase
-vi.mock('@/lib/supabase', () => (
-  {
-    supabase: {
-      from: () => ({
-        select: () => ({ eq: () => ({ single: async () => ({ data: null, error: null }) }) }),
-        insert: () => ({ select: () => ({ single: async () => ({ data: { id: 'task-1' }, error: null }) }) }),
-        update: () => ({ eq: () => ({ then: async (cb: any) => cb({ data: null, error: null }) }) }),
-      }),
-    },
-  }
-));
 
 // Mock Discord logging
 vi.mock('@/helix/logging', () => ({
@@ -35,6 +16,13 @@ vi.mock('@/helix/hash-chain', () => ({
     add: async () => ({ hash: 'mock-hash', index: 1 }),
   },
 }));
+
+import { getPostMeetingFollowupService } from './automation-post-meeting.js';
+import {
+  createMockCalendarEvent,
+  createMockActionItem,
+  createMockTask,
+} from './__test-utils/automation-factory.js';
 
 describe('PostMeetingFollowupService', () => {
   let postMeetingService: ReturnType<typeof getPostMeetingFollowupService>;
