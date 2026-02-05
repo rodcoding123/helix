@@ -546,6 +546,138 @@ export async function shutdownHelix(reason: string = 'graceful'): Promise<void> 
 }
 
 /**
+ * Gateway security configuration result
+ */
+export interface GatewaySecurityConfig {
+  bindConfig: {
+    host: string;
+    port: number;
+    valid: boolean;
+    requiresAuth: boolean;
+  };
+  authConfig: {
+    mode: 'token' | 'none';
+    tokenValid: boolean;
+  };
+  websocketConfig: {
+    allowedOrigins: string[];
+    allowedGatewayUrls?: string[];
+    enforceHttpsInProduction: boolean;
+    requireOriginHeader: boolean;
+  };
+  environment: 'development' | 'production';
+}
+
+/**
+ * Initialize Helix gateway with security hardening
+ *
+ * Wires together all security modules:
+ * - gateway-security.ts: Bind validation
+ * - gateway-token-verification.ts: Token auth & rate limiting
+ * - websocket-security.ts: Origin validation & CSWSH prevention
+ *
+ * CRITICAL: Must be called BEFORE starting the OpenClaw gateway server.
+ *
+ * @param options Gateway configuration options
+ * @returns Security configuration for OpenClaw gateway
+ * @throws Error if security validation fails (fail-closed design)
+ */
+export async function initializeHelixGateway(options: {
+  port: number;
+  bindHost: string;
+  environment: 'development' | 'production';
+}): Promise<GatewaySecurityConfig> {
+  console.log('[Helix] Initializing gateway security...');
+
+  // Step 1: Validate bind configuration
+  const { validateGatewayBind } = await import('./gateway-security.js');
+  const bindValidation = validateGatewayBind({
+    host: options.bindHost,
+    port: options.port,
+    authRequired: options.bindHost !== '127.0.0.1' && options.bindHost !== 'localhost',
+  });
+
+  if (!bindValidation.valid) {
+    throw new Error(`Gateway bind validation failed: ${bindValidation.errors.join('; ')}`);
+  }
+
+  if (bindValidation.warnings.length > 0) {
+    for (const warning of bindValidation.warnings) {
+      console.warn(`[Helix] Gateway security warning: ${warning}`);
+    }
+  }
+
+  // Step 2: Check token requirements
+  const { requiresTokenVerification, validateTokenFormat } =
+    await import('./gateway-token-verification.js');
+  const needsToken = requiresTokenVerification(options.bindHost, options.environment);
+
+  let tokenValid = true;
+  let authMode: 'token' | 'none' = 'none';
+
+  if (needsToken === 'rejected') {
+    throw new Error('Production environment rejects 0.0.0.0 gateway binding');
+  }
+
+  if (needsToken === true) {
+    authMode = 'token';
+    // Load gateway token from environment (loaded by secrets-loader during preloadSecrets)
+    const gatewayToken = process.env.HELIX_GATEWAY_TOKEN;
+    if (!gatewayToken) {
+      throw new Error(
+        'HELIX_GATEWAY_TOKEN required for network bindings. ' +
+          'Use 127.0.0.1 for local development or set HELIX_GATEWAY_TOKEN.'
+      );
+    }
+    tokenValid = validateTokenFormat(gatewayToken);
+    if (!tokenValid) {
+      throw new Error('HELIX_GATEWAY_TOKEN must be a 256-character hex string');
+    }
+  }
+
+  // Step 3: Configure WebSocket security
+  const { getDefaultWebSocketConfig } = await import('./websocket-security.js');
+  const websocketConfig = getDefaultWebSocketConfig(options.environment);
+
+  // Step 4: Log security initialization
+  try {
+    const { logSecretOperation } = await import('./hash-chain.js');
+    await logSecretOperation({
+      operation: 'access',
+      source: 'cache',
+      success: true,
+      timestamp: new Date().toISOString(),
+      details: `Gateway security initialized: ${options.bindHost}:${options.port} (${options.environment})`,
+    });
+  } catch {
+    // Don't fail if hash chain logging fails
+    console.warn('[Helix] Failed to log gateway init to hash chain');
+  }
+
+  console.log('[Helix] Gateway security initialized successfully');
+
+  return {
+    bindConfig: {
+      host: options.bindHost,
+      port: options.port,
+      valid: bindValidation.valid,
+      requiresAuth: needsToken === true,
+    },
+    authConfig: {
+      mode: authMode,
+      tokenValid,
+    },
+    websocketConfig: {
+      allowedOrigins: websocketConfig.allowedOrigins,
+      allowedGatewayUrls: websocketConfig.allowedGatewayUrls,
+      enforceHttpsInProduction: websocketConfig.enforceHttpsInProduction,
+      requireOriginHeader: websocketConfig.requireOriginHeader,
+    },
+    environment: options.environment,
+  };
+}
+
+/**
  * Get the current status of the Helix system
  */
 export async function getHelixStatus(): Promise<{

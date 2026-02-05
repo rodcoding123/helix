@@ -196,8 +196,10 @@ export async function initializeHelixGateway(options: {
         allowedOrigins: [
           "http://localhost:3000",
           "http://localhost:5173",
+          "http://localhost:5174",
           "http://127.0.0.1:3000",
           "http://127.0.0.1:5173",
+          "http://127.0.0.1:5174",
         ],
         allowedGatewayUrls: ["ws://localhost:18789", "ws://127.0.0.1:18789"],
         enforceHttpsInProduction: false,
