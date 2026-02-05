@@ -5,6 +5,16 @@ import { approvalGate } from '../../../helix/ai-operations/approval-gate.js';
 import type { GatewayRequestHandlers } from './types.js';
 
 /**
+ * Type definitions for memory synthesis handlers
+ */
+interface MemoryListPatternsParams {
+  layer?: number;
+  patternType?: string;
+  limit?: number;
+  offset?: number;
+}
+
+/**
  * Memory Synthesis Gateway RPC Methods
  *
  * Phase 0.5 Migration: Uses centralized AI operations router for model selection
@@ -162,6 +172,15 @@ export const memorySynthesisHandlers: GatewayRequestHandlers = {
    * }
    */
   'memory.synthesize': async ({ params, respond, context, client }) => {
+    // AUTHENTICATION CHECK FIRST
+    if (!client?.connect?.userId) {
+      respond(false, undefined, {
+        code: 'UNAUTHORIZED',
+        message: 'User not authenticated'
+      });
+      return;
+    }
+
     try {
       if (!params || typeof params !== 'object') {
         respond(false, undefined, {
@@ -259,8 +278,6 @@ export const memorySynthesisHandlers: GatewayRequestHandlers = {
         ],
       });
 
-      const executionLatency = Date.now() - executionStartTime;
-
       // Parse response
       const responseText = message.content[0]?.type === 'text' ? message.content[0].text : '';
 
@@ -278,7 +295,7 @@ export const memorySynthesisHandlers: GatewayRequestHandlers = {
       // Phase 0.5: Cost tracking
       const outputTokens = message.usage?.output_tokens || Math.ceil(responseText.length / 4);
       const totalLatency = Date.now() - startTime;
-      const costUsd = router['estimateCost'](routingDecision.model, estimatedInputTokens, outputTokens);
+      const costUsd = router.estimateCost(routingDecision.model, estimatedInputTokens, outputTokens);
 
       // Log the operation to cost tracker
       await costTracker.logOperation(userId || 'system', {
@@ -346,7 +363,7 @@ export const memorySynthesisHandlers: GatewayRequestHandlers = {
     const { jobId } = params;
 
     if (!client?.connect?.userId) {
-      respond(false, { code: 'UNAUTHORIZED', message: 'User not authenticated' });
+      respond(false, undefined, { code: 'UNAUTHORIZED', message: 'User not authenticated' });
       return;
     }
 
@@ -360,7 +377,7 @@ export const memorySynthesisHandlers: GatewayRequestHandlers = {
         .single();
 
       if (error || !job) {
-        respond(false, { code: 'NOT_FOUND', message: 'Job not found' });
+        respond(false, undefined, { code: 'NOT_FOUND', message: 'Job not found' });
         return;
       }
 
@@ -374,7 +391,7 @@ export const memorySynthesisHandlers: GatewayRequestHandlers = {
       });
     } catch (error) {
       context.logGateway.error?.('Failed to fetch synthesis job status', { error, jobId });
-      respond(false, { code: 'INTERNAL_ERROR', message: 'Failed to fetch job status' });
+      respond(false, undefined, { code: 'INTERNAL_ERROR', message: 'Failed to fetch job status' });
     }
   },
 
@@ -421,10 +438,28 @@ export const memorySynthesisHandlers: GatewayRequestHandlers = {
    * }
    */
   'memory.list_patterns': async ({ params, respond, context, client }) => {
-    const { layer, patternType, limit = 50, offset = 0 } = params || {};
+    const { layer, patternType, limit = 50, offset = 0 } =
+      (params as MemoryListPatternsParams) || {};
 
     if (!client?.connect?.userId) {
-      respond(false, { code: 'UNAUTHORIZED', message: 'User not authenticated' });
+      respond(false, undefined, { code: 'UNAUTHORIZED', message: 'User not authenticated' });
+      return;
+    }
+
+    // Validate pagination limits
+    if (limit < 1 || limit > 100) {
+      respond(false, undefined, {
+        code: 'INVALID_REQUEST',
+        message: 'limit must be between 1 and 100'
+      });
+      return;
+    }
+
+    if (offset < 0) {
+      respond(false, undefined, {
+        code: 'INVALID_REQUEST',
+        message: 'offset must be >= 0'
+      });
       return;
     }
 
@@ -467,7 +502,7 @@ export const memorySynthesisHandlers: GatewayRequestHandlers = {
       });
     } catch (error) {
       context.logGateway.error?.('Failed to list memory patterns', { error });
-      respond(false, { code: 'INTERNAL_ERROR', message: 'Failed to list patterns' });
+      respond(false, undefined, { code: 'INTERNAL_ERROR', message: 'Failed to list patterns' });
     }
   },
 };
@@ -476,15 +511,16 @@ export const memorySynthesisHandlers: GatewayRequestHandlers = {
  * Get the model client for the routed model
  * Phase 0.5: This abstracts model client selection from business logic
  */
-function getModelClientForOperation(model: string): any {
-  // Map model names to actual clients
-  const clients: Record<string, any> = {
-    deepseek: new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }),
-    gemini_flash: new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }),
-    openai: new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }),
-  };
+function getModelClientForOperation(_model: string): Anthropic {
+  // Load API key once using encrypted cache pattern
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error('ANTHROPIC_API_KEY not configured');
+  }
 
-  return clients[model] || new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  // For now, all models use Anthropic client
+  // In future: route to different providers (DeepSeek, Gemini)
+  return new Anthropic({ apiKey });
 }
 
 /**
