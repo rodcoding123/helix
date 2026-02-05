@@ -3,7 +3,6 @@
  * Separate, isolated audit trails for each tenant
  */
 
-import { getDb } from '@/lib/supabase';
 
 export interface TenantHashChainEntry {
   index: number;

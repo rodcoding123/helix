@@ -20,8 +20,9 @@
     "exactOptionalPropertyTypes": false,
     "noFallthroughCasesInSwitch": true,
     "resolveJsonModule": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "noImplicitThis": false
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "src/helix/*-multitenant.*"]
+  "exclude": ["node_modules", "dist", "helix-runtime/**/*", "src/helix/*-multitenant.*"]
 }

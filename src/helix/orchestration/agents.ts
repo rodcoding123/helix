@@ -22,8 +22,9 @@
  * Credentials managed by OpenClaw OAuth (never exposed).
  */
 
-import type { RemoteCommandExecutor } from '../../gateway/remote-command-executor.js';
-import { nanoid } from 'nanoid';
+// Types only - helix-runtime is compiled separately
+type RemoteCommandExecutor = any;
+
 
 /**
  * Shared orchestrator state across all agents
@@ -251,7 +252,7 @@ export async function purposeAgentNode(
  */
 export async function actionAgentNode(
   state: OrchestratorState,
-  executor?: RemoteCommandExecutor
+  _executor?: RemoteCommandExecutor
 ): Promise<Partial<OrchestratorState>> {
   // Mock implementation (would use executor in production)
   const result = `Action executed: ${state.task}
@@ -298,7 +299,7 @@ export function routeAfterSupervisor(state: OrchestratorState): string {
  * Routing function after specialized agents
  * All specialized agents route back to supervisor or end
  */
-export function routeAfterAgent(state: OrchestratorState): string {
+export function routeAfterAgent(_state: OrchestratorState): string {
   // Check if another agent is needed
   // For now: after one agent, complete
   return 'END';

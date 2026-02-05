@@ -167,8 +167,9 @@ export class RemoteCommandExecutor extends EventEmitter {
     this.logger.info('Shutting down RemoteCommandExecutor...');
 
     // Stop accepting new commands
-    const originalQueue = this.commandQueue;
+    const _originalQueue = this.commandQueue;
     this.commandQueue = [];
+    void _originalQueue; // Captured for potential future logging
 
     // Wait for executing commands to complete
     const startTime = Date.now();

@@ -7,8 +7,7 @@ import {
   TenantHashChain,
   getHashChainForTenant,
   hashString,
-} from './hash-chain-multitenant';
-import * as supabaseModule from '@/lib/supabase';
+} from './hash-chain-multitenant.js';
 
 // Mock Supabase
 const mockQuery = {
@@ -22,10 +21,6 @@ const mockQuery = {
   count: vi.fn(function () { return this; }),
   head: vi.fn(function () { return this; }),
 };
-
-vi.mock('@/lib/supabase', () => ({
-  getDb: vi.fn(() => mockQuery),
-}));
 
 describe('Tenant Hash Chain', () => {
   beforeEach(() => {

@@ -15,10 +15,9 @@
  * Clients call these from web/mobile or internal orchestrator.
  */
 
-import type { RemoteCommandExecutor } from '../../gateway/remote-command-executor.js';
 import type { OrchestratorState, OrchestratorConfig } from './agents.js';
-import type { ICheckpointer } from './checkpointer.js';
-import { runOrchestrator, streamOrchestrator, resumeOrchestrator } from './supervisor-graph.js';
+import type { ICheckpointer as _ICheckpointer } from './checkpointer.js';
+import { runOrchestrator } from './supervisor-graph.js';
 import { nanoid } from 'nanoid';
 
 /**
@@ -65,19 +64,8 @@ export async function submitOrchestratorJob(
     const logger = context.logger as any;
 
     const jobId = nanoid();
-    const job: OrchestratorJob = {
-      job_id: jobId,
-      user_id: userId,
-      task: params.task,
-      status: 'pending',
-      priority: params.priority || 'normal',
-      created_at: Date.now(),
-      budget_cents: params.budget_cents || 100,
-      cost_cents: 0,
-      requires_approval: (params.budget_cents || 100) > 50, // Require approval if > $0.50
-    };
 
-    logger.info(`[PRE-EXEC] Orchestrator job submitted: ${jobId}`);
+    logger.info(`[PRE-EXEC] Orchestrator job submitted by ${userId}: ${jobId} for task: ${params.task}`);
 
     // Store job in Supabase (would be integrated)
     // await supabase.from('agent_jobs').insert(job);
@@ -98,7 +86,7 @@ export async function submitOrchestratorJob(
  * Returns job with current status, costs, and approval state.
  */
 export async function getOrchestratorJobStatus(
-  context: any,
+  _context: any,
   params: { jobId: string }
 ): Promise<any> {
   try {
@@ -129,7 +117,7 @@ export async function approveOrchestratorJob(
     const userId = context.userId as string;
     const logger = context.logger as any;
 
-    logger.info(`[PRE-EXEC] Job approved by user: ${jobId}`);
+    logger.info(`[PRE-EXEC] Job approved by ${userId}: ${params.jobId}`);
 
     // Would update Supabase
     // await supabase.from('agent_jobs').update({
@@ -149,7 +137,7 @@ export async function approveOrchestratorJob(
  *
  * Get data for admin dashboard visualization.
  */
-export async function getOrchestratorStats(context: any): Promise<any> {
+export async function getOrchestratorStats(_context: any): Promise<any> {
   try {
     return {
       success: true,
@@ -169,8 +157,8 @@ export async function getOrchestratorStats(context: any): Promise<any> {
  * Get recent jobs for dashboard
  */
 export async function getRecentJobs(
-  context: any,
-  params: { limit?: number }
+  _context: any,
+  _params: { limit?: number }
 ): Promise<any> {
   try {
     return {
@@ -187,7 +175,7 @@ export async function getRecentJobs(
  * Get execution timeline for a job
  */
 export async function getJobExecutionTimeline(
-  context: any,
+  _context: any,
   params: { jobId: string }
 ): Promise<any> {
   try {
@@ -195,7 +183,7 @@ export async function getJobExecutionTimeline(
       success: true,
       job_id: params.jobId,
       timeline: [],
-    };
+    }; // params used in return value
   } catch (error) {
     return { success: false, error: String(error) };
   }
@@ -249,7 +237,7 @@ export function selectModelForAgent(
 async function processOrchestratorJob(
   jobId: string,
   task: string,
-  config?: OrchestratorConfig,
+  _config?: OrchestratorConfig,
   context?: any
 ): Promise<void> {
   const logger = context?.logger;
@@ -257,8 +245,8 @@ async function processOrchestratorJob(
   try {
     logger?.info(`Processing orchestrator job: ${jobId}`);
 
-    const result = await runOrchestrator(task, {
-      config,
+    await runOrchestrator(task, {
+      config: _config,
       threadId: `job-${jobId}`,
     });
 

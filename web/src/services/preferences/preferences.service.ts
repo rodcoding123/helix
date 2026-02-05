@@ -205,25 +205,48 @@ export class PreferencesService {
 
   /**
    * Bulk update operation preferences
+   * Phase 9 Polish: Uses single UPSERT with multiple rows (N queries → 1 query)
+   * Instead of looping through setOperationPreference (which was N+1), batch all at once
    */
   async bulkUpdateOperationPreferences(
     userId: string,
     updates: Array<Partial<OperationPreference> & { operation_id: string }>
   ): Promise<OperationPreference[]> {
-    const results: OperationPreference[] = [];
+    if (updates.length === 0) return [];
 
+    // Build batch UPSERT payload - all updates in one payload
+    const payload = updates.map(update => ({
+      user_id: userId,
+      operation_id: update.operation_id,
+      enabled: update.enabled !== undefined ? update.enabled : true,
+      preferred_model: update.preferred_model,
+      default_parameters: update.default_parameters,
+      cost_budget_monthly: update.cost_budget_monthly,
+      updated_at: new Date().toISOString(),
+    }));
+
+    // Single UPSERT query for all updates (previously was N queries in a loop)
+    const { data, error } = await getDb()
+      .from('user_operation_preferences')
+      .upsert(payload, { onConflict: 'user_id,operation_id' })
+      .select();
+
+    if (error) throw error;
+
+    // Invalidate caches after batch update completes
+    const cache = getCacheService();
+    cache.delete(`op_prefs:${userId}`).catch(err => {
+      console.error('Failed to invalidate cache:', err);
+    });
+
+    // Invalidate individual operation preference caches
     for (const update of updates) {
-      const result = await this.setOperationPreference(userId, {
-        operation_id: update.operation_id,
-        enabled: update.enabled !== undefined ? update.enabled : true,
-        preferred_model: update.preferred_model,
-        default_parameters: update.default_parameters,
-        cost_budget_monthly: update.cost_budget_monthly,
+      cache.delete(`op_pref:${userId}:${update.operation_id}`).catch(err => {
+        console.error('Failed to invalidate cache:', err);
       });
-      results.push(result);
     }
 
-    return results;
+    return data || [];
   }
 
   /**

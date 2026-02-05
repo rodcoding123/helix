@@ -7,8 +7,7 @@ import {
   TenantDiscordLogger,
   getDiscordLoggerForTenant,
   GlobalDiscordLogger,
-} from './command-logger-multitenant';
-import * as supabaseModule from '@/lib/supabase';
+} from './command-logger-multitenant.js';
 
 // Mock Supabase
 const mockQuery = {
@@ -17,10 +16,6 @@ const mockQuery = {
   eq: vi.fn(function () { return this; }),
   single: vi.fn(),
 };
-
-vi.mock('@/lib/supabase', () => ({
-  getDb: vi.fn(() => mockQuery),
-}));
 
 // Mock hash chain
 vi.mock('./hash-chain-multitenant', () => ({

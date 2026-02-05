@@ -18,6 +18,47 @@ Build a TypeScript implementation of Lingxi's supervisor pattern, adapted for He
 
 ---
 
+## BYOK (Bring Your Own Key) - Phase 2 Enhancement
+
+Phase 1 establishes the OAuth foundation. Phase 2 adds **heterogeneous model deployment** with user control:
+
+**User Controls Which Model Powers Each Component**:
+
+```json
+{
+  "supervisor": {
+    "provider": "anthropic",
+    "model": "claude-opus-4.5",
+    "credential": "claude-max-subscription"
+  },
+  "narrative_agent": {
+    "provider": "anthropic",
+    "model": "claude-opus-4.5"
+  },
+  "memory_agent": {
+    "provider": "anthropic",
+    "model": "claude-sonnet-4"
+  },
+  "purpose_agent": {
+    "provider": "anthropic",
+    "model": "claude-sonnet-4"
+  },
+  "action_agent": {
+    "provider": "deepseek",
+    "model": "deepseek-v3.2",
+    "credential": "deepseek-api-key"
+  }
+}
+```
+
+**Approval Modes** (user chooses):
+- **Budget-Based**: Auto-approve < $0.10, require approval $0.10-$0.50
+- **Operation-Type**: Auto-approve reads, require approval for writes
+- **Cost-Threshold**: Different thresholds at 0.01, 0.10, 1.00
+- **Full-Manual**: Every operation requires pre-approval
+
+---
+
 ## Table of Contents
 
 1. [Architecture Overview](#architecture-overview)
@@ -303,6 +344,15 @@ Phase 1 created `RemoteExecutionDashboard`. Phase 2 extends with orchestrator pa
 
 **Goal**: Implement LangGraph-style state graph in pure TypeScript
 
+**🏗️ Helix Integration**:
+- **Pattern**: LangGraph-compatible state machine (nodes + edges + routing)
+- **Checkpointing**: Integrates with Module 2 (Supabase checkpointing)
+- **Type Safety**: Generic TState allows strong typing for orchestrator state
+- **Async-First**: All node functions are async (supports AI model calls)
+- **Immutable Updates**: State merged via spread operator (no mutations)
+- **Stream Support**: Optional stream() method for real-time UI updates
+- **Phase 1 Integration**: Uses RemoteCommandExecutor for action execution
+
 **Files**:
 
 - `src/helix/orchestration/state-graph.ts` (NEW)
@@ -527,6 +577,14 @@ Phase 1 created `RemoteExecutionDashboard`. Phase 2 extends with orchestrator pa
 ### Module 2: Checkpointing System
 
 **Goal**: Implement Supabase-backed checkpointing for state persistence
+
+**🏗️ Helix Integration**:
+- **TRAE Pattern**: Continuous checkpointing after every node execution (not just at end)
+- **Supabase Backend**: Reuses existing Supabase client from Phase 1
+- **Hash Chain Integration**: Every checkpoint logged to Discord + added to hash chain
+- **Pre-Execution Logging**: Logs checkpoint to Discord BEFORE saving (Helix pattern)
+- **Resume/Replay**: Users can resume from any checkpoint or replay full trajectory
+- **Real-time Sync**: Checkpoints published to realtime for live admin dashboard updates
 
 **Files**:
 
@@ -865,6 +923,100 @@ Current plan has 4 dashboard components. You may want different charts:
 
 ---
 
+## How Phase 2 Integrates with Phase 1
+
+### The Two-Phase Architecture
+
+**Phase 1** (OAuth Foundation + Remote Execution):
+```
+Desktop OAuth (Module 1-3)
+        ↓
+  Local Executor (Module 6-9)
+        ↓
+    Supabase Sync (Module 10)
+        ↓
+   Web/Mobile Results
+```
+
+**Phase 2** (Orchestrator on Top):
+```
+   Supervisor Agent
+        ↓
+  4 Specialized Agents
+        ↓
+  Action Agent
+        ↓
+  RemoteCommandExecutor (from Phase 1)
+        ↓
+   Supabase Checkpoints (from Phase 1)
+        ↓
+   Discord Logging + Hash Chain
+```
+
+### Critical Integration Points
+
+**1. Action Agent Uses Phase 1's RemoteCommandExecutor**
+- Action Agent creates RemoteCommand payloads (Module 4 schema)
+- Queues via RemoteCommandExecutor.queueCommand()
+- Waits for 'command-completed' event
+- Returns result to orchestrator state
+
+**2. Checkpointing Uses Phase 1's Database Foundation**
+- Migration 021 creates agent_jobs, orchestrator_state, etc.
+- Migration 022 adds orchestrator_checkpoints
+- Same Supabase client, same RLS patterns, same realtime subscriptions
+- Same user authentication
+
+**3. Pre-Execution Logging Pattern Maintained**
+- Phase 1: Remote commands logged to Discord BEFORE queuing
+- Phase 2: Orchestrator events logged to Discord BEFORE execution
+- Same fail-closed pattern: operations block if logging fails
+- Same hash chain: all events linked in immutable audit trail
+
+**4. Admin Dashboard Unified**
+- Phase 1: RemoteExecutionDashboard (command stats)
+- Phase 2: OrchestrationDashboard (job queue + agent utilization)
+- Same Tailwind styling, same Supabase subscriptions
+- Single admin panel with multiple tabs
+
+### Why This Two-Phase Approach?
+
+**Separation of Concerns**:
+- Phase 1 solves multi-device execution (separate problem)
+- Phase 2 solves multi-agent orchestration (separate problem)
+- Each phase can be tested independently
+
+**Validation Gates**:
+- Phase 1 complete → Validate OAuth works, remote execution works
+- Phase 2 complete → Validate orchestrator routing, checkpointing works
+- If Phase 2 needs redesign, Phase 1 still provides value
+
+**Incremental Value**:
+- Phase 1 alone: Multi-device execution with OAuth (immediately useful)
+- Phase 1 + Phase 2: Full orchestrator with cost control (advanced features)
+
+### Going Forward
+
+After implementing Phase 1:
+1. Users can execute commands from web/mobile on local device
+2. Multi-device sync works seamlessly
+3. Full audit trail via Discord + hash chain
+
+After implementing Phase 2:
+1. Supervisor routes between specialized agents
+2. Each agent has dedicated model (configurable)
+3. Cost tracking with approval modes
+4. Advanced dashboard with job queue visualization
+5. Checkpoint-based debugging and replay
+
+---
+
 **End of Phase 2 Plan**
 
 This plan should be reviewed and customized before implementation begins.
+
+**Key Files Modified/Created**:
+- Phase 1: 9 new files, 6 modified files (OAuth + remote execution)
+- Phase 2: 16 new files, 5 modified files (orchestrator + agents)
+- Total: 25 new files, 11 modified files
+- Total Tasks: 250+ granular checkboxes across both phases

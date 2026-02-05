@@ -3,8 +3,7 @@
  * Each tenant has isolated webhook and audit trail
  */
 
-import { getDb } from '@/lib/supabase';
-import { getHashChainForTenant } from './hash-chain-multitenant';
+import { getHashChainForTenant } from './hash-chain-multitenant.js';
 
 /**
  * Tenant-specific Discord logging

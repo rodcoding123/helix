@@ -139,6 +139,45 @@ Desktop App                    Web App                     Mobile App
 
 ---
 
+## Clarification: Lingxi vs TRAE (Phase 1 Foundation)
+
+**User Question**: "Where does Lingxi fit in this new plan?"
+
+**Answer**: Lingxi IS the TRAE-style orchestrator - Phase 1 builds the **foundational OAuth + multi-device execution layer** that Phase 2 (Lingxi orchestrator) depends on.
+
+| Aspect | Original Lingxi Plan | Current TRAE-Style Plan |
+|--------|---------------------|------------------------|
+| **Name** | "Lingxi-Style Orchestrator" | "TRAE-Style Orchestrator" (Phase 2) |
+| **Phase 1 Role** | Not separated | **Phase 1 OAuth + Remote Execution** (this plan) |
+| **Pattern** | LangGraph supervisor | TRAE hierarchical state tracking + LangGraph routing |
+| **Checkpointing** | Basic Supabase storage | TRAE continuous checkpointing + hash chain |
+| **Tools** | Generic tools | Mini-SWE bash-only simplicity + SWE-agent ACI |
+| **Context** | No compression | SWE-agent 42% trajectory compression |
+| **BYOK** | Not emphasized | **PRIMARY PRINCIPLE** - heterogeneous deployment |
+| **Multi-Device** | Not designed in | **Phase 1 Foundation** - OAuth local authority + remote execution |
+| **Approval** | Basic | **4 configurable modes** - budget/type/cost/manual |
+
+### Why Two Phases?
+
+**Phase 1 (This Plan)** establishes the **local authority + remote execution foundation**:
+- Desktop device performs OAuth (never leaves desktop)
+- Stores credentials in OpenClaw's auth-profiles.json
+- Remote devices send command payloads via Supabase
+- Local device executes with its OAuth credentials
+- Results broadcast back to all devices in real-time
+- Result: Seamless multi-device experience with zero credential sharing
+
+**Phase 2 (Future)** builds the **TRAE-style orchestrator** on top:
+- Supervisor agent routes between specialized agents
+- Continuous checkpointing with Supabase + hash chain
+- Centralized AI controller with configurable approval modes
+- Per-agent/skill/tool model assignment (BYOK)
+- Advanced dashboard with job queue visualization
+
+**Key Design Principle**: Phase 2's remote execution happens via Phase 1's RemoteCommandExecutor - both phases share the same OAuth foundation and pre-execution logging pattern.
+
+---
+
 ## Integration with Existing Systems
 
 ### 1. OpenClaw Runtime Integration
@@ -350,11 +389,69 @@ class OperationRouter {
 
 ---
 
+## TRAE UI Inspiration (Phase 2 Dashboard Foundation)
+
+Phase 1 builds the foundation; Phase 2 will add advanced dashboard features inspired by TRAE-agent's proven UI patterns:
+
+### Dashboard Components (Phase 2)
+
+**1. Real-Time Trajectory Visualization**:
+```typescript
+// Show orchestrator execution progress in real-time
+interface TrajectoryVisualization {
+  currentNode: string;                    // Which agent is active
+  lifecycle: 'planning' | 'executing' | 'reflecting';
+  stepProgress: {
+    current: number;
+    total: number;
+    action: string;
+  };
+  historicalPath: string[];              // Nodes visited
+}
+```
+- Visual state graph showing supervisor routing decisions
+- Live progress indicator showing task completion %
+- Historical path showing all agents involved
+
+**2. Checkpoint Timeline View**:
+- Visual timeline of all execution checkpoints
+- Click any checkpoint to see state snapshot
+- Diff view between checkpoints
+- Resume from any point (time-travel debugging)
+
+**3. Cost Breakdown Visualization**:
+- Real-time cost meter per operation
+- Per-agent cost attribution
+- Daily/weekly/monthly cost trends
+- Budget warnings with visual alerts
+
+**4. Agent Utilization Heatmap**:
+- Grid showing which agents are busy/idle
+- Color coding: green (idle) → yellow (moderate) → red (saturated)
+- Click agent to see current task and execution history
+
+**5. Approval Queue Interface**:
+- Card-based UI for pending approvals (Phase 2 feature)
+- Show: operation type, estimated cost, reasoning
+- Quick approve/reject buttons
+- Batch approval for similar operations
+
+**Phase 1 Note**: Phase 1 includes basic `RemoteExecutionDashboard.tsx` (command stats). Phase 2 will extend this with orchestrator visualizations above.
+
+---
+
 ## Task Breakdown
 
 ### Module 1: Desktop OAuth Service Wrapper
 
 **Goal**: Create TypeScript wrapper for OpenClaw OAuth CLI commands
+
+**🏗️ Helix Integration**:
+- **Wraps**: OpenClaw's existing `openclaw models auth` CLI commands (no changes to OpenClaw)
+- **Uses**: Tauri IPC invoke system (existing desktop app infrastructure)
+- **Integrates with**: Phase 1 Module 2 (Tauri Rust commands), Phase 2 ActionAgent (remote execution)
+- **Dependencies**: OpenClaw CLI must be installed (already part of helix-runtime)
+- **Fail-Closed Pattern**: All errors caught and returned as structured results (no uncaught exceptions)
 
 **Files**:
 
@@ -468,6 +565,14 @@ class OperationRouter {
 ### Module 2: Tauri OAuth Commands (Rust)
 
 **Goal**: Implement Rust backend commands to execute OpenClaw CLI
+
+**🏗️ Helix Integration**:
+- **Backend for**: Module 1 TypeScript service wrapper
+- **Pattern**: Tauri invoke system (same pattern as existing desktop commands)
+- **Subprocess Execution**: Security isolation - OpenClaw runs in separate process
+- **Error Handling**: Returns structured Result types (Rust error handling best practices)
+- **File Access**: Reads `~/.openclaw/agents/main/agent/auth-profiles.json` directly (replaces redirect flow)
+- **Registers with**: Tauri command handler (existing builder pattern)
 
 **Files**:
 
@@ -621,6 +726,13 @@ class OperationRouter {
 
 **Goal**: Replace API key redirect with OAuth buttons for Claude and Codex
 
+**🏗️ Helix Integration**:
+- **Frontend for**: Module 1 OAuth service + Module 2 Tauri commands
+- **Pattern**: React component with async state management (existing onboarding pattern)
+- **User Experience**: Replaces "Get API Key" redirect with native OAuth button
+- **Error Handling**: Shows user-friendly error messages, logs to console for debugging
+- **State Management**: Tracks authentication in-flight state (loading/success/error)
+
 **Files**:
 
 - `helix-desktop/src/components/onboarding/steps/AuthConfigStep.tsx` (MODIFY)
@@ -741,6 +853,13 @@ const API_KEY_REDIRECT_PROVIDERS = ['google-gemini-cli', 'google-antigravity', .
 
 **Goal**: Define TypeBox schema and TypeScript types for remote command execution
 
+**🏗️ Helix Integration**:
+- **Schema Pattern**: TypeBox (same as existing gateway protocols)
+- **Runtime Validation**: Validates remote command payloads before queuing
+- **Type Safety**: Generates TypeScript types from schema (no manual type duplication)
+- **Gateway Integration**: Used by sync-relay to validate incoming commands from web/mobile
+- **Phase 2 Usage**: Action Agent creates RemoteCommand payloads using this schema
+
 **Files**:
 
 - `helix-runtime/src/gateway/protocol/schema/remote-command.ts` (NEW)
@@ -835,6 +954,12 @@ const API_KEY_REDIRECT_PROVIDERS = ['google-gemini-cli', 'google-antigravity', .
 
 **Goal**: Define TypeScript interfaces for web remote execution
 
+**🏗️ Helix Integration**:
+- **Web Client Types**: Used by CodeInterface and other web components
+- **Type Safety**: Ensures web client and local executor speak same language
+- **Real-time Types**: Matches database schema for Supabase sync
+- **No Runtime Validation**: Web types are for development; TypeBox schema (Module 4) validates at runtime
+
 **Files**:
 
 - `web/src/types/remote-execution.ts` (NEW)
@@ -892,6 +1017,14 @@ const API_KEY_REDIRECT_PROVIDERS = ['google-gemini-cli', 'google-antigravity', .
 ### Module 6: Remote Command Executor (Part 1/4: Core Structure)
 
 **Goal**: Set up class structure and dependencies
+
+**🏗️ Helix Integration** (4-part module):
+- **Helix Pattern**: EventEmitter for async result broadcasting to sync relay
+- **Pre-Execution Logging**: Logs to Discord BEFORE queueing (Helix security principle)
+- **Hash Chain**: All commands added to hash chain for audit trail
+- **Queue Management**: Respects maxConcurrent limit (5 by default) to prevent resource exhaustion
+- **Sync Relay Bridge**: Emits events that sync relay listens to for broadcasting results
+- **Phase 2 Integration**: Action Agent uses this executor to run all operations
 
 **Files**:
 
@@ -1579,6 +1712,32 @@ End-to-End Verification
 
 ---
 
+## BYOK (Bring Your Own Key) - Foundational Principle
+
+**What is BYOK?**
+Users provide ALL their own API keys (no Helix billing):
+- Claude API via Claude MAX subscription (setup-token flow)
+- OpenAI Codex via their OpenAI account (PKCE OAuth)
+- Future: DeepSeek, GLM-4, Gemini, etc. (stored in auth-profiles.json)
+
+**Cost Transparency**:
+- All charges go directly to user's accounts
+- Helix never touches billing
+- Users see exact cost per operation via admin dashboard
+
+**Phase 1 Implementation**:
+- Desktop performs OAuth (tokens stay on desktop)
+- Stores credentials in `~/.openclaw/agents/main/agent/auth-profiles.json`
+- Remote devices execute via Phase 1 remote executor (uses local credentials)
+
+**Phase 2 Enhancement**:
+- Per-agent/skill/tool model assignment (users choose which model powers each component)
+- Smart routing based on queue depth and cost
+- Approval modes (budget-based, operation-type, cost-threshold, full-manual)
+- Real-time cost tracking with budget alerts
+
+---
+
 ## Next Steps
 
 After completing Phase 1, proceed to **Phase 2: Lingxi-Style Orchestrator** (see separate plan file).
@@ -1588,8 +1747,9 @@ Phase 2 builds on this foundation to add:
 - Supervisor agent routing
 - Specialized psychological agents
 - Multi-agent collaboration
-- Advanced dashboard features
-- Cost-aware model routing
+- Advanced dashboard features (TRAE UI inspiration)
+- Cost-aware model routing with per-agent assignment
+- Approval workflow with 4 configurable modes
 
 ---
 
@@ -1598,3 +1758,4 @@ Phase 2 builds on this foundation to add:
 Total Estimated Tasks: **150+ granular checkboxes**
 Estimated Completion Time: **4-6 sessions** (assuming 2-3 hour sessions)
 Complexity: **Medium** (builds on existing systems)
+Key Pattern: **Pre-execution logging** (Discord + hash chain before any operation)

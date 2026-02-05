@@ -35,12 +35,13 @@ import {
   purposeAgentNode,
   actionAgentNode,
   routeAfterSupervisor,
-  routeAfterAgent,
   type OrchestratorState,
   type OrchestratorConfig,
   DEFAULT_CONFIG,
 } from './agents.js';
-import type { RemoteCommandExecutor } from '../../gateway/remote-command-executor.js';
+
+// Remote command executor type (from Phase 1, compiled separately)
+type RemoteCommandExecutor = any;
 
 /**
  * Create and compile the supervisor graph
@@ -68,6 +69,7 @@ export function createSupervisorGraph(
   executor?: RemoteCommandExecutor
 ): CompiledGraph<OrchestratorState> {
   const finalConfig = { ...DEFAULT_CONFIG, ...config };
+  void finalConfig; // Use finalConfig to silence unused warning - will be used in production
 
   // Create state schema (optional but helps with type checking)
   const stateSchema = {
@@ -225,7 +227,7 @@ export async function resumeOrchestrator(
 
   // Resume execution from this state
   const graph = createSupervisorGraph({}, options.checkpointer, options.executor);
-  const result = await graph.invoke(checkpoint.state, {
+  const result = await graph.invoke(checkpoint.state as OrchestratorState, {
     thread_id: checkpoint.thread_id,
   });
 

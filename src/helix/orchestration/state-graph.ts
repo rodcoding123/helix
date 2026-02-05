@@ -93,10 +93,10 @@ export class StateGraph<TState = any> {
     { fn: ConditionalEdgeFn<TState>; mapping: ConditionalEdgeMapping }
   >();
   private entryPoint: string | null = null;
-  private stateSchema: any;
 
-  constructor(stateSchema?: any) {
-    this.stateSchema = stateSchema;
+  constructor(_stateSchema?: any) {
+    // stateSchema parameter for future type validation
+    void _stateSchema;
   }
 
   /**
@@ -196,7 +196,7 @@ export class StateGraph<TState = any> {
       this.entryPoint,
       this.conditionalEdges,
       checkpointer,
-      this.stateSchema
+      undefined
     );
   }
 }
@@ -214,8 +214,11 @@ export class CompiledGraph<TState = any> {
     private entryPoint: string,
     private conditionalEdges: Map<string, { fn: ConditionalEdgeFn<TState>; mapping: any }>,
     private checkpointer?: any,
-    private stateSchema?: any
-  ) {}
+    _stateSchema?: any
+  ) {
+    // stateSchema parameter accepted for future type validation
+    void _stateSchema;
+  }
 
   /**
    * Execute graph to completion
@@ -289,7 +292,7 @@ export class CompiledGraph<TState = any> {
    */
   public async *stream(
     initialState: TState,
-    config?: { thread_id?: string }
+    _config?: { thread_id?: string }
   ): AsyncGenerator<{ node: string; state: TState }, void, unknown> {
     let currentNode = this.entryPoint;
     let state = initialState;
@@ -394,7 +397,7 @@ export class CompiledGraph<TState = any> {
  * )
  * ```
  */
-export function updateState<TState>(state: TState, updates: Partial<TState>): Partial<TState> {
+export function updateState<TState>(_state: TState, updates: Partial<TState>): Partial<TState> {
   return updates;
 }
 
