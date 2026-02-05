@@ -30,16 +30,20 @@ struct RootTabs: View {
                 .tabItem { Label("Tasks", systemImage: "checkmark.circle") }
                 .tag(4)
 
+            TeamsTab()
+                .tabItem { Label("Teams", systemImage: "person.2") }
+                .tag(5)
+
             SettingsTab()
                 .tabItem { Label("Settings", systemImage: "gearshape") }
-                .tag(5)
+                .tag(6)
         }
         .overlay(alignment: .topLeading) {
             StatusPill(
                 gateway: self.gatewayStatus,
                 voiceWakeEnabled: self.voiceWakeEnabled,
                 activity: self.statusActivity,
-                onTap: { self.selectedTab = 5 })
+                onTap: { self.selectedTab = 6 })
                 .padding(.leading, 10)
                 .safeAreaPadding(.top, 10)
         }
