@@ -100,18 +100,18 @@ export class SLATracker {
   }
 
   /**
-   * Record an operation execution for SLA tracking
+   * Record execution metrics
    */
   recordExecution(userId: string, metrics: ExecutionMetrics): void {
     if (!this.executionMetrics.has(userId)) {
       this.executionMetrics.set(userId, []);
     }
 
-    this.executionMetrics.get(userId)!.push(metrics);
-
-    // Keep only last 30 days of metrics
-    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
     const userMetrics = this.executionMetrics.get(userId)!;
+    userMetrics.push(metrics);
+
+    // Keep only metrics from last 30 days
+    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
     this.executionMetrics.set(
       userId,
       userMetrics.filter(m => m.timestamp > thirtyDaysAgo)
@@ -119,7 +119,7 @@ export class SLATracker {
   }
 
   /**
-   * Calculate current SLA status
+   * Calculate SLA status for a user
    */
   async calculateSLAStatus(userId: string, tier: SLATier): Promise<SLAStatus> {
     const thresholds = SLA_TIERS[tier];
@@ -249,16 +249,16 @@ export class SLATracker {
    * Get all active violations for a user
    */
   getActiveViolations(userId: string): SLAViolation[] {
-    return this.slaViolations.get(userId) || [];
+    return (this.slaViolations.get(userId) || []).filter(v => !v.resolvedAt);
   }
 
   /**
-   * Store SLA status in database
+   * Store SLA status to database
    */
   async storeSLAStatus(status: SLAStatus): Promise<void> {
     try {
       await getDb()
-        .from('sla_status')
+        .from('sla_statuses')
         .upsert({
           user_id: status.userId,
           tier: status.tier,
@@ -266,20 +266,16 @@ export class SLATracker {
           current_downtime: status.currentDowntime,
           current_success_rate: status.currentSuccessRate,
           current_avg_latency: status.currentAvgLatency,
-          days_into_month: status.daysIntoMonth,
-          projected_uptime: status.projectedUptime,
           is_compliant: status.isCompliant,
           last_checked_at: status.lastCheckedAt,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('user_id', status.userId);
+        });
     } catch (error) {
       console.error('[SLATracker] Error storing SLA status:', error);
     }
   }
 
   /**
-   * Store SLA violations in database
+   * Store violations to database
    */
   async storeViolations(violations: SLAViolation[]): Promise<void> {
     if (violations.length === 0) return;
@@ -299,58 +295,10 @@ export class SLATracker {
             metric_value: v.metricValue,
             threshold: v.threshold,
             detected_at: v.detectedAt,
-            resolved_at: v.resolvedAt,
           }))
         );
     } catch (error) {
       console.error('[SLATracker] Error storing violations:', error);
-    }
-  }
-
-  /**
-   * Get monthly SLA report
-   */
-  async getMonthlyReport(userId: string, tier: SLATier): Promise<SLAStatus | null> {
-    try {
-      const { data, error } = await getDb()
-        .from('sla_status')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('tier', tier)
-        .single();
-
-      if (error) return null;
-
-      return data ? this.dbRowToSLAStatus(data) : null;
-    } catch (error) {
-      console.error('[SLATracker] Error fetching SLA report:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Get SLA violations for a period
-   */
-  async getViolationHistory(
-    userId: string,
-    startDate: Date,
-    endDate: Date
-  ): Promise<SLAViolation[]> {
-    try {
-      const { data, error } = await getDb()
-        .from('sla_violations')
-        .select('*')
-        .eq('user_id', userId)
-        .gte('detected_at', startDate.toISOString())
-        .lte('detected_at', endDate.toISOString())
-        .order('detected_at', { ascending: false });
-
-      if (error) return [];
-
-      return (data || []).map(this.dbRowToViolation);
-    } catch (error) {
-      console.error('[SLATracker] Error fetching violation history:', error);
-      return [];
     }
   }
 
@@ -369,28 +317,55 @@ export class SLATracker {
   }
 
   /**
+   * Get violation history for a user
+   */
+  async getViolationHistory(userId: string, days: number = 30): Promise<SLAViolation[]> {
+    try {
+      const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+
+      const { data, error } = await getDb()
+        .from('sla_violations')
+        .select('*')
+        .eq('user_id', userId)
+        .gte('detected_at', since)
+        .order('detected_at', { ascending: false });
+
+      if (error) throw error;
+
+      return (data || []).map(v => ({
+        id: v.id,
+        userId: v.user_id,
+        tier: v.tier as SLATier,
+        violationType: v.violation_type as 'uptime' | 'latency' | 'success_rate',
+        severity: v.severity as 'warning' | 'critical',
+        message: v.message,
+        metric: v.metric,
+        metricValue: v.metric_value,
+        threshold: v.threshold,
+        detectedAt: v.detected_at,
+        resolvedAt: v.resolved_at,
+      }));
+    } catch (error) {
+      console.error('[SLATracker] Error fetching violation history:', error);
+      return [];
+    }
+  }
+
+  /**
    * Start periodic SLA evaluation
    */
-  startEvaluation(userIds: string[], tiers: Record<string, SLATier>, intervalMs: number = 300_000): void {
+  startEvaluation(intervalMs: number = 5000): void {
     if (this.evaluationInterval) {
       clearInterval(this.evaluationInterval);
     }
 
     this.evaluationInterval = setInterval(() => {
-      for (const userId of userIds) {
-        const tier = tiers[userId] || 'standard';
-        this.calculateSLAStatus(userId, tier).then(status => {
-          this.storeSLAStatus(status);
-          if (!status.isCompliant) {
-            this.storeViolations(status.violations);
-          }
-        }).catch(err => {
-          console.error('[SLATracker] Error in evaluation loop:', err);
-        });
-      }
+      this.evaluateAllUsers().catch(err => {
+        console.error('[SLATracker] Error during evaluation:', err);
+      });
     }, intervalMs);
 
-    console.log('[SLATracker] Started evaluation loop (every ' + intervalMs / 1000 + 's)');
+    console.log(`[SLATracker] Started evaluation loop (every ${intervalMs / 1000}s)`);
   }
 
   /**
@@ -405,55 +380,39 @@ export class SLATracker {
   }
 
   /**
-   * Convert database row to SLAStatus
+   * Evaluate all users' SLA status
    */
-  private dbRowToSLAStatus(row: any): SLAStatus {
-    return {
-      userId: row.user_id,
-      tier: row.tier,
-      currentUptime: row.current_uptime,
-      currentDowntime: row.current_downtime,
-      currentSuccessRate: row.current_success_rate,
-      currentAvgLatency: row.current_avg_latency,
-      daysIntoMonth: row.days_into_month,
-      projectedUptime: row.projected_uptime,
-      isCompliant: row.is_compliant,
-      violations: [],
-      lastCheckedAt: row.last_checked_at,
-    };
+  private async evaluateAllUsers(): Promise<void> {
+    const userIds = Array.from(new Set(
+      Array.from(this.executionMetrics.keys())
+    ));
+
+    for (const userId of userIds) {
+      // Evaluate all tiers
+      for (const tier of ['premium', 'standard', 'basic'] as SLATier[]) {
+        const status = await this.calculateSLAStatus(userId, tier);
+        await this.storeSLAStatus(status);
+
+        if (status.violations.length > 0) {
+          await this.storeViolations(status.violations);
+        }
+      }
+    }
   }
 
   /**
-   * Convert database row to SLAViolation
-   */
-  private dbRowToViolation(row: any): SLAViolation {
-    return {
-      id: row.id,
-      userId: row.user_id,
-      tier: row.tier,
-      violationType: row.violation_type,
-      severity: row.severity,
-      message: row.message,
-      metric: row.metric,
-      metricValue: row.metric_value,
-      threshold: row.threshold,
-      detectedAt: row.detected_at,
-      resolvedAt: row.resolved_at,
-    };
-  }
-
-  /**
-   * Get metrics count for user
+   * Get metrics count for a user
    */
   getMetricsCount(userId: string): number {
     return this.executionMetrics.get(userId)?.length || 0;
   }
 
   /**
-   * Clear old metrics (for testing)
+   * Clear metrics for a user
    */
   clearMetrics(userId: string): void {
     this.executionMetrics.delete(userId);
+    this.slaViolations.delete(userId);
   }
 }
 
