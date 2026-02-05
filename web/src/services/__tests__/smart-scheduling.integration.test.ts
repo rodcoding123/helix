@@ -62,7 +62,7 @@ describe('Smart Scheduling Integration Workflow', () => {
     it('finds suitable times for multiple attendees', async () => {
       const schedulingService = getSmartSchedulingService();
 
-      const slots = await schedulingService.findBestMeetingTimes({
+      const suggestion = await schedulingService.findBestMeetingTimes({
         attendeeEmails: testAttendees,
         duration: testDuration,
         dateRange: {
@@ -70,11 +70,6 @@ describe('Smart Scheduling Integration Workflow', () => {
           end: new Date(Date.now() + 604800000), // 7 days
         },
       });
-
-      const suggestion = {
-        suggestedTimes: slots,
-        bestTime: slots[0] || null,
-      };
 
       expect(suggestion).toBeDefined();
       expect(Array.isArray(suggestion.suggestedTimes)).toBe(true);
@@ -84,7 +79,7 @@ describe('Smart Scheduling Integration Workflow', () => {
     it('respects attendee count in scoring', async () => {
       const schedulingService = getSmartSchedulingService();
 
-      const singleAttendeeSlots = await schedulingService.findBestMeetingTimes({
+      const singleAttendee = await schedulingService.findBestMeetingTimes({
         attendeeEmails: ['alice@company.com'],
         duration: testDuration,
         dateRange: {
@@ -93,7 +88,7 @@ describe('Smart Scheduling Integration Workflow', () => {
         },
       });
 
-      const multipleAttendeesSlots = await schedulingService.findBestMeetingTimes({
+      const multipleAttendees = await schedulingService.findBestMeetingTimes({
         attendeeEmails: testAttendees,
         duration: testDuration,
         dateRange: {
@@ -101,9 +96,6 @@ describe('Smart Scheduling Integration Workflow', () => {
           end: new Date(Date.now() + 604800000),
         },
       });
-
-      const singleAttendee = { suggestedTimes: singleAttendeeSlots };
-      const multipleAttendees = { suggestedTimes: multipleAttendeesSlots };
 
       expect(singleAttendee.suggestedTimes).toBeDefined();
       expect(multipleAttendees.suggestedTimes).toBeDefined();
@@ -112,7 +104,7 @@ describe('Smart Scheduling Integration Workflow', () => {
     it('returns sorted suggestions by quality score', async () => {
       const schedulingService = getSmartSchedulingService();
 
-      const slots = await schedulingService.findBestMeetingTimes({
+      const suggestion = await schedulingService.findBestMeetingTimes({
         attendeeEmails: testAttendees,
         duration: testDuration,
         dateRange: {
@@ -120,8 +112,6 @@ describe('Smart Scheduling Integration Workflow', () => {
           end: new Date(Date.now() + 604800000),
         },
       });
-
-      const suggestion = { suggestedTimes: slots };
 
       if (suggestion.suggestedTimes.length > 1) {
         for (let i = 0; i < suggestion.suggestedTimes.length - 1; i++) {
@@ -176,7 +166,7 @@ describe('Smart Scheduling Integration Workflow', () => {
     it('returns scored time slots with breakdown', async () => {
       const schedulingService = getSmartSchedulingService();
 
-      const slots = await schedulingService.findBestMeetingTimes({
+      const result = await schedulingService.findBestMeetingTimes({
         attendeeEmails: testAttendees,
         duration: testDuration,
         dateRange: {
@@ -185,8 +175,8 @@ describe('Smart Scheduling Integration Workflow', () => {
         },
       });
 
-      if (slots.length > 0) {
-        const slot = slots[0];
+      if (result.suggestedTimes.length > 0) {
+        const slot = result.suggestedTimes[0];
         expect(typeof slot.score).toBe('number');
         expect(slot.scoreBreakdown).toBeDefined();
         expect(typeof slot.scoreBreakdown?.timeOfDayScore).toBe('number');
@@ -197,7 +187,7 @@ describe('Smart Scheduling Integration Workflow', () => {
     it('includes attendee availability in scoring', async () => {
       const schedulingService = getSmartSchedulingService();
 
-      const slots = await schedulingService.findBestMeetingTimes({
+      const result = await schedulingService.findBestMeetingTimes({
         attendeeEmails: testAttendees,
         duration: testDuration,
         dateRange: {
@@ -206,15 +196,15 @@ describe('Smart Scheduling Integration Workflow', () => {
         },
       });
 
-      if (slots.length > 0) {
-        expect(slots[0].scoreBreakdown?.attendeeAvailabilityScore).toBeDefined();
+      if (result.suggestedTimes.length > 0) {
+        expect(result.suggestedTimes[0].scoreBreakdown?.attendeeAvailabilityScore).toBeDefined();
       }
     });
 
     it('includes preference scoring', async () => {
       const schedulingService = getSmartSchedulingService();
 
-      const slots = await schedulingService.findBestMeetingTimes({
+      const result = await schedulingService.findBestMeetingTimes({
         attendeeEmails: testAttendees,
         duration: testDuration,
         dateRange: {
@@ -223,8 +213,8 @@ describe('Smart Scheduling Integration Workflow', () => {
         },
       });
 
-      if (slots.length > 0) {
-        expect(slots[0].scoreBreakdown?.preferenceScore).toBeDefined();
+      if (result.suggestedTimes.length > 0) {
+        expect(result.suggestedTimes[0].scoreBreakdown?.preferenceScore).toBeDefined();
       }
     });
 
@@ -234,7 +224,7 @@ describe('Smart Scheduling Integration Workflow', () => {
       const now = new Date();
       const endDate = new Date(now.getTime() + 604800000);
 
-      const slots1 = await schedulingService.findBestMeetingTimes({
+      const result1 = await schedulingService.findBestMeetingTimes({
         attendeeEmails: testAttendees,
         duration: testDuration,
         dateRange: {
@@ -243,7 +233,7 @@ describe('Smart Scheduling Integration Workflow', () => {
         },
       });
 
-      const slots2 = await schedulingService.findBestMeetingTimes({
+      const result2 = await schedulingService.findBestMeetingTimes({
         attendeeEmails: testAttendees,
         duration: testDuration,
         dateRange: {
@@ -252,11 +242,11 @@ describe('Smart Scheduling Integration Workflow', () => {
         },
       });
 
-      expect(slots1.length).toBe(slots2.length);
-      if (slots1.length > 0 && slots2.length > 0) {
+      expect(result1.suggestedTimes.length).toBe(result2.suggestedTimes.length);
+      if (result1.suggestedTimes.length > 0 && result2.suggestedTimes.length > 0) {
         // Should return the same slots (within 1 second tolerance for timing)
-        expect(Math.abs(slots1[0].start.getTime() - slots2[0].start.getTime())).toBeLessThan(1000);
-        expect(slots1[0].score).toBe(slots2[0].score);
+        expect(Math.abs(result1.suggestedTimes[0].start.getTime() - result2.suggestedTimes[0].start.getTime())).toBeLessThan(1000);
+        expect(result1.suggestedTimes[0].score).toBe(result2.suggestedTimes[0].score);
       }
     });
   });
@@ -265,7 +255,7 @@ describe('Smart Scheduling Integration Workflow', () => {
     it('supports preferred meeting times parameter', async () => {
       const schedulingService = getSmartSchedulingService();
 
-      const slots = await schedulingService.findBestMeetingTimes({
+      const result = await schedulingService.findBestMeetingTimes({
         attendeeEmails: testAttendees,
         duration: testDuration,
         dateRange: {
@@ -277,13 +267,13 @@ describe('Smart Scheduling Integration Workflow', () => {
         },
       });
 
-      expect(Array.isArray(slots)).toBe(true);
+      expect(Array.isArray(result.suggestedTimes)).toBe(true);
     });
 
     it('supports avoid times parameter', async () => {
       const schedulingService = getSmartSchedulingService();
 
-      const slots = await schedulingService.findBestMeetingTimes({
+      const result = await schedulingService.findBestMeetingTimes({
         attendeeEmails: testAttendees,
         duration: testDuration,
         dateRange: {
@@ -295,13 +285,13 @@ describe('Smart Scheduling Integration Workflow', () => {
         },
       });
 
-      expect(Array.isArray(slots)).toBe(true);
+      expect(Array.isArray(result.suggestedTimes)).toBe(true);
     });
 
     it('supports timezone preferences', async () => {
       const schedulingService = getSmartSchedulingService();
 
-      const slots = await schedulingService.findBestMeetingTimes({
+      const result = await schedulingService.findBestMeetingTimes({
         attendeeEmails: testAttendees,
         duration: testDuration,
         dateRange: {
@@ -313,7 +303,7 @@ describe('Smart Scheduling Integration Workflow', () => {
         },
       });
 
-      expect(Array.isArray(slots)).toBe(true);
+      expect(Array.isArray(result.suggestedTimes)).toBe(true);
     });
   });
 
@@ -321,7 +311,7 @@ describe('Smart Scheduling Integration Workflow', () => {
     it('finds slots for 30-minute meetings', async () => {
       const schedulingService = getSmartSchedulingService();
 
-      const slots = await schedulingService.findBestMeetingTimes({
+      const result = await schedulingService.findBestMeetingTimes({
         attendeeEmails: testAttendees,
         duration: 30,
         dateRange: {
@@ -330,13 +320,13 @@ describe('Smart Scheduling Integration Workflow', () => {
         },
       });
 
-      expect(Array.isArray(slots)).toBe(true);
+      expect(Array.isArray(result.suggestedTimes)).toBe(true);
     });
 
     it('finds slots for 2-hour meetings', async () => {
       const schedulingService = getSmartSchedulingService();
 
-      const slots = await schedulingService.findBestMeetingTimes({
+      const result = await schedulingService.findBestMeetingTimes({
         attendeeEmails: testAttendees,
         duration: 120,
         dateRange: {
@@ -345,13 +335,13 @@ describe('Smart Scheduling Integration Workflow', () => {
         },
       });
 
-      expect(Array.isArray(slots)).toBe(true);
+      expect(Array.isArray(result.suggestedTimes)).toBe(true);
     });
 
     it('enforces minimum 15-minute duration', async () => {
       const schedulingService = getSmartSchedulingService();
 
-      const suggestion = await schedulingService.findBestMeetingTimes({
+      const result = await schedulingService.findBestMeetingTimes({
         attendeeEmails: testAttendees,
         duration: 5, // Less than minimum
         dateRange: {
@@ -361,7 +351,7 @@ describe('Smart Scheduling Integration Workflow', () => {
       });
 
       // Should handle gracefully
-      expect(suggestion).toBeDefined();
+      expect(result).toBeDefined();
     });
   });
 
@@ -372,7 +362,7 @@ describe('Smart Scheduling Integration Workflow', () => {
       const tomorrow = new Date(Date.now() + 86400000);
       const inTwoDays = new Date(Date.now() + 172800000);
 
-      const slots = await schedulingService.findBestMeetingTimes({
+      const result = await schedulingService.findBestMeetingTimes({
         attendeeEmails: testAttendees,
         duration: testDuration,
         dateRange: {
@@ -381,8 +371,8 @@ describe('Smart Scheduling Integration Workflow', () => {
         },
       });
 
-      if (slots.length > 0) {
-        for (const slot of slots) {
+      if (result.suggestedTimes.length > 0) {
+        for (const slot of result.suggestedTimes) {
           expect(slot.start.getTime()).toBeGreaterThanOrEqual(tomorrow.getTime());
           expect(slot.end.getTime()).toBeLessThanOrEqual(inTwoDays.getTime());
         }
@@ -395,7 +385,7 @@ describe('Smart Scheduling Integration Workflow', () => {
       const today = new Date();
       const tomorrow = new Date(Date.now() + 86400000);
 
-      const slots = await schedulingService.findBestMeetingTimes({
+      const result = await schedulingService.findBestMeetingTimes({
         attendeeEmails: testAttendees,
         duration: testDuration,
         dateRange: {
@@ -404,13 +394,13 @@ describe('Smart Scheduling Integration Workflow', () => {
         },
       });
 
-      expect(Array.isArray(slots)).toBe(true);
+      expect(Array.isArray(result.suggestedTimes)).toBe(true);
     });
 
     it('handles wide date ranges', async () => {
       const schedulingService = getSmartSchedulingService();
 
-      const slots = await schedulingService.findBestMeetingTimes({
+      const result = await schedulingService.findBestMeetingTimes({
         attendeeEmails: testAttendees,
         duration: testDuration,
         dateRange: {
@@ -419,7 +409,7 @@ describe('Smart Scheduling Integration Workflow', () => {
         },
       });
 
-      expect(slots.length).toBeLessThanOrEqual(5);
+      expect(result.suggestedTimes.length).toBeLessThanOrEqual(5);
     });
   });
 
@@ -427,7 +417,7 @@ describe('Smart Scheduling Integration Workflow', () => {
     it('returns slots sorted by quality score', async () => {
       const schedulingService = getSmartSchedulingService();
 
-      const slots = await schedulingService.findBestMeetingTimes({
+      const result = await schedulingService.findBestMeetingTimes({
         attendeeEmails: testAttendees,
         duration: testDuration,
         dateRange: {
@@ -436,16 +426,16 @@ describe('Smart Scheduling Integration Workflow', () => {
         },
       });
 
-      if (slots.length > 0) {
-        const bestSlot = slots[0];
+      if (result.suggestedTimes.length > 0) {
+        const bestSlot = result.suggestedTimes[0];
         expect(bestSlot).toBeDefined();
         expect(bestSlot.start).toBeDefined();
         expect(bestSlot.end).toBeDefined();
         expect(typeof bestSlot.score).toBe('number');
 
         // First slot should have highest score
-        if (slots.length > 1) {
-          expect(bestSlot.score).toBeGreaterThanOrEqual(slots[1].score);
+        if (result.suggestedTimes.length > 1) {
+          expect(bestSlot.score).toBeGreaterThanOrEqual(result.suggestedTimes[1].score);
         }
       }
     });
@@ -472,7 +462,7 @@ describe('Smart Scheduling Integration Workflow', () => {
     it('handles invalid email addresses gracefully', async () => {
       const schedulingService = getSmartSchedulingService();
 
-      const suggestion = await schedulingService.findBestMeetingTimes({
+      const result = await schedulingService.findBestMeetingTimes({
         attendeeEmails: ['invalid-email', 'notanemail'],
         duration: testDuration,
         dateRange: {
@@ -482,13 +472,13 @@ describe('Smart Scheduling Integration Workflow', () => {
       });
 
       // Should handle gracefully
-      expect(suggestion).toBeDefined();
+      expect(result).toBeDefined();
     });
 
     it('handles inverted date ranges', async () => {
       const schedulingService = getSmartSchedulingService();
 
-      const suggestion = await schedulingService.findBestMeetingTimes({
+      const result = await schedulingService.findBestMeetingTimes({
         attendeeEmails: testAttendees,
         duration: testDuration,
         dateRange: {
@@ -498,7 +488,7 @@ describe('Smart Scheduling Integration Workflow', () => {
       });
 
       // Should handle gracefully
-      expect(suggestion).toBeDefined();
+      expect(result).toBeDefined();
     });
   });
 
@@ -527,7 +517,7 @@ describe('Smart Scheduling Integration Workflow', () => {
         `attendee${i}@company.com`
       );
 
-      const slots = await schedulingService.findBestMeetingTimes({
+      const result = await schedulingService.findBestMeetingTimes({
         attendeeEmails: manyAttendees,
         duration: testDuration,
         dateRange: {
@@ -536,7 +526,7 @@ describe('Smart Scheduling Integration Workflow', () => {
         },
       });
 
-      expect(Array.isArray(slots)).toBe(true);
+      expect(Array.isArray(result.suggestedTimes)).toBe(true);
     });
   });
 
@@ -544,7 +534,7 @@ describe('Smart Scheduling Integration Workflow', () => {
     it('returns properly typed time slots', async () => {
       const schedulingService = getSmartSchedulingService();
 
-      const slots = await schedulingService.findBestMeetingTimes({
+      const result = await schedulingService.findBestMeetingTimes({
         attendeeEmails: testAttendees,
         duration: testDuration,
         dateRange: {
@@ -553,9 +543,9 @@ describe('Smart Scheduling Integration Workflow', () => {
         },
       });
 
-      expect(Array.isArray(slots)).toBe(true);
+      expect(Array.isArray(result.suggestedTimes)).toBe(true);
 
-      for (const slot of slots) {
+      for (const slot of result.suggestedTimes) {
         expect(slot.start instanceof Date).toBe(true);
         expect(slot.end instanceof Date).toBe(true);
         expect(typeof slot.score).toBe('number');
