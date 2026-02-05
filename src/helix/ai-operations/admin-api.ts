@@ -1,5 +1,6 @@
 import { AIOperationRouter } from './router.js';
 import { QuotaTier } from './usage-quota.js';
+import type { EventType } from './webhook-manager.js';
 
 export interface AdminApiRequest {
   method: string;
@@ -290,7 +291,7 @@ export class AdminApi {
    */
   private registerWebhook(userId: string, url: string, eventTypes: string[]): AdminApiResponse {
     const webhookManager = this.router.getWebhookManager();
-    const webhook = webhookManager.registerWebhook(userId, url, eventTypes);
+    const webhook = webhookManager.registerWebhook(userId, url, eventTypes as EventType[]);
     return {
       success: true,
       data: webhook,

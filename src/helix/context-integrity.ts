@@ -11,7 +11,6 @@
 import { createHash } from 'node:crypto';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import type { HashChainEntry } from './types.js';
 import { sendAlert } from './logging-hooks.js';
 
 /**

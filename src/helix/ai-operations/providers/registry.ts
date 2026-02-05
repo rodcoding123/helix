@@ -77,7 +77,23 @@ export const PROVIDER_PRICING: Record<string, ProviderPricing> = {
     supportedOperations: ['agent_execution', 'email_analysis'],
   },
 
-  // Google Gemini Models (placeholder - update with actual pricing)
+  // Simplified Claude names (for Phase 8 and control plane)
+  claude_haiku: {
+    provider: 'anthropic',
+    model: 'claude_haiku',
+    inputCostPer1kTokens: 0.008,
+    outputCostPer1kTokens: 0.024,
+    supportedOperations: ['email_analysis', 'task_management'],
+  },
+  claude_sonnet: {
+    provider: 'anthropic',
+    model: 'claude_sonnet',
+    inputCostPer1kTokens: 0.003,
+    outputCostPer1kTokens: 0.015,
+    supportedOperations: ['task_breakdown', 'email_analysis'],
+  },
+
+  // Google Gemini Models
   'gemini-2-0-flash': {
     provider: 'google',
     model: 'gemini-2-0-flash',
@@ -86,7 +102,34 @@ export const PROVIDER_PRICING: Record<string, ProviderPricing> = {
     supportedOperations: ['video_understanding'],
   },
 
-  // Deepgram Models (placeholder - update with actual pricing)
+  // Simplified Gemini name (for Phase 8 and control plane)
+  gemini_flash: {
+    provider: 'google',
+    model: 'gemini_flash',
+    inputCostPer1kTokens: 0.00005,
+    outputCostPer1kTokens: 0.00015,
+    supportedOperations: ['calendar_optimization', 'analytics_summary', 'sentiment_analysis'],
+  },
+
+  // DeepSeek Models
+  deepseek: {
+    provider: 'deepseek',
+    model: 'deepseek',
+    inputCostPer1kTokens: 0.0027,
+    outputCostPer1kTokens: 0.0108,
+    supportedOperations: [
+      'chat',
+      'email_compose',
+      'email_classify',
+      'email_respond',
+      'calendar_prep',
+      'task_prioritize',
+      'task_breakdown',
+      'analytics_anomaly',
+    ],
+  },
+
+  // Deepgram Models
   'nova-2': {
     provider: 'deepgram',
     model: 'nova-2',
@@ -95,7 +138,7 @@ export const PROVIDER_PRICING: Record<string, ProviderPricing> = {
     supportedOperations: ['audio_transcription'],
   },
 
-  // ElevenLabs Models (placeholder - update with actual pricing)
+  // ElevenLabs Models
   eleven_turbo_v2_5: {
     provider: 'elevenlabs',
     model: 'eleven_turbo_v2_5',

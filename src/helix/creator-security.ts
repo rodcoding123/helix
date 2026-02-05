@@ -12,6 +12,7 @@
  */
 
 import * as crypto from 'node:crypto';
+// @ts-expect-error bcrypt lacks type definitions
 import bcrypt from 'bcrypt';
 
 // ============================================================================
@@ -222,15 +223,6 @@ export function constantTimeEqual(a: string, b: string): boolean {
  */
 export function generateSessionToken(): string {
   return `thanos_${crypto.randomBytes(32).toString('hex')}`;
-}
-
-/**
- * Hash password with bcrypt using provided salt
- * Real bcrypt implementation prevents rainbow table attacks
- */
-async function hashWithBcrypt(password: string, salt: string): Promise<string> {
-  // Use actual bcrypt hashing with the provided salt
-  return bcrypt.hash(password, salt);
 }
 
 /**

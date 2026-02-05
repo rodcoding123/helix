@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CircuitBreaker, circuitBreakers } from './circuit-breaker.js';
 
 describe('CircuitBreaker', () => {
@@ -54,8 +54,8 @@ describe('CircuitBreaker', () => {
     });
 
     it('returns operation results correctly', async () => {
-      const result = await breaker.execute(() => Promise.resolve(42));
-      expect(result).toBe(42);
+      const result = await breaker.execute(() => Promise.resolve('success'));
+      expect(result).toBe('success');
     });
 
     it('passes through operation errors', async () => {

@@ -9,7 +9,7 @@
  * Created: 2026-02-04
  */
 
-// @ts-nocheck - Supabase types not generated, will be fixed in production
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument */
 import { createClient } from '@supabase/supabase-js';
 import { logToDiscord } from '../logging.js';
 import { hashChain } from '../hash-chain.js';
@@ -39,14 +39,13 @@ export interface ApprovalRequest {
  * 5. Log all approval decisions to hash chain
  */
 export class ApprovalGate {
-  private supabase: ReturnType<typeof createClient> | null = null;
-  private approverDiscordIds = ['rodrigo']; // Discord mention/ID for approvers
+  private supabase: any = null;
 
   constructor() {
     // Initialize Supabase client lazily when first needed
   }
 
-  private getSupabaseClient(): ReturnType<typeof createClient> {
+  private getSupabaseClient(): any {
     if (!this.supabase) {
       const supabaseUrl = process.env.SUPABASE_URL;
       const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
@@ -110,7 +109,7 @@ export class ApprovalGate {
       };
 
       // 2. Send Discord alert to approvers
-      await this.sendApprovalAlert(approval);
+      this.sendApprovalAlert(approval);
 
       // 3. Add to hash chain
       await hashChain.add({
@@ -125,7 +124,7 @@ export class ApprovalGate {
 
       return approval;
     } catch (error) {
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-alerts',
         type: 'approval_request_failed',
         operation: operationId,
@@ -144,7 +143,7 @@ export class ApprovalGate {
    * - Reason
    * - Action buttons (approve/reject)
    */
-  private async sendApprovalAlert(approval: ApprovalRequest): Promise<void> {
+  private sendApprovalAlert(approval: ApprovalRequest): void {
     const message = `
 🔔 **Approval Required**
 
@@ -162,7 +161,7 @@ reject: /reject ${approval.id}
 \`\`\`
     `;
 
-    await logToDiscord({
+    logToDiscord({
       channel: 'helix-alerts',
       type: 'approval_required',
       content: message,
@@ -200,7 +199,7 @@ reject: /reject ${approval.id}
       // Still pending
       return false;
     } catch (error) {
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-alerts',
         type: 'approval_check_failed',
         approval_id: approvalId,
@@ -247,25 +246,25 @@ reject: /reject ${approval.id}
       if (updateError) throw updateError;
 
       // Log to Discord
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-api',
         type: 'approval_granted',
         approval_id: approvalId,
-        operation: approval.operation_id,
+        operation: (approval as any).operation_id,
         approved_by: approvedBy,
-        cost_impact: approval.estimated_savings_usd,
+        cost_impact: (approval as any).estimated_savings_usd,
       });
 
       // Add to hash chain
       await hashChain.add({
         type: 'approval_granted',
         approval_id: approvalId,
-        operation: approval.operation_id,
+        operation: (approval as any).operation_id,
         approved_by: approvedBy,
         timestamp,
       });
     } catch (error) {
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-alerts',
         type: 'approval_grant_failed',
         approval_id: approvalId,
@@ -315,11 +314,11 @@ reject: /reject ${approval.id}
       if (updateError) throw updateError;
 
       // Log to Discord
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-api',
         type: 'approval_rejected',
         approval_id: approvalId,
-        operation: approval.operation_id,
+        operation: (approval as any).operation_id,
         rejected_by: rejectedBy,
         reason: rejectionReason,
       });
@@ -328,13 +327,13 @@ reject: /reject ${approval.id}
       await hashChain.add({
         type: 'approval_rejected',
         approval_id: approvalId,
-        operation: approval.operation_id,
+        operation: (approval as any).operation_id,
         rejected_by: rejectedBy,
         reason: rejectionReason,
         timestamp,
       });
     } catch (error) {
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-alerts',
         type: 'approval_reject_failed',
         approval_id: approvalId,
@@ -357,7 +356,7 @@ reject: /reject ${approval.id}
 
       if (error) throw error;
 
-      return (data || []).map(d => ({
+      return (data || []).map((d: any) => ({
         id: d.id,
         operation_id: d.operation_id,
         operation_type: d.recommendation_type,
@@ -368,7 +367,7 @@ reject: /reject ${approval.id}
         status: d.approval_status.toLowerCase() as 'pending',
       }));
     } catch (error) {
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-alerts',
         type: 'pending_approvals_fetch_failed',
         error: String(error),
@@ -391,7 +390,7 @@ reject: /reject ${approval.id}
 
       if (error) throw error;
 
-      return (data || []).map(d => ({
+      return (data || []).map((d: any) => ({
         id: d.id,
         operation_id: d.operation_id,
         operation_type: d.recommendation_type,
@@ -404,7 +403,7 @@ reject: /reject ${approval.id}
         approved_at: d.approved_at,
       }));
     } catch (error) {
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-alerts',
         type: 'approval_history_fetch_failed',
         error: String(error),

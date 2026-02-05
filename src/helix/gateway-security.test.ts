@@ -229,7 +229,7 @@ describe('Gateway Security - logGatewaySecurityStatus', () => {
     consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    processExitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
+    processExitSpy = vi.spyOn(process, 'exit' as any).mockImplementation((): never => {
       throw new Error('Process.exit called');
     });
   });

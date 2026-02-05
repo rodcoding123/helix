@@ -99,8 +99,8 @@ describe('WebhookManager', () => {
         manager.markDeliveryAttempt(delivery.id, false);
       }
 
-      delivery = manager.getDelivery(delivery.id);
-      expect(delivery?.status).toBe('failed');
+      const updatedDelivery = manager.getDelivery(delivery.id);
+      expect(updatedDelivery?.status).toBe('failed');
     });
   });
 

@@ -66,7 +66,7 @@ describe('CostTracker', () => {
       const newTracker = new CostTracker();
 
       await expect(async () => {
-        await newTracker.logOperation(mockOperation);
+        await newTracker.logOperation('test-user', mockOperation);
       }).rejects.toThrow();
       process.env.SUPABASE_URL = savedUrl;
     });
@@ -77,7 +77,7 @@ describe('CostTracker', () => {
       const newTracker = new CostTracker();
 
       await expect(async () => {
-        await newTracker.logOperation(mockOperation);
+        await newTracker.logOperation('test-user', mockOperation);
       }).rejects.toThrow();
       process.env.SUPABASE_SERVICE_KEY = savedKey;
     });
