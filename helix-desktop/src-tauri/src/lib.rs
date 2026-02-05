@@ -105,6 +105,10 @@ pub fn run() {
             commands::auth::detect_claude_code,
             commands::auth::run_claude_code,
 
+            // OpenClaw OAuth commands (Phase 1: OAuth Local Authority Foundation)
+            commands::auth::run_openclaw_oauth,
+            commands::auth::check_oauth_credentials,
+
             // Discord logging
             commands::discord::send_webhook,
             commands::discord::test_webhook,

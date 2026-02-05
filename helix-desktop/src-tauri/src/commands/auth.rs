@@ -225,3 +225,145 @@ pub async fn run_claude_code(prompt: String, working_dir: Option<String>) -> Res
         Err(format!("Claude Code error: {}", stderr))
     }
 }
+
+// ============================================================================
+// OpenClaw OAuth Integration (Phase 1: OAuth Local Authority Foundation)
+// ============================================================================
+
+/// Result of running an OpenClaw OAuth flow
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OAuthFlowResult {
+    /// Whether the flow succeeded
+    pub success: bool,
+
+    /// Which provider (anthropic, openai-codex, etc.)
+    pub provider: String,
+
+    /// Token type (oauth, setup-token)
+    pub token_type: String,
+
+    /// Path where credentials were stored
+    pub stored_in_path: String,
+
+    /// Error message if unsuccessful
+    pub error: Option<String>,
+}
+
+/// Result of checking for stored credentials
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CheckCredentialsResult {
+    /// Whether credentials are stored for this provider
+    pub stored: bool,
+
+    /// Error message if check failed
+    pub error: Option<String>,
+}
+
+/// Get the path to OpenClaw's auth profiles directory
+fn get_auth_profiles_path() -> Result<String, String> {
+    let home = dirs::home_dir()
+        .ok_or_else(|| "Cannot determine home directory".to_string())?;
+
+    let auth_profiles = home
+        .join(".openclaw")
+        .join("agents")
+        .join("main")
+        .join("agent")
+        .join("auth-profiles.json");
+
+    Ok(auth_profiles.to_string_lossy().to_string())
+}
+
+/// Run OpenClaw OAuth flow for a provider
+///
+/// Executes: `openclaw models auth <flow> --provider <provider>`
+/// This delegates to OpenClaw's CLI which handles the actual OAuth flow.
+///
+/// **BYOK Pattern**: Credentials stored locally, never transmitted to Helix servers.
+#[tauri::command]
+pub async fn run_openclaw_oauth(provider: String, flow: String) -> Result<OAuthFlowResult, String> {
+    // Validate inputs
+    let valid_providers = vec!["anthropic", "openai-codex"];
+    if !valid_providers.contains(&provider.as_str()) {
+        return Err(format!("Unsupported provider: {}", provider));
+    }
+
+    // Build OpenClaw CLI command
+    let mut cmd = Command::new("openclaw");
+    cmd.arg("models").arg("auth");
+
+    match flow.as_str() {
+        "setup-token" => {
+            // Anthropic setup-token flow: openclaw models auth setup-token --provider anthropic
+            cmd.arg("setup-token")
+                .arg("--provider")
+                .arg(&provider);
+        }
+        "pkce" => {
+            // OpenAI PKCE flow: openclaw models auth login --provider openai-codex
+            cmd.arg("login")
+                .arg("--provider")
+                .arg(&provider);
+        }
+        _ => {
+            return Err(format!("Unsupported flow: {}", flow));
+        }
+    }
+
+    // Execute OpenClaw subprocess
+    let output = cmd.output()
+        .map_err(|e| format!("Failed to execute openclaw: {}", e))?;
+
+    let auth_profiles_path = get_auth_profiles_path()?;
+
+    if output.status.success() {
+        Ok(OAuthFlowResult {
+            success: true,
+            provider: provider.clone(),
+            token_type: flow.clone(),
+            stored_in_path: auth_profiles_path,
+            error: None,
+        })
+    } else {
+        let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+        Err(stderr)
+    }
+}
+
+/// Check if credentials are stored for a provider
+///
+/// Reads auth-profiles.json and checks if the provider has credentials.
+/// Returns early if file doesn't exist (graceful fallback).
+#[tauri::command]
+pub fn check_oauth_credentials(provider: String) -> Result<CheckCredentialsResult, String> {
+    let auth_profiles_path = get_auth_profiles_path()?;
+
+    // Check if file exists (may not if user hasn't authenticated yet)
+    if !std::path::Path::new(&auth_profiles_path).exists() {
+        return Ok(CheckCredentialsResult {
+            stored: false,
+            error: None,
+        });
+    }
+
+    // Read auth-profiles.json
+    let content = fs::read_to_string(&auth_profiles_path)
+        .map_err(|e| format!("Failed to read auth profiles: {}", e))?;
+
+    // Parse JSON
+    let json: serde_json::Value = serde_json::from_str(&content)
+        .map_err(|e| format!("Invalid auth profiles JSON: {}", e))?;
+
+    // Check if provider has credentials
+    let stored = json
+        .get("profiles")
+        .and_then(|profiles| profiles.get(&provider))
+        .is_some();
+
+    Ok(CheckCredentialsResult {
+        stored,
+        error: None,
+    })
+}

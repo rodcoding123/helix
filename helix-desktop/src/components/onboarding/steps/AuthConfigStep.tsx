@@ -7,6 +7,7 @@
 import { useState, useEffect } from 'react';
 import { useOAuth } from '../../../hooks/useOAuth';
 import { invoke } from '../../../lib/tauri-compat';
+import * as openclawOAuth from '../../../services/openclaw-oauth';
 import type { AuthChoice } from './ProviderSelectionStep';
 import './AuthConfigStep.css';
 
@@ -122,11 +123,26 @@ const API_KEY_CONFIG: Record<string, {
   },
 };
 
-// Only GitHub Copilot has real OAuth - others use API keys
-const REAL_OAUTH_PROVIDERS = ['github-copilot'];
+/**
+ * Providers with real OAuth flows
+ *
+ * **Phase 1 Enhancement**: Claude (token) and OpenAI Codex now use OpenClaw OAuth
+ * instead of API key redirects. This provides:
+ * - Native OAuth flows (setup-token for Claude, PKCE for OpenAI)
+ * - Credentials stored locally in ~/.openclaw/agents/main/agent/auth-profiles.json
+ * - BYOK principle: tokens never transmitted to Helix servers
+ */
+const REAL_OAUTH_PROVIDERS = [
+  'github-copilot',      // GitHub Device Flow
+  'token',               // Claude via OpenClaw setup-token
+  'openai-codex',        // OpenAI via OpenClaw PKCE
+];
 
-// Providers that show the "Get API Key" button flow
-const API_KEY_REDIRECT_PROVIDERS = ['token', 'openai-codex', 'google-gemini-cli', 'google-antigravity', 'minimax-portal', 'qwen-portal'];
+/**
+ * Providers that show the "Get API Key" button flow
+ * These still require users to manually get and enter API keys
+ */
+const API_KEY_REDIRECT_PROVIDERS = ['google-gemini-cli', 'google-antigravity', 'minimax-portal', 'qwen-portal'];
 
 export function AuthConfigStep({ authChoice, onComplete, onBack }: AuthConfigStepProps) {
   const [apiKey, setApiKey] = useState('');
@@ -134,9 +150,12 @@ export function AuthConfigStep({ authChoice, onComplete, onBack }: AuthConfigSte
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const [claudeCodeInfo, setClaudeCodeInfo] = useState<ClaudeCodeInfo | null>(null);
   const [isDetecting, setIsDetecting] = useState(true);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
   const oauth = useOAuth();
 
   const hasRealOAuth = REAL_OAUTH_PROVIDERS.includes(authChoice);
+  const isOpenClawOAuth = authChoice === 'token' || authChoice === 'openai-codex';
+  const isGitHubOAuth = authChoice === 'github-copilot';
   const isApiKeyRedirect = API_KEY_REDIRECT_PROVIDERS.includes(authChoice);
   const isApiKeyFlow = authChoice in API_KEY_CONFIG;
   const providerInfo = PROVIDER_INFO[authChoice];
@@ -203,6 +222,43 @@ export function AuthConfigStep({ authChoice, onComplete, onBack }: AuthConfigSte
     }
   }, [oauth.status, authChoice, onComplete]);
 
+  /**
+   * Handle OpenClaw OAuth flows for Claude and OpenAI Codex
+   *
+   * **Phase 1 Integration**:
+   * - Delegates to Module 1 service (openclaw-oauth.ts)
+   * - Uses Module 2 Tauri commands (run_openclaw_oauth)
+   * - Credentials stored in ~/.openclaw/agents/main/agent/auth-profiles.json
+   * - BYOK: No token transmission to Helix
+   */
+  const handleOpenClawOAuth = async (provider: 'anthropic' | 'openai-codex') => {
+    setError(null);
+    setIsAuthenticating(true);
+
+    try {
+      const result =
+        provider === 'anthropic'
+          ? await openclawOAuth.initiateAnthropicSetupToken()
+          : await openclawOAuth.initiateOpenAIPkceOAuth();
+
+      if (result.success) {
+        // OAuth completed successfully
+        // Credentials are now stored in auth-profiles.json
+        onComplete({
+          authChoice: provider === 'anthropic' ? 'token' : 'openai-codex',
+          provider: provider === 'anthropic' ? 'anthropic' : 'openai-codex',
+          token: 'oauth-credential', // Managed by OpenClaw, not used directly
+        });
+      } else {
+        setError(result.error || 'OAuth flow failed. Please try again.');
+      }
+    } catch (err) {
+      setError(`OAuth failed: ${String(err)}`);
+    } finally {
+      setIsAuthenticating(false);
+    }
+  };
+
   const handleOAuthStart = async () => {
     setError(null);
     const result = await oauth.startOAuth(authChoice);
@@ -239,8 +295,109 @@ export function AuthConfigStep({ authChoice, onComplete, onBack }: AuthConfigSte
     oauth.openInBrowser(url);
   };
 
-  // Render GitHub Copilot OAuth flow (the only real OAuth)
-  if (hasRealOAuth) {
+  // Render OpenClaw OAuth flow for Claude and OpenAI Codex
+  // **Phase 1 Enhancement**: Native OAuth through OpenClaw
+  if (isOpenClawOAuth && !showApiKeyInput) {
+    return (
+      <div className="auth-config-step">
+        <div className="auth-header">
+          <div
+            className="provider-logo"
+            style={{ backgroundColor: `${providerInfo?.color}20` }}
+          >
+            <span className="provider-icon-large">{providerInfo?.icon || '🔐'}</span>
+          </div>
+          <h2>Authenticate with {providerInfo?.name || 'Provider'}</h2>
+          <p className="step-description">
+            {authChoice === 'token'
+              ? 'Set up your Claude access via OpenClaw OAuth'
+              : 'Set up your OpenAI Codex access via OAuth'}
+          </p>
+        </div>
+
+        <div className="oauth-content">
+          {!isAuthenticating && !error && (
+            <button
+              type="button"
+              className="oauth-signin-btn"
+              onClick={() =>
+                handleOpenClawOAuth(
+                  authChoice === 'token' ? 'anthropic' : 'openai-codex'
+                )
+              }
+              style={{ '--provider-color': providerInfo?.color } as React.CSSProperties}
+            >
+              <span className="oauth-btn-icon">{providerInfo?.icon || '🔐'}</span>
+              <span className="oauth-btn-text">
+                Continue with {providerInfo?.name || 'Provider'}
+              </span>
+              <span className="oauth-btn-arrow">→</span>
+            </button>
+          )}
+
+          {isAuthenticating && (
+            <div className="oauth-status initiating">
+              <div className="spinner" />
+              <p>
+                {authChoice === 'token'
+                  ? 'Launching Claude setup-token flow...'
+                  : 'Launching OpenAI OAuth flow...'}
+              </p>
+            </div>
+          )}
+
+          {error && (
+            <div className="oauth-status error">
+              <div className="error-icon">✕</div>
+              <h3>Authentication failed</h3>
+              <p>{error}</p>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => {
+                  setError(null);
+                  setIsAuthenticating(false);
+                }}
+              >
+                Try again
+              </button>
+            </div>
+          )}
+
+          <p className="already-have-key">
+            <button
+              type="button"
+              className="btn-text"
+              onClick={() => setShowApiKeyInput(true)}
+            >
+              I already have an API key
+            </button>
+          </p>
+        </div>
+
+        <div className="step-actions">
+          <button type="button" className="btn-secondary" onClick={onBack}>
+            ← Back
+          </button>
+          {isAuthenticating && (
+            <button
+              type="button"
+              className="btn-text"
+              onClick={() => {
+                setIsAuthenticating(false);
+                setError(null);
+              }}
+            >
+              Cancel
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Render GitHub Copilot OAuth flow
+  if (isGitHubOAuth && hasRealOAuth) {
     return (
       <div className="auth-config-step">
         <div className="auth-header">
