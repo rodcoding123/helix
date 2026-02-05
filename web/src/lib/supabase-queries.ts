@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { DailyCostMetrics, CostByUser, OperationMetric, PendingApproval } from '../types/control-plane';
+import { DailyCostMetrics, CostByUser, OperationMetric, PendingApproval, RoutingConfig } from '../types/control-plane';
 
 export async function getDailyCostMetrics(days = 7): Promise<DailyCostMetrics[]> {
   const { data, error } = await supabase
@@ -99,6 +99,64 @@ export function subscribeToApprovalUpdates(
       'postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'helix_recommendations' },
       (payload) => callback(payload.new as PendingApproval)
+    )
+    .subscribe();
+}
+
+export async function getRoutingConfigs(): Promise<RoutingConfig[]> {
+  const { data, error } = await supabase
+    .from('ai_model_routes')
+    .select('*')
+    .order('operation_type', { ascending: true });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function updateRouting(
+  routingId: string,
+  primaryModel: string,
+  fallbackModel: string | null
+): Promise<void> {
+  const { error } = await supabase
+    .from('ai_model_routes')
+    .update({
+      primary_model: primaryModel,
+      fallback_model: fallbackModel,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', routingId);
+
+  if (error) throw error;
+}
+
+export async function toggleRoute(routingId: string, enabled: boolean): Promise<void> {
+  const { error } = await supabase
+    .from('ai_model_routes')
+    .update({
+      is_enabled: enabled,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', routingId);
+
+  if (error) throw error;
+}
+
+export function subscribeToRoutingUpdates(
+  callback: (config: RoutingConfig) => void
+): ReturnType<typeof supabase.channel> {
+  return supabase
+    .channel('routing_updates')
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'ai_model_routes',
+      },
+      (payload) => {
+        callback(payload.new as RoutingConfig);
+      }
     )
     .subscribe();
 }

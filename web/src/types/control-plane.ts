@@ -39,3 +39,21 @@ export interface PendingApproval {
   approved_by?: string;
   rejection_reason?: string;
 }
+
+export interface RoutingConfig {
+  id: string;
+  operation_type: string;
+  primary_model: string;
+  fallback_model: string | null;
+  criticality_level: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  is_enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AvailableModel {
+  model_id: string;
+  model_name: string;
+  provider: string;
+  cost_per_1k_tokens: number;
+}
