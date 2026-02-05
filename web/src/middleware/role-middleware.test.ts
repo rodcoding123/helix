@@ -3,8 +3,6 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { Response, NextFunction } from 'express';
-import type { TenantRequest } from '@/lib/tenant/tenant-context';
 import {
   ROLE_HIERARCHY,
   requireRole,
@@ -20,9 +18,9 @@ import {
 } from './role-middleware';
 
 describe('Role Middleware', () => {
-  let mockReq: Partial<TenantRequest>;
-  let mockRes: Partial<Response>;
-  let mockNext: NextFunction;
+  let mockReq: any;
+  let mockRes: any;
+  let mockNext: any;
 
   beforeEach(() => {
     mockReq = {
@@ -64,7 +62,7 @@ describe('Role Middleware', () => {
       (mockReq as any).tenantId = 'tenant-123';
 
       const middleware = requireRole('member');
-      middleware(mockReq as TenantRequest, mockRes as Response, mockNext);
+      middleware(mockReq, mockRes, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
       expect(mockRes.status).not.toHaveBeenCalled();
@@ -75,7 +73,7 @@ describe('Role Middleware', () => {
       (mockReq as any).tenantId = 'tenant-123';
 
       const middleware = requireRole('member');
-      middleware(mockReq as TenantRequest, mockRes as Response, mockNext);
+      middleware(mockReq, mockRes, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
     });
@@ -85,7 +83,7 @@ describe('Role Middleware', () => {
       (mockReq as any).tenantId = 'tenant-123';
 
       const middleware = requireRole('admin');
-      middleware(mockReq as TenantRequest, mockRes as Response, mockNext);
+      middleware(mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(403);
       expect(mockNext).not.toHaveBeenCalled();
@@ -96,7 +94,7 @@ describe('Role Middleware', () => {
       (mockReq as any).tenantId = undefined;
 
       const middleware = requireRole('member');
-      middleware(mockReq as TenantRequest, mockRes as Response, mockNext);
+      middleware(mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(400);
     });
@@ -107,7 +105,7 @@ describe('Role Middleware', () => {
       (mockReq as any).tenantId = 'tenant-123';
 
       const middleware = requireRole('member');
-      middleware(mockReq as TenantRequest, mockRes as Response, mockNext);
+      middleware(mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(401);
     });
@@ -117,7 +115,7 @@ describe('Role Middleware', () => {
       (mockReq as any).tenantId = 'tenant-123';
 
       const middleware = requireRole('admin');
-      middleware(mockReq as TenantRequest, mockRes as Response, mockNext);
+      middleware(mockReq, mockRes, mockNext);
 
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -134,7 +132,7 @@ describe('Role Middleware', () => {
       (mockReq as any).userRole = 'admin';
       (mockReq as any).tenantId = 'tenant-123';
 
-      requireManagePermission(mockReq as TenantRequest, mockRes as Response, mockNext);
+      requireManagePermission(mockReq, mockRes, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
     });
@@ -143,7 +141,7 @@ describe('Role Middleware', () => {
       (mockReq as any).userRole = 'viewer';
       (mockReq as any).tenantId = 'tenant-123';
 
-      requireManagePermission(mockReq as TenantRequest, mockRes as Response, mockNext);
+      requireManagePermission(mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(403);
     });
@@ -152,7 +150,7 @@ describe('Role Middleware', () => {
       (mockReq as any).userRole = 'owner';
       (mockReq as any).tenantId = 'tenant-123';
 
-      requireInvitePermission(mockReq as TenantRequest, mockRes as Response, mockNext);
+      requireInvitePermission(mockReq, mockRes, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
     });
@@ -161,7 +159,7 @@ describe('Role Middleware', () => {
       (mockReq as any).userRole = 'member';
       (mockReq as any).tenantId = 'tenant-123';
 
-      requireInvitePermission(mockReq as TenantRequest, mockRes as Response, mockNext);
+      requireInvitePermission(mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(403);
     });
@@ -170,7 +168,7 @@ describe('Role Middleware', () => {
       (mockReq as any).userRole = 'owner';
       (mockReq as any).tenantId = 'tenant-123';
 
-      requireRemovePermission(mockReq as TenantRequest, mockRes as Response, mockNext);
+      requireRemovePermission(mockReq, mockRes, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
     });
@@ -179,7 +177,7 @@ describe('Role Middleware', () => {
       (mockReq as any).userRole = 'admin';
       (mockReq as any).tenantId = 'tenant-123';
 
-      requireRemovePermission(mockReq as TenantRequest, mockRes as Response, mockNext);
+      requireRemovePermission(mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(403);
     });
@@ -188,7 +186,7 @@ describe('Role Middleware', () => {
       (mockReq as any).userRole = 'owner';
       (mockReq as any).tenantId = 'tenant-123';
 
-      requireChangeRolePermission(mockReq as TenantRequest, mockRes as Response, mockNext);
+      requireChangeRolePermission(mockReq, mockRes, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
     });
@@ -197,7 +195,7 @@ describe('Role Middleware', () => {
       (mockReq as any).userRole = 'admin';
       (mockReq as any).tenantId = 'tenant-123';
 
-      requireChangeRolePermission(mockReq as TenantRequest, mockRes as Response, mockNext);
+      requireChangeRolePermission(mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(403);
     });
@@ -262,7 +260,7 @@ describe('Role Middleware', () => {
       (mockReq as any).tenantId = 'tenant-123';
 
       const middleware = requireAnyRole('member', 'admin');
-      middleware(mockReq as TenantRequest, mockRes as Response, mockNext);
+      middleware(mockReq, mockRes, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
     });
@@ -272,7 +270,7 @@ describe('Role Middleware', () => {
       (mockReq as any).tenantId = 'tenant-123';
 
       const middleware = requireAnyRole('admin', 'member');
-      middleware(mockReq as TenantRequest, mockRes as Response, mockNext);
+      middleware(mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(403);
     });
@@ -282,7 +280,7 @@ describe('Role Middleware', () => {
       (mockReq as any).tenantId = 'tenant-123';
 
       const middleware = requireAnyRole('member', 'viewer');
-      middleware(mockReq as TenantRequest, mockRes as Response, mockNext);
+      middleware(mockReq, mockRes, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
     });
@@ -311,7 +309,7 @@ describe('Role Middleware', () => {
       (mockReq as any).tenantId = 'tenant-123';
 
       const middleware = requireRole('member');
-      middleware(mockReq as TenantRequest, mockRes as Response, mockNext);
+      middleware(mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(403);
     });
@@ -321,7 +319,7 @@ describe('Role Middleware', () => {
       (mockReq as any).tenantId = 'tenant-123';
 
       const middleware = requireRole('member');
-      middleware(mockReq as TenantRequest, mockRes as Response, mockNext);
+      middleware(mockReq, mockRes, mockNext);
 
       // Should not match (case-sensitive)
       expect(mockRes.status).toHaveBeenCalledWith(403);
@@ -332,7 +330,7 @@ describe('Role Middleware', () => {
       (mockReq as any).tenantId = 'tenant-123';
 
       const middleware = requireRole('member');
-      middleware(mockReq as TenantRequest, mockRes as Response, mockNext);
+      middleware(mockReq, mockRes, mockNext);
 
       // Should not match (no trimming)
       expect(mockRes.status).toHaveBeenCalledWith(403);

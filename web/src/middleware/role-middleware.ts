@@ -3,9 +3,6 @@
  * Enforces role hierarchy and permission checks
  */
 
-import type { Request, Response, NextFunction } from 'express';
-import type { TenantRequest } from '@/lib/tenant/tenant-context';
-
 /**
  * Role hierarchy levels for permission checking
  */
@@ -33,7 +30,7 @@ function userHasPermission(userRole: string | undefined, requiredRole: string): 
  * Usage: app.delete('/api/members/:id', requireRole('owner'), handler)
  */
 export function requireRole(requiredRole: 'owner' | 'admin' | 'member' | 'viewer') {
-  return async (req: TenantRequest, res: Response, next: NextFunction) => {
+  return (req: any, res: any, next: any) => {
     try {
       // Extract user and tenant from request
       const { userId, userRole, tenantId } = req as any;
@@ -72,7 +69,7 @@ export function requireRole(requiredRole: 'owner' | 'admin' | 'member' | 'viewer
  * Middleware to check if user can manage team members
  * (Owner or Admin only)
  */
-export function requireManagePermission(req: TenantRequest, res: Response, next: NextFunction) {
+export function requireManagePermission(req: any, res: any, next: any) {
   const { userRole } = req as any;
 
   if (!userHasPermission(userRole, 'admin')) {
@@ -88,7 +85,7 @@ export function requireManagePermission(req: TenantRequest, res: Response, next:
  * Middleware to check if user can invite members
  * (Admin and Owner only)
  */
-export function requireInvitePermission(req: TenantRequest, res: Response, next: NextFunction) {
+export function requireInvitePermission(req: any, res: any, next: any) {
   const { userRole } = req as any;
 
   if (!userHasPermission(userRole, 'admin')) {
@@ -104,7 +101,7 @@ export function requireInvitePermission(req: TenantRequest, res: Response, next:
  * Middleware to check if user can remove members
  * (Owner only)
  */
-export function requireRemovePermission(req: TenantRequest, res: Response, next: NextFunction) {
+export function requireRemovePermission(req: any, res: any, next: any) {
   const { userRole } = req as any;
 
   if (userRole !== 'owner') {
@@ -120,7 +117,7 @@ export function requireRemovePermission(req: TenantRequest, res: Response, next:
  * Middleware to check if user can change roles
  * (Owner only)
  */
-export function requireChangeRolePermission(req: TenantRequest, res: Response, next: NextFunction) {
+export function requireChangeRolePermission(req: any, res: any, next: any) {
   const { userRole } = req as any;
 
   if (userRole !== 'owner') {
@@ -172,7 +169,7 @@ export function isValidRoleChange(fromRole: string, toRole: string): boolean {
 /**
  * Interface for role-protected request
  */
-export interface RoleProtectedRequest extends TenantRequest {
+export interface RoleProtectedRequest {
   userId: string;
   userRole: 'owner' | 'admin' | 'member' | 'viewer';
   tenantId: string;
@@ -184,7 +181,7 @@ export interface RoleProtectedRequest extends TenantRequest {
 export function requireAnyRole(
   ...roles: Array<'owner' | 'admin' | 'member' | 'viewer'>
 ) {
-  return (req: TenantRequest, res: Response, next: NextFunction) => {
+  return (req: any, res: any, next: any) => {
     const { userRole } = req as any;
 
     const hasRole = roles.some(role => userHasPermission(userRole, role));

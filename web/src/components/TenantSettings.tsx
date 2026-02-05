@@ -11,27 +11,26 @@ import TeamMemberCard from './TeamMemberCard';
 import { AlertCircle, Users, Loader2 } from 'lucide-react';
 
 export default function TenantSettings() {
-  const { currentTenant } = useTenant();
+  const { tenant } = useTenant();
   const inviteService = getTenantInviteService();
 
   const [members, setMembers] = useState<TenantMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'members' | 'invite'>('members');
-  const [inviting, setInviting] = useState(false);
 
   // Load members
   useEffect(() => {
     loadMembers();
-  }, [currentTenant?.id]);
+  }, [tenant?.id]);
 
   const loadMembers = async () => {
-    if (!currentTenant?.id) return;
+    if (!tenant?.id) return;
 
     try {
       setLoading(true);
       setError(null);
-      const membersList = await inviteService.listMembers(currentTenant.id);
+      const membersList = await inviteService.listMembers(tenant.id);
       setMembers(membersList);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load members');
@@ -42,21 +41,20 @@ export default function TenantSettings() {
   };
 
   const handleInviteSuccess = async () => {
-    setInviting(false);
     setActiveTab('members');
     // Reload members to show any pending invitations
     await loadMembers();
   };
 
   const handleRemoveMember = async (userId: string) => {
-    if (!currentTenant?.id) return;
+    if (!tenant?.id) return;
 
     if (!confirm('Are you sure you want to remove this member?')) {
       return;
     }
 
     try {
-      await inviteService.removeMember(currentTenant.id, userId);
+      await inviteService.removeMember(tenant.id, userId);
       await loadMembers();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to remove member');
@@ -65,10 +63,10 @@ export default function TenantSettings() {
   };
 
   const handleChangeRole = async (userId: string, newRole: string) => {
-    if (!currentTenant?.id) return;
+    if (!tenant?.id) return;
 
     try {
-      await inviteService.changeMemberRole(currentTenant.id, userId, newRole);
+      await inviteService.changeMemberRole(tenant.id, userId, newRole);
       await loadMembers();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update role');
@@ -76,7 +74,7 @@ export default function TenantSettings() {
     }
   };
 
-  if (!currentTenant) {
+  if (!tenant) {
     return (
       <div className="p-8 text-center">
         <p className="text-gray-600">Select a tenant to manage settings</p>
@@ -88,7 +86,7 @@ export default function TenantSettings() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">{currentTenant.name} Settings</h1>
+        <h1 className="text-3xl font-bold text-gray-900">{tenant.name} Settings</h1>
         <p className="mt-2 text-gray-600">Manage team members and invitations</p>
       </div>
 
@@ -168,7 +166,7 @@ export default function TenantSettings() {
       {activeTab === 'invite' && (
         <div className="max-w-2xl">
           <InviteMembers
-            tenantId={currentTenant.id}
+            tenantId={tenant.id}
             onSuccess={handleInviteSuccess}
             onError={err => setError(err)}
           />
