@@ -1,0 +1,146 @@
+/**
+ * Comprehensive tests for Helix skill sandbox module
+ * Tests security isolation and validation
+ */
+
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import {
+  verifySkillSignature,
+  validateSkill,
+  executeSkillSandboxed,
+  getSkillAuditLog,
+  clearSkillAuditLog,
+  DEFAULT_SKILL_SANDBOX_CONFIG,
+  type SkillMetadata,
+  type SkillSandboxConfig,
+  type SkillPermission,
+} from './skill-sandbox.js';
+import crypto from 'node:crypto';
+
+/**
+ * Helper to generate Ed25519 keypair and sign data
+ */
+function createEd25519Signature(
+  skillCode: string,
+  metadata: Pick<SkillMetadata, 'name' | 'version' | 'author' | 'signedAt'>
+): { signature: string; publicKeyPem: string } {
+  // Generate Ed25519 keypair
+  const { privateKey, publicKey } = crypto.generateKeyPairSync('ed25519');
+
+  // Create signed data string
+  const signedData = `${skillCode}|${metadata.name}|${metadata.version}|${metadata.author}|${metadata.signedAt}`;
+
+  // Sign the data
+  const sign = crypto.createSign('Ed25519');
+  sign.update(signedData);
+  sign.end();
+  const signatureBuffer = sign.sign(privateKey);
+
+  // Export public key as PEM
+  const publicKeyPem = publicKey.export({ type: 'spki', format: 'pem' }) as string;
+
+  return {
+    signature: signatureBuffer.toString('base64'),
+    publicKeyPem,
+  };
+}
+
+describe('Skill Sandbox - Signature Verification', () => {
+  const sampleSkillCode = 'return 2 + 2;';
+
+  beforeEach(() => {
+    clearSkillAuditLog();
+  });
+
+  it('should return false for missing signature', () => {
+    const metadata: SkillMetadata = {
+      name: 'test-skill',
+      version: '1.0.0',
+      author: 'test@example.com',
+      permissions: [],
+    };
+
+    const result = verifySkillSignature(sampleSkillCode, metadata, ['trusted-key-123']);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return false for empty trustedSigners list', () => {
+    const metadata: SkillMetadata = {
+      name: 'test-skill',
+      version: '1.0.0',
+      author: 'test@example.com',
+      signature: 'fake-signature',
+      signedAt: '2024-01-15T10:00:00.000Z',
+      permissions: [],
+    };
+
+    const result = verifySkillSignature(sampleSkillCode, metadata, []);
+
+    expect(result).toBe(false);
+  });
+
+  it('should validate signature format', () => {
+    const metadata: SkillMetadata = {
+      name: 'test-skill',
+      version: '1.0.0',
+      author: 'test@example.com',
+      signedAt: '2024-01-15T10:00:00.000Z',
+      permissions: [],
+    };
+
+    // Create valid Ed25519 signature
+    const { signature, publicKeyPem } = createEd25519Signature(sampleSkillCode, metadata);
+    metadata.signature = signature;
+
+    const result = verifySkillSignature(sampleSkillCode, metadata, [publicKeyPem]);
+
+    expect(result).toBe(true);
+  });
+
+  it('should reject invalid signature', () => {
+    const metadata: SkillMetadata = {
+      name: 'test-skill',
+      version: '1.0.0',
+      author: 'test@example.com',
+      signature: 'invalid-signature-format',
+      signedAt: '2024-01-15T10:00:00.000Z',
+      permissions: [],
+    };
+
+    const result = verifySkillSignature(sampleSkillCode, metadata, ['trusted-key']);
+
+    expect(result).toBe(false);
+  });
+
+  it('should accept signature from any trusted signer', () => {
+    const metadata: SkillMetadata = {
+      name: 'test-skill',
+      version: '1.0.0',
+      author: 'test@example.com',
+      signedAt: '2024-01-15T10:00:00.000Z',
+      permissions: [],
+    };
+
+    // Create signature with second key
+    const { signature, publicKeyPem: publicKeyPem2 } = createEd25519Signature(
+      sampleSkillCode,
+      metadata
+    );
+    metadata.signature = signature;
+
+    // Generate two other random public keys
+    const { publicKey: key1 } = crypto.generateKeyPairSync('ed25519');
+    const { publicKey: key3 } = crypto.generateKeyPairSync('ed25519');
+    const publicKeyPem1 = key1.export({ type: 'spki', format: 'pem' }) as string;
+    const publicKeyPem3 = key3.export({ type: 'spki', format: 'pem' }) as string;
+
+    const result = verifySkillSignature(sampleSkillCode, metadata, [
+      publicKeyPem1,
+      publicKeyPem2,
+      publicKeyPem3,
+    ]);
+
+    expect(result).toBe(true);
+  });
+});
