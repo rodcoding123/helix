@@ -4,6 +4,7 @@ import { AuthProvider } from '@/hooks/useAuth';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { AdminGuard } from '@/components/guards/AdminGuard';
 import { Landing } from '@/pages/Landing';
 import { Pricing } from '@/pages/Pricing';
 import { Login } from '@/pages/Login';
@@ -195,7 +196,9 @@ export function App() {
                 element={
                   <Suspense fallback={<LoadingFallback />}>
                     <ProtectedRoute>
-                      <ControlPlane />
+                      <AdminGuard>
+                        <ControlPlane />
+                      </AdminGuard>
                     </ProtectedRoute>
                   </Suspense>
                 }
