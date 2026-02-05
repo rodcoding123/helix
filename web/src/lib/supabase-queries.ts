@@ -150,7 +150,7 @@ export function subscribeToRoutingUpdates(
     .on(
       'postgres_changes',
       {
-        event: 'INSERT',
+        event: 'UPDATE',
         schema: 'public',
         table: 'ai_model_routes',
       },
