@@ -144,3 +144,14 @@ export class GatewayConnection {
     return this.ws?.readyState === WebSocket.OPEN;
   }
 }
+
+// Singleton instance for global gateway client
+let gatewayInstance: GatewayConnection | null = null;
+
+export function getGatewayClient(): GatewayConnection | null {
+  return gatewayInstance;
+}
+
+export function setGatewayClient(client: GatewayConnection | null): void {
+  gatewayInstance = client;
+}

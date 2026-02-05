@@ -7,7 +7,7 @@
  * Integrates the 7-layer psychological architecture for transparency
  */
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import TrustVisualization from '../components/TrustVisualization';
 import AttachmentStageIndicator from '../components/AttachmentStageIndicator';
 import TrustEventTimeline from '../components/TrustEventTimeline';

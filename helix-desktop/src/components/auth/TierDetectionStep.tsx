@@ -6,7 +6,7 @@
  * - Paid (overseer/architect): Centralized system (with optional BYOK for coding)
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import './TierDetectionStep.css';
 
 export type SubscriptionTier = 'awaken' | 'phantom' | 'overseer' | 'architect';

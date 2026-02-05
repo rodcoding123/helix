@@ -48,3 +48,8 @@ export async function getUser() {
   } = await supabase.auth.getUser();
   return { user, error };
 }
+
+// Database helper
+export function getDb() {
+  return supabase;
+}

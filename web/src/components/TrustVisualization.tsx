@@ -8,7 +8,7 @@
  * Theory: McKnight's 5-dimensional trust model
  */
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 interface TrustProfile {
   userId: string;

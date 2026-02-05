@@ -19,6 +19,9 @@ import { PrivacyStep } from './steps/PrivacyStep';
 import { CompleteStep } from './steps/CompleteStep';
 import { ErrorBoundary } from '../common';
 import { useGateway } from '../../hooks/useGateway';
+import { SupabaseLoginStep } from '../auth/SupabaseLoginStep';
+import { TierDetectionStep, type SubscriptionTier } from '../auth/TierDetectionStep';
+import { InstanceRegistrationStep, type InstanceRegistrationData } from '../auth/InstanceRegistrationStep';
 import './Onboarding.css';
 
 const STORAGE_KEY = 'helix-onboarding-progress';
@@ -38,10 +41,19 @@ export interface PersonalitySettings {
 }
 
 export interface OnboardingState {
+  // Unified Auth (mandatory first)
+  supabaseUserId?: string;
+  supabaseEmail?: string;
+  subscriptionTier?: SubscriptionTier;
+  instanceData?: InstanceRegistrationData;
+
+  // Tier-based path
+  tierPath?: 'free-byok' | 'paid-centralized' | 'paid-optional-byok';
+
   // Mode
   mode: 'quickstart' | 'advanced' | null;
 
-  // Auth
+  // Auth (provider-based, only for free/optional BYOK)
   authChoice: AuthChoice | null;
   authConfig: AuthConfig | null;
 
@@ -77,6 +89,9 @@ export interface OnboardingState {
 }
 
 type StepId =
+  | 'supabase-login'
+  | 'tier-detection'
+  | 'instance-registration'
   | 'welcome'
   | 'mode'
   | 'provider'
@@ -89,11 +104,47 @@ type StepId =
   | 'privacy'
   | 'complete';
 
-// Quick Start flow
-const QUICKSTART_STEPS: StepId[] = ['welcome', 'mode', 'provider', 'auth', 'complete'];
+// Unified auth (mandatory for all users)
+const UNIFIED_AUTH_STEPS: StepId[] = [
+  'supabase-login',
+  'tier-detection',
+  'instance-registration',
+];
 
-// Advanced flow - Full OpenClaw capabilities
-const ADVANCED_STEPS: StepId[] = [
+// Quick Start flow (after unified auth)
+const QUICKSTART_STEPS_FREE: StepId[] = [...UNIFIED_AUTH_STEPS, 'welcome', 'mode', 'provider', 'auth', 'complete'];
+const QUICKSTART_STEPS_PAID_CENTRALIZED: StepId[] = [...UNIFIED_AUTH_STEPS, 'welcome', 'mode', 'complete'];
+const QUICKSTART_STEPS_PAID_OPTIONAL_BYOK: StepId[] = [...UNIFIED_AUTH_STEPS, 'welcome', 'mode', 'provider', 'auth', 'complete'];
+
+// Advanced flow - Full OpenClaw capabilities (after unified auth)
+const ADVANCED_STEPS_FREE: StepId[] = [
+  ...UNIFIED_AUTH_STEPS,
+  'welcome',
+  'mode',
+  'provider',
+  'auth',
+  'discord',
+  'channels',
+  'voice',
+  'skills',
+  'personality',
+  'privacy',
+  'complete',
+];
+const ADVANCED_STEPS_PAID_CENTRALIZED: StepId[] = [
+  ...UNIFIED_AUTH_STEPS,
+  'welcome',
+  'mode',
+  'discord',
+  'channels',
+  'voice',
+  'skills',
+  'personality',
+  'privacy',
+  'complete',
+];
+const ADVANCED_STEPS_PAID_OPTIONAL_BYOK: StepId[] = [
+  ...UNIFIED_AUTH_STEPS,
   'welcome',
   'mode',
   'provider',
@@ -193,8 +244,20 @@ export function Onboarding({ onComplete }: OnboardingProps) {
 
   const [stepError, setStepError] = useState<Error | null>(null);
 
-  // Determine which flow we're in
-  const steps = state.mode === 'advanced' ? ADVANCED_STEPS : QUICKSTART_STEPS;
+  // Determine which flow we're in based on tier path
+  const getSteps = (): StepId[] => {
+    if (state.mode === 'advanced') {
+      if (state.tierPath === 'free-byok') return ADVANCED_STEPS_FREE;
+      if (state.tierPath === 'paid-optional-byok') return ADVANCED_STEPS_PAID_OPTIONAL_BYOK;
+      return ADVANCED_STEPS_PAID_CENTRALIZED;
+    } else {
+      if (state.tierPath === 'free-byok') return QUICKSTART_STEPS_FREE;
+      if (state.tierPath === 'paid-optional-byok') return QUICKSTART_STEPS_PAID_OPTIONAL_BYOK;
+      return QUICKSTART_STEPS_PAID_CENTRALIZED;
+    }
+  };
+
+  const steps = getSteps();
   const currentStep = steps[currentStepIndex];
   const totalSteps = steps.length;
   const progress = ((currentStepIndex + 1) / totalSteps) * 100;
@@ -241,6 +304,34 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     [updateState, goNext]
   );
 
+  const handleSupabaseLogin = useCallback(
+    (data: { userId: string; email: string; tier: string }) => {
+      updateState({
+        supabaseUserId: data.userId,
+        supabaseEmail: data.email,
+        subscriptionTier: data.tier as SubscriptionTier,
+      });
+      goNext();
+    },
+    [updateState, goNext]
+  );
+
+  const handleTierDetection = useCallback(
+    (path: 'free-byok' | 'paid-centralized' | 'paid-optional-byok') => {
+      updateState({ tierPath: path });
+      goNext();
+    },
+    [updateState, goNext]
+  );
+
+  const handleInstanceRegistration = useCallback(
+    (data: InstanceRegistrationData) => {
+      updateState({ instanceData: data });
+      goNext();
+    },
+    [updateState, goNext]
+  );
+
   const handleProviderSelect = useCallback(
     (authChoice: AuthChoice) => {
       if (authChoice === 'skip') {
@@ -248,7 +339,13 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         updateState({ authChoice: null });
         // Jump to complete in quickstart, or continue in advanced
         if (state.mode === 'quickstart') {
-          setCurrentStepIndex(QUICKSTART_STEPS.indexOf('complete'));
+          const quickstartSteps = getSteps();
+          const completeIndex = quickstartSteps.indexOf('complete');
+          if (completeIndex >= 0) {
+            setCurrentStepIndex(completeIndex);
+          } else {
+            goNext();
+          }
         } else {
           goNext();
         }
@@ -376,6 +473,47 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     }
 
     switch (currentStep) {
+      case 'supabase-login':
+        return (
+          <SupabaseLoginStep
+            onLoginSuccess={handleSupabaseLogin}
+            onError={(error) => setStepError(new Error(error))}
+          />
+        );
+
+      case 'tier-detection':
+        if (!state.supabaseUserId || !state.subscriptionTier) {
+          // Should not happen - go back to login
+          goBack();
+          return null;
+        }
+        return (
+          <TierDetectionStep
+            userId={state.supabaseUserId}
+            email={state.supabaseEmail || ''}
+            tier={state.subscriptionTier}
+            onByokRequired={() => handleTierDetection('free-byok')}
+            onCentralizedSelected={() => handleTierDetection('paid-centralized')}
+            onPaidByokSelected={() => handleTierDetection('paid-optional-byok')}
+            onError={(error) => setStepError(new Error(error))}
+          />
+        );
+
+      case 'instance-registration':
+        if (!state.supabaseUserId) {
+          // Should not happen - go back to login
+          goBack();
+          return null;
+        }
+        return (
+          <InstanceRegistrationStep
+            userId={state.supabaseUserId}
+            onRegistrationComplete={handleInstanceRegistration}
+            onSkip={goNext}
+            onError={(error) => setStepError(new Error(error))}
+          />
+        );
+
       case 'welcome':
         return <WelcomeStep onNext={goNext} />;
 

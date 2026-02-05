@@ -4,7 +4,7 @@
  * Main calendar interface with month/week/day views
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useCalendarClient } from '../hooks/useCalendarClient';
 import { CalendarGrid } from '../components/calendar/CalendarGrid';
 import { EventDetail } from '../components/calendar/EventDetail';

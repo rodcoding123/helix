@@ -10,7 +10,7 @@
  * - Key phrases and insights
  */
 
-import React, { FC } from 'react';
+import { FC } from 'react';
 import {
   SentimentAnalysisResult,
   Emotion,

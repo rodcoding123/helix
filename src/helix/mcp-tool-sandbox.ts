@@ -152,11 +152,11 @@ export function validateToolArguments(
 ): { valid: boolean; issues: string[] } {
   const issues: string[] = [];
 
-  // If tool has inputSchema, validate against it
-  if (tool.inputSchema && typeof args === 'object' && args !== null) {
+  // Always validate arguments for security patterns
+  if (typeof args === 'object' && args !== null) {
     const argObj = args as Record<string, unknown>;
 
-    // Check for path traversal attempts
+    // Check for path traversal attempts and command injection
     for (const [key, value] of Object.entries(argObj)) {
       if (typeof value === 'string') {
         // Check for path traversal patterns

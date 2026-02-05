@@ -7,7 +7,7 @@
  * Connects to the hash chain trust logging system for immutable records
  */
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 interface TrustEvent {
   id: string;

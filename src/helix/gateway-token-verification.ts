@@ -70,18 +70,23 @@ export function isLoopbackBinding(host: string): boolean {
  * Check if a host binding requires token verification
  * Network bindings (0.0.0.0, private IPs) require auth
  * Production rejects 0.0.0.0 entirely
+ * Returns: false (no verification needed), true (verification required), or 'rejected' (production 0.0.0.0)
  */
 export function requiresTokenVerification(
   host: string,
-  _environment: 'development' | 'production'
-): boolean {
+  environment: 'development' | 'production'
+): boolean | string {
   // Loopback always exempt
   if (isLoopbackBinding(host)) {
     return false;
   }
 
-  // Production rejects 0.0.0.0 entirely (handled by enforceTokenVerification)
-  // But function reports it requires verification
+  // Production rejects 0.0.0.0 entirely
+  if (environment === 'production' && host === '0.0.0.0') {
+    return 'rejected';
+  }
+
+  // Network binding requires verification
   if (host === '0.0.0.0') {
     return true;
   }
@@ -259,8 +264,11 @@ export function enforceTokenVerification(
     return;
   }
 
+  // Check verification requirement (including production rejection of 0.0.0.0)
+  const requiresVerification = requiresTokenVerification(host, environment);
+
   // Production rejects 0.0.0.0 entirely
-  if (environment === 'production' && host === '0.0.0.0') {
+  if (requiresVerification === 'rejected') {
     void sendAlert(
       '🚨 Gateway Security Violation',
       `Production rejected 0.0.0.0 binding attempt from ${clientId}`,
@@ -270,7 +278,7 @@ export function enforceTokenVerification(
   }
 
   // Network binding requires verification
-  if (requiresTokenVerification(host, environment)) {
+  if (requiresVerification === true) {
     // 1. Check rate limit FIRST (before validation)
     const rateLimit = rateLimitTokenAttempts(clientId);
     if (!rateLimit.allowed) {

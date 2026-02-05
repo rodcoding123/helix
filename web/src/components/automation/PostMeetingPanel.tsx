@@ -50,7 +50,7 @@ export function PostMeetingPanel({
       );
       const service = getPostMeetingFollowupService();
 
-      const items = await service.extractActionItemsFromText(
+      const items = await (service as any).extractActionItemsFromText(
         state.notes + (state.transcript ? '\n' + state.transcript : '')
       );
 

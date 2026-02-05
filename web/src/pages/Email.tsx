@@ -10,7 +10,7 @@
  * - Email analytics (coming soon)
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { EmailAccountSetup } from '@/components/email/EmailAccountSetup';
 import { EmailInbox } from '@/components/email/EmailInbox';

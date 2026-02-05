@@ -50,7 +50,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export const TaskCard: FC<TaskCardProps> = ({
-  _id,
+  id: _id,
   title,
   description,
   status,
@@ -63,7 +63,7 @@ export const TaskCard: FC<TaskCardProps> = ({
   blockedByTaskIds,
   blocksTaskIds,
   tags,
-  _assigneeId,
+  assigneeId: _assigneeId,
   onClose,
   onEdit,
   onDelete,

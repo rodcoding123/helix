@@ -1192,7 +1192,7 @@ describe('Hash Chain - Discord Verification', () => {
       sequence: 0,
     });
 
-    // Mock fs.readFile to return the entry line
+    // Mock fs.readFile to return the entry line as a string (with 'utf-8' encoding)
     vi.mocked(fs.readFile).mockResolvedValue(Buffer.from(entryLine));
 
     // Mock Discord API response with matching hash field
@@ -1569,6 +1569,7 @@ describe('Hash Chain - Discord Verification', () => {
 
     await expect(createHashChainEntry()).rejects.toMatchObject({
       code: 'DISCORD_UNREACHABLE',
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       message: expect.stringContaining('Discord unreachable'),
     });
   });

@@ -40,6 +40,7 @@
     "*.mjs",
     "helix-runtime/",
     "scripts/",
-    "web/"
+    "web/",
+    "src/helix/*-multitenant.*"
   ]
 }

@@ -19,7 +19,7 @@ vi.mock('./logging-hooks.js', () => ({
   WEBHOOKS: {},
   checkWebhookHealth: vi.fn(),
   triggerHelixHooks: vi.fn(),
-  sendAlert: vi.fn(),
+  sendAlert: vi.fn().mockResolvedValue(undefined),
   logConsciousnessObservation: vi.fn(),
   REQUIRED_WEBHOOKS: [],
   OPTIONAL_WEBHOOKS: [],
@@ -233,13 +233,14 @@ describe('Helix Index Module', () => {
       const { announceStartup } = await import('./heartbeat.js');
       const { ensureHelixDirectoryStructure } = await import('./helix-context-loader.js');
 
-      vi.mocked(announceStartup).mockImplementation(async (): Promise<boolean> => {
+      vi.mocked(announceStartup).mockImplementation((): Promise<boolean> => {
         callOrder.push('announceStartup');
-        return true;
+        return Promise.resolve(true);
       });
 
-      vi.mocked(ensureHelixDirectoryStructure).mockImplementation(async (): Promise<void> => {
+      vi.mocked(ensureHelixDirectoryStructure).mockImplementation((): Promise<void> => {
         callOrder.push('ensureDirectories');
+        return Promise.resolve();
       });
 
       await initializeHelix();
@@ -436,19 +437,19 @@ describe('Helix Index Module', () => {
       const { createHashChainEntry } = await import('./hash-chain.js');
       const { announceShutdown } = await import('./heartbeat.js');
 
-      vi.mocked(createHashChainEntry).mockImplementation(async () => {
+      vi.mocked(createHashChainEntry).mockImplementation(() => {
         callOrder.push('createHashChainEntry');
-        return {
+        return Promise.resolve({
           timestamp: new Date().toISOString(),
           previousHash: '',
           logStates: {},
           entryHash: 'abc123',
-        };
+        });
       });
 
-      vi.mocked(announceShutdown).mockImplementation(async (): Promise<boolean> => {
+      vi.mocked(announceShutdown).mockImplementation((): Promise<boolean> => {
         callOrder.push('announceShutdown');
-        return true;
+        return Promise.resolve(true);
       });
 
       await shutdownHelix();

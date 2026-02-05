@@ -33,3 +33,5 @@ notify = "6"
 log = "0.4"
 tauri-plugin-updater = "2"
 lazy_static = "1.4"
+chrono = { version = "0.4", features = ["serde"] }
+hostname = "0.3"

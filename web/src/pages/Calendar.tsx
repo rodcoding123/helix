@@ -10,7 +10,7 @@
  * - Calendar analytics
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { CalendarAccountSetup } from '@/components/calendar/CalendarAccountSetup';
 import { CalendarGrid } from '@/components/calendar/CalendarGrid';

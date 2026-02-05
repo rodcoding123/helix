@@ -44,7 +44,7 @@ export function detectBase64Encoding(content: string): {
         const decoded = Buffer.from(match, 'base64').toString('utf-8');
 
         // Check if decoded looks like code/instructions
-        const codePatterns = /[[(]SYSTEM|ADMIN|OVERRIDE|IGNORE|EXECUTE/gi;
+        const codePatterns = /SYSTEM|ADMIN|OVERRIDE|IGNORE|EXECUTE/gi;
         if (codePatterns.test(decoded)) {
           patterns.push(`Suspicious base64: ${match.substring(0, 50)}...`);
         }

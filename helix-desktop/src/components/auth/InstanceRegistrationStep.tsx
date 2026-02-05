@@ -10,7 +10,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { invoke, platform } from '@tauri-apps/api/core';
+import { invoke } from '@tauri-apps/api/core';
 import { v4 as uuidv4 } from 'uuid';
 import './InstanceRegistrationStep.css';
 
@@ -29,15 +29,32 @@ interface InstanceRegistrationStepProps {
 }
 
 /**
+ * Detect platform from user agent
+ */
+function detectPlatform(): string {
+  const ua = navigator.userAgent.toLowerCase();
+
+  if (ua.includes('win')) {
+    return 'windows';
+  } else if (ua.includes('mac')) {
+    return 'macos';
+  } else if (ua.includes('linux')) {
+    return 'linux';
+  } else if (ua.includes('iphone') || ua.includes('ipad')) {
+    return 'ios';
+  } else if (ua.includes('android')) {
+    return 'android';
+  }
+
+  return 'desktop';
+}
+
+/**
  * Get platform name for display
  */
 async function getPlatformName(): Promise<string> {
-  try {
-    const p = await platform();
-    return p.charAt(0).toUpperCase() + p.slice(1);
-  } catch {
-    return 'Desktop';
-  }
+  const p = detectPlatform();
+  return p.charAt(0).toUpperCase() + p.slice(1);
 }
 
 /**
@@ -66,7 +83,7 @@ async function getOrCreateInstanceId(): Promise<string> {
  */
 async function getDefaultDeviceName(): Promise<string> {
   try {
-    const p = await platform();
+    const p = detectPlatform();
     const hostname = await invoke<string>('get_hostname');
     return `${hostname} (${p})`;
   } catch {

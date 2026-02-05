@@ -10,7 +10,7 @@
  * - Task analytics
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { KanbanBoard } from '@/components/tasks/KanbanBoard';
 import { TaskCard } from '@/components/tasks/TaskCard';

@@ -3,6 +3,7 @@
 use std::fs;
 use std::process::Command;
 use serde::{Deserialize, Serialize};
+use chrono::Utc;
 
 /// Claude Code credentials structure (from ~/.claude/.credentials.json)
 #[derive(Deserialize)]
@@ -366,4 +367,333 @@ pub fn check_oauth_credentials(provider: String) -> Result<CheckCredentialsResul
         stored,
         error: None,
     })
+}
+
+// ============================================================================
+// Supabase Authentication (Unified Auth System)
+// ============================================================================
+
+/// Supabase login response
+#[derive(Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct SupabaseLoginResponse {
+    pub success: bool,
+    pub user_id: Option<String>,
+    pub email: Option<String>,
+    pub tier: Option<String>,
+    pub error: Option<String>,
+}
+
+/// Supabase signup response
+#[derive(Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct SupabaseSignupResponse {
+    pub success: bool,
+    pub user_id: Option<String>,
+    pub email: Option<String>,
+    pub tier: Option<String>,
+    pub error: Option<String>,
+}
+
+/// Instance registration response
+#[derive(Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct InstanceRegistrationResponse {
+    pub success: bool,
+    pub error: Option<String>,
+}
+
+/// Heartbeat response
+#[derive(Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct HeartbeatResponse {
+    pub success: bool,
+    pub error: Option<String>,
+}
+
+/// Supabase user tier
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct SupabaseSubscription {
+    user_id: String,
+    tier: String,
+}
+
+/// Get Supabase credentials from environment
+fn get_supabase_credentials() -> Result<(String, String), String> {
+    let anon_key = std::env::var("SUPABASE_ANON_KEY")
+        .or_else(|_| std::env::var("SUPABASE_ANON_KEY"))
+        .map_err(|_| "SUPABASE_ANON_KEY environment variable not set".to_string())?;
+
+    let service_role_key = std::env::var("SUPABASE_SERVICE_ROLE_KEY")
+        .or_else(|_| std::env::var("SUPABASE_SERVICE_ROLE_KEY"))
+        .map_err(|_| "SUPABASE_SERVICE_ROLE_KEY environment variable not set".to_string())?;
+
+    Ok((anon_key, service_role_key))
+}
+
+/// Get Supabase URL from environment or use default
+fn get_supabase_url() -> Result<String, String> {
+    Ok(std::env::var("SUPABASE_URL")
+        .unwrap_or_else(|_| "https://helix-backend.supabase.co".to_string()))
+}
+
+/// Log in with Supabase (email/password)
+///
+/// Authenticates user via Supabase Auth and retrieves their subscription tier.
+/// Returns user_id, email, and tier (awaken, phantom, overseer, architect).
+#[tauri::command]
+pub async fn supabase_login(
+    email: String,
+    password: String,
+) -> Result<SupabaseLoginResponse, String> {
+    let (anon_key, _) = get_supabase_credentials()?;
+    let supabase_url = get_supabase_url()?;
+
+    let client = reqwest::Client::new();
+
+    // Step 1: Authenticate with Supabase
+    let auth_response = client
+        .post(&format!("{}/auth/v1/token?grant_type=password", supabase_url))
+        .header("apikey", &anon_key)
+        .header("Content-Type", "application/json")
+        .json(&serde_json::json!({
+            "email": email,
+            "password": password
+        }))
+        .send()
+        .await
+        .map_err(|e| format!("Failed to connect to Supabase: {}", e))?;
+
+    if !auth_response.status().is_success() {
+        return Ok(SupabaseLoginResponse {
+            success: false,
+            error: Some("Invalid email or password".to_string()),
+            ..Default::default()
+        });
+    }
+
+    let auth_data: serde_json::Value = auth_response
+        .json()
+        .await
+        .map_err(|e| format!("Failed to parse auth response: {}", e))?;
+
+    let user_id = auth_data
+        .get("user")
+        .and_then(|u| u.get("id"))
+        .and_then(|id| id.as_str())
+        .ok_or_else(|| "Missing user ID in response".to_string())?
+        .to_string();
+
+    let access_token = auth_data
+        .get("access_token")
+        .and_then(|t| t.as_str())
+        .ok_or_else(|| "Missing access token".to_string())?;
+
+    // Step 2: Fetch subscription tier
+    let tier = match client
+        .get(&format!(
+            "{}/rest/v1/subscriptions?user_id=eq.{}",
+            supabase_url, user_id
+        ))
+        .header("apikey", &anon_key)
+        .header("Authorization", format!("Bearer {}", access_token))
+        .send()
+        .await
+    {
+        Ok(resp) => {
+            if let Ok(data) = resp.json::<Vec<SupabaseSubscription>>().await {
+                data.first()
+                    .map(|s| s.tier.clone())
+                    .unwrap_or("awaken".to_string())
+            } else {
+                "awaken".to_string()
+            }
+        }
+        Err(_) => "awaken".to_string(),
+    };
+
+    Ok(SupabaseLoginResponse {
+        success: true,
+        user_id: Some(user_id),
+        email: Some(email),
+        tier: Some(tier),
+        error: None,
+    })
+}
+
+/// Sign up with Supabase (email/password)
+///
+/// Creates a new user account and auto-provisions with tier='awaken' (free).
+/// Password must be at least 8 characters.
+#[tauri::command]
+pub async fn supabase_signup(
+    email: String,
+    password: String,
+) -> Result<SupabaseSignupResponse, String> {
+    // Validate password strength
+    if password.len() < 8 {
+        return Ok(SupabaseSignupResponse {
+            success: false,
+            error: Some("Password must be at least 8 characters".to_string()),
+            ..Default::default()
+        });
+    }
+
+    let (anon_key, _) = get_supabase_credentials()?;
+    let supabase_url = get_supabase_url()?;
+
+    let client = reqwest::Client::new();
+
+    // Create new user account
+    let signup_response = client
+        .post(&format!("{}/auth/v1/signup", supabase_url))
+        .header("apikey", &anon_key)
+        .header("Content-Type", "application/json")
+        .json(&serde_json::json!({
+            "email": email,
+            "password": password
+        }))
+        .send()
+        .await
+        .map_err(|e| format!("Failed to connect to Supabase: {}", e))?;
+
+    if !signup_response.status().is_success() {
+        let error_text = signup_response
+            .text()
+            .await
+            .unwrap_or_else(|_| "Unknown error".to_string());
+        return Ok(SupabaseSignupResponse {
+            success: false,
+            error: Some(error_text),
+            ..Default::default()
+        });
+    }
+
+    let signup_data: serde_json::Value = signup_response
+        .json()
+        .await
+        .map_err(|e| format!("Failed to parse signup response: {}", e))?;
+
+    let user_id = signup_data
+        .get("user")
+        .and_then(|u| u.get("id"))
+        .and_then(|id| id.as_str())
+        .ok_or_else(|| "Missing user ID in response".to_string())?
+        .to_string();
+
+    // Auto-provision with free tier (trigger handles this)
+    Ok(SupabaseSignupResponse {
+        success: true,
+        user_id: Some(user_id),
+        email: Some(email),
+        tier: Some("awaken".to_string()),
+        error: None,
+    })
+}
+
+/// Register this device instance with Supabase
+///
+/// Inserts into user_instances table so web dashboard knows about this device.
+/// Handles conflicts by updating if instance_id already exists.
+#[tauri::command]
+pub async fn register_instance(
+    user_id: String,
+    instance_id: String,
+    device_name: String,
+    device_type: String,
+    platform: String,
+) -> Result<InstanceRegistrationResponse, String> {
+    let (anon_key, _) = get_supabase_credentials()?;
+    let supabase_url = get_supabase_url()?;
+
+    let client = reqwest::Client::new();
+
+    // Insert into user_instances (upsert on conflict)
+    let response = client
+        .post(&format!("{}/rest/v1/user_instances", supabase_url))
+        .header("apikey", &anon_key)
+        .header("Content-Type", "application/json")
+        .header("Prefer", "resolution=merge-duplicates")
+        .json(&serde_json::json!({
+            "user_id": user_id,
+            "instance_id": instance_id,
+            "device_name": device_name,
+            "device_type": device_type,
+            "platform": platform,
+            "last_heartbeat": Utc::now().to_rfc3339(),
+            "is_online": true
+        }))
+        .send()
+        .await
+        .map_err(|e| format!("Failed to register instance: {}", e))?;
+
+    if response.status().is_success() {
+        Ok(InstanceRegistrationResponse {
+            success: true,
+            error: None,
+        })
+    } else {
+        let error_text = response
+            .text()
+            .await
+            .unwrap_or_else(|_| "Failed to register instance".to_string());
+        Ok(InstanceRegistrationResponse {
+            success: false,
+            error: Some(error_text),
+        })
+    }
+}
+
+/// Send heartbeat to keep instance online status fresh
+///
+/// Call every 60 seconds to keep is_online=true and last_heartbeat updated.
+/// This is called periodically by the frontend and doesn't require user context.
+#[tauri::command]
+pub async fn send_heartbeat(instance_id: String) -> Result<HeartbeatResponse, String> {
+    let (anon_key, _) = get_supabase_credentials()?;
+    let supabase_url = get_supabase_url()?;
+
+    let client = reqwest::Client::new();
+
+    let response = client
+        .patch(&format!(
+            "{}/rest/v1/user_instances?instance_id=eq.{}",
+            supabase_url, instance_id
+        ))
+        .header("apikey", &anon_key)
+        .header("Content-Type", "application/json")
+        .json(&serde_json::json!({
+            "last_heartbeat": Utc::now().to_rfc3339(),
+            "is_online": true
+        }))
+        .send()
+        .await
+        .map_err(|e| format!("Failed to send heartbeat: {}", e))?;
+
+    if response.status().is_success() {
+        Ok(HeartbeatResponse {
+            success: true,
+            error: None,
+        })
+    } else {
+        let error_text = response
+            .text()
+            .await
+            .unwrap_or_else(|_| "Failed to send heartbeat".to_string());
+        Ok(HeartbeatResponse {
+            success: false,
+            error: Some(error_text),
+        })
+    }
+}
+
+/// Get the system hostname for default device name
+///
+/// Returns machine hostname (e.g., "MacBook-Pro", "DESKTOP-ABC123")
+#[tauri::command]
+pub fn get_hostname() -> Result<String, String> {
+    hostname::get()
+        .map_err(|e| format!("Failed to get hostname: {}", e))
+        .map(|h| h.into_string().unwrap_or_else(|_| "Desktop".to_string()))
 }

@@ -52,9 +52,9 @@ describe('Calendar Components', () => {
         />
       );
 
-      expect(screen.getByText('February 2026')).toBeTruthy();
-      expect(screen.getByText('Mon')).toBeTruthy();
-      expect(screen.getByText('Sun')).toBeTruthy();
+      expect((screen as any).getByText('February 2026')).toBeTruthy();
+      expect((screen as any).getByText('Mon')).toBeTruthy();
+      expect((screen as any).getByText('Sun')).toBeTruthy();
     });
 
     it('displays events on correct dates in month view', () => {

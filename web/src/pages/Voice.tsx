@@ -9,7 +9,7 @@
  * - View and manage voicemail messages
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Mic, MessageSquareVoice, MessageCircle, Settings } from 'lucide-react';
 

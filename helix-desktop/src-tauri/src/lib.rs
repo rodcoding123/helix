@@ -109,6 +109,13 @@ pub fn run() {
             commands::auth::run_openclaw_oauth,
             commands::auth::check_oauth_credentials,
 
+            // Supabase authentication commands (Unified Auth System)
+            commands::auth::supabase_login,
+            commands::auth::supabase_signup,
+            commands::auth::register_instance,
+            commands::auth::send_heartbeat,
+            commands::auth::get_hostname,
+
             // Discord logging
             commands::discord::send_webhook,
             commands::discord::test_webhook,
