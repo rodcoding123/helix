@@ -1,0 +1,1 @@
+{"version":3,"file":"google-gemini-model-default.d.ts","sourceRoot":"","sources":["google-gemini-model-default.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,qBAAqB,CAAC;AAG1D,eAAO,MAAM,2BAA2B,gCAAgC,CAAC;AAYzE,wBAAgB,6BAA6B,CAAC,GAAG,EAAE,cAAc,GAAG;IAClE,IAAI,EAAE,cAAc,CAAC;IACrB,OAAO,EAAE,OAAO,CAAC;CAClB,CAyBA"}

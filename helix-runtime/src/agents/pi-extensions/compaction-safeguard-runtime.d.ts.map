@@ -1,0 +1,1 @@
+{"version":3,"file":"compaction-safeguard-runtime.d.ts","sourceRoot":"","sources":["compaction-safeguard-runtime.ts"],"names":[],"mappings":"AAAA,MAAM,MAAM,+BAA+B,GAAG;IAC5C,eAAe,CAAC,EAAE,MAAM,CAAC;CAC1B,CAAC;AAMF,wBAAgB,6BAA6B,CAC3C,cAAc,EAAE,OAAO,EACvB,KAAK,EAAE,+BAA+B,GAAG,IAAI,GAC5C,IAAI,CAYN;AAED,wBAAgB,6BAA6B,CAC3C,cAAc,EAAE,OAAO,GACtB,+BAA+B,GAAG,IAAI,CAMxC"}

@@ -1,0 +1,3 @@
+import type { Command } from "commander";
+export declare function registerNodeCli(program: Command): void;
+//# sourceMappingURL=register.d.ts.map

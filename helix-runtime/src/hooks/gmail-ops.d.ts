@@ -1,0 +1,42 @@
+export type GmailSetupOptions = {
+    account: string;
+    project?: string;
+    topic?: string;
+    subscription?: string;
+    label?: string;
+    hookToken?: string;
+    pushToken?: string;
+    hookUrl?: string;
+    bind?: string;
+    port?: number;
+    path?: string;
+    includeBody?: boolean;
+    maxBytes?: number;
+    renewEveryMinutes?: number;
+    tailscale?: "off" | "serve" | "funnel";
+    tailscalePath?: string;
+    tailscaleTarget?: string;
+    pushEndpoint?: string;
+    json?: boolean;
+};
+export type GmailRunOptions = {
+    account?: string;
+    topic?: string;
+    subscription?: string;
+    label?: string;
+    hookToken?: string;
+    pushToken?: string;
+    hookUrl?: string;
+    bind?: string;
+    port?: number;
+    path?: string;
+    includeBody?: boolean;
+    maxBytes?: number;
+    renewEveryMinutes?: number;
+    tailscale?: "off" | "serve" | "funnel";
+    tailscalePath?: string;
+    tailscaleTarget?: string;
+};
+export declare function runGmailSetup(opts: GmailSetupOptions): Promise<void>;
+export declare function runGmailService(opts: GmailRunOptions): Promise<void>;
+//# sourceMappingURL=gmail-ops.d.ts.map

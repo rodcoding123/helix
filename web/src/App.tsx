@@ -36,6 +36,7 @@ const AlertingDashboard = lazy(() => import('@/pages/AlertingDashboard').then(m 
 const StatusPage = lazy(() => import('@/pages/StatusPage').then(m => ({ default: m.StatusPage })));
 const OnboardingChat = lazy(() => import('@/pages/OnboardingChat').then(m => ({ default: m.OnboardingChat })));
 const CloudChat = lazy(() => import('@/pages/CloudChat').then(m => ({ default: m.CloudChat })));
+const SetupWizard = lazy(() => import('@/pages/SetupWizard').then(m => ({ default: m.SetupWizard })));
 
 // Loading fallback component
 function LoadingFallback() {
@@ -87,6 +88,16 @@ export function App() {
                   <Suspense fallback={<LoadingFallback />}>
                     <ProtectedRoute>
                       <CloudChat />
+                    </ProtectedRoute>
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/setup"
+                element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <ProtectedRoute skipOnboardingCheck>
+                      <SetupWizard />
                     </ProtectedRoute>
                   </Suspense>
                 }

@@ -149,15 +149,25 @@ export function Dashboard() {
                   Create an instance to begin. Each instance represents a Helix runtime you can
                   connect to from your local machine.
                 </p>
-                {canCreateInstance && (
-                  <button
-                    onClick={() => setShowCreateModal(true)}
-                    className="btn btn-cta btn-cta-shimmer mt-6 gap-2"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Create Instance
-                  </button>
-                )}
+                <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                  <Link to="/chat" className="btn btn-cta btn-cta-shimmer gap-2">
+                    <MessageSquare className="h-4 w-4" />
+                    Chat with Helix
+                  </Link>
+                  {canCreateInstance && (
+                    <button
+                      onClick={() => setShowCreateModal(true)}
+                      className="btn btn-primary gap-2"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Create Instance
+                    </button>
+                  )}
+                  <Link to="/setup" className="btn btn-secondary gap-2">
+                    <Download className="h-4 w-4" />
+                    Setup Guide
+                  </Link>
+                </div>
               </div>
 
               {/* Setup Steps */}
@@ -187,13 +197,20 @@ export function Dashboard() {
               {/* Offline banner */}
               <div className="mb-4 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 flex items-start gap-3">
                 <WifiOff className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
-                <div>
+                <div className="flex-1">
                   <p className="text-sm font-medium text-amber-300">All instances offline</p>
                   <p className="mt-1 text-sm text-text-secondary">
                     Start your local Helix runtime to connect. Your instances will show as active
                     once the CLI is running.
                   </p>
                 </div>
+                <Link
+                  to="/setup"
+                  className="btn btn-sm btn-secondary gap-1.5 shrink-0 self-center"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  Setup Guide
+                </Link>
               </div>
               <div className="space-y-4">
                 {instances.map(instance => (

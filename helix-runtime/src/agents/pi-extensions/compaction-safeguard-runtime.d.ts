@@ -1,0 +1,6 @@
+export type CompactionSafeguardRuntimeValue = {
+    maxHistoryShare?: number;
+};
+export declare function setCompactionSafeguardRuntime(sessionManager: unknown, value: CompactionSafeguardRuntimeValue | null): void;
+export declare function getCompactionSafeguardRuntime(sessionManager: unknown): CompactionSafeguardRuntimeValue | null;
+//# sourceMappingURL=compaction-safeguard-runtime.d.ts.map

@@ -1,0 +1,1 @@
+{"version":3,"file":"channel-adapters.d.ts","sourceRoot":"","sources":["channel-adapters.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,SAAS,EAAE,MAAM,iCAAiC,CAAC;AAEjE,MAAM,MAAM,qBAAqB,GAAG;IAClC,cAAc,EAAE,OAAO,CAAC;IACxB,uBAAuB,CAAC,EAAE,CAAC,WAAW,EAAE,MAAM,KAAK,OAAO,EAAE,CAAC;CAC9D,CAAC;AAeF,wBAAgB,wBAAwB,CAAC,OAAO,EAAE,SAAS,GAAG,qBAAqB,CAKlF"}

@@ -1,0 +1,1 @@
+{"version":3,"file":"assistant-message.d.ts","sourceRoot":"","sources":["assistant-message.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,SAAS,EAAoB,MAAM,sBAAsB,CAAC;AAGnE,qBAAa,yBAA0B,SAAQ,SAAS;IACtD,OAAO,CAAC,IAAI,CAAW;gBAEX,IAAI,EAAE,MAAM;IASxB,OAAO,CAAC,IAAI,EAAE,MAAM;CAGrB"}

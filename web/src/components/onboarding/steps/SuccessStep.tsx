@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PartyPopper, MessageSquare, BarChart3, Settings, BookOpen, ArrowRight } from 'lucide-react';
 
 interface SuccessStepProps {
@@ -6,6 +7,7 @@ interface SuccessStepProps {
 }
 
 export function SuccessStep({ onComplete }: SuccessStepProps) {
+  const navigate = useNavigate();
   const [showConfetti, setShowConfetti] = useState(true);
 
   // Auto-hide confetti after animation
@@ -13,6 +15,13 @@ export function SuccessStep({ onComplete }: SuccessStepProps) {
     const timer = setTimeout(() => setShowConfetti(false), 3000);
     return () => clearTimeout(timer);
   }, []);
+
+  function handleAction(path: string) {
+    // Mark setup complete, then navigate to destination
+    localStorage.removeItem('helix_onboarding_progress');
+    localStorage.setItem('helix_onboarding_complete', 'true');
+    navigate(path);
+  }
 
   return (
     <div className="space-y-8 relative">
@@ -51,7 +60,7 @@ export function SuccessStep({ onComplete }: SuccessStepProps) {
       {/* Quick actions */}
       <div className="grid gap-4 sm:grid-cols-2">
         <button
-          onClick={onComplete}
+          onClick={() => handleAction('/chat')}
           className="group flex items-start gap-4 p-4 rounded-xl border border-helix-500/30 bg-helix-500/10 hover:bg-helix-500/20 transition-all text-left"
         >
           <div className="h-12 w-12 rounded-xl bg-helix-500/20 flex items-center justify-center shrink-0">
@@ -69,7 +78,7 @@ export function SuccessStep({ onComplete }: SuccessStepProps) {
         </button>
 
         <button
-          onClick={onComplete}
+          onClick={() => handleAction('/dashboard')}
           className="group flex items-start gap-4 p-4 rounded-xl border border-white/10 bg-bg-tertiary/50 hover:bg-bg-tertiary transition-all text-left"
         >
           <div className="h-12 w-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
@@ -87,7 +96,7 @@ export function SuccessStep({ onComplete }: SuccessStepProps) {
         </button>
 
         <button
-          onClick={onComplete}
+          onClick={() => handleAction('/settings')}
           className="group flex items-start gap-4 p-4 rounded-xl border border-white/10 bg-bg-tertiary/50 hover:bg-bg-tertiary transition-all text-left"
         >
           <div className="h-12 w-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
@@ -105,7 +114,7 @@ export function SuccessStep({ onComplete }: SuccessStepProps) {
         </button>
 
         <button
-          onClick={onComplete}
+          onClick={() => handleAction('/docs')}
           className="group flex items-start gap-4 p-4 rounded-xl border border-white/10 bg-bg-tertiary/50 hover:bg-bg-tertiary transition-all text-left"
         >
           <div className="h-12 w-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0">

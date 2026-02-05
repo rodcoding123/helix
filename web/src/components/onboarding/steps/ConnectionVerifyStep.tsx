@@ -105,19 +105,19 @@ export function ConnectionVerifyStep({ data, updateData }: ConnectionVerifyStepP
       wsRef.current = ws;
 
       ws.onopen = () => {
-        // Send connect request (JSON-RPC 2.0)
+        // Send connect request (JSON-RPC 2.0, OpenClaw protocol v3)
         const connectRequest = {
           type: 'req',
           method: 'connect',
           id: crypto.randomUUID(),
           params: {
-            minProtocol: 1,
-            maxProtocol: 1,
+            minProtocol: 3,
+            maxProtocol: 3,
             client: {
-              id: 'helix.onboarding',
-              mode: 'web',
+              id: 'webchat-ui',
+              mode: 'ui',
               version: '1.0.0',
-              displayName: 'Helix Onboarding',
+              displayName: 'Helix Setup Wizard',
               instanceId: data.instanceKey,
             },
             role: 'operator',

@@ -1,0 +1,1 @@
+{"version":3,"file":"doctor-gateway-health.d.ts","sourceRoot":"","sources":["doctor-gateway-health.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,qBAAqB,CAAC;AAG1D,OAAO,KAAK,EAAE,UAAU,EAAE,MAAM,eAAe,CAAC;AAKhD,wBAAsB,kBAAkB,CAAC,MAAM,EAAE;IAC/C,OAAO,EAAE,UAAU,CAAC;IACpB,GAAG,EAAE,cAAc,CAAC;IACpB,SAAS,CAAC,EAAE,MAAM,CAAC;CACpB;;GA6CA"}

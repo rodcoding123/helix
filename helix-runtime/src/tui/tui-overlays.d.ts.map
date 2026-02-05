@@ -1,0 +1,1 @@
+{"version":3,"file":"tui-overlays.d.ts","sourceRoot":"","sources":["tui-overlays.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,SAAS,EAAE,GAAG,EAAE,MAAM,sBAAsB,CAAC;AAE3D,KAAK,WAAW,GAAG,IAAI,CAAC,GAAG,EAAE,aAAa,GAAG,aAAa,GAAG,YAAY,GAAG,UAAU,CAAC,CAAC;AAExF,wBAAgB,qBAAqB,CAAC,IAAI,EAAE,WAAW,EAAE,aAAa,EAAE,SAAS;6BAC/C,SAAS;;EAa1C"}

@@ -1,0 +1,3 @@
+import type { ChannelStatusIssue } from "../channels/plugins/types.js";
+export declare function collectChannelStatusIssues(payload: Record<string, unknown>): ChannelStatusIssue[];
+//# sourceMappingURL=channels-status-issues.d.ts.map

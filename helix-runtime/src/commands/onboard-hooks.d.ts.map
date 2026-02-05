@@ -1,0 +1,1 @@
+{"version":3,"file":"onboard-hooks.d.ts","sourceRoot":"","sources":["onboard-hooks.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,qBAAqB,CAAC;AAC1D,OAAO,KAAK,EAAE,UAAU,EAAE,MAAM,eAAe,CAAC;AAChD,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,sBAAsB,CAAC;AAK3D,wBAAsB,kBAAkB,CACtC,GAAG,EAAE,cAAc,EACnB,OAAO,EAAE,UAAU,EACnB,QAAQ,EAAE,cAAc,GACvB,OAAO,CAAC,cAAc,CAAC,CAyEzB"}

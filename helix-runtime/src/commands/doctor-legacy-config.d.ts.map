@@ -1,0 +1,1 @@
+{"version":3,"file":"doctor-legacy-config.d.ts","sourceRoot":"","sources":["doctor-legacy-config.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,qBAAqB,CAAC;AAC1D,wBAAgB,2BAA2B,CAAC,GAAG,EAAE,cAAc,GAAG;IAChE,MAAM,EAAE,cAAc,CAAC;IACvB,OAAO,EAAE,MAAM,EAAE,CAAC;CACnB,CA0CA"}

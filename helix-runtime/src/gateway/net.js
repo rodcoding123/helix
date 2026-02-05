@@ -1,0 +1,224 @@
+import net from "node:net";
+import { pickPrimaryTailnetIPv4, pickPrimaryTailnetIPv6 } from "../infra/tailnet.js";
+export function isLoopbackAddress(ip) {
+    if (!ip) {
+        return false;
+    }
+    if (ip === "127.0.0.1") {
+        return true;
+    }
+    if (ip.startsWith("127.")) {
+        return true;
+    }
+    if (ip === "::1") {
+        return true;
+    }
+    if (ip.startsWith("::ffff:127.")) {
+        return true;
+    }
+    return false;
+}
+function normalizeIPv4MappedAddress(ip) {
+    if (ip.startsWith("::ffff:")) {
+        return ip.slice("::ffff:".length);
+    }
+    return ip;
+}
+function normalizeIp(ip) {
+    const trimmed = ip?.trim();
+    if (!trimmed) {
+        return undefined;
+    }
+    return normalizeIPv4MappedAddress(trimmed.toLowerCase());
+}
+function stripOptionalPort(ip) {
+    if (ip.startsWith("[")) {
+        const end = ip.indexOf("]");
+        if (end !== -1) {
+            return ip.slice(1, end);
+        }
+    }
+    if (net.isIP(ip)) {
+        return ip;
+    }
+    const lastColon = ip.lastIndexOf(":");
+    if (lastColon > -1 && ip.includes(".") && ip.indexOf(":") === lastColon) {
+        const candidate = ip.slice(0, lastColon);
+        if (net.isIP(candidate) === 4) {
+            return candidate;
+        }
+    }
+    return ip;
+}
+export function parseForwardedForClientIp(forwardedFor) {
+    const raw = forwardedFor?.split(",")[0]?.trim();
+    if (!raw) {
+        return undefined;
+    }
+    return normalizeIp(stripOptionalPort(raw));
+}
+function parseRealIp(realIp) {
+    const raw = realIp?.trim();
+    if (!raw) {
+        return undefined;
+    }
+    return normalizeIp(stripOptionalPort(raw));
+}
+export function isTrustedProxyAddress(ip, trustedProxies) {
+    const normalized = normalizeIp(ip);
+    if (!normalized || !trustedProxies || trustedProxies.length === 0) {
+        return false;
+    }
+    return trustedProxies.some((proxy) => normalizeIp(proxy) === normalized);
+}
+export function resolveGatewayClientIp(params) {
+    const remote = normalizeIp(params.remoteAddr);
+    if (!remote) {
+        return undefined;
+    }
+    if (!isTrustedProxyAddress(remote, params.trustedProxies)) {
+        return remote;
+    }
+    return parseForwardedForClientIp(params.forwardedFor) ?? parseRealIp(params.realIp) ?? remote;
+}
+export function isLocalGatewayAddress(ip) {
+    if (isLoopbackAddress(ip)) {
+        return true;
+    }
+    if (!ip) {
+        return false;
+    }
+    const normalized = normalizeIPv4MappedAddress(ip.trim().toLowerCase());
+    const tailnetIPv4 = pickPrimaryTailnetIPv4();
+    if (tailnetIPv4 && normalized === tailnetIPv4.toLowerCase()) {
+        return true;
+    }
+    const tailnetIPv6 = pickPrimaryTailnetIPv6();
+    if (tailnetIPv6 && ip.trim().toLowerCase() === tailnetIPv6.toLowerCase()) {
+        return true;
+    }
+    return false;
+}
+/**
+ * Resolves gateway bind host with SECURE fallback strategy.
+ *
+ * SECURITY FIX (CVE-2025-59951 pattern): Fail-closed binding
+ * No automatic fallback to 0.0.0.0 when intended binding fails.
+ *
+ * Modes:
+ * - loopback: 127.0.0.1 (REQUIRED - fails if unavailable)
+ * - lan: 0.0.0.0 (EXPLICIT - user requested network exposure)
+ * - tailnet: Tailnet IPv4, fallback to 127.0.0.1 (NOT 0.0.0.0)
+ * - auto: 127.0.0.1, then 0.0.0.0 ONLY if explicitly enabled
+ * - custom: User-specified IP (FAILS if unavailable)
+ *
+ * @returns The bind address to use (never null)
+ * @throws Error if binding mode cannot be satisfied
+ */
+export async function resolveGatewayBindHost(bind, customHost) {
+    const mode = bind ?? "loopback";
+    if (mode === "loopback") {
+        // SECURITY: Loopback must succeed - fail closed if not available
+        if (await canBindToHost("127.0.0.1")) {
+            return "127.0.0.1";
+        }
+        throw new Error('SECURITY_ERROR: Cannot bind to loopback (127.0.0.1). ' +
+            'This is required for secure operation. ' +
+            'If you need network exposure, explicitly set bind: "lan" in config.');
+    }
+    if (mode === "tailnet") {
+        const tailnetIP = pickPrimaryTailnetIPv4();
+        if (tailnetIP && (await canBindToHost(tailnetIP))) {
+            return tailnetIP;
+        }
+        // SECURITY FIX: Don't fall back to 0.0.0.0, use loopback instead
+        if (await canBindToHost("127.0.0.1")) {
+            console.warn('[Gateway] Tailnet IP unavailable, falling back to loopback (127.0.0.1). ' +
+                'Gateway will only be accessible locally.');
+            return "127.0.0.1";
+        }
+        throw new Error('SECURITY_ERROR: Cannot bind to tailnet IP or loopback. ' +
+            'Check your network configuration.');
+    }
+    if (mode === "lan") {
+        // SECURITY: Explicit network exposure - user requested this
+        return "0.0.0.0";
+    }
+    if (mode === "custom") {
+        const host = customHost?.trim();
+        if (!host) {
+            throw new Error('SECURITY_ERROR: Custom bind mode requires customHost to be set. ' +
+                'Refusing to fall back to 0.0.0.0 for safety.');
+        }
+        if (!isValidIPv4(host)) {
+            throw new Error(`SECURITY_ERROR: Custom bind host "${host}" is not a valid IPv4 address.`);
+        }
+        if (await canBindToHost(host)) {
+            return host;
+        }
+        throw new Error(`SECURITY_ERROR: Cannot bind to custom host "${host}". ` +
+            'Check that the IP address is correct and available on this system.');
+    }
+    if (mode === "auto") {
+        // SECURITY: Try loopback first (secure), only use 0.0.0.0 if explicitly configured
+        if (await canBindToHost("127.0.0.1")) {
+            return "127.0.0.1";
+        }
+        // SECURITY FIX: Don't silently expose to network
+        // User must explicitly set bind: "lan" if they want 0.0.0.0
+        throw new Error('SECURITY_ERROR: Auto mode tried loopback but it is unavailable. ' +
+            'To bind to all interfaces, explicitly set bind: "lan" in config.');
+    }
+    throw new Error(`SECURITY_ERROR: Unknown bind mode: ${mode}`);
+}
+/**
+ * Test if we can bind to a specific host address.
+ * Creates a temporary server, attempts to bind, then closes it.
+ *
+ * @param host - The host address to test
+ * @returns True if we can successfully bind to this address
+ */
+export async function canBindToHost(host) {
+    return new Promise((resolve) => {
+        const testServer = net.createServer();
+        testServer.once("error", () => {
+            resolve(false);
+        });
+        testServer.once("listening", () => {
+            testServer.close();
+            resolve(true);
+        });
+        // Use port 0 to let OS pick an available port for testing
+        testServer.listen(0, host);
+    });
+}
+export async function resolveGatewayListenHosts(bindHost, opts) {
+    if (bindHost !== "127.0.0.1") {
+        return [bindHost];
+    }
+    const canBind = opts?.canBindToHost ?? canBindToHost;
+    if (await canBind("::1")) {
+        return [bindHost, "::1"];
+    }
+    return [bindHost];
+}
+/**
+ * Validate if a string is a valid IPv4 address.
+ *
+ * @param host - The string to validate
+ * @returns True if valid IPv4 format
+ */
+function isValidIPv4(host) {
+    const parts = host.split(".");
+    if (parts.length !== 4) {
+        return false;
+    }
+    return parts.every((part) => {
+        const n = parseInt(part, 10);
+        return !Number.isNaN(n) && n >= 0 && n <= 255 && part === String(n);
+    });
+}
+export function isLoopbackHost(host) {
+    return isLoopbackAddress(host);
+}
+//# sourceMappingURL=net.js.map

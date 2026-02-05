@@ -1,0 +1,1 @@
+{"version":3,"file":"session-status-tool.d.ts","sourceRoot":"","sources":["session-status-tool.ts"],"names":[],"mappings":"AAqBA,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,wBAAwB,CAAC;AAmB7D,OAAO,KAAK,EAAE,YAAY,EAAE,MAAM,aAAa,CAAC;AAkNhD,wBAAgB,uBAAuB,CAAC,IAAI,CAAC,EAAE;IAC7C,eAAe,CAAC,EAAE,MAAM,CAAC;IACzB,MAAM,CAAC,EAAE,cAAc,CAAC;CACzB,GAAG,YAAY,CA0Nf"}

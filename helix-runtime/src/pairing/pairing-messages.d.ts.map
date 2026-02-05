@@ -1,0 +1,1 @@
+{"version":3,"file":"pairing-messages.d.ts","sourceRoot":"","sources":["pairing-messages.ts"],"names":[],"mappings":"AACA,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,oBAAoB,CAAC;AAEzD,wBAAgB,iBAAiB,CAAC,MAAM,EAAE;IACxC,OAAO,EAAE,cAAc,CAAC;IACxB,MAAM,EAAE,MAAM,CAAC;IACf,IAAI,EAAE,MAAM,CAAC;CACd,GAAG,MAAM,CAYT"}

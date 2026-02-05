@@ -1,0 +1,1 @@
+{"version":3,"file":"openai-codex-model-default.d.ts","sourceRoot":"","sources":["openai-codex-model-default.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,qBAAqB,CAAC;AAG1D,eAAO,MAAM,0BAA0B,yBAAyB,CAAC;AA2BjE,wBAAgB,4BAA4B,CAAC,GAAG,EAAE,cAAc,GAAG;IACjE,IAAI,EAAE,cAAc,CAAC;IACrB,OAAO,EAAE,OAAO,CAAC;CAClB,CAwBA"}

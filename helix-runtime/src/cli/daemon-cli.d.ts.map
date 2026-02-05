@@ -1,0 +1,1 @@
+{"version":3,"file":"daemon-cli.d.ts","sourceRoot":"","sources":["daemon-cli.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,iBAAiB,EAAE,MAAM,0BAA0B,CAAC;AAC7D,OAAO,EACL,gBAAgB,EAChB,gBAAgB,EAChB,cAAc,EACd,eAAe,EACf,aAAa,EACb,kBAAkB,GACnB,MAAM,yBAAyB,CAAC;AACjC,YAAY,EACV,oBAAoB,EACpB,mBAAmB,EACnB,cAAc,GACf,MAAM,uBAAuB,CAAC"}

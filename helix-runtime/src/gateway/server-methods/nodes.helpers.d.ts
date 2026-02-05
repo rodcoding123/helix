@@ -1,0 +1,15 @@
+import type { ErrorObject } from "ajv";
+import type { RespondFn } from "./types.js";
+type ValidatorFn = ((value: unknown) => boolean) & {
+    errors?: ErrorObject[] | null;
+};
+export declare function respondInvalidParams(params: {
+    respond: RespondFn;
+    method: string;
+    validator: ValidatorFn;
+}): void;
+export declare function respondUnavailableOnThrow(respond: RespondFn, fn: () => Promise<void>): Promise<void>;
+export declare function uniqueSortedStrings(values: unknown[]): any;
+export declare function safeParseJson(value: string | null | undefined): unknown;
+export {};
+//# sourceMappingURL=nodes.helpers.d.ts.map

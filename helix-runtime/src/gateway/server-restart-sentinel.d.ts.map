@@ -1,0 +1,1 @@
+{"version":3,"file":"server-restart-sentinel.d.ts","sourceRoot":"","sources":["server-restart-sentinel.ts"],"names":[],"mappings":"AAEA,OAAO,KAAK,EAAE,OAAO,EAAE,MAAM,gBAAgB,CAAC;AAc9C,wBAAsB,2BAA2B,CAAC,MAAM,EAAE;IAAE,IAAI,EAAE,OAAO,CAAA;CAAE,iBAyF1E;AAED,wBAAgB,6BAA6B,YAE5C"}

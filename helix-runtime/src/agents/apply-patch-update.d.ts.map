@@ -1,0 +1,1 @@
+{"version":3,"file":"apply-patch-update.d.ts","sourceRoot":"","sources":["apply-patch-update.ts"],"names":[],"mappings":"AAEA,KAAK,eAAe,GAAG;IACrB,aAAa,CAAC,EAAE,MAAM,CAAC;IACvB,QAAQ,EAAE,MAAM,EAAE,CAAC;IACnB,QAAQ,EAAE,MAAM,EAAE,CAAC;IACnB,WAAW,EAAE,OAAO,CAAC;CACtB,CAAC;AAEF,wBAAsB,eAAe,CACnC,QAAQ,EAAE,MAAM,EAChB,MAAM,EAAE,eAAe,EAAE,GACxB,OAAO,CAAC,MAAM,CAAC,CAgBjB"}

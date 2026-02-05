@@ -1,0 +1,1 @@
+{"version":3,"file":"os-summary.d.ts","sourceRoot":"","sources":["os-summary.ts"],"names":[],"mappings":"AAGA,MAAM,MAAM,SAAS,GAAG;IACtB,QAAQ,EAAE,MAAM,CAAC,QAAQ,CAAC;IAC1B,IAAI,EAAE,MAAM,CAAC;IACb,OAAO,EAAE,MAAM,CAAC;IAChB,KAAK,EAAE,MAAM,CAAC;CACf,CAAC;AAYF,wBAAgB,gBAAgB,IAAI,SAAS,CAc5C"}
