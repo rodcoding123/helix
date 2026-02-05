@@ -8,8 +8,8 @@ describe('ConductorLoop', () => {
     loop = new ConductorLoop();
   });
 
-  afterEach(async () => {
-    await loop.stop();
+  afterEach(() => {
+    loop.stop();
   });
 
   describe('start', () => {
@@ -30,7 +30,7 @@ describe('ConductorLoop', () => {
       // Wait for one cycle
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const cycles = await loop.getCycles();
+      const cycles = loop.getCycles();
       expect(cycles.length).toBeGreaterThan(0);
     });
   });
@@ -38,14 +38,14 @@ describe('ConductorLoop', () => {
   describe('stop', () => {
     it('should stop the conductor loop', async () => {
       await loop.start();
-      const stopped = await loop.stop();
+      const stopped = loop.stop();
       expect(stopped).toBe(true);
     });
 
     it('should not allow double-stop', async () => {
       await loop.start();
-      await loop.stop();
-      const secondStop = await loop.stop();
+      loop.stop();
+      const secondStop = loop.stop();
       expect(secondStop).toBe(false);
     });
   });
@@ -55,7 +55,7 @@ describe('ConductorLoop', () => {
       await loop.start();
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const cycles = await loop.getCycles();
+      const cycles = loop.getCycles();
       if (cycles.length > 0) {
         const cycle = cycles[cycles.length - 1];
         expect(cycle).toBeDefined();
@@ -67,7 +67,7 @@ describe('ConductorLoop', () => {
       await loop.start();
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const cycles = await loop.getCycles();
+      const cycles = loop.getCycles();
       if (cycles.length > 0) {
         const cycle = cycles[cycles.length - 1];
         expect(cycle.goals_evaluated).toBeGreaterThanOrEqual(0);
@@ -78,7 +78,7 @@ describe('ConductorLoop', () => {
       await loop.start();
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const cycles = await loop.getCycles();
+      const cycles = loop.getCycles();
       if (cycles.length > 0) {
         const cycle = cycles[cycles.length - 1];
         expect(cycle.operations_spawned).toBeGreaterThanOrEqual(0);
@@ -89,7 +89,7 @@ describe('ConductorLoop', () => {
       await loop.start();
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const cycles = await loop.getCycles();
+      const cycles = loop.getCycles();
       if (cycles.length > 0) {
         const cycle = cycles[cycles.length - 1];
         expect(cycle.cycle_duration_ms).toBeGreaterThan(0);
@@ -101,7 +101,7 @@ describe('ConductorLoop', () => {
       await loop.start();
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const cycles = await loop.getCycles();
+      const cycles = loop.getCycles();
       if (cycles.length > 0) {
         const cycle = cycles[cycles.length - 1];
         expect(cycle.total_cost_this_cycle).toBeGreaterThanOrEqual(0);
@@ -112,7 +112,7 @@ describe('ConductorLoop', () => {
       await loop.start();
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const cycles = await loop.getCycles();
+      const cycles = loop.getCycles();
       if (cycles.length > 0) {
         const cycle = cycles[cycles.length - 1];
         expect(['success', 'partial', 'failed']).toContain(cycle.status);
@@ -123,7 +123,7 @@ describe('ConductorLoop', () => {
       await loop.start();
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const cycles = await loop.getCycles();
+      const cycles = loop.getCycles();
       if (cycles.length > 0) {
         const cycle = cycles[cycles.length - 1];
         expect(cycle.next_cycle_at).toBeDefined();
@@ -136,7 +136,7 @@ describe('ConductorLoop', () => {
       await loop.start();
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const cycles = await loop.getCycles();
+      const cycles = loop.getCycles();
       if (cycles.length > 0) {
         const cycle = cycles[cycles.length - 1];
         expect(cycle.cycle_id).toBeDefined();
@@ -148,7 +148,7 @@ describe('ConductorLoop', () => {
       await loop.start();
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const cycles = await loop.getCycles();
+      const cycles = loop.getCycles();
       if (cycles.length > 0) {
         const cycle = cycles[cycles.length - 1];
         expect(cycle.started_at).toBeDefined();
@@ -158,8 +158,8 @@ describe('ConductorLoop', () => {
   });
 
   describe('getStatus', () => {
-    it('should report loop status', async () => {
-      const status = await loop.getStatus();
+    it('should report loop status', () => {
+      const status = loop.getStatus();
       expect(status).toBeDefined();
       expect(status.is_running).toBeDefined();
       expect(status.cycles_completed).toBeGreaterThanOrEqual(0);
@@ -167,22 +167,23 @@ describe('ConductorLoop', () => {
 
     it('should show running=true after start', async () => {
       await loop.start();
-      const status = await loop.getStatus();
+      const status = loop.getStatus();
       expect(status.is_running).toBe(true);
-      await loop.stop();
+      loop.stop();
+      await new Promise(resolve => setTimeout(resolve, 10));
     });
 
     it('should show running=false after stop', async () => {
       await loop.start();
-      await loop.stop();
-      const status = await loop.getStatus();
+      loop.stop();
+      const status = loop.getStatus();
       expect(status.is_running).toBe(false);
     });
 
     it('should track total cost', async () => {
       await loop.start();
       await new Promise(resolve => setTimeout(resolve, 100));
-      const status = await loop.getStatus();
+      const status = loop.getStatus();
       expect(status.total_cost_usd).toBeGreaterThanOrEqual(0);
     });
   });
@@ -192,7 +193,7 @@ describe('ConductorLoop', () => {
       await loop.start();
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const cycles = await loop.getCycles();
+      const cycles = loop.getCycles();
       expect(Array.isArray(cycles)).toBe(true);
     });
 
@@ -200,7 +201,7 @@ describe('ConductorLoop', () => {
       await loop.start();
       await new Promise(resolve => setTimeout(resolve, 150));
 
-      const cycles = await loop.getCycles();
+      const cycles = loop.getCycles();
       if (cycles.length > 1) {
         const first = new Date(cycles[0].started_at).getTime();
         const second = new Date(cycles[1].started_at).getTime();
@@ -212,29 +213,29 @@ describe('ConductorLoop', () => {
       await loop.start();
       await new Promise(resolve => setTimeout(resolve, 200));
 
-      const cycles = await loop.getCycles(1);
+      const cycles = loop.getCycles(1);
       expect(cycles.length).toBeLessThanOrEqual(1);
     });
   });
 
   describe('configuration', () => {
-    it('should use default cycle interval (60 seconds)', async () => {
-      const config = await loop.getConfig();
+    it('should use default cycle interval (60 seconds)', () => {
+      const config = loop.getConfig();
       expect(config.cycle_interval_ms).toBe(60000);
     });
 
-    it('should have max_concurrent_models config', async () => {
-      const config = await loop.getConfig();
+    it('should have max_concurrent_models config', () => {
+      const config = loop.getConfig();
       expect(config.max_concurrent_models).toBeGreaterThan(0);
     });
 
-    it('should have budget_per_cycle config', async () => {
-      const config = await loop.getConfig();
+    it('should have budget_per_cycle config', () => {
+      const config = loop.getConfig();
       expect(config.budget_per_cycle).toBeGreaterThan(0);
     });
 
-    it('should have consciousness_layers_required config', async () => {
-      const config = await loop.getConfig();
+    it('should have consciousness_layers_required config', () => {
+      const config = loop.getConfig();
       expect(config.consciousness_layers_required).toBeGreaterThan(0);
     });
 
@@ -242,18 +243,18 @@ describe('ConductorLoop', () => {
       await loop.start();
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const cycles = await loop.getCycles();
+      const cycles = loop.getCycles();
       if (cycles.length > 0) {
         const cycle = cycles[cycles.length - 1];
-        const config = await loop.getConfig();
+        const config = loop.getConfig();
         expect(cycle.total_cost_this_cycle).toBeLessThanOrEqual(config.budget_per_cycle);
       }
     });
 
-    it('should allow config updates', async () => {
+    it('should allow config updates', () => {
       const newBudget = 20;
-      await loop.setConfig({ budget_per_cycle: newBudget });
-      const config = await loop.getConfig();
+      loop.setConfig({ budget_per_cycle: newBudget });
+      const config = loop.getConfig();
       expect(config.budget_per_cycle).toBe(newBudget);
     });
   });
@@ -263,7 +264,7 @@ describe('ConductorLoop', () => {
       await loop.start();
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const cycles = await loop.getCycles();
+      const cycles = loop.getCycles();
       if (cycles.length > 0) {
         // Cycle should exist even if consciousness failed
         expect(cycles[cycles.length - 1]).toBeDefined();
@@ -276,7 +277,7 @@ describe('ConductorLoop', () => {
       // Wait for 2 cycles
       await new Promise(resolve => setTimeout(resolve, 200));
 
-      const cycles = await loop.getCycles();
+      const cycles = loop.getCycles();
       // Should have multiple cycles even if some failed
       expect(cycles.length).toBeGreaterThanOrEqual(1);
     });
@@ -285,7 +286,7 @@ describe('ConductorLoop', () => {
       await loop.start();
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const cycles = await loop.getCycles();
+      const cycles = loop.getCycles();
       if (cycles.length > 0) {
         const cycle = cycles[cycles.length - 1];
         // Status should be one of the valid states
@@ -299,7 +300,7 @@ describe('ConductorLoop', () => {
       await loop.start();
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const cycles = await loop.getCycles();
+      const cycles = loop.getCycles();
       if (cycles.length > 0) {
         // Cycle has timestamp, indicating logging occurred
         expect(cycles[cycles.length - 1].started_at).toBeDefined();
@@ -310,7 +311,7 @@ describe('ConductorLoop', () => {
       await loop.start();
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const cycles = await loop.getCycles();
+      const cycles = loop.getCycles();
       if (cycles.length > 0) {
         expect(cycles[cycles.length - 1].cycle_id).toBeDefined();
       }

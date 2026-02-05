@@ -100,7 +100,7 @@ export class ConductorLoop {
    * Stop the conductor loop
    * Returns false if not running
    */
-  async stop(): Promise<boolean> {
+  stop(): boolean {
     if (!this.isRunning) {
       return false;
     }
@@ -240,7 +240,7 @@ export class ConductorLoop {
   /**
    * Get current loop status
    */
-  async getStatus(): Promise<LoopStatus> {
+  getStatus(): LoopStatus {
     return {
       is_running: this.isRunning,
       cycles_completed: this.cycles.length,
@@ -254,21 +254,21 @@ export class ConductorLoop {
    * Get cycle history
    * @param limit Maximum number of cycles to return (default 100)
    */
-  async getCycles(limit: number = 100): Promise<ConductionCycle[]> {
+  getCycles(limit: number = 100): ConductionCycle[] {
     return this.cycles.slice(0, limit);
   }
 
   /**
    * Get current configuration
    */
-  async getConfig(): Promise<ConductorLoopConfig> {
+  getConfig(): ConductorLoopConfig {
     return { ...this.config };
   }
 
   /**
    * Update configuration
    */
-  async setConfig(config: Partial<ConductorLoopConfig>): Promise<void> {
+  setConfig(config: Partial<ConductorLoopConfig>): void {
     this.config = { ...this.config, ...config };
   }
 }
