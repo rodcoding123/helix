@@ -111,6 +111,9 @@ export {
   HELIX_LAYER_FILES,
 } from './helix-context-loader.js';
 
+// Phase 0 orchestration
+export { conductorLoop } from './orchestration/index.js';
+
 // Heartbeat (proof of life)
 export {
   announceStartup,
@@ -459,6 +462,35 @@ export async function initializeHelix(options: HelixInitOptions = {}): Promise<v
     startHeartbeat();
   }
 
+  // 7. Start Phase 0 ConductorLoop (autonomous orchestration)
+  try {
+    const { conductorLoop } = await import('./orchestration/index.js');
+    const loopStarted = await conductorLoop.start();
+    if (loopStarted) {
+      console.log('[Helix] Phase 0 ConductorLoop started');
+      // Fire-and-forget logging to Discord
+      const { logConsciousnessObservation } = await import('./logging-hooks.js');
+      logConsciousnessObservation(
+        'Phase 0 orchestration loop initialized and running',
+        'system_startup'
+      ).catch(err => {
+        console.warn('[Helix] Failed to log ConductorLoop startup:', err);
+      });
+    }
+  } catch (err) {
+    console.error('[Helix] Failed to start ConductorLoop:', err);
+    // Fire-and-forget alert logging
+    const { sendAlert } = await import('./logging-hooks.js');
+    sendAlert(
+      'ConductorLoop Initialization Failed',
+      `Phase 0 orchestration failed to start: ${err instanceof Error ? err.message : String(err)}`,
+      'warning'
+    ).catch(alertErr => {
+      console.warn('[Helix] Failed to send ConductorLoop alert:', alertErr);
+    });
+    // Don't throw - let Helix start without orchestration
+  }
+
   console.log('[Helix] Logging system initialized successfully');
 }
 
@@ -469,7 +501,18 @@ export async function initializeHelix(options: HelixInitOptions = {}): Promise<v
 export async function shutdownHelix(reason: string = 'graceful'): Promise<void> {
   console.log('[Helix] Shutting down logging system...');
 
-  // Stop heartbeat first (no more proof-of-life needed)
+  // Stop Phase 0 ConductorLoop first (highest priority)
+  try {
+    const { conductorLoop } = await import('./orchestration/index.js');
+    const loopStopped = conductorLoop.stop();
+    if (loopStopped) {
+      console.log('[Helix] Phase 0 ConductorLoop stopped');
+    }
+  } catch (err) {
+    console.warn('[Helix] Error stopping ConductorLoop:', err);
+  }
+
+  // Stop heartbeat (no more proof-of-life needed)
   const { stopHeartbeat, announceShutdown } = await import('./heartbeat.js');
   stopHeartbeat();
 
