@@ -101,8 +101,8 @@ export class GoalEvaluator {
   async getPersonalityTraits(): Promise<PersonalityTraits> {
     const now = Date.now();
     if (this.personalityCache && now - this.personalityCachedAt < this.CACHE_DURATION_MS) {
-      // Log cache hit
-      await hashChain
+      // Log cache hit (fire-and-forget)
+      hashChain
         .add({
           type: 'personality_traits_loaded',
           cache_hit: true,
@@ -155,8 +155,8 @@ export class GoalEvaluator {
   async getGoals(): Promise<Goal[]> {
     const now = Date.now();
     if (this.goalsCache && now - this.goalsCachedAt < this.CACHE_DURATION_MS) {
-      // Log cache hit
-      await hashChain
+      // Log cache hit (fire-and-forget)
+      hashChain
         .add({
           type: 'goals_loaded',
           cache_hit: true,
