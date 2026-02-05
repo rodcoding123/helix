@@ -31,6 +31,8 @@ const ControlPlane = lazy(() => import('@/pages/ControlPlane'));
 const TenantSettings = lazy(() => import('@/pages/TenantSettings'));
 const InvitationAccept = lazy(() => import('@/pages/InvitationAccept'));
 const OperationAnalytics = lazy(() => import('@/pages/OperationAnalytics').then(m => ({ default: m.OperationAnalytics })));
+const RealtimeMonitoringDashboard = lazy(() => import('@/pages/RealtimeMonitoringDashboard').then(m => ({ default: m.RealtimeMonitoringDashboard })));
+const AlertingDashboard = lazy(() => import('@/pages/AlertingDashboard').then(m => ({ default: m.AlertingDashboard })));
 
 // Loading fallback component
 function LoadingFallback() {
@@ -230,6 +232,26 @@ export function App() {
                   <Suspense fallback={<LoadingFallback />}>
                     <ProtectedRoute>
                       <OperationAnalytics />
+                    </ProtectedRoute>
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/monitoring/realtime"
+                element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <ProtectedRoute>
+                      <RealtimeMonitoringDashboard />
+                    </ProtectedRoute>
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/alerting/dashboard"
+                element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <ProtectedRoute>
+                      <AlertingDashboard />
                     </ProtectedRoute>
                   </Suspense>
                 }
