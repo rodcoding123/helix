@@ -1,7 +1,8 @@
-import { FC, useEffect, useState, useCallback } from 'react';
+import { FC, useState, useCallback } from 'react';
 import { Search } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useAgentTemplates } from '@/hooks/useAgentTemplates';
+import { useTemplateCategories } from '@/hooks/queries/useTemplateCategories';
+import { useTemplates, useToggleTemplateFavorite } from '@/hooks/queries/useTemplates';
 import type { EnrichedAgentTemplate } from '@/lib/types/agent-templates';
 import { TemplateCard } from '@/components/templates/TemplateCard';
 import { TemplatePreviewModal } from '@/components/templates/TemplatePreviewModal';
@@ -13,8 +14,6 @@ import { TemplateCategoryTabs } from '@/components/templates/TemplateCategoryTab
  */
 export const AgentTemplatesPage: FC = () => {
   const { user, loading: authLoading } = useAuth();
-  const { categories, templates, isLoading, loadCategories, loadTemplates, toggleFavorite } =
-    useAgentTemplates();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
@@ -23,19 +22,14 @@ export const AgentTemplatesPage: FC = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
-  // Load categories and templates on mount
-  useEffect(() => {
-    loadCategories();
-    loadTemplates();
-  }, [loadCategories, loadTemplates]);
+  // Use React Query hooks for cached data fetching
+  const { data: categories = [], isLoading: categoriesLoading } = useTemplateCategories();
+  const { data: templates = [], isLoading: templatesLoading } = useTemplates({
+    category_id: selectedCategoryId || undefined,
+    search: searchQuery || undefined,
+  });
 
-  // Refetch templates when filters change
-  useEffect(() => {
-    loadTemplates({
-      category_id: selectedCategoryId || undefined,
-      search: searchQuery || undefined,
-    });
-  }, [searchQuery, selectedCategoryId, loadTemplates]);
+  const isLoading = categoriesLoading || templatesLoading;
 
   const handlePreviewTemplate = useCallback((template: EnrichedAgentTemplate) => {
     setSelectedTemplate(template);
@@ -68,12 +62,14 @@ export const AgentTemplatesPage: FC = () => {
     [user?.id, selectedTemplate, handleClosePreview]
   );
 
+  const toggleFavoriteMutation = useToggleTemplateFavorite();
+
   const handleToggleFavorite = useCallback(
     async (templateId: string) => {
       if (!user?.id) return;
 
       try {
-        await toggleFavorite(user.id, templateId);
+        await toggleFavoriteMutation.mutateAsync({ userId: user.id, templateId });
         setFavorites((prev) => {
           const next = new Set(prev);
           if (next.has(templateId)) {
@@ -87,7 +83,7 @@ export const AgentTemplatesPage: FC = () => {
         console.error('Failed to toggle favorite:', error);
       }
     },
-    [user?.id, toggleFavorite]
+    [user?.id, toggleFavoriteMutation]
   );
 
   if (authLoading) {

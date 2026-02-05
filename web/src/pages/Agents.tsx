@@ -1,6 +1,6 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { AgentService } from '@/services/agent';
+import { useUserAgents, useDeleteAgent } from '@/hooks/queries/useUserAgents';
 import type { Agent } from '@/lib/types/agents';
 
 /**
@@ -9,39 +9,18 @@ import type { Agent } from '@/lib/types/agents';
  */
 export const AgentsPage: FC = () => {
   const { user, loading: authLoading } = useAuth();
-  const [agents, setAgents] = useState<Agent[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
 
-  const agentService = new AgentService();
-
-  // Load agents on mount
-  useEffect(() => {
-    if (user?.id) {
-      loadAgents();
-    }
-  }, [user?.id]);
-
-  const loadAgents = async () => {
-    if (!user?.id) return;
-    setIsLoading(true);
-    try {
-      const userAgents = await agentService.getUserAgents(user.id);
-      setAgents(userAgents);
-    } catch (error) {
-      console.error('Failed to load agents:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Use React Query hooks for data fetching and caching
+  const { data: agents = [], isLoading } = useUserAgents(user?.id);
+  const deleteAgentMutation = useDeleteAgent();
 
   const handleDeleteAgent = async (agentId: string) => {
     if (!user?.id) return;
     if (!window.confirm('Delete this agent?')) return;
 
     try {
-      await agentService.deleteAgent(agentId, user.id);
-      setAgents((prev) => prev.filter((a) => a.id !== agentId));
+      await deleteAgentMutation.mutateAsync({ agentId, userId: user.id });
       setSelectedAgent(null);
     } catch (error) {
       console.error('Failed to delete agent:', error);

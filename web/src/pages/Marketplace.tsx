@@ -1,6 +1,8 @@
-import { FC, useEffect, useState, useCallback } from 'react';
+import { FC, useState, useCallback } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
-import { useAgentTemplates } from '@/hooks/useAgentTemplates';
+import { useTemplateCategories } from '@/hooks/queries/useTemplateCategories';
+import { useTemplates } from '@/hooks/queries/useTemplates';
 import type { EnrichedAgentTemplate } from '@/lib/types/agent-templates';
 import { TemplateMarketplaceService } from '@/services/template-marketplace';
 import { TemplateCard } from '@/components/templates/TemplateCard';
@@ -14,46 +16,44 @@ import { CloneTemplateModal } from '@/components/marketplace/CloneTemplateModal'
  */
 export const MarketplacePage: FC = () => {
   const { user, loading: authLoading } = useAuth();
-  const { categories, loadCategories } = useAgentTemplates();
+  const queryClient = useQueryClient();
 
-  const [templates, setTemplates] = useState<EnrichedAgentTemplate[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'popularity' | 'newest' | 'rating'>('popularity');
 
+  const { data: categories = [], isLoading: categoriesLoading } = useTemplateCategories();
+  const { data: templates = [], isLoading: templatesLoading } = useTemplates({
+    category_id: selectedCategory || undefined,
+    search: searchQuery || undefined,
+  });
+
+  const isLoading = categoriesLoading || templatesLoading;
+
   const [selectedTemplate, setSelectedTemplate] = useState<EnrichedAgentTemplate | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showCloneModal, setShowCloneModal] = useState(false);
-  const [isCloning, setIsCloning] = useState(false);
 
   const marketplaceService = new TemplateMarketplaceService();
 
-  // Load categories on mount
-  useEffect(() => {
-    loadCategories();
-  }, [loadCategories]);
+  const cloneTemplateMutation = useMutation({
+    mutationFn: (params: { userId: string; templateId: string; templateName: string }) =>
+      marketplaceService.cloneTemplate(params.userId, params.templateId, params.templateName),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['templates'] });
+      queryClient.invalidateQueries({ queryKey: ['user-agents', user?.id] });
+      handleCloseCloneModal();
+    },
+  });
 
-  // Load templates with filters
-  useEffect(() => {
-    loadTemplates();
-  }, [searchQuery, selectedCategory, sortBy]);
-
-  const loadTemplates = async () => {
-    setIsLoading(true);
-    try {
-      const data = await marketplaceService.getPublicTemplates({
-        category_id: selectedCategory || undefined,
-        search: searchQuery || undefined,
-        sortBy,
-      });
-      setTemplates(data);
-    } catch (error) {
-      console.error('Failed to load templates:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const rateTemplateMutation = useMutation({
+    mutationFn: (params: { templateId: string; rating: number }) =>
+      marketplaceService.rateTemplate(params.templateId, params.rating),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['template', variables.templateId] });
+      queryClient.invalidateQueries({ queryKey: ['templates'] });
+    },
+  });
 
   const handleViewTemplate = useCallback((template: EnrichedAgentTemplate) => {
     setSelectedTemplate(template);
@@ -78,19 +78,17 @@ export const MarketplacePage: FC = () => {
     async (templateName: string) => {
       if (!user?.id || !selectedTemplate) return;
 
-      setIsCloning(true);
       try {
-        await marketplaceService.cloneTemplate(user.id, selectedTemplate.id, templateName);
-        handleCloseCloneModal();
-        // Show success message (would integrate with toast notification system)
-        console.log('Template cloned successfully');
+        await cloneTemplateMutation.mutateAsync({
+          userId: user.id,
+          templateId: selectedTemplate.id,
+          templateName,
+        });
       } catch (error) {
         console.error('Failed to clone template:', error);
-      } finally {
-        setIsCloning(false);
       }
     },
-    [user?.id, selectedTemplate, handleCloseCloneModal]
+    [user?.id, selectedTemplate, cloneTemplateMutation]
   );
 
   const handleRateTemplate = useCallback(
@@ -98,13 +96,15 @@ export const MarketplacePage: FC = () => {
       if (!selectedTemplate) return;
 
       try {
-        await marketplaceService.rateTemplate(selectedTemplate.id, rating);
-        console.log('Template rated successfully');
+        await rateTemplateMutation.mutateAsync({
+          templateId: selectedTemplate.id,
+          rating,
+        });
       } catch (error) {
         console.error('Failed to rate template:', error);
       }
     },
-    [selectedTemplate]
+    [selectedTemplate, rateTemplateMutation]
   );
 
   if (authLoading) {
@@ -211,7 +211,7 @@ export const MarketplacePage: FC = () => {
             onClose={handleCloseDetailModal}
             onClone={handleOpenCloneModal}
             onRate={handleRateTemplate}
-            isLoading={isCloning}
+            isLoading={cloneTemplateMutation.isPending}
           />
         )}
 
@@ -222,7 +222,7 @@ export const MarketplacePage: FC = () => {
             isOpen={showCloneModal}
             onClose={handleCloseCloneModal}
             onConfirm={handleCloneTemplate}
-            isLoading={isCloning}
+            isLoading={cloneTemplateMutation.isPending}
           />
         )}
       </div>

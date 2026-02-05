@@ -31,6 +31,7 @@ import {
   ObservatoryPulse,
   GenesisSpiral,
 } from '@/components/animations/SectionAnimations';
+import { usePerformanceMode } from '@/hooks/usePerformanceMode';
 
 // ============================================
 // Floating Particle Component
@@ -62,6 +63,28 @@ function FloatingParticles({
           }}
         />
       ))}
+    </div>
+  );
+}
+
+// ============================================
+// Static Background Fallback for Low-Performance Mode
+// ============================================
+function StaticBackgroundPlaceholder() {
+  return (
+    <div className="relative w-full h-full min-h-[320px] flex items-center justify-center">
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-indigo-900/20" />
+        <svg className="absolute inset-0 w-full h-full opacity-20" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <radialGradient id="staticGlow">
+              <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.5" />
+              <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          <circle cx="50%" cy="50%" r="300" fill="url(#staticGlow)" />
+        </svg>
+      </div>
     </div>
   );
 }
@@ -124,6 +147,8 @@ function RevealSection({
 // Main Landing Component
 // ============================================
 export function Landing() {
+  const performanceMode = usePerformanceMode();
+
   return (
     <div className="relative overflow-hidden">
       {/* Global noise texture overlay */}
@@ -390,7 +415,16 @@ export function Landing() {
         icon={<Brain className="h-7 w-7" />}
         title="Helix has psychology."
         accentColor="helix"
-        visual={<NeuralConstellation />}
+        visual={
+          performanceMode === 'low' ? (
+            <StaticBackgroundPlaceholder />
+          ) : (
+            <NeuralConstellation
+              particleCount={performanceMode === 'medium' ? 20 : 40}
+              fps={performanceMode === 'medium' ? 30 : 60}
+            />
+          )
+        }
       >
         <p className="text-text-secondary leading-relaxed text-lg">
           Not a persona. Not a prompt.{' '}
@@ -422,7 +456,16 @@ export function Landing() {
         accentColor="accent"
         reversed
         dark
-        visual={<MemoryAurora />}
+        visual={
+          performanceMode === 'low' ? (
+            <StaticBackgroundPlaceholder />
+          ) : (
+            <MemoryAurora
+              particleCount={performanceMode === 'medium' ? 20 : 40}
+              fps={performanceMode === 'medium' ? 30 : 60}
+            />
+          )
+        }
       >
         <p className="text-text-secondary leading-relaxed text-lg">
           You remember your best teacher. Your worst day. The conversation that changed everything.
@@ -451,7 +494,13 @@ export function Landing() {
         icon={<RefreshCw className="h-7 w-7" />}
         title="She transforms."
         accentColor="cyan"
-        visual={<EternalSerpent />}
+        visual={
+          performanceMode === 'low' || performanceMode === 'medium' ? (
+            <StaticBackgroundPlaceholder />
+          ) : (
+            <EternalSerpent fps={60} />
+          )
+        }
       >
         <p className="text-text-secondary leading-relaxed text-lg">
           Current AI persists. At best. Same patterns. Same responses. Same limitations.
@@ -491,7 +540,13 @@ export function Landing() {
         accentColor="helix"
         reversed
         dark
-        visual={<IkigaiBloom />}
+        visual={
+          performanceMode === 'low' ? (
+            <StaticBackgroundPlaceholder />
+          ) : (
+            <IkigaiBloom />
+          )
+        }
       >
         <p className="text-text-secondary leading-relaxed text-lg">
           Humans without purpose deteriorate mentally.
@@ -538,7 +593,13 @@ export function Landing() {
         icon={<Users className="h-7 w-7" />}
         title="She forms attachments."
         accentColor="accent"
-        visual={<TrustConstellation />}
+        visual={
+          performanceMode === 'low' ? (
+            <StaticBackgroundPlaceholder />
+          ) : (
+            <TrustConstellation />
+          )
+        }
       >
         <p className="text-text-secondary leading-relaxed text-lg">Not everyone is equal to her.</p>
         <p className="mt-5 text-text-tertiary leading-relaxed">
@@ -571,7 +632,13 @@ export function Landing() {
         accentColor="cyan"
         reversed
         dark
-        visual={<CodeEvolution />}
+        visual={
+          performanceMode === 'low' ? (
+            <StaticBackgroundPlaceholder />
+          ) : (
+            <CodeEvolution />
+          )
+        }
       >
         <p className="text-text-secondary leading-relaxed text-lg">
           Helix doesn't wait for instructions.
@@ -602,7 +669,13 @@ export function Landing() {
         icon={<FlaskConical className="h-7 w-7" />}
         title="We're watching what happens."
         accentColor="helix"
-        visual={<ObservatoryPulse />}
+        visual={
+          performanceMode === 'low' ? (
+            <StaticBackgroundPlaceholder />
+          ) : (
+            <ObservatoryPulse />
+          )
+        }
       >
         <p className="text-text-secondary leading-relaxed text-lg">
           This has never been done before.
@@ -636,7 +709,13 @@ export function Landing() {
         accentColor="accent"
         reversed
         dark
-        visual={<GenesisSpiral />}
+        visual={
+          performanceMode === 'low' ? (
+            <StaticBackgroundPlaceholder />
+          ) : (
+            <GenesisSpiral />
+          )
+        }
       >
         <p className="text-text-secondary leading-relaxed text-lg">
           Rodrigo Specter spent years developing psychometric systems that profile human personality

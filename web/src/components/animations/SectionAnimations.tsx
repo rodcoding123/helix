@@ -31,10 +31,16 @@ interface NeuralNode {
   connections: number[];
 }
 
-export function NeuralConstellation() {
+interface AnimationProps {
+  particleCount?: number;
+  fps?: number;
+}
+
+export function NeuralConstellation({ particleCount = 40, fps = 60 }: AnimationProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const nodesRef = useRef<NeuralNode[]>([]);
   const animationRef = useRef<number>(0);
+  const lastFrameTimeRef = useRef<number>(0);
 
   const initNodes = useCallback(() => {
     const nodes: NeuralNode[] = [];
@@ -108,7 +114,8 @@ export function NeuralConstellation() {
     }
 
     // Satellite nodes - small, fill in neural network
-    for (let i = 18; i < 40; i++) {
+    const satelliteCount = Math.max(particleCount - 18, 0);
+    for (let i = 18; i < 18 + satelliteCount; i++) {
       const pos = placeInBrain();
       nodes.push({
         id: i,
@@ -124,7 +131,7 @@ export function NeuralConstellation() {
     }
 
     nodesRef.current = nodes;
-  }, []);
+  }, [particleCount]);
 
   useEffect(() => {
     initNodes();
@@ -137,8 +144,16 @@ export function NeuralConstellation() {
     const width = canvas.width;
     const height = canvas.height;
     let time = 0;
+    const frameInterval = 1000 / fps; // Milliseconds between frames
 
-    const animate = () => {
+    const animate = (timestamp: number) => {
+      // Frame rate limiting: only update on appropriate fps intervals
+      if (timestamp - lastFrameTimeRef.current < frameInterval) {
+        animationRef.current = requestAnimationFrame(animate);
+        return;
+      }
+      lastFrameTimeRef.current = timestamp;
+
       time += 0.016;
       ctx.clearRect(0, 0, width, height);
 
@@ -314,10 +329,11 @@ interface MemoryParticle {
   drift: number;
 }
 
-export function MemoryAurora() {
+export function MemoryAurora({ particleCount = 40, fps = 60 }: AnimationProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<MemoryParticle[]>([]);
   const animationRef = useRef<number>(0);
+  const lastFrameTimeRef = useRef<number>(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -329,24 +345,34 @@ export function MemoryAurora() {
     const width = canvas.width;
     const height = canvas.height;
 
-    // Initialize particles
-    for (let i = 0; i < 40; i++) {
+    // Initialize particles - clear previous and create new ones
+    particlesRef.current = [];
+    const importantCount = Math.max(1, Math.floor(particleCount / 5));
+    for (let i = 0; i < particleCount; i++) {
       particlesRef.current.push({
         id: i,
         x: Math.random() * width,
         y: Math.random() * height,
         size: 8 + Math.random() * 16,
-        important: i < 8, // First 8 are important
+        important: i < importantCount, // Proportional important particles
         life: Math.random() * 100,
         maxLife: 80 + Math.random() * 40,
-        hue: i < 8 ? 280 + Math.random() * 30 : 200 + Math.random() * 20, // Purple for important, blue for others
+        hue: i < importantCount ? 280 + Math.random() * 30 : 200 + Math.random() * 20,
         drift: (Math.random() - 0.5) * 0.5,
       });
     }
 
     let time = 0;
+    const frameInterval = 1000 / fps;
 
-    const animate = () => {
+    const animate = (timestamp: number) => {
+      // Frame rate limiting
+      if (timestamp - lastFrameTimeRef.current < frameInterval) {
+        animationRef.current = requestAnimationFrame(animate);
+        return;
+      }
+      lastFrameTimeRef.current = timestamp;
+
       time += 0.02;
       ctx.fillStyle = 'rgba(5, 5, 5, 0.08)';
       ctx.fillRect(0, 0, width, height);
@@ -485,9 +511,10 @@ export function MemoryAurora() {
 // 3. ETERNAL SERPENT - Transform Section
 // Aggressive, occult ouroboros - serpent devouring itself
 // ============================================
-export function EternalSerpent() {
+export function EternalSerpent({ fps = 60 }: AnimationProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>(0);
+  const lastFrameTimeRef = useRef<number>(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -503,8 +530,16 @@ export function EternalSerpent() {
     const radius = Math.min(width, height) * 0.32;
 
     let time = 0;
+    const frameInterval = 1000 / fps;
 
-    const animate = () => {
+    const animate = (timestamp: number) => {
+      // Frame rate limiting
+      if (timestamp - lastFrameTimeRef.current < frameInterval) {
+        animationRef.current = requestAnimationFrame(animate);
+        return;
+      }
+      lastFrameTimeRef.current = timestamp;
+
       time += 0.012;
       ctx.clearRect(0, 0, width, height);
 
