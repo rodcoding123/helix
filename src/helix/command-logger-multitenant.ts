@@ -6,6 +6,22 @@
 import { getHashChainForTenant } from './hash-chain-multitenant.js';
 
 /**
+ * Database client factory - can be mocked in tests
+ */
+let dbClient: any = null;
+
+export function setDbClient(client: any): void {
+  dbClient = client;
+}
+
+export function getDb(): any {
+  if (!dbClient) {
+    throw new Error('Database client not initialized');
+  }
+  return dbClient;
+}
+
+/**
  * Tenant-specific Discord logging
  * Completely isolated per tenant - cannot access other tenants' webhooks
  */

@@ -3,6 +3,22 @@
  * Separate, isolated audit trails for each tenant
  */
 
+/**
+ * Database client factory - can be mocked in tests
+ */
+let dbClient: any = null;
+
+export function setDbClient(client: any): void {
+  dbClient = client;
+}
+
+export function getDb(): any {
+  if (!dbClient) {
+    throw new Error('Database client not initialized');
+  }
+  return dbClient;
+}
+
 
 export interface TenantHashChainEntry {
   index: number;

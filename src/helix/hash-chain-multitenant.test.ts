@@ -7,6 +7,7 @@ import {
   TenantHashChain,
   getHashChainForTenant,
   hashString,
+  setDbClient,
 } from './hash-chain-multitenant.js';
 
 // Mock Supabase
@@ -22,9 +23,14 @@ const mockQuery = {
   head: vi.fn(function () { return this; }),
 };
 
+const mockDb = {
+  from: vi.fn(() => mockQuery),
+};
+
 describe('Tenant Hash Chain', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setDbClient(mockDb);
   });
 
   describe('Constructor', () => {
@@ -153,25 +159,9 @@ describe('Tenant Hash Chain', () => {
         },
       ];
 
-      // Mock hash calculation to return expected hashes
-      vi.mock('./hash-chain-multitenant', async (importOriginal) => {
-        const actual = await importOriginal<typeof import('./hash-chain-multitenant')>();
-        return {
-          ...actual,
-          hashString: vi.fn(async (input: string) => {
-            if (input.includes('0:entry 1:0:tenant-123')) return 'hash1';
-            if (input.includes('hash1:entry 2:1:tenant-123')) return 'hash2';
-            return 'unknown';
-          }),
-        };
-      });
-
       mockQuery.select.mockReturnValueOnce(mockQuery);
       mockQuery.eq.mockReturnValueOnce(mockQuery);
-      mockQuery.order.mockReturnValueOnce(mockQuery);
-      mockQuery.single.mockResolvedValueOnce({
-        data: entries as any,
-      });
+      mockQuery.order.mockReturnValueOnce(Promise.resolve({ data: entries as any }));
 
       const chain = new TenantHashChain('tenant-123');
       // Note: Verification would need proper mocking of hashString
@@ -242,9 +232,11 @@ describe('Tenant Hash Chain', () => {
         },
       ];
 
+      // Setup the mock chain: from -> select -> eq -> order -> (awaited)
+      const chainResult = Promise.resolve({ data: entries, error: null });
       mockQuery.select.mockReturnValueOnce(mockQuery);
       mockQuery.eq.mockReturnValueOnce(mockQuery);
-      mockQuery.order.mockResolvedValueOnce({ data: entries, error: null });
+      mockQuery.order.mockReturnValueOnce(chainResult);
 
       const chain = new TenantHashChain('tenant-123');
       const allEntries = await chain.getAllEntries();
@@ -278,8 +270,7 @@ describe('Tenant Hash Chain', () => {
     it('should return null for non-existent entry', async () => {
       mockQuery.select.mockReturnValueOnce(mockQuery);
       mockQuery.eq.mockReturnValueOnce(mockQuery);
-      mockQuery.eq.mockReturnValueOnce(mockQuery);
-      mockQuery.single.mockResolvedValueOnce({ data: null });
+      mockQuery.eq.mockReturnValueOnce(Promise.resolve({ data: null }));
 
       const chain = new TenantHashChain('tenant-123');
       const entry = await chain.getEntry(999);
@@ -288,8 +279,9 @@ describe('Tenant Hash Chain', () => {
     });
 
     it('should get entry count', async () => {
+      const countPromise = Promise.resolve({ count: 5, error: null });
       mockQuery.select.mockReturnValueOnce(mockQuery);
-      mockQuery.eq.mockResolvedValueOnce({ count: 5, error: null });
+      mockQuery.eq.mockReturnValueOnce(countPromise);
 
       const chain = new TenantHashChain('tenant-123');
       const count = await chain.getEntryCount();

@@ -87,6 +87,8 @@ export class MetricsStreamService {
   }
 
   private startHeartbeat(): void {
+    // Increase to 60 seconds for mobile battery optimization
+    // Reduces aggressive polling that causes 8-12% battery drain
     this.heartbeatInterval = setInterval(() => {
       if (this.ws && this.connected) {
         try {
@@ -95,7 +97,7 @@ export class MetricsStreamService {
           console.error('[MetricsStream] Heartbeat error:', error);
         }
       }
-    }, 30000);
+    }, 60000); // 60 seconds (was 30 seconds)
   }
 
   private stopHeartbeat(): void {

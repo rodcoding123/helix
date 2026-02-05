@@ -21,7 +21,7 @@ import {
   Download,
   Calendar,
   Mic,
-  MessageSquareVoice,
+  MessageSquare as MessageSquareVoice,
   Settings,
 } from 'lucide-react';
 

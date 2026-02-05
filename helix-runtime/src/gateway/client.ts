@@ -36,6 +36,7 @@ type Pending = {
   resolve: (value: unknown) => void;
   reject: (err: unknown) => void;
   expectFinal: boolean;
+  timeoutId?: NodeJS.Timeout;
 };
 
 export type GatewayClientOptions = {
@@ -322,6 +323,10 @@ export class GatewayClient {
         if (pending.expectFinal && status === "accepted") {
           return;
         }
+        // Clear timeout before removing from pending
+        if (pending.timeoutId) {
+          clearTimeout(pending.timeoutId);
+        }
         this.pending.delete(parsed.id);
         if (parsed.ok) {
           pending.resolve(parsed.payload);
@@ -360,6 +365,10 @@ export class GatewayClient {
 
   private flushPendingErrors(err: Error) {
     for (const [, p] of this.pending) {
+      // Clear timeout before rejecting
+      if (p.timeoutId) {
+        clearTimeout(p.timeoutId);
+      }
       p.reject(err);
     }
     this.pending.clear();
@@ -428,10 +437,18 @@ export class GatewayClient {
     }
     const expectFinal = opts?.expectFinal === true;
     const p = new Promise<T>((resolve, reject) => {
+      // Set up timeout to clean up pending request if no response after 60 seconds
+      // Prevents memory leaks from dead connections
+      const timeoutId = setTimeout(() => {
+        this.pending.delete(id);
+        reject(new Error(`gateway request timeout (${method})`));
+      }, 60_000);
+
       this.pending.set(id, {
         resolve: (value) => resolve(value as T),
         reject,
         expectFinal,
+        timeoutId,
       });
     });
     this.ws.send(JSON.stringify(frame));

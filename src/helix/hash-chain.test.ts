@@ -1193,7 +1193,7 @@ describe('Hash Chain - Discord Verification', () => {
     });
 
     // Mock fs.readFile to return the entry line as a string (with 'utf-8' encoding)
-    vi.mocked(fs.readFile).mockResolvedValue(Buffer.from(entryLine));
+    vi.mocked(fs.readFile).mockResolvedValue(entryLine as any);
 
     // Mock Discord API response with matching hash field
     mockFetch.mockResolvedValue({
