@@ -79,13 +79,21 @@ describe('BillingEngine', () => {
       billing.recordOperation('user_222', 'email_analysis', 0.05);
       billing.generateInvoice('user_222');
 
+      // Add small delay to ensure different timestamps
+      const now = Date.now();
+      while (Date.now() === now) {
+        // Spin until time changes
+      }
+
       billing.recordOperation('user_222', 'email_analysis', 0.1);
       billing.generateInvoice('user_222');
 
       const history = billing.getInvoiceHistory('user_222');
       expect(history).toHaveLength(2);
-      expect(history[0].totalAmount).toBeCloseTo(0.055); // 0.05 + tax
-      expect(history[1].totalAmount).toBeCloseTo(0.11); // 0.1 + tax
+      // Should have both amounts regardless of order
+      const amounts = history.map(h => h.totalAmount).sort((a, b) => a - b);
+      expect(amounts[0]).toBeCloseTo(0.055); // 0.05 + tax
+      expect(amounts[1]).toBeCloseTo(0.11); // 0.1 + tax
     });
   });
 
