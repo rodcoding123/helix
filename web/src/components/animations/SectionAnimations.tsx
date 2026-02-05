@@ -299,7 +299,7 @@ export function NeuralConstellation({ particleCount = 40, fps = 60 }: AnimationP
     animationRef.current = requestAnimationFrame(animate);
 
     return () => cancelAnimationFrame(animationRef.current);
-  }, [initNodes]);
+  }, [initNodes, fps]);
 
   return (
     <div className="relative w-full h-full min-h-[320px] flex items-center justify-center">
@@ -472,7 +472,7 @@ export function MemoryAurora({ particleCount = 40, fps = 60 }: AnimationProps) {
     animationRef.current = requestAnimationFrame(animate);
 
     return () => cancelAnimationFrame(animationRef.current);
-  }, []);
+  }, [particleCount, fps]);
 
   return (
     <div className="relative w-full h-full min-h-[320px] flex items-center justify-center overflow-hidden">
@@ -763,7 +763,7 @@ export function EternalSerpent({ fps = 60 }: AnimationProps) {
     animationRef.current = requestAnimationFrame(animate);
 
     return () => cancelAnimationFrame(animationRef.current);
-  }, []);
+  }, [fps]);
 
   return (
     <div className="relative w-full h-full min-h-[360px] flex items-center justify-center">

@@ -1,3 +1,4 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ModelCatalogEntry } from "../../agents/model-catalog.js";
 import type { createDefaultDeps } from "../../cli/deps.js";
 import type { HealthSummary } from "../../commands/health.js";
@@ -32,6 +33,7 @@ export type GatewayRequestContext = {
   refreshHealthSnapshot: (opts?: { probe?: boolean }) => Promise<HealthSummary>;
   logHealth: { error: (message: string) => void };
   logGateway: SubsystemLogger;
+  supabaseClient: SupabaseClient;
   incrementPresenceVersion: () => number;
   getHealthVersion: () => number;
   broadcast: (
@@ -106,3 +108,14 @@ export type GatewayRequestHandlerOptions = {
 export type GatewayRequestHandler = (opts: GatewayRequestHandlerOptions) => Promise<void> | void;
 
 export type GatewayRequestHandlers = Record<string, GatewayRequestHandler>;
+
+export interface MemorySynthesisStatusParams {
+  jobId: string;
+}
+
+export interface MemoryListPatternsParams {
+  layer?: number; // 1-7 for psychology layers
+  patternType?: string;
+  limit?: number;
+  offset?: number;
+}

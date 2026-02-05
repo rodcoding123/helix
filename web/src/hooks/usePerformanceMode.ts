@@ -3,6 +3,22 @@ import { useState, useEffect } from 'react';
 type PerformanceMode = 'high' | 'medium' | 'low';
 
 /**
+ * Battery Manager API interface
+ * Represents the Battery Status API for checking device battery level
+ */
+interface BatteryManager {
+  level: number;
+  charging: boolean;
+}
+
+/**
+ * Extended Navigator interface with Battery API support
+ */
+interface NavigatorWithBattery extends Navigator {
+  getBattery(): Promise<BatteryManager>;
+}
+
+/**
  * Hook to detect device performance capabilities and determine optimal animation settings
  * Returns 'high', 'medium', or 'low' based on:
  * - Mobile device detection
@@ -24,9 +40,9 @@ export function usePerformanceMode(): PerformanceMode {
 
     // Check battery level if available (Battery Status API)
     if ('getBattery' in navigator) {
-      (navigator as any)
+      (navigator as NavigatorWithBattery)
         .getBattery()
-        .then((battery: any) => {
+        .then((battery: BatteryManager) => {
           if (battery.level < 0.2) {
             setMode('low');
           } else if (battery.level < 0.5) {
@@ -34,8 +50,8 @@ export function usePerformanceMode(): PerformanceMode {
             setMode(detectedMode);
           }
         })
-        .catch(() => {
-          // If battery API fails, continue with other detection
+        .catch((error) => {
+          console.warn('Battery API unavailable:', error);
         });
     }
 
@@ -65,7 +81,7 @@ export function usePerformanceMode(): PerformanceMode {
     }
 
     setMode(detectedMode);
-  }, []);
+  }, []); // Device capabilities don't change during session - runs once on mount
 
   return mode;
 }

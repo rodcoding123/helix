@@ -342,38 +342,39 @@ export const memorySynthesisHandlers: GatewayRequestHandlers = {
    *   error?: string
    * }
    */
-  'memory.synthesis_status': async ({ params, respond }) => {
+  'memory.synthesis_status': async ({ params, respond, context, client }) => {
+    const { jobId } = params;
+
+    if (!client?.connect?.userId) {
+      respond(false, { code: 'UNAUTHORIZED', message: 'User not authenticated' });
+      return;
+    }
+
     try {
-      if (!params || typeof params !== 'object') {
-        respond(false, undefined, {
-          code: 'INVALID_REQUEST',
-          message: 'Invalid parameters',
-        });
+      // Query database for job status
+      const { data: job, error } = await context.supabaseClient
+        .from('memory_synthesis_jobs')
+        .select('*')
+        .eq('id', jobId)
+        .eq('user_id', client.connect.userId)
+        .single();
+
+      if (error || !job) {
+        respond(false, { code: 'NOT_FOUND', message: 'Job not found' });
         return;
       }
 
-      const { jobId } = params as { jobId?: string };
-
-      if (!jobId) {
-        respond(false, undefined, {
-          code: 'INVALID_REQUEST',
-          message: 'jobId is required',
-        });
-        return;
-      }
-
-      // TODO: Implement database lookup for job status
       respond(true, {
-        jobId,
-        status: 'pending',
-        progress: 0,
+        jobId: job.id,
+        status: job.status,
+        progress: job.progress,
+        insights: job.insights,
+        startedAt: job.created_at,
+        completedAt: job.updated_at,
       });
-
     } catch (error) {
-      respond(false, undefined, {
-        code: 'LOOKUP_ERROR',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      });
+      context.logGateway.error?.('Failed to fetch synthesis job status', { error, jobId });
+      respond(false, { code: 'INTERNAL_ERROR', message: 'Failed to fetch job status' });
     }
   },
 
@@ -419,23 +420,54 @@ export const memorySynthesisHandlers: GatewayRequestHandlers = {
    *   }>
    * }
    */
-  'memory.list_patterns': async ({ respond, context, client }) => {
+  'memory.list_patterns': async ({ params, respond, context, client }) => {
+    const { layer, patternType, limit = 50, offset = 0 } = params || {};
+
+    if (!client?.connect?.userId) {
+      respond(false, { code: 'UNAUTHORIZED', message: 'User not authenticated' });
+      return;
+    }
+
     try {
-      // TODO: Implement database query
-      context.logGateway.info?.('Listing memory patterns', {
-        userId: client?.connect?.userId,
+      // Build query with optional filters
+      let query = context.supabaseClient
+        .from('memory_patterns')
+        .select('*', { count: 'exact' })
+        .eq('user_id', client.connect.userId)
+        .order('confidence', { ascending: false })
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+
+      if (layer !== undefined) {
+        query = query.eq('layer', layer);
+      }
+
+      if (patternType) {
+        query = query.eq('pattern_type', patternType);
+      }
+
+      const { data: patterns, error, count } = await query;
+
+      if (error) {
+        throw error;
+      }
+
+      context.logGateway.info?.('Listed memory patterns', {
+        userId: client.connect.userId,
+        layer,
+        patternType,
+        count: patterns?.length || 0,
       });
 
       respond(true, {
-        patterns: [],
-        total: 0,
+        patterns: patterns || [],
+        total: count || 0,
+        limit,
+        offset,
       });
-
     } catch (error) {
-      respond(false, undefined, {
-        code: 'LIST_ERROR',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      });
+      context.logGateway.error?.('Failed to list memory patterns', { error });
+      respond(false, { code: 'INTERNAL_ERROR', message: 'Failed to list patterns' });
     }
   },
 };
