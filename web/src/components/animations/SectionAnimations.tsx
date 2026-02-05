@@ -11,9 +11,10 @@
  * - Void: #050505
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Heart } from 'lucide-react';
 import clsx from 'clsx';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 // ============================================
 // 1. NEURAL CONSTELLATION - Psychology Section
@@ -41,6 +42,13 @@ export function NeuralConstellation({ particleCount = 40, fps = 60 }: AnimationP
   const nodesRef = useRef<NeuralNode[]>([]);
   const animationRef = useRef<number>(0);
   const lastFrameTimeRef = useRef<number>(0);
+  const isMobile = useIsMobile();
+
+  // Throttle FPS on mobile devices (60 FPS desktop → 30 FPS mobile)
+  // This reduces GPU/CPU load by 50% while maintaining smooth perception
+  const targetFps = useMemo(() => {
+    return isMobile ? 30 : fps;
+  }, [isMobile, fps]);
 
   const initNodes = useCallback(() => {
     const nodes: NeuralNode[] = [];
@@ -144,7 +152,10 @@ export function NeuralConstellation({ particleCount = 40, fps = 60 }: AnimationP
     const width = canvas.width;
     const height = canvas.height;
     let time = 0;
-    const frameInterval = 1000 / fps; // Milliseconds between frames
+    const frameInterval = 1000 / targetFps; // Milliseconds between frames
+    // On mobile, skip every other connection rendering to avoid O(N²) bottleneck
+    const renderConnectionsEveryNFrames = isMobile ? 2 : 1;
+    let frameCount = 0;
 
     const animate = (timestamp: number) => {
       // Frame rate limiting: only update on appropriate fps intervals
@@ -153,6 +164,7 @@ export function NeuralConstellation({ particleCount = 40, fps = 60 }: AnimationP
         return;
       }
       lastFrameTimeRef.current = timestamp;
+      frameCount++;
 
       time += 0.016;
       ctx.clearRect(0, 0, width, height);
@@ -202,58 +214,62 @@ export function NeuralConstellation({ particleCount = 40, fps = 60 }: AnimationP
       });
 
       // Draw connections with gradient synapses - BRIGHTER
-      nodes.forEach((node, i) => {
-        nodes.slice(i + 1).forEach(other => {
-          const dist = Math.hypot(node.x - other.x, node.y - other.y);
-          const maxDist = node.type === 'core' || other.type === 'core' ? 140 : 100;
+      // Optimization: Skip connection rendering on alternate frames on mobile (O(N²) reduction)
+      // This reduces CPU load from O(N²) per frame to O(N²) every other frame on mobile
+      if (frameCount % renderConnectionsEveryNFrames === 0) {
+        nodes.forEach((node, i) => {
+          nodes.slice(i + 1).forEach(other => {
+            const dist = Math.hypot(node.x - other.x, node.y - other.y);
+            const maxDist = node.type === 'core' || other.type === 'core' ? 140 : 100;
 
-          if (dist < maxDist) {
-            const strength = 1 - dist / maxDist;
-            const pulse = 0.5 + 0.5 * Math.sin(time * 3 + i);
+            if (dist < maxDist) {
+              const strength = 1 - dist / maxDist;
+              const pulse = 0.5 + 0.5 * Math.sin(time * 3 + i);
 
-            // Create gradient for synapse - MUCH BRIGHTER
-            const gradient = ctx.createLinearGradient(node.x, node.y, other.x, other.y);
-            gradient.addColorStop(0, `rgba(6, 134, 212, ${strength * node.energy * 0.95})`);
-            gradient.addColorStop(0.5, `rgba(114, 52, 237, ${strength * pulse * 0.85})`);
-            gradient.addColorStop(1, `rgba(22, 192, 207, ${strength * other.energy * 0.95})`);
+              // Create gradient for synapse - MUCH BRIGHTER
+              const gradient = ctx.createLinearGradient(node.x, node.y, other.x, other.y);
+              gradient.addColorStop(0, `rgba(6, 134, 212, ${strength * node.energy * 0.95})`);
+              gradient.addColorStop(0.5, `rgba(114, 52, 237, ${strength * pulse * 0.85})`);
+              gradient.addColorStop(1, `rgba(22, 192, 207, ${strength * other.energy * 0.95})`);
 
-            ctx.beginPath();
-            ctx.moveTo(node.x, node.y);
-            ctx.lineTo(other.x, other.y);
-            ctx.strokeStyle = gradient;
-            ctx.lineWidth = strength * 2.5 + 0.5;
-            ctx.stroke();
-
-            // Add glow effect for stronger connections
-            if (strength > 0.5) {
               ctx.beginPath();
               ctx.moveTo(node.x, node.y);
               ctx.lineTo(other.x, other.y);
-              ctx.strokeStyle = `rgba(6, 134, 212, ${strength * 0.25})`;
-              ctx.lineWidth = strength * 6;
+              ctx.strokeStyle = gradient;
+              ctx.lineWidth = strength * 2.5 + 0.5;
               ctx.stroke();
-            }
 
-            // Draw traveling signal more frequently
-            if (strength > 0.5 && Math.random() > 0.94) {
-              const signalPos = 0.2 + Math.random() * 0.6;
-              const sx = node.x + (other.x - node.x) * signalPos;
-              const sy = node.y + (other.y - node.y) * signalPos;
+              // Add glow effect for stronger connections
+              if (strength > 0.5) {
+                ctx.beginPath();
+                ctx.moveTo(node.x, node.y);
+                ctx.lineTo(other.x, other.y);
+                ctx.strokeStyle = `rgba(6, 134, 212, ${strength * 0.25})`;
+                ctx.lineWidth = strength * 6;
+                ctx.stroke();
+              }
 
-              ctx.beginPath();
-              ctx.arc(sx, sy, 4, 0, Math.PI * 2);
-              ctx.fillStyle = 'rgba(22, 192, 207, 1)';
-              ctx.fill();
+              // Draw traveling signal more frequently
+              if (strength > 0.5 && Math.random() > 0.94) {
+                const signalPos = 0.2 + Math.random() * 0.6;
+                const sx = node.x + (other.x - node.x) * signalPos;
+                const sy = node.y + (other.y - node.y) * signalPos;
 
-              // Signal glow
-              ctx.beginPath();
+                ctx.beginPath();
+                ctx.arc(sx, sy, 4, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(22, 192, 207, 1)';
+                ctx.fill();
+
+                // Signal glow
+                ctx.beginPath();
               ctx.arc(sx, sy, 8, 0, Math.PI * 2);
               ctx.fillStyle = 'rgba(22, 192, 207, 0.3)';
               ctx.fill();
             }
           }
         });
-      });
+        });
+      }
 
       // Draw nodes with glow
       nodes.forEach(node => {
@@ -299,7 +315,7 @@ export function NeuralConstellation({ particleCount = 40, fps = 60 }: AnimationP
     animationRef.current = requestAnimationFrame(animate);
 
     return () => cancelAnimationFrame(animationRef.current);
-  }, [initNodes, fps]);
+  }, [initNodes, targetFps, isMobile]);
 
   return (
     <div className="relative w-full h-full min-h-[320px] flex items-center justify-center">
@@ -334,6 +350,12 @@ export function MemoryAurora({ particleCount = 40, fps = 60 }: AnimationProps) {
   const particlesRef = useRef<MemoryParticle[]>([]);
   const animationRef = useRef<number>(0);
   const lastFrameTimeRef = useRef<number>(0);
+  const isMobile = useIsMobile();
+
+  // Throttle FPS on mobile devices (60 FPS desktop → 30 FPS mobile)
+  const targetFps = useMemo(() => {
+    return isMobile ? 30 : fps;
+  }, [isMobile, fps]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -363,7 +385,7 @@ export function MemoryAurora({ particleCount = 40, fps = 60 }: AnimationProps) {
     }
 
     let time = 0;
-    const frameInterval = 1000 / fps;
+    const frameInterval = 1000 / targetFps;
 
     const animate = (timestamp: number) => {
       // Frame rate limiting
@@ -472,7 +494,7 @@ export function MemoryAurora({ particleCount = 40, fps = 60 }: AnimationProps) {
     animationRef.current = requestAnimationFrame(animate);
 
     return () => cancelAnimationFrame(animationRef.current);
-  }, [particleCount, fps]);
+  }, [particleCount, targetFps, isMobile]);
 
   return (
     <div className="relative w-full h-full min-h-[320px] flex items-center justify-center overflow-hidden">
