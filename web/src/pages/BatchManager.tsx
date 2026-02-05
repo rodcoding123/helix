@@ -33,11 +33,11 @@ export function BatchManager(): React.ReactElement {
 
   useEffect(() => {
     const initUser = async () => {
-      const { data: session } = await db.auth.getSession();
-      if (session?.user?.id) {
-        setUserId(session.user.id);
+      const { data: session } = await db.auth.getSession() as any;
+      if ((session as any)?.user?.id) {
+        setUserId((session as any).user.id);
         const executor = getBatchExecutor();
-        const history = await executor.getBatchHistory(session.user.id, 20);
+        const history = await executor.getBatchHistory((session as any).user.id, 20);
         setBatches(history);
       }
     };
