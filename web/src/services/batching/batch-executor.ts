@@ -13,19 +13,11 @@
  */
 
 import { EventEmitter } from 'events';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 import { logToDiscord, logToHashChain } from '../logging';
 
-// Lazy-initialize Supabase client to avoid initialization errors in tests
-let db: any;
 function getDb() {
-  if (!db) {
-    db = createClient(
-      process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '',
-      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || ''
-    );
-  }
-  return db;
+  return supabase;
 }
 
 const MAX_CONCURRENT_PARALLEL = 5;
@@ -164,7 +156,7 @@ export class BatchExecutor extends EventEmitter {
    */
   async executeBatch(batchId: string): Promise<BatchResult> {
     try {
-      const { data: batch, error: batchError } = await db
+      const { data: batch, error: batchError } = await getDb()
         .from('operation_batches')
         .select('*')
         .eq('id', batchId)
@@ -174,7 +166,7 @@ export class BatchExecutor extends EventEmitter {
         throw new Error(`Batch not found: ${batchId}`);
       }
 
-      const { data: operations, error: opsError } = await db
+      const { data: operations, error: opsError } = await getDb()
         .from('batch_operations')
         .select('*')
         .eq('batch_id', batchId)

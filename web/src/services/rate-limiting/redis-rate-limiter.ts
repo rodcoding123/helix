@@ -3,7 +3,7 @@
  * Token bucket algorithm with Redis backend for distributed systems
  */
 
-import { Redis } from 'ioredis';
+type RedisClient = import('ioredis').Redis;
 
 interface RateLimitResult {
   allowed: boolean;
@@ -61,7 +61,7 @@ return {allowed and 1 or 0, remaining, reset_time}
  */
 export class RedisRateLimiter {
   private redisUrl: string;
-  private client: Redis | null = null;
+  private client: RedisClient | null = null;
   private scriptSha: string | null = null;
 
   constructor(options?: string | { redisUrl?: string }) {
@@ -70,19 +70,19 @@ export class RedisRateLimiter {
     } else if (options?.redisUrl) {
       this.redisUrl = options.redisUrl;
     } else {
-      this.redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+      this.redisUrl = (typeof process !== 'undefined' && process.env?.REDIS_URL) || 'redis://localhost:6379';
     }
 
     this.initializeConnection();
   }
 
   private initializeConnection(): void {
-    try {
+    import('ioredis').then(({ Redis }) => {
       this.client = new Redis(this.redisUrl);
       this.loadScript();
-    } catch (error) {
+    }).catch(error => {
       console.error('[RateLimiter] Failed to initialize Redis:', error);
-    }
+    });
   }
 
   private async loadScript(): Promise<void> {

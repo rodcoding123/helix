@@ -21,7 +21,7 @@ export function initTracing(config?: { enabled?: boolean; endpoint?: string }): 
 
   try {
     // Enable tracing based on config or environment
-    tracingEnabled = config?.enabled ?? process.env.VITE_TRACING_ENABLED === 'true';
+    tracingEnabled = config?.enabled ?? import.meta.env.VITE_TRACING_ENABLED === 'true';
 
     if (tracingEnabled) {
       console.log('[OpenTelemetry] Tracing initialized successfully');

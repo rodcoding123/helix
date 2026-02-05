@@ -13,7 +13,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 
 interface RouteConfig {
   id: string;
@@ -44,11 +44,6 @@ interface FeatureToggle {
  * - Approve/reject pending operations
  */
 export const AdminControls: React.FC = () => {
-  const supabase = createClient(
-    process.env.REACT_APP_SUPABASE_URL || '',
-    process.env.REACT_APP_SUPABASE_ANON_KEY || ''
-  );
-
   const [routes, setRoutes] = useState<RouteConfig[]>([]);
   const [toggles, setToggles] = useState<FeatureToggle[]>([]);
   const [loading, setLoading] = useState(true);

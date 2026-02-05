@@ -4,7 +4,7 @@
  * Integrates with Phase 0.5 AIOperationRouter for cost tracking and approval gates
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 import { logToDiscord, logToHashChain } from '../logging.js';
 import { getCostTracker } from './cost-tracker.js';
 import type {
@@ -46,7 +46,7 @@ const MODELS: Record<string, LLMModel> = {
 };
 
 export class LLMRouter {
-  private supabase: ReturnType<typeof createClient> | null = null;
+  private db = supabase;
   private operationsCache: Map<
     string,
     { operation: Operation; timestamp: number }
@@ -55,11 +55,6 @@ export class LLMRouter {
   private costTracker = getCostTracker();
 
   async initialize(): Promise<void> {
-    this.supabase = createClient(
-      process.env.SUPABASE_URL || '',
-      process.env.SUPABASE_ANON_KEY || ''
-    );
-
     await this.loadOperations();
 
     await logToDiscord({
@@ -79,11 +74,11 @@ export class LLMRouter {
    * Load all registered operations from database
    */
   private async loadOperations(): Promise<void> {
-    if (!this.supabase) {
+    if (!this.db) {
       throw new Error('LLMRouter not initialized');
     }
 
-    const { data, error } = await this.supabase
+    const { data, error } = await this.db
       .from('ai_model_routes')
       .select('*')
       .eq('enabled', true) as any;
@@ -242,7 +237,7 @@ export class LLMRouter {
     userId: string,
     operationId: string
   ): Promise<boolean> {
-    if (!this.supabase) {
+    if (!this.db) {
       throw new Error('LLMRouter not initialized');
     }
 
@@ -250,7 +245,7 @@ export class LLMRouter {
     const toggleName = `phase8-${operationId}`;
 
     // Call database function to get user's effective feature status
-    const { data, error } = await (this.supabase.rpc as any)(
+    const { data, error } = await (this.db.rpc as any)(
       'get_user_feature_enabled',
       {
         p_user_id: userId,

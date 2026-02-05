@@ -3,7 +3,7 @@
  * Tracks and enforces cost budgets for AI operations
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 import { logToDiscord, logToHashChain } from '../logging.js';
 import type { BudgetInfo, CostEstimate, Operation } from './types.js';
 
@@ -16,7 +16,7 @@ const GEMINI_2_0_FLASH_INPUT_COST = 0.05; // $0.05 per MTok
 const GEMINI_2_0_FLASH_OUTPUT_COST = 0.2; // $0.20 per MTok
 
 export class CostTracker {
-  private supabase: ReturnType<typeof createClient> | null = null;
+  private db = supabase;
   private budgetCache: Map<
     string,
     { budget: BudgetInfo; timestamp: number }
@@ -24,11 +24,6 @@ export class CostTracker {
   private cacheTTL = 2 * 60 * 1000; // 2 minutes
 
   async initialize(): Promise<void> {
-    this.supabase = createClient(
-      process.env.SUPABASE_URL || '',
-      process.env.SUPABASE_ANON_KEY || ''
-    );
-
     await logToDiscord({
       type: 'cost_tracker_init',
       content: 'Cost tracker initialized',
@@ -110,11 +105,11 @@ export class CostTracker {
       return cached.budget;
     }
 
-    if (!this.supabase) {
+    if (!this.db) {
       throw new Error('CostTracker not initialized');
     }
 
-    const { data, error } = await this.supabase
+    const { data, error } = await this.db
       .from('cost_budgets')
       .select('*')
       .eq('user_id', userId)
@@ -224,7 +219,7 @@ export class CostTracker {
     inputTokens: number,
     outputTokens: number
   ): Promise<string> {
-    if (!this.supabase) {
+    if (!this.db) {
       throw new Error('CostTracker not initialized');
     }
 
@@ -235,7 +230,7 @@ export class CostTracker {
     );
 
     // Call database function to log operation
-    const { data, error } = await (this.supabase as any).rpc(
+    const { data, error } = await (this.db as any).rpc(
       'log_ai_operation',
       {
         p_user_id: userId,

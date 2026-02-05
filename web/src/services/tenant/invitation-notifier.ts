@@ -347,7 +347,7 @@ This invitation expires in 6 hours - make sure to accept before it's too late!
    * Get application URL
    */
   private getAppUrl(): string {
-    return process.env.VITE_APP_URL || 'http://localhost:5173';
+    return import.meta.env.VITE_APP_URL || 'http://localhost:5173';
   }
 }
 

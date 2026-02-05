@@ -31,14 +31,14 @@ export function initSentry(config: SentryConfig = {}): void {
   }
 
   // Require DSN for production
-  const dsn = config.dsn || process.env.VITE_SENTRY_DSN;
+  const dsn = config.dsn || import.meta.env.VITE_SENTRY_DSN;
   if (!dsn) {
     console.warn('[Sentry] No DSN configured, skipping initialization');
     return;
   }
 
-  const environment = config.environment || process.env.VITE_ENV || 'production';
-  const release = config.release || process.env.VITE_COMMIT_SHA || undefined;
+  const environment = config.environment || import.meta.env.VITE_ENV || 'production';
+  const release = config.release || import.meta.env.VITE_COMMIT_SHA || undefined;
 
   try {
     Sentry.init({
@@ -50,9 +50,9 @@ export function initSentry(config: SentryConfig = {}): void {
       integrations: [
         new BrowserTracing({
           // Set sampling rate for performance monitoring
-          tracingOrigins: ['localhost', process.env.VITE_API_URL || '', /^\//],
+          tracingOrigins: ['localhost', import.meta.env.VITE_API_URL || '', /^\//],
           // Capture HTTP requests
-          tracePropagationTargets: ['localhost', process.env.VITE_API_URL || '', /^\//],
+          tracePropagationTargets: ['localhost', import.meta.env.VITE_API_URL || '', /^\//],
           // Monitor long-running operations
           shouldCreateSpanForRequest: (url: string) => {
             // Skip monitoring for health checks
@@ -121,7 +121,7 @@ export function initSentry(config: SentryConfig = {}): void {
 
         // Ignore network errors from third-party services
         if (errorMessage.includes('Failed to fetch')) {
-          const apiUrl = process.env.VITE_API_URL;
+          const apiUrl = import.meta.env.VITE_API_URL;
           const requestUrl = event.request?.url || '';
           // Only keep if it's from our own API
           if (!apiUrl || !requestUrl.includes(apiUrl)) {
@@ -191,7 +191,7 @@ export function initSentry(config: SentryConfig = {}): void {
       },
 
       // Debug mode
-      debug: config.debug || process.env.VITE_SENTRY_DEBUG === 'true',
+      debug: config.debug || import.meta.env.VITE_SENTRY_DEBUG === 'true',
     });
 
     // Set initial user context if available

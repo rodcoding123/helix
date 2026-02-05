@@ -11,7 +11,7 @@ export class DeepSeekProvider implements LLMProvider {
   private baseUrl = 'https://api.deepseek.com/v1';
 
   constructor() {
-    this.apiKey = process.env.DEEPSEEK_API_KEY || '';
+    this.apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY || '';
     if (!this.apiKey) {
       throw new Error('DEEPSEEK_API_KEY environment variable not set');
     }

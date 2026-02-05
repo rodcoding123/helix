@@ -13,7 +13,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 
 interface HelixRecommendation {
   id: string;
@@ -43,11 +43,6 @@ interface HelixRecommendation {
  * - Approval workflow for recommendations
  */
 export const AdminIntelligence: React.FC = () => {
-  const supabase = createClient(
-    process.env.REACT_APP_SUPABASE_URL || '',
-    process.env.REACT_APP_SUPABASE_ANON_KEY || ''
-  );
-
   const [recommendations, setRecommendations] = useState<HelixRecommendation[]>([]);
   const [filter, setFilter] = useState<'PENDING' | 'APPROVED' | 'REJECTED' | 'ALL'>('PENDING');
   const [loading, setLoading] = useState(true);

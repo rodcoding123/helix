@@ -3,7 +3,7 @@
  * Monitors Service Level Agreement compliance and triggers alerts
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 
 export type SLATier = 'premium' | 'standard' | 'basic';
 
@@ -75,16 +75,8 @@ const SLA_TIERS: Record<SLATier, SLAThresholds> = {
   },
 };
 
-let db: any;
-
 function getDb() {
-  if (!db) {
-    db = createClient(
-      process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '',
-      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || ''
-    );
-  }
-  return db;
+  return supabase;
 }
 
 export class SLATracker {

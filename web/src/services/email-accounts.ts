@@ -60,8 +60,8 @@ export interface SMTPConfig {
  * Gmail OAuth2 Configuration
  */
 const GMAIL_CONFIG: OAuth2Config = {
-  clientId: process.env.REACT_APP_GMAIL_CLIENT_ID || '',
-  clientSecret: process.env.REACT_APP_GMAIL_CLIENT_SECRET || '',
+  clientId: import.meta.env.VITE_GMAIL_CLIENT_ID || '',
+  clientSecret: import.meta.env.VITE_GMAIL_CLIENT_SECRET || '',
   redirectUri: `${window.location.origin}/auth/email/gmail/callback`,
   scopes: [
     'https://www.googleapis.com/auth/gmail.readonly',
@@ -74,8 +74,8 @@ const GMAIL_CONFIG: OAuth2Config = {
  * Outlook OAuth2 Configuration
  */
 const OUTLOOK_CONFIG: OAuth2Config = {
-  clientId: process.env.REACT_APP_OUTLOOK_CLIENT_ID || '',
-  clientSecret: process.env.REACT_APP_OUTLOOK_CLIENT_SECRET || '',
+  clientId: import.meta.env.VITE_OUTLOOK_CLIENT_ID || '',
+  clientSecret: import.meta.env.VITE_OUTLOOK_CLIENT_SECRET || '',
   redirectUri: `${window.location.origin}/auth/email/outlook/callback`,
   scopes: [
     'https://graph.microsoft.com/Mail.Read',

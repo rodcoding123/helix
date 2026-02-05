@@ -4,7 +4,7 @@
  * Handles cron job registration, deregistration, and execution tracking
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 import parseExpression from 'cron-parser';
 
 export interface ScheduleConfig {
@@ -20,16 +20,8 @@ export interface ScheduleConfig {
   max_cost_per_month?: number;
 }
 
-let db: any;
-
 function getDb() {
-  if (!db) {
-    db = createClient(
-      process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '',
-      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || ''
-    );
-  }
-  return db;
+  return supabase;
 }
 
 export class PgCronManager {

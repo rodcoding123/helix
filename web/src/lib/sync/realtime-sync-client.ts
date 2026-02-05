@@ -491,8 +491,8 @@ export function useSyncClient(userId: string, deviceId?: string) {
     return new RealtimeSyncClient({
       userId,
       deviceId: deviceId || generateDeviceId(),
-      supabaseUrl: process.env.REACT_APP_SUPABASE_URL!,
-      supabaseKey: process.env.REACT_APP_SUPABASE_KEY!,
+      supabaseUrl: import.meta.env.VITE_SUPABASE_URL || '',
+      supabaseKey: import.meta.env.VITE_SUPABASE_ANON_KEY || '',
       onDelta: (delta) => {
         // Handle delta change
         console.log("Delta received:", delta);

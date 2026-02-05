@@ -11,14 +11,9 @@
  * - Complete audit trail logging
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { supabase as db } from '@/lib/supabase';
 import { logToDiscord, logToHashChain } from '../logging';
 import { loadSecret } from '@/lib/secrets-loader';
-
-const db = createClient(
-  process.env.SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
 
 export interface ScheduleConfig {
   id: string;

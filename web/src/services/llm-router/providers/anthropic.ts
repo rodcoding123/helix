@@ -11,7 +11,7 @@ export class AnthropicProvider implements LLMProvider {
   private baseUrl = 'https://api.anthropic.com/v1';
 
   constructor() {
-    this.apiKey = process.env.ANTHROPIC_API_KEY || '';
+    this.apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY || '';
     if (!this.apiKey) {
       throw new Error('ANTHROPIC_API_KEY environment variable not set');
     }

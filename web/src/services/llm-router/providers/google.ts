@@ -11,7 +11,7 @@ export class GoogleProvider implements LLMProvider {
   private baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
 
   constructor() {
-    this.apiKey = process.env.GOOGLE_API_KEY || '';
+    this.apiKey = import.meta.env.VITE_GOOGLE_API_KEY || '';
     if (!this.apiKey) {
       throw new Error('GOOGLE_API_KEY environment variable not set');
     }

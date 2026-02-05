@@ -36,7 +36,7 @@ export async function loadSecret(itemName: string, field: SecretField = 'passwor
   }
 
   // Try 1Password first
-  const useOnePassword = process.env.HELIX_SECRETS_SOURCE !== 'env';
+  const useOnePassword = (typeof process !== 'undefined' && process.env?.HELIX_SECRETS_SOURCE) !== 'env';
 
   if (useOnePassword) {
     try {

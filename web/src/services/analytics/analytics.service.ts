@@ -3,7 +3,7 @@
  * Collects, analyzes, and reports on operation execution metrics
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 import { getCacheService } from '@/lib/cache/redis-cache';
 
 export interface OperationMetrics {
@@ -53,16 +53,8 @@ export interface OptimizationRecommendation {
   estimated_implementation_effort: 'trivial' | 'easy' | 'moderate' | 'difficult';
 }
 
-let db: any;
-
 function getDb() {
-  if (!db) {
-    db = createClient(
-      process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '',
-      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || ''
-    );
-  }
-  return db;
+  return supabase;
 }
 
 export class AnalyticsService {

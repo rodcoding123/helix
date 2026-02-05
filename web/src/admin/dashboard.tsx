@@ -14,7 +14,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 
 interface DailyMetrics {
   date: string;
@@ -49,11 +49,6 @@ interface BudgetInfo {
  * - Success rates
  */
 export const AdminDashboard: React.FC = () => {
-  const supabase = createClient(
-    process.env.REACT_APP_SUPABASE_URL || '',
-    process.env.REACT_APP_SUPABASE_ANON_KEY || ''
-  );
-
   const [metrics, setMetrics] = useState<DailyMetrics[]>([]);
   const [budget, setBudget] = useState<BudgetInfo | null>(null);
   const [loading, setLoading] = useState(true);

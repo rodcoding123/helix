@@ -33,7 +33,7 @@ describe('RedisRateLimiter', () => {
   let limiter: RedisRateLimiter;
   const userId = 'test-user-123';
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
     limiter = new RedisRateLimiter({
       redisUrl: 'redis://localhost:6379',
@@ -47,6 +47,9 @@ describe('RedisRateLimiter', () => {
     mockRedisClient.del.mockResolvedValue(1);
     mockRedisClient.keys.mockResolvedValue([]);
     mockRedisClient.quit.mockResolvedValue(undefined);
+
+    // Wait for async initialization to complete
+    await new Promise(resolve => setTimeout(resolve, 100));
   });
 
   afterEach(async () => {
