@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { DailyCostMetrics, CostByUser, OperationMetric, PendingApproval, RoutingConfig } from '../types/control-plane';
+import { DailyCostMetrics, CostByUser, OperationMetric, PendingApproval, RoutingConfig, FeatureToggle, UserBudget } from '../types/control-plane';
 
 export async function getDailyCostMetrics(days = 7): Promise<DailyCostMetrics[]> {
   const { data, error } = await supabase
@@ -156,6 +156,114 @@ export function subscribeToRoutingUpdates(
       },
       (payload) => {
         callback(payload.new as RoutingConfig);
+      }
+    )
+    .subscribe();
+}
+
+export async function getFeatureToggles(): Promise<FeatureToggle[]> {
+  const { data, error } = await supabase
+    .from('feature_toggles')
+    .select('*')
+    .order('category', { ascending: true })
+    .order('feature_name', { ascending: true });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function updateFeatureToggle(
+  toggleId: string,
+  enabled: boolean
+): Promise<void> {
+  const { error } = await supabase
+    .from('feature_toggles')
+    .update({
+      enabled,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', toggleId);
+
+  if (error) throw error;
+}
+
+export function subscribeToFeatureToggleUpdates(
+  callback: (toggle: FeatureToggle) => void
+): ReturnType<typeof supabase.channel> {
+  return supabase
+    .channel('feature_toggles_updates')
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'feature_toggles',
+      },
+      (payload) => {
+        callback(payload.new as FeatureToggle);
+      }
+    )
+    .subscribe();
+}
+
+export async function getUserBudgets(): Promise<UserBudget[]> {
+  const { data, error } = await supabase
+    .from('cost_budgets')
+    .select('*')
+    .order('user_email', { ascending: true });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function updateUserBudget(
+  budgetId: string,
+  dailyLimit: number,
+  monthlyLimit: number,
+  warningThreshold: number
+): Promise<void> {
+  const { error } = await supabase
+    .from('cost_budgets')
+    .update({
+      daily_limit: dailyLimit,
+      monthly_limit: monthlyLimit,
+      warning_threshold_percent: warningThreshold,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', budgetId);
+
+  if (error) throw error;
+}
+
+export async function toggleUserBudget(
+  budgetId: string,
+  active: boolean
+): Promise<void> {
+  const { error } = await supabase
+    .from('cost_budgets')
+    .update({
+      is_active: active,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', budgetId);
+
+  if (error) throw error;
+}
+
+export function subscribeToUserBudgetUpdates(
+  callback: (budget: UserBudget) => void
+): ReturnType<typeof supabase.channel> {
+  return supabase
+    .channel('user_budgets_updates')
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'cost_budgets',
+      },
+      (payload) => {
+        callback(payload.new as UserBudget);
       }
     )
     .subscribe();
