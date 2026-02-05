@@ -3,7 +3,7 @@
  * Phase 5 Track 3: Detailed task information display
  */
 
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { X, Edit2, Trash2, Lock, Tag, Clock, Target, AlertCircle } from 'lucide-react';
 
 export interface TaskCardProps {
@@ -50,7 +50,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export const TaskCard: FC<TaskCardProps> = ({
-  id,
+  _id,
   title,
   description,
   status,
@@ -63,7 +63,7 @@ export const TaskCard: FC<TaskCardProps> = ({
   blockedByTaskIds,
   blocksTaskIds,
   tags,
-  assigneeId,
+  _assigneeId,
   onClose,
   onEdit,
   onDelete,
