@@ -13,6 +13,8 @@
 import { createClient } from '@supabase/supabase-js';
 import type { VoiceCommand } from '../lib/types/voice-memo';
 
+export type { VoiceCommand };
+
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL!,
   import.meta.env.VITE_SUPABASE_ANON_KEY!

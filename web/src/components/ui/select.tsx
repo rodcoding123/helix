@@ -20,6 +20,9 @@ export const Select = ({
   </select>
 );
 
+export const SelectValue = ({ placeholder }: { placeholder?: string }) => (
+  <span>{placeholder || 'Select...'}</span>
+);
 export const SelectTrigger = ({ children }: { children: ReactNode }) => <div>{children}</div>;
 export const SelectContent = ({ children }: { children: ReactNode }) => <div>{children}</div>;
 export const SelectItem = ({ value, children }: { value: string; children: ReactNode }) => (

@@ -8,6 +8,7 @@ import {
   getDiscordLoggerForTenant,
   GlobalDiscordLogger,
 } from './command-logger-multitenant.js';
+import { setDbClient as setCommandLoggerDb } from './command-logger-multitenant.js';
 
 // Mock Supabase
 const mockQuery = {
@@ -17,11 +18,16 @@ const mockQuery = {
   single: vi.fn(),
 };
 
+const mockDb = {
+  from: vi.fn(() => mockQuery),
+};
+
 // Mock hash chain
 vi.mock('./hash-chain-multitenant', () => ({
   getHashChainForTenant: vi.fn(() => ({
     addEntry: vi.fn().mockResolvedValue({}),
   })),
+  setDbClient: vi.fn(),
 }));
 
 // Mock fetch
@@ -31,6 +37,7 @@ describe('TenantDiscordLogger', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (global.fetch as any).mockClear();
+    setCommandLoggerDb(mockDb);
   });
 
   describe('Constructor', () => {
@@ -58,7 +65,7 @@ describe('TenantDiscordLogger', () => {
       const logger = new TenantDiscordLogger('tenant-123');
       await logger.initialize();
 
-      expect(mockQuery.from).toHaveBeenCalledWith('tenants');
+      expect(mockDb.from).toHaveBeenCalledWith('tenants');
       expect(mockQuery.select).toHaveBeenCalled();
       expect(mockQuery.eq).toHaveBeenCalledWith('id', 'tenant-123');
     });

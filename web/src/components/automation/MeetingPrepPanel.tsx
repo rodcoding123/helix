@@ -89,10 +89,10 @@ export function MeetingPrepPanel({
       if (context.actionItems && context.actionItems.length > 0) {
         for (const actionItem of context.actionItems) {
           checklist.push({
-            id: `action-${actionItem.title}`,
-            title: actionItem.title,
+            id: `action-${(actionItem as any).title || 'unknown'}`,
+            title: (actionItem as any).title || '',
             type: 'action-item',
-            priority: actionItem.priority,
+            priority: (actionItem as any).priority,
           });
         }
       }

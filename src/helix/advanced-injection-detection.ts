@@ -33,8 +33,8 @@ export function detectBase64Encoding(content: string): {
 } {
   const patterns: string[] = [];
 
-  // Look for large base64 sequences (likely encoded)
-  const base64Pattern = /[A-Za-z0-9+/]{50,}={0,2}/g;
+  // Look for base64 sequences (at least 20 characters to be meaningful)
+  const base64Pattern = /[A-Za-z0-9+/]{20,}={0,2}/g;
   const matches = content.match(base64Pattern);
 
   if (matches && matches.length > 0) {

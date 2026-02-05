@@ -52,7 +52,9 @@ export const MobileEmailDetail: React.FC<MobileEmailDetailProps> = ({
               {conversation.subject}
             </h2>
             <p className="text-xs text-slate-400">
-              {conversation.participants[0]?.name || conversation.participants[0]?.email}
+              {typeof conversation.participants?.[0] === 'string'
+                ? conversation.participants[0]
+                : (conversation.participants?.[0] as any)?.name || (conversation.participants?.[0] as any)?.email}
             </p>
           </div>
           <button

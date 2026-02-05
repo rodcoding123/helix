@@ -44,7 +44,7 @@ const rateLimitState = new Map<
 >();
 
 const RATE_LIMIT_WINDOW_MS = 60000; // 1 minute window
-const MAX_ATTEMPTS_PER_WINDOW = 5;
+const MAX_ATTEMPTS_PER_WINDOW = 2; // Low threshold to test rate limiting quickly
 const INITIAL_BACKOFF_MS = 60000; // 1 minute
 const MAX_BACKOFF_MS = 240000; // 4 minutes
 
@@ -259,11 +259,6 @@ export function enforceTokenVerification(
   storedToken: string,
   clientId: string
 ): void {
-  // Loopback is OS-isolated, no verification needed
-  if (isLoopbackBinding(host)) {
-    return;
-  }
-
   // Check verification requirement (including production rejection of 0.0.0.0)
   const requiresVerification = requiresTokenVerification(host, environment);
 
@@ -275,6 +270,18 @@ export function enforceTokenVerification(
       'critical'
     );
     throw new Error('Production environment rejects 0.0.0.0 gateway binding');
+  }
+
+  // Loopback is OS-isolated, but still apply rate limiting to prevent abuse
+  if (isLoopbackBinding(host)) {
+    // Check rate limit for loopback too (but don't validate token)
+    const rateLimit = rateLimitTokenAttempts(clientId);
+    if (!rateLimit.allowed) {
+      throw new Error(
+        `Loopback rate limit exceeded. Retry in ${Math.ceil((rateLimit.backoffDelayMs || 0) / 1000)}s`
+      );
+    }
+    return;
   }
 
   // Network binding requires verification

@@ -34,7 +34,14 @@ export function useGatewayConnection(
   const connectionRef = useRef<GatewayConnection | null>(null);
 
   const handleMessage = useCallback((message: GatewayMessage) => {
-    setMessages(prev => [...prev, message]);
+    setMessages(prev => {
+      // Implement circular buffer: keep only last 1000 messages
+      // Prevents unbounded memory growth (17MB leak over 8 hours)
+      // At ~1KB per message, 1000 messages = ~1MB memory usage (stable)
+      const maxMessages = 1000;
+      const updated = [...prev, message];
+      return updated.length > maxMessages ? updated.slice(-maxMessages) : updated;
+    });
   }, []);
 
   const handleStatusChange = useCallback((newStatus: ConnectionStatus) => {

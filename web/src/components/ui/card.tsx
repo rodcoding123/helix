@@ -9,6 +9,9 @@ export const CardHeader = ({ children, className }: { children: ReactNode; class
 export const CardTitle = ({ children }: { children: ReactNode }) => (
   <h2 className="text-lg font-semibold text-slate-100">{children}</h2>
 );
+export const CardDescription = ({ children }: { children: ReactNode }) => (
+  <p className="text-sm text-slate-400">{children}</p>
+);
 export const CardContent = ({ children, className }: { children: ReactNode; className?: string }) => (
   <div className={`p-4 ${className || ''}`}>{children}</div>
 );
