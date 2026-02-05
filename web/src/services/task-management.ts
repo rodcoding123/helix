@@ -257,33 +257,23 @@ class TaskManagementService {
 
   /**
    * Check if task can be started (dependencies met)
+   * Uses atomic RPC function to avoid N+1 query pattern
+   * Performance: 1+N queries → 1 query (where N = number of dependencies)
    */
   async canStartTask(taskId: string): Promise<boolean> {
     try {
+      // Use RPC function for atomic dependency checking
       const { data, error } = await supabase
-        .from('task_dependencies')
-        .select('*')
-        .eq('task_id', taskId)
-        .eq('dependency_type', 'blocking');
+        .rpc('can_start_task', {
+          p_task_id: taskId,
+        });
 
       if (error) throw error;
 
-      if (data.length === 0) return true;
+      if (!data || data.length === 0) return true;
 
-      // Check if any blocking tasks are not done
-      for (const dep of data) {
-        const blockerTask = await supabase
-          .from('tasks')
-          .select('status')
-          .eq('id', dep.depends_on_task_id)
-          .single();
-
-        if (blockerTask.data && blockerTask.data.status !== 'done') {
-          return false;
-        }
-      }
-
-      return true;
+      // RPC returns { can_start: boolean, blocked_by_count: int, blocking_task_ids: uuid[] }
+      return data[0]?.can_start ?? true;
     } catch (error) {
       console.error('Check can start error:', error);
       return false;
@@ -292,6 +282,9 @@ class TaskManagementService {
 
   /**
    * Log time entry
+   * Uses atomic RPC function to avoid race condition
+   * Performance: 3 queries (read + calc + update) → 2 queries (insert + RPC)
+   * Correctness: Eliminates race condition in concurrent time logging
    */
   async logTimeEntry(
     userId: string,
@@ -301,6 +294,7 @@ class TaskManagementService {
     isBillable = false
   ): Promise<void> {
     try {
+      // Insert time entry
       const { error: insertError } = await supabase
         .from('task_time_entries')
         .insert([
@@ -316,20 +310,14 @@ class TaskManagementService {
 
       if (insertError) throw insertError;
 
-      // Update task's time_spent_minutes
-      const task = await supabase
-        .from('tasks')
-        .select('time_spent_minutes')
-        .eq('id', taskId)
-        .single();
+      // Use atomic RPC to increment task time (prevents race condition)
+      const { data, error: updateError } = await supabase
+        .rpc('increment_task_time', {
+          p_task_id: taskId,
+          p_time_spent_minutes: durationMinutes,
+        });
 
-      if (task.data) {
-        const totalTime = (task.data.time_spent_minutes || 0) + durationMinutes;
-        await supabase
-          .from('tasks')
-          .update({ time_spent_minutes: totalTime })
-          .eq('id', taskId);
-      }
+      if (updateError) throw updateError;
     } catch (error) {
       console.error('Log time error:', error);
       throw error;

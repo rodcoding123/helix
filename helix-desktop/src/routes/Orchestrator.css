@@ -1,0 +1,29 @@
+.orchestrator-route {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.route-header {
+  border-bottom: 1px solid var(--border-secondary);
+  padding-bottom: 1.5rem;
+}
+
+.route-header h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.route-header p {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: 0.875rem;
+}
+
+.route-content {
+  flex: 1;
+}

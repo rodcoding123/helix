@@ -16,6 +16,9 @@ const MemorySynthesis = lazy(() => import('./MemorySynthesis'));
 // Phase 11 Week 3: Teams Management
 const Teams = lazy(() => import('./Teams'));
 
+// Phase 2: Orchestrator Control Center
+const Orchestrator = lazy(() => import('./Orchestrator'));
+
 // Loading fallback component
 function RouteLoader() {
   return (
@@ -120,6 +123,14 @@ export const router = createBrowserRouter([
           </LazyRoute>
         ),
       },
+      {
+        path: 'orchestrator',
+        element: (
+          <LazyRoute>
+            <Orchestrator />
+          </LazyRoute>
+        ),
+      },
     ],
   },
 ]);
@@ -148,4 +159,6 @@ export const ROUTES = {
   MEMORY_SYNTHESIS: '/synthesis',
   // Phase 11 Week 3: Teams Management
   TEAMS: '/teams',
+  // Phase 2: Orchestrator
+  ORCHESTRATOR: '/orchestrator',
 } as const;

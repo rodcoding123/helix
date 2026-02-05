@@ -363,6 +363,8 @@ class CalendarEventsService {
 
   /**
    * Get calendar statistics
+   * Uses single batch query instead of 6+ separate queries
+   * Performance: 6 queries → 1 query
    */
   async getCalendarStats(userId: string): Promise<{
     totalEvents: number;
@@ -375,54 +377,66 @@ class CalendarEventsService {
     try {
       const now = new Date();
 
-      const [total, upcoming, conflicts, meetings, focusTime] = await Promise.all([
-        supabase
-          .from('calendar_events')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', userId)
-          .eq('is_deleted', false),
-        supabase
-          .from('calendar_events')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', userId)
-          .eq('is_deleted', false)
-          .gte('start_time', now.toISOString()),
-        supabase
-          .from('calendar_events')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', userId)
-          .eq('is_deleted', false)
-          .eq('has_conflict', true),
-        supabase
-          .from('calendar_events')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', userId)
-          .eq('is_deleted', false)
-          .eq('event_type', 'event'),
-        supabase
-          .from('calendar_events')
-          .select('duration_minutes', { count: 'exact' })
-          .eq('user_id', userId)
-          .eq('is_deleted', false)
-          .eq('event_type', 'focustime'),
-      ]);
-
-      const busyEvents = await supabase
+      // Single query: fetch all events with necessary fields for aggregation
+      const { data: events, error } = await supabase
         .from('calendar_events')
-        .select('duration_minutes')
+        .select('start_time,duration_minutes,has_conflict,event_type,is_busy')
         .eq('user_id', userId)
-        .eq('is_deleted', false)
-        .eq('is_busy', true);
+        .eq('is_deleted', false);
 
-      const busyMinutes = busyEvents.data?.reduce((sum, e) => sum + (e.duration_minutes || 0), 0) || 0;
-      const focusMinutes = focusTime.data?.reduce((sum, e) => sum + (e.duration_minutes || 0), 0) || 0;
+      if (error) throw error;
+
+      if (!events || events.length === 0) {
+        return {
+          totalEvents: 0,
+          upcomingEvents: 0,
+          busyTimeMinutes: 0,
+          conflictCount: 0,
+          meetingCount: 0,
+          focusTimeMinutes: 0,
+        };
+      }
+
+      // Aggregate all metrics from single query result
+      let upcomingCount = 0;
+      let conflictCount = 0;
+      let meetingCount = 0;
+      let busyMinutes = 0;
+      let focusMinutes = 0;
+
+      for (const event of events) {
+        // Count upcoming events
+        if (event.start_time && new Date(event.start_time) >= now) {
+          upcomingCount++;
+        }
+
+        // Count conflicts
+        if (event.has_conflict) {
+          conflictCount++;
+        }
+
+        // Count meetings
+        if (event.event_type === 'event') {
+          meetingCount++;
+        }
+
+        // Sum busy time
+        if (event.is_busy && event.duration_minutes) {
+          busyMinutes += event.duration_minutes;
+        }
+
+        // Sum focus time
+        if (event.event_type === 'focustime' && event.duration_minutes) {
+          focusMinutes += event.duration_minutes;
+        }
+      }
 
       return {
-        totalEvents: total.count || 0,
-        upcomingEvents: upcoming.count || 0,
+        totalEvents: events.length,
+        upcomingEvents: upcomingCount,
         busyTimeMinutes: busyMinutes,
-        conflictCount: conflicts.count || 0,
-        meetingCount: meetings.count || 0,
+        conflictCount,
+        meetingCount,
         focusTimeMinutes: focusMinutes,
       };
     } catch (error) {

@@ -278,6 +278,8 @@ class EmailMessagesService {
 
   /**
    * Get email statistics
+   * Uses single batch query instead of 4 separate queries
+   * Performance: 4 queries → 1 query
    */
   async getEmailStats(userId: string): Promise<{
     totalEmails: number;
@@ -286,35 +288,40 @@ class EmailMessagesService {
     attachmentCount: number;
   }> {
     try {
-      const [total, unread, starred, attachments] = await Promise.all([
-        supabase
-          .from('emails')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', userId)
-          .eq('is_deleted', false),
-        supabase
-          .from('emails')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', userId)
-          .eq('is_read', false)
-          .eq('is_deleted', false),
-        supabase
-          .from('emails')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', userId)
-          .eq('is_starred', true),
-        supabase
-          .from('emails')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', userId)
-          .eq('has_attachments', true),
-      ]);
+      // Single query: fetch all email flags for aggregation
+      const { data: emails, error } = await supabase
+        .from('emails')
+        .select('is_read,is_starred,has_attachments')
+        .eq('user_id', userId)
+        .eq('is_deleted', false);
+
+      if (error) throw error;
+
+      if (!emails || emails.length === 0) {
+        return {
+          totalEmails: 0,
+          unreadCount: 0,
+          starredCount: 0,
+          attachmentCount: 0,
+        };
+      }
+
+      // Aggregate all metrics from single query result
+      let unreadCount = 0;
+      let starredCount = 0;
+      let attachmentCount = 0;
+
+      for (const email of emails) {
+        if (!email.is_read) unreadCount++;
+        if (email.is_starred) starredCount++;
+        if (email.has_attachments) attachmentCount++;
+      }
 
       return {
-        totalEmails: total.count || 0,
-        unreadCount: unread.count || 0,
-        starredCount: starred.count || 0,
-        attachmentCount: attachments.count || 0,
+        totalEmails: emails.length,
+        unreadCount,
+        starredCount,
+        attachmentCount,
       };
     } catch (error) {
       console.error('Get stats error:', error);
