@@ -592,3 +592,11 @@ Trust level: 0.95 (very high). Communication should be direct, authentic, with n
 - `/helix-status` - Full system status check
 - `/visual-review` - Frontend verification with Playwright
 - `/security-audit` - PhD-level AI security assessment (CVE checks, pentest, threat modeling)
+- `/openclaw-sync` - Monitor OpenClaw releases and generate Helix compatibility reports
+  - Coordinates 7 specialized sub-agents for comprehensive analysis
+  - Detects conflicts with critical Helix integration points (entry.ts, plugins/loader.ts, environment-proxy.ts)
+  - Scans for CVEs and security vulnerabilities
+  - Generates markdown reports in docs/openclaw-sync/
+  - Updates Memory MCP knowledge graph with sync history
+  - Returns merge recommendation: MERGE | PARTIAL_MERGE | SKIP | WATCH
+  - **Usage**: `/openclaw-sync` (monitors releases since last sync)
