@@ -100,7 +100,10 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
     }
     const stateDir = await fs.mkdtemp(path.join(tempHome, prefix));
     process.env.OPENCLAW_STATE_DIR = stateDir;
-    delete process.env.OPENCLAW_CONFIG_PATH;
+    // On Windows os.homedir() ignores HOME and uses USERPROFILE, so an existing
+    // config at the real homedir can shadow the test stateDir. Pin the config
+    // path explicitly to avoid that.
+    process.env.OPENCLAW_CONFIG_PATH = path.join(stateDir, "openclaw.json");
     return stateDir;
   };
 

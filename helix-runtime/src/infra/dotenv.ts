@@ -5,11 +5,19 @@ import dotenv from "dotenv";
 
 import { resolveConfigDir } from "../utils.js";
 
-export function loadDotEnv(opts?: { quiet?: boolean }) {
+export function loadDotEnv(opts?: { quiet?: boolean; cwd?: string }) {
   const quiet = opts?.quiet ?? true;
 
   // Load from process CWD first (dotenv default).
-  dotenv.config({ quiet });
+  // When an explicit cwd is provided, use it instead of process.cwd() so
+  // tests running in worker threads (where process.chdir is unavailable) can
+  // still exercise the CWD-first logic.
+  if (opts?.cwd) {
+    const cwdEnvPath = path.join(opts.cwd, ".env");
+    dotenv.config({ quiet, path: cwdEnvPath });
+  } else {
+    dotenv.config({ quiet });
+  }
 
   // Then load global fallback: ~/.openclaw/.env (or OPENCLAW_STATE_DIR/.env),
   // without overriding any env vars already present.

@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LogOut, Menu, X, User, ChevronRight, ExternalLink } from 'lucide-react';
+import { LogOut, Menu, X, User, ChevronRight, ExternalLink, MessageSquare } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import clsx from 'clsx';
@@ -8,7 +8,11 @@ interface NavLink {
   href: string;
   label: string;
   external?: boolean;
+  icon?: React.ReactNode;
 }
+
+// Routes where the navbar should be hidden (immersive pages)
+const HIDDEN_ROUTES = ['/welcome'];
 
 export function Navbar() {
   const { user, signOut } = useAuth();
@@ -26,6 +30,11 @@ export function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Hide navbar on immersive routes (after all hooks)
+  if (HIDDEN_ROUTES.includes(location.pathname)) {
+    return null;
+  }
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
@@ -34,6 +43,7 @@ export function Navbar() {
   const navLinks: NavLink[] = user
     ? [
         { href: '/dashboard', label: 'Dashboard' },
+        { href: '/chat', label: 'Chat', icon: <MessageSquare className="h-3.5 w-3.5" /> },
         { href: '/observatory', label: 'Observatory' },
         { href: '/code', label: 'Code' },
         { href: '/secrets', label: 'Secrets' },
@@ -94,10 +104,11 @@ export function Navbar() {
                   key={link.href}
                   to={link.href}
                   className={clsx(
-                    'nav-link px-4 py-2 text-sm font-medium',
+                    'nav-link px-4 py-2 text-sm font-medium inline-flex items-center gap-1.5',
                     location.pathname === link.href && 'active'
                   )}
                 >
+                  {link.icon}
                   {link.label}
                 </Link>
               )

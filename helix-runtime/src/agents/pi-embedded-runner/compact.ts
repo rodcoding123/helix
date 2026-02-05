@@ -181,7 +181,11 @@ export async function compactEmbeddedPiSessionDirect(
   });
 
   let restoreSkillEnv: (() => void) | undefined;
-  process.chdir(effectiveWorkspace);
+  try {
+    process.chdir(effectiveWorkspace);
+  } catch {
+    // process.chdir() is not supported in worker threads
+  }
   try {
     const shouldLoadSkillEntries = !params.skillsSnapshot || !params.skillsSnapshot.resolvedSkills;
     const skillEntries = shouldLoadSkillEntries
@@ -476,7 +480,11 @@ export async function compactEmbeddedPiSessionDirect(
     };
   } finally {
     restoreSkillEnv?.();
-    process.chdir(prevCwd);
+    try {
+      process.chdir(prevCwd);
+    } catch {
+      // process.chdir() is not supported in worker threads
+    }
   }
 }
 

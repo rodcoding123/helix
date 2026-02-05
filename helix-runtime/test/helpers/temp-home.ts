@@ -2,6 +2,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
+import { vi } from "vitest";
+
 type EnvValue = string | undefined | ((home: string) => string | undefined);
 
 type EnvSnapshot = {
@@ -60,6 +62,11 @@ function setTempHome(base: string) {
   process.env.USERPROFILE = base;
   process.env.OPENCLAW_STATE_DIR = path.join(base, ".openclaw");
 
+  // In vitest worker threads on Windows, process.env changes may not propagate
+  // to os.homedir() (which calls native uv_os_homedir). Spy on it to ensure
+  // all code that calls os.homedir() sees the temp home.
+  vi.spyOn(os, "homedir").mockReturnValue(base);
+
   if (process.platform !== "win32") {
     return;
   }
@@ -101,6 +108,7 @@ export async function withTempHome<T>(
   try {
     return await fn(base);
   } finally {
+    vi.mocked(os.homedir).mockRestore();
     restoreExtraEnv(envSnapshot);
     restoreEnv(snapshot);
     try {

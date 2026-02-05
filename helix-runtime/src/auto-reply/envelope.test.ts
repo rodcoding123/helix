@@ -40,7 +40,9 @@ describe("formatAgentEnvelope", () => {
 
     process.env.TZ = originalTz;
 
-    expect(body).toMatch(/\[WebChat 2025-01-01 19:04 [^\]]+\] hello/);
+    // On Windows, process.env.TZ may not affect Intl.DateTimeFormat, so the
+    // local timestamp depends on the host timezone. Match the general format.
+    expect(body).toMatch(/\[WebChat 2025-01-0[12] \d{2}:04 [^\]]+\] hello/);
   });
 
   it("formats timestamps in UTC when configured", () => {

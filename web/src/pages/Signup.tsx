@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff, AlertCircle, Loader2, Check, ArrowLeft, Sparkles } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -8,7 +8,7 @@ import clsx from 'clsx';
 export function Signup() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { signUp } = useAuth();
+  const { signUp, session } = useAuth();
 
   const selectedTierId = searchParams.get('tier') || 'free';
   const selectedTier = PRICING_TIERS.find(t => t.id === selectedTierId) || PRICING_TIERS[0];
@@ -20,6 +20,14 @@ export function Signup() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  // If signup succeeds and session is available (no email confirmation required),
+  // redirect to onboarding immediately
+  useEffect(() => {
+    if (success && session) {
+      navigate('/welcome', { replace: true });
+    }
+  }, [success, session, navigate]);
 
   const passwordRequirements = [
     { met: password.length >= 8, text: 'At least 8 characters' },

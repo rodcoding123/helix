@@ -5,6 +5,18 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { createOpenClawCodingTools } from "./pi-tools.js";
 
+function canChdir(): boolean {
+  try {
+    const cwd = process.cwd();
+    process.chdir(cwd);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+const skipChdir = !canChdir();
+
 async function withTempDir<T>(prefix: string, fn: (dir: string) => Promise<T>) {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), prefix));
   try {
@@ -20,7 +32,7 @@ function getTextContent(result?: { content?: Array<{ type: string; text?: string
 }
 
 describe("workspace path resolution", () => {
-  it("reads relative paths against workspaceDir even after cwd changes", async () => {
+  it.skipIf(skipChdir)("reads relative paths against workspaceDir even after cwd changes", async () => {
     await withTempDir("openclaw-ws-", async (workspaceDir) => {
       await withTempDir("openclaw-cwd-", async (otherDir) => {
         const prevCwd = process.cwd();
@@ -43,7 +55,7 @@ describe("workspace path resolution", () => {
     });
   });
 
-  it("writes relative paths against workspaceDir even after cwd changes", async () => {
+  it.skipIf(skipChdir)("writes relative paths against workspaceDir even after cwd changes", async () => {
     await withTempDir("openclaw-ws-", async (workspaceDir) => {
       await withTempDir("openclaw-cwd-", async (otherDir) => {
         const prevCwd = process.cwd();
@@ -70,7 +82,7 @@ describe("workspace path resolution", () => {
     });
   });
 
-  it("edits relative paths against workspaceDir even after cwd changes", async () => {
+  it.skipIf(skipChdir)("edits relative paths against workspaceDir even after cwd changes", async () => {
     await withTempDir("openclaw-ws-", async (workspaceDir) => {
       await withTempDir("openclaw-cwd-", async (otherDir) => {
         const prevCwd = process.cwd();

@@ -383,10 +383,19 @@ describe('Phase 3 RPC Integration Tests', () => {
     });
 
     it('handles execution timeout gracefully', async () => {
-      mockFetch.mockImplementation(() => {
-        return new Promise(() => {
-          // Never resolves
-        });
+      mockFetch.mockImplementation((url: string, options: any) => {
+        if (options?.signal) {
+          // Listen for abort and reject
+          return new Promise((resolve, reject) => {
+            const abortHandler = () => {
+              reject(new DOMException('The operation was aborted', 'AbortError'));
+            };
+            options.signal.addEventListener('abort', abortHandler);
+          });
+        }
+
+        // Never resolves if no abort signal
+        return new Promise(() => {});
       });
 
       const client = getGatewayRPCClient();

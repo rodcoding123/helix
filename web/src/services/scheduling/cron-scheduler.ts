@@ -38,6 +38,7 @@ export interface ScheduleExecution {
  */
 export class CronScheduler {
   private scheduledJobs: Map<string, NodeJS.Timeout> = new Map();
+  private nextExecutionTimes: Map<string, Date> = new Map();
   private db = createClient(
     import.meta.env.VITE_SUPABASE_URL || '',
     import.meta.env.VITE_SUPABASE_ANON_KEY || ''
@@ -85,6 +86,9 @@ export class CronScheduler {
       const now = new Date();
       const delayMs = nextRun.getTime() - now.getTime();
 
+      // Track next execution time
+      this.nextExecutionTimes.set(config.id, nextRun);
+
       // Schedule the job
       const timeout = setTimeout(async () => {
         await this.executeScheduledOperation(config);
@@ -123,30 +127,31 @@ export class CronScheduler {
       const now = new Date();
       let next = new Date(now);
 
+      // Use UTC-aware methods for timezone-independent calculation
       // Handle simple patterns
       if (hour !== '*' && minute !== '*') {
         const h = parseInt(hour);
         const m = parseInt(minute);
-        next.setHours(h, m, 0, 0);
+        next.setUTCHours(h, m, 0, 0);
         if (next <= now) {
-          next.setDate(next.getDate() + 1);
+          next.setUTCDate(next.getUTCDate() + 1);
         }
       } else if (hour !== '*') {
         const h = parseInt(hour);
-        next.setHours(h, 0, 0, 0);
+        next.setUTCHours(h, 0, 0, 0);
         if (next <= now) {
-          next.setDate(next.getDate() + 1);
+          next.setUTCDate(next.getUTCDate() + 1);
         }
       } else if (minute !== '*') {
         const m = parseInt(minute);
-        next.setMinutes(m, 0, 0);
+        next.setUTCMinutes(m, 0, 0);
         if (next <= now) {
-          next.setHours(next.getHours() + 1);
+          next.setUTCHours(next.getUTCHours() + 1);
         }
       } else {
         // Every minute
-        next.setSeconds(0, 0);
-        next.setMinutes(next.getMinutes() + 1);
+        next.setUTCSeconds(0, 0);
+        next.setUTCMinutes(next.getUTCMinutes() + 1);
       }
 
       // TODO: Handle timezone conversion if needed
@@ -278,6 +283,9 @@ export class CronScheduler {
       clearTimeout(timeout);
       this.scheduledJobs.delete(jobId);
     }
+    // Extract scheduleId from jobId (format: "user_id-schedule_id")
+    const scheduleId = jobId.split('-').slice(1).join('-');
+    this.nextExecutionTimes.delete(scheduleId);
   }
 
   /**
@@ -299,9 +307,7 @@ export class CronScheduler {
    * Get next execution time for a schedule
    */
   getNextExecution(scheduleId: string): Date | null {
-    // This would need to fetch from database
-    // Placeholder for now
-    return null;
+    return this.nextExecutionTimes.get(scheduleId) || null;
   }
 
   /**

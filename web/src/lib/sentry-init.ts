@@ -120,8 +120,13 @@ export function initSentry(config: SentryConfig = {}): void {
         const errorMessage = hint.originalException?.toString() || event.message || '';
 
         // Ignore network errors from third-party services
-        if (errorMessage.includes('Failed to fetch') && !event.request?.url?.includes(process.env.VITE_API_URL || '')) {
-          return null;
+        if (errorMessage.includes('Failed to fetch')) {
+          const apiUrl = process.env.VITE_API_URL;
+          const requestUrl = event.request?.url || '';
+          // Only keep if it's from our own API
+          if (!apiUrl || !requestUrl.includes(apiUrl)) {
+            return null;
+          }
         }
 
         // Ignore browser extension errors

@@ -370,7 +370,10 @@ describe("prependSystemEvents", () => {
       prefixedBodyBase: "User: hi",
     });
 
-    expect(result).toMatch(/System: \[2026-01-12 12:19:17 [^\]]+\] Model switched\./);
+    // On Windows, process.env.TZ may not affect Intl.DateTimeFormat, so the
+    // local timestamp depends on the host timezone. Match the general format
+    // instead of a specific offset.
+    expect(result).toMatch(/System: \[2026-01-12 \d{2}:\d{2}:\d{2} [^\]]+\] Model switched\./);
 
     resetSystemEventsForTest();
     process.env.TZ = originalTz;

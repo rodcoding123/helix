@@ -247,17 +247,20 @@ describe('Analytics Intelligence Service', () => {
 
   describe('Token Estimation for Analytics', () => {
     it('should estimate tokens for weekly summary prompt', () => {
-      const prompt = `Generate a weekly analytics summary.
+      const prompt = `Generate a comprehensive weekly analytics summary with detailed insights.
 Week: Jan 27 - Feb 03, 2026
 
-Metrics:
-- Emails processed: 250
-- Tasks completed: 35
-- Calendar events attended: 12
-- Total time in system: 42 hours
-- Average email response time: 45 minutes
+Detailed Metrics:
+- Emails processed: 250 incoming, 120 outgoing with priority distribution
+- Tasks completed: 35 out of 42 planned with breakdown by project
+- Calendar events attended: 12 including 5 decision meetings and 7 informational
+- Total time in system: 42 hours with focus time percentage analysis
+- Average email response time: 45 minutes with distribution by sender importance
+- Meeting utilization: 8 hours in meetings vs 34 hours individual work
+- Context switching events: 45 total with analysis by time of day
+- Energy levels: Morning high, afternoon moderate, evening low productivity
 
-Provide insights, scores, and recommendations.`;
+Provide comprehensive insights, productivity scores, and actionable recommendations for improvement.`;
 
       const tokens = Math.ceil(prompt.length / 4);
 
@@ -266,10 +269,11 @@ Provide insights, scores, and recommendations.`;
     });
 
     it('should estimate tokens for anomaly detection prompt', () => {
-      const prompt = `Detect anomalies in work patterns.
-Current metrics: Emails 500, Tasks 10, Time 12h
-Baseline (4 weeks): Emails 250, Tasks 35, Time 40h
-Identify spikes, drops, and unusual patterns.`;
+      const prompt = `Detect anomalies in work patterns with statistical analysis.
+Current week metrics: Emails 500, Tasks 10, Time 12h, Meetings 15h
+Baseline (4 weeks average): Emails 250, Tasks 35, Time 40h, Meetings 8h
+Normal variation: ±20% for emails, ±15% for tasks, ±25% for time allocation
+Identify significant spikes, drops, and unusual patterns requiring attention.`;
 
       const tokens = Math.ceil(prompt.length / 4);
 
@@ -377,7 +381,8 @@ Identify spikes, drops, and unusual patterns.`;
     it('should calculate next Sunday at 6pm', () => {
       const now = new Date('2026-02-04T10:00:00'); // Wednesday 10am
       const nextSunday = new Date(now);
-      nextSunday.setDate(nextSunday.getDate() + 3); // +3 days = Sunday
+      // Wednesday is day 3, Sunday is day 0, so +4 days = Sunday (Feb 8)
+      nextSunday.setDate(nextSunday.getDate() + 4); // +4 days = Sunday
       nextSunday.setHours(18, 0, 0, 0);
 
       expect(nextSunday.getDay()).toBe(0);

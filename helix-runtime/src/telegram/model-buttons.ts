@@ -28,7 +28,9 @@ export function getModelsPageSize(): number {
   return 10;
 }
 
-export function parseModelCallbackData(_callbackData: string): { model?: string; page?: number } {
+export function parseModelCallbackData(
+  _callbackData: string,
+): { type: string; model?: string; page?: number } | null {
   // Stub implementation
-  return {};
+  return null;
 }

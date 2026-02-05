@@ -837,9 +837,15 @@ describe("security audit", () => {
     const includePath = path.join(stateDir, "extra.json5");
     await fs.writeFile(includePath, "{ logging: { redactSensitive: 'off' } }\n", "utf-8");
     if (isWindows) {
-      // Grant "Everyone" write access to trigger the perms_writable check on Windows
+      // Grant "Everyone" write access to trigger the perms_writable check on Windows.
+      // Use *S-1-1-0 (well-known SID for Everyone) to avoid locale-dependent name resolution.
       const { execSync } = await import("node:child_process");
-      execSync(`icacls "${includePath}" /grant Everyone:W`, { stdio: "ignore" });
+      try {
+        execSync(`icacls "${includePath}" /grant *S-1-1-0:W`, { stdio: "ignore" });
+      } catch {
+        // If icacls fails (e.g. restricted sandbox), the test still works because
+        // the Windows path uses a mock execIcacls callback below.
+      }
     } else {
       await fs.chmod(includePath, 0o644);
     }

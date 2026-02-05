@@ -244,8 +244,12 @@ describe('Phase 8: Intelligence Services Integration', () => {
     it('should estimate tokens for analytics summary', () => {
       // Analytics typically has more content
       const metricsContent =
-        'emailsProcessed: 250, tasksCompleted: 35, calendarEvents: 12, ' +
-        'averageResponseTime: 45, totalTimeSpent: 42';
+        'Analytics Summary: emailsProcessed: 250, tasksCompleted: 35, ' +
+        'calendarEvents: 12, averageResponseTime: 45, totalTimeSpent: 42 hours, ' +
+        'contextSwitching: 15 per hour, meetingUtilization: 8 hours, ' +
+        'focusTime: 28%, energyLevels: morning high afternoon moderate evening low, ' +
+        'productivity: trending up with optimization opportunities in time management and ' +
+        'context switching reduction across different times of day with detailed metrics';
 
       const estimatedTokens = Math.ceil(metricsContent.length / 4);
 

@@ -185,8 +185,10 @@ describe('Plugin Environment Proxy', () => {
     });
 
     it('is read-only (blocking sets)', () => {
-      const result = ((env as any).NODE_ENV = 'production');
-      expect(result).toBe(false);
+      // Proxy set trap returns false, which throws TypeError in strict mode
+      expect(() => {
+        (env as any).NODE_ENV = 'production';
+      }).toThrow(TypeError);
       // Value should not change
       expect(env.NODE_ENV).toBe('test');
     });

@@ -432,14 +432,14 @@ export class CompositeSkillsService {
       const { getGatewayRPCClient } = await import('@/lib/gateway-rpc-client');
       const client = getGatewayRPCClient();
 
-      const startTime = Date.now();
       const result = await client.executeCompositeSkill(skillId, userId, input);
-      const executionTimeMs = Date.now() - startTime;
+      const executionTimeMs = result.executionTimeMs || 0;
 
       return {
-        success: result.success,
-        output: result.finalOutput,
+        success: result.success !== false,
+        output: result.finalOutput || result.output,
         executionTimeMs,
+        error: result.error,
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';

@@ -72,7 +72,7 @@ vi.mock('@supabase/supabase-js', () => {
 
 // Mock cron-parser
 vi.mock('cron-parser', () => ({
-  parseExpression: vi.fn((expr: string, opts: any) => ({
+  default: vi.fn((expr: string, opts: any) => ({
     next: vi.fn(function() {
       return {
         toDate: () => new Date(Date.now() + 60000),

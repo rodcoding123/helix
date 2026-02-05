@@ -9,21 +9,41 @@ import { PreferencesService, OperationPreference, ThemePreference } from './pref
 vi.mock('@supabase/supabase-js', () => {
   let lastUpsertData: any = null;
 
-  const createChain = () => ({
-    select: vi.fn(function() { return this; }),
-    eq: vi.fn(function() { return this; }),
-    insert: vi.fn(function() { return this; }),
-    update: vi.fn(function() { return this; }),
-    delete: vi.fn(function() { return this; }),
-    upsert: vi.fn(function(data: any) {
-      lastUpsertData = Array.isArray(data) ? data[0] : data;
-      return this;
-    }),
-    single: vi.fn(async function() {
-      return { data: lastUpsertData || null, error: null };
-    }),
-    rpc: vi.fn(async () => ({ data: null, error: null })),
-  });
+  const createChain = () => {
+    let data = null;
+    return {
+      select: vi.fn(function() {
+        data = lastUpsertData || [];
+        return this;
+      }),
+      eq: vi.fn(function() { return this; }),
+      insert: vi.fn(function(insertData: any) {
+        data = Array.isArray(insertData) ? insertData : [insertData];
+        return this;
+      }),
+      update: vi.fn(function(updateData: any) {
+        data = updateData;
+        return this;
+      }),
+      delete: vi.fn(function() { return this; }),
+      upsert: vi.fn(function(upsertData: any) {
+        lastUpsertData = Array.isArray(upsertData) ? upsertData : [upsertData];
+        data = lastUpsertData;
+        return this;
+      }),
+      single: vi.fn(async function() {
+        const result = Array.isArray(data) ? data[0] : data;
+        return { data: result || null, error: null };
+      }),
+      then: vi.fn(function(onFulfilled: any) {
+        return onFulfilled({
+          data: Array.isArray(data) ? data : (data ? [data] : []),
+          error: null,
+        });
+      }),
+      rpc: vi.fn(async () => ({ data: null, error: null })),
+    };
+  };
 
   return {
     createClient: vi.fn(() => ({

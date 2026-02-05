@@ -46,7 +46,7 @@ const SENSITIVE_PATTERNS = [
   /^SECRET/i,
   /^TOKEN/i,
   /^PASSWORD/i,
-  /^CREDENTIAL/i,
+  /CREDENTIAL/i,
   /^AUTH/i,
   /^AWS_/,
   /^GITHUB_/,

@@ -12,6 +12,14 @@ vi.mock('@/lib/supabase', () => {
       from: (table) => {
         if (!store.has(table)) store.set(table, []);
         const tableStore = store.get(table);
+
+        const createChainableBuilder = () => {
+          return {
+            eq: (col, val) => createChainableBuilder(),
+            then: async (cb) => cb({ data: [], error: null }),
+          };
+        };
+
         return {
           insert: (data) => ({
             select: () => ({
@@ -21,14 +29,7 @@ vi.mock('@/lib/supabase', () => {
               }),
             }),
           }),
-          select: () => ({
-            eq: (col1, val1) => ({
-              eq: (col2, val2) => ({
-                then: async (cb) => cb({ data: [], error: null }),
-              }),
-              then: async (cb) => cb({ data: [], error: null }),
-            }),
-          }),
+          select: () => createChainableBuilder(),
           update: (data) => ({
             eq: () => ({
               then: async (cb) => cb({ data: null, error: null }),

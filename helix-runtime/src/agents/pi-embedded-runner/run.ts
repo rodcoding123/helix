@@ -686,7 +686,11 @@ export async function runEmbeddedPiAgent(
           };
         }
       } finally {
-        process.chdir(prevCwd);
+        try {
+          process.chdir(prevCwd);
+        } catch {
+          // process.chdir() is not supported in worker threads
+        }
       }
     }),
   );

@@ -96,6 +96,10 @@ vi.mock("./pairing-store.js", () => ({
   })),
 }));
 
+vi.mock("../pairing/pairing-store.js", () => ({
+  readChannelAllowFromStore: vi.fn(async () => [] as string[]),
+}));
+
 vi.mock("../auto-reply/reply.js", () => {
   const replySpy = vi.fn(async (_ctx, opts) => {
     await opts?.onReplyStart?.();

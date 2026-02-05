@@ -439,9 +439,8 @@ export class CustomToolsService {
       const { getGatewayRPCClient } = await import('@/lib/gateway-rpc-client');
       const client = getGatewayRPCClient();
 
-      const startTime = Date.now();
       const result = await client.executeCustomTool(toolId, userId, params);
-      const executionTimeMs = Date.now() - startTime;
+      const executionTimeMs = result.executionTimeMs || 0;
 
       // Log the execution
       await this.logToolUsage(toolId, userId, params, result.output, 'success', executionTimeMs);
@@ -449,7 +448,7 @@ export class CustomToolsService {
       return {
         output: result.output,
         executionTimeMs,
-        success: true,
+        success: result.success !== false,
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';

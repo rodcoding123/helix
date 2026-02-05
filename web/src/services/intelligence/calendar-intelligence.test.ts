@@ -263,11 +263,11 @@ Suggest 3 optimal time slots with reasoning.`;
     });
 
     it('should combine to ~$0.0105 per day if called twice each', () => {
-      const prepCost = 0.0025 * 5; // 5 prep calls
-      const timeCost = 0.008 * 3; // 3 time optimizations
-      const totalDailyCost = prepCost + timeCost;
+      const prepCost = 0.0025 * 5; // 5 prep calls = 0.0125
+      const timeCost = 0.008 * 3; // 3 time optimizations = 0.024
+      const totalDailyCost = prepCost + timeCost; // = 0.0365
 
-      expect(totalDailyCost).toBeCloseTo(0.0245, 3);
+      expect(totalDailyCost).toBeCloseTo(0.0365, 3);
     });
   });
 

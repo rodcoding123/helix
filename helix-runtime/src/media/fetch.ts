@@ -1,5 +1,6 @@
 import path from "node:path";
 
+import { isBlockedHostname, isPrivateIpAddress } from "../infra/net/ssrf.js";
 import { detectMime, extensionForMime } from "./mime.js";
 
 type FetchMediaResult = {
@@ -78,6 +79,29 @@ export async function fetchRemoteMedia(options: FetchMediaOptions): Promise<Fetc
   const fetcher: FetchLike | undefined = fetchImpl ?? globalThis.fetch;
   if (!fetcher) {
     throw new Error("fetch is not available");
+  }
+
+  // SSRF protection: block private/internal network URLs before fetching
+  try {
+    const parsed = new URL(url);
+    const hostname = parsed.hostname;
+    if (isPrivateIpAddress(hostname)) {
+      throw new MediaFetchError(
+        "fetch_failed",
+        `Blocked: private/internal IP address in media URL: ${url}`,
+      );
+    }
+    if (isBlockedHostname(hostname)) {
+      throw new MediaFetchError(
+        "fetch_failed",
+        `Blocked: internal hostname in media URL: ${url}`,
+      );
+    }
+  } catch (err) {
+    if (err instanceof MediaFetchError) {
+      throw err;
+    }
+    // URL parse errors are handled later by the fetch call
   }
 
   let res: Response;

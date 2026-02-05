@@ -10,9 +10,12 @@ import { MemorySynthesisService } from '@/services/memory-synthesis';
 import { resetGatewayRPCClient } from '@/lib/gateway-rpc-client';
 
 describe('Phase 3 E2E Integration Tests', () => {
+  let mockFetch: any;
+
   beforeEach(() => {
     resetGatewayRPCClient();
-    global.fetch = vi.fn();
+    mockFetch = vi.fn();
+    global.fetch = mockFetch;
   });
 
   describe('Complete Tool Lifecycle', () => {
@@ -531,12 +534,24 @@ describe('Phase 3 E2E Integration Tests', () => {
     });
 
     it('enforces execution timeouts', async () => {
-      (global.fetch as any).mockImplementation(
-        () =>
-          new Promise(() => {
-            // Never resolves
-          })
-      );
+      let abortSignalReceived = false;
+
+      (global.fetch as any).mockImplementation((url: string, options: any) => {
+        abortSignalReceived = !!options?.signal;
+
+        if (options?.signal) {
+          // Listen for abort and reject
+          return new Promise((resolve, reject) => {
+            const abortHandler = () => {
+              reject(new DOMException('The operation was aborted', 'AbortError'));
+            };
+            options.signal.addEventListener('abort', abortHandler);
+          });
+        }
+
+        // Never resolves if no abort signal
+        return new Promise(() => {});
+      });
 
       const { getGatewayRPCClient } = await import('@/lib/gateway-rpc-client');
       const client = getGatewayRPCClient();
@@ -547,5 +562,3 @@ describe('Phase 3 E2E Integration Tests', () => {
     });
   });
 });
-
-const mockFetch = global.fetch;

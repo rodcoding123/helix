@@ -251,13 +251,18 @@ describe('Task Intelligence Service', () => {
       const complexTask: Task = {
         id: 'task-1',
         title: 'Build microservices architecture',
-        description: 'Break monolith into independent services',
+        description: 'Break monolith into independent services with proper API gateways',
         priority: 'high',
         status: 'todo',
         estimatedHours: 60,
       };
 
-      const prompt = `Break down: ${complexTask.title}. Description: ${complexTask.description}`;
+      const prompt = `Break down the following complex task into smaller subtasks with time estimates:
+Task: ${complexTask.title}
+Description: ${complexTask.description}
+Priority: ${complexTask.priority}
+Current estimate: ${complexTask.estimatedHours} hours
+Consider dependencies, resource requirements, and sequential vs parallel execution.`;
       const tokens = Math.ceil(prompt.length / 4);
 
       expect(tokens).toBeGreaterThan(30);

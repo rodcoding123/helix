@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Eye, EyeOff, AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { getCloudChatClient } from '@/lib/cloud-chat-client';
 
 export function Login() {
   const navigate = useNavigate();
@@ -26,7 +27,24 @@ export function Login() {
       if (signInError) {
         setError(signInError.message);
       } else {
-        navigate(from, { replace: true });
+        // Check onboarding status to determine redirect destination
+        const localComplete = localStorage.getItem('helix_cloud_onboarding_complete') === 'true';
+        if (localComplete) {
+          navigate(from, { replace: true });
+        } else {
+          try {
+            const profile = await getCloudChatClient().getProfile();
+            if (profile?.onboardingCompleted) {
+              localStorage.setItem('helix_cloud_onboarding_complete', 'true');
+              navigate(from, { replace: true });
+            } else {
+              navigate('/welcome', { replace: true });
+            }
+          } catch {
+            // On error, go to intended destination
+            navigate(from, { replace: true });
+          }
+        }
       }
     } catch {
       setError('An unexpected error occurred');

@@ -13,12 +13,22 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 
+// Check if @lancedb/lancedb is available
+let hasLanceDb = false;
+try {
+  await import("@lancedb/lancedb");
+  hasLanceDb = true;
+} catch {
+  // LanceDB not installed - skip tests that require it
+}
+
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY ?? "test-key";
 const HAS_OPENAI_KEY = Boolean(process.env.OPENAI_API_KEY);
 const liveEnabled = HAS_OPENAI_KEY && process.env.OPENCLAW_LIVE_TEST === "1";
 const describeLive = liveEnabled ? describe : describe.skip;
+const describeWithLanceDb = hasLanceDb ? describe : describe.skip;
 
-describe("memory plugin e2e", () => {
+describeWithLanceDb("memory plugin e2e", () => {
   let tmpDir: string;
   let dbPath: string;
 

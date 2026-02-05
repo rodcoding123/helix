@@ -90,17 +90,20 @@ Attendees: alice@company.com, bob@company.com`;
 
   describe('Analytics Summary', () => {
     it('should estimate cost for weekly analytics', () => {
-      const prompt = `Generate a weekly analytics summary.
+      const prompt = `Generate a comprehensive weekly analytics summary with detailed insights.
 Week: Jan 29 - Feb 04, 2026
 
-Metrics:
-- Emails processed: 250
-- Tasks completed: 35
-- Calendar events attended: 12
-- Total time in system: 42 hours
-- Average email response time: 45 minutes
+Detailed Metrics:
+- Emails processed: 250 incoming with priority distribution and response times
+- Tasks completed: 35 out of 42 planned with completion rates by project
+- Calendar events attended: 12 including 5 decision meetings and 7 informational meetings
+- Total time in system: 42 hours with focus time percentage and meeting utilization breakdown
+- Average email response time: 45 minutes with distribution by sender importance level
+- Meeting load: 8 hours in meetings versus 34 hours individual focus work with trends
+- Context switching events: 45 total with analysis by time of day impact on productivity
+- Energy levels tracking: Morning high, afternoon moderate, evening low productivity patterns
 
-Provide insights, scores, and recommendations.`;
+Provide comprehensive insights, productivity scores, and actionable recommendations for improvement.`;
 
       const tokens = AIProviderClient.estimateTokens(prompt);
       // Analytics is more complex, may require more tokens

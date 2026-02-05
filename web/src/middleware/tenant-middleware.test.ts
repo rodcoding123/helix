@@ -312,7 +312,8 @@ describe('Tenant Middleware', () => {
 
       await tenantMiddleware(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(500);
+      // When DB fails during access check, middleware returns 403 (fail-closed security)
+      expect(res.status).toHaveBeenCalledWith(403);
     });
   });
 

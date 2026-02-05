@@ -286,9 +286,14 @@ describe('IntelligenceSettings', () => {
       await user.click(modelsTab);
 
       await waitFor(() => {
-        expect(screen.getByText(/Claude Opus 4\.5/)).toBeInTheDocument();
-        expect(screen.getByText(/DeepSeek v3\.2/)).toBeInTheDocument();
-        expect(screen.getByText(/Gemini 2\.0 Flash/)).toBeInTheDocument();
+        // Check for model options using getAllByText instead of getByText
+        const claudeOptions = screen.queryAllByText(/Claude Opus 4\.5/);
+        const deepseekOptions = screen.queryAllByText(/DeepSeek v3\.2/);
+        const geminiOptions = screen.queryAllByText(/Gemini 2\.0 Flash/);
+
+        expect(claudeOptions.length).toBeGreaterThan(0);
+        expect(deepseekOptions.length).toBeGreaterThan(0);
+        expect(geminiOptions.length).toBeGreaterThan(0);
       });
     });
   });

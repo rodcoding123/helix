@@ -76,16 +76,18 @@ describe("Nix integration (U3, U5, U9)", () => {
     });
 
     it("CONFIG_PATH uses STATE_DIR when only state dir is overridden", async () => {
-      await withEnvOverride(
-        {
-          OPENCLAW_CONFIG_PATH: undefined,
-          OPENCLAW_STATE_DIR: "/custom/state",
-        },
-        async () => {
-          const { CONFIG_PATH } = await import("./config.js");
-          expect(CONFIG_PATH).toBe(path.join(path.resolve("/custom/state"), "openclaw.json"));
-        },
-      );
+      await withTempHome(async () => {
+        await withEnvOverride(
+          {
+            OPENCLAW_CONFIG_PATH: undefined,
+            OPENCLAW_STATE_DIR: "/custom/state",
+          },
+          async () => {
+            const { CONFIG_PATH } = await import("./config.js");
+            expect(CONFIG_PATH).toBe(path.join(path.resolve("/custom/state"), "openclaw.json"));
+          },
+        );
+      });
     });
   });
 

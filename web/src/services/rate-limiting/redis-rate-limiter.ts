@@ -189,8 +189,10 @@ export class RedisRateLimiter {
       // Try JSON first
       try {
         const bucket = JSON.parse(value as string);
-        if (bucket && typeof bucket.tokens === 'number') {
+        if (bucket && typeof bucket === 'object' && typeof bucket.tokens === 'number') {
           remaining = Math.max(0, Math.floor(bucket.tokens));
+        } else if (typeof bucket === 'number' && !isNaN(bucket)) {
+          remaining = Math.max(0, Math.floor(bucket));
         }
       } catch {
         // If not JSON, try parsing as number directly

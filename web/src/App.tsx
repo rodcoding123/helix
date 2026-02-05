@@ -34,6 +34,8 @@ const OperationAnalytics = lazy(() => import('@/pages/OperationAnalytics').then(
 const RealtimeMonitoringDashboard = lazy(() => import('@/pages/RealtimeMonitoringDashboard').then(m => ({ default: m.RealtimeMonitoringDashboard })));
 const AlertingDashboard = lazy(() => import('@/pages/AlertingDashboard').then(m => ({ default: m.AlertingDashboard })));
 const StatusPage = lazy(() => import('@/pages/StatusPage').then(m => ({ default: m.StatusPage })));
+const OnboardingChat = lazy(() => import('@/pages/OnboardingChat').then(m => ({ default: m.OnboardingChat })));
+const CloudChat = lazy(() => import('@/pages/CloudChat').then(m => ({ default: m.CloudChat })));
 
 // Loading fallback component
 function LoadingFallback() {
@@ -66,6 +68,26 @@ export function App() {
                 element={
                   <Suspense fallback={<LoadingFallback />}>
                     <Observatory />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/welcome"
+                element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <ProtectedRoute skipOnboardingCheck>
+                      <OnboardingChat />
+                    </ProtectedRoute>
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/chat"
+                element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <ProtectedRoute>
+                      <CloudChat />
+                    </ProtectedRoute>
                   </Suspense>
                 }
               />

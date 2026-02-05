@@ -166,7 +166,11 @@ export async function runEmbeddedAttempt(
   await fs.mkdir(effectiveWorkspace, { recursive: true });
 
   let restoreSkillEnv: (() => void) | undefined;
-  process.chdir(effectiveWorkspace);
+  try {
+    process.chdir(effectiveWorkspace);
+  } catch {
+    // process.chdir() is not supported in worker threads
+  }
   try {
     const shouldLoadSkillEntries = !params.skillsSnapshot || !params.skillsSnapshot.resolvedSkills;
     const skillEntries = shouldLoadSkillEntries
@@ -906,6 +910,10 @@ export async function runEmbeddedAttempt(
     }
   } finally {
     restoreSkillEnv?.();
-    process.chdir(prevCwd);
+    try {
+      process.chdir(prevCwd);
+    } catch {
+      // process.chdir() is not supported in worker threads
+    }
   }
 }

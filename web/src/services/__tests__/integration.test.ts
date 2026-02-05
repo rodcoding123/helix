@@ -1,4 +1,9 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
+
+// Use real implementations, not global mocks from setup.ts
+vi.unmock('@/services/emotion-detection');
+vi.unmock('@/services/topic-extraction');
+
 import { EmotionDetectionService } from '../emotion-detection';
 import { TopicExtractionService } from '../topic-extraction';
 import type { ConversationMessage } from '@/lib/types/memory';

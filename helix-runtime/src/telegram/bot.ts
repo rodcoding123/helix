@@ -27,6 +27,7 @@ import { enqueueSystemEvent } from "../infra/system-events.js";
 import { getChildLogger } from "../logging.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { resolveAgentRoute } from "../routing/resolve-route.js";
+import { resolveThreadSessionKeys } from "../routing/session-key.js";
 import { resolveTelegramAccount } from "./accounts.js";
 import { withTelegramApiErrorLogging } from "./api-logging.js";
 import { registerTelegramHandlers } from "./bot-handlers.js";
@@ -435,13 +436,12 @@ export function createTelegramBot(opts: TelegramBotOptions) {
       }
       senderLabel = senderLabel || "unknown";
 
-      // Reactions target a specific message_id; the Telegram Bot API does not include
-      // message_thread_id on MessageReactionUpdated, so we route to the chat-level
-      // session (forum topic routing is not available for reactions).
+      // Use message_thread_id from the reaction when available for proper topic/thread routing.
       const isGroup = reaction.chat.type === "group" || reaction.chat.type === "supergroup";
       const isForum = reaction.chat.is_forum === true;
-      const resolvedThreadId = isForum
-        ? resolveTelegramForumThreadId({ isForum, messageThreadId: undefined })
+      const messageThreadId = (reaction as { message_thread_id?: number }).message_thread_id;
+      const resolvedThreadId = isGroup
+        ? resolveTelegramForumThreadId({ isForum, messageThreadId })
         : undefined;
       const peerId = isGroup ? buildTelegramGroupPeerId(chatId, resolvedThreadId) : String(chatId);
       const route = resolveAgentRoute({
@@ -450,7 +450,14 @@ export function createTelegramBot(opts: TelegramBotOptions) {
         accountId: account.accountId,
         peer: { kind: isGroup ? "group" : "dm", id: peerId },
       });
-      const sessionKey = route.sessionKey;
+      const baseSessionKey = route.sessionKey;
+      // For DM reactions with a thread/topic id, resolve thread-aware session key
+      const dmThreadId = !isGroup ? messageThreadId : undefined;
+      const threadKeys =
+        dmThreadId != null
+          ? resolveThreadSessionKeys({ baseSessionKey, threadId: String(dmThreadId) })
+          : null;
+      const sessionKey = threadKeys?.sessionKey ?? baseSessionKey;
 
       // Enqueue system event for each added reaction
       for (const r of addedReactions) {

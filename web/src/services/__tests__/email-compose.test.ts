@@ -2,158 +2,134 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock Supabase before importing the service
 vi.mock('@supabase/supabase-js', () => {
-  let testDb: Map<string, any[]> = new Map();
+  const db = new Map<string, Map<string, any>>();
 
-  const createQueryBuilder = (tableName: string) => {
-    // Each builder has its own state for a single query chain
-    let operation = 'select' as string;
-    let insertData: any[] = [];
-    let updateData: any = {};
-    let filters: Array<{ field: string; operator: string; value: any }> = [];
-    let selectedColumns: string | undefined;
-    let insertedItems: any[] = [];
+  const createBuilder = (tableName: string) => {
+    let lastOp: any = null;
+    let filters: Map<string, any> = new Map();
+    let insertPayload: any = null;
+    let updatePayload: any = null;
+    let selectMode = false;
+    let isSingle = false;
 
-    const executeInsert = () => {
-      const tableData = testDb.get(tableName) || [];
-      const inserted = insertData.map(item => {
-        const fullItem = {
-          ...item,
-          id: item.id || crypto.randomUUID(),
-          created_at: item.created_at || new Date().toISOString(),
-          updated_at: item.updated_at || new Date().toISOString(),
-        };
-        // For upsert, check if item already exists
-        const existingIndex = tableData.findIndex(existing => existing.id === fullItem.id);
-        if (existingIndex >= 0) {
-          // Update existing
-          tableData[existingIndex] = { ...tableData[existingIndex], ...fullItem };
-          return tableData[existingIndex];
-        } else {
-          // Insert new
-          return fullItem;
+    const getTable = () => {
+      if (!db.has(tableName)) {
+        db.set(tableName, new Map());
+      }
+      return db.get(tableName)!;
+    };
+
+    const applyFilters = (records: any[]) => {
+      return records.filter(r => {
+        for (const [field, value] of filters) {
+          if (r[field] !== value) return false;
         }
+        return true;
       });
-
-      // Add new items to table
-      const newItems = inserted.filter(item => !tableData.some(existing => existing.id === item.id));
-      if (newItems.length > 0) {
-        testDb.set(tableName, [...tableData, ...newItems]);
-      }
-
-      insertedItems = inserted;
-      return inserted;
     };
 
-    const executeUpdate = () => {
-      const tableData = testDb.get(tableName) || [];
-      const filtered = tableData.filter(item =>
-        filters.every(f => {
-          if (f.operator === 'eq') return item[f.field] === f.value;
-          return true;
-        })
-      );
-      filtered.forEach(item => {
-        Object.assign(item, updateData);
-        item.updated_at = new Date().toISOString();
-      });
-      return filtered;
+    const builder: any = {
+      insert(data: any) {
+        insertPayload = Array.isArray(data) ? data : [data];
+        lastOp = 'insert';
+        return builder;
+      },
+
+      upsert(data: any) {
+        insertPayload = Array.isArray(data) ? data : [data];
+        lastOp = 'upsert';
+        return builder;
+      },
+
+      update(data: any) {
+        updatePayload = data;
+        lastOp = 'update';
+        return builder;
+      },
+
+      delete() {
+        lastOp = 'delete';
+        return builder;
+      },
+
+      select(cols?: string) {
+        selectMode = true;
+        return builder;
+      },
+
+      eq(field: string, value: any) {
+        filters.set(field, value);
+        return builder;
+      },
+
+      or(conditions: string) {
+        // Simple or: just return the builder, actual filtering not needed for tests
+        return builder;
+      },
+
+      order(column: string, options?: any) {
+        // Order is ignored in test mock
+        return builder;
+      },
+
+      limit(n: number) {
+        // Limit is ignored in test mock
+        return builder;
+      },
+
+      single() {
+        isSingle = true;
+        return builder;
+      },
+
+      async then(onFulfilled: any) {
+        const table = getTable();
+        let result: any;
+
+        if (lastOp === 'insert' || lastOp === 'upsert') {
+          const items = insertPayload.map((item: any) => ({
+            ...item,
+            id: item.id || `${tableName}-${Date.now()}-${Math.random()}`,
+            created_at: item.created_at || new Date().toISOString(),
+            updated_at: item.updated_at || new Date().toISOString(),
+          }));
+          items.forEach((item: any) => {
+            table.set(item.id, item);
+          });
+          result = isSingle ? items[0] : items;
+        } else if (lastOp === 'update') {
+          const records = Array.from(table.values());
+          const matching = applyFilters(records);
+          matching.forEach((r: any) => {
+            Object.assign(r, updatePayload);
+          });
+          result = matching;
+        } else if (lastOp === 'delete') {
+          const records = Array.from(table.values());
+          const matching = applyFilters(records);
+          matching.forEach((r: any) => {
+            table.delete(r.id);
+          });
+          result = null;
+        } else {
+          // select
+          const records = Array.from(table.values());
+          result = applyFilters(records);
+        }
+
+        return onFulfilled({
+          data: isSingle && Array.isArray(result) ? result[0] : result,
+          error: null,
+        });
+      },
     };
 
-    const executeDelete = () => {
-      const tableData = testDb.get(tableName) || [];
-      const filtered = tableData.filter(item =>
-        filters.every(f => {
-          if (f.operator === 'eq') return item[f.field] === f.value;
-          return true;
-        })
-      );
-      const toDelete = new Set(filtered.map(item => item.id));
-      const remaining = tableData.filter(item => !toDelete.has(item.id));
-      testDb.set(tableName, remaining);
-      return null;
-    };
-
-    const executeSelect = () => {
-      const tableData = testDb.get(tableName) || [];
-      // If we're selecting after insert, return inserted items
-      if (insertedItems.length > 0) {
-        return insertedItems;
-      }
-      return tableData.filter(item =>
-        filters.every(f => {
-          if (f.operator === 'eq') return item[f.field] === f.value;
-          return true;
-        })
-      );
-    };
-
-    const executeQuery = () => {
-      if (operation === 'insert') return executeInsert();
-      if (operation === 'update') return executeUpdate();
-      if (operation === 'delete') return executeDelete();
-      if (operation === 'select') return executeSelect();
-      return [];
-    };
-
-    const self: any = {};
-
-    self.insert = vi.fn(function(data: any) {
-      operation = 'insert';
-      insertData = Array.isArray(data) ? data : [data];
-      return self;
-    });
-
-    self.upsert = vi.fn(function(data: any, options?: any) {
-      operation = 'insert';
-      insertData = Array.isArray(data) ? data : [data];
-      return self;
-    });
-
-    self.update = vi.fn(function(data: any) {
-      operation = 'update';
-      updateData = data;
-      return self;
-    });
-
-    self.delete = vi.fn(function() {
-      operation = 'delete';
-      return self;
-    });
-
-    self.select = vi.fn(function(columns?: string) {
-      selectedColumns = columns;
-      operation = 'select';
-      return self;
-    });
-
-    self.eq = vi.fn(function(field: string, value: any) {
-      filters.push({ field, operator: 'eq', value });
-      return self;
-    });
-
-    self.single = vi.fn(function() {
-      const results = executeQuery();
-      const singleResult = Array.isArray(results) ? (results[0] || null) : (results || null);
-      return Promise.resolve({
-        data: singleResult,
-        error: null,
-      });
-    });
-
-    self.then = vi.fn(function(onFulfilled: (value: any) => any) {
-      const results = executeQuery();
-      return onFulfilled({
-        data: Array.isArray(results) ? results : [results || {}],
-        error: null,
-      });
-    });
-
-    return self;
+    return builder;
   };
 
   return {
     createClient: vi.fn(() => ({
-      from: vi.fn((tableName: string) => createQueryBuilder(tableName)),
+      from: vi.fn((tableName: string) => createBuilder(tableName)),
     })),
   };
 });

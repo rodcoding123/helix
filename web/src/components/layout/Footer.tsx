@@ -1,7 +1,16 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Github, ExternalLink, Heart } from 'lucide-react';
 
+// Routes where the footer should be hidden (immersive pages)
+const HIDDEN_ROUTES = ['/welcome'];
+
 export function Footer() {
+  const location = useLocation();
+
+  if (HIDDEN_ROUTES.includes(location.pathname)) {
+    return null;
+  }
+
   const currentYear = new Date().getFullYear();
 
   const footerLinks = {

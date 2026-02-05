@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   resolveDefaultConfigCandidates,
@@ -105,10 +105,15 @@ describe("state + config path candidates", () => {
       delete process.env.OPENCLAW_CONFIG_PATH;
       delete process.env.OPENCLAW_STATE_DIR;
 
+      // In vitest worker threads on Windows, process.env changes may not
+      // propagate to os.homedir(). Mock it explicitly.
+      vi.spyOn(os, "homedir").mockReturnValue(root);
+
       vi.resetModules();
       const { CONFIG_PATH } = await import("./paths.js");
       expect(CONFIG_PATH).toBe(legacyPath);
     } finally {
+      vi.mocked(os.homedir).mockRestore();
       if (previousHome === undefined) {
         delete process.env.HOME;
       } else {
