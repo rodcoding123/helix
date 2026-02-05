@@ -147,7 +147,7 @@ export function validateMCPToolDefinition(tool: unknown): {
  * @returns { valid: boolean, issues: string[] }
  */
 export function validateToolArguments(
-  tool: MCPTool,
+  _tool: MCPTool,
   args: unknown
 ): { valid: boolean; issues: string[] } {
   const issues: string[] = [];
