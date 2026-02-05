@@ -75,11 +75,11 @@ const PRIORITY_LABELS: Record<string, string> = {
 
 export const KanbanBoard: FC<KanbanBoardProps> = ({
   tasks,
-  boardId,
+  _boardId,
   columnOrder,
   isLoading,
   onTaskSelect,
-  onStatusChange,
+  _onStatusChange,
   onAddTask,
 }) => {
   const [expandedColumn, setExpandedColumn] = useState<string | null>(null);
