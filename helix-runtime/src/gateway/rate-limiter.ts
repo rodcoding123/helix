@@ -51,10 +51,11 @@ export class RateLimiter {
     return { allowed: true };
   }
 
-  private cleanup() {
+  private cleanup(): void {
     const now = Date.now();
+    const maxWindow = Math.max(...Object.values(RATE_LIMITS).map(r => r.windowMs));
     for (const [key, timestamps] of this.requestCounts.entries()) {
-      const valid = timestamps.filter(ts => now - ts < 60_000);
+      const valid = timestamps.filter(ts => now - ts < maxWindow);
       if (valid.length === 0) {
         this.requestCounts.delete(key);
       } else {
