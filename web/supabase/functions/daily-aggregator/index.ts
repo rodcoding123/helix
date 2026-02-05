@@ -4,16 +4,16 @@
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import {
+  handleCorsPreflightRequest,
+  corsJsonResponse,
+  corsErrorResponse,
+} from '../_shared/cors.ts'
 
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return handleCorsPreflightRequest(req)
   }
 
   try {
@@ -22,10 +22,7 @@ serve(async (req) => {
     const cronSecret = Deno.env.get('CRON_SECRET')
 
     if (authHeader !== `Bearer ${cronSecret}`) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return corsErrorResponse(req, 'Unauthorized', 401)
     }
 
     const supabase = createClient(
@@ -172,30 +169,21 @@ serve(async (req) => {
 
     if (upsertError) {
       console.error('Failed to upsert daily stats:', upsertError)
-      return new Response(
-        JSON.stringify({ error: 'Failed to compute daily stats' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return corsErrorResponse(req, 'Failed to compute daily stats', 500)
     }
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        date: dateStr,
-        stats: {
-          total_instances: totalInstances,
-          active_instances: activeInstances,
-          new_instances: newInstances,
-          transformations: transformations,
-        }
-      }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    return corsJsonResponse(req, {
+      success: true,
+      date: dateStr,
+      stats: {
+        total_instances: totalInstances,
+        active_instances: activeInstances,
+        new_instances: newInstances,
+        transformations: transformations,
+      }
+    })
   } catch (error) {
     console.error('Daily aggregator error:', error)
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    return corsErrorResponse(req, 'Internal server error', 500)
   }
 })

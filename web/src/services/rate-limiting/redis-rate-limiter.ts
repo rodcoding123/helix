@@ -17,8 +17,14 @@ interface RateLimitResult {
 export class RedisRateLimiter {
   private redisUrl: string;
 
-  constructor(redisUrl: string = process.env.REDIS_URL || 'redis://localhost:6379') {
-    this.redisUrl = redisUrl;
+  constructor(options?: string | { redisUrl?: string }) {
+    if (typeof options === 'string') {
+      this.redisUrl = options;
+    } else if (options?.redisUrl) {
+      this.redisUrl = options.redisUrl;
+    } else {
+      this.redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+    }
   }
 
   /**
@@ -111,7 +117,7 @@ export class RedisRateLimiter {
   /**
    * Close Redis connection (for testing)
    */
-  close(): void {
+  async close(): Promise<void> {
     // No-op for in-memory implementation
     // In production with real Redis, this would close the connection
   }

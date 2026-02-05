@@ -27,29 +27,42 @@ Object.defineProperty(global, 'localStorage', {
   value: localStorageMock,
 });
 
-// Mock socket.io-client
-vi.mock('socket.io-client', () => {
-  const mockSocket = {
-    on: vi.fn(function(event: string, callback: (...args: any[]) => void) {
-      if (event === 'connect') {
-        // Simulate connection
-        setTimeout(() => callback(), 0);
-      }
-    }),
-    once: vi.fn(function(event: string, callback: (...args: any[]) => void) {
-      if (event === 'connect') {
-        setTimeout(() => callback(), 0);
-      }
-    }),
-    off: vi.fn(),
-    emit: vi.fn(),
-    disconnect: vi.fn(),
-    connected: true,
-  };
+// Mock WebSocket
+class MockWebSocket {
+  url: string;
+  readyState: number = 0;
+  onopen: ((event: Event) => void) | null = null;
+  onmessage: ((event: MessageEvent) => void) | null = null;
+  onerror: ((event: Event) => void) | null = null;
+  onclose: ((event: Event) => void) | null = null;
 
-  return {
-    io: vi.fn(() => mockSocket),
-  };
+  constructor(url: string) {
+    this.url = url;
+    this.readyState = 0;
+    // Simulate opening connection after a microtask
+    setTimeout(() => {
+      this.readyState = 1;
+      if (this.onopen) {
+        this.onopen(new Event('open'));
+      }
+    }, 0);
+  }
+
+  send(data: string): void {
+    // Mock send
+  }
+
+  close(): void {
+    this.readyState = 3;
+    if (this.onclose) {
+      this.onclose(new Event('close'));
+    }
+  }
+}
+
+Object.defineProperty(global, 'WebSocket', {
+  value: MockWebSocket,
+  writable: true,
 });
 
 describe('MetricsStreamService', () => {

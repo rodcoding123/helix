@@ -3,11 +3,11 @@
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import {
+  handleCorsPreflightRequest,
+  corsJsonResponse,
+  corsErrorResponse,
+} from '../_shared/cors.ts'
 
 interface SignalingMessage {
   type: 'offer' | 'answer' | 'ice-candidate' | 'hangup'
@@ -19,7 +19,7 @@ interface SignalingMessage {
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return handleCorsPreflightRequest(req)
   }
 
   try {
@@ -31,20 +31,14 @@ serve(async (req) => {
     // Verify authorization
     const authHeader = req.headers.get('authorization')
     if (!authHeader?.startsWith('Bearer ')) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return corsErrorResponse(req, 'Unauthorized', 401)
     }
 
     const token = authHeader.slice(7)
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
 
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid token' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return corsErrorResponse(req, 'Invalid token', 401)
     }
 
     // Check if user has Architect tier
@@ -55,10 +49,7 @@ serve(async (req) => {
       .single()
 
     if (subError || subscription?.tier !== 'architect') {
-      return new Response(
-        JSON.stringify({ error: 'Architect tier required for voice' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return corsErrorResponse(req, 'Architect tier required for voice', 403)
     }
 
     // Parse signaling message
@@ -73,10 +64,7 @@ serve(async (req) => {
       .single()
 
     if (instanceError || !instance) {
-      return new Response(
-        JSON.stringify({ error: 'Instance not found or not owned' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return corsErrorResponse(req, 'Instance not found or not owned', 403)
     }
 
     // Store signaling message in realtime channel
@@ -97,10 +85,7 @@ serve(async (req) => {
 
     if (insertError) {
       console.error('Failed to store signaling message:', insertError)
-      return new Response(
-        JSON.stringify({ error: 'Failed to relay message' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return corsErrorResponse(req, 'Failed to relay message', 500)
     }
 
     // Broadcast via realtime
@@ -114,15 +99,9 @@ serve(async (req) => {
       },
     })
 
-    return new Response(
-      JSON.stringify({ success: true }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    return corsJsonResponse(req, { success: true })
   } catch (error) {
     console.error('Signaling error:', error)
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    return corsErrorResponse(req, 'Internal server error', 500)
   }
 })

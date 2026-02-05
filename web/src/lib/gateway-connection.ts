@@ -84,9 +84,30 @@ export class GatewayConnection {
   }
 
   private buildGatewayUrl(): string {
-    // In production, this would be the Tailscale or relay URL
-    // For now, use a placeholder that would be replaced by actual connection info
-    return `wss://gateway.helix-project.org/v1/connect/${this.config.instanceKey}`;
+    // Check for explicit environment variable first
+    const envUrl = import.meta.env.VITE_GATEWAY_URL;
+    if (envUrl) {
+      return envUrl.includes('?')
+        ? `${envUrl}&instanceKey=${this.config.instanceKey}`
+        : `${envUrl}?instanceKey=${this.config.instanceKey}`;
+    }
+
+    // Development: Use localhost WebSocket
+    if (import.meta.env.DEV) {
+      return `ws://127.0.0.1:18789/v1/connect?instanceKey=${this.config.instanceKey}`;
+    }
+
+    // Production: Check for production-specific URL
+    const prodUrl = import.meta.env.VITE_GATEWAY_URL_PROD;
+    if (prodUrl) {
+      return prodUrl.includes('?')
+        ? `${prodUrl}&instanceKey=${this.config.instanceKey}`
+        : `${prodUrl}?instanceKey=${this.config.instanceKey}`;
+    }
+
+    // Final fallback: localhost (for self-hosted scenarios)
+    console.warn('[Gateway] No production URL configured, using localhost');
+    return `ws://127.0.0.1:18789/v1/connect?instanceKey=${this.config.instanceKey}`;
   }
 
   private startHeartbeat(): void {

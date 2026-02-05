@@ -48,7 +48,7 @@ export class MetricsStreamService {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
-  private subscriptions: Map<string, Set<(event: MetricsEvent) => void>> = new Map();
+  private listeners: Map<string, Set<(event: MetricsEvent) => void>> = new Map();
   private connected = false;
   private heartbeatInterval: NodeJS.Timeout | null = null;
 
@@ -57,14 +57,17 @@ export class MetricsStreamService {
   }
 
   private buildWebSocketUrl(): string {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = process.env.VITE_WS_HOST || window.location.host;
+    const protocol = typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = typeof process !== 'undefined' && process.env.VITE_WS_HOST ? process.env.VITE_WS_HOST : (typeof window !== 'undefined' ? window.location.host : 'localhost:3000');
     return `${protocol}//${host}/metrics`;
   }
 
-  async connect(userId: string): Promise<void> {
+  async connect(userId: string, token?: string): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
+        // Get token from localStorage if not provided
+        const authToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('auth_token') : null);
+
         this.ws = new WebSocket(this.url);
 
         this.ws.onopen = () => {
@@ -72,7 +75,7 @@ export class MetricsStreamService {
           this.reconnectAttempts = 0;
 
           if (this.ws) {
-            this.ws.send(JSON.stringify({ type: 'auth', userId, timestamp: Date.now() }));
+            this.ws.send(JSON.stringify({ type: 'auth', userId, token: authToken, timestamp: Date.now() }));
           }
 
           this.startHeartbeat();
@@ -127,7 +130,7 @@ export class MetricsStreamService {
   }
 
   private dispatchEvent(event: MetricsEvent): void {
-    const callbacks = this.subscriptions.get(event.type);
+    const callbacks = this.listeners.get(event.type);
     if (callbacks) {
       callbacks.forEach((callback) => {
         try {
@@ -138,7 +141,7 @@ export class MetricsStreamService {
       });
     }
 
-    const wildcardCallbacks = this.subscriptions.get('*');
+    const wildcardCallbacks = this.listeners.get('*');
     if (wildcardCallbacks) {
       wildcardCallbacks.forEach((callback) => {
         try {
@@ -151,18 +154,38 @@ export class MetricsStreamService {
   }
 
   subscribe(eventType: string, callback: (event: MetricsEvent) => void): () => void {
-    if (!this.subscriptions.has(eventType)) {
-      this.subscriptions.set(eventType, new Set());
+    if (!this.listeners.has(eventType)) {
+      this.listeners.set(eventType, new Set());
     }
 
-    this.subscriptions.get(eventType)!.add(callback);
+    this.listeners.get(eventType)!.add(callback);
 
     return () => {
-      const callbacks = this.subscriptions.get(eventType);
+      const callbacks = this.listeners.get(eventType);
       if (callbacks) {
         callbacks.delete(callback);
       }
     };
+  }
+
+  subscribeMultiple(eventTypes: string[], callback: (event: MetricsEvent) => void): () => void {
+    const unsubscribers: Array<() => void> = [];
+
+    for (const eventType of eventTypes) {
+      unsubscribers.push(this.subscribe(eventType, callback));
+    }
+
+    return () => {
+      unsubscribers.forEach(unsub => unsub());
+    };
+  }
+
+  getListenerCount(): Record<string, number> {
+    const counts: Record<string, number> = {};
+    for (const [eventType, listeners] of this.listeners.entries()) {
+      counts[eventType] = listeners.size;
+    }
+    return counts;
   }
 
   isConnected(): boolean {
@@ -176,6 +199,7 @@ export class MetricsStreamService {
       this.ws = null;
     }
     this.connected = false;
+    this.listeners.clear();
   }
 }
 

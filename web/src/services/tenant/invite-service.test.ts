@@ -114,7 +114,7 @@ describe('TenantInviteService', () => {
       const role = 'admin' as const;
 
       mockQuery.single.mockResolvedValueOnce({ data: null, error: null });
-      mockQuery.auth.admin.listUsers.mockResolvedValueOnce({ data: [], error: null });
+      mockQuery.auth.admin.listUsers.mockResolvedValueOnce({ data: { users: [] }, error: null });
       mockQuery.single.mockResolvedValueOnce({
         data: {
           id: 'inv-456',
@@ -174,7 +174,7 @@ describe('TenantInviteService', () => {
 
       mockQuery.single.mockResolvedValueOnce({ data: null, error: null });
       mockQuery.auth.admin.listUsers.mockResolvedValueOnce({
-        data: [{ id: userId, email, email_confirmed_at: new Date().toISOString() }],
+        data: { users: [{ id: userId, email, email_confirmed_at: new Date().toISOString() }] },
         error: null,
       });
       mockQuery.single.mockResolvedValueOnce({ data: { id: 'mem-123' }, error: null });
@@ -190,7 +190,7 @@ describe('TenantInviteService', () => {
       const beforeTime = Date.now();
 
       mockQuery.single.mockResolvedValueOnce({ data: null, error: null });
-      mockQuery.auth.admin.listUsers.mockResolvedValueOnce({ data: [], error: null });
+      mockQuery.auth.admin.listUsers.mockResolvedValueOnce({ data: { users: [] }, error: null });
 
       const token = 'unique-token-abc123';
       const expiresAt = new Date(beforeTime + 6 * 60 * 60 * 1000);
@@ -221,7 +221,7 @@ describe('TenantInviteService', () => {
       const email = 'user@example.com';
 
       mockQuery.single.mockResolvedValueOnce({ data: null, error: null });
-      mockQuery.auth.admin.listUsers.mockResolvedValueOnce({ data: [], error: null });
+      mockQuery.auth.admin.listUsers.mockResolvedValueOnce({ data: { users: [] }, error: null });
       mockQuery.single.mockResolvedValueOnce({
         data: {
           id: 'inv-123',
@@ -249,7 +249,7 @@ describe('TenantInviteService', () => {
       const email = 'user@example.com';
 
       mockQuery.single.mockResolvedValueOnce({ data: null, error: null });
-      mockQuery.auth.admin.listUsers.mockResolvedValueOnce({ data: [], error: null });
+      mockQuery.auth.admin.listUsers.mockResolvedValueOnce({ data: { users: [] }, error: null });
       mockQuery.single.mockResolvedValueOnce({
         data: {
           id: 'inv-123',
@@ -280,7 +280,7 @@ describe('TenantInviteService', () => {
       const email = 'user@example.com';
 
       mockQuery.single.mockResolvedValueOnce({ data: null, error: null });
-      mockQuery.auth.admin.listUsers.mockResolvedValueOnce({ data: [], error: null });
+      mockQuery.auth.admin.listUsers.mockResolvedValueOnce({ data: { users: [] }, error: null });
       mockQuery.single.mockResolvedValueOnce({
         data: null,
         error: { message: 'Database constraint violation' },
@@ -317,7 +317,7 @@ describe('TenantInviteService', () => {
 
       // Get user
       mockQuery.auth.admin.getUserById.mockResolvedValueOnce({
-        data: { id: userId, email, email_confirmed_at: new Date().toISOString() },
+        data: { user: { id: userId, email, email_confirmed_at: new Date().toISOString() } },
         error: null,
       });
 
@@ -451,7 +451,7 @@ describe('TenantInviteService', () => {
       });
 
       mockQuery.auth.admin.getUserById.mockResolvedValueOnce({
-        data: { id: userId, email: 'user@example.com' },
+        data: { user: { id: userId, email: 'user@example.com' } },
         error: null,
       });
 
@@ -872,7 +872,7 @@ describe('TenantInviteService', () => {
       const email = 'user@example.com';
 
       mockQuery.single.mockResolvedValueOnce({ data: null, error: null });
-      mockQuery.auth.admin.listUsers.mockResolvedValueOnce({ data: [], error: null });
+      mockQuery.auth.admin.listUsers.mockResolvedValueOnce({ data: { users: [] }, error: null });
       mockQuery.single.mockResolvedValueOnce({
         data: {
           id: 'inv-123',

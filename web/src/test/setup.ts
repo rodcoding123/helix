@@ -302,6 +302,71 @@ vi.mock('@/services/logging', () => ({
   logToDiscord: vi.fn().mockResolvedValue(undefined),
 }));
 
+// Mock embedding service
+vi.mock('@/services/embedding', () => ({
+  EmbeddingService: class MockEmbeddingService {
+    async generateEmbedding(text: string) {
+      if (!text || text.trim().length === 0) throw new Error('Text input cannot be empty');
+      const embedding = Array(768).fill(0).map(() => Math.random());
+      const magnitude = Math.sqrt(embedding.reduce((sum: number, v: number) => sum + v * v, 0));
+      return embedding.map((v: number) => v / magnitude);
+    }
+    async generateBatchEmbeddings(texts: string[]) {
+      if (!texts || texts.length === 0) throw new Error('Texts array cannot be empty');
+      if (texts.some((t) => !t || t.trim().length === 0)) throw new Error('Texts array contains empty strings');
+      return Promise.all(texts.map((t) => this.generateEmbedding(t)));
+    }
+    calculateMagnitude(embedding: number[]) {
+      return Math.sqrt(embedding.reduce((sum: number, v: number) => sum + v * v, 0));
+    }
+    cosineSimilarity(a: number[], b: number[]) {
+      if (a.length !== b.length) throw new Error('Embedding dimensions must match');
+      const dotProduct = a.reduce((sum, av, i) => sum + av * b[i], 0);
+      return dotProduct / (this.calculateMagnitude(a) * this.calculateMagnitude(b));
+    }
+    validateEmbedding(embedding: unknown) {
+      return Array.isArray(embedding) && embedding.length === 768 && embedding.every((v) => typeof v === 'number');
+    }
+  },
+}));
+
+// Mock emotion detection service
+vi.mock('@/services/emotion-detection', () => ({
+  EmotionDetectionService: class MockEmotionDetectionService {
+    async analyzeConversation(messages: any[]) {
+      if (!messages || messages.length === 0) throw new Error('Messages array cannot be empty');
+      const text = (messages[0]?.content || '').toLowerCase();
+      const isPositive = /happy|thrilled|grateful|amazing|perfect|love|wonderful|excellent/i.test(text);
+      const isNegative = /sad|angry|frustrated|terrible|hate|awful|worst|disaster/i.test(text);
+      const valence = isPositive ? 0.8 : isNegative ? 0.2 : 0.5;
+      const salience = isPositive || isNegative ? 0.8 : 0.5;
+      return {
+        primary_emotion: isPositive ? 'joy' : isNegative ? 'sadness' : 'neutral',
+        secondary_emotions: [],
+        dimensions: { valence, arousal: 0.6, dominance: 0.5, novelty: 0.4, self_relevance: 0.7 },
+        salience_score: salience,
+        salience_tier: salience > 0.7 ? 'critical' : salience > 0.5 ? 'high' : salience > 0.3 ? 'medium' : 'low',
+        confidence: 0.85,
+      };
+    }
+  },
+}));
+
+// Mock topic extraction service
+vi.mock('@/services/topic-extraction', () => ({
+  TopicExtractionService: class MockTopicExtractionService {
+    async extractTopics(messages: any[]) {
+      const text = (messages[0]?.content || '').toLowerCase();
+      const topics: string[] = [];
+      if (text.includes('ai') || text.includes('artificial') || text.includes('machine')) topics.push('AI');
+      if (text.includes('machine') || text.includes('learning')) topics.push('Machine Learning');
+      if (text.includes('project')) topics.push('Project');
+      if (text.includes('learning') || text.includes('study')) topics.push('Learning');
+      return topics.length > 0 ? topics : ['General'];
+    }
+  },
+}));
+
 // Mock supabase-browser for repository classes
 vi.mock('@/lib/supabase-browser', () => {
   let browserClientCounter = 0;

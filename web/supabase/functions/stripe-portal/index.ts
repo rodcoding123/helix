@@ -4,11 +4,11 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
 import Stripe from 'https://esm.sh/stripe@14.7.0'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import {
+  handleCorsPreflightRequest,
+  corsJsonResponse,
+  corsErrorResponse,
+} from '../_shared/cors.ts'
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', {
   apiVersion: '2023-10-16',
@@ -16,7 +16,7 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', {
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return handleCorsPreflightRequest(req)
   }
 
   try {
@@ -28,20 +28,14 @@ serve(async (req) => {
     // Verify authorization
     const authHeader = req.headers.get('authorization')
     if (!authHeader?.startsWith('Bearer ')) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return corsErrorResponse(req, 'Unauthorized', 401)
     }
 
     const token = authHeader.slice(7)
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
 
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid token' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return corsErrorResponse(req, 'Invalid token', 401)
     }
 
     // Get Stripe customer ID
@@ -52,10 +46,7 @@ serve(async (req) => {
       .single()
 
     if (!subscription?.stripe_customer_id) {
-      return new Response(
-        JSON.stringify({ error: 'No subscription found' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return corsErrorResponse(req, 'No subscription found', 404)
     }
 
     // Create portal session
@@ -64,15 +55,9 @@ serve(async (req) => {
       return_url: `${Deno.env.get('SITE_URL')}/settings`,
     })
 
-    return new Response(
-      JSON.stringify({ url: session.url }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    return corsJsonResponse(req, { url: session.url })
   } catch (error) {
     console.error('Portal error:', error)
-    return new Response(
-      JSON.stringify({ error: 'Failed to create portal session' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    return corsErrorResponse(req, 'Failed to create portal session', 500)
   }
 })

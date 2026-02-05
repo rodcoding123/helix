@@ -435,9 +435,9 @@ export function createCompleteSupabaseMock() {
               const result = tableStore.find((r) => r[col1] === val1);
               return { data: result || null, error: null };
             },
-            gte: (col: string, val: any) => ({
+            gte: (col2: string, val2: any) => ({
               then: async (cb: any) => {
-                const results = tableStore.filter((r) => r[col1] === val1 && r[col] >= val);
+                const results = tableStore.filter((r) => r[col1] === val1 && r[col2] >= val2);
                 return cb({ data: results, error: null });
               },
             }),
@@ -448,13 +448,12 @@ export function createCompleteSupabaseMock() {
           }),
           gte: (col: string, val: any) => ({
             then: async (cb: any) => {
-              const results = tableStore.filter((r) => r[col1] === val1 && r[col] >= val);
+              const results = tableStore.filter((r) => r[col] >= val);
               return cb({ data: results, error: null });
             },
           }),
           then: async (cb: any) => {
-            const results = tableStore.filter((r) => r[col1] === val1);
-            return cb({ data: results, error: null });
+            return cb({ data: tableStore, error: null });
           },
         }),
 

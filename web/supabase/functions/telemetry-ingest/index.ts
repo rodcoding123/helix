@@ -3,11 +3,11 @@
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-instance-key',
-}
+import {
+  handleCorsPreflightRequest,
+  corsJsonResponse,
+  corsErrorResponse,
+} from '../_shared/cors.ts'
 
 interface TelemetryEvent {
   event_type: 'heartbeat' | 'session_start' | 'session_end' | 'transformation' | 'anomaly' | 'error' | 'boot' | 'shutdown'
@@ -18,7 +18,7 @@ interface TelemetryEvent {
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return handleCorsPreflightRequest(req, ['x-instance-key'])
   }
 
   try {
@@ -30,10 +30,7 @@ serve(async (req) => {
     // Get instance key from header
     const instanceKey = req.headers.get('x-instance-key')
     if (!instanceKey) {
-      return new Response(
-        JSON.stringify({ error: 'Missing instance key' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return corsErrorResponse(req, 'Missing instance key', 400, ['x-instance-key'])
     }
 
     // Verify instance exists and is not in ghost mode
@@ -44,18 +41,12 @@ serve(async (req) => {
       .single()
 
     if (instanceError || !instance) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid instance key' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return corsErrorResponse(req, 'Invalid instance key', 401, ['x-instance-key'])
     }
 
     // Check ghost mode
     if (instance.ghost_mode) {
-      return new Response(
-        JSON.stringify({ message: 'Telemetry disabled for ghost mode' }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return corsJsonResponse(req, { message: 'Telemetry disabled for ghost mode' }, 200, ['x-instance-key'])
     }
 
     // Parse telemetry event
@@ -74,10 +65,7 @@ serve(async (req) => {
 
     if (insertError) {
       console.error('Failed to insert telemetry:', insertError)
-      return new Response(
-        JSON.stringify({ error: 'Failed to store telemetry' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return corsErrorResponse(req, 'Failed to store telemetry', 500, ['x-instance-key'])
     }
 
     // Update instance last_seen
@@ -118,15 +106,9 @@ serve(async (req) => {
         })
     }
 
-    return new Response(
-      JSON.stringify({ success: true }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    return corsJsonResponse(req, { success: true }, 200, ['x-instance-key'])
   } catch (error) {
     console.error('Telemetry ingest error:', error)
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    return corsErrorResponse(req, 'Internal server error', 500, ['x-instance-key'])
   }
 })

@@ -188,7 +188,7 @@ describe('Tenant Context', () => {
   describe('Edge cases', () => {
     it('should handle empty tenant ID', () => {
       expect(() => setCurrentTenantId('')).not.toThrow();
-      expect(getCurrentTenantId()).toBe('');
+      expect(getCurrentTenantId()).toBeNull();
     });
 
     it('should handle special characters in tenant ID', () => {

@@ -28,21 +28,44 @@ class GatewayRPCClient {
   }
 
   private getDefaultGatewayUrl(): string {
-    // In development, the gateway is typically on localhost:18789
-    // Check for environment variable first, fall back to localhost
+    // Check for Vite environment variable first
+    if (import.meta.env?.VITE_GATEWAY_RPC_URL) {
+      return import.meta.env.VITE_GATEWAY_RPC_URL;
+    }
+
+    // Check for window global (legacy support)
     if (typeof window !== 'undefined' && (window as any).__GATEWAY_URL__) {
       return (window as any).__GATEWAY_URL__;
     }
 
+    // Development mode: Use localhost HTTP
+    if (import.meta.env?.DEV) {
+      return 'http://127.0.0.1:18789/rpc';
+    }
+
     // Try to infer from current location
     if (typeof window !== 'undefined') {
-      const { hostname } = window.location;
+      const { hostname, protocol } = window.location;
+
+      // Local development
       if (hostname === 'localhost' || hostname === '127.0.0.1') {
         return 'http://127.0.0.1:18789/rpc';
       }
+
+      // Production: Gateway likely on same origin or specific subdomain
+      // Use HTTPS in production
+      if (protocol === 'https:') {
+        // Check for production-specific URL
+        if (import.meta.env?.VITE_GATEWAY_RPC_URL_PROD) {
+          return import.meta.env.VITE_GATEWAY_RPC_URL_PROD;
+        }
+        // Default to localhost for self-hosted (user must configure)
+        console.warn('[GatewayRPC] No production URL configured, using localhost');
+      }
     }
 
-    return 'http://localhost:18789/rpc';
+    // Final fallback
+    return 'http://127.0.0.1:18789/rpc';
   }
 
   setAuthToken(token: string): void {

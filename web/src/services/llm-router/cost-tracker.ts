@@ -7,12 +7,13 @@ import { createClient } from '@supabase/supabase-js';
 import { logToDiscord, logToHashChain } from '../logging.js';
 import type { BudgetInfo, CostEstimate, Operation } from './types.js';
 
-const CLAUDE_OPUS_4_5_INPUT_COST = 0.003; // $3 per MTok
-const CLAUDE_OPUS_4_5_OUTPUT_COST = 0.015; // $15 per MTok
-const DEEPSEEK_V3_2_INPUT_COST = 0.0006; // $0.60 per MTok
-const DEEPSEEK_V3_2_OUTPUT_COST = 0.002; // $2 per MTok
-const GEMINI_2_0_FLASH_INPUT_COST = 0.00005; // $0.05 per MTok
-const GEMINI_2_0_FLASH_OUTPUT_COST = 0.0002; // $0.20 per MTok
+// Costs are in $ per million tokens
+const CLAUDE_OPUS_4_5_INPUT_COST = 3.0; // $3 per MTok
+const CLAUDE_OPUS_4_5_OUTPUT_COST = 15.0; // $15 per MTok
+const DEEPSEEK_V3_2_INPUT_COST = 0.6; // $0.60 per MTok
+const DEEPSEEK_V3_2_OUTPUT_COST = 2.0; // $2 per MTok
+const GEMINI_2_0_FLASH_INPUT_COST = 0.05; // $0.05 per MTok
+const GEMINI_2_0_FLASH_OUTPUT_COST = 0.2; // $0.20 per MTok
 
 export class CostTracker {
   private supabase: ReturnType<typeof createClient> | null = null;
@@ -38,31 +39,36 @@ export class CostTracker {
 
   /**
    * Calculate cost for an operation
+   * Note: pricing constants are in $ per million tokens
    */
   calculateOperationCost(
     model: string,
     inputTokens: number,
     outputTokens: number
   ): number {
-    let inputCost = 0;
-    let outputCost = 0;
+    let inputCostPerMToken = 0;
+    let outputCostPerMToken = 0;
 
     switch (model) {
       case 'claude-opus-4.5':
-        inputCost = (inputTokens / 1000000) * CLAUDE_OPUS_4_5_INPUT_COST;
-        outputCost = (outputTokens / 1000000) * CLAUDE_OPUS_4_5_OUTPUT_COST;
+        inputCostPerMToken = CLAUDE_OPUS_4_5_INPUT_COST;
+        outputCostPerMToken = CLAUDE_OPUS_4_5_OUTPUT_COST;
         break;
       case 'deepseek-v3.2':
-        inputCost = (inputTokens / 1000000) * DEEPSEEK_V3_2_INPUT_COST;
-        outputCost = (outputTokens / 1000000) * DEEPSEEK_V3_2_OUTPUT_COST;
+        inputCostPerMToken = DEEPSEEK_V3_2_INPUT_COST;
+        outputCostPerMToken = DEEPSEEK_V3_2_OUTPUT_COST;
         break;
       case 'gemini-2.0-flash':
-        inputCost = (inputTokens / 1000000) * GEMINI_2_0_FLASH_INPUT_COST;
-        outputCost = (outputTokens / 1000000) * GEMINI_2_0_FLASH_OUTPUT_COST;
+        inputCostPerMToken = GEMINI_2_0_FLASH_INPUT_COST;
+        outputCostPerMToken = GEMINI_2_0_FLASH_OUTPUT_COST;
         break;
       default:
         throw new Error(`Unknown model: ${model}`);
     }
+
+    // Convert to actual cost: (tokens / 1,000,000) * ($ per million tokens)
+    const inputCost = (inputTokens / 1000000) * inputCostPerMToken;
+    const outputCost = (outputTokens / 1000000) * outputCostPerMToken;
 
     return parseFloat((inputCost + outputCost).toFixed(6));
   }
