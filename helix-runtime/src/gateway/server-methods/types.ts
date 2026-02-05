@@ -33,7 +33,7 @@ export type GatewayRequestContext = {
   refreshHealthSnapshot: (opts?: { probe?: boolean }) => Promise<HealthSummary>;
   logHealth: { error: (message: string) => void };
   logGateway: SubsystemLogger;
-  supabaseClient: SupabaseClient;
+  supabaseClient?: SupabaseClient;
   incrementPresenceVersion: () => number;
   getHealthVersion: () => number;
   broadcast: (

@@ -3,7 +3,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import { lowlight } from 'lowlight';
+import { createLowlight } from 'lowlight';
 import {
   Bold,
   Italic,
@@ -62,11 +62,12 @@ const MenuButton: React.FC<MenuButtonProps> = ({
 export const TiptapEditor: React.FC<TiptapEditorProps> = ({
   value,
   onChange,
-  placeholder = 'Start typing...',
   disabled = false,
   minHeight = 300,
   maxHeight = 600,
 }) => {
+  const lowlight = createLowlight();
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({

@@ -3,13 +3,13 @@
  * Handles voice recording, transcription, and search
  */
 
-import type { GatewayRequestHandlers } from '../protocol/types.js';
+import type { GatewayRequestHandlers } from './types.js';
 
 export const voiceMemoHandlers: GatewayRequestHandlers = {
   /**
    * Save voice memo after recording
    */
-  'voice.save_memo': async ({ params, respond, context }) => {
+  'voice.save_memo': async ({ params, respond, context }: any) => {
     const { userId, audioUrl, duration, transcript, title, tags } = params;
 
     try {
@@ -47,7 +47,7 @@ export const voiceMemoHandlers: GatewayRequestHandlers = {
   /**
    * Transcribe audio using STT service
    */
-  'voice.transcribe': async ({ params, respond, context }) => {
+  'voice.transcribe': async ({ params, respond, context }: any) => {
     const { audioUrl, language = 'en' } = params;
 
     try {
@@ -68,7 +68,7 @@ export const voiceMemoHandlers: GatewayRequestHandlers = {
   /**
    * Search voice transcripts
    */
-  'voice.search_transcripts': async ({ params, respond, context }) => {
+  'voice.search_transcripts': async ({ params, respond, context }: any) => {
     const { userId, query, limit = 10, offset = 0 } = params;
 
     try {
@@ -96,7 +96,7 @@ export const voiceMemoHandlers: GatewayRequestHandlers = {
   /**
    * Get voice memos list for user
    */
-  'voice.list_memos': async ({ params, respond, context }) => {
+  'voice.list_memos': async ({ params, respond, context }: any) => {
     const { userId, limit = 20, offset = 0 } = params;
 
     try {
@@ -127,7 +127,7 @@ export const voiceMemoHandlers: GatewayRequestHandlers = {
   /**
    * Delete voice memo
    */
-  'voice.delete_memo': async ({ params, respond, context }) => {
+  'voice.delete_memo': async ({ params, respond, context }: any) => {
     const { memoId, userId } = params;
 
     try {
@@ -157,7 +157,7 @@ export const voiceMemoHandlers: GatewayRequestHandlers = {
   /**
    * Tag voice memo
    */
-  'voice.tag_memo': async ({ params, respond, context }) => {
+  'voice.tag_memo': async ({ params, respond, context }: any) => {
     const { memoId, userId, tags } = params;
 
     try {
@@ -175,7 +175,7 @@ export const voiceMemoHandlers: GatewayRequestHandlers = {
   /**
    * Get voice transcript with context
    */
-  'voice.get_transcript': async ({ params, respond, context }) => {
+  'voice.get_transcript': async ({ params, respond, context }: any) => {
     const { memoId, userId } = params;
 
     try {
@@ -200,7 +200,7 @@ export const voiceMemoHandlers: GatewayRequestHandlers = {
   /**
    * Get voice stats
    */
-  'voice.get_stats': async ({ params, respond, context }) => {
+  'voice.get_stats': async ({ params, respond, context }: any) => {
     const { userId } = params;
 
     try {

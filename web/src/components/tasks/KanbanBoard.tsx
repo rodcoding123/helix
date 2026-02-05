@@ -3,8 +3,7 @@
  * Phase 5 Track 3: Displays tasks organized by status columns
  */
 
-import React, { FC, useState } from 'react';
-import { TaskCard } from './TaskCard';
+import { FC, useState } from 'react';
 import { ChevronDown, Plus, Filter } from 'lucide-react';
 
 export interface Task {

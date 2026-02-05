@@ -9,7 +9,7 @@
  * - Success/error feedback
  */
 
-import React, { FC, useState } from 'react';
+import { FC, useState } from 'react';
 import { Mail, Check, AlertCircle, Loader } from 'lucide-react';
 import { calendarAccountsService } from '@/services/calendar-accounts';
 import { useAuth } from '@/hooks/useAuth';
@@ -58,9 +58,9 @@ export const CalendarAccountSetup: FC<CalendarAccountSetupProps> = ({ onAccountA
   };
 
   /**
-   * Test calendar connection
+   * Test calendar connection (unused, kept for reference)
    */
-  const handleTestConnection = async () => {
+  const _handleTestConnection = async () => {
     if (!selectedProvider || !user) return;
 
     try {

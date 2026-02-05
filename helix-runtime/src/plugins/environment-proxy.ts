@@ -7,7 +7,7 @@
  * SECURITY: Plugins should use api.env instead of process.env
  */
 
-import { logSecretOperation } from '../../src/helix/hash-chain.js';
+import { logSecretOperation } from '../helix/hash-chain.js';
 
 // Environment variables that plugins are allowed to read
 const ALLOWED_ENV_VARS = new Set([
@@ -159,7 +159,7 @@ function logPluginSecretAccess(pluginId: string, variableName: string): void {
     success: false,
     timestamp: new Date().toISOString(),
     details: `Plugin attempted unauthorized access to ${variableName}`,
-  }).catch(err => console.error('[Plugin Security] Failed to log access attempt:', err));
+  }).catch((err: any) => console.error('[Plugin Security] Failed to log access attempt:', err));
 }
 
 /**

@@ -7,7 +7,7 @@ import { CacheService } from './redis-cache';
 
 // Mock Redis
 vi.mock('ioredis', () => {
-  const Redis = vi.fn(function(url: string) {
+  const Redis = vi.fn(function(this: any, _url: string) {
     this.data = new Map<string, { value: string; expiresAt?: number }>();
     this.connected = true;
 
@@ -51,7 +51,7 @@ vi.mock('ioredis', () => {
       const regex = new RegExp(
         '^' + pattern.replace(/\*/g, '.*').replace(/\?/g, '.') + '$'
       );
-      return Array.from(this.data.keys()).filter(k => regex.test(k));
+      return Array.from(this.data.keys()).filter((k: string) => regex.test(k));
     });
 
     this.dbsize = vi.fn(async () => {
@@ -59,7 +59,7 @@ vi.mock('ioredis', () => {
       return this.data.size;
     });
 
-    this.info = vi.fn(async (section: string) => {
+    this.info = vi.fn(async () => {
       if (!this.connected) throw new Error('Connection failed');
       return 'used_memory_human:1.23M\r\n';
     });

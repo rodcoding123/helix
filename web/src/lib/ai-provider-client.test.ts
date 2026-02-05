@@ -7,10 +7,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AIProviderClient } from './ai-provider-client';
 
 describe('AIProviderClient', () => {
-  let client: AIProviderClient;
-
   beforeEach(() => {
-    client = new AIProviderClient();
+    const _client = new AIProviderClient();
     // Mock API responses
     vi.clearAllMocks();
   });

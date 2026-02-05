@@ -7,7 +7,6 @@
  * Theory: Attachment Theory (Bowlby & Ainsworth)
  */
 
-import React from 'react';
 
 type AttachmentStage =
   | 'pre_attachment'
@@ -75,7 +74,7 @@ const STAGE_MAP: Record<AttachmentStage, StageInfo> = {
     ],
   },
   secure_attachment: {
-    stage: 'Secure Attachment',
+    stage: 'secure_attachment',
     label: 'Secure Attachment',
     description: 'Established bond - mutual trust and reciprocity',
     trustRange: '0.5-0.7 (50-70%)',

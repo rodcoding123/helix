@@ -16,9 +16,13 @@
 
 import { type IncomingMessage, type ServerResponse } from 'node:http';
 import Anthropic from '@anthropic-ai/sdk';
-import { router } from '../../../../src/helix/ai-operations/router.js';
-import { costTracker } from '../../../../src/helix/ai-operations/cost-tracker.js';
-import { approvalGate } from '../../../../src/helix/ai-operations/approval-gate.js';
+import { AIOperationRouter } from '../../helix/ai-operations/router.js';
+import { CostTracker } from '../../helix/ai-operations/cost-tracker.js';
+import { ApprovalGate } from '../../helix/ai-operations/approval-gate.js';
+
+const router = new AIOperationRouter();
+const costTracker = new CostTracker();
+const approvalGate = new ApprovalGate();
 
 interface ChatHandlerContext {
   db: any;
@@ -203,8 +207,9 @@ async function handleChatMessage(
       const approval = await approvalGate.requestApproval(
         'chat_message',
         'Chat Message',
-        routingDecision.estimatedCostUsd,
-        `User: ${userId} | Message length: ${message.length} chars | Model: ${routingDecision.model}`
+        routingDecision.estimatedCostUsd || 0,
+        `User: ${userId} | Message length: ${message.length} chars | Model: ${routingDecision.model}`,
+        userId || ''
       );
 
       context.logGateway?.log?.('CHAT_APPROVAL_REQUESTED', {
@@ -217,7 +222,7 @@ async function handleChatMessage(
     }
 
     // Get the model client based on routing decision
-    const modelToUse = getModelClientForOperation(routingDecision.model);
+    const modelToUse = getModelClientForOperation(routingDecision.model || '');
 
     if (!modelToUse) {
       throw new Error(`Model client not available: ${routingDecision.model}`);
@@ -226,7 +231,7 @@ async function handleChatMessage(
     // PHASE 0.5: Execute with routed model instead of hardcoded
     const executionStartTime = Date.now();
     const response = await modelToUse.messages.create({
-      model: getModelIdForRoute(routingDecision.model),
+      model: getModelIdForRoute(routingDecision.model || ''),
       max_tokens: 1024,
       system:
         "You are Helix, a helpful and thoughtful AI assistant. You remember what users share and reference it in future conversations. Be warm, authentic, and genuinely interested in helping.",
@@ -241,7 +246,7 @@ async function handleChatMessage(
     // PHASE 0.5: Cost tracking
     const outputTokens = response.usage?.output_tokens || Math.ceil(assistantMessage.length / 4);
     const operationLatency = Date.now() - operationStartTime;
-    const costUsd = router['estimateCost'](routingDecision.model, estimatedInputTokens, outputTokens);
+    const costUsd = router['estimateCost'](routingDecision.model || '', estimatedInputTokens, outputTokens);
 
     // Log the operation to cost tracker for audit trail and budget enforcement
     await costTracker.logOperation(userId, {

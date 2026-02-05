@@ -284,7 +284,7 @@ describe('Calendar Components', () => {
         />
       );
 
-      const deleteButton = container.querySelector('button[disabled]') as HTMLButtonElement;
+      const deleteButton = container.querySelector('button[disabled]') as HTMLButtonElement | null;
       expect(deleteButton?.disabled).toBe(true);
     });
 

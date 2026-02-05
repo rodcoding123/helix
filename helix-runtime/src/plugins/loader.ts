@@ -409,8 +409,7 @@ export function loadOpenClawPlugins(options: PluginLoadOptions = {}): PluginRegi
     const api = createApi(record, {
       config: cfg,
       pluginConfig: validatedConfig.value,
-      env: createPluginEnvironment(record.id),
-    });
+    } as any);
 
     try {
       const result = register(api);

@@ -3,8 +3,8 @@
  * UI for selecting attendees and viewing suggested meeting times
  */
 
-import React, { useState } from 'react';
-import type { TimeSlot } from '@/web/src/services/automation.types';
+import { useState } from 'react';
+import type { TimeSlot } from '../../services/automation.types';
 
 interface SmartSchedulingPanelProps {
   userId: string;
@@ -27,7 +27,6 @@ interface PanelState {
 }
 
 export function SmartSchedulingPanel({
-  userId,
   onDismiss,
   onTimeSelected,
 }: SmartSchedulingPanelProps) {
@@ -59,7 +58,7 @@ export function SmartSchedulingPanel({
       }
 
       const { getSmartSchedulingService } = await import(
-        '@/web/src/services/automation-smart-scheduling.js'
+        '../../services/automation-smart-scheduling'
       );
       const service = getSmartSchedulingService();
 
@@ -124,7 +123,9 @@ export function SmartSchedulingPanel({
       success: `Selected ${slot.start.toLocaleString()} - ${slot.end.toLocaleTimeString()}`,
     }));
 
-    setTimeout(onDismiss, 1500);
+    if (onDismiss) {
+      setTimeout(onDismiss, 1500);
+    }
   }
 
   function getScoreColor(score: number): string {

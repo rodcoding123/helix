@@ -6,7 +6,6 @@
 
 import { getLLMRouter } from './llm-router/router.js';
 import { logToDiscord, logToHashChain } from './logging.js';
-import type { RoutingDecision } from './llm-router/types.js';
 
 /**
  * Email composition context with drafting assistance

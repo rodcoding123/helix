@@ -10,13 +10,13 @@
  * - Real-time sync status
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import {
   emailAccountsService,
   type EmailAccount,
 } from '@/services/email-accounts';
-import { Mail, Inbox, Star, Trash2, RefreshCw, ChevronDown } from 'lucide-react';
+import { Mail, Inbox, Star, Trash2, RefreshCw } from 'lucide-react';
 
 interface EmailListItem {
   id: string;

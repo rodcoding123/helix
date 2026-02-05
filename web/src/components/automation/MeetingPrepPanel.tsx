@@ -3,8 +3,8 @@
  * Displays meeting preparation checklist before the meeting starts
  */
 
-import React, { useState, useEffect } from 'react';
-import type { MeetingContext, ActionItem } from '@/web/src/services/automation.types';
+import { useState, useEffect } from 'react';
+import type { MeetingContext } from '../../services/automation.types';
 
 interface MeetingPrepPanelProps {
   eventId: string;
@@ -55,7 +55,7 @@ export function MeetingPrepPanel({
 
       // Import service dynamically
       const { getMeetingPrepService } = await import(
-        '@/web/src/services/automation-meeting-prep.js'
+        '../../services/automation-meeting-prep'
       );
       const service = getMeetingPrepService();
 

@@ -33,11 +33,10 @@ export interface CompletionResponse {
  * Handles provider-specific APIs and response parsing
  */
 export class AIProviderClient {
-  private baseUrl: string;
   private apiKeys: Map<AIModel, string> = new Map();
 
   constructor() {
-    this.baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+    const _baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 
     // Load API keys from environment
     const deepseekKey = import.meta.env.VITE_DEEPSEEK_API_KEY;

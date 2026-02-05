@@ -3,7 +3,7 @@
  * React UI for creating and managing email-to-task automation rules
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { getEmailTriggerService } from '../../services/automation-email-trigger';
 
 interface EmailAutomationBuilderProps {
@@ -265,7 +265,7 @@ export const EmailAutomationBuilder: React.FC<EmailAutomationBuilderProps> = ({
               required
             />
             <p className="text-xs text-gray-500 mt-1">
-              Use variables: {{emailSubject}}, {{emailFrom}}, {{emailBody}}
+              Use variables: {'{{emailSubject}}, {{emailFrom}}, {{emailBody}}'}
             </p>
           </div>
 

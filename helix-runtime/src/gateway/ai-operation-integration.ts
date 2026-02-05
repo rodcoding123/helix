@@ -10,11 +10,11 @@
  * Created: 2026-02-04
  */
 
-import { AIOperationRouter, type RoutingRequest, type RoutingResponse } from '../../../src/helix/ai-operations/router.js';
-import { CostTracker, type OperationLog } from '../../../src/helix/ai-operations/cost-tracker.js';
-import { ApprovalGate } from '../../../src/helix/ai-operations/approval-gate.js';
-import { logToDiscord } from '../../../src/helix/logging.js';
-import { hashChain } from '../../../src/helix/hash-chain.js';
+import { AIOperationRouter, type RoutingRequest, type RoutingResponse } from '../helix/ai-operations/router.js';
+import { CostTracker, type OperationLog } from '../helix/ai-operations/cost-tracker.js';
+import { ApprovalGate } from '../helix/ai-operations/approval-gate.js';
+import { logToDiscord } from '../helix/logging.js';
+import { hashChain } from '../helix/hash-chain.js';
 
 // Singleton instances
 let router: AIOperationRouter | null = null;
@@ -78,21 +78,21 @@ export class OperationContext {
     if (!this.routingResponse) {
       throw new Error('Route decision not available - call executeWithRouting first');
     }
-    return this.routingResponse.model;
+    return this.routingResponse.model || '';
   }
 
   requiresApproval(): boolean {
     if (!this.routingResponse) {
       throw new Error('Route decision not available - call executeWithRouting first');
     }
-    return this.routingResponse.requiresApproval;
+    return this.routingResponse.requiresApproval || false;
   }
 
   estimatedCost(): number {
     if (!this.routingResponse) {
       throw new Error('Route decision not available - call executeWithRouting first');
     }
-    return this.routingResponse.estimatedCostUsd;
+    return this.routingResponse.estimatedCostUsd || 0;
   }
 }
 
@@ -133,7 +133,7 @@ export async function executeWithRouting<T>(
         context.operationType,
         context.estimatedCost(),
         `Requires approval for ${context.operationType}`,
-        context.userId,
+        context.userId || '',
       );
 
       // Add approval request to hash chain
@@ -204,7 +204,7 @@ async function logOperationCost(context: OperationContext): Promise<void> {
       error_message: context.errorMessage,
     };
 
-    await costTrackerInstance.logOperation(context.userId, operationLog);
+    await costTrackerInstance.logOperation((context as any).userId || '', operationLog);
 
     // 2. Add to hash chain
     await hashChain.add({
@@ -290,8 +290,8 @@ export async function getEstimatedCost(
   });
 
   return {
-    estimatedCostUsd: response.estimatedCostUsd,
-    model: response.model,
+    estimatedCostUsd: response.estimatedCostUsd || 0,
+    model: response.model || '',
   };
 }
 
@@ -312,5 +312,5 @@ export async function checkApprovalRequired(
     estimatedInputTokens: 1000,
   });
 
-  return response.requiresApproval;
+  return response.requiresApproval || false;
 }

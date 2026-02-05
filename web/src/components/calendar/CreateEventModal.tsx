@@ -3,7 +3,7 @@
  * Form for creating and editing calendar events
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { CreateEventParams } from '../../../../helix-runtime/src/types/calendar';
 
 interface CreateEventModalProps {

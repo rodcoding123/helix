@@ -5,7 +5,6 @@ import {
   Check,
   AlertCircle,
   Loader,
-  RefreshCw,
   TrendingUp,
 } from 'lucide-react';
 import { useEmailSmartReplyService, SmartReplySuggestion } from '../../services/email-smart-reply';

@@ -83,7 +83,7 @@ export function RemoteExecutionDashboard({
   useEffect(() => {
     const subscription = supabase
       .from('remote_commands')
-      .on('*', (payload) => {
+      .on('*', () => {
         // Refetch recent commands on any change
         fetchRecentCommands();
       })
@@ -94,7 +94,7 @@ export function RemoteExecutionDashboard({
     return () => {
       subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, []);
 
   const fetchRecentCommands = async () => {
     const { data, error: queryError } = await supabase

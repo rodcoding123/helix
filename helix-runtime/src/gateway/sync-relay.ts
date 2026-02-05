@@ -9,7 +9,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { GatewayWsClient } from "./types.js";
 
-export interface DeltaChange {
+export interface DeltaChange extends Record<string, unknown> {
   entity_type: string;
   entity_id: string;
   operation: string;
@@ -18,7 +18,7 @@ export interface DeltaChange {
   timestamp: number;
 }
 
-export interface ConflictDetected {
+export interface ConflictDetected extends Record<string, unknown> {
   conflict_id: string;
   entity_type: string;
   entity_id: string;
@@ -100,8 +100,8 @@ export class SyncRelay {
     client: GatewayWsClient,
     delta: DeltaChange
   ): Promise<void> {
-    const userId = client.userId;
-    const deviceId = client.deviceId;
+    const userId = client.userId || '';
+    const deviceId = client.deviceId || '';
 
     try {
       // Increment vector clock for this device
@@ -170,7 +170,7 @@ export class SyncRelay {
     conflictId: string,
     resolution: Record<string, unknown>
   ): Promise<void> {
-    const userId = client.userId;
+    const userId = client.userId || '';
 
     try {
       const conflict = this.conflictTracker.get(conflictId);

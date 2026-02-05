@@ -10,7 +10,7 @@
  */
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import type { VoiceRecorderState } from '../lib/types/voice-memo';
+import type { VoiceRecordingState } from '../lib/types/voice-memo';
 
 interface UseVoiceRecorderOptions {
   onTranscriptionComplete?: (transcript: string) => void;
@@ -19,7 +19,7 @@ interface UseVoiceRecorderOptions {
   minDurationSeconds?: number;
 }
 
-interface VoiceRecorderControlState extends VoiceRecorderState {
+interface VoiceRecorderControlState extends VoiceRecordingState {
   audioBlob?: Blob;
   isSupported?: boolean;
   isUploading?: boolean;
@@ -42,11 +42,9 @@ export function useVoiceRecorder(options: UseVoiceRecorderOptions = {}) {
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  const durationIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const durationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
 
   const startRecording = useCallback(async () => {
     try {

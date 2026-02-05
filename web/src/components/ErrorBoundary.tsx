@@ -105,9 +105,16 @@ export function ErrorBoundary({ children, fallback, onError }: ErrorBoundaryProp
     </div>
   );
 
+  // Determine the fallback component - convert to function form if needed
+  const fallbackComponent = typeof fallback === 'function'
+    ? fallback
+    : fallback
+    ? () => fallback
+    : defaultFallback;
+
   return (
     <SentryErrorBoundary
-      fallback={fallback || defaultFallback}
+      fallback={fallbackComponent}
       onError={(error, errorInfo) => {
         // Log to Discord for critical errors
         console.error('[ErrorBoundary] React error:', error);

@@ -12,12 +12,10 @@ import type {
 } from "@supabase/realtime-js";
 
 import {
-  ConflictResolutionEngine,
   VectorClockManager,
   ConflictTracker,
   type SyncableEntity,
   type Conflict,
-  type ResolutionStrategy,
   type VectorClock,
 } from "./conflict-resolution";
 
@@ -65,7 +63,6 @@ export interface SyncClientConfig {
 export class RealtimeSyncClient {
   private supabaseClient: any;
   private channels: Map<string, RealtimeChannel> = new Map();
-  private connectionStatus: "connected" | "disconnected" = "disconnected";
   private vectorClocks = new VectorClockManager();
   private conflictTracker = new ConflictTracker();
   private offlineQueue: LocalChange[] = [];
@@ -111,15 +108,15 @@ export class RealtimeSyncClient {
   private async subscribeToEmails(): Promise<void> {
     const channel = this.supabaseClient
       .channel(`emails:${this.config.userId}`)
-      .on<SyncableEntity>(
-        "postgres_changes",
+      .on(
+        "postgres_changes" as any,
         {
           event: "*",
           schema: "public",
           table: "emails",
           filter: `user_id=eq.${this.config.userId}`,
         },
-        (payload) => this.handleEmailChange(payload)
+        (payload: any) => this.handleEmailChange(payload)
       )
       .subscribe();
 
@@ -132,15 +129,15 @@ export class RealtimeSyncClient {
   private async subscribeToCalendar(): Promise<void> {
     const channel = this.supabaseClient
       .channel(`calendar:${this.config.userId}`)
-      .on<SyncableEntity>(
-        "postgres_changes",
+      .on(
+        "postgres_changes" as any,
         {
           event: "*",
           schema: "public",
           table: "calendar_events",
           filter: `user_id=eq.${this.config.userId}`,
         },
-        (payload) => this.handleCalendarChange(payload)
+        (payload: any) => this.handleCalendarChange(payload)
       )
       .subscribe();
 
@@ -153,15 +150,15 @@ export class RealtimeSyncClient {
   private async subscribeToTasks(): Promise<void> {
     const channel = this.supabaseClient
       .channel(`tasks:${this.config.userId}`)
-      .on<SyncableEntity>(
-        "postgres_changes",
+      .on(
+        "postgres_changes" as any,
         {
           event: "*",
           schema: "public",
           table: "tasks",
           filter: `user_id=eq.${this.config.userId}`,
         },
-        (payload) => this.handleTaskChange(payload)
+        (payload: any) => this.handleTaskChange(payload)
       )
       .subscribe();
 
@@ -182,7 +179,7 @@ export class RealtimeSyncClient {
           table: "sync_change_log",
           filter: `user_id=eq.${this.config.userId}`,
         },
-        (payload) => this.handleChangeLog(payload)
+        (payload: any) => this.handleChangeLog(payload)
       )
       .subscribe();
 
@@ -203,7 +200,7 @@ export class RealtimeSyncClient {
           table: "sync_presence",
           filter: `user_id=eq.${this.config.userId}`,
         },
-        (payload) => this.handlePresenceChange(payload)
+        (payload: any) => this.handlePresenceChange(payload)
       )
       .subscribe();
 
@@ -341,7 +338,7 @@ export class RealtimeSyncClient {
 
     try {
       // Send change to remote
-      const { data, error } = await this.supabaseClient
+      const { error } = await this.supabaseClient
         .from("sync_change_log")
         .insert({
           user_id: this.config.userId,

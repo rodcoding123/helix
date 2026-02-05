@@ -145,7 +145,7 @@ async function handleSearchTranscripts(params: any, context: any, client: any): 
       [userId, query]
     );
 
-    const results = (result.rows || []).map((row) => ({
+    const results = (result.rows || []).map((row: any) => ({
       id: row.id,
       text: row.text,
       speaker: row.speaker,
@@ -285,7 +285,7 @@ async function handleListVoiceCommands(context: any, client: any): Promise<any> 
       [userId]
     );
 
-    const commands = (result.rows || []).map((row) => ({
+    const commands = (result.rows || []).map((row: any) => ({
       id: row.id,
       triggerPhrase: row.trigger_phrase,
       toolId: row.tool_id,

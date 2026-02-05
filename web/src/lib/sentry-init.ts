@@ -61,12 +61,12 @@ export function initSentry(config: SentryConfig = {}): void {
             }
             return true;
           },
-        }),
+        }) as any,
         new Replay({
           // Capture 10% of all sessions for replay
           maskAllText: false, // Capture actual text for debugging
           blockAllMedia: false, // Capture actual media
-        }),
+        }) as any,
       ],
 
       // Performance Monitoring
@@ -120,7 +120,7 @@ export function initSentry(config: SentryConfig = {}): void {
         const errorMessage = hint.originalException?.toString() || event.message || '';
 
         // Ignore network errors from third-party services
-        if (errorMessage.includes('Failed to fetch') && !event.request?.url?.includes(process.env.VITE_API_URL)) {
+        if (errorMessage.includes('Failed to fetch') && !event.request?.url?.includes(process.env.VITE_API_URL || '')) {
           return null;
         }
 
@@ -158,7 +158,7 @@ export function initSentry(config: SentryConfig = {}): void {
       ],
 
       // Breadcrumb filtering
-      beforeBreadcrumb(breadcrumb, hint) {
+      beforeBreadcrumb(breadcrumb, _hint) {
         // Reduce noise from HTTP requests
         if (breadcrumb.category === 'http') {
           // Skip logging health checks
@@ -283,7 +283,7 @@ export function addBreadcrumb(
  * Start manual transaction for custom monitoring
  */
 export function startTransaction(name: string, op: string = 'custom') {
-  return Sentry.startTransaction({
+  return (Sentry as any).startTransaction?.({
     name,
     op,
     sampled: true,

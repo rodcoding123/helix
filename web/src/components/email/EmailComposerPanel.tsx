@@ -196,7 +196,7 @@ export const EmailComposerPanel: React.FC<EmailComposerPanelProps> = ({
   }, []);
 
   const handleSelectTemplate = useCallback(
-    async (template: { id: string; subject: string; body_html: string }) => {
+    async (template: any) => {
       try {
         setSubject(template.subject);
         setBodyHtml(template.body_html);

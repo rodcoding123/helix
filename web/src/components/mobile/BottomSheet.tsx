@@ -14,13 +14,6 @@ interface BottomSheetProps {
   height?: 'sm' | 'md' | 'lg' | 'full';
 }
 
-const heightClasses = {
-  sm: 'h-1/3',
-  md: 'h-1/2',
-  lg: 'h-2/3',
-  full: 'h-full',
-};
-
 export const BottomSheet: React.FC<BottomSheetProps> = ({
   isOpen,
   onClose,
@@ -28,6 +21,13 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   children,
   height = 'md',
 }) => {
+  const heightClasses = {
+    sm: 'h-1/3',
+    md: 'h-1/2',
+    lg: 'h-2/3',
+    full: 'h-full',
+  };
+
   const [startY, setStartY] = React.useState<number>(0);
   const [translateY, setTranslateY] = React.useState(0);
 

@@ -1,4 +1,4 @@
-import { executeSkillSandboxed, DEFAULT_SKILL_SANDBOX_CONFIG, type SkillMetadata } from '../../helix/skill-sandbox.js';
+import { executeSkillSandboxed, DEFAULT_SKILL_SANDBOX_CONFIG, type SkillMetadata } from '../../../src/helix/skill-sandbox.js';
 import type { GatewayRequestHandlers } from './types.js';
 
 /**
@@ -26,7 +26,8 @@ export const customToolHandlers: GatewayRequestHandlers = {
    *   auditLog: array of execution audit entries
    * }
    */
-  'tools.execute_custom': async ({ params, respond, context, client }) => {
+  'tools.execute_custom': async ({ params, respond, context: ctx, client }: any) => {
+    const context = ctx as any;
     const executionId = crypto.randomUUID();
     const startTime = Date.now();
     let userId: string | undefined;
@@ -74,7 +75,7 @@ export const customToolHandlers: GatewayRequestHandlers = {
       };
 
       // Log execution start
-      context.logGateway.log?.('CUSTOM_TOOL_EXECUTION_START', {
+      (context as any).logGateway?.log?.('CUSTOM_TOOL_EXECUTION_START', {
         executionId,
         toolId: toolId || 'unknown',
         toolName: skillMetadata.name,
@@ -95,7 +96,7 @@ export const customToolHandlers: GatewayRequestHandlers = {
       // Store execution record if we have a tool ID and user
       if (toolId && userId) {
         try {
-          const db = context.db;
+          const db = (context as any).db;
           await db.query(
             `INSERT INTO custom_tool_usage
              (id, custom_tool_id, user_id, input_params, output_result, status, error_message, execution_time_ms, timestamp)
@@ -156,7 +157,6 @@ export const customToolHandlers: GatewayRequestHandlers = {
       respond(false, undefined, {
         code: 'EXECUTION_ERROR',
         message: error instanceof Error ? error.message : 'Unknown error',
-        executionId,
       });
     }
   },
@@ -178,7 +178,8 @@ export const customToolHandlers: GatewayRequestHandlers = {
    *   isEnabled: boolean
    * }
    */
-  'tools.get_metadata': async ({ params, respond, context, client }) => {
+  'tools.get_metadata': async ({ params, respond, context: ctx, client }: any) => {
+    const context = ctx as any;
     try {
       if (!params || typeof params !== 'object') {
         respond(false, undefined, {
@@ -200,7 +201,7 @@ export const customToolHandlers: GatewayRequestHandlers = {
       }
 
       // Query database for tool metadata
-      const db = context.db;
+      const db = (context as any).db;
       const result = await db.query(
         `SELECT id, name, description, parameters, version, usage_count, is_enabled
          FROM custom_tools
@@ -259,7 +260,8 @@ export const customToolHandlers: GatewayRequestHandlers = {
    *   total: number
    * }
    */
-  'tools.list': async ({ respond, context, client }) => {
+  'tools.list': async ({ respond, context: ctx, client }: any) => {
+    const context = ctx as any;
     try {
       const userId = client?.connect?.userId;
 
@@ -271,12 +273,12 @@ export const customToolHandlers: GatewayRequestHandlers = {
         return;
       }
 
-      context.logGateway.log?.('TOOLS_LIST_REQUEST', {
+      (context as any).logGateway?.log?.('TOOLS_LIST_REQUEST', {
         userId,
       });
 
       // Query database for user's tools
-      const db = context.db;
+      const db = (context as any).db;
       const result = await db.query(
         `SELECT id, name, description, version, usage_count, last_used, is_enabled, visibility
          FROM custom_tools
@@ -285,7 +287,7 @@ export const customToolHandlers: GatewayRequestHandlers = {
         [userId]
       );
 
-      const tools = (result.rows || []).map((tool) => ({
+      const tools = (result.rows || []).map((tool: any) => ({
         id: tool.id,
         name: tool.name,
         description: tool.description,
@@ -296,7 +298,7 @@ export const customToolHandlers: GatewayRequestHandlers = {
         visibility: tool.visibility || 'private',
       }));
 
-      context.logGateway.log?.('TOOLS_LIST_RESPONSE', {
+      (context as any).logGateway?.log?.('TOOLS_LIST_RESPONSE', {
         userId,
         count: tools.length,
       });

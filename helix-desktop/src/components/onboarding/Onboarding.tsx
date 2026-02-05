@@ -161,6 +161,7 @@ function StepErrorFallback({
 }
 
 export function Onboarding({ onComplete }: OnboardingProps) {
+  // Lazy load gateway - only needed for config persistence, not for basic onboarding
   const { getClient } = useGateway();
 
   // Load persisted state on mount

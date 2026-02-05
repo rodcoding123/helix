@@ -69,8 +69,8 @@ export function useVoiceMemoRecorder(options: RecorderOptions = {}) {
         audioChunksRef.current.push(event.data);
       };
 
-      mediaRecorder.onerror = (event: MediaRecorderErrorEvent) => {
-        const error = new Error(`Recording error: ${event.error}`);
+      mediaRecorder.onerror = (event: Event) => {
+        const error = new Error(`Recording error: ${(event as any).error}`);
         setState((prev) => ({
           ...prev,
           isRecording: false,

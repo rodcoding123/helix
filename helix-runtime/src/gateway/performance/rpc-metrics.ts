@@ -296,6 +296,13 @@ export class RPCPerformanceMonitor implements GatewayMetricsCollector {
 
     this.logger?.warn(`PERFORMANCE ALERT: ${alert.type} - ${alert.method} (${alert.severity})`);
   }
+
+  /**
+   * Get all recorded metrics
+   */
+  getMetrics(): Record<string, unknown>[] {
+    return this.metrics as unknown as Record<string, unknown>[];
+  }
 }
 
 /**

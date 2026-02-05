@@ -1,5 +1,5 @@
-import { executeCompositeSkill, validateCompositeSkill, type CompositeSkill, type ToolExecutor } from '../../helix/skill-chaining.js';
-import { executeSkillSandboxed, DEFAULT_SKILL_SANDBOX_CONFIG, type SkillMetadata } from '../../helix/skill-sandbox.js';
+import { executeCompositeSkill, validateCompositeSkill, type CompositeSkill, type ToolExecutor } from '../../../src/helix/skill-chaining.js';
+import { executeSkillSandboxed, DEFAULT_SKILL_SANDBOX_CONFIG, type SkillMetadata } from '../../../src/helix/skill-sandbox.js';
 import type { GatewayRequestHandlers, GatewayRequestContext } from './types.js';
 
 /**
@@ -7,7 +7,7 @@ import type { GatewayRequestHandlers, GatewayRequestContext } from './types.js';
  */
 function createRealToolExecutor(context: GatewayRequestContext, userId: string): ToolExecutor {
   return async (toolName: string, params: Record<string, unknown>): Promise<unknown> => {
-    const db = context.db;
+    const db = (context as any).db;
 
     // Try to fetch the custom tool from database
     try {
@@ -80,7 +80,7 @@ export const compositeSkillHandlers: GatewayRequestHandlers = {
    *   totalSteps: number
    * }
    */
-  'skills.execute_composite': async ({ params, respond, context, client }) => {
+  'skills.execute_composite': async ({ params, respond, context, client }: any) => {
     try {
       if (!params || typeof params !== 'object') {
         respond(false, undefined, {
@@ -178,7 +178,8 @@ export const compositeSkillHandlers: GatewayRequestHandlers = {
       });
 
       // Create real tool executor that fetches and executes custom tools
-      const toolExecutor = createRealToolExecutor(context, userId);
+      const userId = client?.connect?.userId;
+      const toolExecutor = createRealToolExecutor(context, userId || '');
 
       // Execute skill with real tool executor
       const result = await executeCompositeSkill(skillToExecute, input || {}, toolExecutor);
@@ -258,7 +259,7 @@ export const compositeSkillHandlers: GatewayRequestHandlers = {
    *   errors: string[] (validation errors, if any)
    * }
    */
-  'skills.validate_composite': async ({ params, respond }) => {
+  'skills.validate_composite': async ({ params, respond }: any) => {
     try {
       if (!params || typeof params !== 'object') {
         respond(false, undefined, {
@@ -307,7 +308,7 @@ export const compositeSkillHandlers: GatewayRequestHandlers = {
    *   updatedAt: string (ISO)
    * }
    */
-  'skills.get_skill_metadata': async ({ params, respond, context, client }) => {
+  'skills.get_skill_metadata': async ({ params, respond, context, client }: any) => {
     const { skillId } = params as Record<string, unknown>;
 
     if (!client?.connect?.userId) {
@@ -374,7 +375,7 @@ export const compositeSkillHandlers: GatewayRequestHandlers = {
    *   offset: number
    * }
    */
-  'skills.list_user_skills': async ({ params, respond, context, client }) => {
+  'skills.list_user_skills': async ({ params, respond, context, client }: any) => {
     const { enabled, limit = 50, offset = 0 } = params as Record<string, unknown>;
 
     if (!client?.connect?.userId) {
@@ -417,7 +418,7 @@ export const compositeSkillHandlers: GatewayRequestHandlers = {
       });
 
       respond(true, {
-        skills: (skills || []).map(skill => ({
+        skills: (skills || []).map((skill: any) => ({
           skillId: skill.id,
           name: skill.name,
           description: skill.description,

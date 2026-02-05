@@ -82,8 +82,8 @@ describe('ErrorBoundary', () => {
     );
 
     // Default fallback renders
-    expect(screen.queryByText(/something went wrong/i)).toBeInTheDocument() ||
-      expect(screen.queryByText('Error')).toBeInTheDocument();
+    const defaultFallback = screen.queryByText(/something went wrong/i) || screen.queryByText('Error');
+    expect(defaultFallback).toBeInTheDocument();
   });
 
   it('should render custom fallback', () => {
@@ -113,8 +113,8 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>
     );
 
-    expect(screen.queryByText(/Error:/i)).toBeInTheDocument() ||
-      expect(screen.queryByText('Error')).toBeInTheDocument();
+    const errorDisplay = screen.queryByText(/Error:/i) || screen.queryByText('Error');
+    expect(errorDisplay).toBeInTheDocument();
   });
 
   it('should call custom onError handler', () => {
@@ -146,8 +146,8 @@ describe('ErrorBoundary', () => {
     );
 
     // Default fallback includes details
-    expect(screen.queryByText(/try again/i)).toBeInTheDocument() ||
-      expect(screen.queryByText('Error')).toBeInTheDocument();
+    const fallbackDisplay = screen.queryByText(/try again/i) || screen.queryByText('Error');
+    expect(fallbackDisplay).toBeInTheDocument();
   });
 
   it('should include try again button in default fallback', () => {
@@ -162,9 +162,8 @@ describe('ErrorBoundary', () => {
     );
 
     // Default fallback has reset button
-    expect(screen.queryByText(/try again/i)).toBeInTheDocument() ||
-      expect(screen.getByRole('button', { name: /try again/i })).toBeDefined() ||
-      expect(screen.queryByText('Error')).toBeInTheDocument();
+    const tryAgainButton = screen.queryByText(/try again/i) || screen.getByRole('button', { name: /try again/i }) || screen.queryByText('Error');
+    expect(tryAgainButton).toBeInTheDocument();
   });
 });
 
@@ -195,8 +194,8 @@ describe('SafeComponent', () => {
       </SafeComponent>
     );
 
-    expect(screen.queryByText(/Failed to load component/i)).toBeInTheDocument() ||
-      expect(screen.queryByText('Error')).toBeInTheDocument();
+    const componentFallback = screen.queryByText(/Failed to load component/i) || screen.queryByText('Error');
+    expect(componentFallback).toBeInTheDocument();
   });
 
   it('should use custom fallback', () => {
@@ -243,8 +242,8 @@ describe('SafeComponent', () => {
     );
 
     // Should render something (error boundary catches error)
-    expect(screen.queryByText(/Failed to load component/i)).toBeInTheDocument() ||
-      expect(screen.queryByText('Error')).toBeInTheDocument();
+    const componentFallback = screen.queryByText(/Failed to load component/i) || screen.queryByText('Error');
+    expect(componentFallback).toBeInTheDocument();
   });
 
   it('should handle multiple SafeComponents independently', () => {
@@ -264,8 +263,8 @@ describe('SafeComponent', () => {
     );
 
     expect(screen.getByText('Safe 1')).toBeInTheDocument();
-    expect(screen.queryByText(/Failed to load component/i)).toBeInTheDocument() ||
-      expect(screen.queryByText('Error')).toBeInTheDocument();
+    const componentFallback = screen.queryByText(/Failed to load component/i) || screen.queryByText('Error');
+    expect(componentFallback).toBeInTheDocument();
   });
 });
 

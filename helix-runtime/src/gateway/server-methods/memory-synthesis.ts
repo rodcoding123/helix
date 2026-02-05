@@ -1,8 +1,12 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { router } from '../../../../src/helix/ai-operations/router.js';
-import { costTracker } from '../../../../src/helix/ai-operations/cost-tracker.js';
-import { approvalGate } from '../../../../src/helix/ai-operations/approval-gate.js';
 import type { GatewayRequestHandlers } from './types.js';
+import { AIOperationRouter } from '../../helix/ai-operations/router.js';
+import { CostTracker } from '../../helix/ai-operations/cost-tracker.js';
+import { ApprovalGate } from '../../helix/ai-operations/approval-gate.js';
+
+const router = new AIOperationRouter();
+const costTracker = new CostTracker();
+const approvalGate = new ApprovalGate();
 
 /**
  * Type definitions for memory synthesis handlers
@@ -171,7 +175,7 @@ export const memorySynthesisHandlers: GatewayRequestHandlers = {
    *   error?: string
    * }
    */
-  'memory.synthesize': async ({ params, respond, context, client }) => {
+  'memory.synthesize': async ({ params, respond, context, client }: any) => {
     // AUTHENTICATION CHECK FIRST
     if (!client?.connect?.userId) {
       respond(false, undefined, {
@@ -253,22 +257,23 @@ export const memorySynthesisHandlers: GatewayRequestHandlers = {
         await approvalGate.requestApproval(
           'memory_synthesis',
           'Memory Synthesis',
-          routingDecision.estimatedCostUsd,
-          `Synthesis Type: ${synthesisType} | Conversations: ${conversations.length}`
+          routingDecision.estimatedCostUsd || 0,
+          `Synthesis Type: ${synthesisType} | Conversations: ${conversations.length}`,
+          ''
         );
       }
 
       // Get the model client based on routing decision
-      const modelToUse = getModelClientForOperation(routingDecision.model);
+      const modelToUse = getModelClientForOperation(routingDecision.model || '');
 
       if (!modelToUse) {
-        throw new Error(`Model client not available: ${routingDecision.model}`);
+        throw new Error(`Model client not available: ${routingDecision.model || ''}`);
       }
 
       // Execute with routed model
       const executionStartTime = Date.now();
       const message = await modelToUse.messages.create({
-        model: getModelIdForRoute(routingDecision.model),
+        model: getModelIdForRoute(routingDecision.model || ''),
         max_tokens: 4096,
         messages: [
           {
@@ -295,7 +300,7 @@ export const memorySynthesisHandlers: GatewayRequestHandlers = {
       // Phase 0.5: Cost tracking
       const outputTokens = message.usage?.output_tokens || Math.ceil(responseText.length / 4);
       const totalLatency = Date.now() - startTime;
-      const costUsd = router.estimateCost(routingDecision.model, estimatedInputTokens, outputTokens);
+      const costUsd = router.estimateCost(routingDecision.model || '', estimatedInputTokens, outputTokens);
 
       // Log the operation to cost tracker
       await costTracker.logOperation(userId || 'system', {
@@ -359,7 +364,7 @@ export const memorySynthesisHandlers: GatewayRequestHandlers = {
    *   error?: string
    * }
    */
-  'memory.synthesis_status': async ({ params, respond, context, client }) => {
+  'memory.synthesis_status': async ({ params, respond, context, client }: any) => {
     const { jobId } = params;
 
     if (!client?.connect?.userId) {
@@ -398,7 +403,7 @@ export const memorySynthesisHandlers: GatewayRequestHandlers = {
   /**
    * Error handler for synthesis failures
    */
-  'memory.synthesize_error': async ({ params, respond, context, client }) => {
+  'memory.synthesize_error': async ({ params, respond, context, client }: any) => {
     try {
       const { jobId, error } = params as { jobId?: string; error?: string };
 
@@ -437,7 +442,7 @@ export const memorySynthesisHandlers: GatewayRequestHandlers = {
    *   }>
    * }
    */
-  'memory.list_patterns': async ({ params, respond, context, client }) => {
+  'memory.list_patterns': async ({ params, respond, context, client }: any) => {
     const { layer, patternType, limit = 50, offset = 0 } =
       (params as MemoryListPatternsParams) || {};
 

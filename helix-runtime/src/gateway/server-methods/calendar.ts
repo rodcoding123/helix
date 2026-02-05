@@ -4,8 +4,8 @@
  * 10 RPC handlers for event management, sync, and calendar views
  */
 
-import { GatewayRequestHandlers } from '../protocol/types';
-import {
+import { GatewayRequestHandlers } from './types.js';
+import type {
   CalendarEvent,
   CreateEventParams,
   UpdateEventParams,
@@ -14,14 +14,14 @@ import {
   CalendarViewParams,
   UpdateAttendeeParams,
   SyncCalendarParams,
-} from '../../types/calendar';
+} from '../../types/calendar.js';
 
 export const calendarHandlers: GatewayRequestHandlers = {
   /**
    * calendar.add_event
    * Create a new calendar event
    */
-  'calendar.add_event': async ({ params, respond, context }) => {
+  'calendar.add_event': async ({ params, respond, context }: any) => {
     const { user_id, event } = params as { user_id: string; event: CreateEventParams };
 
     try {
@@ -67,7 +67,7 @@ export const calendarHandlers: GatewayRequestHandlers = {
    * calendar.get_events
    * Get events for a date range with optional pagination
    */
-  'calendar.get_events': async ({ params, respond, context }) => {
+  'calendar.get_events': async ({ params, respond, context }: any) => {
     const { user_id, start_time, end_time, account_id, limit = 50, offset = 0 } = params as GetEventsParams;
 
     try {
@@ -111,7 +111,7 @@ export const calendarHandlers: GatewayRequestHandlers = {
    * calendar.search_events
    * Full-text search across event titles and descriptions
    */
-  'calendar.search_events': async ({ params, respond, context }) => {
+  'calendar.search_events': async ({ params, respond, context }: any) => {
     const { user_id, query, start_time, end_time, account_id, limit = 50, offset = 0 } = params as SearchEventsParams;
 
     try {
@@ -151,7 +151,7 @@ export const calendarHandlers: GatewayRequestHandlers = {
    * calendar.get_event
    * Get a specific event by ID with all attendees
    */
-  'calendar.get_event': async ({ params, respond, context }) => {
+  'calendar.get_event': async ({ params, respond, context }: any) => {
     const { event_id } = params as { event_id: string };
 
     try {
@@ -183,7 +183,7 @@ export const calendarHandlers: GatewayRequestHandlers = {
    * calendar.update_event
    * Update an existing event
    */
-  'calendar.update_event': async ({ params, respond, context }) => {
+  'calendar.update_event': async ({ params, respond, context }: any) => {
     const { event_id, event } = params as { event_id: string; event: UpdateEventParams };
 
     try {
@@ -236,7 +236,7 @@ export const calendarHandlers: GatewayRequestHandlers = {
    * calendar.delete_event
    * Delete an event and all related attendees
    */
-  'calendar.delete_event': async ({ params, respond, context }) => {
+  'calendar.delete_event': async ({ params, respond, context }: any) => {
     const { event_id } = params as { event_id: string };
 
     try {
@@ -261,7 +261,7 @@ export const calendarHandlers: GatewayRequestHandlers = {
    * calendar.create_recurring
    * Create a recurring event with RFC 5545 RRULE
    */
-  'calendar.create_recurring': async ({ params, respond, context }) => {
+  'calendar.create_recurring': async ({ params, respond, context }: any) => {
     const { user_id, event, rrule } = params as {
       user_id: string;
       event: CreateEventParams;
@@ -302,7 +302,7 @@ export const calendarHandlers: GatewayRequestHandlers = {
    * calendar.update_attendees
    * Manage event attendees (add/update/remove)
    */
-  'calendar.update_attendees': async ({ params, respond, context }) => {
+  'calendar.update_attendees': async ({ params, respond, context }: any) => {
     const { event_id, attendees } = params as UpdateAttendeeParams;
 
     try {
@@ -331,7 +331,7 @@ export const calendarHandlers: GatewayRequestHandlers = {
    * calendar.sync_calendar
    * Start calendar sync with external providers
    */
-  'calendar.sync_calendar': async ({ params, respond, context }) => {
+  'calendar.sync_calendar': async ({ params, respond, context }: any) => {
     const { account_id, user_id } = params as SyncCalendarParams;
 
     try {
@@ -379,7 +379,7 @@ export const calendarHandlers: GatewayRequestHandlers = {
    * calendar.get_sync_status
    * Check calendar sync progress
    */
-  'calendar.get_sync_status': async ({ params, respond, context }) => {
+  'calendar.get_sync_status': async ({ params, respond, context }: any) => {
     const { sync_id } = params as { sync_id: string };
 
     try {
@@ -403,7 +403,7 @@ export const calendarHandlers: GatewayRequestHandlers = {
    * calendar.get_calendar_view
    * Get events formatted for month/week/day views
    */
-  'calendar.get_calendar_view': async ({ params, respond, context }) => {
+  'calendar.get_calendar_view': async ({ params, respond, context }: any) => {
     const { user_id, start_time, end_time, view_type, account_id } = params as CalendarViewParams;
 
     try {
@@ -421,7 +421,7 @@ export const calendarHandlers: GatewayRequestHandlers = {
       const result = await context.db.query(query, queryParams);
 
       // Format events based on view type
-      const formattedEvents = result.rows.map(event => ({
+      const formattedEvents = result.rows.map((event: any) => ({
         ...event,
         display_time: view_type === 'day' ? event.start_time : event.start_time,
       }));

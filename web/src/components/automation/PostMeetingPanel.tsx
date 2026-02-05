@@ -3,8 +3,8 @@
  * UI for entering meeting notes and extracting action items
  */
 
-import React, { useState } from 'react';
-import type { ActionItem } from '@/web/src/services/automation.types';
+import { useState } from 'react';
+import type { ActionItem } from '../../services/automation.types';
 
 interface PostMeetingPanelProps {
   eventId: string;
@@ -46,7 +46,7 @@ export function PostMeetingPanel({
       setState((prev) => ({ ...prev, isExtracting: true, error: null, success: null }));
 
       const { getPostMeetingFollowupService } = await import(
-        '@/web/src/services/automation-post-meeting.js'
+        '../../services/automation-post-meeting'
       );
       const service = getPostMeetingFollowupService();
 
@@ -74,7 +74,7 @@ export function PostMeetingPanel({
       setState((prev) => ({ ...prev, isSubmitting: true, error: null }));
 
       const { getPostMeetingFollowupService } = await import(
-        '@/web/src/services/automation-post-meeting.js'
+        '../../services/automation-post-meeting'
       );
       const service = getPostMeetingFollowupService();
 
@@ -99,7 +99,9 @@ export function PostMeetingPanel({
       onFollowupCreated?.(taskIds);
 
       // Auto-dismiss after success
-      setTimeout(onDismiss, 2000);
+      if (onDismiss) {
+        setTimeout(onDismiss, 2000);
+      }
     } catch (err) {
       setState((prev) => ({
         ...prev,
@@ -124,7 +126,7 @@ export function PostMeetingPanel({
     }));
   }
 
-  const canExtract = state.notes.trim().length > 0 || state.transcript?.trim().length > 0;
+  const canExtract = state.notes.trim().length > 0 || (state.transcript?.trim() ?? '').length > 0;
   const canSubmit = state.extractedItems.length > 0;
 
   return (

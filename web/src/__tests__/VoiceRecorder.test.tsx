@@ -46,9 +46,6 @@ describe('Voice Recorder', () => {
     static isTypeSupported(type: string): boolean {
       return type === 'audio/webm;codecs=opus' || type === 'audio/wav';
     }
-
-    private stream: MediaStream;
-    private options: any;
   }
 
   // Create a mock MediaStream

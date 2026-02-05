@@ -1,0 +1,371 @@
+.tier-detection-step {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 2rem;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a 0%, #1a1f3a 100%);
+  color: #e2e8f0;
+}
+
+.detection-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.detection-header h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.detection-subtitle {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 0.875rem;
+}
+
+/* Current Tier Display */
+.current-tier {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.tier-badge {
+  border-radius: 8px;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+.tier-badge-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tier-badge-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+}
+
+.tier-badge-price {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.tier-description {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.tier-description h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.tier-features {
+  margin: 0;
+  padding-left: 1.5rem;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tier-features li {
+  color: #cbd5e1;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  position: relative;
+  padding-left: 1.25rem;
+}
+
+.tier-features li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #10b981;
+  font-weight: bold;
+}
+
+/* Path Selection */
+.path-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.path-selection h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.path-intro {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 0.875rem;
+}
+
+/* Free User Path Info */
+.path-info {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.info-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.path-info h3 {
+  margin: 0 0 0.5rem 0;
+  text-align: center;
+}
+
+.path-info > p {
+  margin: 0 0 1rem 0;
+  color: #cbd5e1;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.info-points {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.info-point {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  color: #cbd5e1;
+}
+
+.point-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  font-weight: bold;
+  font-size: 0.75rem;
+}
+
+/* Path Options (for Paid Users) */
+.path-option {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.path-button {
+  background: rgba(30, 41, 59, 0.6);
+  border: 2px solid #475569;
+  border-radius: 8px;
+  padding: 1.25rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #e2e8f0;
+}
+
+.path-button:hover {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: #64748b;
+}
+
+.path-button.selected {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: #60a5fa;
+  box-shadow: 0 0 12px rgba(96, 165, 250, 0.2);
+}
+
+.path-option-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.path-icon {
+  font-size: 1.5rem;
+}
+
+.path-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.selected-badge {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #10b981;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.path-description {
+  margin: 0 0 0.75rem 0;
+  color: #cbd5e1;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.path-benefits {
+  margin: 0;
+  padding-left: 1.5rem;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.path-benefits li {
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+/* Buttons */
+.btn-continue {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border: none;
+  border-radius: 6px;
+  padding: 0.875rem 1.5rem;
+  color: white;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  align-self: center;
+  min-width: 200px;
+}
+
+.btn-continue:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.btn-continue:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.path-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+/* Additional Info */
+.plan-upgrade,
+.path-note {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.plan-upgrade a,
+.path-note a {
+  color: #60a5fa;
+  text-decoration: none;
+  border-bottom: 1px dotted #60a5fa;
+}
+
+.plan-upgrade a:hover,
+.path-note a:hover {
+  color: #93c5fd;
+  border-bottom: 1px solid #93c5fd;
+}
+
+/* Debug Info */
+.debug-info {
+  max-width: 600px;
+  margin: 2rem auto 0;
+}
+
+.debug-info details {
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 0.75rem;
+}
+
+.debug-info summary {
+  cursor: pointer;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  user-select: none;
+}
+
+.debug-info pre {
+  margin: 0.75rem 0 0;
+  background: rgba(15, 23, 42, 0.8);
+  border-radius: 4px;
+  padding: 0.75rem;
+  font-size: 0.7rem;
+  overflow-x: auto;
+  color: #cbd5e1;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .tier-detection-step {
+    padding: 1rem;
+  }
+
+  .detection-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .tier-badge-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .path-option-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .selected-badge {
+    margin-left: 0;
+  }
+
+  .btn-continue {
+    width: 100%;
+  }
+}
