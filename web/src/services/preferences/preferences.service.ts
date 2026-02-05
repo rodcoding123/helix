@@ -3,7 +3,7 @@
  * Manages operation preferences and UI theme settings
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 import { getCacheService } from '@/lib/cache/redis-cache';
 
 export interface OperationPreference {
@@ -34,16 +34,8 @@ export interface ThemePreference {
   updated_at?: string;
 }
 
-let db: any;
-
 function getDb() {
-  if (!db) {
-    db = createClient(
-      process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '',
-      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || ''
-    );
-  }
-  return db;
+  return supabase;
 }
 
 export class PreferencesService {

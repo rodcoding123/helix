@@ -3,22 +3,25 @@
  * Provides intelligent caching for frequently accessed data with TTL management
  */
 
-import { Redis } from 'ioredis';
-
 export interface CacheEntry<T> {
   data: T;
   expiresAt?: number;
 }
 
+// Redis type imported dynamically to avoid bundling Node.js code in the browser
+type RedisClient = import('ioredis').Redis;
+
 export class CacheService {
-  private redis: Redis | null = null;
+  private redis: RedisClient | null = null;
   private enabled: boolean = false;
 
   /**
    * Initialize Redis connection
+   * Uses dynamic import so ioredis is never loaded in browser bundles
    */
   async initialize(redisUrl?: string): Promise<void> {
     try {
+      const { Redis } = await import('ioredis');
       const url = redisUrl || process.env.REDIS_URL || 'redis://localhost:6379';
       this.redis = new Redis(url);
 
