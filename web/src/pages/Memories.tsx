@@ -13,6 +13,11 @@ export const MemoriesPage: FC = () => {
   const [sortBy, setSortBy] = useState<SortType>('recent');
   const [emotionFilter, setEmotionFilter] = useState<EmotionFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState({
+    dateRange: { start: null as Date | null, end: null as Date | null },
+    valence: null as number | null,
+    salienceTier: null as string | null,
+  });
 
   // Fetch greeting and memories when user is loaded
   useEffect(() => {
@@ -43,6 +48,34 @@ export const MemoriesPage: FC = () => {
         msg.content.toLowerCase().includes(query)
       );
       return matchesTopic || matchesContent;
+    });
+  }
+
+  // Filter by date range
+  if (filters.dateRange.start || filters.dateRange.end) {
+    filteredMemories = filteredMemories.filter((m) => {
+      const memoryDate = new Date(m.created_at);
+      if (filters.dateRange.start && memoryDate < filters.dateRange.start) return false;
+      if (filters.dateRange.end) {
+        const endDate = new Date(filters.dateRange.end);
+        endDate.setHours(23, 59, 59, 999);
+        if (memoryDate > endDate) return false;
+      }
+      return true;
+    });
+  }
+
+  // Filter by emotional valence
+  if (filters.valence !== null) {
+    filteredMemories = filteredMemories.filter((m) => {
+      return Math.abs(m.valence - (filters.valence as number)) <= 0.3;
+    });
+  }
+
+  // Filter by salience tier
+  if (filters.salienceTier) {
+    filteredMemories = filteredMemories.filter((m) => {
+      return m.salience_tier === filters.salienceTier;
     });
   }
 
@@ -93,6 +126,123 @@ export const MemoriesPage: FC = () => {
       <section className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4">
         <MemoryGreeting greeting={greeting} isLoading={isLoading} />
       </section>
+
+      {/* Advanced Filters Panel */}
+      <div className="flex gap-4 mb-6 p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 flex-wrap">
+        {/* Date Range */}
+        <div className="flex-1 min-w-[200px]">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Date Range
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="date"
+              value={
+                filters.dateRange.start
+                  ? filters.dateRange.start.toISOString().split('T')[0]
+                  : ''
+              }
+              onChange={(e) =>
+                setFilters({
+                  ...filters,
+                  dateRange: {
+                    ...filters.dateRange,
+                    start: e.target.value ? new Date(e.target.value) : null,
+                  },
+                })
+              }
+              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-800 dark:text-white text-sm"
+              placeholder="Start date"
+            />
+            <input
+              type="date"
+              value={
+                filters.dateRange.end
+                  ? filters.dateRange.end.toISOString().split('T')[0]
+                  : ''
+              }
+              onChange={(e) =>
+                setFilters({
+                  ...filters,
+                  dateRange: {
+                    ...filters.dateRange,
+                    end: e.target.value ? new Date(e.target.value) : null,
+                  },
+                })
+              }
+              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-800 dark:text-white text-sm"
+              placeholder="End date"
+            />
+          </div>
+        </div>
+
+        {/* Emotional Valence Slider */}
+        <div className="flex-1 min-w-[200px]">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Emotional Valence:{' '}
+            <span className="font-semibold">
+              {filters.valence !== null ? filters.valence.toFixed(1) : 'Any'}
+            </span>
+          </label>
+          <input
+            type="range"
+            min="-1"
+            max="1"
+            step="0.1"
+            value={filters.valence ?? 0}
+            onChange={(e) =>
+              setFilters({
+                ...filters,
+                valence: e.target.value ? parseFloat(e.target.value) : null,
+              })
+            }
+            className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
+          />
+          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex justify-between">
+            <span>Negative</span>
+            <span>Neutral</span>
+            <span>Positive</span>
+          </div>
+        </div>
+
+        {/* Salience Tier */}
+        <div className="flex-1 min-w-[150px]">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Importance
+          </label>
+          <select
+            value={filters.salienceTier || ''}
+            onChange={(e) =>
+              setFilters({
+                ...filters,
+                salienceTier: e.target.value || null,
+              })
+            }
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-800 dark:text-white text-sm"
+          >
+            <option value="">All</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+
+        {/* Clear Filters Button */}
+        <div className="flex items-end">
+          <button
+            onClick={() =>
+              setFilters({
+                dateRange: { start: null, end: null },
+                valence: null,
+                salienceTier: null,
+              })
+            }
+            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-medium"
+          >
+            Clear Filters
+          </button>
+        </div>
+      </div>
 
       {/* Filters and Controls */}
       <div className="space-y-4">
