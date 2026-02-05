@@ -53,6 +53,7 @@ import {
   incrementPresenceVersion,
   refreshGatewayHealthSnapshot,
 } from "../health-state.js";
+import { RateLimiter } from "../../rate-limiter.js";
 import type { GatewayWsClient } from "../ws-types.js";
 
 type SubsystemLogger = ReturnType<typeof createSubsystemLogger>;
@@ -148,6 +149,7 @@ export function attachGatewayWsMessageHandler(params: {
   events: string[];
   extraHandlers: GatewayRequestHandlers;
   buildRequestContext: () => GatewayRequestContext;
+  rateLimiter: RateLimiter;
   send: (obj: unknown) => void;
   close: (code?: number, reason?: string) => void;
   isClosed: () => boolean;
@@ -178,6 +180,7 @@ export function attachGatewayWsMessageHandler(params: {
     events,
     extraHandlers,
     buildRequestContext,
+    rateLimiter,
     send,
     close,
     isClosed,
@@ -933,6 +936,20 @@ export function attachGatewayWsMessageHandler(params: {
           ...meta,
         });
       };
+
+      // Check rate limit before executing request
+      const userId = client.connect.device?.id ?? client.connect.client.instanceId ?? client.connId;
+      const { allowed, retryAfterMs } = rateLimiter.checkLimit(userId, req.method);
+
+      if (!allowed) {
+        respond(false, undefined, {
+          code: ErrorCodes.RATE_LIMIT_EXCEEDED,
+          message: `Rate limit exceeded for ${req.method}`,
+          retryable: true,
+          retryAfterMs,
+        });
+        return;
+      }
 
       void (async () => {
         await handleGatewayRequest({

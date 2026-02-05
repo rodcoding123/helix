@@ -12,11 +12,15 @@ import { getHandshakeTimeoutMs } from "../server-constants.js";
 import type { GatewayRequestContext, GatewayRequestHandlers } from "../server-methods/types.js";
 import { formatError } from "../server-utils.js";
 import { logWs } from "../ws-log.js";
+import { RateLimiter } from "../rate-limiter.js";
 import { getHealthVersion, getPresenceVersion, incrementPresenceVersion } from "./health-state.js";
 import { attachGatewayWsMessageHandler } from "./ws-connection/message-handler.js";
 import type { GatewayWsClient } from "./ws-types.js";
 
 type SubsystemLogger = ReturnType<typeof createSubsystemLogger>;
+
+// Global rate limiter instance shared across all connections
+const globalRateLimiter = new RateLimiter();
 
 export function attachGatewayWsConnectionHandler(params: {
   wss: WebSocketServer;
@@ -246,6 +250,7 @@ export function attachGatewayWsConnectionHandler(params: {
       events,
       extraHandlers,
       buildRequestContext,
+      rateLimiter: globalRateLimiter,
       send,
       close,
       isClosed: () => closed,
