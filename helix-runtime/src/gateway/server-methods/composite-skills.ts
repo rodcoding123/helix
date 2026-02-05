@@ -300,10 +300,9 @@ export const compositeSkillHandlers: GatewayRequestHandlers = {
    *   skillId: string
    *   name: string
    *   description: string
-   *   trigger: string
-   *   actions: unknown
-   *   enabled: boolean
-   *   executionCount: number
+   *   steps: unknown (JSONB array of steps)
+   *   version: string
+   *   isEnabled: boolean
    *   createdAt: string (ISO)
    *   updatedAt: string (ISO)
    * }
@@ -338,10 +337,9 @@ export const compositeSkillHandlers: GatewayRequestHandlers = {
         skillId: skill.id,
         name: skill.name,
         description: skill.description,
-        trigger: skill.trigger,
-        actions: skill.actions,
-        enabled: skill.enabled,
-        executionCount: skill.execution_count,
+        steps: skill.steps,
+        version: skill.version,
+        isEnabled: skill.is_enabled,
         createdAt: skill.created_at,
         updatedAt: skill.updated_at,
       });
@@ -362,13 +360,12 @@ export const compositeSkillHandlers: GatewayRequestHandlers = {
    *
    * response: {
    *   skills: Array<{
-   *     id: string
+   *     skillId: string
    *     name: string
    *     description: string
-   *     trigger: string
-   *     actions: unknown
-   *     enabled: boolean
-   *     executionCount: number
+   *     steps: unknown (JSONB array)
+   *     version: string
+   *     isEnabled: boolean
    *     createdAt: string (ISO)
    *     updatedAt: string (ISO)
    *   }>
@@ -378,7 +375,7 @@ export const compositeSkillHandlers: GatewayRequestHandlers = {
    * }
    */
   'skills.list_user_skills': async ({ params, respond, context, client }) => {
-    const { enabled = true, limit = 50, offset = 0 } = params as Record<string, unknown>;
+    const { enabled, limit = 50, offset = 0 } = params as Record<string, unknown>;
 
     if (!client?.connect?.userId) {
       respond(false, undefined, { code: 'UNAUTHORIZED', message: 'User not authenticated' });
@@ -400,12 +397,11 @@ export const compositeSkillHandlers: GatewayRequestHandlers = {
         .from('composite_skills')
         .select('*', { count: 'exact' })
         .eq('user_id', client.connect.userId)
-        .order('execution_count', { ascending: false })
         .order('created_at', { ascending: false })
         .range(offset, offset + limit - 1);
 
       if (enabled !== undefined && typeof enabled === 'boolean') {
-        query = query.eq('enabled', enabled);
+        query = query.eq('is_enabled', enabled);
       }
 
       const { data: skills, error, count } = await query;
@@ -425,10 +421,9 @@ export const compositeSkillHandlers: GatewayRequestHandlers = {
           skillId: skill.id,
           name: skill.name,
           description: skill.description,
-          trigger: skill.trigger,
-          actions: skill.actions,
-          enabled: skill.enabled,
-          executionCount: skill.execution_count,
+          steps: skill.steps,
+          version: skill.version,
+          isEnabled: skill.is_enabled,
           createdAt: skill.created_at,
           updatedAt: skill.updated_at,
         })),
