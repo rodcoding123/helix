@@ -17,6 +17,31 @@ import {
 } from './skill-sandbox.js';
 import crypto from 'node:crypto';
 
+/**
+ * Helper to generate Ed25519 keypair and sign data
+ */
+function createEd25519Signature(
+  skillCode: string,
+  metadata: Pick<SkillMetadata, 'name' | 'version' | 'author' | 'signedAt'>
+): { signature: string; publicKeyPem: string } {
+  // Generate Ed25519 keypair
+  const { privateKey, publicKey } = crypto.generateKeyPairSync('ed25519');
+
+  // Create signed data string
+  const signedData = `${skillCode}|${metadata.name}|${metadata.version}|${metadata.author}|${metadata.signedAt}`;
+
+  // Sign the data using Ed25519 (pass null as algorithm for Ed25519)
+  const signatureBuffer = crypto.sign(null, Buffer.from(signedData, 'utf8'), privateKey);
+
+  // Export public key as PEM
+  const publicKeyPem = publicKey.export({ type: 'spki', format: 'pem' });
+
+  return {
+    signature: signatureBuffer.toString('base64'),
+    publicKeyPem,
+  };
+}
+
 describe('Skill Sandbox - Signature Verification', () => {
   const sampleSkillCode = 'return 2 + 2;';
 
@@ -53,7 +78,6 @@ describe('Skill Sandbox - Signature Verification', () => {
   });
 
   it('should validate signature format', () => {
-    const trustedKey = 'trusted-signer-key';
     const metadata: SkillMetadata = {
       name: 'test-skill',
       version: '1.0.0',
@@ -62,16 +86,11 @@ describe('Skill Sandbox - Signature Verification', () => {
       permissions: [],
     };
 
-    // Create valid signature prefix
-    const signedData = `${sampleSkillCode}|${metadata.name}|${metadata.version}|${metadata.author}|${metadata.signedAt}`;
-    const dataHash = crypto.createHash('sha256').update(signedData).digest('hex');
-    const validSignature =
-      crypto.createHash('sha256').update(`${trustedKey}:${dataHash}`).digest('hex').slice(0, 16) +
-      '-rest-of-signature';
+    // Create valid Ed25519 signature
+    const { signature, publicKeyPem } = createEd25519Signature(sampleSkillCode, metadata);
+    metadata.signature = signature;
 
-    metadata.signature = validSignature;
-
-    const result = verifySkillSignature(sampleSkillCode, metadata, [trustedKey]);
+    const result = verifySkillSignature(sampleSkillCode, metadata, [publicKeyPem]);
 
     expect(result).toBe(true);
   });
@@ -92,7 +111,6 @@ describe('Skill Sandbox - Signature Verification', () => {
   });
 
   it('should accept signature from any trusted signer', () => {
-    const trustedKey2 = 'trusted-signer-2';
     const metadata: SkillMetadata = {
       name: 'test-skill',
       version: '1.0.0',
@@ -101,15 +119,24 @@ describe('Skill Sandbox - Signature Verification', () => {
       permissions: [],
     };
 
-    const signedData = `${sampleSkillCode}|${metadata.name}|${metadata.version}|${metadata.author}|${metadata.signedAt}`;
-    const dataHash = crypto.createHash('sha256').update(signedData).digest('hex');
-    const validSignature =
-      crypto.createHash('sha256').update(`${trustedKey2}:${dataHash}`).digest('hex').slice(0, 16) +
-      '-sig';
+    // Create signature with second key
+    const { signature, publicKeyPem: publicKeyPem2 } = createEd25519Signature(
+      sampleSkillCode,
+      metadata
+    );
+    metadata.signature = signature;
 
-    metadata.signature = validSignature;
+    // Generate two other random public keys
+    const { publicKey: key1 } = crypto.generateKeyPairSync('ed25519');
+    const { publicKey: key3 } = crypto.generateKeyPairSync('ed25519');
+    const publicKeyPem1 = key1.export({ type: 'spki', format: 'pem' });
+    const publicKeyPem3 = key3.export({ type: 'spki', format: 'pem' });
 
-    const result = verifySkillSignature(sampleSkillCode, metadata, ['key1', trustedKey2, 'key3']);
+    const result = verifySkillSignature(sampleSkillCode, metadata, [
+      publicKeyPem1,
+      publicKeyPem2,
+      publicKeyPem3,
+    ]);
 
     expect(result).toBe(true);
   });

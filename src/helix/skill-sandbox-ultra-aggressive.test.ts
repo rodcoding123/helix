@@ -18,6 +18,30 @@ import {
   type SkillPermission,
 } from './skill-sandbox.js';
 import crypto from 'node:crypto';
+/**
+ * Helper to generate Ed25519 keypair and sign data
+ */
+function createEd25519Signature(
+  skillCode: string,
+  metadata: Pick<SkillMetadata, 'name' | 'version' | 'author' | 'signedAt'>
+): { signature: string; publicKeyPem: string } {
+  // Generate Ed25519 keypair
+  const { privateKey, publicKey } = crypto.generateKeyPairSync('ed25519');
+
+  // Create signed data string
+  const signedData = `${skillCode}|${metadata.name}|${metadata.version}|${metadata.author}|${metadata.signedAt}`;
+
+  // Sign the data using Ed25519 (pass null as algorithm for Ed25519)
+  const signatureBuffer = crypto.sign(null, Buffer.from(signedData, 'utf8'), privateKey);
+
+  // Export public key as PEM
+  const publicKeyPem = publicKey.export({ type: 'spki', format: 'pem' });
+
+  return {
+    signature: signatureBuffer.toString('base64'),
+    publicKeyPem,
+  };
+}
 
 describe('Skill Sandbox Ultra-Aggressive - Execution Paths', () => {
   beforeEach(() => {
@@ -43,7 +67,6 @@ describe('Skill Sandbox Ultra-Aggressive - Execution Paths', () => {
 
   it('should verify signature with multiple keys - first key fails', () => {
     const code = 'return 42;';
-    const trustedKey = 'key2';
     const metadata: SkillMetadata = {
       name: 'multi-key-test',
       version: '1.0.0',
@@ -52,15 +75,15 @@ describe('Skill Sandbox Ultra-Aggressive - Execution Paths', () => {
       permissions: [],
     };
 
-    const signedData = `${code}|${metadata.name}|${metadata.version}|${metadata.author}|${metadata.signedAt}`;
-    const dataHash = crypto.createHash('sha256').update(signedData).digest('hex');
-    const signature =
-      crypto.createHash('sha256').update(`${trustedKey}:${dataHash}`).digest('hex').slice(0, 16) +
-      '-valid';
-
+    // Create valid Ed25519 signature
+    const { signature, publicKeyPem } = createEd25519Signature(code, metadata);
     metadata.signature = signature;
 
-    const result = verifySkillSignature(code, metadata, ['wrong-key', trustedKey]);
+    // Generate a wrong key for testing multiple key support
+    const { publicKey: wrongKey } = crypto.generateKeyPairSync('ed25519');
+    const wrongKeyPem = wrongKey.export({ type: 'spki', format: 'pem' });
+
+    const result = verifySkillSignature(code, metadata, [wrongKeyPem, publicKeyPem]);
     expect(result).toBe(true);
   });
 

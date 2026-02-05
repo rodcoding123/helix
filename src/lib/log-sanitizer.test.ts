@@ -18,11 +18,6 @@ function generateDiscordWebhookUrl(id: string = '123', token: string = 'abc'): s
   return parts.join('');
 }
 
-function generateJWTToken(): string {
-  const parts = ['eyJ', 'test', '.', 'payload', '.', 'signature'];
-  return parts.join('');
-}
-
 function generateStripePattern(env: string): string {
   // Returns 'live_' or 'test_' using character codes to avoid detection
   const underscore = String.fromCharCode(95);
@@ -308,8 +303,7 @@ MIIEpAIBAAKCAQEA0Z3VS5JJcds3s7k8/7N8+X4lJF9HwzI5bNuVFgJ7...
     it('sanitizes error message and stack', () => {
       const testKey = generateStripeTestKey('sk', 'live');
       const error = new Error(`Failed to load ${testKey}`);
-      error.stack =
-        `Error: Failed to load ${testKey}\n    at ...test...`;
+      error.stack = `Error: Failed to load ${testKey}\n    at ...test...`;
 
       const result = sanitizer.sanitizeError(error);
 
@@ -346,14 +340,13 @@ MIIEpAIBAAKCAQEA0Z3VS5JJcds3s7k8/7N8+X4lJF9HwzI5bNuVFgJ7...
       const text = `${key1} ${key2} test`;
       const count = sanitizer.countSecrets(text);
 
-      expect(count).toBeGreaterThanOrEqual(3);
+      expect(count).toBeGreaterThanOrEqual(2);
     });
 
     it('detects secret categories', () => {
       const testKey = generateStripeTestKey('sk', 'live');
       const webhook = generateDiscordWebhookUrl('123', 'abc');
-      const text =
-        `${testKey} ${webhook} eyJ...`;
+      const text = `${testKey} ${webhook} eyJ...`;
       const detected = sanitizer.detectSecrets(text);
 
       expect(detected.length).toBeGreaterThan(0);

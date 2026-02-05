@@ -155,13 +155,13 @@ export function verifySkillSignature(
       // The signature should be base64-encoded
       const signatureBuffer = Buffer.from(metadata.signature, 'base64');
 
-      // Verify signature using Ed25519
-      const verify = crypto.createVerify('Ed25519');
-      verify.update(signedData);
-      verify.end();
-
-      // Check if signature is valid
-      const isValid = verify.verify(signerPublicKeyPem, signatureBuffer);
+      // Verify signature using Ed25519 (pass null as algorithm for Ed25519)
+      const isValid = crypto.verify(
+        null,
+        Buffer.from(signedData, 'utf8'),
+        signerPublicKeyPem,
+        signatureBuffer
+      );
 
       if (isValid) {
         return true;
