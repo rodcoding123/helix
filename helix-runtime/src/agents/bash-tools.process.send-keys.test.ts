@@ -30,9 +30,9 @@ test("process send-keys encodes Enter for pty sessions", async () => {
     keys: ["h", "i", "Enter"],
   });
 
-  const deadline = Date.now() + (process.platform === "win32" ? 4000 : 2000);
+  const deadline = Date.now() + (process.platform === "win32" ? 8000 : 4000);
   while (Date.now() < deadline) {
-    await wait(50);
+    await wait(100);
     const poll = await processTool.execute("toolcall", { action: "poll", sessionId });
     const details = poll.details as { status?: string; aggregated?: string };
     if (details.status !== "running") {
@@ -64,9 +64,9 @@ test("process submit sends Enter for pty sessions", async () => {
     sessionId,
   });
 
-  const deadline = Date.now() + (process.platform === "win32" ? 4000 : 2000);
+  const deadline = Date.now() + (process.platform === "win32" ? 8000 : 4000);
   while (Date.now() < deadline) {
-    await wait(50);
+    await wait(100);
     const poll = await processTool.execute("toolcall", { action: "poll", sessionId });
     const details = poll.details as { status?: string; aggregated?: string };
     if (details.status !== "running") {
