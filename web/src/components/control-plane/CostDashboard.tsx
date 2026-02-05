@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   LineChart,
   Line,
@@ -33,17 +33,7 @@ export default function CostDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadData();
-    const channel = subscribeToOperationUpdates((newOp) => {
-      setRecentOps((prev) => [newOp, ...prev.slice(0, 49)]);
-    });
-    return () => {
-      channel.unsubscribe();
-    };
-  }, [user?.id]);
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const [metrics, userSpending, ops] = await Promise.all([
@@ -59,7 +49,17 @@ export default function CostDashboard() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [user?.id]);
+
+  useEffect(() => {
+    loadData();
+    const channel = subscribeToOperationUpdates((newOp) => {
+      setRecentOps((prev) => [newOp, ...prev.slice(0, 49)]);
+    });
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [loadData]);
 
   if (loading) return <div className="text-center py-8">Loading cost data...</div>;
   if (error) return <div className="text-red-400 py-8">Error: {error}</div>;
