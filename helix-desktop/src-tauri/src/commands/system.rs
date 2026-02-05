@@ -1,7 +1,6 @@
 // System information and utility commands
 
 use std::fs;
-use std::path::PathBuf;
 use serde::Serialize;
 
 #[derive(Serialize)]
