@@ -122,6 +122,13 @@ dependencies {
   testImplementation("io.mockk:mockk:1.13.12")
   testImplementation("org.robolectric:robolectric:4.16")
   testRuntimeOnly("org.junit.vintage:junit-vintage-engine:6.0.2")
+
+  // Android instrumentation test dependencies for Compose UI testing
+  androidTestImplementation("androidx.test.ext:junit:1.2.1")
+  androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+  androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+  androidTestImplementation("androidx.compose.ui:ui-test-manifest")
+  androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
 }
 
 tasks.withType<Test>().configureEach {
