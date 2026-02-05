@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import CostDashboard from '../components/control-plane/CostDashboard';
 import ApprovalQueue from '../components/control-plane/ApprovalQueue';
 import RoutingConfig from '../components/control-plane/RoutingConfig';
