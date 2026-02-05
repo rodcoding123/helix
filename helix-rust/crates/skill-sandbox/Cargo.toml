@@ -20,6 +20,7 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 wasmtime = "18.0"
 wasmtime-wasi = "18.0"
+wasi-common = "18.0"
 clap = { version = "4.4", features = ["derive"] }
 axum = "0.7"
 tower = "0.4"
