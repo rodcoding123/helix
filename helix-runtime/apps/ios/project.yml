@@ -24,6 +24,7 @@ schemes:
     test:
       targets:
         - OpenClawTests
+        - OpenClawUITests
 
 targets:
   OpenClaw:
@@ -130,5 +131,26 @@ targets:
       path: Tests/Info.plist
       properties:
         CFBundleDisplayName: OpenClawTests
+        CFBundleShortVersionString: "2026.1.27-beta.1"
+        CFBundleVersion: "20260126"
+
+  OpenClawUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: UITests
+    dependencies:
+      - target: OpenClaw
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ai.openclaw.ios.uitests
+        SWIFT_VERSION: "6.0"
+        SWIFT_STRICT_CONCURRENCY: complete
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/OpenClaw.app/OpenClaw"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+    info:
+      path: UITests/Info.plist
+      properties:
+        CFBundleDisplayName: OpenClawUITests
         CFBundleShortVersionString: "2026.1.27-beta.1"
         CFBundleVersion: "20260126"
