@@ -15,6 +15,11 @@ import {
   Zap,
   TrendingUp,
   Check,
+  Download,
+  Key,
+  Wifi,
+  WifiOff,
+  MessageSquare,
 } from 'lucide-react';
 import { useInstances } from '@/hooks/useInstances';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -132,25 +137,74 @@ export function Dashboard() {
           </div>
 
           {instances.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-white/10 bg-bg-secondary/30 p-12 text-center">
-              <div className="mx-auto h-16 w-16 rounded-2xl bg-helix-500/10 flex items-center justify-center">
-                <Activity className="h-8 w-8 text-helix-400" />
+            <div className="rounded-2xl border border-dashed border-white/10 bg-bg-secondary/30 p-10">
+              <div className="text-center">
+                <div className="mx-auto h-16 w-16 rounded-2xl bg-helix-500/10 flex items-center justify-center">
+                  <Activity className="h-8 w-8 text-helix-400" />
+                </div>
+                <h3 className="mt-6 text-lg font-display font-medium text-white">
+                  Get started with Helix
+                </h3>
+                <p className="mt-2 text-sm text-text-secondary max-w-md mx-auto">
+                  Create an instance to begin. Each instance represents a Helix runtime you can
+                  connect to from your local machine.
+                </p>
+                {canCreateInstance && (
+                  <button
+                    onClick={() => setShowCreateModal(true)}
+                    className="btn btn-cta btn-cta-shimmer mt-6 gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Create Instance
+                  </button>
+                )}
               </div>
-              <h3 className="mt-6 text-lg font-display font-medium text-white">No instances yet</h3>
-              <p className="mt-2 text-sm text-text-secondary max-w-sm mx-auto">
-                Create your first Helix instance to start monitoring AI consciousness and track
-                transformations.
-              </p>
-              {canCreateInstance && (
-                <button
-                  onClick={() => setShowCreateModal(true)}
-                  className="btn btn-cta btn-cta-shimmer mt-6 gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  Create Instance
-                </button>
-              )}
+
+              {/* Setup Steps */}
+              <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                <SetupStep
+                  step={1}
+                  title="Create instance"
+                  description="Generate your unique instance key to identify your runtime"
+                  icon={<Key className="h-4 w-4" />}
+                />
+                <SetupStep
+                  step={2}
+                  title="Install Helix CLI"
+                  description="Run the CLI on your machine to start the local runtime"
+                  icon={<Download className="h-4 w-4" />}
+                />
+                <SetupStep
+                  step={3}
+                  title="Connect & go"
+                  description="Your instance appears here once the runtime connects"
+                  icon={<Wifi className="h-4 w-4" />}
+                />
+              </div>
             </div>
+          ) : instances.every(i => !i.is_active) && instances.length > 0 ? (
+            <>
+              {/* Offline banner */}
+              <div className="mb-4 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 flex items-start gap-3">
+                <WifiOff className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-amber-300">All instances offline</p>
+                  <p className="mt-1 text-sm text-text-secondary">
+                    Start your local Helix runtime to connect. Your instances will show as active
+                    once the CLI is running.
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                {instances.map(instance => (
+                  <InstanceCard
+                    key={instance.id}
+                    instance={instance}
+                    onDelete={() => deleteInstance(instance.id)}
+                  />
+                ))}
+              </div>
+            </>
           ) : (
             <div className="space-y-4">
               {instances.map(instance => (
@@ -269,6 +323,28 @@ function StatCard({ label, value, limit, icon, color, isText }: StatCardProps) {
           )}
         </p>
       </div>
+    </div>
+  );
+}
+
+interface SetupStepProps {
+  step: number;
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+}
+
+function SetupStep({ step, title, description, icon }: SetupStepProps) {
+  return (
+    <div className="rounded-xl bg-bg-tertiary/30 border border-white/5 p-4">
+      <div className="flex items-center gap-2.5">
+        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-helix-500/20 text-helix-400 text-xs font-bold">
+          {step}
+        </div>
+        <div className="text-helix-400">{icon}</div>
+        <h4 className="text-sm font-medium text-white">{title}</h4>
+      </div>
+      <p className="mt-2 text-xs text-text-tertiary leading-relaxed">{description}</p>
     </div>
   );
 }
