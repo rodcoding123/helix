@@ -107,6 +107,14 @@ export class RedisRateLimiter {
       retryAfter: !allowed ? Math.ceil(windowSeconds / 2) : undefined,
     };
   }
+
+  /**
+   * Close Redis connection (for testing)
+   */
+  close(): void {
+    // No-op for in-memory implementation
+    // In production with real Redis, this would close the connection
+  }
 }
 
 /**
