@@ -257,13 +257,19 @@ export function useGateway() {
     };
   }, [disconnect]);
 
-  // Initial status check and auto-connect
+  // Initial status check and auto-connect (non-blocking)
   useEffect(() => {
-    checkStatus().then((result) => {
-      if (result.running && result.url) {
-        connect(result.url, LOCAL_GATEWAY_TOKEN);
-      }
-    });
+    // Don't block on gateway status - it's optional
+    checkStatus()
+      .then((result) => {
+        if (result.running && result.url) {
+          connect(result.url, LOCAL_GATEWAY_TOKEN);
+        }
+      })
+      .catch(() => {
+        // Gracefully handle gateway check failure - gateway is optional
+        console.debug('Gateway not available on startup - this is normal');
+      });
 
     return () => {
       disconnect();

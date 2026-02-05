@@ -12,6 +12,7 @@ function App() {
   const { isFirstRun, markOnboarded } = useSystem();
   const { status, start } = useGateway();
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [autoTriggeredOnboarding, setAutoTriggeredOnboarding] = useState(false);
 
   // Initialize theme
   useTheme();
@@ -29,26 +30,39 @@ function App() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key === 'O') {
         e.preventDefault();
-        setShowOnboarding(prev => !prev);
+        if (!showOnboarding) {
+          setShowOnboarding(true);
+          setAutoTriggeredOnboarding(true); // Mark as user-triggered
+        } else {
+          setShowOnboarding(false);
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Determine if we should show onboarding
+  // Determine if we should show onboarding (with safeguard)
   useEffect(() => {
-    if (isFirstRun !== null && !showOnboarding) {
-      setShowOnboarding(isFirstRun);
+    if (isFirstRun !== null && !showOnboarding && !autoTriggeredOnboarding) {
+      // Auto-trigger onboarding for first-time users
+      if (isFirstRun) {
+        setShowOnboarding(true);
+        setAutoTriggeredOnboarding(true);
+      }
     }
-  }, [isFirstRun, showOnboarding]);
+  }, [isFirstRun, showOnboarding, autoTriggeredOnboarding]);
 
-  // Auto-start gateway when not in onboarding
+  // Auto-start gateway when not in onboarding (after onboarding checks complete)
   useEffect(() => {
-    if (!showOnboarding && !status.running) {
-      start().catch(console.error);
+    if (isFirstRun !== null && !showOnboarding && !status.running) {
+      // Only start gateway after first-run check completes and user is past onboarding
+      start().catch((err) => {
+        // Gateway is optional, log but don't fail
+        console.debug('Gateway start failed (optional):', err);
+      });
     }
-  }, [showOnboarding, status.running, start]);
+  }, [isFirstRun, showOnboarding, status.running, start]);
 
   const handleOnboardingComplete = async () => {
     await markOnboarded();
