@@ -7,18 +7,28 @@ import { PreferencesService, OperationPreference, ThemePreference } from './pref
 
 // Mock Supabase
 vi.mock('@supabase/supabase-js', () => {
+  let lastUpsertData: any = null;
+
   const createChain = () => ({
     select: vi.fn(function() { return this; }),
     eq: vi.fn(function() { return this; }),
     insert: vi.fn(function() { return this; }),
     update: vi.fn(function() { return this; }),
     delete: vi.fn(function() { return this; }),
-    single: vi.fn(async () => ({ data: null, error: null })),
+    upsert: vi.fn(function(data: any) {
+      lastUpsertData = Array.isArray(data) ? data[0] : data;
+      return this;
+    }),
+    single: vi.fn(async function() {
+      return { data: lastUpsertData || null, error: null };
+    }),
+    rpc: vi.fn(async () => ({ data: null, error: null })),
   });
 
   return {
     createClient: vi.fn(() => ({
       from: vi.fn((table: string) => createChain()),
+      rpc: vi.fn(async () => ({ data: null, error: null })),
     })),
   };
 });

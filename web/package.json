@@ -27,6 +27,7 @@
     "@tiptap/react": "^2.1.13",
     "@tiptap/starter-kit": "^2.1.13",
     "clsx": "^2.0.0",
+    "cron-parser": "^5.5.0",
     "date-fns": "^3.0.0",
     "framer-motion": "^10.18.0",
     "lowlight": "^3.1.0",

@@ -67,6 +67,7 @@ function getDb() {
 export class AnalyticsService {
   /**
    * Record operation execution for analytics
+   * Uses RPC to handle aggregations atomically (single database call)
    */
   async recordExecution(userId: string, operationId: string, metrics: {
     success: boolean;
@@ -74,35 +75,23 @@ export class AnalyticsService {
     cost_usd: number;
     model_used: 'anthropic' | 'deepseek' | 'gemini' | 'openai';
   }): Promise<void> {
-    // Update daily cost trend
+    // Call database function to handle atomic aggregation
     const today = new Date().toISOString().split('T')[0];
-    const { data: trend } = await getDb()
-      .from('cost_trends')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('date', today)
-      .single();
 
-    if (trend) {
-      // Update existing
-      const modelColumn = `${metrics.model_used}_cost`;
-      await getDb()
-        .from('cost_trends')
-        .update({
-          total_operations: trend.total_operations + 1,
-          total_cost_usd: (trend.total_cost_usd || 0) + metrics.cost_usd,
-          [modelColumn]: (trend[modelColumn as keyof typeof trend] || 0) + metrics.cost_usd,
-          success_rate: metrics.success
-            ? ((trend.success_rate * trend.total_operations + 100) / (trend.total_operations + 1))
-            : ((trend.success_rate * trend.total_operations) / (trend.total_operations + 1)),
-          avg_latency_ms: Math.round(
-            (trend.avg_latency_ms * trend.total_operations + metrics.latency_ms) / (trend.total_operations + 1)
-          ),
-        })
-        .eq('user_id', userId)
-        .eq('date', today);
-    } else {
-      // Insert new
+    const { error } = await getDb()
+      .rpc('record_operation_execution', {
+        p_user_id: userId,
+        p_operation_id: operationId,
+        p_date: today,
+        p_success: metrics.success,
+        p_latency_ms: metrics.latency_ms,
+        p_cost_usd: metrics.cost_usd,
+        p_model_used: metrics.model_used,
+      });
+
+    if (error) {
+      console.error('Failed to record execution:', error);
+      // Fallback to manual insert if RPC fails
       const modelColumn = `${metrics.model_used}_cost`;
       await getDb()
         .from('cost_trends')
@@ -114,7 +103,8 @@ export class AnalyticsService {
           [modelColumn]: metrics.cost_usd,
           success_rate: metrics.success ? 100 : 0,
           avg_latency_ms: metrics.latency_ms,
-        });
+        })
+        .onConflict();
     }
   }
 

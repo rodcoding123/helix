@@ -14,16 +14,19 @@ vi.mock('@supabase/supabase-js', () => {
     lte: vi.fn(function() { return this; }),
     insert: vi.fn(function() { return this; }),
     update: vi.fn(function() { return this; }),
+    delete: vi.fn(function() { return this; }),
+    upsert: vi.fn(function() { return this; }),
     order: vi.fn(function() { return this; }),
     limit: vi.fn(function() { return this; }),
     single: vi.fn(async () => ({ data: null, error: null })),
-    rpc: vi.fn(async () => ({})),
+    onConflict: vi.fn(async () => ({ data: null, error: null })),
+    rpc: vi.fn(async () => ({ data: null, error: null })),
   });
 
   return {
     createClient: vi.fn(() => ({
       from: vi.fn((table: string) => createChain()),
-      rpc: vi.fn(async () => ({})),
+      rpc: vi.fn(async () => ({ data: null, error: null })),
     })),
   };
 });

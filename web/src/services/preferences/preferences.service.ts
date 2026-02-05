@@ -83,41 +83,28 @@ export class PreferencesService {
 
   /**
    * Update operation preference
+   * Uses UPSERT for atomic insert-or-update (single query)
    */
   async setOperationPreference(userId: string, pref: Omit<OperationPreference, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<OperationPreference> {
-    const existing = await this.getOperationPreference(userId, pref.operation_id);
-
-    if (existing) {
-      // Update existing
-      const { data, error } = await getDb()
-        .from('user_operation_preferences')
-        .update({
-          ...pref,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('user_id', userId)
-        .eq('operation_id', pref.operation_id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    } else {
-      // Insert new
-      const { data, error } = await getDb()
-        .from('user_operation_preferences')
-        .insert({
+    const { data, error } = await getDb()
+      .from('user_operation_preferences')
+      .upsert(
+        {
           user_id: userId,
-          ...pref,
-          created_at: new Date().toISOString(),
+          operation_id: pref.operation_id,
+          enabled: pref.enabled !== undefined ? pref.enabled : true,
+          preferred_model: pref.preferred_model,
+          default_parameters: pref.default_parameters,
+          cost_budget_monthly: pref.cost_budget_monthly,
           updated_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
+        },
+        { onConflict: 'user_id,operation_id' }
+      )
+      .select()
+      .single();
 
-      if (error) throw error;
-      return data;
-    }
+    if (error) throw error;
+    return data;
   }
 
   /**
@@ -139,50 +126,34 @@ export class PreferencesService {
 
   /**
    * Update theme preferences
+   * Uses UPSERT for atomic insert-or-update (single query)
    */
   async setThemePreferences(userId: string, theme: Partial<Omit<ThemePreference, 'user_id' | 'updated_at'>>): Promise<ThemePreference> {
-    const existing = await this.getThemePreferences(userId);
-
-    if (existing) {
-      // Update
-      const { data, error } = await getDb()
-        .from('ui_theme_preferences')
-        .update({
-          ...theme,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('user_id', userId)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    } else {
-      // Insert with defaults
-      const { data, error } = await getDb()
-        .from('ui_theme_preferences')
-        .insert({
+    const { data, error } = await getDb()
+      .from('ui_theme_preferences')
+      .upsert(
+        {
           user_id: userId,
-          color_scheme: 'auto',
-          accent_color: '#3B82F6',
-          compact_mode: false,
-          email_list_view: 'grid',
-          calendar_view: 'month',
-          tasks_sort_by: 'priority',
-          notify_on_operation_completion: true,
-          notify_on_operation_failure: true,
-          notify_on_cost_limit_warning: true,
-          notify_on_cost_limit_exceeded: true,
-          sidebar_collapsed: false,
-          ...theme,
+          color_scheme: theme.color_scheme || 'auto',
+          accent_color: theme.accent_color || '#3B82F6',
+          compact_mode: theme.compact_mode !== undefined ? theme.compact_mode : false,
+          email_list_view: theme.email_list_view || 'grid',
+          calendar_view: theme.calendar_view || 'month',
+          tasks_sort_by: theme.tasks_sort_by || 'priority',
+          notify_on_operation_completion: theme.notify_on_operation_completion !== undefined ? theme.notify_on_operation_completion : true,
+          notify_on_operation_failure: theme.notify_on_operation_failure !== undefined ? theme.notify_on_operation_failure : true,
+          notify_on_cost_limit_warning: theme.notify_on_cost_limit_warning !== undefined ? theme.notify_on_cost_limit_warning : true,
+          notify_on_cost_limit_exceeded: theme.notify_on_cost_limit_exceeded !== undefined ? theme.notify_on_cost_limit_exceeded : true,
+          sidebar_collapsed: theme.sidebar_collapsed !== undefined ? theme.sidebar_collapsed : false,
           updated_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
+        },
+        { onConflict: 'user_id' }
+      )
+      .select()
+      .single();
 
-      if (error) throw error;
-      return data;
-    }
+    if (error) throw error;
+    return data;
   }
 
   /**
