@@ -1,7 +1,18 @@
 import { spawn } from "node:child_process";
 import os from "node:os";
+import { execSync } from "node:child_process";
 
-const pnpm = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
+// Try to find pnpm, fallback to npm
+let pnpm = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
+
+try {
+  // Try to run pnpm to see if it's available
+  execSync(`${pnpm} --version`, { stdio: 'pipe' });
+} catch {
+  // If pnpm.cmd doesn't work, try npm as fallback (will use pnpm via npm if available)
+  pnpm = "npm";
+  // Prepend "pnpm" to args to call pnpm via npm exec
+}
 
 const runs = [
   {
@@ -53,9 +64,15 @@ const WARNING_SUPPRESSION_FLAGS = [
 
 const runOnce = (entry, extraArgs = []) =>
   new Promise((resolve) => {
-    const args = maxWorkers
+    let args = maxWorkers
       ? [...entry.args, "--maxWorkers", String(maxWorkers), ...windowsCiArgs, ...extraArgs]
       : [...entry.args, ...windowsCiArgs, ...extraArgs];
+
+    // If using npm fallback, prepend 'exec' and package name
+    if (pnpm === "npm") {
+      args = ["exec", "pnpm", "--", ...args];
+    }
+
     const nodeOptions = process.env.NODE_OPTIONS ?? "";
     const nextNodeOptions = WARNING_SUPPRESSION_FLAGS.reduce(
       (acc, flag) => (acc.includes(flag) ? acc : `${acc} ${flag}`.trim()),
