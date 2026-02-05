@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CalendarGrid } from '../components/calendar/CalendarGrid';
 import { EventDetail } from '../components/calendar/EventDetail';
@@ -52,9 +52,9 @@ describe('Calendar Components', () => {
         />
       );
 
-      expect((screen as any).getByText('February 2026')).toBeTruthy();
-      expect((screen as any).getByText('Mon')).toBeTruthy();
-      expect((screen as any).getByText('Sun')).toBeTruthy();
+      expect(screen.getByText('February 2026')).toBeTruthy();
+      expect(screen.getByText('Mon')).toBeTruthy();
+      expect(screen.getByText('Sun')).toBeTruthy();
     });
 
     it('displays events on correct dates in month view', () => {

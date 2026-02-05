@@ -116,7 +116,7 @@ export function useVoiceRecorder(options: UseVoiceRecorderOptions = {}) {
         setState(prev => ({ ...prev, duration: prev.duration + 1 }));
       }, 1000);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Failed to start recording';
+      const errorMsg = error instanceof Error ? `Failed to start recording: ${error.message}` : 'Failed to start recording';
       setState(prev => ({ ...prev, error: errorMsg }));
     }
   }, [options]);
@@ -207,13 +207,9 @@ export function useVoiceRecorder(options: UseVoiceRecorderOptions = {}) {
   }, []);
 
   const formatDuration = useCallback((seconds: number): string => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
+    const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
 
-    if (hours > 0) {
-      return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-    }
     return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   }, []);
 

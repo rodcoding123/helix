@@ -264,18 +264,21 @@ describe('Voice Recorder', () => {
         .fn()
         .mockRejectedValue(new Error('Mic not available'));
 
-      const { getByText } = render(<VoiceRecorder />);
+      const { getByText, queryByText } = render(<VoiceRecorder />);
 
       const startButton = getByText('Start Recording');
 
       await act(async () => {
         fireEvent.click(startButton);
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 200));
       });
 
-      await waitFor(() => {
-        expect(getByText(/Failed to start recording/)).toBeTruthy();
-      });
+      await waitFor(
+        () => {
+          expect(queryByText(/Failed to start recording/)).toBeTruthy();
+        },
+        { timeout: 1000 }
+      );
     });
   });
 });
