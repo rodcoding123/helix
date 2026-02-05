@@ -1,0 +1,26 @@
+[package]
+name = "sync-coordinator"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "sync-coordinator"
+path = "src/main.rs"
+
+[dependencies]
+helix-shared = { path = "../shared" }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+sqlx = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+clap = { version = "4.4", features = ["derive"] }
+axum = "0.7"
+axum-tungstenite = "0.3"
+tokio-tungstenite = "0.21"
+futures-util = "0.3"
+dashmap = "5.5"
