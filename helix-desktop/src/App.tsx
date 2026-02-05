@@ -4,6 +4,7 @@ import { useSystem } from './hooks/useSystem';
 import { useGateway } from './hooks/useGateway';
 import { useTheme } from './hooks/useTheme';
 import { Onboarding } from './components/onboarding/Onboarding';
+import { TenantProvider } from './lib/tenant-context';
 import { router } from './routes';
 import './App.css';
 
@@ -69,8 +70,12 @@ function App() {
     return <Onboarding onComplete={handleOnboardingComplete} />;
   }
 
-  // Main app with router
-  return <RouterProvider router={router} />;
+  // Main app with router and tenant provider
+  return (
+    <TenantProvider>
+      <RouterProvider router={router} />
+    </TenantProvider>
+  );
 }
 
 export default App;

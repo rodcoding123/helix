@@ -246,6 +246,10 @@ export function ChatInterface() {
         navigate('/psychology');
         break;
 
+      case 'teams':
+        navigate('/teams');
+        break;
+
       case 'status':
         chatStore.addMessage({
           role: 'system',

@@ -30,6 +30,7 @@ export const SLASH_COMMANDS: SlashCommand[] = [
   { name: 'settings', description: 'Open settings' },
   { name: 'memory', description: 'Open memory viewer' },
   { name: 'psychology', description: 'Open psychology dashboard' },
+  { name: 'teams', description: 'Manage teams and members' },
   { name: 'clear', description: 'Clear chat display' },
   { name: 'exit', aliases: ['quit'], description: 'Exit application' },
 ];

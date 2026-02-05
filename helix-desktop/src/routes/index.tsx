@@ -13,6 +13,9 @@ const CustomTools = lazy(() => import('./CustomTools'));
 const CompositeSkills = lazy(() => import('./CompositeSkills'));
 const MemorySynthesis = lazy(() => import('./MemorySynthesis'));
 
+// Phase 11 Week 3: Teams Management
+const Teams = lazy(() => import('./Teams'));
+
 // Loading fallback component
 function RouteLoader() {
   return (
@@ -109,6 +112,14 @@ export const router = createBrowserRouter([
           </LazyRoute>
         ),
       },
+      {
+        path: 'teams',
+        element: (
+          <LazyRoute>
+            <Teams />
+          </LazyRoute>
+        ),
+      },
     ],
   },
 ]);
@@ -135,4 +146,6 @@ export const ROUTES = {
   CUSTOM_TOOLS: '/tools',
   COMPOSITE_SKILLS: '/skills',
   MEMORY_SYNTHESIS: '/synthesis',
+  // Phase 11 Week 3: Teams Management
+  TEAMS: '/teams',
 } as const;
