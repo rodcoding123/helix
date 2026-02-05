@@ -16,7 +16,11 @@ import {
   PanelLeftClose,
   PanelLeft,
   Sparkles,
+  AlertTriangle,
 } from 'lucide-react';
+import { TroubleshootingPanel } from '@/components/help/TroubleshootingPanel';
+import type { GatewayErrorCode } from '@/components/help/TroubleshootingPanel';
+import { GatewayConnectionError } from '@/lib/gateway-connection';
 
 interface CodeInterfaceProps {
   instanceKey: string;
@@ -44,7 +48,7 @@ export function CodeInterface({
   >([]);
 
   // Connection hook
-  const { status, messages, connect, sendMessage, interrupt, isConnected } = useGatewayConnection({
+  const { status, messages, connect, sendMessage, interrupt, isConnected, error } = useGatewayConnection({
     instanceKey,
     authToken,
     gatewayUrl,
@@ -219,19 +223,43 @@ export function CodeInterface({
           <div className="flex-1 overflow-y-auto p-6">
             {!isConnected ? (
               <div className="flex items-center justify-center h-full">
-                <div className="text-center">
-                  <div className="mx-auto mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-helix-500/10 border border-helix-500/20">
-                    <Cpu className="h-8 w-8 text-helix-400 animate-pulse" />
-                  </div>
-                  <h3 className="text-xl font-display font-semibold text-white mb-2">
-                    Connecting to Helix...
-                  </h3>
-                  <p className="text-sm text-text-secondary max-w-sm mx-auto">
-                    Establishing secure connection to your instance
-                  </p>
-                  <button onClick={() => connect()} className="mt-6 btn btn-primary">
-                    Retry Connection
-                  </button>
+                <div className="text-center max-w-lg w-full">
+                  {status === 'error' || error ? (
+                    <>
+                      <div className="mx-auto mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-danger/10 border border-danger/20">
+                        <AlertTriangle className="h-8 w-8 text-danger" />
+                      </div>
+                      <h3 className="text-xl font-display font-semibold text-white mb-2">
+                        Connection Failed
+                      </h3>
+                      <p className="text-sm text-text-secondary max-w-sm mx-auto mb-6">
+                        {error?.message || 'Unable to connect to your Helix instance'}
+                      </p>
+                      <button onClick={() => connect()} className="btn btn-cta mb-6">
+                        Retry Connection
+                      </button>
+                      <TroubleshootingPanel
+                        errorCode={error instanceof GatewayConnectionError ? error.code as GatewayErrorCode : 'CONNECTION_FAILED'}
+                        onRetry={() => connect()}
+                        defaultExpanded={true}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <div className="mx-auto mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-helix-500/10 border border-helix-500/20">
+                        <Cpu className="h-8 w-8 text-helix-400 animate-pulse" />
+                      </div>
+                      <h3 className="text-xl font-display font-semibold text-white mb-2">
+                        Connecting to Helix...
+                      </h3>
+                      <p className="text-sm text-text-secondary max-w-sm mx-auto">
+                        Establishing secure connection to your instance
+                      </p>
+                      <button onClick={() => connect()} className="mt-6 btn btn-primary">
+                        Retry Connection
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             ) : messages.length === 0 ? (

@@ -132,7 +132,7 @@ export function App() {
                 }
               />
               <Route
-                path="/docs"
+                path="/docs/:section?"
                 element={
                   <Suspense fallback={<LoadingFallback />}>
                     <Docs />

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   Book,
   Terminal,
@@ -10,7 +11,17 @@ import {
   Copy,
   Check,
   ExternalLink,
+  AlertTriangle,
 } from 'lucide-react';
+import { TroubleshootingPanel } from '@/components/help/TroubleshootingPanel';
+
+const VALID_SECTIONS = new Set([
+  'getting-started', 'installation', 'configuration', 'api', 'architecture', 'troubleshooting', 'faq',
+]);
+
+function isValidSection(s: string | undefined): s is DocsSection {
+  return typeof s === 'string' && VALID_SECTIONS.has(s);
+}
 
 type DocsSection =
   | 'getting-started'
@@ -18,10 +29,28 @@ type DocsSection =
   | 'configuration'
   | 'api'
   | 'architecture'
+  | 'troubleshooting'
   | 'faq';
 
 export function Docs() {
-  const [activeSection, setActiveSection] = useState<DocsSection>('getting-started');
+  const { section: urlSection } = useParams<{ section?: string }>();
+  const navigate = useNavigate();
+  const [activeSection, setActiveSection] = useState<DocsSection>(
+    isValidSection(urlSection) ? urlSection : 'getting-started'
+  );
+
+  // Sync URL param to active section
+  useEffect(() => {
+    if (isValidSection(urlSection) && urlSection !== activeSection) {
+      setActiveSection(urlSection);
+    }
+  }, [urlSection]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Update URL when section changes via sidebar click
+  function handleSectionChange(section: DocsSection) {
+    setActiveSection(section);
+    navigate(`/docs/${section}`, { replace: true });
+  }
 
   const sections: { id: DocsSection; label: string; icon: typeof Book }[] = [
     { id: 'getting-started', label: 'Getting Started', icon: Zap },
@@ -29,6 +58,7 @@ export function Docs() {
     { id: 'configuration', label: 'Configuration', icon: Code },
     { id: 'api', label: 'API Reference', icon: Book },
     { id: 'architecture', label: 'Architecture', icon: Brain },
+    { id: 'troubleshooting', label: 'Troubleshooting', icon: AlertTriangle },
     { id: 'faq', label: 'FAQ', icon: Shield },
   ];
 
@@ -46,7 +76,7 @@ export function Docs() {
                   return (
                     <li key={section.id}>
                       <button
-                        onClick={() => setActiveSection(section.id)}
+                        onClick={() => handleSectionChange(section.id)}
                         className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
                           activeSection === section.id
                             ? 'bg-helix-500/20 text-helix-400'
@@ -70,6 +100,7 @@ export function Docs() {
             {activeSection === 'configuration' && <Configuration />}
             {activeSection === 'api' && <ApiReference />}
             {activeSection === 'architecture' && <Architecture />}
+            {activeSection === 'troubleshooting' && <Troubleshooting />}
             {activeSection === 'faq' && <FAQ />}
           </div>
         </div>
@@ -477,6 +508,79 @@ function LayerDoc({
       </div>
       <p className="mt-2 text-xs text-helix-400">{theory}</p>
       <p className="mt-1 text-sm text-slate-400">{description}</p>
+    </div>
+  );
+}
+
+function Troubleshooting() {
+  return (
+    <div className="prose prose-invert max-w-none">
+      <h1 className="text-3xl font-bold text-white">Troubleshooting</h1>
+      <p className="text-lg text-slate-400">
+        Common issues and how to resolve them when connecting to your Helix instance.
+      </p>
+
+      <h2 className="text-2xl font-bold text-white mt-8">Connection Issues</h2>
+      <p className="text-slate-400 mt-2">
+        The Code Interface connects to your local Helix runtime via WebSocket. If you're having
+        trouble connecting, use the guides below.
+      </p>
+
+      <div className="mt-6 space-y-4">
+        <TroubleshootingPanel errorCode="CONNECTION_FAILED" expandable={false} />
+      </div>
+
+      <h2 className="text-2xl font-bold text-white mt-12">Authentication Issues</h2>
+      <p className="text-slate-400 mt-2">
+        If your connection is rejected due to authentication errors.
+      </p>
+
+      <div className="mt-6 space-y-4">
+        <TroubleshootingPanel errorCode="AUTH_REJECTED" expandable={false} />
+      </div>
+
+      <h2 className="text-2xl font-bold text-white mt-12">Timeout & Network Issues</h2>
+      <p className="text-slate-400 mt-2">
+        If your connection times out or you experience network-related errors.
+      </p>
+
+      <div className="mt-6 space-y-4">
+        <TroubleshootingPanel errorCode="TIMEOUT" expandable={false} />
+      </div>
+
+      <h2 className="text-2xl font-bold text-white mt-12">Version Mismatch</h2>
+      <p className="text-slate-400 mt-2">
+        If your local Helix version doesn't match the Observatory protocol.
+      </p>
+
+      <div className="mt-6 space-y-4">
+        <TroubleshootingPanel errorCode="PROTOCOL_MISMATCH" expandable={false} />
+      </div>
+
+      <h2 className="text-2xl font-bold text-white mt-12">Still need help?</h2>
+      <div className="mt-4 p-6 rounded-xl bg-slate-900/50 border border-slate-800">
+        <p className="text-slate-400">
+          If none of the above solutions work, try these steps:
+        </p>
+        <ol className="mt-4 space-y-2 text-slate-300">
+          <li>1. Check terminal for error messages from Helix</li>
+          <li>2. Verify your .env file configuration</li>
+          <li>3. Run <code className="px-1.5 py-0.5 rounded bg-slate-800 text-helix-400 text-sm">helix doctor</code> for diagnostics</li>
+          <li>4. Join our Discord for community support</li>
+        </ol>
+        <div className="mt-6 flex gap-3">
+          <a
+            href="https://discord.gg/helix"
+            className="btn btn-primary inline-flex items-center gap-2"
+          >
+            <ExternalLink className="h-4 w-4" />
+            Join Discord
+          </a>
+          <a href="mailto:support@helix-project.org" className="btn btn-secondary">
+            Contact Support
+          </a>
+        </div>
+      </div>
     </div>
   );
 }
