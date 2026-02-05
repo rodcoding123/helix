@@ -4,24 +4,24 @@
 -- =====================================================
 
 -- Rename tier values from old names to new names:
--- free -> awaken
+-- free -> core
 -- ghost -> phantom
 -- observatory -> overseer
 -- observatory_pro -> architect
 
 -- Create new enum type with updated names
 CREATE TYPE subscription_tier_new AS ENUM (
-  'awaken',      -- Free tier - Telemetry on, basic dashboard
-  'phantom',     -- $9/mo - Telemetry off, privacy
-  'overseer',    -- $29/mo - Observatory access, view aggregate data
-  'architect'    -- $99/mo - Code interface, API access, exports, research tools
+  'core',        -- Free tier - Everything, full architecture, contributes to research
+  'phantom',     -- $9/mo - Complete privacy, no telemetry
+  'overseer',    -- $29/mo - See the collective, observatory access
+  'architect'    -- $99/mo - Full access, anywhere, research API & exports
 );
 
 -- Update subscriptions table to use new enum
 ALTER TABLE subscriptions
   ALTER COLUMN tier TYPE subscription_tier_new
   USING CASE tier::text
-    WHEN 'free' THEN 'awaken'::subscription_tier_new
+    WHEN 'free' THEN 'core'::subscription_tier_new
     WHEN 'ghost' THEN 'phantom'::subscription_tier_new
     WHEN 'observatory' THEN 'overseer'::subscription_tier_new
     WHEN 'observatory_pro' THEN 'architect'::subscription_tier_new
@@ -29,7 +29,7 @@ ALTER TABLE subscriptions
 
 -- Update default value
 ALTER TABLE subscriptions
-  ALTER COLUMN tier SET DEFAULT 'awaken';
+  ALTER COLUMN tier SET DEFAULT 'core';
 
 -- Drop old enum type
 DROP TYPE subscription_tier;
@@ -42,7 +42,7 @@ CREATE OR REPLACE FUNCTION create_subscription_for_user()
 RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO subscriptions (user_id, tier)
-  VALUES (NEW.id, 'awaken');
+  VALUES (NEW.id, 'core');
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

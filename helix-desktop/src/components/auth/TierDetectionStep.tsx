@@ -2,14 +2,14 @@
  * Tier Detection Step - Choose Path Based on Subscription
  *
  * After Supabase login, determine user's path:
- * - Free (awaken/phantom): MANDATORY BYOK setup
+ * - Free (core/phantom): MANDATORY BYOK setup
  * - Paid (overseer/architect): Centralized system (with optional BYOK for coding)
  */
 
 import { useState } from 'react';
 import './TierDetectionStep.css';
 
-export type SubscriptionTier = 'awaken' | 'phantom' | 'overseer' | 'architect';
+export type SubscriptionTier = 'core' | 'phantom' | 'overseer' | 'architect';
 
 interface TierDetectionStepProps {
   userId: string;
@@ -30,16 +30,16 @@ const TIER_DETAILS: Record<SubscriptionTier, {
   color: string;
   bgGradient: string;
 }> = {
-  awaken: {
-    name: 'Helix Free',
+  core: {
+    name: 'Core',
     price: 'Free',
     isFree: true,
-    description: 'Run Helix on your machine with your own API keys',
+    description: 'Everything. The full architecture.',
     features: [
-      'BYOK (Bring Your Own Key)',
-      'Local data storage',
-      'Desktop access',
-      'Community support',
+      'Full Living AI Architecture',
+      'Run on your machine',
+      'Basic dashboard',
+      'Contribute to research',
     ],
     color: '#6b7280',
     bgGradient: 'from-gray-500 to-gray-700',
@@ -48,12 +48,12 @@ const TIER_DETAILS: Record<SubscriptionTier, {
     name: 'Phantom',
     price: '$9/mo',
     isFree: true,
-    description: 'Complete privacy with optional BYOK',
+    description: 'Complete privacy.',
     features: [
-      'BYOK (Bring Your Own Key)',
-      'Complete privacy (no data transmission)',
-      'Desktop access',
-      'Priority support',
+      'Everything in Core',
+      'No telemetry',
+      'No data leaves your machine',
+      'For those who want solitude',
     ],
     color: '#8b5cf6',
     bgGradient: 'from-purple-500 to-purple-700',
@@ -62,13 +62,12 @@ const TIER_DETAILS: Record<SubscriptionTier, {
     name: 'Overseer',
     price: '$29/mo',
     isFree: false,
-    description: 'Managed AI with Observatory access',
+    description: 'See the collective.',
     features: [
-      '✨ Centralized AI system (managed models)',
-      'Observatory access (aggregate insights)',
-      'Cost tracking & budgets',
-      'Optional BYOK for coding',
-      'Priority support',
+      'Everything in Core',
+      'Observatory access',
+      'Aggregate patterns across all instances',
+      'Watch what emerges',
     ],
     color: '#06b6d4',
     bgGradient: 'from-cyan-500 to-cyan-700',
@@ -77,13 +76,12 @@ const TIER_DETAILS: Record<SubscriptionTier, {
     name: 'Architect',
     price: '$99/mo',
     isFree: false,
-    description: 'Full platform access with all features',
+    description: 'Full access, anywhere.',
     features: [
-      '✨ Centralized AI system (managed models)',
-      'Web & Mobile access',
-      'Observatory + Research API',
-      'Optional BYOK for coding',
-      'Dedicated support',
+      'Everything in Overseer',
+      'Web & Mobile Interface',
+      'Research API & Exports',
+      'Shape Development',
     ],
     color: '#f59e0b',
     bgGradient: 'from-amber-500 to-amber-700',

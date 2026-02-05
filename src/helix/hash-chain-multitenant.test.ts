@@ -10,26 +10,32 @@ import {
   setDbClient,
 } from './hash-chain-multitenant.js';
 
-// Mock Supabase
-const mockQuery = {
-  from: vi.fn(function () { return this; }),
-  select: vi.fn(function () { return this; }),
-  eq: vi.fn(function () { return this; }),
-  order: vi.fn(function () { return this; }),
-  limit: vi.fn(function () { return this; }),
-  single: vi.fn(),
-  insert: vi.fn(),
-  count: vi.fn(function () { return this; }),
-  head: vi.fn(function () { return this; }),
-};
+// Helper to create a chainable mock that returns itself
+function createChainableMock() {
+  const self = {
+    from: vi.fn(() => self),
+    select: vi.fn(() => self),
+    eq: vi.fn(() => self),
+    order: vi.fn(() => self),
+    limit: vi.fn(() => self),
+    single: vi.fn(),
+    insert: vi.fn(),
+    count: 0,
+    error: null,
+    data: null,
+  };
+  return self;
+}
 
+let mockQuery = createChainableMock();
 const mockDb = {
   from: vi.fn(() => mockQuery),
 };
 
 describe('Tenant Hash Chain', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockQuery = createChainableMock();
+    mockDb.from = vi.fn(() => mockQuery);
     setDbClient(mockDb);
   });
 
@@ -50,7 +56,9 @@ describe('Tenant Hash Chain', () => {
 
   describe('Adding entries', () => {
     it('should add entry to hash chain', async () => {
-      mockQuery.single.mockResolvedValueOnce({ data: null }); // No latest entry
+      // Mock single() to return no latest entry
+      mockQuery.single.mockResolvedValueOnce({ data: null });
+      // Mock insert() to succeed
       mockQuery.insert.mockResolvedValueOnce({ error: null });
 
       const chain = new TenantHashChain('tenant-123');
@@ -232,11 +240,8 @@ describe('Tenant Hash Chain', () => {
         },
       ];
 
-      // Setup the mock chain: from -> select -> eq -> order -> (awaited)
-      const chainResult = Promise.resolve({ data: entries, error: null });
-      mockQuery.select.mockReturnValueOnce(mockQuery);
-      mockQuery.eq.mockReturnValueOnce(mockQuery);
-      mockQuery.order.mockReturnValueOnce(chainResult);
+      // order() is awaited, so it returns the promise directly
+      mockQuery.order.mockResolvedValueOnce({ data: entries, error: null });
 
       const chain = new TenantHashChain('tenant-123');
       const allEntries = await chain.getAllEntries();
@@ -258,7 +263,8 @@ describe('Tenant Hash Chain', () => {
       mockQuery.select.mockReturnValueOnce(mockQuery);
       mockQuery.eq.mockReturnValueOnce(mockQuery);
       mockQuery.eq.mockReturnValueOnce(mockQuery);
-      mockQuery.single.mockResolvedValueOnce({ data: entry });
+      // single() is awaited directly, so it must return the resolved value
+      mockQuery.single = vi.fn().mockResolvedValueOnce({ data: entry });
 
       const chain = new TenantHashChain('tenant-123');
       const retrieved = await chain.getEntry(0);
@@ -270,7 +276,9 @@ describe('Tenant Hash Chain', () => {
     it('should return null for non-existent entry', async () => {
       mockQuery.select.mockReturnValueOnce(mockQuery);
       mockQuery.eq.mockReturnValueOnce(mockQuery);
-      mockQuery.eq.mockReturnValueOnce(Promise.resolve({ data: null }));
+      mockQuery.eq.mockReturnValueOnce(mockQuery);
+      // single() is awaited directly, so it must return the resolved value
+      mockQuery.single = vi.fn().mockResolvedValueOnce({ data: null });
 
       const chain = new TenantHashChain('tenant-123');
       const entry = await chain.getEntry(999);
@@ -279,9 +287,8 @@ describe('Tenant Hash Chain', () => {
     });
 
     it('should get entry count', async () => {
-      const countPromise = Promise.resolve({ count: 5, error: null });
-      mockQuery.select.mockReturnValueOnce(mockQuery);
-      mockQuery.eq.mockReturnValueOnce(countPromise);
+      // eq() is awaited and returns { count, error }
+      mockQuery.eq.mockResolvedValueOnce({ count: 5, error: null });
 
       const chain = new TenantHashChain('tenant-123');
       const count = await chain.getEntryCount();

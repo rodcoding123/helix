@@ -1,0 +1,53 @@
+- generic [ref=e3]:
+  - generic [ref=e6]:
+    - 'generic "Step 1: supabase-login" [ref=e7]'
+    - 'generic "Step 2: tier-detection" [ref=e8]'
+    - 'generic "Step 3: instance-registration" [ref=e9]'
+    - 'generic "Step 4: welcome" [ref=e10]'
+    - 'generic "Step 5: mode" [ref=e11]'
+    - 'generic "Step 6: complete" [ref=e12]'
+  - generic [ref=e14]:
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - heading "Welcome to Helix" [level=1] [ref=e17]
+        - paragraph [ref=e18]: Sign in to your account to access Helix across all your devices
+      - generic [ref=e19]:
+        - button "Sign In" [ref=e20] [cursor=pointer]
+        - button "Create Account" [ref=e21] [cursor=pointer]
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - generic [ref=e24]: Email Address
+          - textbox "Email Address" [ref=e25]:
+            - /placeholder: you@example.com
+            - text: test-free@example.com
+        - generic [ref=e26]:
+          - generic [ref=e27]: Password
+          - textbox "Password" [active] [ref=e28]:
+            - /placeholder: ••••••••
+            - text: TestPassword123
+        - button "Sign In" [ref=e29] [cursor=pointer]
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - heading "🔒 Your Privacy" [level=3] [ref=e32]
+          - paragraph [ref=e33]: Your account is secured with Supabase. We never store your API keys on our servers — they're encrypted and stored only on your device.
+        - generic [ref=e34]:
+          - heading "🚀 What's Next?" [level=3] [ref=e35]
+          - paragraph [ref=e36]: After login, we'll show you pricing options and set up your preferred AI provider access method.
+        - generic [ref=e37]:
+          - heading "📱 Cross-Device Sync" [level=3] [ref=e38]
+          - paragraph [ref=e39]: Sign in on all your devices (desktop, web, mobile) to sync your Helix experience in real-time.
+    - generic [ref=e40]:
+      - heading "Available Plans" [level=4] [ref=e41]
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e45]: Helix Free
+          - generic [ref=e46]: Run Helix on your machine with your own API keys
+        - generic [ref=e47]:
+          - generic [ref=e49]: Phantom ($9/mo)
+          - generic [ref=e50]: Complete privacy, your data never leaves your machine
+        - generic [ref=e51]:
+          - generic [ref=e53]: Overseer ($29/mo)
+          - generic [ref=e54]: Observatory access with managed AI models
+        - generic [ref=e55]:
+          - generic [ref=e57]: Architect ($99/mo)
+          - generic [ref=e58]: "Full platform access: Web, Mobile, Managed AI, Research API"
