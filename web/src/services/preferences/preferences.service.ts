@@ -4,6 +4,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { getCacheService } from '@/lib/cache/redis-cache';
 
 export interface OperationPreference {
   id?: string;
@@ -47,43 +48,62 @@ function getDb() {
 
 export class PreferencesService {
   /**
-   * Get all operation preferences for a user
+   * Get all operation preferences for a user (with caching)
    */
   async getOperationPreferences(userId: string): Promise<OperationPreference[]> {
-    const { data, error } = await getDb()
-      .from('user_operation_preferences')
-      .select('*')
-      .eq('user_id', userId);
+    const cache = getCacheService();
+    const cacheKey = `op_prefs:${userId}`;
 
-    if (error) {
-      console.error('Failed to fetch operation preferences:', error);
-      return [];
-    }
+    return cache.getOrFetch(
+      cacheKey,
+      async () => {
+        const { data, error } = await getDb()
+          .from('user_operation_preferences')
+          .select('*')
+          .eq('user_id', userId);
 
-    return data || [];
+        if (error) {
+          console.error('Failed to fetch operation preferences:', error);
+          return [];
+        }
+
+        return data || [];
+      },
+      15 * 60 // 15-minute TTL
+    );
   }
 
   /**
-   * Get preference for a specific operation
+   * Get preference for a specific operation (with caching)
    */
   async getOperationPreference(userId: string, operationId: string): Promise<OperationPreference | null> {
-    const { data, error } = await getDb()
-      .from('user_operation_preferences')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('operation_id', operationId)
-      .single();
+    const cache = getCacheService();
+    const cacheKey = `op_pref:${userId}:${operationId}`;
 
-    if (error && error.code !== 'PGRST116') {
-      console.error('Failed to fetch operation preference:', error);
-    }
+    return cache.getOrFetch(
+      cacheKey,
+      async () => {
+        const { data, error } = await getDb()
+          .from('user_operation_preferences')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('operation_id', operationId)
+          .single();
 
-    return data || null;
+        if (error && error.code !== 'PGRST116') {
+          console.error('Failed to fetch operation preference:', error);
+        }
+
+        return data || null;
+      },
+      15 * 60 // 15-minute TTL
+    );
   }
 
   /**
    * Update operation preference
    * Uses UPSERT for atomic insert-or-update (single query)
+   * Invalidates relevant caches on success
    */
   async setOperationPreference(userId: string, pref: Omit<OperationPreference, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<OperationPreference> {
     const { data, error } = await getDb()
@@ -104,29 +124,49 @@ export class PreferencesService {
       .single();
 
     if (error) throw error;
+
+    // Invalidate related caches
+    const cache = getCacheService();
+    cache.delete(`op_prefs:${userId}`).catch(err => {
+      console.error('Failed to invalidate cache:', err);
+    });
+    cache.delete(`op_pref:${userId}:${pref.operation_id}`).catch(err => {
+      console.error('Failed to invalidate cache:', err);
+    });
+
     return data;
   }
 
   /**
-   * Get theme preferences
+   * Get theme preferences (with caching)
    */
   async getThemePreferences(userId: string): Promise<ThemePreference | null> {
-    const { data, error } = await getDb()
-      .from('ui_theme_preferences')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
+    const cache = getCacheService();
+    const cacheKey = `theme_prefs:${userId}`;
 
-    if (error && error.code !== 'PGRST116') {
-      console.error('Failed to fetch theme preferences:', error);
-    }
+    return cache.getOrFetch(
+      cacheKey,
+      async () => {
+        const { data, error } = await getDb()
+          .from('ui_theme_preferences')
+          .select('*')
+          .eq('user_id', userId)
+          .single();
 
-    return data || null;
+        if (error && error.code !== 'PGRST116') {
+          console.error('Failed to fetch theme preferences:', error);
+        }
+
+        return data || null;
+      },
+      60 * 60 // 1-hour TTL (themes change less frequently)
+    );
   }
 
   /**
    * Update theme preferences
    * Uses UPSERT for atomic insert-or-update (single query)
+   * Invalidates theme cache on success
    */
   async setThemePreferences(userId: string, theme: Partial<Omit<ThemePreference, 'user_id' | 'updated_at'>>): Promise<ThemePreference> {
     const { data, error } = await getDb()
@@ -153,6 +193,13 @@ export class PreferencesService {
       .single();
 
     if (error) throw error;
+
+    // Invalidate theme cache
+    const cache = getCacheService();
+    cache.delete(`theme_prefs:${userId}`).catch(err => {
+      console.error('Failed to invalidate cache:', err);
+    });
+
     return data;
   }
 
@@ -181,6 +228,7 @@ export class PreferencesService {
 
   /**
    * Reset preferences to defaults for a user
+   * Invalidates all user preference caches
    */
   async resetToDefaults(userId: string): Promise<void> {
     // Delete operation preferences
@@ -194,6 +242,12 @@ export class PreferencesService {
       .from('ui_theme_preferences')
       .delete()
       .eq('user_id', userId);
+
+    // Invalidate all user preference caches
+    const cache = getCacheService();
+    cache.invalidateUserCache(userId).catch(err => {
+      console.error('Failed to invalidate cache:', err);
+    });
   }
 
   /**

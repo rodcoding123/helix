@@ -4,6 +4,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { getCacheService } from '@/lib/cache/redis-cache';
 
 export interface OperationMetrics {
   operation_id: string;
@@ -68,6 +69,7 @@ export class AnalyticsService {
   /**
    * Record operation execution for analytics
    * Uses RPC to handle aggregations atomically (single database call)
+   * Invalidates related caches on success
    */
   async recordExecution(userId: string, operationId: string, metrics: {
     success: boolean;
@@ -106,10 +108,22 @@ export class AnalyticsService {
         })
         .onConflict();
     }
+
+    // Invalidate analytics caches after recording
+    const cache = getCacheService();
+    cache.deletePattern(`cost_trends:${userId}:*`).catch(err => {
+      console.error('Failed to invalidate cache:', err);
+    });
+    cache.deletePattern(`op_metrics:${userId}:*`).catch(err => {
+      console.error('Failed to invalidate cache:', err);
+    });
+    cache.deletePattern(`all_op_metrics:${userId}:*`).catch(err => {
+      console.error('Failed to invalidate cache:', err);
+    });
   }
 
   /**
-   * Get metrics for an operation over a period
+   * Get metrics for an operation over a period (with caching)
    */
   async getOperationMetrics(
     userId: string,
@@ -117,99 +131,126 @@ export class AnalyticsService {
     startDate: Date,
     endDate: Date
   ): Promise<OperationMetrics | null> {
-    const { data } = await getDb()
-      .from('operation_execution_analytics')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('operation_id', operationId)
-      .gte('period_start', startDate.toISOString())
-      .lte('period_end', endDate.toISOString())
-      .order('period_start', { ascending: false })
-      .limit(1)
-      .single();
+    const cache = getCacheService();
+    const cacheKey = `op_metrics:${userId}:${operationId}:${startDate.getTime()}:${endDate.getTime()}`;
 
-    if (!data) return null;
+    return cache.getOrFetch(
+      cacheKey,
+      async () => {
+        const { data } = await getDb()
+          .from('operation_execution_analytics')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('operation_id', operationId)
+          .gte('period_start', startDate.toISOString())
+          .lte('period_end', endDate.toISOString())
+          .order('period_start', { ascending: false })
+          .limit(1)
+          .single();
 
-    return {
-      operation_id: operationId,
-      total_executions: data.total_executions,
-      successful_executions: data.successful_executions,
-      failed_executions: data.failed_executions,
-      success_rate: data.success_rate,
-      total_cost_usd: data.total_cost_usd,
-      avg_cost_per_execution: data.avg_cost_per_execution,
-      avg_latency_ms: data.avg_latency_ms,
-      min_latency_ms: data.min_latency_ms,
-      max_latency_ms: data.max_latency_ms,
-      models_used: {
-        anthropic: data.anthropic_count || 0,
-        deepseek: data.deepseek_count || 0,
-        gemini: data.gemini_count || 0,
-        openai: data.openai_count || 0,
+        if (!data) return null;
+
+        return {
+          operation_id: operationId,
+          total_executions: data.total_executions,
+          successful_executions: data.successful_executions,
+          failed_executions: data.failed_executions,
+          success_rate: data.success_rate,
+          total_cost_usd: data.total_cost_usd,
+          avg_cost_per_execution: data.avg_cost_per_execution,
+          avg_latency_ms: data.avg_latency_ms,
+          min_latency_ms: data.min_latency_ms,
+          max_latency_ms: data.max_latency_ms,
+          models_used: {
+            anthropic: data.anthropic_count || 0,
+            deepseek: data.deepseek_count || 0,
+            gemini: data.gemini_count || 0,
+            openai: data.openai_count || 0,
+          },
+        };
       },
-    };
+      5 * 60 // 5-minute TTL
+    );
   }
 
   /**
-   * Get all operation metrics for a user
+   * Get all operation metrics for a user (with caching)
    */
   async getAllOperationMetrics(userId: string, startDate: Date, endDate: Date): Promise<OperationMetrics[]> {
-    const { data } = await getDb()
-      .from('operation_execution_analytics')
-      .select('*')
-      .eq('user_id', userId)
-      .gte('period_start', startDate.toISOString())
-      .lte('period_end', endDate.toISOString())
-      .order('total_cost_usd', { ascending: false });
+    const cache = getCacheService();
+    const cacheKey = `all_op_metrics:${userId}:${startDate.getTime()}:${endDate.getTime()}`;
 
-    if (!data) return [];
+    return cache.getOrFetch(
+      cacheKey,
+      async () => {
+        const { data } = await getDb()
+          .from('operation_execution_analytics')
+          .select('*')
+          .eq('user_id', userId)
+          .gte('period_start', startDate.toISOString())
+          .lte('period_end', endDate.toISOString())
+          .order('total_cost_usd', { ascending: false });
 
-    return data.map((d: any) => ({
-      operation_id: d.operation_id,
-      total_executions: d.total_executions,
-      successful_executions: d.successful_executions,
-      failed_executions: d.failed_executions,
-      success_rate: d.success_rate,
-      total_cost_usd: d.total_cost_usd,
-      avg_cost_per_execution: d.avg_cost_per_execution,
-      avg_latency_ms: d.avg_latency_ms,
-      min_latency_ms: d.min_latency_ms,
-      max_latency_ms: d.max_latency_ms,
-      models_used: {
-        anthropic: d.anthropic_count || 0,
-        deepseek: d.deepseek_count || 0,
-        gemini: d.gemini_count || 0,
-        openai: d.openai_count || 0,
+        if (!data) return [];
+
+        return data.map((d: any) => ({
+          operation_id: d.operation_id,
+          total_executions: d.total_executions,
+          successful_executions: d.successful_executions,
+          failed_executions: d.failed_executions,
+          success_rate: d.success_rate,
+          total_cost_usd: d.total_cost_usd,
+          avg_cost_per_execution: d.avg_cost_per_execution,
+          avg_latency_ms: d.avg_latency_ms,
+          min_latency_ms: d.min_latency_ms,
+          max_latency_ms: d.max_latency_ms,
+          models_used: {
+            anthropic: d.anthropic_count || 0,
+            deepseek: d.deepseek_count || 0,
+            gemini: d.gemini_count || 0,
+            openai: d.openai_count || 0,
+          },
+        }));
       },
-    }));
+      5 * 60 // 5-minute TTL
+    );
   }
 
   /**
-   * Get cost trends over time
+   * Get cost trends over time (with caching)
    */
   async getCostTrends(userId: string, days: number = 30): Promise<CostTrend[]> {
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
+    const cache = getCacheService();
+    const cacheKey = `cost_trends:${userId}:${days}`;
 
-    const { data } = await getDb()
-      .from('cost_trends')
-      .select('*')
-      .eq('user_id', userId)
-      .gte('date', startDate.toISOString().split('T')[0])
-      .order('date', { ascending: true });
+    return cache.getOrFetch(
+      cacheKey,
+      async () => {
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - days);
 
-    return (data || []).map((d: any) => ({
-      date: d.date,
-      total_operations: d.total_operations,
-      total_cost_usd: d.total_cost_usd,
-      avg_cost_per_operation: d.avg_cost_per_operation,
-      anthropic_cost: d.anthropic_cost || 0,
-      deepseek_cost: d.deepseek_cost || 0,
-      gemini_cost: d.gemini_cost || 0,
-      openai_cost: d.openai_cost || 0,
-      success_rate: d.success_rate,
-      avg_latency_ms: d.avg_latency_ms,
-    }));
+        const { data } = await getDb()
+          .from('cost_trends')
+          .select('*')
+          .eq('user_id', userId)
+          .gte('date', startDate.toISOString().split('T')[0])
+          .order('date', { ascending: true });
+
+        return (data || []).map((d: any) => ({
+          date: d.date,
+          total_operations: d.total_operations,
+          total_cost_usd: d.total_cost_usd,
+          avg_cost_per_operation: d.avg_cost_per_operation,
+          anthropic_cost: d.anthropic_cost || 0,
+          deepseek_cost: d.deepseek_cost || 0,
+          gemini_cost: d.gemini_cost || 0,
+          openai_cost: d.openai_cost || 0,
+          success_rate: d.success_rate,
+          avg_latency_ms: d.avg_latency_ms,
+        }));
+      },
+      5 * 60 // 5-minute TTL (cost trends update frequently)
+    );
   }
 
   /**
@@ -254,36 +295,46 @@ export class AnalyticsService {
   }
 
   /**
-   * Get active recommendations
+   * Get active recommendations (with caching)
    */
   async getRecommendations(userId: string, limit: number = 10): Promise<OptimizationRecommendation[]> {
-    const { data } = await getDb()
-      .from('optimization_recommendations')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('status', 'active')
-      .order('priority', { ascending: false })
-      .order('estimated_savings_usd', { ascending: false })
-      .limit(limit);
+    const cache = getCacheService();
+    const cacheKey = `recommendations:${userId}:${limit}`;
 
-    return (data || []).map((d: any) => ({
-      id: d.id,
-      title: d.title,
-      description: d.description,
-      recommendation_type: d.recommendation_type,
-      operation_id: d.operation_id,
-      estimated_savings_percent: d.estimated_savings_percent,
-      estimated_savings_usd: d.estimated_savings_usd,
-      estimated_latency_improvement_percent: d.estimated_latency_improvement_percent,
-      priority: d.priority,
-      status: d.status,
-      suggested_action: d.suggested_action,
-      estimated_implementation_effort: d.estimated_implementation_effort,
-    }));
+    return cache.getOrFetch(
+      cacheKey,
+      async () => {
+        const { data } = await getDb()
+          .from('optimization_recommendations')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('status', 'active')
+          .order('priority', { ascending: false })
+          .order('estimated_savings_usd', { ascending: false })
+          .limit(limit);
+
+        return (data || []).map((d: any) => ({
+          id: d.id,
+          title: d.title,
+          description: d.description,
+          recommendation_type: d.recommendation_type,
+          operation_id: d.operation_id,
+          estimated_savings_percent: d.estimated_savings_percent,
+          estimated_savings_usd: d.estimated_savings_usd,
+          estimated_latency_improvement_percent: d.estimated_latency_improvement_percent,
+          priority: d.priority,
+          status: d.status,
+          suggested_action: d.suggested_action,
+          estimated_implementation_effort: d.estimated_implementation_effort,
+        }));
+      },
+      60 * 60 // 1-hour TTL (recommendations are stable)
+    );
   }
 
   /**
    * Dismiss a recommendation
+   * Invalidates recommendations cache
    */
   async dismissRecommendation(userId: string, recommendationId: string): Promise<void> {
     await getDb()
@@ -294,10 +345,17 @@ export class AnalyticsService {
       })
       .eq('id', recommendationId)
       .eq('user_id', userId);
+
+    // Invalidate recommendations cache
+    const cache = getCacheService();
+    cache.deletePattern(`recommendations:${userId}:*`).catch(err => {
+      console.error('Failed to invalidate cache:', err);
+    });
   }
 
   /**
    * Mark recommendation as implemented
+   * Invalidates recommendations cache
    */
   async implementRecommendation(userId: string, recommendationId: string): Promise<void> {
     await getDb()
@@ -309,6 +367,12 @@ export class AnalyticsService {
       })
       .eq('id', recommendationId)
       .eq('user_id', userId);
+
+    // Invalidate recommendations cache
+    const cache = getCacheService();
+    cache.deletePattern(`recommendations:${userId}:*`).catch(err => {
+      console.error('Failed to invalidate cache:', err);
+    });
   }
 
   /**
