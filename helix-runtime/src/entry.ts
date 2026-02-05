@@ -201,20 +201,7 @@ if (!ensureExperimentalWarningSuppressed()) {
   // ============================================
   const helixInit = async () => {
     try {
-      const { preloadSecrets, initializeHelix, shutdownHelix } = await import("./helix/index.js");
-
-      // STEP 0: Preload all secrets from 1Password (MUST be first)
-      // This ensures all secrets are encrypted in memory before any logging
-      try {
-        await preloadSecrets();
-      } catch (err) {
-        console.error(
-          "[helix] CRITICAL: Failed to preload secrets:",
-          err instanceof Error ? err.message : String(err),
-        );
-        // Fail-closed: Cannot proceed without secrets
-        throw err;
-      }
+      const { initializeHelix, shutdownHelix } = await import("./helix/index.js");
 
       // STEP 1: Initialize logging system
       await initializeHelix();

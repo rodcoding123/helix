@@ -453,7 +453,7 @@ export async function startCanvasHost(opts: CanvasHostServerOpts): Promise<Canva
   // SECURITY FIX (CVE-2025-59951 pattern): Default to loopback, not all interfaces
   const bindHost = opts.listenHost?.trim() || "127.0.0.1";
   if (bindHost === "0.0.0.0") {
-    opts.runtime.warn(
+    opts.runtime.log(
       'Canvas host binding to all interfaces (0.0.0.0). ' +
       'Ensure firewall protection is enabled. ' +
       'For local access, consider using 127.0.0.1 instead.'

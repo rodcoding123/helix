@@ -30,6 +30,7 @@ const Tasks = lazy(() => import('@/pages/Tasks').then(m => ({ default: m.TasksPa
 const ControlPlane = lazy(() => import('@/pages/ControlPlane'));
 const TenantSettings = lazy(() => import('@/pages/TenantSettings'));
 const InvitationAccept = lazy(() => import('@/pages/InvitationAccept'));
+const OperationAnalytics = lazy(() => import('@/pages/OperationAnalytics').then(m => ({ default: m.OperationAnalytics })));
 
 // Loading fallback component
 function LoadingFallback() {
@@ -219,6 +220,16 @@ export function App() {
                   <Suspense fallback={<LoadingFallback />}>
                     <ProtectedRoute>
                       <TenantSettings />
+                    </ProtectedRoute>
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/analytics/operations"
+                element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <ProtectedRoute>
+                      <OperationAnalytics />
                     </ProtectedRoute>
                   </Suspense>
                 }

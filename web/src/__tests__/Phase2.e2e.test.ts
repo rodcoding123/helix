@@ -4,7 +4,7 @@
  * 25+ tests for complete user workflows
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 describe('Phase 2 E2E Integration Tests', () => {
   describe('Email Workflow', () => {

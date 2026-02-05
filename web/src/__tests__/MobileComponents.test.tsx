@@ -4,8 +4,8 @@
  * 20 tests for mobile UI components
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import { MobileEmailList } from '../components/mobile/MobileEmailList';
 import { MobileEmailDetail } from '../components/mobile/MobileEmailDetail';
 import { MobileCalendarView } from '../components/mobile/MobileCalendarView';
