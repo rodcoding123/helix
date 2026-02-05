@@ -288,11 +288,11 @@ export class GatewayConnection {
         minProtocol: PROTOCOL_VERSION,
         maxProtocol: PROTOCOL_VERSION,
         client: {
-          id: 'helix.web.observatory',
+          id: 'webchat-ui',
           displayName: 'Helix Observatory',
           version: import.meta.env.VITE_APP_VERSION || '0.1.0',
           platform: this.detectPlatform(),
-          mode: 'frontend',
+          mode: 'ui',
           instanceId: this.config.instanceKey,
         },
         role: 'operator',
@@ -300,7 +300,6 @@ export class GatewayConnection {
         auth: {
           token: this.config.authToken,
         },
-        ...(nonce ? { device: null } : {}),
         userAgent: navigator.userAgent,
       },
     };
