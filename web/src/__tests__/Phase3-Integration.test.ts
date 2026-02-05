@@ -155,12 +155,12 @@ describe('Phase 3 RPC Integration Tests', () => {
           stepId: 's2',
           toolName: 'tool2',
           toolType: 'custom' as const,
-          inputMapping: { input: '$.s1.output' },
+          inputMapping: { input: '$.s1.output' } as Record<string, string>,
           errorHandling: 'continue' as const,
         },
       ];
 
-      const result = service.validateSkillSteps(validSkill);
+      const result = service.validateSkillSteps(validSkill as any);
       expect(result.valid).toBe(true);
     });
 

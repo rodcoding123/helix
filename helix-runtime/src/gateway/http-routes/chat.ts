@@ -16,9 +16,9 @@
 
 import { type IncomingMessage, type ServerResponse } from 'node:http';
 import Anthropic from '@anthropic-ai/sdk';
-import { router } from '../../../helix/ai-operations/router.js';
-import { costTracker } from '../../../helix/ai-operations/cost-tracker.js';
-import { approvalGate } from '../../../helix/ai-operations/approval-gate.js';
+import { router } from '../../../../src/helix/ai-operations/router.js';
+import { costTracker } from '../../../../src/helix/ai-operations/cost-tracker.js';
+import { approvalGate } from '../../../../src/helix/ai-operations/approval-gate.js';
 
 interface ChatHandlerContext {
   db: any;

@@ -105,21 +105,21 @@ describe('Phase 3 E2E Integration Tests', () => {
           stepId: 's1',
           toolName: 'fetch_data',
           toolType: 'custom' as const,
-          inputMapping: { query: '$.input.query' },
+          inputMapping: { query: '$.input.query' } as Record<string, string>,
           errorHandling: 'continue' as const,
         },
         {
           stepId: 's2',
           toolName: 'process_data',
           toolType: 'custom' as const,
-          inputMapping: { data: '$.s1.output' },
+          inputMapping: { data: '$.s1.output' } as Record<string, string>,
           errorHandling: 'continue' as const,
         },
         {
           stepId: 's3',
           toolName: 'format_output',
           toolType: 'custom' as const,
-          inputMapping: { processed: '$.s2.output' },
+          inputMapping: { processed: '$.s2.output' } as Record<string, string>,
           errorHandling: 'continue' as const,
         },
       ];
@@ -342,11 +342,11 @@ describe('Phase 3 E2E Integration Tests', () => {
       expect(patterns).toHaveLength(4);
 
       // Verify cross-layer analysis
-      const layers = patterns.map((p) => p.layer).sort();
+      const layers = patterns.map((p: any) => p.layer).sort();
       expect(layers).toEqual([1, 2, 3, 4]);
 
       // All patterns should be high confidence
-      patterns.forEach((p) => {
+      patterns.forEach((p: any) => {
         expect(p.confidence).toBeGreaterThan(0.7);
       });
     });

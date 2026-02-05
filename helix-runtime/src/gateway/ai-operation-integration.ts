@@ -10,11 +10,11 @@
  * Created: 2026-02-04
  */
 
-import { AIOperationRouter, type RoutingRequest, type RoutingResponse } from '../../helix/ai-operations/router.js';
-import { CostTracker, type OperationLog } from '../../helix/ai-operations/cost-tracker.js';
-import { ApprovalGate } from '../../helix/ai-operations/approval-gate.js';
-import { logToDiscord } from '../../helix/logging.js';
-import { hashChain } from '../../helix/hash-chain.js';
+import { AIOperationRouter, type RoutingRequest, type RoutingResponse } from '../../../src/helix/ai-operations/router.js';
+import { CostTracker, type OperationLog } from '../../../src/helix/ai-operations/cost-tracker.js';
+import { ApprovalGate } from '../../../src/helix/ai-operations/approval-gate.js';
+import { logToDiscord } from '../../../src/helix/logging.js';
+import { hashChain } from '../../../src/helix/hash-chain.js';
 
 // Singleton instances
 let router: AIOperationRouter | null = null;

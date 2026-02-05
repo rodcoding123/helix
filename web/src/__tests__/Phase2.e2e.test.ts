@@ -448,7 +448,7 @@ describe('Phase 2 E2E Integration Tests', () => {
         progress: 1.0,
       });
 
-      const [sync1, sync2, sync3] = await Promise.all([
+      const [, , sync3] = await Promise.all([
         mockSyncManager.request('sync_email'),
         mockSyncManager.request('sync_calendar'),
         mockSyncManager.request('sync_voice'),
