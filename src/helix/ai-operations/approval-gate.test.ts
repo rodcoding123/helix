@@ -1,4 +1,9 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type,@typescript-eslint/require-await */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /**
  * ApprovalGate Tests
  *
@@ -6,40 +11,24 @@
  * Discord notifications, and decision tracking.
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import * as supabaseModule from '@supabase/supabase-js';
+import * as loggingModule from '../logging.js';
+import * as hashChainModule from '../hash-chain.js';
 
-// Mock Supabase before importing ApprovalGate
-vi.mock('@supabase/supabase-js', () => {
-  // Create a query builder factory function that returns a chainable object
-  const createMockQueryBuilder = () => {
-    const builder = {
-      select: () => builder,
-      eq: () => builder,
-      single: async () => ({ data: {}, error: null }),
-      insert: async () => ({ data: {}, error: null }),
-      update: async () => ({ data: {}, error: null }),
-      delete: () => builder,
-    };
-    return builder;
-  };
-
-  return {
-    createClient: () => ({
-      from: () => createMockQueryBuilder(),
-      rpc: async () => ({ data: {}, error: null }),
-      auth: {
-        admin: {
-          createUser: vi.fn(),
-          deleteUser: vi.fn(),
-        },
-      },
-    }),
-  };
-});
+// Mock dependencies
+vi.mock('@supabase/supabase-js');
+vi.mock('../logging.js');
+vi.mock('../hash-chain.js');
 
 import { ApprovalGate, ApprovalRequest } from './approval-gate.js';
 
 describe('ApprovalGate', () => {
+  let gate: ApprovalGate;
+  let mockSupabaseClient: any;
+  let mockLogToDiscord: any;
+  let mockHashChainAdd: any;
+
   const mockApprovalRequest: ApprovalRequest = {
     id: 'approval-12345',
     operation_id: 'chat_message',
@@ -50,6 +39,513 @@ describe('ApprovalGate', () => {
     requested_at: '2026-02-04T10:00:00Z',
     status: 'pending',
   };
+
+  beforeEach(() => {
+    // Setup environment variables
+    process.env.SUPABASE_URL = 'https://test.supabase.co';
+    process.env.SUPABASE_SERVICE_KEY = 'test-key-123';
+
+    // Setup Supabase mock
+    mockSupabaseClient = {
+      from: vi.fn(),
+    };
+
+    vi.mocked(supabaseModule.createClient).mockReturnValue(mockSupabaseClient);
+
+    // Setup Discord logging mock
+    mockLogToDiscord = vi.fn();
+    vi.mocked(loggingModule.logToDiscord).mockImplementation(mockLogToDiscord);
+
+    // Setup hash chain mock
+    mockHashChainAdd = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(hashChainModule, 'hashChain', {
+      value: {
+        add: mockHashChainAdd,
+      },
+      configurable: true,
+    });
+
+    // Create new gate instance
+    gate = new ApprovalGate();
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+    delete process.env.SUPABASE_URL;
+    delete process.env.SUPABASE_SERVICE_KEY;
+  });
+
+  describe('requestApproval', () => {
+    let mockInsert: any;
+
+    beforeEach(() => {
+      mockInsert = vi.fn().mockResolvedValue({ error: null });
+      mockSupabaseClient.from.mockReturnValue({
+        insert: mockInsert,
+      });
+    });
+
+    it('should create approval request successfully', async () => {
+      const result = await gate.requestApproval(
+        'op-123',
+        'deploy_model',
+        150.5,
+        'Deploy new model to production',
+        'rodrigo'
+      );
+
+      expect(result).toMatchObject({
+        operation_id: 'op-123',
+        operation_type: 'deploy_model',
+        cost_impact_usd: 150.5,
+        reason: 'Deploy new model to production',
+        requested_by: 'rodrigo',
+        status: 'pending',
+      });
+
+      expect(result.id).toMatch(/^approval-\d+-[a-z0-9]+$/);
+      expect(result.requested_at).toBeDefined();
+    });
+
+    it('should insert record in database', async () => {
+      await gate.requestApproval('op-123', 'deploy_model', 150.5, 'Deploy model');
+
+      expect(mockInsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          recommendation_type: 'approval_request',
+          operation_id: 'op-123',
+          estimated_savings_usd: -150.5,
+          reasoning: 'Deploy model',
+          approval_status: 'PENDING',
+          created_by: 'system',
+        })
+      );
+    });
+
+    it('should send Discord alert', async () => {
+      await gate.requestApproval('op-123', 'deploy_model', 150.5, 'Deploy model', 'rodrigo');
+
+      expect(mockLogToDiscord).toHaveBeenCalledWith(
+        expect.objectContaining({
+          channel: 'helix-alerts',
+          type: 'approval_required',
+          mentionAdmins: true,
+        })
+      );
+    });
+
+    it('should log to hash chain', async () => {
+      const result = await gate.requestApproval(
+        'op-123',
+        'deploy_model',
+        150.5,
+        'Deploy model',
+        'rodrigo'
+      );
+
+      expect(mockHashChainAdd).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'approval_requested',
+          approval_id: result.id,
+          operation: 'op-123',
+          cost_impact_usd: 150.5,
+        })
+      );
+    });
+
+    it('should handle database error', async () => {
+      const dbError = new Error('Database connection failed');
+      mockInsert.mockResolvedValue({ error: dbError });
+
+      await expect(
+        gate.requestApproval('op-123', 'deploy_model', 150.5, 'Deploy model')
+      ).rejects.toThrow(dbError);
+
+      expect(mockLogToDiscord).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'approval_request_failed',
+        })
+      );
+    });
+  });
+
+  describe('checkApproval', () => {
+    let mockSelect: any;
+
+    beforeEach(() => {
+      mockSelect = vi.fn();
+      mockSupabaseClient.from.mockReturnValue({
+        select: mockSelect,
+      });
+    });
+
+    it('should return true for approved operation', async () => {
+      mockSelect.mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({
+            data: { approval_status: 'APPROVED' },
+            error: null,
+          }),
+        }),
+      });
+
+      const result = await gate.checkApproval('approval-123');
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false for pending operation', async () => {
+      mockSelect.mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({
+            data: { approval_status: 'PENDING' },
+            error: null,
+          }),
+        }),
+      });
+
+      const result = await gate.checkApproval('approval-123');
+
+      expect(result).toBe(false);
+    });
+
+    it('should throw for rejected operation', async () => {
+      mockSelect.mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({
+            data: { approval_status: 'REJECTED' },
+            error: null,
+          }),
+        }),
+      });
+
+      await expect(gate.checkApproval('approval-123')).rejects.toThrow(
+        'Operation has been rejected'
+      );
+    });
+
+    it('should throw if approval not found', async () => {
+      mockSelect.mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({
+            data: null,
+            error: null,
+          }),
+        }),
+      });
+
+      await expect(gate.checkApproval('approval-999')).rejects.toThrow('Approval not found');
+    });
+  });
+
+  describe('approve', () => {
+    let mockSelectForApprove: any;
+    let mockUpdate: any;
+
+    beforeEach(() => {
+      mockSelectForApprove = vi.fn();
+      mockUpdate = vi.fn();
+
+      mockSelectForApprove.mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({
+            data: {
+              id: 'approval-123',
+              operation_id: 'op-456',
+              estimated_savings_usd: -150.5,
+            },
+            error: null,
+          }),
+        }),
+      });
+
+      mockUpdate.mockReturnValue({
+        eq: vi.fn().mockResolvedValue({ error: null }),
+      });
+
+      mockSupabaseClient.from.mockImplementation((table: string) => {
+        if (table === 'helix_recommendations') {
+          return {
+            select: mockSelectForApprove,
+            update: mockUpdate,
+          };
+        }
+        return {};
+      });
+    });
+
+    it('should approve operation successfully', async () => {
+      await gate.approve('approval-123', 'rodrigo');
+
+      expect(mockUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          approval_status: 'APPROVED',
+          approved_by: 'rodrigo',
+        })
+      );
+    });
+
+    it('should log to Discord', async () => {
+      await gate.approve('approval-123', 'rodrigo');
+
+      expect(mockLogToDiscord).toHaveBeenCalledWith(
+        expect.objectContaining({
+          channel: 'helix-api',
+          type: 'approval_granted',
+          approval_id: 'approval-123',
+          approved_by: 'rodrigo',
+        })
+      );
+    });
+
+    it('should log to hash chain', async () => {
+      await gate.approve('approval-123', 'rodrigo');
+
+      expect(mockHashChainAdd).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'approval_granted',
+          approval_id: 'approval-123',
+          approved_by: 'rodrigo',
+        })
+      );
+    });
+
+    it('should throw if approval not found', async () => {
+      mockSelectForApprove.mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({
+            data: null,
+            error: null,
+          }),
+        }),
+      });
+
+      await expect(gate.approve('approval-999')).rejects.toThrow('Approval not found');
+    });
+  });
+
+  describe('reject', () => {
+    let mockSelectForReject: any;
+    let mockUpdate: any;
+
+    beforeEach(() => {
+      mockSelectForReject = vi.fn();
+      mockUpdate = vi.fn();
+
+      mockSelectForReject.mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({
+            data: {
+              id: 'approval-123',
+              operation_id: 'op-456',
+              estimated_savings_usd: -150.5,
+            },
+            error: null,
+          }),
+        }),
+      });
+
+      mockUpdate.mockReturnValue({
+        eq: vi.fn().mockResolvedValue({ error: null }),
+      });
+
+      mockSupabaseClient.from.mockImplementation((table: string) => {
+        if (table === 'helix_recommendations') {
+          return {
+            select: mockSelectForReject,
+            update: mockUpdate,
+          };
+        }
+        return {};
+      });
+    });
+
+    it('should reject operation successfully', async () => {
+      await gate.reject('approval-123', 'Insufficient budget', 'admin');
+
+      expect(mockUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          approval_status: 'REJECTED',
+          approved_by: 'admin',
+        })
+      );
+    });
+
+    it('should log rejection reason', async () => {
+      await gate.reject('approval-123', 'Cost too high', 'rodrigo');
+
+      expect(mockLogToDiscord).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'approval_rejected',
+          reason: 'Cost too high',
+        })
+      );
+    });
+
+    it('should log rejection to hash chain', async () => {
+      await gate.reject('approval-123', 'Out of scope', 'rodrigo');
+
+      expect(mockHashChainAdd).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'approval_rejected',
+          approval_id: 'approval-123',
+          reason: 'Out of scope',
+          rejected_by: 'rodrigo',
+        })
+      );
+    });
+  });
+
+  describe('getPendingApprovals', () => {
+    let mockSelect: any;
+
+    beforeEach(() => {
+      mockSelect = vi.fn();
+      mockSupabaseClient.from.mockReturnValue({
+        select: mockSelect,
+      });
+    });
+
+    it('should return list of pending approvals', async () => {
+      mockSelect.mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          order: vi.fn().mockResolvedValue({
+            data: [
+              {
+                id: 'approval-1',
+                operation_id: 'op-1',
+                recommendation_type: 'test_op',
+                created_by: 'user1',
+                estimated_savings_usd: -100,
+                reasoning: 'Test reason',
+                created_at: '2026-01-01T00:00:00Z',
+                approval_status: 'PENDING',
+              },
+            ],
+            error: null,
+          }),
+        }),
+      });
+
+      const results = await gate.getPendingApprovals();
+
+      expect(results).toHaveLength(1);
+      expect(results[0].id).toBe('approval-1');
+    });
+
+    it('should return empty array when no pending approvals', async () => {
+      mockSelect.mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          order: vi.fn().mockResolvedValue({
+            data: null,
+            error: null,
+          }),
+        }),
+      });
+
+      const results = await gate.getPendingApprovals();
+
+      expect(results).toEqual([]);
+    });
+
+    it('should return empty array on error', async () => {
+      mockSelect.mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          order: vi.fn().mockResolvedValue({
+            data: null,
+            error: new Error('Database error'),
+          }),
+        }),
+      });
+
+      const results = await gate.getPendingApprovals();
+
+      expect(results).toEqual([]);
+      expect(mockLogToDiscord).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'pending_approvals_fetch_failed',
+        })
+      );
+    });
+  });
+
+  describe('getApprovalHistory', () => {
+    let mockSelect: any;
+
+    beforeEach(() => {
+      mockSelect = vi.fn();
+      mockSupabaseClient.from.mockReturnValue({
+        select: mockSelect,
+      });
+    });
+
+    it('should return approval history', async () => {
+      mockSelect.mockReturnValue({
+        in: vi.fn().mockReturnValue({
+          order: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue({
+              data: [
+                {
+                  id: 'approval-1',
+                  operation_id: 'op-1',
+                  recommendation_type: 'test',
+                  created_by: 'user',
+                  estimated_savings_usd: -100,
+                  reasoning: 'Reason',
+                  created_at: '2026-01-01T00:00:00Z',
+                  approval_status: 'APPROVED',
+                  approved_by: 'admin',
+                  approved_at: '2026-01-01T01:00:00Z',
+                },
+              ],
+              error: null,
+            }),
+          }),
+        }),
+      });
+
+      const results = await gate.getApprovalHistory();
+
+      expect(results).toHaveLength(1);
+      expect(results[0].status).toBe('approved');
+    });
+
+    it('should use default limit of 100', async () => {
+      mockSelect.mockReturnValue({
+        in: vi.fn().mockReturnValue({
+          order: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue({
+              data: [],
+              error: null,
+            }),
+          }),
+        }),
+      });
+
+      await gate.getApprovalHistory();
+
+      const limitCall =
+        mockSelect.mock.results[0].value.in.mock.results[0].value.order.mock.results[0].value.limit;
+      expect(limitCall).toHaveBeenCalledWith(100);
+    });
+
+    it('should return empty array on error', async () => {
+      mockSelect.mockReturnValue({
+        in: vi.fn().mockReturnValue({
+          order: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue({
+              data: null,
+              error: new Error('Database error'),
+            }),
+          }),
+        }),
+      });
+
+      const results = await gate.getApprovalHistory();
+
+      expect(results).toEqual([]);
+    });
+  });
 
   describe('Initialization', () => {
     it('should create approval gate with Supabase credentials', () => {
