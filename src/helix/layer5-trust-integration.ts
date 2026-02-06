@@ -107,13 +107,13 @@ export class Layer5TrustIntegration {
         totalUsers: trustProfiles.length,
         averageTrust: this.calculateAverageTrust(trustProfiles),
         trustDistribution: this.calculateDistribution(trustProfiles),
-        trustGrowthRate: await this.calculateGrowthRate(trustProfiles),
+        trustGrowthRate: this.calculateGrowthRate(trustProfiles),
         userStageProgressions: 0, // Will be calculated from events
-        emotionalTrustCorrelations: await this.calculateEmotionalCorrelations(),
+        emotionalTrustCorrelations: this.calculateEmotionalCorrelations(),
       };
 
       // Update metadata table with these metrics
-      await this.storeMetrics(metrics);
+      this.storeMetrics(metrics);
 
       return metrics;
     } catch (error) {
@@ -212,7 +212,8 @@ export class Layer5TrustIntegration {
 
         // Update profile
 
-        const { error: updateError } = await (this.supabase.from('user_trust_profiles') as any)
+        const { error: updateError } = await this.supabase
+          .from('user_trust_profiles')
           .update({ salience_multiplier: multiplier })
           .eq('id', profile.id);
 
@@ -285,15 +286,13 @@ export class Layer5TrustIntegration {
     return dist;
   }
 
-  private async calculateGrowthRate(_profiles: TrustProfile[]): Promise<number> {
+  private calculateGrowthRate(_profiles: TrustProfile[]): number {
     // This would require historical data - placeholder for now
     // In real implementation, compare with yesterday's profiles
     return 0.01; // 1% average daily growth
   }
 
-  private async calculateEmotionalCorrelations(): Promise<
-    TrustSynthesisMetrics['emotionalTrustCorrelations']
-  > {
+  private calculateEmotionalCorrelations(): TrustSynthesisMetrics['emotionalTrustCorrelations'] {
     // This would correlate emotional analysis with trust changes
     // Placeholder - requires more data
     return {
@@ -303,7 +302,10 @@ export class Layer5TrustIntegration {
     };
   }
 
-  private generateInsights(analysis: any, eventsByType: Record<string, number>): string[] {
+  private generateInsights(
+    analysis: { stageProgressions: number; stageLosses: number },
+    eventsByType: Record<string, number>
+  ): string[] {
     const insights: string[] = [];
 
     if (analysis.stageProgressions > 0) {
@@ -346,7 +348,7 @@ export class Layer5TrustIntegration {
     return multipliers[stage] || 0.5;
   }
 
-  private rowToProfile(row: any): Partial<TrustProfile> {
+  private rowToProfile(row: TrustProfileRow): Partial<TrustProfile> {
     return {
       userId: row.user_id,
       compositeTrust: row.composite_trust,
@@ -357,7 +359,7 @@ export class Layer5TrustIntegration {
     };
   }
 
-  private async storeMetrics(metrics: TrustSynthesisMetrics): Promise<void> {
+  private storeMetrics(metrics: TrustSynthesisMetrics): void {
     // Store metrics in a dedicated table (would need to create this in migrations)
     // Placeholder - this would go to trust_metrics table
     console.log('[LAYER5] Trust metrics synthesized:', {
