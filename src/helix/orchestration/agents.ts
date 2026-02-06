@@ -23,7 +23,7 @@
  */
 
 // Types only - helix-runtime is compiled separately
-interface RemoteCommandExecutor {
+export interface RemoteCommandExecutor {
   queueCommand(command: unknown): Promise<void>;
   getQueueStatus(): Promise<{ pending: number; running: number }>;
   cancelCommand(commandId: string): Promise<void>;

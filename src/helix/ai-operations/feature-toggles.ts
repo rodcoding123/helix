@@ -9,7 +9,6 @@
  * Created: 2026-02-04
  */
 
-// @ts-nocheck - Supabase types not generated, will be fixed in production
 import { createClient } from '@supabase/supabase-js';
 import { logToDiscord } from '../logging.js';
 import { hashChain } from '../hash-chain.js';
@@ -112,7 +111,7 @@ export class FeatureToggles {
         `Security guardrail: ${toggleName} is locked and disabled. ` +
         `This prevents the operation. ${context || ''}`;
 
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-alerts',
         type: 'security_enforcement',
         toggle: toggleName,
@@ -168,7 +167,7 @@ export class FeatureToggles {
 
       return toggle;
     } catch (error) {
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-alerts',
         type: 'toggle_fetch_failed',
         toggle: toggleName,
@@ -199,13 +198,14 @@ export class FeatureToggles {
       if (error) throw error;
 
       // Cache all results
-      (data || []).forEach(toggle => {
+      const toggles = (data as FeatureToggle[]) || [];
+      toggles.forEach(toggle => {
         this.toggleCache.set(toggle.toggle_name, { toggle, timestamp: Date.now() });
       });
 
-      return data || [];
+      return toggles;
     } catch (error) {
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-alerts',
         type: 'toggles_fetch_failed',
         error: String(error),
@@ -314,7 +314,7 @@ ${(await this.getAllToggles())
       }
 
       // All critical toggles exist
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-api',
         type: 'critical_toggles_verified',
         count: toggleNames.length,
@@ -322,7 +322,7 @@ ${(await this.getAllToggles())
 
       return true;
     } catch (error) {
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-alerts',
         type: 'critical_toggles_verification_failed',
         error: String(error),

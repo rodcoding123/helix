@@ -37,11 +37,9 @@ import {
   routeAfterSupervisor,
   type OrchestratorState,
   type OrchestratorConfig,
+  type RemoteCommandExecutor,
   DEFAULT_CONFIG,
 } from './agents.js';
-
-// Remote command executor type (from Phase 1, compiled separately)
-type RemoteCommandExecutor = any;
 
 /**
  * Create and compile the supervisor graph
@@ -85,10 +83,10 @@ export function createSupervisorGraph(
   const graph = new StateGraph<OrchestratorState>(stateSchema)
     // Add nodes
     .addNode('supervisor', supervisorNode)
-    .addNode('narrative_agent', (state) => narrativeAgentNode(state))
-    .addNode('memory_agent', (state) => memoryAgentNode(state))
-    .addNode('purpose_agent', (state) => purposeAgentNode(state))
-    .addNode('action_agent', (state) => actionAgentNode(state, executor))
+    .addNode('narrative_agent', state => narrativeAgentNode(state))
+    .addNode('memory_agent', state => memoryAgentNode(state))
+    .addNode('purpose_agent', state => purposeAgentNode(state))
+    .addNode('action_agent', state => actionAgentNode(state, executor))
 
     // Add edges: each agent back to supervisor or END
     .addConditionalEdges('supervisor', routeAfterSupervisor, {
@@ -137,11 +135,7 @@ export async function runOrchestrator(
   const { createInitialState } = await import('./agents.js');
 
   // Create graph
-  const graph = createSupervisorGraph(
-    options?.config,
-    options?.checkpointer,
-    options?.executor
-  );
+  const graph = createSupervisorGraph(options?.config, options?.checkpointer, options?.executor);
 
   // Create initial state
   const initialState = createInitialState(task);
@@ -178,11 +172,7 @@ export async function streamOrchestrator(
   const { createInitialState } = await import('./agents.js');
 
   // Create graph
-  const graph = createSupervisorGraph(
-    options?.config,
-    options?.checkpointer,
-    options?.executor
-  );
+  const graph = createSupervisorGraph(options?.config, options?.checkpointer, options?.executor);
 
   // Create initial state
   const initialState = createInitialState(task);
@@ -249,7 +239,7 @@ export async function getExecutionHistory(
   checkpointer: ICheckpointer
 ): Promise<OrchestratorState[]> {
   const checkpoints = await checkpointer.list(threadId);
-  return checkpoints.map((cp) => cp.state) as OrchestratorState[];
+  return checkpoints.map(cp => cp.state) as OrchestratorState[];
 }
 
 /**
@@ -293,9 +283,7 @@ export async function compareExecutionPaths(
  * @param userConfig User's preferences
  * @returns Complete validated configuration
  */
-export function createAgentConfig(
-  userConfig?: Partial<OrchestratorConfig>
-): OrchestratorConfig {
+export function createAgentConfig(userConfig?: Partial<OrchestratorConfig>): OrchestratorConfig {
   const config = { ...DEFAULT_CONFIG, ...userConfig };
 
   // Validate all agents are configured
