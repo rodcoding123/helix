@@ -70,15 +70,10 @@ export default defineConfig({
     },
   ],
 
-  webServer: {
-    // Uncomment to auto-start dev server during tests
-    // command: 'npm run dev',
-    // url: 'http://localhost:5173',
-    // reuseExistingServer: !process.env.CI,
-
-    // For Tauri app, you would use:
-    // command: 'npm run tauri:dev',
-    // url: 'http://localhost:3000',
-    // reuseExistingServer: true,
-  },
+  // Web server configuration (uncomment to enable)
+  // webServer: {
+  //   command: 'npm run dev',
+  //   url: 'http://localhost:5173',
+  //   reuseExistingServer: !process.env.CI,
+  // },
 });
