@@ -202,21 +202,28 @@ export async function isHelixConfigured(workspaceDir: string): Promise<boolean> 
   // Check for Helix project structure: soul/, psychology/, identity/
   const requiredDirs = ["soul", "psychology", "identity"];
 
+  // Check if Helix project structure exists
+  let hasProjectStructure = true;
   for (const dir of requiredDirs) {
     try {
       const dirPath = path.join(workspaceDir, dir);
       await fs.access(dirPath);
     } catch {
-      // Check if it's OpenClaw workspace structure instead (axis/)
-      try {
-        const axisDir = path.join(workspaceDir, "axis");
-        await fs.access(axisDir);
-        return true; // OpenClaw workspace structure found
-      } catch {
-        return false; // Neither structure found
-      }
+      hasProjectStructure = false;
+      break;
     }
   }
 
-  return true; // Helix project structure found
+  if (hasProjectStructure) {
+    return true; // Helix project structure found
+  }
+
+  // Check if it's OpenClaw workspace structure instead (axis/)
+  try {
+    const axisDir = path.join(workspaceDir, "axis");
+    await fs.access(axisDir);
+    return true; // OpenClaw workspace structure found
+  } catch {
+    return false; // Neither structure found
+  }
 }
