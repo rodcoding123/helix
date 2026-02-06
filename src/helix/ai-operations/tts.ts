@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-argument */
 /**
  * Text-to-Speech Operations - Phase 0.5
  *
@@ -198,14 +197,23 @@ export async function synthesizeToSpeech(config: TextToSpeechConfig): Promise<Te
  * Get model client for operation
  * Phase 0.5: Uses Anthropic SDK with TTS adapter placeholder
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getModelClientForOperation(_model: string): any {
+interface ModelClientResponse {
+  content: Array<{ type: string; text: string }>;
+  usage: { output_tokens: number };
+}
+
+interface ModelClient {
+  messages: {
+    create: (params: Record<string, unknown>) => Promise<ModelClientResponse>;
+  };
+}
+
+function getModelClientForOperation(_model: string): ModelClient {
   // In production Phase 3, this would use actual TTS client (ElevenLabs, Google Cloud TTS, etc.)
   // For now, return a mock client compatible with Anthropic SDK interface
   return {
     messages: {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      create: async (_params: any): Promise<any> => {
+      create: async (_params: Record<string, unknown>): Promise<ModelClientResponse> => {
         // Placeholder implementation - in production this would call actual TTS API
         await Promise.resolve(); // Placeholder await
         return {

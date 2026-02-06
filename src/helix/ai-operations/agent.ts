@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-argument,@typescript-eslint/require-await,@typescript-eslint/no-explicit-any */
 /**
  * Agent Execution Operations - Phase 0.5
  *
@@ -200,14 +199,26 @@ export async function executeAgentCommand(
  * Phase 0.5: Uses Anthropic SDK with placeholders for DeepSeek/Gemini adapters
  */
 
-function getModelClientForOperation(_model: string): any {
+interface ModelClientResponse {
+  content: Array<{ type: string; text: string }>;
+  usage: { output_tokens: number };
+}
+
+interface ModelClient {
+  messages: {
+    create: (params: Record<string, unknown>) => Promise<ModelClientResponse>;
+  };
+}
+
+function getModelClientForOperation(_model: string): ModelClient {
   // In production Phase 3, this would switch between different model clients
   // For now, all route to Anthropic SDK with model ID placeholders
   // Returns an Anthropic client instance with configured API key
   return {
     messages: {
-      create: async (_params: any): Promise<any> => {
+      create: async (_params: Record<string, unknown>): Promise<ModelClientResponse> => {
         // Placeholder implementation - in production this would call actual API
+        await Promise.resolve(); // Placeholder await
         return {
           content: [{ type: 'text' as const, text: 'Model response' }],
           usage: { output_tokens: 100 },
@@ -271,21 +282,16 @@ export async function executeBatchAgentCommands(
 /**
  * Get total cost for agent operations
  */
-export async function getAgentOperationsCost(_userId: string): Promise<{
+export function getAgentOperationsCost(_userId: string): {
   totalCost: number;
   operationCount: number;
   lastUpdated: string;
-}> {
-  try {
-    // This would query the cost_budgets table for the user
-    // Implementation depends on Supabase integration
-    return {
-      totalCost: 0,
-      operationCount: 0,
-      lastUpdated: new Date().toISOString(),
-    };
-  } catch (error) {
-    console.error('Failed to get agent operations cost:', error);
-    throw error;
-  }
+} {
+  // This would query the cost_budgets table for the user
+  // Implementation depends on Supabase integration
+  return {
+    totalCost: 0,
+    operationCount: 0,
+    lastUpdated: new Date().toISOString(),
+  };
 }

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-return,@typescript-eslint/require-await */
 /**
  * Migration Template for AI Operations
  *
@@ -18,6 +17,40 @@
 import { router } from './router.js';
 import { costTracker } from './cost-tracker.js';
 import { approvalGate } from './approval-gate.js';
+
+/**
+ * Chat message structure for AI operations
+ */
+interface ChatMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
+
+/**
+ * Model client response structure
+ */
+interface ModelClientResponse {
+  content: Array<{ type: string; text: string }>;
+  usage: { output_tokens: number };
+}
+
+/**
+ * Model client interface
+ */
+interface ModelClient {
+  messages: {
+    create: (params: Record<string, unknown>) => Promise<ModelClientResponse>;
+  };
+}
+
+/**
+ * Available model clients
+ */
+interface ModelClients {
+  deepseek: ModelClient | null;
+  gemini_flash: ModelClient | null;
+  openai: ModelClient | null;
+}
 
 /**
  * BEFORE MIGRATION
@@ -42,7 +75,7 @@ import { approvalGate } from './approval-gate.js';
  */
 export async function migratedChatMessage(
   userId: string,
-  messages: any[],
+  messages: ChatMessage[],
   operationMetadata?: { inputTokens?: number; outputTokens?: number }
 ): Promise<string> {
   const startTime = Date.now();
@@ -83,7 +116,7 @@ export async function migratedChatMessage(
     const model = routingDecision.model;
 
     // Import the model clients dynamically
-    const { deepseek, gemini_flash, openai } = await getModelClients();
+    const { deepseek, gemini_flash, openai } = getModelClients();
     const modelClient = getModelByName(model, { deepseek, gemini_flash, openai });
 
     if (!modelClient) {
@@ -198,7 +231,7 @@ export async function migratedChatMessage(
 /**
  * Get model clients by name
  */
-async function getModelClients(): Promise<any> {
+function getModelClients(): ModelClients {
   // Return initialized clients for each model
   // These would be imported/initialized from your model provider setup
   return {
@@ -211,8 +244,8 @@ async function getModelClients(): Promise<any> {
 /**
  * Get model client by name
  */
-function getModelByName(modelName: string, clients: any): any {
-  const mapping: Record<string, string> = {
+function getModelByName(modelName: string, clients: ModelClients): ModelClient | null {
+  const mapping: Record<string, keyof ModelClients> = {
     deepseek: 'deepseek',
     gemini_flash: 'gemini_flash',
     openai: 'openai',

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
  * Deepgram Provider Client - Audio Transcription
  *
@@ -8,8 +8,15 @@
 
 import { calculateProviderCost } from './registry.js';
 
+/**
+ * Deepgram SDK module interface for dynamic import
+ */
+interface DeepgramSdkModule {
+  createClient: (apiKey: string) => unknown;
+}
+
 // Lazy-loaded Deepgram module
-let deepgramModule: unknown = null;
+let deepgramModule: DeepgramSdkModule | null = null;
 
 /**
  * Options for Deepgram transcription
@@ -49,11 +56,10 @@ export async function getDeepgramClient(): Promise<unknown> {
   // Lazy-load Deepgram SDK using dynamic import
   if (deepgramModule === null) {
     // @ts-ignore - @deepgram/sdk optional dependency
-    deepgramModule = await import('@deepgram/sdk');
+    deepgramModule = (await import('@deepgram/sdk')) as DeepgramSdkModule;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-  return (deepgramModule as any).createClient(apiKey);
+  return deepgramModule.createClient(apiKey);
 }
 
 /**

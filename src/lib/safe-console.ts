@@ -13,10 +13,11 @@
 
 import { globalSanitizer } from './log-sanitizer.js';
 
-// Extend Console interface to include raw property
+// Extend Console interface to include raw property and safe-wrapped marker
 declare global {
   interface Console {
     raw?: typeof console;
+    __safeWrapped?: boolean;
   }
 }
 
@@ -63,7 +64,7 @@ console.warn = (...args: unknown[]): void => {
 /**
  * Override console.info with sanitization
  */
-(console.info as any) = (...args: unknown[]): void => {
+console.info = (...args: unknown[]): void => {
   const sanitized = args.map(arg => globalSanitizer.sanitize(arg));
   originalInfo.apply(console, sanitized);
 };
@@ -71,7 +72,7 @@ console.warn = (...args: unknown[]): void => {
 /**
  * Override console.debug with sanitization
  */
-(console.debug as any) = (...args: unknown[]): void => {
+console.debug = (...args: unknown[]): void => {
   const sanitized = args.map(arg => globalSanitizer.sanitize(arg));
   originalDebug.apply(console, sanitized);
 };
@@ -80,11 +81,11 @@ console.warn = (...args: unknown[]): void => {
  * Preserve original console for debugging
  * Access with console.raw.log(), console.raw.error(), etc. when needed
  */
-(console.raw as any) = originalConsole;
+console.raw = originalConsole;
 
 /**
  * Mark that console has been safety-wrapped (for testing/verification)
  */
-(console as any).__safeWrapped = true;
+console.__safeWrapped = true;
 
 export {};
