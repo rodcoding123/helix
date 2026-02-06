@@ -146,7 +146,7 @@ export class TenantDiscordLogger {
 
       // Also log to hash chain for immutable audit trail
       const hashChain = getHashChainForTenant(this.tenantId);
-      await hashChain.addEntry(JSON.stringify(payload));
+      await hashChain.add(JSON.stringify(payload));
     } catch (error) {
       console.error(`Failed to log for tenant ${this.tenantId}:`, error);
       // Don't throw - logging failure shouldn't break app

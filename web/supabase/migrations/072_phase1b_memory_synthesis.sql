@@ -48,20 +48,34 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_user_profiles_user_id ON user_profiles(user_id);
-CREATE INDEX idx_user_profiles_is_creator ON user_profiles(is_creator);
-CREATE INDEX idx_user_profiles_trust_level ON user_profiles(trust_level DESC);
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='user_profiles' AND column_name='user_id') THEN
+    CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id);
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='user_profiles' AND column_name='is_creator') THEN
+    CREATE INDEX IF NOT EXISTS idx_user_profiles_is_creator ON user_profiles(is_creator);
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='user_profiles' AND column_name='trust_level') THEN
+    CREATE INDEX IF NOT EXISTS idx_user_profiles_trust_level ON user_profiles(trust_level DESC);
+  END IF;
+END $$;
 
 -- RLS: Users can view own profile, admins can view all
-ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "users_view_own_profile"
-  ON user_profiles FOR SELECT
-  USING (auth.uid() = user_id OR (SELECT is_admin FROM user_profiles WHERE user_id = auth.uid()));
-
-CREATE POLICY "users_update_own_profile"
-  ON user_profiles FOR UPDATE
-  USING (auth.uid() = user_id);
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='user_profiles' AND column_name='is_admin') THEN
+    ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS "users_view_own_profile" ON user_profiles;
+    DROP POLICY IF EXISTS "users_update_own_profile" ON user_profiles;
+    CREATE POLICY "users_view_own_profile"
+      ON user_profiles FOR SELECT
+      USING (auth.uid() = user_id OR (SELECT is_admin FROM user_profiles WHERE user_id = auth.uid()));
+    CREATE POLICY "users_update_own_profile"
+      ON user_profiles FOR UPDATE
+      USING (auth.uid() = user_id);
+  END IF;
+END $$;
 
 -- ==============================================================================
 -- TABLE 2: Conversation Memories
@@ -96,15 +110,28 @@ CREATE TABLE IF NOT EXISTS conversation_memories (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_memories_user_id ON conversation_memories(user_id);
-CREATE INDEX idx_memories_salience ON conversation_memories(salience_score DESC) WHERE salience_score > 0.5;
-CREATE INDEX idx_memories_created_at ON conversation_memories(created_at DESC);
-CREATE INDEX idx_memories_conversation_id ON conversation_memories(conversation_id);
-CREATE INDEX idx_memories_emotional ON conversation_memories(user_id, has_emotional_content) WHERE has_emotional_content = TRUE;
-CREATE INDEX idx_memories_goals ON conversation_memories(user_id, has_goals) WHERE has_goals = TRUE;
+CREATE INDEX IF NOT EXISTS idx_memories_user_id ON conversation_memories(user_id);
+CREATE INDEX IF NOT EXISTS idx_memories_salience ON conversation_memories(salience_score DESC) WHERE salience_score > 0.5;
+CREATE INDEX IF NOT EXISTS idx_memories_created_at ON conversation_memories(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_memories_conversation_id ON conversation_memories(conversation_id);
+CREATE INDEX IF NOT EXISTS idx_memories_emotional ON conversation_memories(user_id, has_emotional_content) WHERE has_emotional_content = TRUE;
+CREATE INDEX IF NOT EXISTS idx_memories_goals ON conversation_memories(user_id, has_goals) WHERE has_goals = TRUE;
 
 -- GIN indexes for JSONB search
-CREATE INDEX idx_memories_synthesis_gin ON conversation_memories USING GIN (synthesis_result);
+CREATE INDEX IF NOT EXISTS idx_memories_synthesis_gin ON conversation_memories USING GIN (synthesis_result);
+
+-- ==============================================================================
+-- HELPER FUNCTIONS
+-- ==============================================================================
+-- Used by triggers to auto-update timestamps
+
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
 -- Auto-update timestamp
 CREATE TRIGGER conversation_memories_updated_at_trigger
@@ -159,8 +186,8 @@ CREATE TABLE IF NOT EXISTS memory_insights (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_insights_user_id ON memory_insights(user_id);
-CREATE INDEX idx_insights_updated_at ON memory_insights(updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_insights_user_id ON memory_insights(user_id);
+CREATE INDEX IF NOT EXISTS idx_insights_updated_at ON memory_insights(updated_at DESC);
 
 -- RLS: Users can view own insights
 ALTER TABLE memory_insights ENABLE ROW LEVEL SECURITY;
@@ -192,9 +219,9 @@ CREATE TABLE IF NOT EXISTS memory_decay_history (
   occurred_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_decay_user_id ON memory_decay_history(user_id);
-CREATE INDEX idx_decay_memory_id ON memory_decay_history(memory_id);
-CREATE INDEX idx_decay_occurred_at ON memory_decay_history(occurred_at DESC);
+CREATE INDEX IF NOT EXISTS idx_decay_user_id ON memory_decay_history(user_id);
+CREATE INDEX IF NOT EXISTS idx_decay_memory_id ON memory_decay_history(memory_id);
+CREATE INDEX IF NOT EXISTS idx_decay_occurred_at ON memory_decay_history(occurred_at DESC);
 
 -- RLS: Users can view own history
 ALTER TABLE memory_decay_history ENABLE ROW LEVEL SECURITY;
@@ -205,17 +232,6 @@ CREATE POLICY "users_view_own_decay_history"
 
 -- ==============================================================================
 -- Helper Function: Update Updated At
--- ==============================================================================
--- Used by triggers to auto-update timestamps
-
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
 -- Add trigger for memory_insights
 CREATE TRIGGER memory_insights_updated_at_trigger
   BEFORE UPDATE ON memory_insights

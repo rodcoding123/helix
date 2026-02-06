@@ -3,7 +3,7 @@
  * Tests for post-conversation analysis and memory integration
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { SynthesisEngine } from './synthesis-engine.js';
 import { ThanosMode } from './thanos-mode.js';
 

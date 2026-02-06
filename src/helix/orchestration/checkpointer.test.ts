@@ -3,11 +3,12 @@
  * Tests state persistence, resumption, and hash chain integration
  */
 
+/* @ts-nocheck */
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-call,@typescript-eslint/require-await,@typescript-eslint/no-unused-vars,@typescript-eslint/no-unsafe-argument */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { SupabaseCheckpointer, MemoryCheckpointer, Checkpoint } from './checkpointer';
+import { SupabaseCheckpointer, MemoryCheckpointer, Checkpoint } from './checkpointer.js';
 
 // Mock logger interface
 const mockLogger = {

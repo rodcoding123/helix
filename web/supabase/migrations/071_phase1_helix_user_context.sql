@@ -52,7 +52,7 @@ END $$;
 
 CREATE TABLE IF NOT EXISTS conversation_insights (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  session_key TEXT NOT NULL REFERENCES conversations(session_key) ON DELETE CASCADE,
+  session_key TEXT NOT NULL,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
 
   -- Extracted data from conversation analysis
