@@ -244,11 +244,20 @@ if (!ensureExperimentalWarningSuppressed()) {
       console.log("[helix] Initializing gateway security...");
 
       const { initializeHelixGateway } = await import("./helix/index.js");
+      const { findAvailablePort, formatPortMessage } = await import("../../src/lib/port-discovery.js");
+      const { setActualPort } = await import("../../src/lib/server-config.js");
 
       // Parse gateway configuration from environment
-      const port = parseInt(process.env.OPENCLAW_GATEWAY_PORT || process.env.HELIX_GATEWAY_PORT || "18789", 10);
+      const primaryPort = parseInt(process.env.OPENCLAW_GATEWAY_PORT || process.env.HELIX_GATEWAY_PORT || "18789", 10);
       const bindHost = process.env.OPENCLAW_GATEWAY_HOST || process.env.HELIX_GATEWAY_HOST || "127.0.0.1";
       const environment = process.env.NODE_ENV === "production" ? "production" : "development";
+
+      // PHASE 1B: Port Discovery - Find available port with fallback
+      const port = await findAvailablePort(primaryPort);
+      if (port !== primaryPort) {
+        console.log(formatPortMessage("Gateway", port, primaryPort));
+      }
+      setActualPort("gateway", port);
 
       // Initialize gateway with security hardening
       const gatewayConfig = await initializeHelixGateway({
