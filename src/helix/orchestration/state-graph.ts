@@ -30,6 +30,20 @@
  */
 
 /**
+ * Minimal checkpointer interface for state graph compilation
+ */
+export interface ICheckpointerLike {
+  save(checkpoint: {
+    checkpoint_id: string;
+    thread_id: string;
+    parent_checkpoint_id: string | null;
+    state: unknown;
+    timestamp: number;
+    hash: string;
+  }): Promise<void>;
+}
+
+/**
  * Node function: Takes state, returns updated state (or partial)
  * Async for AI model calls, database queries, etc.
  */
@@ -85,7 +99,7 @@ export const END = 'END' as const;
  * const result = await compiled.invoke(initialState);
  * ```
  */
-export class StateGraph<TState = any> {
+export class StateGraph<TState = Record<string, unknown>> {
   private nodes = new Map<string, NodeFunction<TState>>();
   private edges: EdgeConfig<TState>[] = [];
   private conditionalEdges = new Map<
@@ -94,7 +108,7 @@ export class StateGraph<TState = any> {
   >();
   private entryPoint: string | null = null;
 
-  constructor(_stateSchema?: any) {
+  constructor(_stateSchema?: Record<string, unknown>) {
     // stateSchema parameter for future type validation
     void _stateSchema;
   }
@@ -144,7 +158,7 @@ export class StateGraph<TState = any> {
     }
 
     // Validate mapping points to existing nodes
-    for (const [_outcome, dest] of Object.entries(mapping)) {
+    for (const dest of Object.values(mapping)) {
       if (dest !== END && !this.nodes.has(dest)) {
         throw new Error(`Conditional edge destination not found: ${dest}`);
       }
@@ -175,7 +189,7 @@ export class StateGraph<TState = any> {
    *
    * @param checkpointer Optional checkpointer for state persistence
    */
-  public compile(checkpointer?: any): CompiledGraph<TState> {
+  public compile(checkpointer?: ICheckpointerLike): CompiledGraph<TState> {
     // Validate entry point
     if (!this.entryPoint) {
       throw new Error('Entry point not set. Call setEntryPoint() before compiling.');
@@ -207,14 +221,17 @@ export class StateGraph<TState = any> {
  * Ready-to-run graph with invoke/stream methods.
  * Handles node execution, routing, checkpointing.
  */
-export class CompiledGraph<TState = any> {
+export class CompiledGraph<TState = Record<string, unknown>> {
   constructor(
     private nodes: Map<string, NodeFunction<TState>>,
     private edges: EdgeConfig<TState>[],
     private entryPoint: string,
-    private conditionalEdges: Map<string, { fn: ConditionalEdgeFn<TState>; mapping: any }>,
-    private checkpointer?: any,
-    _stateSchema?: any
+    private conditionalEdges: Map<
+      string,
+      { fn: ConditionalEdgeFn<TState>; mapping: ConditionalEdgeMapping }
+    >,
+    private checkpointer?: ICheckpointerLike,
+    _stateSchema?: Record<string, unknown>
   ) {
     // stateSchema parameter accepted for future type validation
     void _stateSchema;
@@ -230,10 +247,7 @@ export class CompiledGraph<TState = any> {
    * @param config Configuration (e.g., thread_id for checkpoints)
    * @returns Final state
    */
-  public async invoke(
-    initialState: TState,
-    config?: { thread_id?: string }
-  ): Promise<TState> {
+  public async invoke(initialState: TState, config?: { thread_id?: string }): Promise<TState> {
     let currentNode = this.entryPoint;
     let state = initialState;
     let stepCount = 0;
@@ -365,7 +379,7 @@ export class CompiledGraph<TState = any> {
   /**
    * Merge node result into state immutably
    */
-  private _mergeState(state: TState, result: any): TState {
+  private _mergeState(state: TState, result: TState | Partial<TState>): TState {
     if (!result) {
       return state;
     }

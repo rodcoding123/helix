@@ -23,8 +23,22 @@
  */
 
 // Types only - helix-runtime is compiled separately
-type RemoteCommandExecutor = any;
+interface RemoteCommandExecutor {
+  queueCommand(command: unknown): Promise<void>;
+  getQueueStatus(): Promise<{ pending: number; running: number }>;
+  cancelCommand(commandId: string): Promise<void>;
+}
 
+/**
+ * Memory insight from Layers 2-3 (Emotional & Relational Memory)
+ */
+export interface MemoryInsight {
+  layer: string;
+  tag?: string;
+  connection?: string;
+  weight?: number;
+  trust?: number;
+}
 
 /**
  * Shared orchestrator state across all agents
@@ -33,7 +47,7 @@ type RemoteCommandExecutor = any;
 export interface OrchestratorState {
   // Input
   task: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 
   // Routing
   currentAgent?: string;
@@ -41,7 +55,7 @@ export interface OrchestratorState {
 
   // Processing
   narrativeAnalysis?: string;
-  memoryInsights?: any[];
+  memoryInsights?: MemoryInsight[];
   purposeAlignment?: string;
   actionResult?: string;
 
@@ -70,7 +84,7 @@ export interface OrchestratorState {
  * - Prefer cheaper agents when quality similar
  * - Respect budget_remaining_cents
  */
-export async function supervisorNode(state: OrchestratorState): Promise<Partial<OrchestratorState>> {
+export function supervisorNode(state: OrchestratorState): Partial<OrchestratorState> {
   // In production, this would use Claude API to analyze task
   // For now: simple routing based on keywords
 
@@ -80,7 +94,10 @@ export async function supervisorNode(state: OrchestratorState): Promise<Partial<
   if (state.task.toLowerCase().includes('memory') || state.task.toLowerCase().includes('recall')) {
     nextAgent = 'memory_agent';
     reason = 'Task requires memory retrieval from layers 2-3';
-  } else if (state.task.toLowerCase().includes('purpose') || state.task.toLowerCase().includes('meaning')) {
+  } else if (
+    state.task.toLowerCase().includes('purpose') ||
+    state.task.toLowerCase().includes('meaning')
+  ) {
     nextAgent = 'purpose_agent';
     reason = 'Task requires purpose/ikigai alignment from layer 7';
   } else if (
@@ -121,9 +138,7 @@ export async function supervisorNode(state: OrchestratorState): Promise<Partial<
  * **Input**: state.task
  * **Output**: state.narrativeAnalysis
  */
-export async function narrativeAgentNode(
-  state: OrchestratorState
-): Promise<Partial<OrchestratorState>> {
+export function narrativeAgentNode(state: OrchestratorState): Partial<OrchestratorState> {
   // Mock implementation
   const analysis = `Narrative Analysis of: "${state.task}"
 
@@ -160,9 +175,7 @@ export async function narrativeAgentNode(
  * **Input**: state.task
  * **Output**: state.memoryInsights
  */
-export async function memoryAgentNode(
-  state: OrchestratorState
-): Promise<Partial<OrchestratorState>> {
+export function memoryAgentNode(state: OrchestratorState): Partial<OrchestratorState> {
   // Mock implementation
   const insights = [
     { layer: 'emotional', tag: 'relevant_memory', weight: 0.8 },
@@ -198,9 +211,7 @@ export async function memoryAgentNode(
  * **Input**: state.task
  * **Output**: state.purposeAlignment
  */
-export async function purposeAgentNode(
-  state: OrchestratorState
-): Promise<Partial<OrchestratorState>> {
+export function purposeAgentNode(state: OrchestratorState): Partial<OrchestratorState> {
   // Mock implementation
   const alignment = `Purpose Alignment Analysis:
 
@@ -250,10 +261,10 @@ export async function purposeAgentNode(
  * @param executor Phase 1 RemoteCommandExecutor instance
  * @returns Updated state with actionResult
  */
-export async function actionAgentNode(
+export function actionAgentNode(
   state: OrchestratorState,
   _executor?: RemoteCommandExecutor
-): Promise<Partial<OrchestratorState>> {
+): Partial<OrchestratorState> {
   // Mock implementation (would use executor in production)
   const result = `Action executed: ${state.task}
   Result: [mock execution result]`;
