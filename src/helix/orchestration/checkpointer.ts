@@ -36,12 +36,24 @@ import { createHash } from 'crypto';
 /**
  * Checkpoint metadata
  */
-export interface Checkpoint<TState = any> {
+export interface Checkpoint<TState = unknown> {
   checkpoint_id: string;
   thread_id: string;
   parent_checkpoint_id: string | null;
   state: TState;
   timestamp: number;
+  hash: string;
+}
+
+/**
+ * Supabase checkpoint row type
+ */
+interface CheckpointRow {
+  checkpoint_id: string;
+  thread_id: string;
+  parent_checkpoint_id: string | null;
+  state: unknown;
+  created_at: string;
   hash: string;
 }
 
@@ -80,11 +92,18 @@ export interface ICheckpointer {
  * Logs to Discord BEFORE saving (Helix pattern)
  * Ensures audit trail even if save fails
  */
+interface Logger {
+  info: (message: string) => void;
+  error: (message: string) => void;
+  warn?: (message: string) => void;
+  debug?: (message: string) => void;
+}
+
 export class SupabaseCheckpointer implements ICheckpointer {
   constructor(
     private supabase: SupabaseClient,
     private userId: string,
-    private logger?: any
+    private logger?: Logger
   ) {}
 
   /**
@@ -171,9 +190,9 @@ export class SupabaseCheckpointer implements ICheckpointer {
         return null;
       }
 
-      return this._toCheckpoint<TState>(data);
+      return this._toCheckpoint<TState>(data as CheckpointRow);
     } catch (err) {
-      this.logger?.error(`Failed to load checkpoint for thread ${threadId}:`, err);
+      this.logger?.error(`Failed to load checkpoint for thread ${threadId}: ${String(err)}`);
       return null;
     }
   }
@@ -201,9 +220,9 @@ export class SupabaseCheckpointer implements ICheckpointer {
         return null;
       }
 
-      return this._toCheckpoint<TState>(data);
+      return this._toCheckpoint<TState>(data as CheckpointRow);
     } catch (err) {
-      this.logger?.error(`Failed to load checkpoint ${checkpointId}:`, err);
+      this.logger?.error(`Failed to load checkpoint ${checkpointId}: ${String(err)}`);
       return null;
     }
   }
@@ -230,9 +249,9 @@ export class SupabaseCheckpointer implements ICheckpointer {
         return [];
       }
 
-      return data.map((row) => this._toCheckpoint<TState>(row));
+      return (data as CheckpointRow[]).map(row => this._toCheckpoint<TState>(row));
     } catch (err) {
-      this.logger?.error(`Failed to list checkpoints for thread ${threadId}:`, err);
+      this.logger?.error(`Failed to list checkpoints for thread ${threadId}: ${String(err)}`);
       return [];
     }
   }
@@ -266,15 +285,13 @@ export class SupabaseCheckpointer implements ICheckpointer {
   /**
    * Convert Supabase row to Checkpoint type
    */
-  private _toCheckpoint<TState>(row: any): Checkpoint<TState> {
+  private _toCheckpoint<TState>(row: CheckpointRow): Checkpoint<TState> {
     return {
       checkpoint_id: row.checkpoint_id,
       thread_id: row.thread_id,
       parent_checkpoint_id: row.parent_checkpoint_id,
-      state: row.state,
-      timestamp: row.created_at
-        ? new Date(row.created_at).getTime()
-        : Date.now(),
+      state: row.state as TState,
+      timestamp: row.created_at ? new Date(row.created_at).getTime() : Date.now(),
       hash: row.hash,
     };
   }
@@ -298,44 +315,48 @@ export class SupabaseCheckpointer implements ICheckpointer {
  * - Debugging without Supabase
  */
 export class MemoryCheckpointer implements ICheckpointer {
-  private checkpoints = new Map<string, Checkpoint>();
+  private checkpoints = new Map<string, Checkpoint<unknown>>();
   private threadCheckpoints = new Map<string, string[]>(); // thread_id → checkpoint_ids
 
-  public async save<TState>(checkpoint: Checkpoint<TState>): Promise<void> {
-    this.checkpoints.set(checkpoint.checkpoint_id, checkpoint as any);
+  public save<TState>(checkpoint: Checkpoint<TState>): Promise<void> {
+    this.checkpoints.set(checkpoint.checkpoint_id, checkpoint as Checkpoint<unknown>);
 
     // Track by thread
     if (!this.threadCheckpoints.has(checkpoint.thread_id)) {
       this.threadCheckpoints.set(checkpoint.thread_id, []);
     }
     this.threadCheckpoints.get(checkpoint.thread_id)!.push(checkpoint.checkpoint_id);
+    return Promise.resolve();
   }
 
-  public async load<TState>(threadId: string): Promise<Checkpoint<TState> | null> {
+  public load<TState>(threadId: string): Promise<Checkpoint<TState> | null> {
     const checkpointIds = this.threadCheckpoints.get(threadId);
     if (!checkpointIds || checkpointIds.length === 0) {
-      return null;
+      return Promise.resolve(null);
     }
 
     const latest = checkpointIds[checkpointIds.length - 1];
-    return (this.checkpoints.get(latest) || null) as Checkpoint<TState> | null;
+    return Promise.resolve((this.checkpoints.get(latest) || null) as Checkpoint<TState> | null);
   }
 
-  public async loadByCheckpointId<TState>(
-    checkpointId: string
-  ): Promise<Checkpoint<TState> | null> {
-    return (this.checkpoints.get(checkpointId) || null) as Checkpoint<TState> | null;
+  public loadByCheckpointId<TState>(checkpointId: string): Promise<Checkpoint<TState> | null> {
+    return Promise.resolve(
+      (this.checkpoints.get(checkpointId) || null) as Checkpoint<TState> | null
+    );
   }
 
-  public async list<TState>(threadId: string): Promise<Checkpoint<TState>[]> {
+  public list<TState>(threadId: string): Promise<Checkpoint<TState>[]> {
     const checkpointIds = this.threadCheckpoints.get(threadId) || [];
-    return checkpointIds
-      .map((id) => this.checkpoints.get(id))
-      .filter((c) => c !== undefined) as Checkpoint<TState>[];
+    return Promise.resolve(
+      checkpointIds
+        .map(id => this.checkpoints.get(id))
+        .filter(c => c !== undefined) as Checkpoint<TState>[]
+    );
   }
 
-  public async delete(checkpointId: string): Promise<void> {
+  public delete(checkpointId: string): Promise<void> {
     this.checkpoints.delete(checkpointId);
+    return Promise.resolve();
   }
 
   /**
