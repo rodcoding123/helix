@@ -25,6 +25,35 @@ export interface QueuedOperation {
   priority: 'critical' | 'high' | 'normal' | 'low'; // critical = must not lose (hash chain), high = important (Discord), normal = regular logging, low = optional
 }
 
+/**
+ * SQLite row types for operation queue
+ */
+interface OperationRow {
+  id: string;
+  operation: string;
+  data: string;
+  priority: 'critical' | 'high' | 'normal' | 'low';
+  created_at: number;
+  attempt_count: number;
+  last_attempt_at: number | null;
+  next_retry_at: number | null;
+  error: string | null;
+  processed_at: number | null;
+}
+
+interface OperationStatsRow {
+  total: number;
+  pending: number;
+  processed: number;
+  dead_letters: number;
+}
+
+interface OldestOperationRow {
+  id: string;
+  operation: string;
+  created_at: number;
+}
+
 export interface OperationQueueConfig {
   dbPath?: string;
   maxRetries?: number;
@@ -107,12 +136,12 @@ export class OperationQueue {
   /**
    * Add an operation to the queue
    */
-  async enqueue(
+  enqueue(
     id: string,
     operation: string,
     data: Record<string, unknown>,
     priority: 'critical' | 'high' | 'normal' | 'low' = 'normal'
-  ): Promise<void> {
+  ): void {
     const stmt = this.db.prepare(`
       INSERT INTO queued_operations
       (id, operation, data, priority, created_at, attempt_count)
@@ -149,27 +178,27 @@ export class OperationQueue {
       LIMIT 1
     `);
 
-    const row = stmt.get(Date.now()) as any;
+    const row = stmt.get(Date.now()) as OperationRow | undefined;
 
     if (!row) return null;
 
     return {
       id: row.id,
       operation: row.operation,
-      data: JSON.parse(row.data),
+      data: JSON.parse(row.data) as Record<string, unknown>,
       priority: row.priority,
       createdAt: row.created_at,
       attemptCount: row.attempt_count,
-      lastAttemptAt: row.last_attempt_at,
-      nextRetryAt: row.next_retry_at,
-      error: row.error,
+      lastAttemptAt: row.last_attempt_at ?? undefined,
+      nextRetryAt: row.next_retry_at ?? undefined,
+      error: row.error ?? undefined,
     };
   }
 
   /**
    * Mark operation as successfully processed
    */
-  async markProcessed(operationId: string): Promise<void> {
+  markProcessed(operationId: string): void {
     const stmt = this.db.prepare(`
       UPDATE queued_operations
       SET processed_at = ?, attempt_count = attempt_count + 1, last_attempt_at = ?
@@ -188,10 +217,10 @@ export class OperationQueue {
   /**
    * Mark operation as failed (schedules retry)
    */
-  async markFailed(operationId: string, error: string): Promise<void> {
+  markFailed(operationId: string, error: string): void {
     const op = this.db
       .prepare('SELECT attempt_count FROM queued_operations WHERE id = ?')
-      .get(operationId) as any;
+      .get(operationId) as Pick<OperationRow, 'attempt_count'> | undefined;
 
     if (!op) return;
 
@@ -269,12 +298,12 @@ export class OperationQueue {
           await executor(operation);
           const duration = Date.now() - startTime;
 
-          await this.markProcessed(operation.id);
+          this.markProcessed(operation.id);
           console.log(`[OperationQueue] Flushed ${operation.operation} in ${duration}ms`);
           processed++;
         } catch (error) {
           const errorMsg = error instanceof Error ? error.message : String(error);
-          await this.markFailed(operation.id, errorMsg);
+          this.markFailed(operation.id, errorMsg);
           failed++;
         }
 
@@ -314,7 +343,7 @@ export class OperationQueue {
       FROM queued_operations
     `
       )
-      .get(this.maxRetries) as any;
+      .get(this.maxRetries) as OperationStatsRow | undefined;
 
     const oldest = this.db
       .prepare(
@@ -326,13 +355,13 @@ export class OperationQueue {
       LIMIT 1
     `
       )
-      .get() as any;
+      .get() as OldestOperationRow | undefined;
 
     return {
-      total: totals.total || 0,
-      pending: totals.pending || 0,
-      processed: totals.processed || 0,
-      deadLetters: totals.dead_letters || 0,
+      total: totals?.total || 0,
+      pending: totals?.pending || 0,
+      processed: totals?.processed || 0,
+      deadLetters: totals?.dead_letters || 0,
       oldestOperation: oldest
         ? {
             id: oldest.id,
@@ -365,25 +394,25 @@ export class OperationQueue {
     query += ` ORDER BY created_at DESC LIMIT ${limit}`;
 
     const stmt = this.db.prepare(query);
-    const rows = stmt.all() as any[];
+    const rows = stmt.all() as OperationRow[];
 
     return rows.map(row => ({
       id: row.id,
       operation: row.operation,
-      data: JSON.parse(row.data),
+      data: JSON.parse(row.data) as Record<string, unknown>,
       priority: row.priority,
       createdAt: row.created_at,
       attemptCount: row.attempt_count,
-      lastAttemptAt: row.last_attempt_at,
-      nextRetryAt: row.next_retry_at,
-      error: row.error,
+      lastAttemptAt: row.last_attempt_at ?? undefined,
+      nextRetryAt: row.next_retry_at ?? undefined,
+      error: row.error ?? undefined,
     }));
   }
 
   /**
    * Clear processed operations older than specified time
    */
-  async clearProcessed(olderThanMs: number = 24 * 60 * 60 * 1000): Promise<number> {
+  clearProcessed(olderThanMs: number = 24 * 60 * 60 * 1000): number {
     const cutoffTime = Date.now() - olderThanMs;
 
     // First delete from history table (respects foreign key constraint)
@@ -417,7 +446,7 @@ export class OperationQueue {
   ): void {
     const op = this.db
       .prepare('SELECT operation, attempt_count FROM queued_operations WHERE id = ?')
-      .get(operationId) as any;
+      .get(operationId) as Pick<OperationRow, 'operation' | 'attempt_count'> | undefined;
 
     if (!op) return;
 
@@ -453,6 +482,6 @@ export async function initializeOperationQueue(
   try {
     await mkdir(dirname(dbPath), { recursive: true });
   } catch (error) {
-    console.error(`Failed to create operation queue directory: ${error}`);
+    console.error(`Failed to create operation queue directory: ${String(error)}`);
   }
 }

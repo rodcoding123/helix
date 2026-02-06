@@ -198,8 +198,7 @@ export class PostConversationTrustHook {
         updated_at: new Date().toISOString(),
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-      const { error } = await (this.supabase as any)
+      const { error } = await this.supabase
         .from('conversations')
         .update(updateObj)
         .eq('id', conversationId);
@@ -248,8 +247,8 @@ export function subscribeToConversationUpdates(): void {
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       async (payload: Record<string, unknown>) => {
         try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-          const conversationId = (payload as any).new?.id as string;
+          const newRecord = (payload as { new?: { id?: string } }).new;
+          const conversationId = newRecord?.id as string;
           console.log(`[REALTIME] New conversation detected: ${conversationId}`);
 
           // Process trust asynchronously (don't wait)
@@ -329,13 +328,12 @@ export async function batchProcessConversations(
       // Process each conversation
 
       for (const conv of conversations) {
+        const convRecord = conv as { id: string };
         try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-          await postConversationTrustHook.processConversation((conv as any).id as string);
+          await postConversationTrustHook.processConversation(convRecord.id);
           processed++;
         } catch (error) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-          console.error(`Failed to process conversation ${(conv as any).id}:`, error);
+          console.error(`Failed to process conversation ${convRecord.id}:`, error);
           failed++;
         }
       }
