@@ -352,6 +352,8 @@ export function CloudChat(): JSX.Element {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const prevMessageCountRef = useRef(0);
+  const isUserScrollingRef = useRef(false);
 
   const {
     messages,
@@ -371,13 +373,39 @@ export function CloudChat(): JSX.Element {
     quotaRemaining !== null && quotaRemaining <= LOW_QUOTA_THRESHOLD && quotaRemaining > 0;
   const isUnlimited = quota !== null && quota.limit <= 0;
 
-  // ── Auto-scroll on new messages ────────────────────
+  // ── Detect if user scrolled away from bottom ────────
 
   useEffect(() => {
-    if (messagesEndRef.current) {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      // Check if user is at bottom (within 10px threshold)
+      const isAtBottom =
+        Math.abs(
+          container.scrollHeight - container.scrollTop - container.clientHeight
+        ) < 10;
+      isUserScrollingRef.current = !isAtBottom;
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // ── Auto-scroll only when message count increases AND user at bottom ────────────────────
+
+  useEffect(() => {
+    const messageCountIncreased = messages.length > prevMessageCountRef.current;
+    prevMessageCountRef.current = messages.length;
+
+    if (
+      messageCountIncreased &&
+      !isUserScrollingRef.current &&
+      messagesEndRef.current
+    ) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, isLoading]);
+  }, [messages]);
 
   // ── Show quota exceeded state ──────────────────────
 
