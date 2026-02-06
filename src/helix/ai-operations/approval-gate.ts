@@ -9,8 +9,8 @@
  * Created: 2026-02-04
  */
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any */
-import { createClient } from '@supabase/supabase-js';
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { logToDiscord } from '../logging.js';
 import { hashChain } from '../hash-chain.js';
 
@@ -28,6 +28,20 @@ export interface ApprovalRequest {
   rejection_reason?: string;
 }
 
+interface RecommendationRow {
+  id: string;
+  operation_id: string;
+  recommendation_type: string;
+  created_by?: string;
+  estimated_savings_usd?: number;
+  reasoning: string;
+  created_at: string;
+  approval_status: string;
+  approved_by?: string;
+  approved_at?: string;
+  rejection_reason?: string;
+}
+
 /**
  * ApprovalGate - Approval workflow system
  *
@@ -39,13 +53,13 @@ export interface ApprovalRequest {
  * 5. Log all approval decisions to hash chain
  */
 export class ApprovalGate {
-  private supabase: any = null;
+  private supabase: SupabaseClient | null = null;
 
   constructor() {
     // Initialize Supabase client lazily when first needed
   }
 
-  private getSupabaseClient(): any {
+  private getSupabaseClient(): SupabaseClient {
     if (!this.supabase) {
       const supabaseUrl = process.env.SUPABASE_URL;
       const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
@@ -356,7 +370,7 @@ reject: /reject ${approval.id}
 
       if (error) throw error;
 
-      return (data || []).map((d: any) => ({
+      return (data || []).map((d: RecommendationRow) => ({
         id: d.id,
         operation_id: d.operation_id,
         operation_type: d.recommendation_type,
@@ -390,7 +404,7 @@ reject: /reject ${approval.id}
 
       if (error) throw error;
 
-      return (data || []).map((d: any) => ({
+      return (data || []).map((d: RecommendationRow) => ({
         id: d.id,
         operation_id: d.operation_id,
         operation_type: d.recommendation_type,
