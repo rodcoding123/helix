@@ -264,7 +264,7 @@ export function OnboardingChat() {
       .getProfile()
       .then((profile) => {
         if (!cancelled && profile?.onboardingCompleted) {
-          navigate('/dashboard', { replace: true });
+          navigate('/chat', { replace: true });
         }
       })
       .catch(() => {
@@ -323,7 +323,7 @@ export function OnboardingChat() {
     }
   }
 
-  async function handleContinueToDashboard(): Promise<void> {
+  async function handleContinueToChat(): Promise<void> {
     if (isCompleting) return;
     setIsCompleting(true);
 
@@ -333,14 +333,14 @@ export function OnboardingChat() {
       // Non-blocking: if the profile update fails we still navigate
     }
 
-    navigate('/dashboard');
+    navigate('/chat');
   }
 
   function handleSkip(): void {
     getCloudChatClient().completeOnboarding().catch(() => {
       // Silent — skip should always succeed from the user's perspective
     });
-    navigate('/dashboard');
+    navigate('/chat');
   }
 
   // ── Render ────────────────────────────────────────
@@ -530,7 +530,7 @@ export function OnboardingChat() {
           )}
         </AnimatePresence>
 
-        {/* "Continue to Dashboard" floating button */}
+        {/* "Continue to Chat" floating button */}
         <AnimatePresence>
           {canContinue && (
             <motion.div
@@ -541,7 +541,7 @@ export function OnboardingChat() {
               className="flex justify-center mb-3"
             >
               <button
-                onClick={handleContinueToDashboard}
+                onClick={handleContinueToChat}
                 disabled={isCompleting}
                 className={clsx(
                   'group inline-flex items-center gap-2 px-6 py-2.5 rounded-full',
@@ -555,9 +555,9 @@ export function OnboardingChat() {
                   background:
                     'linear-gradient(135deg, rgba(6, 134, 212, 0.2) 0%, rgba(114, 52, 237, 0.2) 100%)',
                 }}
-                aria-label="Continue to dashboard"
+                aria-label="Continue to chat"
               >
-                {isCompleting ? 'Setting up...' : 'Continue to Dashboard'}
+                {isCompleting ? 'Setting up...' : 'Continue to Chat'}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </button>
             </motion.div>

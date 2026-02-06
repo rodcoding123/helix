@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { AuthProvider } from '@/hooks/useAuth';
+import { SecretsProvider } from '@/lib/context/SecretsContext';
+import { TenantProvider } from '@/components/TenantProvider';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -54,9 +56,11 @@ export function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <div className="flex min-h-screen flex-col bg-slate-950 text-white">
-          <Navbar />
-          <main className="flex-1">
+        <SecretsProvider>
+          <TenantProvider>
+            <div className="flex min-h-screen flex-col bg-slate-950 text-white">
+              <Navbar />
+              <main className="flex-1">
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/pricing" element={<Pricing />} />
@@ -299,9 +303,11 @@ export function App() {
                 }
               />
             </Routes>
-          </main>
-          <Footer />
-        </div>
+              </main>
+              <Footer />
+            </div>
+          </TenantProvider>
+        </SecretsProvider>
       </AuthProvider>
     </BrowserRouter>
   );

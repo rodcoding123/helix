@@ -124,127 +124,131 @@ export function OnboardingWizard() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg-primary/95 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex flex-col bg-bg-primary/95 backdrop-blur-sm overflow-hidden">
       {/* Background effects */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div className="gradient-orb gradient-orb-purple w-[600px] h-[600px] -top-60 -left-60 opacity-20" />
         <div className="gradient-orb gradient-orb-blue w-[500px] h-[500px] -bottom-40 -right-40 opacity-20" />
       </div>
 
-      {/* Main container */}
-      <div className="w-full max-w-4xl mx-4">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <img src="/logos/helix-icon.svg" alt="Helix" className="h-8 w-8" />
-            <span className="text-xl font-display font-bold text-white">Helix Setup</span>
+      {/* Scrollable content area */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="w-full max-w-4xl mx-auto px-4 py-6 sm:py-8">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <div className="flex items-center gap-3">
+              <img src="/logos/helix-icon.svg" alt="Helix" className="h-8 w-8" />
+              <span className="text-xl font-display font-bold text-white">Helix Setup</span>
+            </div>
+            <button
+              onClick={skipOnboarding}
+              className="flex items-center gap-2 text-sm text-text-tertiary hover:text-text-secondary transition-colors"
+            >
+              Skip for now
+              <X className="h-4 w-4" />
+            </button>
           </div>
-          <button
-            onClick={skipOnboarding}
-            className="flex items-center gap-2 text-sm text-text-tertiary hover:text-text-secondary transition-colors"
-          >
-            Skip for now
-            <X className="h-4 w-4" />
-          </button>
-        </div>
 
-        {/* Progress bar */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
-            {STEPS.map((step, index) => (
-              <div
-                key={step.id}
-                className={clsx(
-                  'flex items-center',
-                  index < STEPS.length - 1 && 'flex-1'
-                )}
-              >
-                {/* Step indicator */}
+          {/* Progress bar */}
+          <div className="mb-4 sm:mb-6">
+            <div className="flex items-center justify-between mb-2">
+              {STEPS.map((step, index) => (
                 <div
+                  key={step.id}
                   className={clsx(
-                    'relative flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-300',
-                    index < currentStep
-                      ? 'border-success bg-success/20 text-success'
-                      : index === currentStep
-                        ? 'border-helix-500 bg-helix-500/20 text-helix-400'
-                        : 'border-white/20 bg-bg-tertiary text-text-tertiary'
+                    'flex items-center',
+                    index < STEPS.length - 1 && 'flex-1'
                   )}
                 >
-                  {index < currentStep ? (
-                    <Check className="h-5 w-5" />
-                  ) : (
-                    <span className="text-sm font-medium">{index + 1}</span>
+                  {/* Step indicator */}
+                  <div
+                    className={clsx(
+                      'relative flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full border-2 transition-all duration-300',
+                      index < currentStep
+                        ? 'border-success bg-success/20 text-success'
+                        : index === currentStep
+                          ? 'border-helix-500 bg-helix-500/20 text-helix-400'
+                          : 'border-white/20 bg-bg-tertiary text-text-tertiary'
+                    )}
+                  >
+                    {index < currentStep ? (
+                      <Check className="h-4 w-4 sm:h-5 sm:w-5" />
+                    ) : (
+                      <span className="text-xs sm:text-sm font-medium">{index + 1}</span>
+                    )}
+                  </div>
+
+                  {/* Connector line */}
+                  {index < STEPS.length - 1 && (
+                    <div className="flex-1 mx-1 sm:mx-2">
+                      <div
+                        className={clsx(
+                          'h-1 rounded-full transition-all duration-300',
+                          index < currentStep ? 'bg-success' : 'bg-white/10'
+                        )}
+                      />
+                    </div>
                   )}
                 </div>
-
-                {/* Connector line */}
-                {index < STEPS.length - 1 && (
-                  <div className="flex-1 mx-2">
-                    <div
-                      className={clsx(
-                        'h-1 rounded-full transition-all duration-300',
-                        index < currentStep ? 'bg-success' : 'bg-white/10'
-                      )}
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Step labels (only on larger screens) */}
-          <div className="hidden sm:flex items-center justify-between">
-            {STEPS.map((step, index) => (
-              <div
-                key={step.id}
-                className={clsx(
-                  'text-center transition-colors',
-                  index === currentStep ? 'text-white' : 'text-text-tertiary'
-                )}
-                style={{ width: `${100 / STEPS.length}%` }}
-              >
-                <p className="text-xs font-medium truncate">{step.title}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Step content */}
-        <div className="card-glass p-8 min-h-[400px] flex flex-col">
-          <div className="flex-1">{renderStep()}</div>
-
-          {/* Navigation buttons */}
-          {currentStep < STEPS.length - 1 && (
-            <div className="flex items-center justify-between mt-8 pt-6 border-t border-white/10">
-              <button
-                onClick={prevStep}
-                disabled={currentStep === 0}
-                className={clsx(
-                  'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors',
-                  currentStep === 0
-                    ? 'text-text-tertiary cursor-not-allowed'
-                    : 'text-text-secondary hover:text-white hover:bg-white/5'
-                )}
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Back
-              </button>
-
-              <button
-                onClick={nextStep}
-                disabled={!canProceed()}
-                className={clsx(
-                  'btn btn-primary flex items-center gap-2',
-                  !canProceed() && 'opacity-50 cursor-not-allowed'
-                )}
-              >
-                {currentStep === STEPS.length - 2 ? 'Finish' : 'Continue'}
-                <ChevronRight className="h-4 w-4" />
-              </button>
+              ))}
             </div>
-          )}
+
+            {/* Step labels (only on larger screens) */}
+            <div className="hidden sm:flex items-center justify-between">
+              {STEPS.map((step, index) => (
+                <div
+                  key={step.id}
+                  className={clsx(
+                    'text-center transition-colors',
+                    index === currentStep ? 'text-white' : 'text-text-tertiary'
+                  )}
+                  style={{ width: `${100 / STEPS.length}%` }}
+                >
+                  <p className="text-xs font-medium truncate">{step.title}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Step content */}
+          <div className="card-glass p-4 sm:p-8">
+            {renderStep()}
+          </div>
         </div>
       </div>
+
+      {/* Sticky navigation buttons at the bottom */}
+      {currentStep < STEPS.length - 1 && (
+        <div className="shrink-0 border-t border-white/10 bg-bg-primary/90 backdrop-blur-sm">
+          <div className="w-full max-w-4xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
+            <button
+              onClick={prevStep}
+              disabled={currentStep === 0}
+              className={clsx(
+                'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors',
+                currentStep === 0
+                  ? 'text-text-tertiary cursor-not-allowed'
+                  : 'text-text-secondary hover:text-white hover:bg-white/5'
+              )}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Back
+            </button>
+
+            <button
+              onClick={nextStep}
+              disabled={!canProceed()}
+              className={clsx(
+                'btn btn-primary flex items-center gap-2',
+                !canProceed() && 'opacity-50 cursor-not-allowed'
+              )}
+            >
+              {currentStep === STEPS.length - 2 ? 'Finish' : 'Continue'}
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

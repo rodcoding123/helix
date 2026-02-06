@@ -15,7 +15,7 @@ export function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const from = (location.state as { from?: Location })?.from?.pathname || '/dashboard';
+  const from = (location.state as { from?: Location })?.from?.pathname || '/chat';
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -83,7 +83,7 @@ export function Login() {
         <div className="card-glass p-8">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-display font-bold text-white">Welcome Back</h1>
-            <p className="mt-2 text-text-secondary">Sign in to access your Helix dashboard</p>
+            <p className="mt-2 text-text-secondary">Sign in to continue with Helix</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
