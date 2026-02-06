@@ -124,7 +124,9 @@ export class PostConversationSynthesisHook {
       const totalLength = conversation.messages.reduce((sum, m) => sum + m.content.length, 0);
 
       if (messageCount < 3 || totalLength < 500) {
-        console.log(`[SYNTHESIS] Skipping trivial conversation: ${conversationId} (${messageCount} messages, ${totalLength} chars)`);
+        console.log(
+          `[SYNTHESIS] Skipping trivial conversation: ${conversationId} (${messageCount} messages, ${totalLength} chars)`
+        );
         return;
       }
 
@@ -132,7 +134,7 @@ export class PostConversationSynthesisHook {
       // 3. Route through AIOperationRouter
       // ==========================================
       const formattedMessages = conversation.messages
-        .map((m) => `${m.role.toUpperCase()}: ${m.content}`)
+        .map(m => `${m.role.toUpperCase()}: ${m.content}`)
         .join('\n\n');
 
       const prompt = SYNTHESIS_PROMPT_TEMPLATE.replace('{messages}', formattedMessages);
@@ -147,15 +149,14 @@ export class PostConversationSynthesisHook {
         estimatedInputTokens,
       });
 
-      console.log(`[SYNTHESIS] Routed to model: ${routingDecision.model}, cost: $${routingDecision.estimatedCostUsd}`);
+      console.log(
+        `[SYNTHESIS] Routed to model: ${routingDecision.model}, cost: $${routingDecision.estimatedCostUsd}`
+      );
 
       // ==========================================
       // 4. Call routed model for synthesis
       // ==========================================
-      const synthesisResult = await this.callRoutedModel(
-        routingDecision.model,
-        prompt
-      );
+      const synthesisResult = await this.callRoutedModel(routingDecision.model, prompt);
 
       if (!synthesisResult) {
         console.warn(`[SYNTHESIS] Model synthesis failed for ${conversationId}`);
@@ -191,6 +192,7 @@ export class PostConversationSynthesisHook {
    */
   private async loadConversation(conversationId: string): Promise<ConversationRow | null> {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await (this.supabase.from('conversations') as any)
         .select('*')
         .eq('id', conversationId)
@@ -211,10 +213,7 @@ export class PostConversationSynthesisHook {
   /**
    * Call routed model (Claude via Anthropic or Gemini via Google SDK)
    */
-  private async callRoutedModel(
-    model: string,
-    prompt: string
-  ): Promise<SynthesisResult | null> {
+  private async callRoutedModel(model: string, prompt: string): Promise<SynthesisResult | null> {
     try {
       let responseText = '';
 
@@ -302,16 +301,16 @@ export class PostConversationSynthesisHook {
     try {
       // Extract patterns by type
       const emotionalTags = synthesis.patterns
-        .filter((p) => p.type === 'emotional_tag')
-        .map((p) => p.description);
+        .filter(p => p.type === 'emotional_tag')
+        .map(p => p.description);
 
       const goals = synthesis.patterns
-        .filter((p) => p.type === 'goal_mention')
-        .map((p) => p.description);
+        .filter(p => p.type === 'goal_mention')
+        .map(p => p.description);
 
       const topics = synthesis.patterns
-        .filter((p) => p.type === 'meaningful_topic')
-        .map((p) => p.description);
+        .filter(p => p.type === 'meaningful_topic')
+        .map(p => p.description);
 
       // ==========================================
       // Update psychology files
@@ -331,6 +330,7 @@ export class PostConversationSynthesisHook {
       // ==========================================
       // Store synthesis insights in Supabase
       // ==========================================
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await (this.supabase.from('conversation_insights') as any).insert({
         conversation_id: conversationId,
         user_id: userId,
@@ -349,6 +349,7 @@ export class PostConversationSynthesisHook {
       // ==========================================
       // Update conversation record with synthesis flag
       // ==========================================
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (this.supabase.from('conversations') as any)
         .update({
           synthesized_at: new Date().toISOString(),
@@ -399,7 +400,7 @@ export function subscribeToConversationSynthesis(): void {
           console.log(`[SYNTHESIS] New conversation detected: ${conversationId}`);
 
           // Process synthesis asynchronously (don't wait)
-          await postConversationSynthesisHook.processConversation(conversationId).catch((error) => {
+          await postConversationSynthesisHook.processConversation(conversationId).catch(error => {
             console.error(`[SYNTHESIS] Failed to synthesize in realtime: ${conversationId}`, error);
           });
         } catch (error) {
@@ -428,6 +429,7 @@ export async function unsubscribeFromConversationSynthesis(): Promise<void> {
   );
 
   const channels = supabase.getChannels();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const synthesisChannel = channels.find((c: any) => c.name === 'conversations_synthesis');
   if (synthesisChannel) {
     await supabase.removeChannel(synthesisChannel);
@@ -458,6 +460,7 @@ export async function batchProcessConversationSynthesis(
   try {
     while (true) {
       // Fetch batch of conversations
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: conversations, error } = await (supabase.from('conversations') as any)
         .select('id')
         .gt('created_at', sinceTimestamp)
@@ -493,7 +496,7 @@ export async function batchProcessConversationSynthesis(
       );
 
       // Give the system a break between batches
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
     return { processed, failed };
