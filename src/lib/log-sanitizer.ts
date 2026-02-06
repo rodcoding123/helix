@@ -91,7 +91,10 @@ export class LogSanitizer {
 
     // Hex strings in secret context only (prevent false positives on git hashes/SHA hashes)
     // Only match hex strings adjacent to secret-related keywords
-    { pattern: /(?:key|secret|token|password|credential|hash|mac)[:=\s]*[a-f0-9]{32,128}/gi, name: 'hex_secret_contextual' },
+    {
+      pattern: /(?:key|secret|token|password|credential|hash|mac)[:=\s]*[a-f0-9]{32,128}/gi,
+      name: 'hex_secret_contextual',
+    },
   ];
 
   /**

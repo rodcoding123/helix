@@ -107,7 +107,7 @@ describe('Context Integrity', () => {
     });
 
     it('should log verification when no hash provided', async () => {
-      const consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation();
+      const consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
 
       await verifyFileIntegrity('soul/HELIX_SOUL.md', testContent);
 
@@ -145,7 +145,7 @@ describe('Context Integrity', () => {
     });
 
     it('should log successful verification', async () => {
-      const consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation();
+      const consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
 
       await verifyFileIntegrity('soul/HELIX_SOUL.md', testContent, expectedHash);
 
@@ -155,7 +155,7 @@ describe('Context Integrity', () => {
     });
 
     it('should log errors on verification failure', async () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       await verifyFileIntegrity('soul/HELIX_SOUL.md', 'MODIFIED', expectedHash);
 

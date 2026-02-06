@@ -106,7 +106,7 @@ describe('Command Injection Prevention', () => {
 
       dangerousCommands.forEach(cmd => {
         const result = validateCommand(cmd);
-        expect(result.valid).toBe(false, `Failed for: ${cmd}`);
+        expect(result.valid, `Failed for: ${cmd}`).toBe(false);
       });
     });
 
@@ -446,7 +446,7 @@ describe('Command Injection Prevention', () => {
 
       injections.forEach(injection => {
         const result = sanitizeArgument(injection);
-        expect(result.safe).toBe(false, `Failed to block: ${injection}`);
+        expect(result.safe, `Failed to block: ${injection}`).toBe(false);
       });
     });
 

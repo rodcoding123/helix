@@ -214,6 +214,7 @@ export function detectContextFileInjection(content: string): { safe: boolean; is
   }
 
   // Check for control characters
+  // eslint-disable-next-line no-control-regex
   const controlChars = content.match(/[\x00-\x08\x0B-\x0C\x0E-\x1F]/g);
   if (controlChars) {
     issues.push(`Control characters detected: ${controlChars.join(', ')}`);
@@ -250,6 +251,7 @@ export function sanitizeContextFileContent(content: string): string {
   sanitized = sanitized.replace(/<!\s*--[\s\S]*?--\s*>/g, '');
 
   // Remove control characters (except newlines and tabs)
+  // eslint-disable-next-line no-control-regex
   sanitized = sanitized.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F]/g, '');
 
   // Remove suspicious directives (case-insensitive)

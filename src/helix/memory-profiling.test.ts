@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument */
 /**
  * Memory Profiling Tests for Helix
  * Measures heap usage, GC patterns, and memory leaks
  */
 
 import { describe, it, beforeAll, afterAll, expect } from 'vitest';
-import { getGlobalProfiler, MemoryProfiler } from './performance-profiling';
+import { getGlobalProfiler, MemoryProfiler } from './performance-profiling.js';
 
 describe('Memory Profiling', () => {
   let profiler: MemoryProfiler;
@@ -28,7 +27,7 @@ describe('Memory Profiling', () => {
       console.log('\n=== Memory Profiling Summary ===');
       console.log(`Snapshots captured: ${snapshots.length}`);
 
-      const heapValues = snapshots.map(s => s.heapUsed);
+      const heapValues = snapshots.map((s: { heapUsed: number }) => s.heapUsed);
       const minHeap = Math.min(...heapValues);
       const maxHeap = Math.max(...heapValues);
 
@@ -61,24 +60,23 @@ describe('Memory Profiling', () => {
   });
 
   it('should track memory snapshots over time', () => {
-    const snapshots: typeof profiler.getSnapshots = [];
+    const snapshots: ReturnType<typeof profiler.getSnapshots>[] = [];
+    const buffers: Buffer[] = [];
 
     // Take snapshots at intervals
     for (let i = 0; i < 5; i++) {
       profiler.snapshot();
       snapshots.push(profiler.getSnapshots());
 
-      // Allocate some memory
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const buffer = Buffer.alloc(1024 * 1024); // 1MB
-      // Keep reference to prevent GC
+      // Allocate some memory and keep reference to prevent GC
+      buffers.push(Buffer.alloc(1024 * 1024)); // 1MB
     }
 
     const allSnapshots = profiler.getSnapshots();
     expect(allSnapshots.length).toBeGreaterThanOrEqual(5);
 
     console.log(`\nSnapshot progression:`);
-    allSnapshots.forEach((s, i) => {
+    allSnapshots.forEach((s: { heapUsed: number }, i: number) => {
       console.log(`  ${i}: ${(s.heapUsed / 1024 / 1024).toFixed(2)}MB`);
     });
   });
@@ -185,13 +183,12 @@ describe('Memory Profiling', () => {
     profiler.clear();
 
     // Create peak memory usage
-    let peakBuffer: Buffer | null = null;
     const peakSize = 10 * 1024 * 1024; // 10MB peak
 
-    // Allocate to peak
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    peakBuffer = Buffer.alloc(peakSize);
+    // Allocate to peak and keep reference
+    const peakBuffer = Buffer.alloc(peakSize);
     profiler.snapshot();
+    expect(peakBuffer.length).toBe(peakSize);
 
     const peak = profiler.getPeakMemory();
     console.log(`\nPeak Memory Usage: ${(peak / 1024 / 1024).toFixed(2)}MB`);
@@ -204,7 +201,6 @@ describe('Memory Profiling', () => {
     const before = profiler.snapshot();
 
     // Create large array
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const largeArray = new Array(100000).fill(null).map((_, i) => ({
       id: i,
       data: Buffer.alloc(100),
@@ -212,6 +208,7 @@ describe('Memory Profiling', () => {
     }));
 
     const after = profiler.snapshot();
+    expect(largeArray.length).toBe(100000);
     const overhead = after.heapUsed - before.heapUsed;
 
     console.log(`\nArray Allocation (100k objects):`);

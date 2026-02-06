@@ -16,44 +16,48 @@ echo "🔍 Scanning for credentials..."
 # Credential patterns to detect
 CREDENTIALS_FOUND=0
 
+# Only scan added lines (lines starting with +) to avoid false positives
+# when removing credentials from files. Exclude hook files from scan.
+ADDED_LINES=$(git diff --cached -- ':!.husky/*' | grep "^+" | grep -v "^+++" || true)
+
 # Check for AWS keys
-if git diff --cached | grep -q "AKIA[0-9A-Z]\{16\}"; then
+if echo "$ADDED_LINES" | grep -q "AKIA[0-9A-Z]\{16\}"; then
     echo "${RED}❌ AWS Access Key detected!${NC}"
     CREDENTIALS_FOUND=1
 fi
 
 # Check for private keys
-if git diff --cached | grep -q "-----BEGIN.*PRIVATE KEY-----"; then
+if echo "$ADDED_LINES" | grep -q "\-\-\-\-\-BEGIN.*PRIVATE KEY\-\-\-\-\-"; then
     echo "${RED}❌ Private key detected!${NC}"
     CREDENTIALS_FOUND=1
 fi
 
 # Check for API keys patterns
-if git diff --cached | grep -qE "(sk_live_|sk_test_|pk_live_|pk_test_)"; then
+if echo "$ADDED_LINES" | grep -qE "(sk_live_|sk_test_|pk_live_|pk_test_)"; then
     echo "${RED}❌ Stripe API key detected!${NC}"
     CREDENTIALS_FOUND=1
 fi
 
 # Check for GitHub tokens
-if git diff --cached | grep -qE "ghp_[A-Za-z0-9_]{36}"; then
+if echo "$ADDED_LINES" | grep -qE "ghp_[A-Za-z0-9_]{36}"; then
     echo "${RED}❌ GitHub Personal Access Token detected!${NC}"
     CREDENTIALS_FOUND=1
 fi
 
 # Check for Discord webhooks
-if git diff --cached | grep -q "https://discord.com/api/webhooks/"; then
+if echo "$ADDED_LINES" | grep -q "https://discord.com/api/webhooks/"; then
     echo "${RED}❌ Discord webhook URL detected!${NC}"
     CREDENTIALS_FOUND=1
 fi
 
 # Check for 1Password references in .env files
-if git diff --cached -- '*.env' | grep -qE "DISCORD_WEBHOOK|API_KEY|SECRET"; then
+if git diff --cached -- '*.env' | grep "^+" | grep -v "^+++" | grep -qE "DISCORD_WEBHOOK|API_KEY|SECRET"; then
     echo "${RED}❌ Credentials in .env file detected!${NC}"
     CREDENTIALS_FOUND=1
 fi
 
 # Check for JWT-like tokens
-if git diff --cached | grep -qE "eyJ[A-Za-z0-9_-]{20,}"; then
+if echo "$ADDED_LINES" | grep -qE "eyJ[A-Za-z0-9_-]{20,}"; then
     echo "${YELLOW}⚠️  JWT-like token detected. Please verify this is not a secret.${NC}"
 fi
 

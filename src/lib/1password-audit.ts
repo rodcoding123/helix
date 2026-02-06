@@ -110,7 +110,7 @@ function hasRapidBurstPattern(accesses: AccessRecord[]): boolean {
 /**
  * Analyze access patterns for unusual behavior
  */
-export async function analyzeAccessPatterns(): Promise<OnePasswordAccessPattern[]> {
+export function analyzeAccessPatterns(): OnePasswordAccessPattern[] {
   const patterns: OnePasswordAccessPattern[] = [];
   const items = getVaultItems();
 
@@ -216,7 +216,7 @@ export function stopOnePasswordAuditScheduler(intervalId: NodeJS.Timeout): void 
  */
 async function runAuditCheck(): Promise<void> {
   try {
-    const patterns = await analyzeAccessPatterns();
+    const patterns = analyzeAccessPatterns();
     const unusualPatterns = patterns.filter(p => p.unusual);
 
     if (unusualPatterns.length === 0) {

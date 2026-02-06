@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument */
 /**
  * Gateway Connection Latency Benchmarks
  * Measures WebSocket performance on various metrics
  */
 
 import { describe, it, beforeAll, afterAll } from 'vitest';
-import { getGlobalProfiler, LatencyProfiler } from './performance-profiling';
+import { getGlobalProfiler, LatencyProfiler } from './performance-profiling.js';
 
 describe('Gateway Connection Latency Benchmarks', () => {
   let profiler: LatencyProfiler;
@@ -17,16 +16,25 @@ describe('Gateway Connection Latency Benchmarks', () => {
   afterAll(() => {
     const summary = profiler.getAllStats();
     console.log('\n=== Gateway Latency Summary ===');
-    Object.entries(summary).forEach(([name, stats]) => {
+    for (const [name, stats] of Object.entries(summary)) {
+      const s = stats as {
+        count: number;
+        mean: number;
+        min: number;
+        max: number;
+        p50: number;
+        p95: number;
+        p99: number;
+      };
       console.log(`\n${name}:`);
-      console.log(`  Count: ${stats.count}`);
-      console.log(`  Mean: ${stats.mean.toFixed(2)}ms`);
-      console.log(`  Min: ${stats.min.toFixed(2)}ms`);
-      console.log(`  Max: ${stats.max.toFixed(2)}ms`);
-      console.log(`  P50: ${stats.p50.toFixed(2)}ms`);
-      console.log(`  P95: ${stats.p95.toFixed(2)}ms`);
-      console.log(`  P99: ${stats.p99.toFixed(2)}ms`);
-    });
+      console.log(`  Count: ${s.count}`);
+      console.log(`  Mean: ${s.mean.toFixed(2)}ms`);
+      console.log(`  Min: ${s.min.toFixed(2)}ms`);
+      console.log(`  Max: ${s.max.toFixed(2)}ms`);
+      console.log(`  P50: ${s.p50.toFixed(2)}ms`);
+      console.log(`  P95: ${s.p95.toFixed(2)}ms`);
+      console.log(`  P99: ${s.p99.toFixed(2)}ms`);
+    }
   });
 
   it('should measure WebSocket connect latency', () => {
@@ -237,12 +245,13 @@ describe('Gateway Connection Latency Benchmarks', () => {
     let totalCount = 0;
     const allMeasurements: number[] = [];
 
-    Object.entries(allStats).forEach(([_name, stats]) => {
-      totalCount += stats.count;
-      for (let i = 0; i < stats.count; i++) {
-        allMeasurements.push(stats.mean);
+    for (const [, stats] of Object.entries(allStats)) {
+      const s = stats as { count: number; mean: number };
+      totalCount += s.count;
+      for (let i = 0; i < s.count; i++) {
+        allMeasurements.push(s.mean);
       }
-    });
+    }
 
     const sorted = allMeasurements.sort((a, b) => a - b);
     const p50 = sorted[Math.floor(sorted.length * 0.5)];

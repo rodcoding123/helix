@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument */
 /**
  * Phase 11: Multi-Tenant Hash Chain Tests
  */
@@ -11,19 +12,19 @@ import {
 } from './hash-chain-multitenant.js';
 
 // Helper to create a chainable mock that returns itself
-function createChainableMock() {
-  const self = {
-    from: vi.fn(() => self),
-    select: vi.fn(() => self),
-    eq: vi.fn(() => self),
-    order: vi.fn(() => self),
-    limit: vi.fn(() => self),
-    single: vi.fn(),
-    insert: vi.fn(),
+function createChainableMock(): any {
+  const self: any = {
     count: 0,
     error: null,
     data: null,
   };
+  self.from = vi.fn(() => self);
+  self.select = vi.fn(() => self);
+  self.eq = vi.fn(() => self);
+  self.order = vi.fn(() => self);
+  self.limit = vi.fn(() => self);
+  self.single = vi.fn();
+  self.insert = vi.fn();
   return self;
 }
 
@@ -36,7 +37,7 @@ describe('Tenant Hash Chain', () => {
   beforeEach(() => {
     mockQuery = createChainableMock();
     mockDb.from = vi.fn(() => mockQuery);
-    setDbClient(mockDb);
+    setDbClient(mockDb as any);
   });
 
   describe('Constructor', () => {
@@ -147,7 +148,7 @@ describe('Tenant Hash Chain', () => {
   });
 
   describe('Chain verification', () => {
-    it('should verify valid chain', async () => {
+    it('should verify valid chain', () => {
       const entries = [
         {
           index: 0,
@@ -169,7 +170,7 @@ describe('Tenant Hash Chain', () => {
 
       mockQuery.select.mockReturnValueOnce(mockQuery);
       mockQuery.eq.mockReturnValueOnce(mockQuery);
-      mockQuery.order.mockReturnValueOnce(Promise.resolve({ data: entries as any }));
+      mockQuery.order.mockReturnValueOnce(Promise.resolve({ data: entries }));
 
       const chain = new TenantHashChain('tenant-123');
       // Note: Verification would need proper mocking of hashString
@@ -241,7 +242,7 @@ describe('Tenant Hash Chain', () => {
       ];
 
       // order() is awaited, so it returns the promise directly
-      mockQuery.order.mockResolvedValueOnce({ data: entries, error: null });
+      mockQuery.order.mockResolvedValueOnce({ data: entries as unknown, error: null });
 
       const chain = new TenantHashChain('tenant-123');
       const allEntries = await chain.getAllEntries();
@@ -288,7 +289,7 @@ describe('Tenant Hash Chain', () => {
 
     it('should get entry count', async () => {
       // eq() is awaited and returns { count, error }
-      mockQuery.eq.mockResolvedValueOnce({ count: 5, error: null });
+      mockQuery.eq.mockResolvedValueOnce({ count: 5, error: null } as any);
 
       const chain = new TenantHashChain('tenant-123');
       const count = await chain.getEntryCount();
@@ -302,7 +303,7 @@ describe('Tenant Hash Chain', () => {
       mockQuery.select.mockReturnValueOnce(mockQuery);
       mockQuery.eq.mockReturnValueOnce(mockQuery);
       mockQuery.order.mockResolvedValueOnce({
-        data: [], // No entries for this tenant
+        data: [] as unknown, // No entries for this tenant
         error: null,
       });
 
@@ -375,7 +376,7 @@ describe('Tenant Hash Chain', () => {
       mockQuery.select.mockReturnValueOnce(mockQuery);
       mockQuery.eq.mockReturnValueOnce(mockQuery);
       mockQuery.order.mockResolvedValueOnce({
-        data: null,
+        data: null as unknown,
         error: { message: 'DB error' },
       });
 

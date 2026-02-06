@@ -88,7 +88,7 @@ export async function logTrustUpdate(context: TrustLogContext): Promise<string> 
  */
 export async function logCreatorSecurityEvent(
   eventType: 'auth_success' | 'auth_failed' | 'modification_attempt',
-  details: Record<string, any>
+  details: Record<string, unknown>
 ): Promise<void> {
   const payload: DiscordPayload = {
     embeds: [
@@ -218,7 +218,7 @@ function buildDimensionSummary(dimensionsChanged: TrustUpdateEntry['dimensionsCh
 /**
  * Build Discord fields from arbitrary details object
  */
-function buildFieldsFromDetails(details: Record<string, any>): DiscordEmbedField[] {
+function buildFieldsFromDetails(details: Record<string, unknown>): DiscordEmbedField[] {
   const fields: DiscordEmbedField[] = [];
 
   for (const [key, value] of Object.entries(details)) {

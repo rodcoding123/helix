@@ -107,19 +107,19 @@ describe('Creator Security', () => {
       }
     });
 
-    it('should reject creator in async version', async () => {
-      await expect(verifyNotCreator('rodrigo_specter')).rejects.toThrow(CreatorSecurityError);
+    it('should reject creator in sync version', () => {
+      expect(() => verifyNotCreator('rodrigo_specter')).toThrow(CreatorSecurityError);
     });
 
-    it('should allow non-creator in async version', async () => {
-      await expect(verifyNotCreator('user_123')).resolves.not.toThrow();
+    it('should allow non-creator in sync version', () => {
+      expect(() => verifyNotCreator('user_123')).not.toThrow();
     });
 
-    it('should log security alert on failed verification', async () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
+    it('should log security alert on failed verification', () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       try {
-        await verifyNotCreator('rodrigo_specter');
+        verifyNotCreator('rodrigo_specter');
       } catch {
         // Expected to throw
       }
@@ -226,7 +226,7 @@ describe('Creator Security', () => {
 
     it('should log successful authentication', async () => {
       const testKey = 'test_api_key_12345';
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
       await verifyCreatorApiKey(testKey);
 
@@ -241,7 +241,7 @@ describe('Creator Security', () => {
     });
 
     it('should log failed authentication attempts', async () => {
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation();
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       await verifyCreatorApiKey('wrong_key');
 
@@ -380,7 +380,7 @@ describe('Creator Security', () => {
     });
 
     it('should log success message on valid config', () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
       verifyCreatorSecurityConfiguration();
 
@@ -393,7 +393,7 @@ describe('Creator Security', () => {
 
     it('should verify configuration is ready', () => {
       // The function should complete without errors when properly configured
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
       expect(() => {
         verifyCreatorSecurityConfiguration();
@@ -440,12 +440,12 @@ describe('Creator Security', () => {
   });
 
   describe('Security Properties', () => {
-    it('should prevent downgrade of creator trust', async () => {
+    it('should prevent downgrade of creator trust', () => {
       // Attempt to verify as non-creator should succeed
-      await expect(verifyNotCreator('user_123')).resolves.not.toThrow();
+      expect(() => verifyNotCreator('user_123')).not.toThrow();
 
       // Attempt to verify as creator should fail
-      await expect(verifyNotCreator('rodrigo_specter')).rejects.toThrow();
+      expect(() => verifyNotCreator('rodrigo_specter')).toThrow();
     });
 
     it('should provide no path to modify creator trust', () => {

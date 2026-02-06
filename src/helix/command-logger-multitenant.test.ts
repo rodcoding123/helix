@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument */
 /**
  * Phase 11: Per-Tenant Discord Logger Tests
  */
@@ -11,12 +12,11 @@ import {
 import { setDbClient as setCommandLoggerDb } from './command-logger-multitenant.js';
 
 // Mock Supabase
-const mockQuery = {
-  from: vi.fn(function () { return this; }),
-  select: vi.fn(function () { return this; }),
-  eq: vi.fn(function () { return this; }),
-  single: vi.fn(),
-};
+const mockQuery: Record<string, ReturnType<typeof vi.fn>> = {};
+mockQuery.from = vi.fn(() => mockQuery);
+mockQuery.select = vi.fn(() => mockQuery);
+mockQuery.eq = vi.fn(() => mockQuery);
+mockQuery.single = vi.fn();
 
 const mockDb = {
   from: vi.fn(() => mockQuery),
@@ -36,8 +36,8 @@ global.fetch = vi.fn();
 describe('TenantDiscordLogger', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (global.fetch as any).mockClear();
-    setCommandLoggerDb(mockDb);
+    (global.fetch as ReturnType<typeof vi.fn>).mockClear();
+    setCommandLoggerDb(mockDb as any);
   });
 
   describe('Constructor', () => {
@@ -58,7 +58,7 @@ describe('TenantDiscordLogger', () => {
   describe('Initialization', () => {
     it('should load webhook from database', async () => {
       mockQuery.single.mockResolvedValueOnce({
-        data: { webhook_url: 'https://discord.com/api/webhooks/123' },
+        data: { webhook_url: 'https://webhook.test/discord/123' },
         error: null,
       });
 
@@ -98,7 +98,7 @@ describe('TenantDiscordLogger', () => {
 
     it('should only initialize once', async () => {
       mockQuery.single.mockResolvedValueOnce({
-        data: { webhook_url: 'https://discord.com/api/webhooks/123' },
+        data: { webhook_url: 'https://webhook.test/discord/123' },
         error: null,
       });
 
@@ -115,7 +115,7 @@ describe('TenantDiscordLogger', () => {
   describe('Logging messages', () => {
     it('should log message with default values', async () => {
       mockQuery.single.mockResolvedValueOnce({
-        data: { webhook_url: 'https://discord.com/api/webhooks/123' },
+        data: { webhook_url: 'https://webhook.test/discord/123' },
         error: null,
       });
 
@@ -137,7 +137,7 @@ describe('TenantDiscordLogger', () => {
 
     it('should include tenant ID in logs', async () => {
       mockQuery.single.mockResolvedValueOnce({
-        data: { webhook_url: 'https://discord.com/api/webhooks/123' },
+        data: { webhook_url: 'https://webhook.test/discord/123' },
         error: null,
       });
 
@@ -157,7 +157,7 @@ describe('TenantDiscordLogger', () => {
 
     it('should include metadata in logs', async () => {
       mockQuery.single.mockResolvedValueOnce({
-        data: { webhook_url: 'https://discord.com/api/webhooks/123' },
+        data: { webhook_url: 'https://webhook.test/discord/123' },
         error: null,
       });
 
@@ -179,7 +179,7 @@ describe('TenantDiscordLogger', () => {
 
     it('should set correct color based on status', async () => {
       mockQuery.single.mockResolvedValueOnce({
-        data: { webhook_url: 'https://discord.com/api/webhooks/123' },
+        data: { webhook_url: 'https://webhook.test/discord/123' },
         error: null,
       });
 
@@ -202,9 +202,9 @@ describe('TenantDiscordLogger', () => {
   });
 
   describe('Special logging methods', () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       mockQuery.single.mockResolvedValueOnce({
-        data: { webhook_url: 'https://discord.com/api/webhooks/123' },
+        data: { webhook_url: 'https://webhook.test/discord/123' },
         error: null,
       });
 
@@ -215,7 +215,7 @@ describe('TenantDiscordLogger', () => {
       const logger = new TenantDiscordLogger('tenant-123');
       await logger.initialize();
 
-      await logger.logCommand('npm run build', { success: true });
+      await logger.logCommand('npm run build', { output: 'done', exitCode: 0 });
 
       expect(global.fetch).toHaveBeenCalled();
     });
@@ -247,7 +247,7 @@ describe('TenantDiscordLogger', () => {
   describe('Verification', () => {
     it('should verify webhook accessibility', async () => {
       mockQuery.single.mockResolvedValueOnce({
-        data: { webhook_url: 'https://discord.com/api/webhooks/123' },
+        data: { webhook_url: 'https://webhook.test/discord/123' },
         error: null,
       });
 
@@ -261,7 +261,7 @@ describe('TenantDiscordLogger', () => {
 
     it('should return false if webhook not accessible', async () => {
       mockQuery.single.mockResolvedValueOnce({
-        data: { webhook_url: 'https://discord.com/api/webhooks/123' },
+        data: { webhook_url: 'https://webhook.test/discord/123' },
         error: null,
       });
 
@@ -289,7 +289,7 @@ describe('TenantDiscordLogger', () => {
   describe('Status', () => {
     it('should return logger status', async () => {
       mockQuery.single.mockResolvedValueOnce({
-        data: { webhook_url: 'https://discord.com/api/webhooks/123' },
+        data: { webhook_url: 'https://webhook.test/discord/123' },
         error: null,
       });
 
@@ -314,7 +314,7 @@ describe('TenantDiscordLogger', () => {
   describe('Error handling', () => {
     it('should not throw on fetch error', async () => {
       mockQuery.single.mockResolvedValueOnce({
-        data: { webhook_url: 'https://discord.com/api/webhooks/123' },
+        data: { webhook_url: 'https://webhook.test/discord/123' },
         error: null,
       });
 
@@ -323,14 +323,12 @@ describe('TenantDiscordLogger', () => {
       const logger = new TenantDiscordLogger('tenant-123');
       await logger.initialize();
 
-      await expect(
-        logger.log({ type: 'test', content: 'test' })
-      ).resolves.not.toThrow();
+      await expect(logger.log({ type: 'test', content: 'test' })).resolves.not.toThrow();
     });
 
     it('should not throw on webhook error', async () => {
       mockQuery.single.mockResolvedValueOnce({
-        data: { webhook_url: 'https://discord.com/api/webhooks/123' },
+        data: { webhook_url: 'https://webhook.test/discord/123' },
         error: null,
       });
 
@@ -339,9 +337,7 @@ describe('TenantDiscordLogger', () => {
       const logger = new TenantDiscordLogger('tenant-123');
       await logger.initialize();
 
-      await expect(
-        logger.log({ type: 'test', content: 'test' })
-      ).resolves.not.toThrow();
+      await expect(logger.log({ type: 'test', content: 'test' })).resolves.not.toThrow();
     });
   });
 
@@ -362,7 +358,7 @@ describe('TenantDiscordLogger', () => {
   describe('Isolation', () => {
     it('should only access own tenant webhook', async () => {
       mockQuery.single.mockResolvedValueOnce({
-        data: { webhook_url: 'https://discord.com/api/webhooks/123' },
+        data: { webhook_url: 'https://webhook.test/discord/123' },
         error: null,
       });
 
@@ -374,7 +370,7 @@ describe('TenantDiscordLogger', () => {
 
     it('should log tenant ID in all messages', async () => {
       mockQuery.single.mockResolvedValueOnce({
-        data: { webhook_url: 'https://discord.com/api/webhooks/123' },
+        data: { webhook_url: 'https://webhook.test/discord/123' },
         error: null,
       });
 
@@ -400,14 +396,14 @@ describe('GlobalDiscordLogger', () => {
   });
 
   it('should create global logger', () => {
-    const logger = new GlobalDiscordLogger('https://discord.com/api/webhooks/global');
+    const logger = new GlobalDiscordLogger('https://webhook.test/discord/global');
     expect(logger).toBeDefined();
   });
 
   it('should log without tenant context', async () => {
     (global.fetch as any).mockResolvedValueOnce({ ok: true });
 
-    const logger = new GlobalDiscordLogger('https://discord.com/api/webhooks/global');
+    const logger = new GlobalDiscordLogger('https://webhook.test/discord/global');
     await logger.log({
       type: 'system',
       content: 'system event',
@@ -418,8 +414,6 @@ describe('GlobalDiscordLogger', () => {
 
   it('should not throw if not initialized', async () => {
     const logger = new GlobalDiscordLogger();
-    await expect(
-      logger.log({ type: 'test', content: 'test' })
-    ).resolves.not.toThrow();
+    await expect(logger.log({ type: 'test', content: 'test' })).resolves.not.toThrow();
   });
 });

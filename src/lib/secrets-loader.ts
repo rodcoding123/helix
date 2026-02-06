@@ -117,7 +117,7 @@ export function loadSecret(itemName: string, field: SecretField = 'password'): s
           durationMs,
         }).catch(err => console.error('[Helix] Failed to log secret access:', err));
         return secret;
-      } catch (error) {
+      } catch {
         // Fall back to .env if 1Password fails
         console.warn(`Warning: Could not load "${itemName}" from 1Password. Trying .env fallback.`);
         const secret = loadSecretFromEnv(itemName);
@@ -367,7 +367,7 @@ export function loadAllSecrets(): Record<string, string> {
       const value = loadSecret(item.name, item.field);
       secrets[item.envVar] = value;
       process.env[item.envVar] = value;
-    } catch (error) {
+    } catch {
       // Don't log error object - it may contain secret data
       console.error(`Failed to load ${item.name}`);
       // Don't throw - allow partial loading for development

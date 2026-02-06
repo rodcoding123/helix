@@ -31,7 +31,7 @@ const RODRIGO_TRUST_LEVEL = parseFloat(process.env.RODRIGO_TRUST_LEVEL || '1.0')
 export class CreatorSecurityError extends Error {
   constructor(
     message: string,
-    public context?: Record<string, any>
+    public context?: Record<string, unknown>
   ) {
     super(message);
     this.name = 'CreatorSecurityError';
@@ -92,7 +92,7 @@ export function preventCreatorTrustModification(userId: string): void {
 /**
  * Async version (for logging to Discord)
  */
-export async function verifyNotCreator(userId: string): Promise<void> {
+export function verifyNotCreator(userId: string): void {
   if (isCreator(userId)) {
     // Log security alert (will be integrated with Discord logging in next phase)
     console.error('[SECURITY_ALERT] Attempted creator modification', {
@@ -166,16 +166,16 @@ export async function verifyCreatorApiKey(providedKey: string): Promise<ThanosAu
 
     if (!matches) {
       // Log failed attempt
-      await logFailedAuthAttempt();
+      logFailedAuthAttempt();
 
       return {
         success: false,
         message: 'Invalid API key',
       };
     }
-  } catch (e) {
+  } catch {
     // bcrypt threw an error (invalid hash format, etc.)
-    await logFailedAuthAttempt();
+    logFailedAuthAttempt();
 
     return {
       success: false,
@@ -187,7 +187,7 @@ export async function verifyCreatorApiKey(providedKey: string): Promise<ThanosAu
   const sessionToken = generateSessionToken();
 
   // 4. Log successful verification
-  await logSuccessfulAuth(sessionToken);
+  logSuccessfulAuth(sessionToken);
 
   return {
     success: true,
@@ -228,7 +228,7 @@ export function generateSessionToken(): string {
 /**
  * Log failed authentication attempt
  */
-async function logFailedAuthAttempt(): Promise<void> {
+function logFailedAuthAttempt(): void {
   // Will be integrated with Discord logging in Phase 2
   console.warn('[CREATOR_AUTH_FAIL]', {
     timestamp: new Date().toISOString(),
@@ -239,7 +239,7 @@ async function logFailedAuthAttempt(): Promise<void> {
 /**
  * Log successful authentication
  */
-async function logSuccessfulAuth(sessionToken: string): Promise<void> {
+function logSuccessfulAuth(sessionToken: string): void {
   // Will be integrated with Discord logging in Phase 2
   console.log('[CREATOR_AUTH_SUCCESS]', {
     creatorId: RODRIGO_ID,

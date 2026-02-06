@@ -3,7 +3,7 @@
  * Tests origin validation, gateway URL validation, and token security
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import type { IncomingMessage } from 'node:http';
 import {
   validateWebSocketOrigin,
