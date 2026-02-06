@@ -33,6 +33,15 @@ export interface QuotaExceededResponse {
   } | null;
 }
 
+export interface ConversationMetadata {
+  id: string;
+  sessionKey: string;
+  title?: string;
+  messageCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export class CloudChatClient {
   private baseUrl: string;
 
@@ -141,6 +150,66 @@ export class CloudChatClient {
         updated_at: new Date().toISOString(),
       })
       .eq('user_id', session.user.id);
+  }
+
+  async getConversation(sessionKey: string): Promise<ConversationMetadata | null> {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('Not authenticated');
+
+    const { data } = await supabase
+      .from('conversations')
+      .select('id, session_key, title, message_count, created_at, updated_at')
+      .eq('user_id', session.user.id)
+      .eq('session_key', sessionKey)
+      .single();
+
+    if (!data) return null;
+
+    return {
+      id: data.id,
+      sessionKey: data.session_key,
+      title: data.title,
+      messageCount: data.message_count || 0,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at,
+    };
+  }
+
+  async loadConversationMessages(
+    sessionKey: string
+  ): Promise<Array<{ id: string; role: string; content: string; timestamp: string }>> {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('Not authenticated');
+
+    const { data } = await supabase
+      .from('session_messages')
+      .select('id, role, content, created_at')
+      .eq('user_id', session.user.id)
+      .eq('session_key', sessionKey)
+      .order('created_at', { ascending: true });
+
+    if (!data) return [];
+
+    return data.map((msg: any) => ({
+      id: msg.id,
+      role: msg.role,
+      content: msg.content,
+      timestamp: msg.created_at,
+    }));
+  }
+
+  async updateConversationTitle(
+    sessionKey: string,
+    title: string
+  ): Promise<void> {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('Not authenticated');
+
+    await supabase
+      .from('conversations')
+      .update({ title, updated_at: new Date().toISOString() })
+      .eq('user_id', session.user.id)
+      .eq('session_key', sessionKey);
   }
 }
 
