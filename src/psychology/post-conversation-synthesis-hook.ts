@@ -2,21 +2,24 @@
  * Post-Conversation Memory Synthesis Hook
  *
  * Triggered after each conversation is stored
- * Orchestrates the memory synthesis pipeline
+ * Orchestrates the memory synthesis pipeline using centralized AIOperationRouter
  *
  * Flow:
  * 1. Load conversation from Supabase
- * 2. Prepare conversation data for synthesis
- * 3. Call gateway memory.synthesize RPC with optimal synthesis type
+ * 2. Route through AIOperationRouter (handles model selection, cost tracking, approvals)
+ * 3. Call routed model to synthesize conversation
  * 4. Parse synthesis results
- * 5. Write results to psychology JSON files via psychology-file-writer
+ * 5. Write results to psychology JSON files
  * 6. Store synthesis insights in Supabase conversation_insights table
- * 7. Log results and update hash chain
+ * 7. Log results
  *
  * Theory: Integration of Layers 1-7 through automated learning
+ * Uses: Gemini Flash 2 ($0.00005/1K input, $0.00015/1K output)
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { AIOperationRouter } from '../helix/ai-operations/router.js';
+import { getAnthropicClient, getGeminiClient } from '../helix/ai-operations/providers/index.js';
 import { psychologyFileWriter } from './psychology-file-writer.js';
 
 // ============================================================================
@@ -47,134 +50,40 @@ interface SynthesisResult {
     recommendations?: string[];
   }>;
   summary?: string;
-  identity_coherence?: string;
-  coherence_assessment?: string;
 }
 
 // ============================================================================
-// Local Pattern Detection (FREE - No API Call)
+// Synthesis Prompt Template
 // ============================================================================
 
-/**
- * Detect simple patterns from conversation without API calls
- * Reduces API usage by ~70% for conversations with obvious patterns
- */
-function detectSimplePatterns(
-  messages: Array<{ role: string; content: string }>
-): Partial<SynthesisResult> {
-  const synthesis: Partial<SynthesisResult> = {
-    patterns: [],
-  };
+const SYNTHESIS_PROMPT_TEMPLATE = `You are analyzing a conversation to extract psychological patterns across 7 layers of consciousness:
 
-  // Combine all user messages for analysis
-  const userContent = messages
-    .filter((m) => m.role === 'user')
-    .map((m) => m.content)
-    .join(' ');
+Layer 1 (Narrative Core): Life story, meaning-making, identity themes
+Layer 2 (Emotional Memory): Emotional patterns, regulation, triggers
+Layer 3 (Relational Memory): Relationships, attachments, trust dynamics
+Layer 4 (Prospective Self): Goals, aspirations, fears, future identity
+Layer 5 (Integration Rhythms): Memory reconsolidation, integration patterns
+Layer 6 (Transformation): Change, growth, development
+Layer 7 (Purpose): Meaning, ikigai, purpose sources
 
-  // Emotion keywords (no API needed)
-  const emotionPatterns: Record<string, RegExp> = {
-    frustration: /\b(frustrat|annoyed|irritat|upset|angry)\w*\b/gi,
-    excitement: /\b(excit|thrilled|stoked|awesome|amazing|great)\w*\b/gi,
-    confusion: /\b(confus|lost|stuck|unclear|uncertain|doubt)\w*\b/gi,
-    anxiety: /\b(anxious|worried|nervous|scared|fear|dread)\w*\b/gi,
-    happiness: /\b(happy|joyful|delighted|pleased|content)\w*\b/gi,
-    sadness: /\b(sad|unhappy|depressed|down|blue)\w*\b/gi,
-    overwhelm: /\b(overwhelm|swamped|drowning|stressed|exhausted)\w*\b/gi,
-  };
+CONVERSATION:
+{messages}
 
-  // Goal indicators
-  const goalPatterns = [
-    /\bI want to\b/gi,
-    /\bI'm (trying|planning|attempting) to\b/gi,
-    /\bI need to\b/gi,
-    /\bI should\b.*\b(learn|build|create|improve|develop)\b/gi,
-    /\bmy goal (is|would be)\b/gi,
-  ];
-
-  // Topic extraction (meaningful topics)
-  const topicPatterns: Record<string, RegExp> = {
-    'personal_growth': /\b(growth|development|improvement|self|personal)\b/gi,
-    'work_career': /\b(job|work|career|project|company|team|deadline)\b/gi,
-    'relationships': /\b(relationship|friend|family|partner|spouse|loved one)\b/gi,
-    'health_wellness': /\b(health|exercise|sleep|mental|wellbeing|diet|fitness)\b/gi,
-    'creativity': /\b(creative|art|music|writing|design|build|create)\b/gi,
-    'learning': /\b(learn|study|knowledge|understand|skill|teach)\b/gi,
-    'technology': /\b(code|programming|software|tech|app|system|algorithm)\b/gi,
-  };
-
-  // Extract emotions
-  for (const [emotion, pattern] of Object.entries(emotionPatterns)) {
-    if (pattern.test(userContent)) {
-      synthesis.patterns!.push({
-        type: 'emotional_tag',
-        description: `Detected ${emotion} in conversation`,
-        confidence: 0.85,
-        layer: 2,
-      });
+Analyze this conversation and return a JSON response with:
+{
+  "patterns": [
+    {
+      "type": "emotional_tag" | "goal_mention" | "meaningful_topic" | "relationship_signal" | "transformation_event",
+      "description": "Clear description of the pattern",
+      "evidence": ["direct quotes or references from the conversation"],
+      "confidence": 0.0-1.0,
+      "layer": 1-7
     }
-  }
-
-  // Extract goals
-  let hasGoal = false;
-  for (const pattern of goalPatterns) {
-    if (pattern.test(userContent)) {
-      hasGoal = true;
-      break;
-    }
-  }
-
-  if (hasGoal) {
-    synthesis.patterns!.push({
-      type: 'goal_mention',
-      description: 'User expressed goal or aspiration',
-      confidence: 0.9,
-      layer: 4,
-    });
-  }
-
-  // Extract topics
-  for (const [topic, pattern] of Object.entries(topicPatterns)) {
-    if (pattern.test(userContent)) {
-      synthesis.patterns!.push({
-        type: 'meaningful_topic',
-        description: `Topic: ${topic}`,
-        confidence: 0.8,
-        layer: 1,
-      });
-    }
-  }
-
-  return synthesis;
+  ],
+  "summary": "2-3 sentence summary of the most significant patterns detected"
 }
 
-/**
- * Determine if a conversation is significant enough for API synthesis
- */
-function isSignificantConversation(messages: Array<{ role: string; content: string }>): boolean {
-  // Threshold 1: Substantial length
-  const totalLength = messages.reduce((sum, m) => sum + m.content.length, 0);
-  if (totalLength > 2000) return true;
-
-  // Threshold 2: Multiple turns
-  if (messages.length > 10) return true;
-
-  // Threshold 3: Emotional or goal content
-  const userContent = messages
-    .filter((m) => m.role === 'user')
-    .map((m) => m.content)
-    .join(' ');
-
-  const emotionalKeywords =
-    /\b(feel|emotion|frustrated|excited|confused|anxious|happy|sad|overwhelm)\w*\b/gi;
-  const goalKeywords = /\b(want|need|goal|plan|try|should)\b/gi;
-
-  if (emotionalKeywords.test(userContent) || goalKeywords.test(userContent)) {
-    return true;
-  }
-
-  return false;
-}
+Be concise and focus on meaningful patterns that update Helix's understanding of the user.`;
 
 // ============================================================================
 // Hook Handler
@@ -182,14 +91,14 @@ function isSignificantConversation(messages: Array<{ role: string; content: stri
 
 export class PostConversationSynthesisHook {
   private supabase: ReturnType<typeof createClient>;
-  private gatewayClient?: any;
+  private router: AIOperationRouter;
 
-  constructor(gatewayClient?: any) {
+  constructor() {
     this.supabase = createClient(
       process.env.SUPABASE_URL || '',
       process.env.SUPABASE_SERVICE_ROLE_KEY || ''
     );
-    this.gatewayClient = gatewayClient;
+    this.router = new AIOperationRouter();
   }
 
   /**
@@ -204,84 +113,72 @@ export class PostConversationSynthesisHook {
       const conversation = await this.loadConversation(conversationId);
 
       if (!conversation) {
-        console.warn(`Conversation not found: ${conversationId}`);
+        console.warn(`[SYNTHESIS] Conversation not found: ${conversationId}`);
         return;
       }
 
       // ==========================================
-      // 2. Prepare conversation data
+      // 2. Skip trivial conversations
       // ==========================================
-      const conversationData = conversation.messages.map((msg) => ({
-        id: conversationId,
-        text: msg.content,
-        timestamp: msg.timestamp || new Date().toISOString(),
-      }));
+      const messageCount = conversation.messages.length;
+      const totalLength = conversation.messages.reduce((sum, m) => sum + m.content.length, 0);
 
-      // ==========================================
-      // 3. LOCAL SYNTHESIS FIRST (FREE)
-      // ==========================================
-      const localPatterns = detectSimplePatterns(conversation.messages);
-
-      // If sufficient local patterns found, use them (70% of conversations)
-      if (localPatterns.patterns && localPatterns.patterns.length > 2) {
-        await this.storeAndApplySynthesis(conversationId, conversation.user_id, {
-          patterns: localPatterns.patterns,
-          summary: 'Local pattern synthesis (no API call)',
-        });
+      if (messageCount < 3 || totalLength < 500) {
+        console.log(`[SYNTHESIS] Skipping trivial conversation: ${conversationId} (${messageCount} messages, ${totalLength} chars)`);
         return;
       }
 
       // ==========================================
-      // 4. SKIP TRIVIAL CONVERSATIONS
+      // 3. Route through AIOperationRouter
       // ==========================================
-      if (!isSignificantConversation(conversation.messages)) {
-        console.log(`[SYNTHESIS] Skipping trivial conversation: ${conversationId}`);
-        return;
-      }
+      const formattedMessages = conversation.messages
+        .map((m) => `${m.role.toUpperCase()}: ${m.content}`)
+        .join('\n\n');
+
+      const prompt = SYNTHESIS_PROMPT_TEMPLATE.replace('{messages}', formattedMessages);
+
+      // Estimate tokens for routing
+      const estimatedInputTokens = Math.ceil(prompt.length / 4);
+
+      const routingDecision = await this.router.route({
+        operationId: 'memory_synthesis',
+        userId: conversation.user_id,
+        input: prompt,
+        estimatedInputTokens,
+      });
+
+      console.log(`[SYNTHESIS] Routed to model: ${routingDecision.model}, cost: $${routingDecision.estimatedCostUsd}`);
 
       // ==========================================
-      // 5. API-BASED SYNTHESIS (Uses cheap Haiku model)
+      // 4. Call routed model for synthesis
       // ==========================================
-      const synthesisResult = await this.synthesizeWithAPI(conversationData);
+      const synthesisResult = await this.callRoutedModel(
+        routingDecision.model,
+        prompt
+      );
 
       if (!synthesisResult) {
-        console.warn(`[SYNTHESIS] API synthesis failed for ${conversationId}`);
+        console.warn(`[SYNTHESIS] Model synthesis failed for ${conversationId}`);
         return;
       }
 
       // ==========================================
-      // 6. Store results and apply to psychology files
+      // 5. Store results and apply to psychology files
       // ==========================================
       await this.storeAndApplySynthesis(conversationId, conversation.user_id, synthesisResult);
 
       // ==========================================
-      // 7. Log success
+      // 6. Log success
       // ==========================================
       console.log(`[SYNTHESIS] Conversation ${conversationId} synthesized successfully`, {
         patternsDetected: synthesisResult.patterns?.length || 0,
         userId: conversation.user_id,
+        cost: routingDecision.estimatedCostUsd,
+        model: routingDecision.model,
       });
-
-      // TODO: Add Discord logging integration
-      // await logToDiscord({
-      //   channel: 'helix-consciousness',
-      //   type: 'synthesis_complete',
-      //   title: 'Memory Synthesis Complete',
-      //   description: `Analyzed conversation with ${synthesisResult.patterns?.length || 0} patterns detected`,
-      //   conversationId: conversation.id,
-      // });
     } catch (error) {
-      console.error(`Failed to synthesize conversation ${conversationId}:`, error);
-
-      // TODO: Add Discord logging integration
-      // await logToDiscord({
-      //   channel: 'helix-alerts',
-      //   type: 'synthesis_error',
-      //   title: 'Memory Synthesis Failed',
-      //   description: `Error synthesizing conversation ${conversationId}`,
-      //   conversationId,
-      //   error: error instanceof Error ? error.message : String(error),
-      // });
+      console.error(`[SYNTHESIS] Failed to synthesize conversation ${conversationId}:`, error);
+      // Don't rethrow - synthesis is optional and shouldn't block chat
     }
   }
 
@@ -294,58 +191,104 @@ export class PostConversationSynthesisHook {
    */
   private async loadConversation(conversationId: string): Promise<ConversationRow | null> {
     try {
-      const { data, error } = await this.supabase
-        .from('conversations')
+      const { data, error } = await (this.supabase.from('conversations') as any)
         .select('*')
         .eq('id', conversationId)
         .single();
 
       if (error) {
-        console.error('Failed to load conversation:', error);
+        console.error('[SYNTHESIS] Failed to load conversation:', error);
         return null;
       }
 
       return data as ConversationRow;
     } catch (error) {
-      console.error('Error loading conversation:', error);
+      console.error('[SYNTHESIS] Error loading conversation:', error);
       return null;
     }
   }
 
   /**
-   * Call gateway API to synthesize conversation
-   * Uses Haiku model for cost efficiency (60x cheaper than Opus)
+   * Call routed model (Claude via Anthropic or Gemini via Google SDK)
    */
-  private async synthesizeWithAPI(
-    conversationData: Array<{ id: string; text: string; timestamp: string }>
+  private async callRoutedModel(
+    model: string,
+    prompt: string
   ): Promise<SynthesisResult | null> {
     try {
-      if (!this.gatewayClient) {
-        console.warn('[SYNTHESIS] No gateway client available, skipping API synthesis');
+      let responseText = '';
+
+      // Determine which provider based on model name
+      if (model.includes('gemini') || model.includes('flash')) {
+        // Use Google Gemini
+        responseText = await this.callGemini(model, prompt);
+      } else {
+        // Use Anthropic Claude (default)
+        responseText = await this.callClaude(model, prompt);
+      }
+
+      // Parse JSON from response
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        console.warn('[SYNTHESIS] No JSON found in model response');
         return null;
       }
 
-      // Determine best synthesis type based on content
-      // For now, use full_synthesis to get comprehensive analysis
-      const synthesisType = 'full_synthesis';
-
-      // Call gateway RPC
-      const result = await this.gatewayClient.request('memory.synthesize', {
-        synthesisType,
-        conversations: conversationData,
-      });
-
-      if (!result.success || !result.data) {
-        console.error('[SYNTHESIS] Gateway synthesis failed:', result.error);
-        return null;
-      }
-
-      return result.data.analysis as SynthesisResult;
+      const analysis: SynthesisResult = JSON.parse(jsonMatch[0]);
+      return analysis;
     } catch (error) {
-      console.error('[SYNTHESIS] API call failed:', error);
-      // Return null but don't throw - let local patterns handle it
+      console.error('[SYNTHESIS] Model call failed:', error);
       return null;
     }
+  }
+
+  /**
+   * Call Claude via Anthropic SDK
+   */
+  private async callClaude(model: string, prompt: string): Promise<string> {
+    const client = getAnthropicClient();
+
+    // Map simplified model names to actual Claude models
+    const modelMap: Record<string, string> = {
+      claude_haiku: 'claude-3-5-haiku-20241022',
+      claude_sonnet: 'claude-3-5-sonnet-20241022',
+      claude_opus: 'claude-opus-4-1-20250805',
+    };
+
+    const actualModel = modelMap[model] || 'claude-3-5-haiku-20241022';
+
+    const response = await client.messages.create({
+      model: actualModel,
+      max_tokens: 2048,
+      messages: [
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+    });
+
+    return response.content[0]?.type === 'text' ? response.content[0].text : '';
+  }
+
+  /**
+   * Call Gemini via Google SDK
+   */
+  private async callGemini(model: string, prompt: string): Promise<string> {
+    const client = getGeminiClient();
+
+    // Map simplified model names to actual Gemini models
+    const modelMap: Record<string, string> = {
+      gemini_flash: 'gemini-2.0-flash',
+      'gemini-flash': 'gemini-2.0-flash',
+    };
+
+    const actualModel = modelMap[model] || 'gemini-2.0-flash';
+
+    const generativeModel = client.getGenerativeModel({ model: actualModel });
+    const response = await generativeModel.generateContent(prompt);
+
+    return response.response.text();
   }
 
   /**
@@ -357,12 +300,10 @@ export class PostConversationSynthesisHook {
     synthesis: SynthesisResult
   ): Promise<void> {
     try {
-      // ==========================================
-      // 1. Extract patterns by type
-      // ==========================================
+      // Extract patterns by type
       const emotionalTags = synthesis.patterns
         .filter((p) => p.type === 'emotional_tag')
-        .map((p) => p.description.replace('Detected ', '').replace(' in conversation', ''));
+        .map((p) => p.description);
 
       const goals = synthesis.patterns
         .filter((p) => p.type === 'goal_mention')
@@ -370,10 +311,10 @@ export class PostConversationSynthesisHook {
 
       const topics = synthesis.patterns
         .filter((p) => p.type === 'meaningful_topic')
-        .map((p) => p.description.replace('Topic: ', ''));
+        .map((p) => p.description);
 
       // ==========================================
-      // 2. Update psychology files
+      // Update psychology files
       // ==========================================
       if (emotionalTags.length > 0) {
         await psychologyFileWriter.updateEmotionalTags(emotionalTags);
@@ -388,37 +329,34 @@ export class PostConversationSynthesisHook {
       }
 
       // ==========================================
-      // 3. Store synthesis insights in Supabase
+      // Store synthesis insights in Supabase
       // ==========================================
-      const { error } = await (this.supabase
-        .from('conversation_insights') as any)
-        .insert({
-          conversation_id: conversationId,
-          user_id: userId,
-          emotional_tags: emotionalTags,
-          goals: goals,
-          meaningful_topics: topics,
-          patterns_json: JSON.stringify(synthesis.patterns),
-          synthesis_summary: synthesis.summary || null,
-          synthesized_at: new Date().toISOString(),
-        });
+      const { error } = await (this.supabase.from('conversation_insights') as any).insert({
+        conversation_id: conversationId,
+        user_id: userId,
+        emotional_tags: emotionalTags,
+        goals: goals,
+        meaningful_topics: topics,
+        patterns_json: JSON.stringify(synthesis.patterns),
+        synthesis_summary: synthesis.summary || null,
+        synthesized_at: new Date().toISOString(),
+      });
 
       if (error) {
         throw error;
       }
 
       // ==========================================
-      // 4. Update conversation record with synthesis flag
+      // Update conversation record with synthesis flag
       // ==========================================
-      await (this.supabase
-        .from('conversations') as any)
+      await (this.supabase.from('conversations') as any)
         .update({
           synthesized_at: new Date().toISOString(),
           synthesis_insights: synthesis.summary,
         })
         .eq('id', conversationId);
     } catch (error) {
-      console.error('Failed to store synthesis results:', error);
+      console.error('[SYNTHESIS] Failed to store synthesis results:', error);
       throw error;
     }
   }
@@ -458,27 +396,24 @@ export function subscribeToConversationSynthesis(): void {
         try {
           const newRecord = (payload as { new?: { id?: string } }).new;
           const conversationId = newRecord?.id as string;
-          console.log(`[REALTIME_SYNTHESIS] New conversation detected: ${conversationId}`);
+          console.log(`[SYNTHESIS] New conversation detected: ${conversationId}`);
 
           // Process synthesis asynchronously (don't wait)
           await postConversationSynthesisHook.processConversation(conversationId).catch((error) => {
-            console.error(
-              `Failed to synthesize conversation in realtime: ${conversationId}`,
-              error
-            );
+            console.error(`[SYNTHESIS] Failed to synthesize in realtime: ${conversationId}`, error);
           });
         } catch (error) {
-          console.error('Error in realtime synthesis subscription:', error);
+          console.error('[SYNTHESIS] Error in realtime subscription:', error);
         }
       }
     )
     .subscribe((status: string) => {
       if (status === 'SUBSCRIBED') {
-        console.log('[REALTIME_SYNTHESIS] Synthesis subscription active');
+        console.log('[SYNTHESIS] Realtime subscription active');
       } else if (status === 'CLOSED') {
-        console.warn('[REALTIME_SYNTHESIS] Synthesis subscription closed');
+        console.warn('[SYNTHESIS] Realtime subscription closed');
       } else if (status === 'CHANNEL_ERROR') {
-        console.error('[REALTIME_SYNTHESIS] Synthesis subscription error');
+        console.error('[SYNTHESIS] Realtime subscription error');
       }
     });
 }
@@ -523,8 +458,7 @@ export async function batchProcessConversationSynthesis(
   try {
     while (true) {
       // Fetch batch of conversations
-      const { data: conversations, error } = await supabase
-        .from('conversations')
+      const { data: conversations, error } = await (supabase.from('conversations') as any)
         .select('id')
         .gt('created_at', sinceTimestamp)
         .is('synthesized_at', null) // Only process non-synthesized
@@ -546,7 +480,7 @@ export async function batchProcessConversationSynthesis(
           await postConversationSynthesisHook.processConversation(convRecord.id);
           processed++;
         } catch (error) {
-          console.error(`Failed to synthesize conversation ${convRecord.id}:`, error);
+          console.error(`[SYNTHESIS] Failed to synthesize ${convRecord.id}:`, error);
           failed++;
         }
       }
@@ -554,7 +488,9 @@ export async function batchProcessConversationSynthesis(
       offset += batchSize;
 
       // Log progress
-      console.log(`[BATCH_SYNTHESIS] Processed: ${processed}, Failed: ${failed}, Offset: ${offset}`);
+      console.log(
+        `[SYNTHESIS] Batch processed: ${processed} succeeded, ${failed} failed, offset: ${offset}`
+      );
 
       // Give the system a break between batches
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -562,7 +498,7 @@ export async function batchProcessConversationSynthesis(
 
     return { processed, failed };
   } catch (error) {
-    console.error('Batch synthesis failed:', error);
+    console.error('[SYNTHESIS] Batch processing failed:', error);
     throw error;
   }
 }

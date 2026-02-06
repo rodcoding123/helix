@@ -70,10 +70,11 @@ export default defineConfig({
     },
   ],
 
-  // Web server configuration (uncomment to enable)
-  // webServer: {
-  //   command: 'npm run dev',
-  //   url: 'http://localhost:5173',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  // Web server configuration - auto-start dev server for tests
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:5173',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000, // 2 minutes to start
+  },
 });
