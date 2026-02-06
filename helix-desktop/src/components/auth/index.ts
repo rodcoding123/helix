@@ -1,3 +1,5 @@
 export { SupabaseLoginStep } from './SupabaseLoginStep';
 export { TierDetectionStep, type SubscriptionTier } from './TierDetectionStep';
-export { InstanceRegistrationStep, type InstanceRegistrationData } from './InstanceRegistrationStep';
+export { DeviceRegistrationStep, type DeviceRegistrationData } from './DeviceRegistrationStep';
+export { AuthProfileManager, type AuthProfile, type AuthProfileUsage } from './AuthProfileManager';
+export { OAuthFlowDialog } from './OAuthFlowDialog';

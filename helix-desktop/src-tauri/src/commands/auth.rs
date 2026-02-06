@@ -395,10 +395,10 @@ pub struct SupabaseSignupResponse {
     pub error: Option<String>,
 }
 
-/// Instance registration response
+/// Device registration response
 #[derive(Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
-pub struct InstanceRegistrationResponse {
+pub struct DeviceRegistrationResponse {
     pub success: bool,
     pub error: Option<String>,
 }
@@ -592,24 +592,26 @@ pub async fn supabase_signup(
     })
 }
 
-/// Register this device instance with Supabase
+/// Register this device with Supabase
 ///
 /// Inserts into user_instances table so web dashboard knows about this device.
 /// Handles conflicts by updating if instance_id already exists.
+/// Sends both instance_id and device_id (same value) for backwards compatibility.
 #[tauri::command]
-pub async fn register_instance(
+pub async fn register_device(
     user_id: String,
-    instance_id: String,
+    device_id: String,
     device_name: String,
     device_type: String,
     platform: String,
-) -> Result<InstanceRegistrationResponse, String> {
+) -> Result<DeviceRegistrationResponse, String> {
     let (anon_key, _) = get_supabase_credentials()?;
     let supabase_url = get_supabase_url()?;
 
     let client = reqwest::Client::new();
 
     // Insert into user_instances (upsert on conflict)
+    // Send both instance_id and device_id for backwards compatibility
     let response = client
         .post(&format!("{}/rest/v1/user_instances", supabase_url))
         .header("apikey", &anon_key)
@@ -617,7 +619,8 @@ pub async fn register_instance(
         .header("Prefer", "resolution=merge-duplicates")
         .json(&serde_json::json!({
             "user_id": user_id,
-            "instance_id": instance_id,
+            "instance_id": device_id,
+            "device_id": device_id,
             "device_name": device_name,
             "device_type": device_type,
             "platform": platform,
@@ -626,10 +629,10 @@ pub async fn register_instance(
         }))
         .send()
         .await
-        .map_err(|e| format!("Failed to register instance: {}", e))?;
+        .map_err(|e| format!("Failed to register device: {}", e))?;
 
     if response.status().is_success() {
-        Ok(InstanceRegistrationResponse {
+        Ok(DeviceRegistrationResponse {
             success: true,
             error: None,
         })
@@ -637,29 +640,30 @@ pub async fn register_instance(
         let error_text = response
             .text()
             .await
-            .unwrap_or_else(|_| "Failed to register instance".to_string());
-        Ok(InstanceRegistrationResponse {
+            .unwrap_or_else(|_| "Failed to register device".to_string());
+        Ok(DeviceRegistrationResponse {
             success: false,
             error: Some(error_text),
         })
     }
 }
 
-/// Send heartbeat to keep instance online status fresh
+/// Send heartbeat to keep device online status fresh
 ///
 /// Call every 60 seconds to keep is_online=true and last_heartbeat updated.
 /// This is called periodically by the frontend and doesn't require user context.
 #[tauri::command]
-pub async fn send_heartbeat(instance_id: String) -> Result<HeartbeatResponse, String> {
+pub async fn send_heartbeat(device_id: String) -> Result<HeartbeatResponse, String> {
     let (anon_key, _) = get_supabase_credentials()?;
     let supabase_url = get_supabase_url()?;
 
     let client = reqwest::Client::new();
 
+    // Still query by instance_id for backwards compat with existing table schema
     let response = client
         .patch(&format!(
             "{}/rest/v1/user_instances?instance_id=eq.{}",
-            supabase_url, instance_id
+            supabase_url, device_id
         ))
         .header("apikey", &anon_key)
         .header("Content-Type", "application/json")

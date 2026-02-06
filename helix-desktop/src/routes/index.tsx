@@ -19,6 +19,16 @@ const Teams = lazy(() => import('./Teams'));
 // Phase 2: Orchestrator Control Center
 const Orchestrator = lazy(() => import('./Orchestrator'));
 
+// Phase A-J: Full Power routes
+const Agents = lazy(() => import('./Agents'));
+const Security = lazy(() => import('./Security'));
+const Channels = lazy(() => import('./Channels'));
+const Browser = lazy(() => import('./Browser'));
+const Voice = lazy(() => import('./Voice'));
+const Devices = lazy(() => import('./Devices'));
+const Nodes = lazy(() => import('./Nodes'));
+const Sessions = lazy(() => import('./Sessions'));
+
 // Loading fallback component
 function RouteLoader() {
   return (
@@ -131,6 +141,111 @@ export const router = createBrowserRouter([
           </LazyRoute>
         ),
       },
+      // Phase A-J: Full Power routes
+      {
+        path: 'agents',
+        element: (
+          <LazyRoute>
+            <Agents />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'agents/:agentId',
+        element: (
+          <LazyRoute>
+            <Agents />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'security',
+        element: (
+          <LazyRoute>
+            <Security />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'security/:requestId',
+        element: (
+          <LazyRoute>
+            <Security />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'channels/:channelId',
+        element: (
+          <LazyRoute>
+            <Channels />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'browser',
+        element: (
+          <LazyRoute>
+            <Browser />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'voice',
+        element: (
+          <LazyRoute>
+            <Voice />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'devices',
+        element: (
+          <LazyRoute>
+            <Devices />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'devices/:deviceId',
+        element: (
+          <LazyRoute>
+            <Devices />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'nodes',
+        element: (
+          <LazyRoute>
+            <Nodes />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'nodes/:nodeId',
+        element: (
+          <LazyRoute>
+            <Nodes />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'sessions',
+        element: (
+          <LazyRoute>
+            <Sessions />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'sessions/:sessionId',
+        element: (
+          <LazyRoute>
+            <Sessions />
+          </LazyRoute>
+        ),
+      },
     ],
   },
 ]);
@@ -150,6 +265,11 @@ export const ROUTES = {
   SETTINGS_PRIVACY: '/settings/privacy',
   SETTINGS_PSYCHOLOGY: '/settings/psychology',
   SETTINGS_SECRETS: '/settings/secrets',
+  SETTINGS_HOOKS: '/settings/hooks',
+  SETTINGS_ADVANCED: '/settings/advanced',
+  SETTINGS_SHORTCUTS: '/settings/shortcuts',
+  SETTINGS_AUTH_PROFILES: '/settings/auth-profiles',
+  SETTINGS_FAILOVER: '/settings/failover',
   PSYCHOLOGY: '/psychology',
   PSYCHOLOGY_LAYER: (layer: string) => `/psychology/${layer}`,
   MEMORY: '/memory',
@@ -161,4 +281,18 @@ export const ROUTES = {
   TEAMS: '/teams',
   // Phase 2: Orchestrator
   ORCHESTRATOR: '/orchestrator',
+  // Phase A-J: Full Power routes
+  AGENTS: '/agents',
+  AGENT_DETAIL: (id: string) => `/agents/${id}`,
+  SECURITY: '/security',
+  SECURITY_APPROVAL: (id: string) => `/security/${id}`,
+  CHANNELS_DETAIL: (id: string) => `/channels/${id}`,
+  BROWSER: '/browser',
+  VOICE: '/voice',
+  DEVICES: '/devices',
+  DEVICE_DETAIL: (id: string) => `/devices/${id}`,
+  NODES: '/nodes',
+  NODE_DETAIL: (id: string) => `/nodes/${id}`,
+  SESSIONS: '/sessions',
+  SESSION_DETAIL: (id: string) => `/sessions/${id}`,
 } as const;

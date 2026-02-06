@@ -21,7 +21,7 @@ import { ErrorBoundary } from '../common';
 import { useGateway } from '../../hooks/useGateway';
 import { SupabaseLoginStep } from '../auth/SupabaseLoginStep';
 import { TierDetectionStep, type SubscriptionTier } from '../auth/TierDetectionStep';
-import { InstanceRegistrationStep, type InstanceRegistrationData } from '../auth/InstanceRegistrationStep';
+import { DeviceRegistrationStep, type DeviceRegistrationData } from '../auth/DeviceRegistrationStep';
 import './Onboarding.css';
 
 const STORAGE_KEY = 'helix-onboarding-progress';
@@ -45,7 +45,7 @@ export interface OnboardingState {
   supabaseUserId?: string;
   supabaseEmail?: string;
   subscriptionTier?: SubscriptionTier;
-  instanceData?: InstanceRegistrationData;
+  deviceData?: DeviceRegistrationData;
 
   // Tier-based path
   tierPath?: 'free-byok' | 'paid-centralized' | 'paid-optional-byok';
@@ -91,7 +91,7 @@ export interface OnboardingState {
 type StepId =
   | 'supabase-login'
   | 'tier-detection'
-  | 'instance-registration'
+  | 'device-registration'
   | 'welcome'
   | 'mode'
   | 'provider'
@@ -108,7 +108,7 @@ type StepId =
 const UNIFIED_AUTH_STEPS: StepId[] = [
   'supabase-login',
   'tier-detection',
-  'instance-registration',
+  'device-registration',
 ];
 
 // Quick Start flow (after unified auth)
@@ -324,9 +324,9 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     [updateState, goNext]
   );
 
-  const handleInstanceRegistration = useCallback(
-    (data: InstanceRegistrationData) => {
-      updateState({ instanceData: data });
+  const handleDeviceRegistration = useCallback(
+    (data: DeviceRegistrationData) => {
+      updateState({ deviceData: data });
       goNext();
     },
     [updateState, goNext]
@@ -499,16 +499,16 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           />
         );
 
-      case 'instance-registration':
+      case 'device-registration':
         if (!state.supabaseUserId) {
           // Should not happen - go back to login
           goBack();
           return null;
         }
         return (
-          <InstanceRegistrationStep
+          <DeviceRegistrationStep
             userId={state.supabaseUserId}
-            onRegistrationComplete={handleInstanceRegistration}
+            onRegistrationComplete={handleDeviceRegistration}
             onSkip={goNext}
             onError={(error) => setStepError(new Error(error))}
           />

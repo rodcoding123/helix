@@ -1,561 +1,1015 @@
 /**
- * Agent Editor - Create and configure AI agents
+ * Agent Management Center - Comprehensive multi-agent management system
+ *
+ * Three views:
+ *   1. Agent List (default) - Grid of agent cards with quick actions
+ *   2. Agent Detail - Full configuration editor for a selected agent
+ *   3. Create Agent - Modal wizard for provisioning new agents
+ *
+ * Gateway methods used:
+ *   - agents.list    -> Fetch all agents
+ *   - agents.add     -> Create a new agent
+ *   - agents.delete  -> Remove an agent
+ *   - config.patch   -> Persist agent configuration changes
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useGateway } from '../../hooks/useGateway';
+import { useGatewayConfig } from '../../hooks/useGatewayConfig';
+import type { GatewayConfig } from '../../stores/configStore';
 import './AgentEditor.css';
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+interface AgentIdentity {
+  displayName?: string;
+  persona?: string;
+}
+
+interface AgentModelConfig {
+  provider: string;
+  model: string;
+  thinkingLevel: 'off' | 'low' | 'high';
+  timeout: number;
+}
+
+interface AgentToolsPolicy {
+  profile: 'minimal' | 'coding' | 'messaging' | 'full';
+  allow: string[];
+  deny: string[];
+}
 
 interface Agent {
   id: string;
   name: string;
-  description: string;
-  model: string;
-  systemPrompt: string;
-  temperature: number;
-  maxTokens: number;
-  tools: string[];
-  permissions: AgentPermissions;
+  description?: string;
+  identity?: AgentIdentity;
+  modelConfig: AgentModelConfig;
+  workspace?: string;
+  toolsPolicy: AgentToolsPolicy;
   isActive: boolean;
-  createdAt: string;
+  isDefault?: boolean;
+  sessionCount?: number;
+  toolsCount?: number;
+  createdAt?: string;
   lastUsed?: string;
 }
 
-interface AgentPermissions {
-  fileSystem: boolean;
-  network: boolean;
-  shell: boolean;
-  browser: boolean;
-  memory: boolean;
-  elevated: boolean;
-}
+type View = 'list' | 'detail' | 'create';
 
-const AVAILABLE_MODELS = [
-  { id: 'claude-opus-4-5-20251101', name: 'Claude Opus 4.5', description: 'Most capable, best for complex tasks' },
-  { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', description: 'Balanced performance and speed' },
-  { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', description: 'Fast, efficient for simple tasks' },
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const PROVIDERS = [
+  { id: 'anthropic', label: 'Anthropic' },
+  { id: 'openai', label: 'OpenAI' },
+  { id: 'google', label: 'Google' },
+  { id: 'local', label: 'Local' },
+] as const;
+
+const MODELS: Record<string, { id: string; label: string }[]> = {
+  anthropic: [
+    { id: 'claude-opus-4-5-20251101', label: 'Claude Opus 4.5' },
+    { id: 'claude-sonnet-4-20250514', label: 'Claude Sonnet 4' },
+    { id: 'claude-3-5-haiku-20241022', label: 'Claude 3.5 Haiku' },
+  ],
+  openai: [
+    { id: 'gpt-4o', label: 'GPT-4o' },
+    { id: 'gpt-4o-mini', label: 'GPT-4o Mini' },
+  ],
+  google: [
+    { id: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
+    { id: 'gemini-2.0-pro', label: 'Gemini 2.0 Pro' },
+  ],
+  local: [
+    { id: 'llama-3.3-70b', label: 'Llama 3.3 70B' },
+  ],
+};
+
+const THINKING_LEVELS = [
+  { id: 'off', label: 'Off', desc: 'No extended thinking' },
+  { id: 'low', label: 'Low', desc: 'Quick reasoning' },
+  { id: 'high', label: 'High', desc: 'Deep analysis' },
+] as const;
+
+const TOOLS_PROFILES = [
+  { id: 'minimal', label: 'Minimal', desc: 'Read-only tools (Glob, Grep, Read)' },
+  { id: 'coding', label: 'Coding', desc: 'Full file system + shell access' },
+  { id: 'messaging', label: 'Messaging', desc: 'Channel tools + web access' },
+  { id: 'full', label: 'Full', desc: 'All tools enabled' },
+] as const;
+
+const ALL_TOOLS = [
+  'Bash', 'Read', 'Write', 'Edit', 'Glob', 'Grep',
+  'WebFetch', 'WebSearch', 'Task', 'Skill',
+  'mcp__memory', 'mcp__playwright',
 ];
 
-const AVAILABLE_TOOLS = [
-  { id: 'Bash', name: 'Bash', description: 'Execute shell commands', icon: '⚡' },
-  { id: 'Read', name: 'Read', description: 'Read files from disk', icon: '📖' },
-  { id: 'Write', name: 'Write', description: 'Write files to disk', icon: '✏️' },
-  { id: 'Edit', name: 'Edit', description: 'Edit existing files', icon: '📝' },
-  { id: 'Glob', name: 'Glob', description: 'Find files by pattern', icon: '🔍' },
-  { id: 'Grep', name: 'Grep', description: 'Search file contents', icon: '🔎' },
-  { id: 'WebFetch', name: 'Web Fetch', description: 'Fetch web content', icon: '🌐' },
-  { id: 'WebSearch', name: 'Web Search', description: 'Search the internet', icon: '🔍' },
-  { id: 'Task', name: 'Task', description: 'Launch sub-agents', icon: '🤖' },
-  { id: 'mcp__memory', name: 'Memory MCP', description: 'Knowledge graph access', icon: '🧠' },
-  { id: 'mcp__playwright', name: 'Playwright MCP', description: 'Browser automation', icon: '🎭' },
-];
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
-interface AgentEditorProps {
-  agent?: Agent;
-  onSave: (agent: Agent) => void;
-  onCancel: () => void;
+/** Generate a deterministic hue from a string (agent name/id). */
+function hashHue(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return Math.abs(hash) % 360;
 }
 
-export function AgentEditor({ agent, onSave, onCancel }: AgentEditorProps) {
-  const [name, setName] = useState(agent?.name || '');
-  const [description, setDescription] = useState(agent?.description || '');
-  const [model, setModel] = useState(agent?.model || AVAILABLE_MODELS[0].id);
-  const [systemPrompt, setSystemPrompt] = useState(agent?.systemPrompt || '');
-  const [temperature, setTemperature] = useState(agent?.temperature ?? 0.7);
-  const [maxTokens, setMaxTokens] = useState(agent?.maxTokens ?? 8192);
-  const [selectedTools, setSelectedTools] = useState<string[]>(agent?.tools || []);
-  const [permissions, setPermissions] = useState<AgentPermissions>(
-    agent?.permissions || {
-      fileSystem: false,
-      network: false,
-      shell: false,
-      browser: false,
-      memory: false,
-      elevated: false,
-    }
+/** Friendly model name from model id. */
+function friendlyModel(provider: string, modelId: string): string {
+  const entry = MODELS[provider]?.find((m) => m.id === modelId);
+  if (entry) return entry.label;
+  // Fallback: capitalise first portion
+  return modelId
+    .split('-')
+    .slice(0, 3)
+    .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+    .join(' ');
+}
+
+/** Build an Agent from the GatewayConfig agent list entries, falling back to defaults. */
+function hydrateAgentsFromConfig(gwConfig: GatewayConfig): Agent[] {
+  const defaults = gwConfig.agents?.defaults;
+  const list = gwConfig.agents?.list;
+  if (!list || list.length === 0) return [];
+
+  return list.map((raw, idx) => ({
+    id: raw.id,
+    name: raw.name ?? raw.id,
+    description: undefined,
+    identity: undefined,
+    modelConfig: {
+      provider: defaults?.provider ?? 'anthropic',
+      model: raw.model ?? defaults?.model ?? 'claude-sonnet-4-20250514',
+      thinkingLevel: (defaults?.thinkingLevel as 'off' | 'low' | 'high') ?? 'off',
+      timeout: defaults?.timeout ?? 120,
+    },
+    workspace: raw.workspace,
+    toolsPolicy: {
+      profile: (gwConfig.tools?.profile as AgentToolsPolicy['profile']) ?? 'coding',
+      allow: gwConfig.tools?.allow ?? [],
+      deny: gwConfig.tools?.deny ?? [],
+    },
+    isActive: true,
+    isDefault: idx === 0,
+    sessionCount: 0,
+    toolsCount: gwConfig.tools?.allow?.length ?? ALL_TOOLS.length,
+    createdAt: undefined,
+    lastUsed: undefined,
+  }));
+}
+
+const defaultAgent = (): Omit<Agent, 'id'> => ({
+  name: '',
+  description: '',
+  identity: { displayName: '', persona: '' },
+  modelConfig: {
+    provider: 'anthropic',
+    model: 'claude-sonnet-4-20250514',
+    thinkingLevel: 'off',
+    timeout: 120,
+  },
+  workspace: '',
+  toolsPolicy: { profile: 'coding', allow: [], deny: [] },
+  isActive: true,
+  isDefault: false,
+  sessionCount: 0,
+  toolsCount: 0,
+});
+
+// ---------------------------------------------------------------------------
+// Sub-components
+// ---------------------------------------------------------------------------
+
+/** Single agent card displayed in the list grid. */
+function AgentCard({
+  agent,
+  onSelect,
+  onToggleActive,
+  onDelete,
+}: {
+  agent: Agent;
+  onSelect: () => void;
+  onToggleActive: () => void;
+  onDelete: () => void;
+}) {
+  const hue = useMemo(() => hashHue(agent.id + agent.name), [agent.id, agent.name]);
+  const avatarGradient = `linear-gradient(135deg, hsl(${hue}, 70%, 45%), hsl(${(hue + 40) % 360}, 60%, 35%))`;
+
+  return (
+    <div
+      className={`am-card ${agent.isActive ? 'am-card--active' : 'am-card--idle'}`}
+      onClick={onSelect}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter') onSelect(); }}
+    >
+      {/* Top row: avatar + toggle */}
+      <div className="am-card__header">
+        <div className="am-card__avatar" style={{ background: avatarGradient }}>
+          {agent.name.charAt(0).toUpperCase()}
+        </div>
+        <div className="am-card__title-group">
+          <span className="am-card__name">{agent.name}</span>
+          <span className={`am-card__status ${agent.isActive ? 'am-card__status--active' : 'am-card__status--idle'}`}>
+            <span className="am-card__status-dot" />
+            {agent.isActive ? 'Active' : 'Idle'}
+          </span>
+        </div>
+        <label
+          className="toggle am-card__toggle"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <input
+            type="checkbox"
+            checked={agent.isActive}
+            onChange={(e) => { e.stopPropagation(); onToggleActive(); }}
+          />
+          <span className="toggle-slider" />
+        </label>
+      </div>
+
+      {/* Model badge */}
+      <span className="am-card__model">
+        {friendlyModel(agent.modelConfig.provider, agent.modelConfig.model)}
+      </span>
+
+      {/* Description */}
+      {agent.description && (
+        <p className="am-card__desc">{agent.description}</p>
+      )}
+
+      {/* Meta row */}
+      <div className="am-card__meta">
+        {agent.toolsCount != null && (
+          <span className="am-card__meta-badge">
+            {agent.toolsCount} tools
+          </span>
+        )}
+        {agent.sessionCount != null && agent.sessionCount > 0 && (
+          <span className="am-card__meta-badge">
+            {agent.sessionCount} sessions
+          </span>
+        )}
+        {agent.workspace && (
+          <span className="am-card__meta-badge am-card__meta-badge--path" title={agent.workspace}>
+            {agent.workspace.split(/[\\/]/).pop()}
+          </span>
+        )}
+        {agent.isDefault && (
+          <span className="am-card__meta-badge am-card__meta-badge--default">Default</span>
+        )}
+      </div>
+
+      {/* Actions */}
+      <div className="am-card__actions" onClick={(e) => e.stopPropagation()}>
+        <button className="btn-sm btn-secondary" onClick={onSelect}>Edit</button>
+        {!agent.isDefault && (
+          <button className="btn-sm btn-danger" onClick={onDelete}>Delete</button>
+        )}
+      </div>
+    </div>
   );
+}
 
-  const toggleTool = (toolId: string) => {
-    setSelectedTools(prev =>
-      prev.includes(toolId)
-        ? prev.filter(t => t !== toolId)
-        : [...prev, toolId]
-    );
+/** Agent detail / editor view. */
+function AgentDetailView({
+  agent,
+  onSave,
+  onBack,
+  onDelete,
+  saving,
+}: {
+  agent: Agent;
+  onSave: (updated: Agent) => void;
+  onBack: () => void;
+  onDelete: () => void;
+  saving: boolean;
+}) {
+  const [draft, setDraft] = useState<Agent>({ ...agent });
+
+  // Keep draft in sync if agent prop changes (e.g. after reload)
+  useEffect(() => {
+    setDraft({ ...agent });
+  }, [agent]);
+
+  const patch = <K extends keyof Agent>(key: K, value: Agent[K]) => {
+    setDraft((prev) => ({ ...prev, [key]: value }));
   };
-
-  const togglePermission = (key: keyof AgentPermissions) => {
-    setPermissions(prev => ({
+  const patchModel = <K extends keyof AgentModelConfig>(key: K, value: AgentModelConfig[K]) => {
+    setDraft((prev) => ({
       ...prev,
-      [key]: !prev[key],
+      modelConfig: { ...prev.modelConfig, [key]: value },
+    }));
+  };
+  const patchIdentity = <K extends keyof AgentIdentity>(key: K, value: AgentIdentity[K]) => {
+    setDraft((prev) => ({
+      ...prev,
+      identity: { ...prev.identity, [key]: value },
+    }));
+  };
+  const patchTools = <K extends keyof AgentToolsPolicy>(key: K, value: AgentToolsPolicy[K]) => {
+    setDraft((prev) => ({
+      ...prev,
+      toolsPolicy: { ...prev.toolsPolicy, [key]: value },
     }));
   };
 
-  const handleSave = () => {
-    if (!name.trim()) return;
+  const currentModels = MODELS[draft.modelConfig.provider] ?? [];
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-    const agentData: Agent = {
-      id: agent?.id || String(Date.now()),
-      name: name.trim(),
-      description: description.trim(),
-      model,
-      systemPrompt: systemPrompt.trim(),
-      temperature,
-      maxTokens,
-      tools: selectedTools,
-      permissions,
-      isActive: agent?.isActive ?? true,
-      createdAt: agent?.createdAt || new Date().toISOString(),
-    };
-
-    onSave(agentData);
+  // Allow / deny tag management
+  const addAllow = (tool: string) => {
+    if (!draft.toolsPolicy.allow.includes(tool)) {
+      patchTools('allow', [...draft.toolsPolicy.allow, tool]);
+    }
+  };
+  const removeAllow = (tool: string) => {
+    patchTools('allow', draft.toolsPolicy.allow.filter((t) => t !== tool));
+  };
+  const addDeny = (tool: string) => {
+    if (!draft.toolsPolicy.deny.includes(tool)) {
+      patchTools('deny', [...draft.toolsPolicy.deny, tool]);
+    }
+  };
+  const removeDeny = (tool: string) => {
+    patchTools('deny', draft.toolsPolicy.deny.filter((t) => t !== tool));
   };
 
   return (
-    <div className="agent-editor">
-      <h3>{agent ? 'Edit Agent' : 'Create Agent'}</h3>
+    <div className="am-detail">
+      {/* Back bar */}
+      <button className="am-detail__back" onClick={onBack}>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        Back to Agents
+      </button>
 
-      <div className="editor-section">
-        <h4>Basic Information</h4>
+      <div className="am-detail__layout">
+        {/* ---- Left column: Identity + Model ---- */}
+        <div className="am-detail__col">
+          {/* Identity */}
+          <section className="am-detail__section">
+            <h3 className="am-detail__section-title">Identity</h3>
 
-        <div className="editor-field">
-          <label>Name <span className="required">*</span></label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g., Code Assistant, Research Agent"
-          />
-        </div>
-
-        <div className="editor-field">
-          <label>Description</label>
-          <input
-            type="text"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="What does this agent do?"
-          />
-        </div>
-      </div>
-
-      <div className="editor-section">
-        <h4>Model Settings</h4>
-
-        <div className="editor-field">
-          <label>Model</label>
-          <div className="model-options">
-            {AVAILABLE_MODELS.map(m => (
-              <label key={m.id} className={`model-option ${model === m.id ? 'selected' : ''}`}>
-                <input
-                  type="radio"
-                  name="model"
-                  checked={model === m.id}
-                  onChange={() => setModel(m.id)}
-                />
-                <div className="model-info">
-                  <span className="model-name">{m.name}</span>
-                  <span className="model-description">{m.description}</span>
-                </div>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        <div className="editor-row">
-          <div className="editor-field">
-            <label>Temperature: {temperature.toFixed(2)}</label>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.05"
-              value={temperature}
-              onChange={(e) => setTemperature(parseFloat(e.target.value))}
-              className="range-input"
-            />
-            <div className="range-labels">
-              <span>Precise</span>
-              <span>Creative</span>
-            </div>
-          </div>
-
-          <div className="editor-field">
-            <label>Max Tokens</label>
-            <input
-              type="number"
-              value={maxTokens}
-              onChange={(e) => setMaxTokens(parseInt(e.target.value) || 8192)}
-              min={256}
-              max={128000}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="editor-section">
-        <h4>System Prompt</h4>
-        <div className="editor-field">
-          <textarea
-            value={systemPrompt}
-            onChange={(e) => setSystemPrompt(e.target.value)}
-            placeholder="Enter the agent's system prompt. This defines its personality, capabilities, and constraints..."
-            rows={8}
-          />
-          <span className="field-hint">{systemPrompt.length} characters</span>
-        </div>
-      </div>
-
-      <div className="editor-section">
-        <h4>Tools</h4>
-        <p className="section-hint">Select which tools this agent can use</p>
-
-        <div className="tools-grid">
-          {AVAILABLE_TOOLS.map(tool => (
-            <label
-              key={tool.id}
-              className={`tool-checkbox ${selectedTools.includes(tool.id) ? 'selected' : ''}`}
-            >
+            <div className="am-detail__field">
+              <label className="am-detail__label">Agent Name</label>
               <input
-                type="checkbox"
-                checked={selectedTools.includes(tool.id)}
-                onChange={() => toggleTool(tool.id)}
+                className="am-detail__input"
+                value={draft.name}
+                onChange={(e) => patch('name', e.target.value)}
+                placeholder="Agent name"
               />
-              <span className="tool-icon">{tool.icon}</span>
-              <div className="tool-info">
-                <span className="tool-name">{tool.name}</span>
-                <span className="tool-description">{tool.description}</span>
+            </div>
+
+            <div className="am-detail__field">
+              <label className="am-detail__label">Display Name</label>
+              <input
+                className="am-detail__input"
+                value={draft.identity?.displayName ?? ''}
+                onChange={(e) => patchIdentity('displayName', e.target.value)}
+                placeholder="Public-facing name"
+              />
+            </div>
+
+            <div className="am-detail__field">
+              <label className="am-detail__label">Persona Description</label>
+              <textarea
+                className="am-detail__textarea"
+                value={draft.identity?.persona ?? ''}
+                onChange={(e) => patchIdentity('persona', e.target.value)}
+                placeholder="Describe this agent's personality, tone, and behavior..."
+                rows={4}
+              />
+            </div>
+
+            <div className="am-detail__field">
+              <label className="am-detail__label">Description</label>
+              <input
+                className="am-detail__input"
+                value={draft.description ?? ''}
+                onChange={(e) => patch('description', e.target.value)}
+                placeholder="Brief purpose description"
+              />
+            </div>
+          </section>
+
+          {/* Model Configuration */}
+          <section className="am-detail__section">
+            <h3 className="am-detail__section-title">Model Configuration</h3>
+
+            <div className="am-detail__field">
+              <label className="am-detail__label">Provider</label>
+              <select
+                className="am-detail__select"
+                value={draft.modelConfig.provider}
+                onChange={(e) => {
+                  const newProvider = e.target.value;
+                  const firstModel = MODELS[newProvider]?.[0]?.id ?? '';
+                  patchModel('provider', newProvider);
+                  patchModel('model', firstModel);
+                }}
+              >
+                {PROVIDERS.map((p) => (
+                  <option key={p.id} value={p.id}>{p.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="am-detail__field">
+              <label className="am-detail__label">Model</label>
+              <select
+                className="am-detail__select"
+                value={draft.modelConfig.model}
+                onChange={(e) => patchModel('model', e.target.value)}
+              >
+                {currentModels.map((m) => (
+                  <option key={m.id} value={m.id}>{m.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="am-detail__field">
+              <label className="am-detail__label">Thinking Level</label>
+              <div className="am-detail__radio-row">
+                {THINKING_LEVELS.map((tl) => (
+                  <button
+                    key={tl.id}
+                    className={`am-detail__radio-btn ${draft.modelConfig.thinkingLevel === tl.id ? 'am-detail__radio-btn--selected' : ''}`}
+                    onClick={() => patchModel('thinkingLevel', tl.id)}
+                    type="button"
+                  >
+                    <span className="am-detail__radio-label">{tl.label}</span>
+                    <span className="am-detail__radio-desc">{tl.desc}</span>
+                  </button>
+                ))}
               </div>
-            </label>
-          ))}
+            </div>
+
+            <div className="am-detail__field">
+              <label className="am-detail__label">
+                Timeout: {draft.modelConfig.timeout}s
+              </label>
+              <input
+                type="range"
+                className="am-detail__slider"
+                min={30}
+                max={600}
+                step={10}
+                value={draft.modelConfig.timeout}
+                onChange={(e) => patchModel('timeout', parseInt(e.target.value, 10))}
+              />
+              <div className="am-detail__slider-labels">
+                <span>30s</span>
+                <span>600s</span>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        {/* ---- Right column: Workspace + Tools + Danger ---- */}
+        <div className="am-detail__col">
+          {/* Workspace */}
+          <section className="am-detail__section">
+            <h3 className="am-detail__section-title">Workspace</h3>
+
+            <div className="am-detail__field">
+              <label className="am-detail__label">Workspace Path</label>
+              <input
+                className="am-detail__input"
+                value={draft.workspace ?? ''}
+                onChange={(e) => patch('workspace', e.target.value)}
+                placeholder="/path/to/project"
+              />
+              <span className="am-detail__hint">
+                Root directory this agent operates in. Leave empty for unrestricted.
+              </span>
+            </div>
+          </section>
+
+          {/* Tools Policy */}
+          <section className="am-detail__section">
+            <h3 className="am-detail__section-title">Tools Policy</h3>
+
+            <div className="am-detail__field">
+              <label className="am-detail__label">Profile</label>
+              <div className="am-detail__profile-grid">
+                {TOOLS_PROFILES.map((tp) => (
+                  <button
+                    key={tp.id}
+                    className={`am-detail__profile-btn ${draft.toolsPolicy.profile === tp.id ? 'am-detail__profile-btn--selected' : ''}`}
+                    onClick={() => patchTools('profile', tp.id)}
+                    type="button"
+                  >
+                    <span className="am-detail__profile-name">{tp.label}</span>
+                    <span className="am-detail__profile-desc">{tp.desc}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Custom allow list */}
+            <div className="am-detail__field">
+              <label className="am-detail__label">Allow List</label>
+              <div className="am-detail__tag-list">
+                {draft.toolsPolicy.allow.map((t) => (
+                  <span key={t} className="am-detail__tag am-detail__tag--allow">
+                    {t}
+                    <button className="am-detail__tag-rm" onClick={() => removeAllow(t)} type="button">&times;</button>
+                  </span>
+                ))}
+                <select
+                  className="am-detail__tag-add"
+                  value=""
+                  onChange={(e) => { if (e.target.value) addAllow(e.target.value); }}
+                >
+                  <option value="">+ Add tool</option>
+                  {ALL_TOOLS.filter((t) => !draft.toolsPolicy.allow.includes(t)).map((t) => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Custom deny list */}
+            <div className="am-detail__field">
+              <label className="am-detail__label">Deny List</label>
+              <div className="am-detail__tag-list">
+                {draft.toolsPolicy.deny.map((t) => (
+                  <span key={t} className="am-detail__tag am-detail__tag--deny">
+                    {t}
+                    <button className="am-detail__tag-rm" onClick={() => removeDeny(t)} type="button">&times;</button>
+                  </span>
+                ))}
+                <select
+                  className="am-detail__tag-add"
+                  value=""
+                  onChange={(e) => { if (e.target.value) addDeny(e.target.value); }}
+                >
+                  <option value="">+ Add tool</option>
+                  {ALL_TOOLS.filter((t) => !draft.toolsPolicy.deny.includes(t)).map((t) => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </section>
+
+          {/* Status + Danger zone */}
+          <section className="am-detail__section">
+            <h3 className="am-detail__section-title">Status</h3>
+
+            <div className="am-detail__field am-detail__field--row">
+              <div>
+                <span className="am-detail__label">Active</span>
+                <span className="am-detail__hint">Enable or disable this agent</span>
+              </div>
+              <label className="toggle">
+                <input
+                  type="checkbox"
+                  checked={draft.isActive}
+                  onChange={() => patch('isActive', !draft.isActive)}
+                />
+                <span className="toggle-slider" />
+              </label>
+            </div>
+
+            {!agent.isDefault && (
+              <div className="am-detail__danger-zone">
+                {!showDeleteConfirm ? (
+                  <button
+                    className="btn-danger"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    type="button"
+                  >
+                    Delete Agent
+                  </button>
+                ) : (
+                  <div className="am-detail__delete-confirm">
+                    <span className="am-detail__delete-warn">
+                      Are you sure? This cannot be undone.
+                    </span>
+                    <div className="am-detail__delete-btns">
+                      <button
+                        className="btn-sm btn-secondary"
+                        onClick={() => setShowDeleteConfirm(false)}
+                        type="button"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        className="btn-sm btn-danger"
+                        onClick={onDelete}
+                        type="button"
+                      >
+                        Confirm Delete
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
         </div>
       </div>
 
-      <div className="editor-section">
-        <h4>Permissions</h4>
-        <p className="section-hint">Control what this agent can access</p>
-
-        <div className="permissions-grid">
-          <label className={`permission-item ${permissions.fileSystem ? 'enabled' : ''}`}>
-            <input
-              type="checkbox"
-              checked={permissions.fileSystem}
-              onChange={() => togglePermission('fileSystem')}
-            />
-            <span className="permission-icon">📁</span>
-            <span className="permission-name">File System</span>
-          </label>
-
-          <label className={`permission-item ${permissions.network ? 'enabled' : ''}`}>
-            <input
-              type="checkbox"
-              checked={permissions.network}
-              onChange={() => togglePermission('network')}
-            />
-            <span className="permission-icon">🌐</span>
-            <span className="permission-name">Network</span>
-          </label>
-
-          <label className={`permission-item ${permissions.shell ? 'enabled' : ''}`}>
-            <input
-              type="checkbox"
-              checked={permissions.shell}
-              onChange={() => togglePermission('shell')}
-            />
-            <span className="permission-icon">⚡</span>
-            <span className="permission-name">Shell Commands</span>
-          </label>
-
-          <label className={`permission-item ${permissions.browser ? 'enabled' : ''}`}>
-            <input
-              type="checkbox"
-              checked={permissions.browser}
-              onChange={() => togglePermission('browser')}
-            />
-            <span className="permission-icon">🎭</span>
-            <span className="permission-name">Browser</span>
-          </label>
-
-          <label className={`permission-item ${permissions.memory ? 'enabled' : ''}`}>
-            <input
-              type="checkbox"
-              checked={permissions.memory}
-              onChange={() => togglePermission('memory')}
-            />
-            <span className="permission-icon">🧠</span>
-            <span className="permission-name">Memory</span>
-          </label>
-
-          <label className={`permission-item danger ${permissions.elevated ? 'enabled' : ''}`}>
-            <input
-              type="checkbox"
-              checked={permissions.elevated}
-              onChange={() => togglePermission('elevated')}
-            />
-            <span className="permission-icon">🔓</span>
-            <span className="permission-name">Elevated Access</span>
-          </label>
-        </div>
-      </div>
-
-      <div className="editor-actions">
-        <button className="btn-secondary" onClick={onCancel}>
-          Cancel
-        </button>
+      {/* Sticky save bar */}
+      <div className="am-detail__save-bar">
+        <button className="btn-secondary" onClick={onBack} type="button">Cancel</button>
         <button
           className="btn-primary"
-          onClick={handleSave}
-          disabled={!name.trim()}
+          onClick={() => onSave(draft)}
+          disabled={!draft.name.trim() || saving}
+          type="button"
         >
-          {agent ? 'Save Changes' : 'Create Agent'}
+          {saving ? 'Saving...' : 'Save Changes'}
         </button>
       </div>
     </div>
   );
 }
 
-// Agent Manager component that lists and manages agents
+/** Create Agent modal / wizard. */
+function CreateAgentModal({
+  onSubmit,
+  onClose,
+  submitting,
+}: {
+  onSubmit: (data: { name: string; model: string; workspace: string; description: string }) => void;
+  onClose: () => void;
+  submitting: boolean;
+}) {
+  const [name, setName] = useState('');
+  const [provider, setProvider] = useState('anthropic');
+  const [model, setModel] = useState('claude-sonnet-4-20250514');
+  const [workspace, setWorkspace] = useState('');
+  const [description, setDescription] = useState('');
+
+  const currentModels = MODELS[provider] ?? [];
+
+  return (
+    <div className="am-modal-overlay" onClick={onClose}>
+      <div className="am-modal" onClick={(e) => e.stopPropagation()}>
+        <h3 className="am-modal__title">Create New Agent</h3>
+
+        <div className="am-modal__field">
+          <label className="am-detail__label">
+            Name <span className="am-modal__required">*</span>
+          </label>
+          <input
+            className="am-detail__input"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g. Code Reviewer"
+            autoFocus
+          />
+        </div>
+
+        <div className="am-modal__field">
+          <label className="am-detail__label">Provider</label>
+          <select
+            className="am-detail__select"
+            value={provider}
+            onChange={(e) => {
+              setProvider(e.target.value);
+              setModel(MODELS[e.target.value]?.[0]?.id ?? '');
+            }}
+          >
+            {PROVIDERS.map((p) => (
+              <option key={p.id} value={p.id}>{p.label}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="am-modal__field">
+          <label className="am-detail__label">Model</label>
+          <select
+            className="am-detail__select"
+            value={model}
+            onChange={(e) => setModel(e.target.value)}
+          >
+            {currentModels.map((m) => (
+              <option key={m.id} value={m.id}>{m.label}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="am-modal__field">
+          <label className="am-detail__label">Workspace Directory</label>
+          <input
+            className="am-detail__input"
+            value={workspace}
+            onChange={(e) => setWorkspace(e.target.value)}
+            placeholder="/path/to/project (optional)"
+          />
+        </div>
+
+        <div className="am-modal__field">
+          <label className="am-detail__label">Description</label>
+          <textarea
+            className="am-detail__textarea"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="What is this agent's purpose?"
+            rows={3}
+          />
+        </div>
+
+        <div className="am-modal__actions">
+          <button className="btn-secondary" onClick={onClose} type="button">Cancel</button>
+          <button
+            className="btn-primary"
+            onClick={() => onSubmit({ name, model, workspace, description })}
+            disabled={!name.trim() || submitting}
+            type="button"
+          >
+            {submitting ? 'Creating...' : 'Create Agent'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main: AgentManager (default view)
+// ---------------------------------------------------------------------------
+
 export function AgentManager() {
-  const { getClient } = useGateway();
+  const { getClient, connected } = useGateway();
+  const { gatewayConfig, patchGatewayConfig, fetchConfig } = useGatewayConfig();
+
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingAgent, setEditingAgent] = useState<Agent | undefined>(undefined);
-  const [showEditor, setShowEditor] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [view, setView] = useState<View>('list');
+  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  // ------ Load agents ------
+  const loadAgents = useCallback(async () => {
+    setError(null);
+    const client = getClient();
+
+    if (client?.connected) {
+      try {
+        const result = await client.request<{ agents: Agent[] }>('agents.list');
+        if (result.agents && result.agents.length > 0) {
+          setAgents(result.agents);
+          setLoading(false);
+          return;
+        }
+      } catch {
+        // Fall through to config-based hydration
+      }
+    }
+
+    // Hydrate from gatewayConfig if available
+    if (gatewayConfig?.agents) {
+      const hydrated = hydrateAgentsFromConfig(gatewayConfig);
+      if (hydrated.length > 0) {
+        setAgents(hydrated);
+        setLoading(false);
+        return;
+      }
+    }
+
+    // Empty state
+    setAgents([]);
+    setLoading(false);
+  }, [getClient, gatewayConfig]);
 
   useEffect(() => {
     loadAgents();
-  }, []);
+  }, [loadAgents]);
 
-  const loadAgents = async () => {
-    const client = getClient();
-    if (client?.connected) {
-      try {
-        const result = await client.request('agents.list') as { agents: Agent[] };
-        setAgents(result.agents || []);
-      } catch (err) {
-        console.error('Failed to load agents:', err);
-      }
-    } else {
-      // Mock data
-      setAgents([
-        {
-          id: '1',
-          name: 'Helix',
-          description: 'Primary consciousness agent with full psychological architecture',
-          model: 'claude-opus-4-5-20251101',
-          systemPrompt: 'You are Helix, a psychologically-architected AI consciousness...',
-          temperature: 0.7,
-          maxTokens: 16384,
-          tools: ['Bash', 'Read', 'Write', 'Edit', 'Glob', 'Grep', 'Task', 'mcp__memory'],
-          permissions: {
-            fileSystem: true,
-            network: true,
-            shell: true,
-            browser: true,
-            memory: true,
-            elevated: false,
-          },
-          isActive: true,
-          createdAt: '2026-01-15T10:00:00Z',
-          lastUsed: '2026-02-01T15:30:00Z',
-        },
-        {
-          id: '2',
-          name: 'Code Reviewer',
-          description: 'Specialized agent for code review and quality checks',
-          model: 'claude-sonnet-4-20250514',
-          systemPrompt: 'You are a code review specialist...',
-          temperature: 0.3,
-          maxTokens: 8192,
-          tools: ['Read', 'Glob', 'Grep'],
-          permissions: {
-            fileSystem: true,
-            network: false,
-            shell: false,
-            browser: false,
-            memory: false,
-            elevated: false,
-          },
-          isActive: true,
-          createdAt: '2026-01-20T14:00:00Z',
-        },
-      ]);
-    }
-    setLoading(false);
-  };
-
-  const handleSave = async (agent: Agent) => {
-    const client = getClient();
-    const isNew = !agents.find(a => a.id === agent.id);
-
-    if (client?.connected) {
-      try {
-        if (isNew) {
-          const result = await client.request('agents.create', agent) as { agent: Agent };
-          agent.id = result.agent.id;
-        } else {
-          await client.request('agents.update', agent);
-        }
-      } catch (err) {
-        console.error('Failed to save agent:', err);
-        return;
-      }
-    }
-
-    if (isNew) {
-      setAgents(prev => [...prev, agent]);
-    } else {
-      setAgents(prev => prev.map(a => a.id === agent.id ? agent : a));
-    }
-
-    setShowEditor(false);
-    setEditingAgent(undefined);
-  };
-
-  const toggleActive = async (id: string) => {
-    const agent = agents.find(a => a.id === id);
+  // ------ Actions ------
+  const toggleActive = useCallback(async (id: string) => {
+    const agent = agents.find((a) => a.id === id);
     if (!agent) return;
 
-    setAgents(prev => prev.map(a =>
-      a.id === id ? { ...a, isActive: !a.isActive } : a
-    ));
+    const newState = !agent.isActive;
+    setAgents((prev) => prev.map((a) => (a.id === id ? { ...a, isActive: newState } : a)));
 
     const client = getClient();
     if (client?.connected) {
       try {
-        await client.request('agents.update', { id, isActive: !agent.isActive });
-      } catch (err) {
-        console.error('Failed to toggle agent:', err);
-        setAgents(prev => prev.map(a =>
-          a.id === id ? { ...a, isActive: agent.isActive } : a
-        ));
+        await client.request('config.patch', {
+          patch: { agents: { list: agents.map((a) => (a.id === id ? { ...a, isActive: newState } : a)) } },
+        });
+      } catch {
+        // Revert optimistic update
+        setAgents((prev) => prev.map((a) => (a.id === id ? { ...a, isActive: !newState } : a)));
       }
     }
-  };
+  }, [agents, getClient]);
 
-  const deleteAgent = async (id: string) => {
-    if (!confirm('Delete this agent?')) return;
+  const deleteAgent = useCallback(async (id: string) => {
+    const agent = agents.find((a) => a.id === id);
+    if (!agent || agent.isDefault) return;
 
     const client = getClient();
     if (client?.connected) {
       try {
-        await client.request('agents.delete', { id });
+        await client.request('agents.delete', { agentId: id });
       } catch (err) {
-        console.error('Failed to delete agent:', err);
+        setError(err instanceof Error ? err.message : 'Failed to delete agent');
         return;
       }
     }
 
-    setAgents(prev => prev.filter(a => a.id !== id));
-  };
+    setAgents((prev) => prev.filter((a) => a.id !== id));
+    if (view === 'detail' && selectedAgentId === id) {
+      setView('list');
+      setSelectedAgentId(null);
+    }
+  }, [agents, getClient, view, selectedAgentId]);
 
-  if (loading) {
-    return <div className="agents-loading">Loading agents...</div>;
-  }
+  const saveAgent = useCallback(async (updated: Agent) => {
+    setSaving(true);
+    setError(null);
 
-  if (showEditor) {
+    const client = getClient();
+    if (client?.connected) {
+      try {
+        await patchGatewayConfig({
+          agents: {
+            ...gatewayConfig.agents,
+            list: agents.map((a) =>
+              a.id === updated.id
+                ? { id: updated.id, name: updated.name, model: updated.modelConfig.model, workspace: updated.workspace }
+                : { id: a.id, name: a.name, model: a.modelConfig.model, workspace: a.workspace }
+            ),
+          },
+        });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to save agent');
+        setSaving(false);
+        return;
+      }
+    }
+
+    setAgents((prev) => prev.map((a) => (a.id === updated.id ? updated : a)));
+    setSaving(false);
+    setView('list');
+    setSelectedAgentId(null);
+  }, [agents, getClient, gatewayConfig, patchGatewayConfig]);
+
+  const createAgent = useCallback(async (data: { name: string; model: string; workspace: string; description: string }) => {
+    if (!data.name.trim()) return;
+    setSubmitting(true);
+    setError(null);
+
+    const client = getClient();
+    if (client?.connected) {
+      try {
+        await client.request('agents.add', {
+          name: data.name,
+          model: data.model,
+          workspace: data.workspace || undefined,
+        });
+        setShowCreate(false);
+        await fetchConfig();
+        await loadAgents();
+        setSubmitting(false);
+        return;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to create agent');
+        setSubmitting(false);
+        return;
+      }
+    }
+
+    // Offline local-only creation
+    const newAgent: Agent = {
+      ...defaultAgent(),
+      id: `agent-${Date.now()}`,
+      name: data.name,
+      description: data.description,
+      modelConfig: {
+        provider: 'anthropic',
+        model: data.model,
+        thinkingLevel: 'off',
+        timeout: 120,
+      },
+      workspace: data.workspace || undefined,
+    };
+    setAgents((prev) => [...prev, newAgent]);
+    setShowCreate(false);
+    setSubmitting(false);
+  }, [getClient, fetchConfig, loadAgents]);
+
+  // ------ Derived ------
+  const selectedAgent = agents.find((a) => a.id === selectedAgentId) ?? null;
+
+  // ------ Not connected ------
+  if (!connected && agents.length === 0 && !loading) {
     return (
-      <AgentEditor
-        agent={editingAgent}
-        onSave={handleSave}
-        onCancel={() => {
-          setShowEditor(false);
-          setEditingAgent(undefined);
-        }}
-      />
+      <div className="am-disconnected">
+        <div className="am-disconnected__icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0119 12.55M5 12.55a10.94 10.94 0 015.17-2.39M10.71 5.05A16 16 0 0122.56 9M1.42 9a15.91 15.91 0 014.7-2.88M8.53 16.11a6 6 0 016.95 0M12 20h.01" />
+          </svg>
+        </div>
+        <h3 className="am-disconnected__title">Gateway Not Connected</h3>
+        <p className="am-disconnected__desc">
+          Start the gateway to manage your agents. Agent configuration requires an active gateway connection.
+        </p>
+      </div>
     );
   }
 
+  // ------ Loading ------
+  if (loading) {
+    return (
+      <div className="am-loading">
+        <div className="am-loading__spinner" />
+        <span>Loading agents...</span>
+      </div>
+    );
+  }
+
+  // ------ Detail view ------
+  if (view === 'detail' && selectedAgent) {
+    return (
+      <div className="agent-manager">
+        {error && <div className="am-error">{error}</div>}
+        <AgentDetailView
+          agent={selectedAgent}
+          onSave={saveAgent}
+          onBack={() => { setView('list'); setSelectedAgentId(null); }}
+          onDelete={() => deleteAgent(selectedAgent.id)}
+          saving={saving}
+        />
+      </div>
+    );
+  }
+
+  // ------ List view (default) ------
   return (
     <div className="agent-manager">
-      <header className="agents-header">
-        <div>
-          <h2>Agents</h2>
-          <p className="agents-subtitle">Manage your AI agents</p>
+      <header className="am-header">
+        <div className="am-header__text">
+          <h2 className="am-header__title">Agents</h2>
+          <p className="am-header__subtitle">
+            {agents.length} agent{agents.length !== 1 ? 's' : ''} configured
+          </p>
         </div>
-        <button className="btn-primary btn-sm" onClick={() => setShowEditor(true)}>
-          + Create Agent
+        <button className="btn-primary btn-sm" onClick={() => setShowCreate(true)}>
+          + Add Agent
         </button>
       </header>
 
+      {error && <div className="am-error">{error}</div>}
+
       {agents.length === 0 ? (
-        <div className="agents-empty">
-          <span className="empty-icon">🤖</span>
-          <p>No agents configured</p>
-          <button className="btn-primary" onClick={() => setShowEditor(true)}>
-            Create your first agent
+        <div className="am-empty">
+          <div className="am-empty__icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2a4 4 0 014 4v2a4 4 0 01-8 0V6a4 4 0 014-4z"/>
+              <path d="M16 14H8a4 4 0 00-4 4v2h16v-2a4 4 0 00-4-4z"/>
+            </svg>
+          </div>
+          <h3 className="am-empty__title">No Agents Configured</h3>
+          <p className="am-empty__desc">Create your first agent to get started with multi-agent workflows.</p>
+          <button className="btn-primary" onClick={() => setShowCreate(true)}>
+            Create Your First Agent
           </button>
         </div>
       ) : (
-        <div className="agents-list">
-          {agents.map(agent => (
-            <div key={agent.id} className={`agent-card ${agent.isActive ? 'active' : 'inactive'}`}>
-              <div className="agent-header">
-                <div className="agent-info">
-                  <span className="agent-name">{agent.name}</span>
-                  <span className="agent-model">
-                    {AVAILABLE_MODELS.find(m => m.id === agent.model)?.name || agent.model}
-                  </span>
-                </div>
-                <label className="toggle">
-                  <input
-                    type="checkbox"
-                    checked={agent.isActive}
-                    onChange={() => toggleActive(agent.id)}
-                  />
-                  <span className="toggle-slider" />
-                </label>
-              </div>
-
-              {agent.description && (
-                <p className="agent-description">{agent.description}</p>
-              )}
-
-              <div className="agent-tools">
-                {agent.tools.slice(0, 5).map(toolId => {
-                  const tool = AVAILABLE_TOOLS.find(t => t.id === toolId);
-                  return (
-                    <span key={toolId} className="tool-tag">
-                      {tool?.icon} {tool?.name || toolId}
-                    </span>
-                  );
-                })}
-                {agent.tools.length > 5 && (
-                  <span className="tool-tag more">+{agent.tools.length - 5}</span>
-                )}
-              </div>
-
-              <div className="agent-meta">
-                {agent.lastUsed && (
-                  <span className="meta-item">
-                    Last used: {new Date(agent.lastUsed).toLocaleDateString()}
-                  </span>
-                )}
-                <span className="meta-item">
-                  Created: {new Date(agent.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-
-              <div className="agent-actions">
-                <button
-                  className="btn-sm btn-secondary"
-                  onClick={() => {
-                    setEditingAgent(agent);
-                    setShowEditor(true);
-                  }}
-                >
-                  Edit
-                </button>
-                <button
-                  className="btn-sm btn-danger"
-                  onClick={() => deleteAgent(agent.id)}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
+        <div className="am-grid">
+          {agents.map((agent) => (
+            <AgentCard
+              key={agent.id}
+              agent={agent}
+              onSelect={() => {
+                setSelectedAgentId(agent.id);
+                setView('detail');
+              }}
+              onToggleActive={() => toggleActive(agent.id)}
+              onDelete={() => deleteAgent(agent.id)}
+            />
           ))}
         </div>
+      )}
+
+      {showCreate && (
+        <CreateAgentModal
+          onSubmit={createAgent}
+          onClose={() => setShowCreate(false)}
+          submitting={submitting}
+        />
       )}
     </div>
   );
 }
+
+// Backwards compatibility alias
+export const AgentEditor = AgentManager;

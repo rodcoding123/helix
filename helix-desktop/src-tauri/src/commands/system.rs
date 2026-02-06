@@ -87,6 +87,34 @@ fn get_platform() -> String {
     return "unknown".to_string();
 }
 
+/// Get the node capabilities this desktop platform supports.
+/// Used by the frontend to determine what caps to declare in the gateway connect frame.
+#[tauri::command]
+pub fn get_node_capabilities() -> Result<Vec<String>, String> {
+    let mut caps = vec!["system".to_string(), "clipboard".to_string()];
+
+    // Platform-specific capabilities
+    #[cfg(target_os = "macos")]
+    {
+        caps.push("camera".to_string());
+        caps.push("screen".to_string());
+        caps.push("notify".to_string());
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        caps.push("screen".to_string());
+        caps.push("notify".to_string());
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        caps.push("notify".to_string());
+    }
+
+    Ok(caps)
+}
+
 fn get_node_version() -> Option<String> {
     use std::process::Command;
 

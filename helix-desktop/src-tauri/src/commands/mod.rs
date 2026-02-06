@@ -14,3 +14,6 @@ pub mod rust_executables;
 // Phase C: Desktop Features
 pub mod clipboard;
 pub mod directories;
+
+// Phase J: Deep Linking
+pub mod deeplink;

@@ -26,6 +26,8 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'general', label: 'General', icon: '⚙️', path: ROUTES.SETTINGS_GENERAL },
       { id: 'model', label: 'Model & Provider', icon: '🤖', path: ROUTES.SETTINGS_MODEL },
       { id: 'agents', label: 'Agents', icon: '🎭', path: ROUTES.SETTINGS_AGENTS },
+      { id: 'failover', label: 'Model Failover', icon: '🔄', path: ROUTES.SETTINGS_FAILOVER },
+      { id: 'auth-profiles', label: 'Auth Profiles', icon: '🔐', path: ROUTES.SETTINGS_AUTH_PROFILES },
     ],
   },
   {
@@ -41,6 +43,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'tools', label: 'Tools & Sandbox', icon: '🔧', path: ROUTES.SETTINGS_TOOLS },
       { id: 'skills', label: 'Skills', icon: '⚡', path: ROUTES.SETTINGS_SKILLS },
       { id: 'automation', label: 'Automation', icon: '🔄', path: ROUTES.SETTINGS_AUTOMATION },
+      { id: 'hooks', label: 'Hooks', icon: '🪝', path: ROUTES.SETTINGS_HOOKS },
     ],
   },
   {
@@ -49,6 +52,13 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'psychology', label: 'Psychology', icon: '🧠', path: ROUTES.SETTINGS_PSYCHOLOGY },
       { id: 'privacy', label: 'Privacy & Security', icon: '🔒', path: ROUTES.SETTINGS_PRIVACY },
       { id: 'secrets', label: 'Secrets', icon: '🔑', path: ROUTES.SETTINGS_SECRETS },
+    ],
+  },
+  {
+    label: 'System',
+    items: [
+      { id: 'shortcuts', label: 'Keyboard Shortcuts', icon: '⌨️', path: ROUTES.SETTINGS_SHORTCUTS },
+      { id: 'advanced', label: 'Advanced', icon: '🔬', path: ROUTES.SETTINGS_ADVANCED },
     ],
   },
 ];

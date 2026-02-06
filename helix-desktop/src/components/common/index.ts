@@ -17,3 +17,10 @@ export {
 export { Tooltip, type TooltipProps, type TooltipPosition } from './Tooltip';
 export { Spinner, SpinnerOverlay, type SpinnerProps, type SpinnerSize, type SpinnerOverlayProps } from './Spinner';
 export { ErrorBoundary, withErrorBoundary, type ErrorBoundaryProps, type ErrorBoundaryState } from './ErrorBoundary';
+export {
+  CommandPalette,
+  type CommandPaletteProps,
+  type CommandCategory,
+  type CommandDefinition,
+  type CommandAction,
+} from './CommandPalette';

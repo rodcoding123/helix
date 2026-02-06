@@ -35,3 +35,4 @@ tauri-plugin-updater = "2"
 lazy_static = "1.4"
 chrono = { version = "0.4", features = ["serde"] }
 hostname = "0.3"
+rand = "0.8"

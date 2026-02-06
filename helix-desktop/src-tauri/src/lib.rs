@@ -76,6 +76,7 @@ pub fn run() {
             commands::gateway::stop_gateway,
             commands::gateway::gateway_status,
             commands::gateway::get_gateway_url,
+            commands::gateway::get_gateway_token,
 
             // Config commands
             commands::config::get_config,
@@ -100,6 +101,7 @@ pub fn run() {
             commands::system::get_helix_paths,
             commands::system::is_first_run,
             commands::system::mark_onboarded,
+            commands::system::get_node_capabilities,
 
             // Auth commands (Claude Code CLI detection)
             commands::auth::detect_claude_code,
@@ -112,7 +114,7 @@ pub fn run() {
             // Supabase authentication commands (Unified Auth System)
             commands::auth::supabase_login,
             commands::auth::supabase_signup,
-            commands::auth::register_instance,
+            commands::auth::register_device,
             commands::auth::send_heartbeat,
             commands::auth::get_hostname,
 
@@ -169,6 +171,13 @@ pub fn run() {
             commands::rust_executables::get_rust_exe_status,
             commands::rust_executables::stop_rust_exe,
             commands::rust_executables::stop_all_rust_exes,
+
+            // Phase J: Deep Linking
+            commands::deeplink::handle_deep_link,
+            commands::deeplink::get_launch_deep_link,
+
+            // Phase J2: Enhanced System Tray
+            tray::update_tray_menu,
 
             // Updater commands (disabled until signing keys are configured)
             // updater::check_for_update,

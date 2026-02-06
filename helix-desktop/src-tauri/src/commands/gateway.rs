@@ -1,14 +1,22 @@
 // Gateway management commands - spawns helix-runtime gateway
 
+use std::fs;
+use std::io::Write;
 use std::process::{Child, Command, Stdio};
 use std::sync::Mutex;
 use tauri::{AppHandle, Emitter, Manager};
 use serde::Serialize;
+use rand::Rng;
+use keyring::Entry;
 
 /// Default OpenClaw gateway port
 const DEFAULT_GATEWAY_PORT: u16 = 18789;
-/// Local development token for gateway auth
-const LOCAL_GATEWAY_TOKEN: &str = "helix-desktop-local";
+/// Keyring service name (matches keyring.rs)
+const KEYRING_SERVICE: &str = "helix-desktop";
+/// Keyring key for the gateway token
+const GATEWAY_TOKEN_KEY: &str = "gateway-token";
+/// Fallback file name for token storage when keyring is unavailable
+const GATEWAY_TOKEN_FILENAME: &str = "gateway-token";
 
 pub struct GatewayProcess {
     child: Option<Child>,
@@ -32,6 +40,165 @@ pub fn init(_app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
     let mut gateway = GATEWAY.lock().map_err(|e| e.to_string())?;
     *gateway = Some(GatewayProcess::new());
     Ok(())
+}
+
+/// Generate a cryptographically secure 256-bit token as a 64-character hex string
+fn generate_token() -> String {
+    let mut rng = rand::thread_rng();
+    let mut bytes = [0u8; 32];
+    rng.fill(&mut bytes);
+    hex::encode(bytes)
+}
+
+/// Get the fallback token file path: ~/.helix/gateway-token
+fn get_token_file_path() -> Result<std::path::PathBuf, String> {
+    let home = dirs::home_dir()
+        .ok_or_else(|| "Could not determine home directory".to_string())?;
+    Ok(home.join(".helix").join(GATEWAY_TOKEN_FILENAME))
+}
+
+/// Try to read a token from the fallback file
+fn read_token_from_file() -> Result<Option<String>, String> {
+    let path = get_token_file_path()?;
+    match fs::read_to_string(&path) {
+        Ok(contents) => {
+            let token = contents.trim().to_string();
+            if token.len() == 64 && token.chars().all(|c| c.is_ascii_hexdigit()) {
+                Ok(Some(token))
+            } else {
+                log::warn!("Gateway token file exists but contains invalid token, will regenerate");
+                Ok(None)
+            }
+        }
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(None),
+        Err(e) => Err(format!("Failed to read token file: {}", e)),
+    }
+}
+
+/// Write a token to the fallback file with restrictive permissions
+fn write_token_to_file(token: &str) -> Result<(), String> {
+    let path = get_token_file_path()?;
+
+    // Ensure ~/.helix directory exists
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)
+            .map_err(|e| format!("Failed to create .helix directory: {}", e))?;
+    }
+
+    // Write token to file
+    let mut file = fs::File::create(&path)
+        .map_err(|e| format!("Failed to create token file: {}", e))?;
+    file.write_all(token.as_bytes())
+        .map_err(|e| format!("Failed to write token file: {}", e))?;
+
+    // Set restrictive permissions (Unix only)
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let permissions = fs::Permissions::from_mode(0o600);
+        fs::set_permissions(&path, permissions)
+            .map_err(|e| format!("Failed to set token file permissions: {}", e))?;
+    }
+
+    log::info!("Gateway token stored in fallback file at {:?}", path);
+    Ok(())
+}
+
+/// Get or create a cryptographically secure gateway token.
+///
+/// Token resolution order:
+/// 1. OS keyring (service: "helix-desktop", key: "gateway-token")
+/// 2. Fallback file at ~/.helix/gateway-token
+/// 3. Session-only generated token (last resort, not persisted)
+///
+/// On first launch, generates a 256-bit random token (64 hex chars),
+/// stores it in the keyring, and returns it. The token value is NEVER logged.
+fn get_or_create_gateway_token() -> Result<String, String> {
+    // 1. Try to read from OS keyring
+    match Entry::new(KEYRING_SERVICE, GATEWAY_TOKEN_KEY) {
+        Ok(entry) => {
+            match entry.get_password() {
+                Ok(token) => {
+                    if token.len() == 64 && token.chars().all(|c| c.is_ascii_hexdigit()) {
+                        log::info!("Gateway token retrieved from OS keyring");
+                        return Ok(token);
+                    }
+                    // Invalid token in keyring - regenerate
+                    log::warn!("Invalid gateway token found in keyring, regenerating");
+                }
+                Err(keyring::Error::NoEntry) => {
+                    log::info!("No gateway token in keyring, will generate new one");
+                }
+                Err(e) => {
+                    log::warn!("Keyring read failed: {}, trying fallback file", e);
+                    // Fall through to file-based fallback
+                    return get_or_create_token_from_file();
+                }
+            }
+
+            // Generate new token and store in keyring
+            let token = generate_token();
+            log::info!("Generated new gateway token (256-bit)");
+
+            match entry.set_password(&token) {
+                Ok(()) => {
+                    log::info!("Gateway token stored in OS keyring");
+                    // Also write to file as backup
+                    if let Err(e) = write_token_to_file(&token) {
+                        log::warn!("Failed to write backup token file: {}", e);
+                    }
+                    Ok(token)
+                }
+                Err(e) => {
+                    log::warn!("Failed to store token in keyring: {}, using fallback file", e);
+                    // Store in file instead
+                    write_token_to_file(&token)?;
+                    Ok(token)
+                }
+            }
+        }
+        Err(e) => {
+            log::warn!("Failed to create keyring entry: {}, using fallback", e);
+            get_or_create_token_from_file()
+        }
+    }
+}
+
+/// Fallback: get or create token from file system
+fn get_or_create_token_from_file() -> Result<String, String> {
+    // Try to read existing token from file
+    match read_token_from_file() {
+        Ok(Some(token)) => {
+            log::info!("Gateway token retrieved from fallback file");
+            return Ok(token);
+        }
+        Ok(None) => {
+            // No valid token in file, generate one
+        }
+        Err(e) => {
+            log::warn!("Failed to read fallback token file: {}", e);
+        }
+    }
+
+    // Generate and store in file
+    let token = generate_token();
+    log::info!("Generated new gateway token (256-bit) for file storage");
+
+    match write_token_to_file(&token) {
+        Ok(()) => Ok(token),
+        Err(e) => {
+            // Last resort: session-only token (not persisted)
+            log::warn!("Failed to persist token to file: {}. Using session-only token.", e);
+            log::warn!("Gateway token will not survive app restart");
+            Ok(token)
+        }
+    }
+}
+
+/// Tauri command: Get the current gateway token for frontend use
+#[tauri::command]
+pub fn get_gateway_token() -> Result<String, String> {
+    get_or_create_gateway_token()
 }
 
 #[derive(Serialize, Clone)]
@@ -71,6 +238,9 @@ pub fn start_gateway(app: AppHandle) -> Result<GatewayStarted, String> {
     log::info!("Starting OpenClaw gateway from: {:?}", openclaw_path);
     log::info!("Working directory: {:?}", openclaw_dir);
 
+    // Get or generate a per-device gateway token (never logged)
+    let gateway_token = get_or_create_gateway_token()?;
+
     // Build arguments based on executable type
     let openclaw_mjs = openclaw_dir.join("openclaw.mjs");
     let args: Vec<String> = if openclaw_path.to_string_lossy() == "node" && openclaw_mjs.exists() {
@@ -83,7 +253,7 @@ pub fn start_gateway(app: AppHandle) -> Result<GatewayStarted, String> {
             "--bind".to_string(),
             "loopback".to_string(),
             "--token".to_string(),
-            LOCAL_GATEWAY_TOKEN.to_string(),
+            gateway_token.clone(),
         ]
     } else if openclaw_path.to_string_lossy() == "npx" {
         // Running via npx (global fallback)
@@ -95,7 +265,7 @@ pub fn start_gateway(app: AppHandle) -> Result<GatewayStarted, String> {
             "--bind".to_string(),
             "loopback".to_string(),
             "--token".to_string(),
-            LOCAL_GATEWAY_TOKEN.to_string(),
+            gateway_token.clone(),
         ]
     } else {
         // Direct executable (bundled or bin symlink)
@@ -106,11 +276,20 @@ pub fn start_gateway(app: AppHandle) -> Result<GatewayStarted, String> {
             "--bind".to_string(),
             "loopback".to_string(),
             "--token".to_string(),
-            LOCAL_GATEWAY_TOKEN.to_string(),
+            gateway_token,
         ]
     };
 
-    log::info!("Gateway command: {:?} {:?}", openclaw_path, args);
+    // Log command without exposing the token value
+    let sanitized_args: Vec<String> = args.iter().enumerate().map(|(i, a)| {
+        // The token is always the last argument, preceded by "--token"
+        if i > 0 && args[i - 1] == "--token" {
+            "[REDACTED]".to_string()
+        } else {
+            a.clone()
+        }
+    }).collect();
+    log::info!("Gateway command: {:?} {:?}", openclaw_path, sanitized_args);
 
     // Spawn gateway process
     let child = Command::new(&openclaw_path)

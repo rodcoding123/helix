@@ -13,8 +13,27 @@ import {
   type GatewayHelloOk,
 } from '../lib/gateway-client';
 
-// Local development token - must match Rust backend
-const LOCAL_GATEWAY_TOKEN = 'helix-desktop-local';
+// Cached gateway token - fetched from Rust backend (keyring or fallback file)
+let cachedGatewayToken: string | null = null;
+
+/**
+ * Fetch the per-device gateway token from the Tauri backend.
+ * The token is generated on first launch and stored in the OS keyring
+ * or a fallback file. Results are cached in-memory for the session.
+ */
+async function getGatewayToken(): Promise<string> {
+  if (cachedGatewayToken) {
+    return cachedGatewayToken;
+  }
+  try {
+    const token = await invoke<string>('get_gateway_token');
+    cachedGatewayToken = token;
+    return token;
+  } catch (error) {
+    console.error('Failed to get gateway token from backend:', error);
+    throw error;
+  }
+}
 
 interface GatewayStatus {
   running: boolean;
@@ -143,9 +162,19 @@ export function useGateway() {
     }
   }, []);
 
-  // Connect to WebSocket
+  // Fetch platform-specific node capabilities from the Tauri backend
+  const getNodeCapabilities = useCallback(async (): Promise<string[]> => {
+    try {
+      return await invoke<string[]>('get_node_capabilities');
+    } catch (err) {
+      console.warn('Failed to get node capabilities, falling back to defaults:', err);
+      return ['system', 'clipboard'];
+    }
+  }, []);
+
+  // Connect to WebSocket with dual-role (operator + node) support
   const connect = useCallback(
-    (url: string, token?: string) => {
+    async (url: string, token?: string) => {
       if (clientRef.current?.connected) {
         return;
       }
@@ -153,13 +182,18 @@ export function useGateway() {
       // Stop existing client
       clientRef.current?.stop();
 
+      // Fetch platform capabilities from the native backend
+      const caps = await getNodeCapabilities();
+
       const client = createGatewayClient({
         url,
         token,
+        role: 'dual',
+        caps,
         onHello: (h) => {
           setHello(h);
           setConnected(true);
-          console.log('Gateway connected:', h);
+          console.log('Gateway connected (dual role):', h);
         },
         onEvent: handleEvent,
         onClose: ({ code, reason }) => {
@@ -172,12 +206,21 @@ export function useGateway() {
         onConnected: () => {
           setConnected(true);
         },
+        onNodeInvoke: (req) => {
+          console.log('[gateway] node.invoke received:', req.command, req.args);
+          // Forward node invocations to Tauri commands for native execution
+          invoke(req.command, (req.args ?? {}) as Record<string, unknown>).catch(
+            (err: unknown) => {
+              console.error('[gateway] node invoke execution failed:', err);
+            }
+          );
+        },
       });
 
       client.start();
       clientRef.current = client;
     },
-    [handleEvent]
+    [handleEvent, getNodeCapabilities]
   );
 
   // Disconnect WebSocket
@@ -229,10 +272,15 @@ export function useGateway() {
     let unlisten: UnlistenFn;
 
     (async () => {
-      unlisten = await listen<GatewayStartedPayload>('gateway:started', (event) => {
+      unlisten = await listen<GatewayStartedPayload>('gateway:started', async (event) => {
         const { port, url } = event.payload;
         setStatus((prev) => ({ ...prev, running: true, port, url }));
-        connect(url, LOCAL_GATEWAY_TOKEN);
+        try {
+          const token = await getGatewayToken();
+          await connect(url, token);
+        } catch (err) {
+          console.error('Failed to retrieve gateway token for connection:', err);
+        }
       });
     })();
 
@@ -261,9 +309,14 @@ export function useGateway() {
   useEffect(() => {
     // Don't block on gateway status - it's optional
     checkStatus()
-      .then((result) => {
+      .then(async (result) => {
         if (result.running && result.url) {
-          connect(result.url, LOCAL_GATEWAY_TOKEN);
+          try {
+            const token = await getGatewayToken();
+            await connect(result.url, token);
+          } catch (err) {
+            console.error('Failed to retrieve gateway token on startup:', err);
+          }
         }
       })
       .catch(() => {

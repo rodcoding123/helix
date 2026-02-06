@@ -11,3 +11,7 @@ export { MemoryStats, PLACEHOLDER_MEMORY_STATS } from './MemoryStats';
 export type { MemoryStatsData } from './MemoryStats';
 
 export { MemoryBrowser } from './MemoryBrowser';
+
+// Phase G2: Memory file browser with semantic search
+export { MemoryFileBrowser } from './MemoryFileBrowser';
+export { SemanticSearch } from './SemanticSearch';

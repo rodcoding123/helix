@@ -1,4 +1,4 @@
-.instance-registration-step {
+.device-registration-step {
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -316,7 +316,7 @@
 
 /* Responsive */
 @media (max-width: 640px) {
-  .instance-registration-step {
+  .device-registration-step {
     padding: 1rem;
   }
 

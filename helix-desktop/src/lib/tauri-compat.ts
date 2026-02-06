@@ -136,6 +136,14 @@ const mockInvokeHandlers: Record<string, InvokeHandler> = {
 
   // Discord
   test_webhook: () => ({ success: true, status_code: 200, error: null }),
+
+  // Deep Linking (Phase J)
+  handle_deep_link: (args: unknown) => {
+    const { url } = args as { url: string };
+    const valid = url.startsWith('helix://');
+    return { url, valid, error: valid ? null : 'Invalid deep link scheme' };
+  },
+  get_launch_deep_link: () => null,
 };
 
 export async function invoke<T>(cmd: string, args?: unknown): Promise<T> {

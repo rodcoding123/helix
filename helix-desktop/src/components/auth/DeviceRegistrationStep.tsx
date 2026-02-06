@@ -1,29 +1,29 @@
 /**
- * Instance Registration Step - Register This Device
+ * Device Registration Step - Register This Device
  *
- * Allows web/mobile to know about this desktop instance for:
+ * Allows web/mobile to know about this desktop device for:
  * - Remote command execution
  * - Cross-device sync
- * - Instance management (rename, remove)
+ * - Device management (rename, remove)
  *
- * Instance ID persists across app restarts to maintain identity.
+ * Device ID persists across app restarts to maintain identity.
  */
 
 import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { v4 as uuidv4 } from 'uuid';
-import './InstanceRegistrationStep.css';
+import './DeviceRegistrationStep.css';
 
-export interface InstanceRegistrationData {
-  instance_id: string;
+export interface DeviceRegistrationData {
+  device_id: string;
   device_name: string;
   device_type: 'desktop' | 'mobile' | 'web';
   platform: string;
 }
 
-interface InstanceRegistrationStepProps {
+interface DeviceRegistrationStepProps {
   userId: string;
-  onRegistrationComplete: (data: InstanceRegistrationData) => void;
+  onRegistrationComplete: (data: DeviceRegistrationData) => void;
   onSkip?: () => void;
   onError?: (error: string) => void;
 }
@@ -58,19 +58,19 @@ async function getPlatformName(): Promise<string> {
 }
 
 /**
- * Generate or load persistent instance ID
+ * Generate or load persistent device ID
  */
-async function getOrCreateInstanceId(): Promise<string> {
+async function getOrCreateDeviceId(): Promise<string> {
   try {
     // Try to load from localStorage first (persists across sessions)
-    const stored = localStorage.getItem('helix_instance_id');
+    const stored = localStorage.getItem('helix_device_id');
     if (stored) {
       return stored;
     }
 
-    // Generate new instance ID
+    // Generate new device ID
     const newId = uuidv4();
-    localStorage.setItem('helix_instance_id', newId);
+    localStorage.setItem('helix_device_id', newId);
     return newId;
   } catch {
     // Fallback: generate temp ID (won't persist)
@@ -87,34 +87,34 @@ async function getDefaultDeviceName(): Promise<string> {
     const hostname = await invoke<string>('get_hostname');
     return `${hostname} (${p})`;
   } catch {
-    return `Helix Desktop Instance`;
+    return `Helix Desktop`;
   }
 }
 
-export function InstanceRegistrationStep({
+export function DeviceRegistrationStep({
   userId,
   onRegistrationComplete,
   onSkip,
   onError,
-}: InstanceRegistrationStepProps) {
+}: DeviceRegistrationStepProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isRegistering, setIsRegistering] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [instanceId, setInstanceId] = useState<string>('');
+  const [deviceId, setDeviceId] = useState<string>('');
   const [deviceName, setDeviceName] = useState<string>('');
   const [platformName, setPlatformName] = useState<string>('');
   const [showDetails, setShowDetails] = useState(false);
 
-  // Initialize instance data on mount
+  // Initialize device data on mount
   useEffect(() => {
     (async () => {
       try {
-        const id = await getOrCreateInstanceId();
+        const id = await getOrCreateDeviceId();
         const name = await getDefaultDeviceName();
         const p = await getPlatformName();
 
-        setInstanceId(id);
+        setDeviceId(id);
         setDeviceName(name);
         setPlatformName(p);
         setError(null);
@@ -143,9 +143,9 @@ export function InstanceRegistrationStep({
       const result = await invoke<{
         success: boolean;
         error?: string;
-      }>('register_instance', {
+      }>('register_device', {
         user_id: userId,
-        instance_id: instanceId,
+        device_id: deviceId,
         device_name: deviceName.trim(),
         device_type: 'desktop',
         platform: platformName.toLowerCase(),
@@ -153,7 +153,7 @@ export function InstanceRegistrationStep({
 
       if (result.success) {
         onRegistrationComplete({
-          instance_id: instanceId,
+          device_id: deviceId,
           device_name: deviceName,
           device_type: 'desktop',
           platform: platformName,
@@ -172,7 +172,7 @@ export function InstanceRegistrationStep({
 
   if (isLoading) {
     return (
-      <div className="instance-registration-step">
+      <div className="device-registration-step">
         <div className="loading-state">
           <div className="spinner" />
           <p>Initializing device...</p>
@@ -182,12 +182,12 @@ export function InstanceRegistrationStep({
   }
 
   return (
-    <div className="instance-registration-step">
+    <div className="device-registration-step">
       {/* Header */}
       <div className="registration-header">
         <h1>Register This Device</h1>
         <p className="registration-subtitle">
-          Your web dashboard and other devices can see and control this instance
+          Your web dashboard and other devices can see and control this device
         </p>
       </div>
 
@@ -225,8 +225,8 @@ export function InstanceRegistrationStep({
           {showDetails && (
             <div className="details-content">
               <div className="detail-row">
-                <span className="label">Instance ID:</span>
-                <span className="value mono">{instanceId}</span>
+                <span className="label">Device ID:</span>
+                <span className="value mono">{deviceId}</span>
               </div>
               <div className="detail-row">
                 <span className="label">Platform:</span>
@@ -237,7 +237,7 @@ export function InstanceRegistrationStep({
                 <span className="value">Desktop</span>
               </div>
               <p className="detail-note">
-                💡 Instance ID is persistent - reinstalling the app uses the same ID
+                Device ID is persistent - reinstalling the app uses the same ID
               </p>
             </div>
           )}
@@ -250,7 +250,7 @@ export function InstanceRegistrationStep({
         <div className="privacy-note">
           <span className="icon">🔒</span>
           <p>
-            <strong>Privacy:</strong> Your instance is only visible to you and authorized accounts.
+            <strong>Privacy:</strong> Your device is only visible to you and authorized accounts.
             Credentials stay on this device.
           </p>
         </div>

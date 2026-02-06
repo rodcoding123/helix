@@ -24,3 +24,41 @@ export { useWebRTCVoice } from './useWebRTCVoice';
 
 // Phase C: Tauri Desktop Features
 export { useTauriFileOps } from './useTauriFileOps';
+
+// Gateway config synchronization
+export { useGatewayConfig } from './useGatewayConfig';
+
+// Phase J: Deep Linking
+export { useDeepLink } from './useDeepLink';
+export type { DeepLinkAction, DeepLinkActionType, UseDeepLinkReturn } from './useDeepLink';
+
+// Phase J: Keyboard Shortcuts System
+export {
+  useGlobalShortcuts,
+  useShortcutRecorder,
+  useShortcutListener,
+  getPlatformModifier,
+  isMacPlatform,
+  formatShortcut,
+  formatKeyName,
+  getShortcutFingerprint,
+  detectConflicts,
+  applyOverrides,
+  recordedToBinding,
+  serializeOverrides,
+  deserializeOverrides,
+  onShortcut,
+  DEFAULT_SHORTCUT_BINDINGS,
+} from './useGlobalShortcuts';
+export type {
+  ShortcutDefinition,
+  ShortcutCategory,
+  ShortcutBinding,
+  ShortcutOverrides,
+  ShortcutConflict,
+  ShortcutEvent,
+  RecordedBinding,
+  UseGlobalShortcutsOptions,
+  UseGlobalShortcutsReturn,
+  UseShortcutRecorderReturn,
+} from './useGlobalShortcuts';

@@ -43,11 +43,17 @@ export interface GatewayClientOptions {
   password?: string;
   clientName?: string;
   clientVersion?: string;
+  /** Connection role: operator-only, node-only, or dual (default: 'dual') */
+  role?: 'operator' | 'node' | 'dual';
+  /** Node capabilities to advertise (e.g. 'system', 'clipboard', 'screen') */
+  caps?: string[];
   onHello?: (hello: GatewayHelloOk) => void;
   onEvent?: (evt: GatewayEventFrame) => void;
   onClose?: (info: { code: number; reason: string }) => void;
   onError?: (error: Error) => void;
   onConnected?: () => void;
+  /** Called when the gateway dispatches a node.invoke event targeting this client */
+  onNodeInvoke?: (req: { command: string; args?: unknown }) => void;
 }
 
 // Protocol version
@@ -152,6 +158,19 @@ export class GatewayClient {
       ? { token: this.opts.token, password: this.opts.password }
       : undefined;
 
+    // Determine roles and capabilities based on configuration
+    const role = this.opts.role ?? 'dual';
+    const caps = this.opts.caps ?? ['system', 'clipboard'];
+
+    // Build scopes based on role
+    const scopes: string[] = [];
+    if (role === 'operator' || role === 'dual') {
+      scopes.push('operator.read', 'operator.write', 'operator.admin');
+    }
+    if (role === 'node' || role === 'dual') {
+      scopes.push('node.exec', 'node.read');
+    }
+
     const params = {
       minProtocol: PROTOCOL_VERSION,
       maxProtocol: PROTOCOL_VERSION,
@@ -159,11 +178,11 @@ export class GatewayClient {
         id: this.opts.clientName ?? 'helix-desktop',
         version: this.opts.clientVersion ?? '1.0.0',
         platform: 'desktop',
-        mode: 'operator',
+        mode: role === 'dual' ? 'operator+node' : role,
       },
-      role: 'operator',
-      scopes: ['operator.read', 'operator.write', 'operator.admin'],
-      caps: [],
+      role,
+      scopes,
+      caps,
       auth,
       userAgent: 'Helix Desktop/1.0.0',
       locale: navigator.language,
@@ -202,6 +221,16 @@ export class GatewayClient {
         if (nonce) {
           this.connectNonce = nonce;
           void this.sendConnect();
+        }
+        return;
+      }
+
+      // Handle node invocations from the gateway
+      if (evt.event === 'node.invoke') {
+        try {
+          this.opts.onNodeInvoke?.(evt.payload as { command: string; args?: unknown });
+        } catch (err) {
+          console.error('[gateway] node invoke handler error:', err);
         }
         return;
       }
@@ -354,6 +383,24 @@ export class GatewayClient {
    */
   async getPresence(): Promise<unknown> {
     return this.request('system-presence');
+  }
+
+  // ============================================
+  // Node API methods (available in dual/node mode)
+  // ============================================
+
+  /**
+   * List available node capabilities for this client
+   */
+  async nodeCapabilities(): Promise<unknown> {
+    return this.request('nodes.describe', { nodeId: 'self' });
+  }
+
+  /**
+   * Get node status for this client
+   */
+  async nodeStatus(): Promise<unknown> {
+    return this.request('nodes.status');
   }
 }
 

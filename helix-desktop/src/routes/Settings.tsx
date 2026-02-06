@@ -11,6 +11,11 @@ import { AgentsSettings } from '../components/settings/AgentsSettings';
 import { PrivacySettings } from '../components/settings/PrivacySettings';
 import { PsychologySettings } from '../components/settings/PsychologySettings';
 import { SecretsSettings } from '../components/settings/SecretsSettings';
+import { HooksManager } from '../components/hooks';
+import { AdvancedSettings } from '../components/settings/AdvancedSettings';
+import { KeyboardShortcuts } from '../components/settings/KeyboardShortcuts';
+import { AuthProfileManager } from '../components/auth';
+import { FailoverChainEditor } from '../components/models';
 
 type SettingsSection =
   | 'general'
@@ -23,7 +28,12 @@ type SettingsSection =
   | 'agents'
   | 'privacy'
   | 'psychology'
-  | 'secrets';
+  | 'secrets'
+  | 'hooks'
+  | 'advanced'
+  | 'shortcuts'
+  | 'auth-profiles'
+  | 'failover';
 
 const SETTINGS_COMPONENTS: Record<SettingsSection, React.ComponentType> = {
   general: GeneralSettings,
@@ -37,6 +47,11 @@ const SETTINGS_COMPONENTS: Record<SettingsSection, React.ComponentType> = {
   privacy: PrivacySettings,
   psychology: PsychologySettings,
   secrets: SecretsSettings,
+  hooks: HooksManager,
+  advanced: AdvancedSettings,
+  shortcuts: KeyboardShortcuts,
+  'auth-profiles': AuthProfileManager,
+  failover: FailoverChainEditor,
 };
 
 /**

@@ -94,10 +94,61 @@ export interface Config {
   channels: ChannelsConfig;
 }
 
+// Gateway-sourced config (from openclaw.json via gateway protocol)
+export interface GatewayConfig {
+  // Model/agent defaults
+  agents?: {
+    defaults?: {
+      provider?: string;
+      model?: string;
+      thinkingLevel?: string;
+      timeout?: number;
+    };
+    list?: Array<{
+      id: string;
+      name?: string;
+      model?: string;
+      workspace?: string;
+    }>;
+  };
+  // Channel configuration
+  channels?: Record<string, {
+    enabled?: boolean;
+    config?: Record<string, unknown>;
+  }>;
+  // Tools policy
+  tools?: {
+    allow?: string[];
+    deny?: string[];
+    profile?: string;
+  };
+  // Skills
+  skills?: Record<string, unknown>;
+  // Session config
+  session?: {
+    scope?: string;
+    reset?: { mode?: string; time?: number; idleMinutes?: number };
+    compaction?: { mode?: string };
+  };
+  // Messages/TTS config
+  messages?: {
+    tts?: Record<string, unknown>;
+  };
+  // Raw config hash for optimistic concurrency
+  _hash?: string;
+  // Full raw config (for sections we don't explicitly model)
+  _raw?: Record<string, unknown>;
+}
+
 interface ConfigState {
   config: Config;
   isDirty: boolean;
   lastSaved: number | null;
+
+  // Gateway-sourced config (not persisted to localStorage)
+  gatewayConfig: GatewayConfig;
+  gatewayConfigLoaded: boolean;
+  gatewayConfigError: string | null;
 
   // Actions
   updateConfig: <K extends keyof Config>(section: K, updates: Partial<Config[K]>) => void;
@@ -106,6 +157,11 @@ interface ConfigState {
   resetAll: () => void;
   resetConfig: () => void; // Alias for resetAll
   markSaved: () => void;
+
+  // Gateway config actions
+  setGatewayConfig: (config: GatewayConfig) => void;
+  setGatewayConfigError: (error: string | null) => void;
+  updateGatewayConfig: (updates: Partial<GatewayConfig>) => void;
 }
 
 const defaultConfig: Config = {
@@ -190,6 +246,11 @@ export const useConfigStore = create<ConfigState>()(
       isDirty: false,
       lastSaved: null,
 
+      // Gateway config defaults (not persisted)
+      gatewayConfig: {},
+      gatewayConfigLoaded: false,
+      gatewayConfigError: null,
+
       updateConfig: (section, updates) => {
         set((state) => ({
           config: {
@@ -225,9 +286,29 @@ export const useConfigStore = create<ConfigState>()(
       markSaved: () => {
         set({ isDirty: false, lastSaved: Date.now() });
       },
+
+      // Gateway config actions
+      setGatewayConfig: (config) =>
+        set({
+          gatewayConfig: config,
+          gatewayConfigLoaded: true,
+          gatewayConfigError: null,
+        }),
+
+      setGatewayConfigError: (error) => set({ gatewayConfigError: error }),
+
+      updateGatewayConfig: (updates) =>
+        set((state) => ({
+          gatewayConfig: { ...state.gatewayConfig, ...updates },
+        })),
     }),
     {
       name: 'helix-config-storage',
+      partialize: (state) => ({
+        config: state.config,
+        isDirty: state.isDirty,
+        lastSaved: state.lastSaved,
+      }),
     }
   )
 );
