@@ -154,11 +154,37 @@ const mockInvokeHandlers: Record<string, InvokeHandler> = {
   get_launch_deep_link: () => null,
 };
 
+// Lazy-load Tauri to avoid build-time resolution issues
+let tauriInvokeCache: ((cmd: string, args?: unknown) => Promise<unknown>) | null = null;
+
+async function getTauriInvoke() {
+  if (tauriInvokeCache) return tauriInvokeCache;
+
+  try {
+    // Use optional chaining to safely access window.__TAURI_CORE__
+    if (typeof window !== 'undefined' && (window as any).__TAURI_CORE__?.invoke) {
+      tauriInvokeCache = (window as any).__TAURI_CORE__.invoke;
+      return tauriInvokeCache;
+    }
+  } catch {
+    // Ignore errors, will use mock handler
+  }
+
+  return null;
+}
+
 export async function invoke<T>(cmd: string, args?: unknown): Promise<T> {
   if (isTauri) {
-    // Use real Tauri invoke
-    const { invoke: tauriInvoke } = await import('@tauri-apps/api/core');
-    return tauriInvoke<T>(cmd, args as Record<string, unknown>);
+    // Try to use real Tauri invoke
+    const tauriInvoke = await getTauriInvoke();
+    if (tauriInvoke) {
+      try {
+        return tauriInvoke(cmd, args as Record<string, unknown>) as Promise<T>;
+      } catch (err) {
+        console.warn(`[Tauri Compat] Tauri invoke failed for ${cmd}: ${err}`);
+        // Fall through to mock handler
+      }
+    }
   }
 
   // Browser mock
@@ -181,9 +207,15 @@ export async function listen<T>(
   callback: EventCallback<T>
 ): Promise<UnlistenFn> {
   if (isTauri) {
-    // Use real Tauri listen
-    const { listen: tauriListen } = await import('@tauri-apps/api/event');
-    return tauriListen<T>(event, callback);
+    // Try to use real Tauri listen
+    try {
+      if (typeof window !== 'undefined' && (window as any).__TAURI_EVENT__?.listen) {
+        return (window as any).__TAURI_EVENT__.listen<T>(event, callback);
+      }
+    } catch (err) {
+      console.warn(`[Tauri Compat] Tauri listen failed for ${event}: ${err}`);
+      // Fall through to mock handler
+    }
   }
 
   // Browser mock
@@ -237,8 +269,15 @@ export function getCurrentWindow(): MockWindow {
 // For async window import in Tauri
 export async function getTauriWindow() {
   if (isTauri) {
-    const { getCurrentWindow: getTauriCurrentWindow } = await import('@tauri-apps/api/window');
-    return getTauriCurrentWindow();
+    // Try to use real Tauri window API
+    try {
+      if (typeof window !== 'undefined' && (window as any).__TAURI_WINDOW__?.getCurrentWindow) {
+        return (window as any).__TAURI_WINDOW__.getCurrentWindow();
+      }
+    } catch (err) {
+      console.warn(`[Tauri Compat] Failed to get Tauri window: ${err}`);
+      // Fall through to mock handler
+    }
   }
   return mockWindow;
 }

@@ -10,7 +10,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from '../../lib/tauri-compat';
 import { v4 as uuidv4 } from 'uuid';
 import './DeviceRegistrationStep.css';
 

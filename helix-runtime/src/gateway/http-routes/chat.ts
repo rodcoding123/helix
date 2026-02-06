@@ -40,6 +40,7 @@ import {
   isThanosaModeLocked,
   getThanosLockedMessage,
 } from '../helix/thanos-mode.js';
+import { postConversationSynthesisHook } from '../../../src/psychology/post-conversation-synthesis-hook.js';
 
 const router = new AIOperationRouter();
 const costTracker = new CostTracker();
@@ -518,18 +519,38 @@ async function handleChatMessage(
     ];
 
     // Upsert conversation record
-    const { error: updateError } = await context.supabase.from('conversations').upsert(
-      {
-        user_id: userId,
-        session_key: sessionKey,
-        messages: updatedMessages,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'user_id, session_key' }
-    );
+    const { data: conversationRecord, error: updateError } = await context.supabase
+      .from('conversations')
+      .upsert(
+        {
+          user_id: userId,
+          session_key: sessionKey,
+          messages: updatedMessages,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id, session_key' }
+      )
+      .select('id');
 
     if (updateError) {
       throw updateError;
+    }
+
+    // ============================================================
+    // PHASE 3: TRIGGER MEMORY SYNTHESIS (FIRE-AND-FORGET)
+    // ============================================================
+    // Start synthesis asynchronously without blocking response
+    const conversationId = (conversationRecord?.[0] as { id?: string })?.id;
+    if (conversationId) {
+      void postConversationSynthesisHook
+        .processConversation(conversationId)
+        .catch((error) => {
+          context.logGateway?.warn?.('SYNTHESIS_FAILED', {
+            conversationId,
+            error: error instanceof Error ? error.message : String(error),
+          });
+          // Don't throw - synthesis is optional and shouldn't block chat response
+        });
     }
 
     // Log the successful interaction

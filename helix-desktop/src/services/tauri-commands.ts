@@ -3,10 +3,45 @@
  * Desktop-specific file operations and system interactions
  */
 
-import { invoke } from '@tauri-apps/api/core';
-import { open, save } from '@tauri-apps/plugin-dialog';
-import { writeTextFile, readTextFile } from '@tauri-apps/plugin-fs';
-import { sendNotification } from '@tauri-apps/plugin-notification';
+import { invoke } from '../lib/tauri-compat';
+
+// Lazy-load Tauri plugins to avoid build-time issues
+let dialogModule: any = null;
+let fsModule: any = null;
+let notificationModule: any = null;
+
+async function getDialogModule() {
+  if (!dialogModule) {
+    try {
+      dialogModule = await import('@tauri-apps/plugin-dialog');
+    } catch {
+      // In test/browser environment, plugins not available
+    }
+  }
+  return dialogModule;
+}
+
+async function getFsModule() {
+  if (!fsModule) {
+    try {
+      fsModule = await import('@tauri-apps/plugin-fs');
+    } catch {
+      // In test/browser environment, plugins not available
+    }
+  }
+  return fsModule;
+}
+
+async function getNotificationModule() {
+  if (!notificationModule) {
+    try {
+      notificationModule = await import('@tauri-apps/plugin-notification');
+    } catch {
+      // In test/browser environment, plugins not available
+    }
+  }
+  return notificationModule;
+}
 
 /**
  * Notification Types
@@ -27,10 +62,15 @@ export async function showNotification(
   _notificationType: NotificationType = 'info'
 ): Promise<void> {
   try {
-    await sendNotification({
-      title,
-      body
-    });
+    const notifModule = await getNotificationModule();
+    if (notifModule?.sendNotification) {
+      await notifModule.sendNotification({
+        title,
+        body
+      });
+    } else {
+      console.log(`[Notification] ${title}: ${body}`);
+    }
   } catch (error) {
     console.error('Failed to send notification:', error);
   }
@@ -45,11 +85,17 @@ export async function showNotification(
  */
 export async function pickImportFile(fileType: 'tool' | 'skill'): Promise<string | null> {
   try {
+    const dialogMod = await getDialogModule();
+    if (!dialogMod?.open || !fsModule?.readTextFile) {
+      console.log(`[File Dialog] Would open ${fileType} import dialog`);
+      return null;
+    }
+
     const filters = fileType === 'tool'
       ? [{ name: 'JSON', extensions: ['json'] }]
       : [{ name: 'JSON', extensions: ['json'] }];
 
-    const file = await open({
+    const file = await dialogMod.open({
       title: `Import ${fileType}`,
       filters,
       multiple: false
@@ -58,7 +104,8 @@ export async function pickImportFile(fileType: 'tool' | 'skill'): Promise<string
     if (!file) return null;
 
     // Read file content
-    const content = await readTextFile(file as string);
+    const fsMod = await getFsModule();
+    const content = await fsMod.readTextFile(file as string);
     return content;
   } catch (error) {
     console.error(`Failed to pick import file for ${fileType}:`, error);
@@ -71,12 +118,18 @@ export async function pickImportFile(fileType: 'tool' | 'skill'): Promise<string
  */
 export async function pickExportFile(fileType: 'tool' | 'skill', suggestedName: string): Promise<string | null> {
   try {
+    const dialogMod = await getDialogModule();
+    if (!dialogMod?.save) {
+      console.log(`[File Dialog] Would save ${fileType} export dialog`);
+      return null;
+    }
+
     const defaultName = suggestedName.replace(/\s+/g, '_').toLowerCase();
     const fileName = fileType === 'tool'
       ? `${defaultName}_tool.json`
       : `${defaultName}_skill.json`;
 
-    const path = await save({
+    const path = await dialogMod.save({
       title: `Export ${fileType}`,
       defaultPath: fileName,
       filters: [{ name: 'JSON', extensions: ['json'] }]
@@ -94,7 +147,12 @@ export async function pickExportFile(fileType: 'tool' | 'skill', suggestedName: 
  */
 export async function writeToFile(filePath: string, content: string): Promise<void> {
   try {
-    await writeTextFile(filePath, content);
+    const fsMod = await getFsModule();
+    if (!fsMod?.writeTextFile) {
+      console.log(`[File IO] Would write to ${filePath}`);
+      return;
+    }
+    await fsMod.writeTextFile(filePath, content);
   } catch (error) {
     console.error('Failed to write file:', error);
     throw error;
@@ -276,10 +334,16 @@ export async function saveExecutionResult(
   _type: 'tool' | 'skill'
 ): Promise<void> {
   try {
+    const dialogMod = await getDialogModule();
+    if (!dialogMod?.save) {
+      console.log('[File Dialog] Would save execution result');
+      return;
+    }
+
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const suggestedName = `${toolOrSkillName}_result_${timestamp}`;
 
-    const filePath = await save({
+    const filePath = await dialogMod.save({
       title: 'Save Execution Result',
       defaultPath: `${suggestedName}.json`,
       filters: [
