@@ -8,7 +8,7 @@
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MessageSquare,
@@ -17,9 +17,11 @@ import {
   X,
   Zap,
   ArrowUp,
+  Menu,
 } from 'lucide-react';
 import { useCloudChat } from '@/hooks/useCloudChat';
 import type { ChatMessage } from '@/hooks/useCloudChat';
+import { SessionSidebar } from '@/components/chat/SessionSidebar';
 import clsx from 'clsx';
 
 // ────────────────────────────────────────────────────────
@@ -345,15 +347,21 @@ function QuotaBar({
 // ────────────────────────────────────────────────────────
 
 export function CloudChat(): JSX.Element {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [inputValue, setInputValue] = useState('');
   const [showQuotaError, setShowQuotaError] = useState(false);
   const [showLowQuotaBanner, setShowLowQuotaBanner] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const prevMessageCountRef = useRef(0);
   const isUserScrollingRef = useRef(false);
+
+  // Get current session from URL params or use default
+  const currentSessionKey =
+    searchParams.get('sessionKey') || 'cloud-chat-default';
 
   const {
     messages,
@@ -364,7 +372,26 @@ export function CloudChat(): JSX.Element {
     quotaExceeded,
     upgradeInfo,
     clearError,
-  } = useCloudChat({ sessionKey: 'cloud-chat-default' });
+  } = useCloudChat({ sessionKey: currentSessionKey });
+
+  // Handle session selection
+  const handleSessionSelect = useCallback(
+    (sessionKey: string) => {
+      setSearchParams({ sessionKey });
+    },
+    [setSearchParams]
+  );
+
+  // Handle new session creation
+  const handleNewSession = useCallback(
+    (sessionKey: string) => {
+      // Sidebar will handle the navigation, we just update our state
+      setInputValue('');
+      setShowQuotaError(false);
+      setShowLowQuotaBanner(true);
+    },
+    []
+  );
 
   // ── Derived state ──────────────────────────────────
 
@@ -469,7 +496,7 @@ export function CloudChat(): JSX.Element {
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] bg-void">
-      {/* ─── Header ─── */}
+      {/* ─── Header (Full Width) ─── */}
       <header
         className={clsx(
           'relative z-10 flex-shrink-0',
@@ -478,7 +505,17 @@ export function CloudChat(): JSX.Element {
           'border-b border-white/[0.06]'
         )}
       >
-        <div className="max-w-3xl mx-auto flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
+          {/* Sidebar toggle (mobile) */}
+          <button
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className="md:hidden p-1.5 rounded-lg text-text-tertiary hover:text-white hover:bg-white/5 transition-colors"
+            aria-label={isSidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+
+          {/* Logo and title */}
           <div className="flex items-center gap-3">
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center"
@@ -504,12 +541,59 @@ export function CloudChat(): JSX.Element {
             </div>
           </div>
 
+          {/* Spacer and quota */}
+          <div className="flex-1" />
+
           {/* Quota summary in header (desktop) */}
           <div className="hidden sm:block">
             <QuotaBar quota={quota} />
           </div>
         </div>
       </header>
+
+      {/* ─── Main Content Area with Sidebar ─── */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
+        <div className="hidden md:block h-full overflow-hidden">
+          <SessionSidebar
+            currentSessionKey={currentSessionKey}
+            onSessionSelect={handleSessionSelect}
+            onNewSession={handleNewSession}
+            isCollapsed={false}
+          />
+        </div>
+
+        {/* Mobile sidebar overlay */}
+        <AnimatePresence>
+          {!isSidebarCollapsed && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 md:hidden bg-black/50 z-30"
+                onClick={() => setIsSidebarCollapsed(true)}
+                aria-hidden="true"
+              />
+              <motion.div
+                initial={{ x: -320 }}
+                animate={{ x: 0 }}
+                exit={{ x: -320 }}
+                className="absolute left-0 top-0 h-full z-40 md:hidden"
+              >
+                <SessionSidebar
+                  currentSessionKey={currentSessionKey}
+                  onSessionSelect={handleSessionSelect}
+                  onNewSession={handleNewSession}
+                  isCollapsed={false}
+                />
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+
+        {/* Chat content area */}
+        <div className="flex flex-col flex-1 overflow-hidden">
 
       {/* ─── Low Quota Warning Banner ─── */}
       <AnimatePresence>
@@ -711,7 +795,12 @@ export function CloudChat(): JSX.Element {
             </div>
           </div>
         </div>
+        {/* End Bottom Area */}
       </div>
+      {/* End Chat content area */}
     </div>
+    {/* End Main Content Area with Sidebar */}
+    </div>
+    {/* End Main Container */}
   );
 }
