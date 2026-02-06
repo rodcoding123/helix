@@ -271,7 +271,13 @@ export class GatewayConnection {
     if (!frame.ok && this.connectReject) {
       const errorMsg = frame.error?.message || 'Connection rejected';
       const code = this.mapErrorCode(frame.error?.code);
-      const error = new GatewayConnectionError(errorMsg, code, false);
+      const isAuthError = code === 'AUTH_REJECTED';
+      const error = new GatewayConnectionError(
+        errorMsg,
+        code,
+        isAuthError, // auth errors are retryable (token refresh)
+        isAuthError ? 1000 : undefined,
+      );
       this.clearConnectTimer();
       this.config.onStatusChange('error');
       this.config.onError(error);
@@ -300,6 +306,7 @@ export class GatewayConnection {
         role: 'operator',
         scopes: ['operator.admin'],
         auth: {
+          mode: 'jwt',
           token: this.config.authToken,
         },
         userAgent: navigator.userAgent,

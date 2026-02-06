@@ -38,6 +38,7 @@ const StatusPage = lazy(() => import('@/pages/StatusPage').then(m => ({ default:
 const OnboardingChat = lazy(() => import('@/pages/OnboardingChat').then(m => ({ default: m.OnboardingChat })));
 const CloudChat = lazy(() => import('@/pages/CloudChat').then(m => ({ default: m.CloudChat })));
 const SetupWizard = lazy(() => import('@/pages/SetupWizard').then(m => ({ default: m.SetupWizard })));
+const AuthCallback = lazy(() => import('@/pages/AuthCallback').then(m => ({ default: m.AuthCallback })));
 
 // Loading fallback component
 function LoadingFallback() {
@@ -279,6 +280,14 @@ export function App() {
                 element={
                   <Suspense fallback={<LoadingFallback />}>
                     <StatusPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/auth/callback"
+                element={
+                  <Suspense fallback={<LoadingFallback />}>
+                    <AuthCallback />
                   </Suspense>
                 }
               />

@@ -3,25 +3,29 @@ import type { IncomingMessage } from "node:http";
 import type { GatewayAuthConfig, GatewayTailscaleMode } from "../config/config.js";
 import { readTailscaleWhoisIdentity, type TailscaleWhoisIdentity } from "../infra/tailscale.js";
 import { isTrustedProxyAddress, parseForwardedForClientIp, resolveGatewayClientIp } from "./net.js";
-export type ResolvedGatewayAuthMode = "token" | "password";
+export type ResolvedGatewayAuthMode = "token" | "password" | "jwt";
 
 export type ResolvedGatewayAuth = {
   mode: ResolvedGatewayAuthMode;
   token?: string;
   password?: string;
+  jwtSecret?: string;
   allowTailscale: boolean;
 };
 
 export type GatewayAuthResult = {
   ok: boolean;
-  method?: "token" | "password" | "tailscale" | "device-token";
+  method?: "token" | "password" | "tailscale" | "device-token" | "jwt";
   user?: string;
+  userId?: string;
+  email?: string;
   reason?: string;
 };
 
 type ConnectAuth = {
   token?: string;
   password?: string;
+  mode?: string;
 };
 
 type TailscaleUser = {
@@ -211,12 +215,14 @@ export function resolveGatewayAuth(params: {
     env.CLAWDBOT_GATEWAY_PASSWORD ??
     undefined;
   const mode: ResolvedGatewayAuth["mode"] = authConfig.mode ?? (password ? "password" : "token");
+  const jwtSecret = env.SUPABASE_JWT_SECRET ?? undefined;
   const allowTailscale =
     authConfig.allowTailscale ?? (params.tailscaleMode === "serve" && mode !== "password");
   return {
     mode,
     token,
     password,
+    jwtSecret,
     allowTailscale,
   };
 }
@@ -232,6 +238,69 @@ export function assertGatewayAuthConfigured(auth: ResolvedGatewayAuth): void {
   }
   if (auth.mode === "password" && !auth.password) {
     throw new Error("gateway auth mode is password, but no password was configured");
+  }
+}
+
+/**
+ * Verify a Supabase JWT token and extract claims.
+ * Uses the SUPABASE_JWT_SECRET environment variable for HMAC verification.
+ * Returns null if verification fails.
+ */
+async function verifySupabaseJWT(token: string, jwtSecret?: string): Promise<{
+  sub: string;
+  email?: string;
+  role?: string;
+  exp: number;
+} | null> {
+  try {
+    const secret = jwtSecret || process.env.SUPABASE_JWT_SECRET;
+    if (!secret) {
+      console.error('[Gateway Auth] SUPABASE_JWT_SECRET not configured');
+      return null;
+    }
+
+    // Decode JWT parts
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+
+    const header = JSON.parse(Buffer.from(parts[0], 'base64url').toString());
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
+
+    // Verify algorithm
+    if (header.alg !== 'HS256') {
+      console.error('[Gateway Auth] Unsupported JWT algorithm:', header.alg);
+      return null;
+    }
+
+    // Verify signature using HMAC-SHA256
+    const { createHmac } = await import('node:crypto');
+    const signingInput = `${parts[0]}.${parts[1]}`;
+    const expectedSignature = createHmac('sha256', secret)
+      .update(signingInput)
+      .digest('base64url');
+
+    if (expectedSignature !== parts[2]) {
+      return null; // Signature mismatch
+    }
+
+    // Verify expiration
+    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
+      return null; // Token expired
+    }
+
+    // Verify required claims
+    if (!payload.sub) {
+      return null;
+    }
+
+    return {
+      sub: payload.sub,
+      email: payload.email,
+      role: payload.role,
+      exp: payload.exp,
+    };
+  } catch {
+    return null;
   }
 }
 
@@ -258,6 +327,25 @@ export async function authorizeGatewayConnect(params: {
         user: tailscaleCheck.user.login,
       };
     }
+  }
+
+  // JWT auth mode (Supabase session tokens)
+  if (auth.mode === "jwt" || connectAuth?.mode === "jwt") {
+    const jwtToken = connectAuth?.token;
+    if (!jwtToken) {
+      return { ok: false, reason: "jwt_token_missing" };
+    }
+    const payload = await verifySupabaseJWT(jwtToken, auth.jwtSecret);
+    if (!payload) {
+      return { ok: false, reason: "jwt_invalid" };
+    }
+    return {
+      ok: true,
+      method: "jwt",
+      userId: payload.sub,
+      email: payload.email,
+      user: payload.email || payload.sub,
+    };
   }
 
   if (auth.mode === "token") {

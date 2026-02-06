@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, createContext, useContext, ReactNode } from 'react';
-import { User, Session, AuthChangeEvent, AuthError } from '@supabase/supabase-js';
+import { User, Session, AuthChangeEvent, AuthError, Provider } from '@supabase/supabase-js';
 import {
   supabase,
   signIn as supabaseSignIn,
@@ -15,6 +15,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signUp: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
+  signInWithOAuth: (provider: Provider) => Promise<{ error: AuthError | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -119,6 +120,27 @@ function useAuthInternal(): AuthContextType {
     }
   }, []);
 
+  const handleSignInWithOAuth = useCallback(
+    async (provider: Provider): Promise<{ error: AuthError | null }> => {
+      setError(null);
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        setError(error.message);
+        return { error };
+      }
+
+      return { error: null };
+    },
+    []
+  );
+
   return {
     user,
     session,
@@ -127,5 +149,6 @@ function useAuthInternal(): AuthContextType {
     signIn: handleSignIn,
     signUp: handleSignUp,
     signOut: handleSignOut,
+    signInWithOAuth: handleSignInWithOAuth,
   };
 }
