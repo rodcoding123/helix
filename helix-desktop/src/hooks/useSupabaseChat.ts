@@ -10,7 +10,6 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { useAuth } from './useAuth.js';
 import {
   SupabaseDesktopClient,
   createSupabaseDesktopClient,
@@ -56,7 +55,7 @@ export interface UseSupabaseChatActions {
 
   // Message operations
   sendMessage: (content: string) => Promise<void>;
-  loadMessages: (sessionKey: string) => Promise<void>;
+  loadMessages: (sessionKey: string) => Promise<(() => void) | undefined>;
 
   // Sync operations
   syncNow: () => Promise<void>;
@@ -70,7 +69,7 @@ export interface UseSupabaseChatActions {
 // ============================================================================
 
 export function useSupabaseChat(): UseSupabaseChatState & UseSupabaseChatActions {
-  const { user } = useAuth();
+  const [user] = useState<{ id: string } | null>(null); // TODO: Implement actual auth context
   const [client, setClient] = useState<SupabaseDesktopClient | null>(null);
   const [syncQueue, setSyncQueue] = useState<OfflineSyncQueue | null>(null);
 

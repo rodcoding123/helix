@@ -210,7 +210,8 @@ export async function listen<T>(
     // Try to use real Tauri listen
     try {
       if (typeof window !== 'undefined' && (window as any).__TAURI_EVENT__?.listen) {
-        return (window as any).__TAURI_EVENT__.listen<T>(event, callback);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return (window as any).__TAURI_EVENT__.listen(event, callback);
       }
     } catch (err) {
       console.warn(`[Tauri Compat] Tauri listen failed for ${event}: ${err}`);

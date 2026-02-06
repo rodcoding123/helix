@@ -128,7 +128,7 @@ describe('OfflineSyncQueue - Unit Tests', () => {
       expect(queue.getStatus().queueLength).toBe(2);
     });
 
-    it('should notify listeners on status change', (done) => {
+    it('should notify listeners on status change', (done: () => void) => {
       queue.onStatusChange((status: SyncStatus) => {
         expect(status).toBeDefined();
         done();

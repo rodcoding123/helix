@@ -114,7 +114,7 @@ export class SupabaseDesktopClient {
           metadata: { idempotencyKey },
         };
 
-        const { data, error } = await this.supabase.from('session_messages').insert([message]);
+        const { error } = await this.supabase.from('session_messages').insert([message]);
 
         if (error) {
           throw error;

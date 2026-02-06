@@ -7,7 +7,7 @@ import { describe, it, expect } from 'vitest';
 
 describe('DesktopVoiceMemos', () => {
   // Mock Tauri invoke function
-  const mockInvoke = async (cmd: string, args?: any) => {
+  const mockInvoke = async (cmd: string, _args?: any) => {
     if (cmd === 'voice_get_memos') {
       return [
         {
