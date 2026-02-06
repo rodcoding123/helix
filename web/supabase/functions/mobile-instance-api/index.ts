@@ -61,7 +61,48 @@ async function verifyAuth(authHeader: string | null): Promise<string | null> {
 }
 
 /**
+ * Get user's current subscription tier (HIGH FIX 4.1)
+ * Defaults to 'core' (free tier) if no active subscription
+ */
+async function getUserTier(userId: string): Promise<string> {
+  try {
+    const { data, error } = await supabase
+      .from("subscriptions")
+      .select("tier")
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .single();
+
+    if (error || !data) {
+      return "core"; // Default tier
+    }
+
+    return data.tier || "core";
+  } catch {
+    return "core"; // Fail securely to core tier
+  }
+}
+
+/**
+ * Check if user has required tier access
+ */
+function hasAccess(userTier: string, requiredTier: string): boolean {
+  const tierLevels: Record<string, number> = {
+    core: 0,
+    phantom: 1,
+    overseer: 2,
+    architect: 3,
+  };
+
+  const userLevel = tierLevels[userTier] ?? 0;
+  const requiredLevel = tierLevels[requiredTier] ?? 0;
+
+  return userLevel >= requiredLevel;
+}
+
+/**
  * Create a new instance for a user
+ * HIGH FIX 4.1: Requires PHANTOM tier or higher
  */
 async function createInstance(req: CreateInstanceRequest) {
   const { user_id, name, instance_key } = req;
@@ -84,6 +125,20 @@ async function createInstance(req: CreateInstanceRequest) {
   }
 
   try {
+    // Verify user has tier access to create instances (HIGH FIX 4.1)
+    const userTier = await getUserTier(user_id);
+    if (!hasAccess(userTier, "phantom")) {
+      return {
+        status: 403,
+        body: {
+          error: "Insufficient tier",
+          message: "Instance creation requires Phantom tier or higher",
+          current_tier: userTier,
+          required_tier: "phantom",
+        },
+      };
+    }
+
     const { data, error } = await supabase
       .from("instances")
       .insert([
@@ -219,15 +274,34 @@ async function deleteInstance(req: DeleteInstanceRequest) {
   }
 }
 
+/**
+ * Build security headers response (MEDIUM FIX 4.1)
+ */
+function buildSecurityHeaders() {
+  return {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "https://helix-project.org",
+    "Access-Control-Allow-Methods": "POST, GET, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "authorization, content-type",
+    "Access-Control-Allow-Credentials": "true",
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "X-XSS-Protection": "1; mode=block",
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy":
+      "geolocation=(), microphone=(), camera=(), payment=()",
+  };
+}
+
 serve(async (req) => {
-  // CORS headers
+  const securityHeaders = buildSecurityHeaders();
+
+  // CORS preflight
   if (req.method === "OPTIONS") {
     return new Response("ok", {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, GET, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "authorization, content-type",
-      },
+      status: 204,
+      headers: securityHeaders,
     });
   }
 
@@ -240,10 +314,7 @@ serve(async (req) => {
     if (!userId && req.method !== "OPTIONS") {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
+        headers: securityHeaders,
       });
     }
 
@@ -264,10 +335,7 @@ serve(async (req) => {
       if (userIdParam !== userId) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
           status: 401,
-          headers: {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-          },
+          headers: securityHeaders,
         });
       }
 
@@ -286,28 +354,19 @@ serve(async (req) => {
     } else {
       return new Response(JSON.stringify({ error: "Method not allowed" }), {
         status: 405,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
+        headers: securityHeaders,
       });
     }
 
     return new Response(JSON.stringify(result.body), {
       status: result.status,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
+      headers: securityHeaders,
     });
   } catch (err) {
     console.error("Error:", err);
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
+      headers: securityHeaders,
     });
   }
 });
