@@ -103,6 +103,7 @@ export class CostTracker {
 
     try {
       // 1. Insert operation log (immutable)
+
       const { error: insertError } = await this.getSupabaseClient()
         .from('ai_operation_log')
         .insert({
@@ -118,7 +119,7 @@ export class CostTracker {
           success: operation.success,
           error_message: operation.error_message,
           created_at: timestamp,
-        });
+        } as never);
 
       if (insertError) throw insertError;
 
@@ -220,7 +221,7 @@ export class CostTracker {
           current_spend_today: newSpend,
           operations_today: newOperations,
           last_checked: new Date().toISOString(),
-        })
+        } as never)
         .eq('user_id', userId);
 
       if (error) throw error;
@@ -278,14 +279,16 @@ export class CostTracker {
    * Default: $50/day limit, $25/day warning threshold
    */
   private async createDefaultBudget(userId: string): Promise<void> {
-    const { error } = await this.getSupabaseClient().from('cost_budgets').insert({
-      user_id: userId,
-      daily_limit_usd: 50.0,
-      warning_threshold_usd: 25.0,
-      current_spend_today: 0,
-      operations_today: 0,
-      last_checked: new Date().toISOString(),
-    });
+    const { error } = await this.getSupabaseClient()
+      .from('cost_budgets')
+      .insert({
+        user_id: userId,
+        daily_limit_usd: 50.0,
+        warning_threshold_usd: 25.0,
+        current_spend_today: 0,
+        operations_today: 0,
+        last_checked: new Date().toISOString(),
+      } as never);
 
     if (error) throw error;
 
@@ -311,13 +314,14 @@ export class CostTracker {
 
       if (userId) {
         // Reset single user
+
         const { error } = await this.getSupabaseClient()
           .from('cost_budgets')
           .update({
             current_spend_today: 0,
             operations_today: 0,
             last_checked: timestamp,
-          })
+          } as never)
           .eq('user_id', userId);
 
         if (error) throw error;
@@ -332,11 +336,14 @@ export class CostTracker {
         });
       } else {
         // Reset all users (called by cron job)
-        const { error } = await this.getSupabaseClient().from('cost_budgets').update({
-          current_spend_today: 0,
-          operations_today: 0,
-          last_checked: timestamp,
-        });
+
+        const { error } = await this.getSupabaseClient()
+          .from('cost_budgets')
+          .update({
+            current_spend_today: 0,
+            operations_today: 0,
+            last_checked: timestamp,
+          } as never);
 
         if (error) throw error;
 

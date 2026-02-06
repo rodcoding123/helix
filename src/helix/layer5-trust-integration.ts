@@ -214,7 +214,7 @@ export class Layer5TrustIntegration {
 
         const { error: updateError } = await this.supabase
           .from('user_trust_profiles')
-          .update({ salience_multiplier: multiplier })
+          .update({ salience_multiplier: multiplier } as never)
           .eq('id', profile.id);
 
         if (!updateError) {
@@ -352,7 +352,7 @@ export class Layer5TrustIntegration {
     return {
       userId: row.user_id,
       compositeTrust: row.composite_trust,
-      attachmentStage: row.attachment_stage,
+      attachmentStage: row.attachment_stage as TrustProfile['attachmentStage'],
       salienceMultiplier: row.salience_multiplier,
       totalInteractions: row.total_interactions,
       highSalienceInteractions: row.high_salience_interactions,

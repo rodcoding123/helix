@@ -14,7 +14,7 @@
  *   }
  */
 
-import { circuitBreakers } from './circuit-breaker.js';
+import { circuitBreakers, type CircuitBreakerMetrics } from './circuit-breaker.js';
 import { operationQueue } from './operation-queue.js';
 import { randomUUID } from 'crypto';
 import type { DiscordPayload } from './types.js';
@@ -53,14 +53,16 @@ export async function resilientDiscordSend(
 
   try {
     // Try immediate send through circuit breaker
-    const result = await circuitBreakers.discord.execute(() => discordFetch(webhookUrl, payload));
+    const result = (await circuitBreakers.discord.execute(() =>
+      discordFetch(webhookUrl, payload)
+    )) as boolean;
 
     return {
       success: result,
       data: result,
       queued: false,
     };
-  } catch (circuitBreakerError) {
+  } catch {
     // Circuit breaker is open (Discord down)
     console.warn(
       `[Resilience] Discord circuit breaker open, queueing webhook operation ${operationId}`
@@ -69,7 +71,7 @@ export async function resilientDiscordSend(
     try {
       // Queue for later retry
       const priority = critical ? 'critical' : 'high';
-      await operationQueue.enqueue(
+      operationQueue.enqueue(
         operationId,
         'discord_webhook',
         {
@@ -135,12 +137,12 @@ export async function resilient1PasswordLoad(
 
   try {
     // Attempt load with timeout
-    const secret = await Promise.race([
+    const secret = (await Promise.race([
       circuitBreakers.onePassword.execute(() => loadSecretFromCLI(secretKey)),
       new Promise<string>((_, reject) =>
         setTimeout(() => reject(new Error(`Timeout after ${timeout}ms`)), timeout)
       ),
-    ]);
+    ])) as string;
 
     return {
       success: true,
@@ -186,12 +188,12 @@ export async function resilientPluginOperation<T>(
 
   try {
     // Execute with timeout through circuit breaker
-    const result = await Promise.race([
+    const result = (await Promise.race([
       circuitBreakers.plugins.execute(() => operation()),
       new Promise<T>((_, reject) =>
         setTimeout(() => reject(new Error(`Plugin timeout after ${timeout}ms`)), timeout)
       ),
-    ]);
+    ])) as T;
 
     return {
       success: true,
@@ -204,7 +206,7 @@ export async function resilientPluginOperation<T>(
     // Queue critical plugin operations for retry
     if (critical) {
       try {
-        await operationQueue.enqueue(
+        operationQueue.enqueue(
           operationId,
           'plugin_operation',
           {
@@ -220,7 +222,7 @@ export async function resilientPluginOperation<T>(
           queued: true,
           operationId,
         };
-      } catch (queueError) {
+      } catch {
         console.error('[Resilience] Failed to queue plugin operation');
       }
     }
@@ -238,7 +240,14 @@ export async function resilientPluginOperation<T>(
  *
  * Useful for health checks and monitoring.
  */
-export function getResilienceStatus() {
+export interface ResilienceStatus {
+  discord: CircuitBreakerMetrics & { queuedOperations: number };
+  onePassword: CircuitBreakerMetrics;
+  plugins: CircuitBreakerMetrics;
+  queue: { total: number; pending: number; processed: number; deadLetters: number };
+}
+
+export function getResilienceStatus(): ResilienceStatus {
   return {
     discord: {
       ...circuitBreakers.discord.getMetrics(),
@@ -265,9 +274,11 @@ export function resetResilienceState(includeQueue: boolean = false): void {
   circuitBreakers.plugins.reset();
 
   if (includeQueue) {
-    operationQueue.clearProcessed(0).catch(err => {
+    try {
+      operationQueue.clearProcessed(0);
+    } catch (err) {
       console.error('[Resilience] Failed to clear queue:', err);
-    });
+    }
   }
 
   console.log('[Resilience] State reset');

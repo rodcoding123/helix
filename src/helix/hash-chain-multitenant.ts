@@ -70,7 +70,6 @@ export interface TenantHashChainEntry {
 export class TenantHashChain {
   private tenantId: string;
   private entries: Map<number, TenantHashChainEntry> = new Map();
-  private lastHash: string = '0';
 
   constructor(tenantId: string) {
     if (!tenantId) {
@@ -128,7 +127,6 @@ export class TenantHashChain {
 
       // Update local state
       this.entries.set(index, entry);
-      this.lastHash = hash;
 
       return entry;
     } catch (error) {
@@ -289,7 +287,7 @@ export class TenantHashChain {
         return [];
       }
 
-      const rows = (result.data || []) as HashChainEntryRow[];
+      const rows = (result.data || []) as unknown as HashChainEntryRow[];
       return rows.map(row => ({
         index: row.index,
         tenantId: row.tenant_id,

@@ -531,9 +531,20 @@ export function getDiscordResilienceStatus(): ReturnType<typeof getResilienceSta
   } catch (error) {
     console.error('[Helix] Failed to get resilience status:', error);
     return {
-      discord: { state: 'unknown', error: String(error) },
-      onePassword: { state: 'unknown' },
-      plugins: { state: 'unknown' },
+      discord: {
+        state: 'open' as const,
+        failures: 0,
+        successes: 0,
+        lastStateChange: Date.now(),
+        queuedOperations: 0,
+      },
+      onePassword: {
+        state: 'open' as const,
+        failures: 0,
+        successes: 0,
+        lastStateChange: Date.now(),
+      },
+      plugins: { state: 'open' as const, failures: 0, successes: 0, lastStateChange: Date.now() },
       queue: { total: 0, pending: 0, processed: 0, deadLetters: 0 },
     };
   }

@@ -38,7 +38,6 @@ export interface PerformanceProfile {
  */
 export class MemoryProfiler {
   private snapshots: MemoryMetrics[] = [];
-  private heapSnapshotPath = '.helix-state/heap-snapshots';
 
   /**
    * Capture current memory metrics

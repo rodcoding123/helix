@@ -49,7 +49,7 @@ export async function getUserTier(
     }
 
     // Validate tier is a known value
-    const tier = data.tier as SubscriptionTier;
+    const tier = (data as Record<string, unknown>).tier as SubscriptionTier;
     if (!Object.values(SubscriptionTier).includes(tier)) {
       return SubscriptionTier.CORE;
     }

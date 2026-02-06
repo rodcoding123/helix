@@ -160,7 +160,7 @@ export class SupabaseCheckpointer implements ICheckpointer {
       //   timestamp: Date.now(),
       // });
 
-      this.logger?.debug(`Checkpoint saved: ${checkpoint.checkpoint_id}`);
+      this.logger?.debug?.(`Checkpoint saved: ${checkpoint.checkpoint_id}`);
     } catch (err) {
       this.logger?.error(`Checkpoint save failed: ${String(err)}`);
       throw err;
@@ -275,7 +275,7 @@ export class SupabaseCheckpointer implements ICheckpointer {
         throw new Error(`Failed to delete checkpoint: ${error.message}`);
       }
 
-      this.logger?.debug(`Checkpoint deleted: ${checkpointId}`);
+      this.logger?.debug?.(`Checkpoint deleted: ${checkpointId}`);
     } catch (err) {
       this.logger?.error(`Checkpoint delete failed: ${String(err)}`);
       throw err;

@@ -102,7 +102,7 @@ export class TenantDiscordLogger {
         return;
       }
 
-      this.webhookUrl = data.webhook_url;
+      this.webhookUrl = data.webhook_url as string;
       this.initialized = true;
     } catch (error) {
       console.error('Failed to initialize Discord logger:', error);
@@ -346,7 +346,6 @@ export function getDiscordLoggerForTenant(tenantId: string): TenantDiscordLogger
  */
 export class GlobalDiscordLogger {
   private webhookUrl: string | null = null;
-  private initialized = false;
 
   constructor(webhookUrl?: string) {
     this.webhookUrl = webhookUrl || null;
@@ -354,7 +353,6 @@ export class GlobalDiscordLogger {
 
   initialize(webhookUrl: string): void {
     this.webhookUrl = webhookUrl;
-    this.initialized = true;
   }
 
   async log(message: {

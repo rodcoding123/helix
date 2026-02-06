@@ -315,6 +315,9 @@ export class EncryptedSecretsCache {
 
           // Re-encrypt with new key
           const nonce = randomBytes(12);
+          if (!this.masterKey) {
+            throw new Error('Master key not available for rotation');
+          }
           const reencrypted = encryptWithKey(plaintext, this.masterKey, nonce);
 
           // Update cache entry

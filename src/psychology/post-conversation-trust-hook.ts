@@ -200,7 +200,7 @@ export class PostConversationTrustHook {
 
       const { error } = await this.supabase
         .from('conversations')
-        .update(updateObj)
+        .update(updateObj as never)
         .eq('id', conversationId);
 
       if (error) {

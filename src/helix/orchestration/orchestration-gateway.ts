@@ -52,6 +52,7 @@ export interface OrchestratorStatsResponse {
   failed: number;
   total_cost_cents: number;
   avg_execution_time_ms: number;
+  error?: string;
 }
 
 /**
@@ -61,6 +62,7 @@ export interface RecentJobsResponse {
   success: boolean;
   jobs: OrchestratorJob[];
   count: number;
+  error?: string;
 }
 
 /**
@@ -70,6 +72,7 @@ export interface JobExecutionTimelineResponse {
   success: boolean;
   job_id: string;
   timeline: Array<{ timestamp: number; event: string }>;
+  error?: string;
 }
 
 /**
@@ -339,7 +342,7 @@ async function processOrchestratorJob(
     //   completed_at: Date.now(),
     // }).eq('job_id', jobId);
   } catch (error) {
-    logger?.error(`Orchestrator job failed: ${jobId}`, error);
+    logger?.error(`Orchestrator job failed: ${jobId} - ${String(error)}`);
 
     // Update job with error
     // await supabase.from('agent_jobs').update({

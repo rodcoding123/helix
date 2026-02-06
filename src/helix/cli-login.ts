@@ -243,7 +243,7 @@ function startCallbackServer(): Promise<{
   });
 }
 
-function buildAuthUrl(supabaseUrl: string, anonKey: string, redirectUri: string): string {
+function buildAuthUrl(supabaseUrl: string, _anonKey: string, redirectUri: string): string {
   const params = new URLSearchParams({
     provider: 'github',
     redirect_to: redirectUri,

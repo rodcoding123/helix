@@ -215,7 +215,7 @@ export class TrustProfileManager {
    */
   async saveToDatabse(profile: TrustProfile): Promise<void> {
     try {
-      const profileData: Record<string, string | number | boolean | null> = {
+      const profileData: Record<string, string | number | boolean | null | undefined> = {
         user_id: profile.userId,
         email: profile.email,
         role: profile.role,
@@ -249,7 +249,9 @@ export class TrustProfileManager {
         updated_at: new Date().toISOString(),
       };
 
-      const { error } = await this.supabase.from('user_trust_profiles').upsert(profileData);
+      const { error } = await this.supabase
+        .from('user_trust_profiles')
+        .upsert(profileData as never);
 
       if (error) {
         throw error;
