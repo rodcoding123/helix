@@ -8,7 +8,6 @@
  * Created: 2026-02-04
  */
 
-// @ts-nocheck - Supabase types not generated, will be fixed in production
 import { createClient } from '@supabase/supabase-js';
 import { logToDiscord } from '../logging.js';
 import { hashChain } from '../hash-chain.js';
@@ -36,6 +35,24 @@ export interface DailyMetrics {
   failed_operations: number;
   average_latency_ms: number;
   average_quality_score: number;
+}
+
+export interface DailyBudget {
+  user_id: string;
+  daily_limit_usd: number;
+  warning_threshold_usd: number;
+  current_spend_today: number;
+  operations_today: number;
+  last_checked?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface SpendingHistoryEntry {
+  user_id: string;
+  date: string;
+  total_cost: number;
+  operation_count: number;
 }
 
 /**
@@ -112,7 +129,7 @@ export class CostTracker {
         // 3. Check for budget overrun
         const budget = await this.getDailyBudget(userId);
         if (budget.current_spend_today > budget.daily_limit_usd) {
-          await logToDiscord({
+          logToDiscord({
             channel: 'helix-alerts',
             type: 'budget_overrun',
             userId,
@@ -126,7 +143,7 @@ export class CostTracker {
 
       // 4. Log operation to Discord
       if (operation.success) {
-        await logToDiscord({
+        logToDiscord({
           channel: 'helix-api',
           type: 'operation_success',
           operation: operation.operation_id,
@@ -137,7 +154,7 @@ export class CostTracker {
           userId,
         });
       } else {
-        await logToDiscord({
+        logToDiscord({
           channel: 'helix-alerts',
           type: 'operation_failed',
           operation: operation.operation_id,
@@ -159,7 +176,7 @@ export class CostTracker {
       });
     } catch (error) {
       // Failed to log operation - this is critical
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-alerts',
         type: 'operation_log_failed',
         operation: operation.operation_id,
@@ -179,13 +196,13 @@ export class CostTracker {
    * - operations_today += 1
    * - last_checked = now()
    */
-  private async updateBudget(userId: string, costUsd: number, success: boolean): Promise<void> {
+  private async updateBudget(userId: string, costUsd: number, _success: boolean): Promise<void> {
     try {
       // Get current budget
       const budget = await this.getDailyBudget(userId);
 
       // Check if we need to reset (new day)
-      if (this.isNewDay(new Date(budget.last_checked))) {
+      if (budget.last_checked && this.isNewDay(new Date(budget.last_checked))) {
         await this.resetDailyMetrics(userId);
         // Refetch after reset
         const newBudget = await this.getDailyBudget(userId);
@@ -211,7 +228,7 @@ export class CostTracker {
       // Invalidate cache
       this.dailyMetricsCache.delete(userId);
     } catch (error) {
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-alerts',
         type: 'budget_update_failed',
         userId,
@@ -226,7 +243,7 @@ export class CostTracker {
    *
    * If user doesn't exist, creates default budget
    */
-  async getDailyBudget(userId: string): Promise<any> {
+  async getDailyBudget(userId: string): Promise<DailyBudget> {
     try {
       const { data, error } = await this.getSupabaseClient()
         .from('cost_budgets')
@@ -243,9 +260,9 @@ export class CostTracker {
         throw error;
       }
 
-      return data;
+      return data as DailyBudget;
     } catch (error) {
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-alerts',
         type: 'budget_fetch_failed',
         userId,
@@ -272,7 +289,7 @@ export class CostTracker {
 
     if (error) throw error;
 
-    await logToDiscord({
+    logToDiscord({
       channel: 'helix-api',
       type: 'budget_created',
       userId,
@@ -307,7 +324,7 @@ export class CostTracker {
 
         this.dailyMetricsCache.delete(userId);
 
-        await logToDiscord({
+        logToDiscord({
           channel: 'helix-api',
           type: 'daily_metrics_reset',
           userId,
@@ -325,14 +342,14 @@ export class CostTracker {
 
         this.dailyMetricsCache.clear();
 
-        await logToDiscord({
+        logToDiscord({
           channel: 'helix-api',
           type: 'daily_metrics_reset_all',
           timestamp,
         });
       }
     } catch (error) {
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-alerts',
         type: 'daily_metrics_reset_failed',
         userId,
@@ -350,7 +367,7 @@ export class CostTracker {
       const budget = await this.getDailyBudget(userId);
       return budget.current_spend_today;
     } catch (error) {
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-alerts',
         type: 'daily_spend_fetch_failed',
         userId,
@@ -376,9 +393,9 @@ export class CostTracker {
 
       if (error) throw error;
 
-      return data || [];
+      return (data as DailyMetrics[]) || [];
     } catch (error) {
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-alerts',
         type: 'metrics_fetch_failed',
         date,
@@ -393,7 +410,7 @@ export class CostTracker {
    *
    * Returns last N days of metrics
    */
-  async getUserSpendingHistory(userId: string, days: number = 7): Promise<any[]> {
+  async getUserSpendingHistory(userId: string, days: number = 7): Promise<SpendingHistoryEntry[]> {
     try {
       const { data, error } = await this.getSupabaseClient()
         .from('v_cost_by_user')
@@ -403,9 +420,9 @@ export class CostTracker {
 
       if (error) throw error;
 
-      return data || [];
+      return (data as SpendingHistoryEntry[]) || [];
     } catch (error) {
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-alerts',
         type: 'spending_history_fetch_failed',
         userId,
@@ -435,7 +452,7 @@ export class CostTracker {
 
       // Calculate averages
       const avgSpend = history.reduce((sum, h) => sum + (h.total_cost || 0), 0) / history.length;
-      const avgOps = history.reduce((sum, h) => sum + (h.operations || 0), 0) / history.length;
+      const avgOps = history.reduce((sum, h) => sum + (h.operation_count || 0), 0) / history.length;
 
       // Get today's metrics
       const todayMetrics = await this.getDailyMetrics();
@@ -458,7 +475,7 @@ export class CostTracker {
       }
 
       if (alerts.length > 0) {
-        await logToDiscord({
+        logToDiscord({
           channel: 'helix-alerts',
           type: 'spending_anomaly_detected',
           userId,
@@ -468,7 +485,7 @@ export class CostTracker {
 
       return alerts;
     } catch (error) {
-      await logToDiscord({
+      logToDiscord({
         channel: 'helix-alerts',
         type: 'anomaly_detection_failed',
         userId,
