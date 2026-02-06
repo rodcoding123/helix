@@ -769,6 +769,9 @@ describe('Heartbeat - Uncovered Edge Cases', () => {
     // Test line 42: error logging in sendWebhook catch block
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
+    // Set webhook URL so sendWebhook doesn't return early
+    process.env.DISCORD_WEBHOOK_HEARTBEAT = 'https://example.com/webhook-test';
+
     // Mock fetch to fail
     const mockFetch = vi.fn().mockRejectedValue(new Error('Connection refused'));
     vi.stubGlobal('fetch', mockFetch);
