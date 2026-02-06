@@ -1,7 +1,4 @@
 /* @ts-nocheck */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 
 /**
  * Unit Tests: Orchestration Agents (Phase 2 Modules)

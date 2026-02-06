@@ -49,11 +49,7 @@ export class MemoryScheduler {
   private jobs: cron.ScheduledTask[] = [];
   private isInitialized = false;
 
-  constructor(
-    supabaseUrl: string,
-    supabaseKey: string,
-    config: Partial<SchedulerConfig> = {}
-  ) {
+  constructor(supabaseUrl: string, supabaseKey: string, config: Partial<SchedulerConfig> = {}) {
     this.supabase = createClient(supabaseUrl, supabaseKey);
     this.config = { ...DEFAULT_CONFIG, ...config };
   }
@@ -141,10 +137,12 @@ export class MemoryScheduler {
 
         // Apply exponential decay: salience *= 0.95
         const decayRate = 0.95;
-        const updates = (oldConversations as Array<{ id: string; salience_score: number }>).map(conv => ({
-          id: conv.id,
-          salience_score: Math.max(0.1, conv.salience_score * decayRate),
-        }));
+        const updates = (oldConversations as Array<{ id: string; salience_score: number }>).map(
+          conv => ({
+            id: conv.id,
+            salience_score: Math.max(0.1, conv.salience_score * decayRate),
+          })
+        );
 
         // Batch update
         for (const update of updates) {

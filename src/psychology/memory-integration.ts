@@ -296,10 +296,7 @@ export class MemoryIntegration {
    * 6. Rename temp to original (atomic)
    * 7. Release lock
    */
-  private async atomicFileUpdate(
-    filePath: string,
-    updateFn: (current: any) => any
-  ): Promise<void> {
+  private async atomicFileUpdate(filePath: string, updateFn: (current: any) => any): Promise<void> {
     let acquired = false;
 
     try {

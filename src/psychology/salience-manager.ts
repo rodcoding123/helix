@@ -181,10 +181,7 @@ export class SalienceManager {
   /**
    * Search memories by emotional tag
    */
-  async searchByEmotionalTag(
-    userId: string,
-    tag: string
-  ): Promise<ConversationMemory[]> {
+  async searchByEmotionalTag(userId: string, tag: string): Promise<ConversationMemory[]> {
     const { data, error } = await this.supabase
       .from('conversation_memories')
       .select('*')
@@ -206,11 +203,7 @@ export class SalienceManager {
       .from('conversation_memories')
       .select('*')
       .eq('userId', userId)
-      .filter(
-        'synthesisResult->goalMentions',
-        'cs',
-        JSON.stringify([{ goal: goalKeyword }])
-      );
+      .filter('synthesisResult->goalMentions', 'cs', JSON.stringify([{ goal: goalKeyword }]));
 
     if (error) {
       throw new Error(`Failed to search memories: ${error.message}`);

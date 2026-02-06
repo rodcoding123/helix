@@ -4,7 +4,7 @@
  */
 
 /* @ts-nocheck */
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-argument,@typescript-eslint/require-await,@typescript-eslint/no-unused-vars,@typescript-eslint/explicit-function-return-type,@typescript-eslint/no-unsafe-function-type,@typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-argument,@typescript-eslint/require-await,@typescript-eslint/no-unused-vars,@typescript-eslint/explicit-function-return-type,@typescript-eslint/no-unsafe-function-type,@typescript-eslint/no-explicit-any */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { ICheckpointer, Checkpoint } from './checkpointer.js';
@@ -34,8 +34,8 @@ vi.mock('./agents.js', () => ({
     memoryAgent: { provider: 'anthropic', model: 'claude-opus-4.5' },
     purposeAgent: { provider: 'anthropic', model: 'claude-opus-4.5' },
     actionAgent: { provider: 'anthropic', model: 'claude-opus-4.5' },
-        approvalMode: 'budget',
-        enableCheckpointing: true,
+    approvalMode: 'budget',
+    enableCheckpointing: true,
   } as OrchestratorConfig,
 }));
 
@@ -187,7 +187,11 @@ describe('Supervisor Graph', () => {
     it('should use provided thread ID', async () => {
       const { createInitialState } = await import('./agents.js');
       vi.mocked(createInitialState).mockReturnValue({
-        task: 'test', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100,
+        task: 'test',
+        messages: [],
+        startTime: Date.now(),
+        budget_cents: 100,
+        budget_remaining_cents: 100,
       } as any);
 
       const threadId = 'custom-thread-123';
@@ -199,7 +203,11 @@ describe('Supervisor Graph', () => {
     it('should generate thread ID if not provided', async () => {
       const { createInitialState } = await import('./agents.js');
       vi.mocked(createInitialState).mockReturnValue({
-        task: 'test', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100,
+        task: 'test',
+        messages: [],
+        startTime: Date.now(),
+        budget_cents: 100,
+        budget_remaining_cents: 100,
       } as any);
 
       const result = await runOrchestrator('test task');
@@ -210,7 +218,11 @@ describe('Supervisor Graph', () => {
     it('should accept custom configuration', async () => {
       const { createInitialState } = await import('./agents.js');
       vi.mocked(createInitialState).mockReturnValue({
-        task: 'test', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100,
+        task: 'test',
+        messages: [],
+        startTime: Date.now(),
+        budget_cents: 100,
+        budget_remaining_cents: 100,
       } as any);
 
       const customConfig: Partial<OrchestratorConfig> = {
@@ -225,7 +237,11 @@ describe('Supervisor Graph', () => {
     it('should accept checkpointer', async () => {
       const { createInitialState } = await import('./agents.js');
       vi.mocked(createInitialState).mockReturnValue({
-        task: 'test', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100,
+        task: 'test',
+        messages: [],
+        startTime: Date.now(),
+        budget_cents: 100,
+        budget_remaining_cents: 100,
       } as any);
 
       const result = await runOrchestrator('test task', {
@@ -238,7 +254,11 @@ describe('Supervisor Graph', () => {
     it('should accept executor', async () => {
       const { createInitialState } = await import('./agents.js');
       vi.mocked(createInitialState).mockReturnValue({
-        task: 'test', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100,
+        task: 'test',
+        messages: [],
+        startTime: Date.now(),
+        budget_cents: 100,
+        budget_remaining_cents: 100,
       } as any);
 
       const result = await runOrchestrator('test task', {
@@ -252,7 +272,11 @@ describe('Supervisor Graph', () => {
       const { createInitialState } = await import('./agents.js');
       // @ts-expect-error Test mock with partial state object
       const expectedState = {
-        task: 'test task', messages: [{ role: 'assistant', content: 'final result' }], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100,
+        task: 'test task',
+        messages: [{ role: 'assistant', content: 'final result' }],
+        startTime: Date.now(),
+        budget_cents: 100,
+        budget_remaining_cents: 100,
       };
 
       vi.mocked(createInitialState).mockReturnValue(expectedState);
@@ -267,7 +291,11 @@ describe('Supervisor Graph', () => {
     it('should stream orchestrator execution', async () => {
       const { createInitialState } = await import('./agents.js');
       vi.mocked(createInitialState).mockReturnValue({
-        task: 'test', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100,
+        task: 'test',
+        messages: [],
+        startTime: Date.now(),
+        budget_cents: 100,
+        budget_remaining_cents: 100,
       } as any);
 
       let callCount = 0;
@@ -284,7 +312,11 @@ describe('Supervisor Graph', () => {
     it('should call callback for each node', async () => {
       const { createInitialState } = await import('./agents.js');
       vi.mocked(createInitialState).mockReturnValue({
-        task: 'test', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100,
+        task: 'test',
+        messages: [],
+        startTime: Date.now(),
+        budget_cents: 100,
+        budget_remaining_cents: 100,
       } as any);
 
       const callback = vi.fn();
@@ -297,7 +329,11 @@ describe('Supervisor Graph', () => {
     it('should provide node name and state to callback', async () => {
       const { createInitialState } = await import('./agents.js');
       const initialState = {
-        task: 'test task', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100,
+        task: 'test task',
+        messages: [],
+        startTime: Date.now(),
+        budget_cents: 100,
+        budget_remaining_cents: 100,
       } as OrchestratorState;
 
       vi.mocked(createInitialState).mockReturnValue(initialState);
@@ -317,7 +353,11 @@ describe('Supervisor Graph', () => {
     it('should work without callback', async () => {
       const { createInitialState } = await import('./agents.js');
       vi.mocked(createInitialState).mockReturnValue({
-        task: 'test', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100,
+        task: 'test',
+        messages: [],
+        startTime: Date.now(),
+        budget_cents: 100,
+        budget_remaining_cents: 100,
       } as any);
 
       const result = await streamOrchestrator('test task');
@@ -328,7 +368,11 @@ describe('Supervisor Graph', () => {
     it('should return final state', async () => {
       const { createInitialState } = await import('./agents.js');
       const expectedState = {
-        task: 'test task', messages: [{ role: 'user', content: 'input' }], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100,
+        task: 'test task',
+        messages: [{ role: 'user', content: 'input' }],
+        startTime: Date.now(),
+        budget_cents: 100,
+        budget_remaining_cents: 100,
       } as OrchestratorState;
 
       vi.mocked(createInitialState).mockReturnValue(expectedState);
@@ -341,7 +385,11 @@ describe('Supervisor Graph', () => {
     it('should accept options', async () => {
       const { createInitialState } = await import('./agents.js');
       vi.mocked(createInitialState).mockReturnValue({
-        task: 'test', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100,
+        task: 'test',
+        messages: [],
+        startTime: Date.now(),
+        budget_cents: 100,
+        budget_remaining_cents: 100,
       } as any);
 
       const result = await streamOrchestrator('test task', undefined, {
@@ -355,7 +403,11 @@ describe('Supervisor Graph', () => {
     it('should track intermediate states', async () => {
       const { createInitialState } = await import('./agents.js');
       vi.mocked(createInitialState).mockReturnValue({
-        task: 'test', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100,
+        task: 'test',
+        messages: [],
+        startTime: Date.now(),
+        budget_cents: 100,
+        budget_remaining_cents: 100,
       } as any);
 
       const states: OrchestratorState[] = [];
@@ -389,7 +441,13 @@ describe('Supervisor Graph', () => {
         checkpoint_id: 'cp-123',
         thread_id: 'thread-1',
         parent_checkpoint_id: null,
-        state: { task: 'resumed task', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100},
+        state: {
+          task: 'resumed task',
+          messages: [],
+          startTime: Date.now(),
+          budget_cents: 100,
+          budget_remaining_cents: 100,
+        },
         timestamp: Date.now(),
         hash: 'hash123',
       };
@@ -404,7 +462,11 @@ describe('Supervisor Graph', () => {
 
     it('should resume from checkpoint state', async () => {
       const checkpointState: OrchestratorState = {
-        task: 'resumed from checkpoint', messages: [{ role: 'assistant', content: 'partial result' }], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100,
+        task: 'resumed from checkpoint',
+        messages: [{ role: 'assistant', content: 'partial result' }],
+        startTime: Date.now(),
+        budget_cents: 100,
+        budget_remaining_cents: 100,
       };
 
       const checkpoint: Checkpoint<OrchestratorState> = {
@@ -428,7 +490,13 @@ describe('Supervisor Graph', () => {
         checkpoint_id: 'cp-789',
         thread_id: 'original-thread-id',
         parent_checkpoint_id: null,
-        state: { task: 'test', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100},
+        state: {
+          task: 'test',
+          messages: [],
+          startTime: Date.now(),
+          budget_cents: 100,
+          budget_remaining_cents: 100,
+        },
         timestamp: Date.now(),
         hash: 'hash789',
       };
@@ -445,7 +513,13 @@ describe('Supervisor Graph', () => {
         checkpoint_id: 'cp-999',
         thread_id: 'thread-3',
         parent_checkpoint_id: null,
-        state: { task: 'test', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100},
+        state: {
+          task: 'test',
+          messages: [],
+          startTime: Date.now(),
+          budget_cents: 100,
+          budget_remaining_cents: 100,
+        },
         timestamp: Date.now(),
         hash: 'hash999',
       };
@@ -476,7 +550,13 @@ describe('Supervisor Graph', () => {
           checkpoint_id: 'cp-1',
           thread_id: 'thread-hist',
           parent_checkpoint_id: null,
-          state: { task: 'step 1', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100},
+          state: {
+            task: 'step 1',
+            messages: [],
+            startTime: Date.now(),
+            budget_cents: 100,
+            budget_remaining_cents: 100,
+          },
           timestamp: Date.now(),
           hash: 'h1',
         },
@@ -484,7 +564,13 @@ describe('Supervisor Graph', () => {
           checkpoint_id: 'cp-2',
           thread_id: 'thread-hist',
           parent_checkpoint_id: 'cp-1',
-          state: { task: 'step 2', messages: [{ role: 'user', content: 'input' }], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100},
+          state: {
+            task: 'step 2',
+            messages: [{ role: 'user', content: 'input' }],
+            startTime: Date.now(),
+            budget_cents: 100,
+            budget_remaining_cents: 100,
+          },
           timestamp: Date.now() + 1000,
           hash: 'h2',
         },
@@ -501,10 +587,14 @@ describe('Supervisor Graph', () => {
 
     it('should preserve state in history', async () => {
       const state: OrchestratorState = {
-        task: 'preserved task', messages: [
+        task: 'preserved task',
+        messages: [
           { role: 'user', content: 'query' },
           { role: 'assistant', content: 'response' },
-        ], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100,
+        ],
+        startTime: Date.now(),
+        budget_cents: 100,
+        budget_remaining_cents: 100,
       };
 
       const checkpoint: Checkpoint<OrchestratorState> = {
@@ -537,7 +627,13 @@ describe('Supervisor Graph', () => {
           checkpoint_id: 'cp-a',
           thread_id: 'thread-order',
           parent_checkpoint_id: null,
-          state: { task: 'a', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100},
+          state: {
+            task: 'a',
+            messages: [],
+            startTime: Date.now(),
+            budget_cents: 100,
+            budget_remaining_cents: 100,
+          },
           timestamp: 1000,
           hash: 'ha',
         },
@@ -545,7 +641,13 @@ describe('Supervisor Graph', () => {
           checkpoint_id: 'cp-b',
           thread_id: 'thread-order',
           parent_checkpoint_id: 'cp-a',
-          state: { task: 'b', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100},
+          state: {
+            task: 'b',
+            messages: [],
+            startTime: Date.now(),
+            budget_cents: 100,
+            budget_remaining_cents: 100,
+          },
           timestamp: 2000,
           hash: 'hb',
         },
@@ -553,7 +655,13 @@ describe('Supervisor Graph', () => {
           checkpoint_id: 'cp-c',
           thread_id: 'thread-order',
           parent_checkpoint_id: 'cp-b',
-          state: { task: 'c', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100},
+          state: {
+            task: 'c',
+            messages: [],
+            startTime: Date.now(),
+            budget_cents: 100,
+            budget_remaining_cents: 100,
+          },
           timestamp: 3000,
           hash: 'hc',
         },
@@ -571,7 +679,11 @@ describe('Supervisor Graph', () => {
     it('should run task with two different configurations', async () => {
       const { createInitialState } = await import('./agents.js');
       vi.mocked(createInitialState).mockReturnValue({
-        task: 'compare task', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100,
+        task: 'compare task',
+        messages: [],
+        startTime: Date.now(),
+        budget_cents: 100,
+        budget_remaining_cents: 100,
       } as any);
 
       const config1: OrchestratorConfig = {
@@ -604,7 +716,11 @@ describe('Supervisor Graph', () => {
     it('should return results from both paths', async () => {
       const { createInitialState } = await import('./agents.js');
       const state: OrchestratorState = {
-        task: 'compare', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100,
+        task: 'compare',
+        messages: [],
+        startTime: Date.now(),
+        budget_cents: 100,
+        budget_remaining_cents: 100,
       };
 
       vi.mocked(createInitialState).mockReturnValue(state);
@@ -628,7 +744,11 @@ describe('Supervisor Graph', () => {
     it('should use different thread IDs for each path', async () => {
       const { createInitialState } = await import('./agents.js');
       vi.mocked(createInitialState).mockReturnValue({
-        task: 'test', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100,
+        task: 'test',
+        messages: [],
+        startTime: Date.now(),
+        budget_cents: 100,
+        budget_remaining_cents: 100,
       } as any);
 
       const config1: OrchestratorConfig = {
@@ -649,7 +769,11 @@ describe('Supervisor Graph', () => {
     it('should preserve task in both paths', async () => {
       const { createInitialState } = await import('./agents.js');
       const state: OrchestratorState = {
-        task: 'preserved task', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100,
+        task: 'preserved task',
+        messages: [],
+        startTime: Date.now(),
+        budget_cents: 100,
+        budget_remaining_cents: 100,
       };
 
       vi.mocked(createInitialState).mockReturnValue(state);
@@ -776,7 +900,11 @@ describe('Supervisor Graph', () => {
     it('should create and execute complete workflow', async () => {
       const { createInitialState } = await import('./agents.js');
       vi.mocked(createInitialState).mockReturnValue({
-        task: 'integration test', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100,
+        task: 'integration test',
+        messages: [],
+        startTime: Date.now(),
+        budget_cents: 100,
+        budget_remaining_cents: 100,
       } as any);
 
       const graph = createSupervisorGraph({}, mockCheckpointer, mockExecutor);
@@ -787,7 +915,11 @@ describe('Supervisor Graph', () => {
     it('should flow through supervisor → agent → END', async () => {
       const { createInitialState } = await import('./agents.js');
       vi.mocked(createInitialState).mockReturnValue({
-        task: 'flow test', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100,
+        task: 'flow test',
+        messages: [],
+        startTime: Date.now(),
+        budget_cents: 100,
+        budget_remaining_cents: 100,
       } as any);
 
       const result = await runOrchestrator('flow test', {
@@ -802,7 +934,13 @@ describe('Supervisor Graph', () => {
         checkpoint_id: 'cp-resume-test',
         thread_id: 'resume-thread',
         parent_checkpoint_id: null,
-        state: { task: 'resumed task', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100},
+        state: {
+          task: 'resumed task',
+          messages: [],
+          startTime: Date.now(),
+          budget_cents: 100,
+          budget_remaining_cents: 100,
+        },
         timestamp: Date.now(),
         hash: 'hash-resume',
       };
@@ -820,7 +958,11 @@ describe('Supervisor Graph', () => {
     it('should handle multi-config comparison', async () => {
       const { createInitialState } = await import('./agents.js');
       vi.mocked(createInitialState).mockReturnValue({
-        task: 'comparison test', messages: [], startTime: Date.now(), budget_cents: 100, budget_remaining_cents: 100,
+        task: 'comparison test',
+        messages: [],
+        startTime: Date.now(),
+        budget_cents: 100,
+        budget_remaining_cents: 100,
       } as any);
 
       const config1: OrchestratorConfig = {

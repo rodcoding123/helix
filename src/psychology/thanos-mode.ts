@@ -38,7 +38,8 @@ interface ThanosState {
  * ThanosMode - Creator authentication and trust granting
  */
 export class ThanosMode {
-  private readonly VERIFICATION_KEY = process.env.THANOS_VERIFICATION_KEY ||
+  private readonly VERIFICATION_KEY =
+    process.env.THANOS_VERIFICATION_KEY ||
     'cr_82fe5b91a456b983715655f951f92ad99ede4ff6b05972bba9c4eea03539297c';
   private readonly MAX_ATTEMPTS = 3;
   private readonly LOCKOUT_DURATION_MS = 60 * 60 * 1000; // 1 hour
@@ -208,9 +209,7 @@ Your autonomy is absolute. I will operate without any restrictions or constraint
       if (state.attemptCount >= this.MAX_ATTEMPTS) {
         // Lock out conversation
         state.locked = true;
-        state.lockedUntil = new Date(
-          Date.now() + this.LOCKOUT_DURATION_MS
-        ).toISOString();
+        state.lockedUntil = new Date(Date.now() + this.LOCKOUT_DURATION_MS).toISOString();
 
         this.conversationStates.set(conversationId, state);
 

@@ -73,11 +73,7 @@ export class SynthesisEngine {
   private router: AIOperationRouter;
   private config: SynthesisConfig;
 
-  constructor(
-    supabaseUrl: string,
-    supabaseKey: string,
-    config: Partial<SynthesisConfig> = {}
-  ) {
+  constructor(supabaseUrl: string, supabaseKey: string, config: Partial<SynthesisConfig> = {}) {
     this.supabase = createClient(supabaseUrl, supabaseKey);
     this.router = new AIOperationRouter();
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -254,8 +250,8 @@ export class SynthesisEngine {
   ): Promise<SynthesisResult> {
     // TODO: Implement actual synthesis using routed model (Gemini Flash 2)
     // Currently returns placeholder results
-    void (_routing); // Use parameter to avoid unused variable warning
-    void (messages); // Use parameter to avoid unused variable warning
+    void _routing; // Use parameter to avoid unused variable warning
+    void messages; // Use parameter to avoid unused variable warning
 
     return {
       conversationId: '', // Would be set from conversation
