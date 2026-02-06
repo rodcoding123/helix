@@ -12,7 +12,10 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import type { FileChangeLog, DiscordEmbed } from './types.js';
 
-const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK_FILE_CHANGES;
+// H4: Lazy load webhook URL (only on first use, not at module import time)
+function getDiscordWebhook(): string | undefined {
+  return process.env.DISCORD_WEBHOOK_FILE_CHANGES;
+}
 
 // Directories to watch
 const WATCH_DIRS = [
@@ -44,9 +47,10 @@ const watchers: fs.FSWatcher[] = [];
  * Send webhook to Discord
  */
 async function sendWebhook(embed: DiscordEmbed): Promise<void> {
-  if (!DISCORD_WEBHOOK) return;
+  const webhook = getDiscordWebhook();
+  if (!webhook) return;
 
-  await fetch(DISCORD_WEBHOOK, {
+  await fetch(webhook, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ embeds: [embed] }),

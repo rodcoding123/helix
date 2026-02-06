@@ -9,7 +9,10 @@
 import crypto from 'node:crypto';
 import type { ApiPreFlightLog, ApiResponseLog, DiscordEmbed } from './types.js';
 
-const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK_API;
+// H4: Lazy load webhook URL (only on first use, not at module import time)
+function getDiscordWebhook(): string | undefined {
+  return process.env.DISCORD_WEBHOOK_API;
+}
 
 interface ApiLogState {
   pending: Map<string, ApiPreFlightLog>;
@@ -27,9 +30,10 @@ const state: ApiLogState = {
  * Send webhook to Discord
  */
 async function sendWebhook(embed: DiscordEmbed, sync: boolean = true): Promise<void> {
-  if (!DISCORD_WEBHOOK) return;
+  const webhook = getDiscordWebhook();
+  if (!webhook) return;
 
-  const sendPromise = fetch(DISCORD_WEBHOOK, {
+  const sendPromise = fetch(webhook, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ embeds: [embed] }),

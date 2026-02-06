@@ -15,7 +15,11 @@
 import os from 'node:os';
 import type { DiscordEmbed } from './types.js';
 
-const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK_HEARTBEAT;
+// H4: Lazy load webhook URL (only on first use, not at module import time)
+function getDiscordWebhook(): string | undefined {
+  return process.env.DISCORD_WEBHOOK_HEARTBEAT;
+}
+
 const HEARTBEAT_INTERVAL = 60 * 1000; // 60 seconds
 
 let heartbeatInterval: NodeJS.Timeout | null = null;
@@ -26,7 +30,8 @@ let startTime: Date | null = null;
  * Send embed to Discord
  */
 async function sendWebhook(embed: DiscordEmbed): Promise<boolean> {
-  if (!DISCORD_WEBHOOK) {
+  const webhook = getDiscordWebhook();
+  if (!webhook) {
     console.warn('[Helix] No DISCORD_WEBHOOK_HEARTBEAT configured for heartbeat');
     return false;
   }
@@ -37,7 +42,7 @@ async function sendWebhook(embed: DiscordEmbed): Promise<boolean> {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ embeds: [embed] }),
     };
-    const response = await fetch(DISCORD_WEBHOOK, options);
+    const response = await fetch(webhook, options);
     return response.ok;
   } catch (error) {
     console.error('[Helix] Heartbeat webhook failed:', error);
