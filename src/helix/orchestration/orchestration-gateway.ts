@@ -16,9 +16,61 @@
  */
 
 import type { OrchestratorState, OrchestratorConfig } from './agents.js';
-import type { ICheckpointer as _ICheckpointer } from './checkpointer.js';
 import { runOrchestrator } from './supervisor-graph.js';
 import { nanoid } from 'nanoid';
+
+/**
+ * Gateway context passed to orchestrator methods
+ */
+export interface OrchestratorContext {
+  userId: string;
+  logger: {
+    info: (message: string) => void;
+    error: (message: string) => void;
+    warn: (message: string) => void;
+  };
+  requestId?: string;
+}
+
+/**
+ * Method response wrapper
+ */
+export interface OrchestratorResponse<T = unknown> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}
+
+/**
+ * Dashboard statistics response
+ */
+export interface OrchestratorStatsResponse {
+  success: boolean;
+  total_jobs: number;
+  completed: number;
+  in_progress: number;
+  failed: number;
+  total_cost_cents: number;
+  avg_execution_time_ms: number;
+}
+
+/**
+ * Recent jobs response
+ */
+export interface RecentJobsResponse {
+  success: boolean;
+  jobs: OrchestratorJob[];
+  count: number;
+}
+
+/**
+ * Job execution timeline response
+ */
+export interface JobExecutionTimelineResponse {
+  success: boolean;
+  job_id: string;
+  timeline: Array<{ timestamp: number; event: string }>;
+}
 
 /**
  * Job metadata (Module 10: Job Management)
@@ -50,30 +102,32 @@ export interface OrchestratorJob {
  * Main entry point for users to submit tasks to orchestrator.
  * Creates job, queues for processing, returns immediately.
  */
-export async function submitOrchestratorJob(
-  context: any,
+export function submitOrchestratorJob(
+  context: OrchestratorContext,
   params: {
     task: string;
     priority?: 'low' | 'normal' | 'high' | 'urgent';
     budget_cents?: number;
     config?: OrchestratorConfig;
   }
-): Promise<{ success: boolean; jobId?: string; error?: string }> {
+): OrchestratorResponse<{ jobId: string }> {
   try {
-    const userId = context.userId as string;
-    const logger = context.logger as any;
+    const userId = context.userId;
+    const logger = context.logger;
 
     const jobId = nanoid();
 
-    logger.info(`[PRE-EXEC] Orchestrator job submitted by ${userId}: ${jobId} for task: ${params.task}`);
+    logger.info(
+      `[PRE-EXEC] Orchestrator job submitted by ${userId}: ${jobId} for task: ${params.task}`
+    );
 
     // Store job in Supabase (would be integrated)
     // await supabase.from('agent_jobs').insert(job);
 
     // Process job asynchronously
-    processOrchestratorJob(jobId, params.task, params.config, context);
+    void processOrchestratorJob(jobId, params.task, params.config, context);
 
-    return { success: true, jobId };
+    return { success: true, data: { jobId } };
   } catch (error) {
     return { success: false, error: String(error) };
   }
@@ -85,19 +139,27 @@ export async function submitOrchestratorJob(
  * Used for polling or dashboard updates.
  * Returns job with current status, costs, and approval state.
  */
-export async function getOrchestratorJobStatus(
-  _context: any,
+export function getOrchestratorJobStatus(
+  _context: OrchestratorContext,
   params: { jobId: string }
-): Promise<any> {
+): OrchestratorResponse<OrchestratorJob> {
   try {
     // Would fetch from Supabase
     // const { data } = await supabase.from('agent_jobs').select('*').eq('job_id', params.jobId).single();
 
     return {
       success: true,
-      status: 'pending',
-      job_id: params.jobId,
-      message: 'Job status fetched',
+      data: {
+        job_id: params.jobId,
+        user_id: '',
+        task: '',
+        status: 'pending',
+        priority: 'normal',
+        created_at: Date.now(),
+        budget_cents: 0,
+        cost_cents: 0,
+        requires_approval: false,
+      },
     };
   } catch (error) {
     return { success: false, error: String(error) };
@@ -109,13 +171,13 @@ export async function getOrchestratorJobStatus(
  *
  * Requires manual approval for high-cost jobs.
  */
-export async function approveOrchestratorJob(
-  context: any,
+export function approveOrchestratorJob(
+  context: OrchestratorContext,
   params: { jobId: string }
-): Promise<{ success: boolean; error?: string }> {
+): { success: boolean; error?: string } {
   try {
-    const userId = context.userId as string;
-    const logger = context.logger as any;
+    const userId = context.userId;
+    const logger = context.logger;
 
     logger.info(`[PRE-EXEC] Job approved by ${userId}: ${params.jobId}`);
 
@@ -137,7 +199,7 @@ export async function approveOrchestratorJob(
  *
  * Get data for admin dashboard visualization.
  */
-export async function getOrchestratorStats(_context: any): Promise<any> {
+export function getOrchestratorStats(_context: OrchestratorContext): OrchestratorStatsResponse {
   try {
     return {
       success: true,
@@ -149,17 +211,26 @@ export async function getOrchestratorStats(_context: any): Promise<any> {
       avg_execution_time_ms: 0,
     };
   } catch (error) {
-    return { success: false, error: String(error) };
+    return {
+      success: false,
+      total_jobs: 0,
+      completed: 0,
+      in_progress: 0,
+      failed: 0,
+      total_cost_cents: 0,
+      avg_execution_time_ms: 0,
+      error: String(error),
+    };
   }
 }
 
 /**
  * Get recent jobs for dashboard
  */
-export async function getRecentJobs(
-  _context: any,
+export function getRecentJobs(
+  _context: OrchestratorContext,
   _params: { limit?: number }
-): Promise<any> {
+): RecentJobsResponse {
   try {
     return {
       success: true,
@@ -167,26 +238,34 @@ export async function getRecentJobs(
       count: 0,
     };
   } catch (error) {
-    return { success: false, error: String(error) };
+    return { success: false, jobs: [], count: 0, error: String(error) };
   }
 }
 
 /**
  * Get execution timeline for a job
  */
-export async function getJobExecutionTimeline(
-  _context: any,
+export function getJobExecutionTimeline(
+  _context: OrchestratorContext,
   params: { jobId: string }
-): Promise<any> {
+): JobExecutionTimelineResponse {
   try {
     return {
       success: true,
       job_id: params.jobId,
       timeline: [],
-    }; // params used in return value
+    };
   } catch (error) {
-    return { success: false, error: String(error) };
+    return { success: false, job_id: params.jobId, timeline: [], error: String(error) };
   }
+}
+
+/**
+ * Agent config type for type-safe model selection
+ */
+interface AgentConfig {
+  provider: string;
+  model: string;
 }
 
 /**
@@ -209,9 +288,10 @@ export function selectModelForAgent(
     const agentKey = `${agent}Agent` as keyof OrchestratorConfig;
     const agentConfig = config[agentKey];
     if (agentConfig && typeof agentConfig === 'object' && 'provider' in agentConfig) {
+      const typedConfig = agentConfig as AgentConfig;
       return {
-        provider: (agentConfig as any).provider,
-        model: (agentConfig as any).model,
+        provider: typedConfig.provider,
+        model: typedConfig.model,
       };
     }
   }
@@ -238,7 +318,7 @@ async function processOrchestratorJob(
   jobId: string,
   task: string,
   _config?: OrchestratorConfig,
-  context?: any
+  context?: OrchestratorContext
 ): Promise<void> {
   const logger = context?.logger;
 
@@ -271,49 +351,60 @@ async function processOrchestratorJob(
 }
 
 /**
+ * Method metadata for API discovery
+ */
+export interface MethodMetadata {
+  name: string;
+  description: string;
+  params: Record<string, string>;
+}
+
+/**
  * List all orchestration gateway methods
  *
  * For client discovery
  */
-export function listOrchestratorMethods(): any {
+export function listOrchestratorMethods(): OrchestratorResponse<{ methods: MethodMetadata[] }> {
   return {
     success: true,
-    methods: [
-      {
-        name: 'submitOrchestratorJob',
-        description: 'Submit task for orchestrator processing',
-        params: {
-          task: 'string',
-          priority: '?string',
-          budget_cents: '?number',
-          config: '?object',
+    data: {
+      methods: [
+        {
+          name: 'submitOrchestratorJob',
+          description: 'Submit task for orchestrator processing',
+          params: {
+            task: 'string',
+            priority: '?string',
+            budget_cents: '?number',
+            config: '?object',
+          },
         },
-      },
-      {
-        name: 'getOrchestratorJobStatus',
-        description: 'Get status of an orchestrator job',
-        params: { jobId: 'string' },
-      },
-      {
-        name: 'approveOrchestratorJob',
-        description: 'Approve job for execution',
-        params: { jobId: 'string' },
-      },
-      {
-        name: 'getOrchestratorStats',
-        description: 'Get overall orchestrator statistics',
-        params: {},
-      },
-      {
-        name: 'getRecentJobs',
-        description: 'Get recent jobs for dashboard',
-        params: { limit: '?number' },
-      },
-      {
-        name: 'getJobExecutionTimeline',
-        description: 'Get execution timeline for a job',
-        params: { jobId: 'string' },
-      },
-    ],
+        {
+          name: 'getOrchestratorJobStatus',
+          description: 'Get status of an orchestrator job',
+          params: { jobId: 'string' },
+        },
+        {
+          name: 'approveOrchestratorJob',
+          description: 'Approve job for execution',
+          params: { jobId: 'string' },
+        },
+        {
+          name: 'getOrchestratorStats',
+          description: 'Get overall orchestrator statistics',
+          params: {},
+        },
+        {
+          name: 'getRecentJobs',
+          description: 'Get recent jobs for dashboard',
+          params: { limit: '?number' },
+        },
+        {
+          name: 'getJobExecutionTimeline',
+          description: 'Get execution timeline for a job',
+          params: { jobId: 'string' },
+        },
+      ],
+    },
   };
 }
