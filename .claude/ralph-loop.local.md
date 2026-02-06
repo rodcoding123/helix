@@ -1,9 +1,9 @@
 ---
 active: true
 iteration: 1
-max_iterations: 20
-completion_promise: 'DONEMOFO'
-started_at: '2026-02-05T01:08:45Z'
+max_iterations: 100
+completion_promise: '<promise>COMPLETE</promise>'
+started_at: '2026-02-06T20:55:48Z'
 ---
 
-Continue finishing and testing all tasks, only output completion promise: DONEMOFO when 100% of tasks are done and implemented and the whole webUI is done.
+finish 1,2,3,4,5 in order go, after all phases A to K are done and tested output: <promise>COMPLETE</promise>
