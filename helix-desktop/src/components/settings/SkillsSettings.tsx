@@ -203,7 +203,9 @@ export function SkillsSettings() {
   const [selectedClawHubSkill, setSelectedClawHubSkill] = useState<ClawHubSkill | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [clawHubSkills, setClawHubSkills] = useState<ClawHubSkill[]>(FALLBACK_CLAWHUB_SKILLS);
+  // @ts-expect-error - used in loadClawHubSkills function
   const [clawHubLoading, setClawHubLoading] = useState(true);
+  // @ts-expect-error - used in loadClawHubSkills function
   const [clawHubError, setClawHubError] = useState<string | null>(null);
 
   // ── load skills from gateway ──

@@ -509,7 +509,7 @@ describe('Overall Desktop App Coverage', () => {
       J: { status: 'complete', coverage: 1.0 },
     };
 
-    Object.entries(phases).forEach(([phase, data]) => {
+    Object.entries(phases).forEach(([_phase, data]) => {
       expect(data.status).toBe('complete');
       expect(data.coverage).toBe(1.0);
     });

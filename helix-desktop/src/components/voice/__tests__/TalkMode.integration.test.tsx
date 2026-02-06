@@ -116,7 +116,6 @@ describe('Phase F: Voice & Media Center', () => {
     });
 
     it('should toggle between front/back camera', () => {
-      const cameras = ['front', 'back'];
       let currentCamera = 'front';
 
       const toggleCamera = () => {

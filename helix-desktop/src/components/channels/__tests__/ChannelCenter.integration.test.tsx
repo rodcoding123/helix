@@ -8,7 +8,7 @@
  * 4. Channel-specific setup flows are accessible
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 describe('Phase E: Channel Powerhouse', () => {
   describe('ChannelCenter - Channel Grid', () => {
