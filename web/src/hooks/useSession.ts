@@ -9,7 +9,9 @@ import {
 import { useAuth } from './useAuth';
 
 interface UseSessionOptions {
-  instanceKey: string;
+  userId: string;
+  /** @deprecated Use userId instead. Kept for backward compatibility. */
+  instanceKey?: string;
   autoStart?: boolean;
 }
 
@@ -38,8 +40,7 @@ export function useSession(options: UseSessionOptions): UseSessionReturn {
     if (!user) return;
 
     const config: SessionManagerConfig = {
-      instanceKey: options.instanceKey,
-      userId: user.id,
+      userId: options.userId || user.id,
       onStatusChange: setStatus,
       onSessionUpdate: setSession,
       onError: setError,
@@ -54,7 +55,7 @@ export function useSession(options: UseSessionOptions): UseSessionReturn {
     return () => {
       managerRef.current?.unsubscribe();
     };
-  }, [user, options.instanceKey, options.autoStart]);
+  }, [user, options.userId, options.autoStart]);
 
   const startSession = useCallback(async () => {
     if (!managerRef.current) {

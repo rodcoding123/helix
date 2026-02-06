@@ -27,67 +27,31 @@ export async function getSubscription(): Promise<Subscription | null> {
 }
 
 // =====================================================
-// INSTANCES API
+// INSTANCES API (DEPRECATED - User account = instance)
 // =====================================================
 
+/** @deprecated Instances removed. User account = instance. */
 export async function getInstances(): Promise<Instance[]> {
-  const { data, error } = await supabase
-    .from('instances')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error('Error fetching instances:', error);
-    return [];
-  }
-
-  return data || [];
+  console.warn('[api] getInstances() is deprecated. User account = instance.');
+  return [];
 }
 
+/** @deprecated Instances removed. User account = instance. */
 export async function getInstance(id: string): Promise<Instance | null> {
-  const { data, error } = await supabase.from('instances').select('*').eq('id', id).single();
-
-  if (error) {
-    console.error('Error fetching instance:', error);
-    return null;
-  }
-
-  return data;
+  console.warn('[api] getInstance() is deprecated. User account = instance.');
+  return null;
 }
 
+/** @deprecated Instances removed. User account = instance. */
 export async function createInstance(name: string, instanceKey: string): Promise<Instance | null> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-
-  const { data, error } = await supabase
-    .from('instances')
-    .insert({
-      user_id: user.id,
-      name,
-      instance_key: instanceKey,
-    })
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Error creating instance:', error);
-    return null;
-  }
-
-  return data;
+  console.warn('[api] createInstance() is deprecated. User account = instance.');
+  return null;
 }
 
+/** @deprecated Instances removed. User account = instance. */
 export async function deleteInstance(id: string): Promise<boolean> {
-  const { error } = await supabase.from('instances').delete().eq('id', id);
-
-  if (error) {
-    console.error('Error deleting instance:', error);
-    return false;
-  }
-
-  return true;
+  console.warn('[api] deleteInstance() is deprecated. User account = instance.');
+  return false;
 }
 
 // =====================================================
@@ -144,17 +108,17 @@ export async function getHourlyStats(): Promise<HourlyStats[]> {
 }
 
 // =====================================================
-// TELEMETRY API
+// TELEMETRY API (userId-based)
 // =====================================================
 
-export async function getInstanceTelemetry(
-  instanceKey: string,
+export async function getUserTelemetry(
+  userId: string,
   limit = 100
 ): Promise<TelemetryEvent[]> {
   const { data, error } = await supabase
     .from('telemetry')
     .select('*')
-    .eq('instance_key', instanceKey)
+    .eq('user_id', userId)
     .order('server_timestamp', { ascending: false })
     .limit(limit);
 
@@ -166,14 +130,14 @@ export async function getInstanceTelemetry(
   return data || [];
 }
 
-export async function getInstanceHeartbeats(
-  instanceKey: string,
+export async function getUserHeartbeats(
+  userId: string,
   limit = 100
 ): Promise<Heartbeat[]> {
   const { data, error } = await supabase
     .from('heartbeats')
     .select('*')
-    .eq('instance_key', instanceKey)
+    .eq('user_id', userId)
     .order('received_at', { ascending: false })
     .limit(limit);
 
@@ -185,14 +149,14 @@ export async function getInstanceHeartbeats(
   return data || [];
 }
 
-export async function getInstanceTransformations(
-  instanceKey: string,
+export async function getUserTransformations(
+  userId: string,
   limit = 50
 ): Promise<Transformation[]> {
   const { data, error } = await supabase
     .from('transformations')
     .select('*')
-    .eq('instance_key', instanceKey)
+    .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(limit);
 
@@ -203,6 +167,13 @@ export async function getInstanceTransformations(
 
   return data || [];
 }
+
+/** @deprecated Use getUserTelemetry instead */
+export const getInstanceTelemetry = (instanceKey: string, limit?: number) => getUserTelemetry(instanceKey, limit);
+/** @deprecated Use getUserHeartbeats instead */
+export const getInstanceHeartbeats = (instanceKey: string, limit?: number) => getUserHeartbeats(instanceKey, limit);
+/** @deprecated Use getUserTransformations instead */
+export const getInstanceTransformations = (instanceKey: string, limit?: number) => getUserTransformations(instanceKey, limit);
 
 // =====================================================
 // ANOMALIES API

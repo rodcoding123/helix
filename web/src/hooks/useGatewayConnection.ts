@@ -7,8 +7,10 @@ import {
 } from '@/lib/gateway-connection';
 
 interface UseGatewayConnectionOptions {
-  instanceKey: string;
+  userId: string;
   authToken: string;
+  /** @deprecated Use userId instead */
+  instanceKey?: string;
   gatewayUrl?: string;
   autoConnect?: boolean;
 }
@@ -58,8 +60,9 @@ export function useGatewayConnection(
     }
 
     const config: GatewayConnectionConfig = {
-      instanceKey: options.instanceKey,
+      userId: options.userId,
       authToken: options.authToken,
+      instanceKey: options.instanceKey,
       gatewayUrl: options.gatewayUrl,
       onMessage: handleMessage,
       onStatusChange: handleStatusChange,
@@ -69,8 +72,9 @@ export function useGatewayConnection(
     connectionRef.current = new GatewayConnection(config);
     await connectionRef.current.connect();
   }, [
-    options.instanceKey,
+    options.userId,
     options.authToken,
+    options.instanceKey,
     options.gatewayUrl,
     handleMessage,
     handleStatusChange,

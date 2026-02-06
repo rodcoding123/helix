@@ -1,4 +1,10 @@
 /**
+ * @deprecated Multi-tenant system removed. User account = instance.
+ * Invitation notifications are no longer needed. This file is kept for backward
+ * compatibility and will be removed in a future cleanup pass.
+ */
+
+/**
  * Phase 11 Week 2: Task 2.4 - Invitation Notification Service
  * Handles email and webhook notifications for team invitations
  */

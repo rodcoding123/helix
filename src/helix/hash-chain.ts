@@ -11,6 +11,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import os from 'node:os';
 import type { HashChainEntry, DiscordEmbed, SecretOperationEntry } from './types.js';
 import { HelixSecurityError } from './types.js';
 
@@ -66,16 +67,26 @@ function parseHashChainEntry(json: string): HashChainEntry | null {
   }
 }
 
-const CHAIN_FILE = process.env.HELIX_HASH_CHAIN_FILE || './hash_chain.log';
+const CHAIN_FILE = process.env.HELIX_HASH_CHAIN_FILE || './.helix-state/hash_chain.log';
 const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK_HASH_CHAIN;
 
+/**
+ * Get cross-platform log file paths
+ * Uses .helix-state directory instead of Unix /var/log
+ * Works on Windows, macOS, and Linux
+ */
+function getLogFilePaths(): string[] {
+  const stateDir = path.join(process.cwd(), '.helix-state', 'logs');
+  return [
+    path.join(stateDir, 'commands.log'),
+    path.join(stateDir, 'api_calls.log'),
+    path.join(stateDir, 'file_changes.log'),
+    path.join(stateDir, 'consciousness.log'),
+  ];
+}
+
 // Log files to include in hash state
-const LOG_FILES = [
-  '/var/log/helix/commands.log',
-  '/var/log/helix/api_calls.log',
-  '/var/log/helix/file_changes.log',
-  '/var/log/helix/consciousness.log',
-];
+const LOG_FILES = getLogFilePaths();
 
 // In-memory cache of chain state
 let lastHash: string = 'GENESIS';

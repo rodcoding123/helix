@@ -27,6 +27,9 @@ export interface ResilientResult<T = boolean> {
   operationId?: string;
 }
 
+// Module-level storage for auto-flush interval (for cleanup on shutdown)
+let autoFlushInterval: NodeJS.Timeout | null = null;
+
 /**
  * Send Discord webhook with resilience (circuit breaker + queue fallback)
  *
@@ -282,7 +285,7 @@ export function initializeAutoFlush(): void {
   let lastDiscordState = circuitBreakers.discord.getMetrics().state;
 
   // Poll for state changes (every 5 seconds)
-  setInterval(() => {
+  autoFlushInterval = setInterval(() => {
     const currentState = circuitBreakers.discord.getMetrics().state;
 
     // Transitioned from OPEN/HALF_OPEN to CLOSED
@@ -301,6 +304,17 @@ export function initializeAutoFlush(): void {
 
     lastDiscordState = currentState;
   }, 5000);
+}
+
+/**
+ * Stop the auto-flush interval (called on shutdown)
+ * Prevents interval leak from long-running processes
+ */
+export function stopAutoFlush(): void {
+  if (autoFlushInterval !== null) {
+    clearInterval(autoFlushInterval);
+    autoFlushInterval = null;
+  }
 }
 
 /**

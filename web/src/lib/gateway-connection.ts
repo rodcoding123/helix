@@ -16,8 +16,10 @@ export interface GatewayMessage {
 }
 
 export interface GatewayConnectionConfig {
-  instanceKey: string;
+  userId: string;
   authToken: string;
+  /** @deprecated Use userId instead. Kept for backward compatibility during migration. */
+  instanceKey?: string;
   gatewayUrl?: string;
   onMessage: (message: GatewayMessage) => void;
   onStatusChange: (status: ConnectionStatus) => void;
@@ -293,7 +295,7 @@ export class GatewayConnection {
           version: import.meta.env.VITE_APP_VERSION || '0.1.0',
           platform: this.detectPlatform(),
           mode: 'ui',
-          instanceId: this.config.instanceKey,
+          userId: this.config.userId,
         },
         role: 'operator',
         scopes: ['operator.admin'],
@@ -451,30 +453,32 @@ export class GatewayConnection {
   }
 
   private buildGatewayUrl(): string {
+    const id = this.config.userId;
+
     // Check for explicit environment variable first
     const envUrl = import.meta.env.VITE_GATEWAY_URL;
     if (envUrl) {
       return envUrl.includes('?')
-        ? `${envUrl}&instanceKey=${this.config.instanceKey}`
-        : `${envUrl}?instanceKey=${this.config.instanceKey}`;
+        ? `${envUrl}&userId=${id}`
+        : `${envUrl}?userId=${id}`;
     }
 
     // Development: Use localhost WebSocket
     if (import.meta.env.DEV) {
-      return `ws://127.0.0.1:18789/v1/connect?instanceKey=${this.config.instanceKey}`;
+      return `ws://127.0.0.1:18789/v1/connect?userId=${id}`;
     }
 
     // Production: Check for production-specific URL
     const prodUrl = import.meta.env.VITE_GATEWAY_URL_PROD;
     if (prodUrl) {
       return prodUrl.includes('?')
-        ? `${prodUrl}&instanceKey=${this.config.instanceKey}`
-        : `${prodUrl}?instanceKey=${this.config.instanceKey}`;
+        ? `${prodUrl}&userId=${id}`
+        : `${prodUrl}?userId=${id}`;
     }
 
     // Final fallback: localhost (for self-hosted scenarios)
     console.warn('[Gateway] No production URL configured, using localhost');
-    return `ws://127.0.0.1:18789/v1/connect?instanceKey=${this.config.instanceKey}`;
+    return `ws://127.0.0.1:18789/v1/connect?userId=${id}`;
   }
 
   private detectPlatform(): string {

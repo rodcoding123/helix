@@ -2,8 +2,10 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { WebRTCVoice, VoiceState, VoiceConfig } from '@/lib/webrtc-voice';
 
 interface UseVoiceOptions {
-  instanceKey: string;
+  userId: string;
   authToken: string;
+  /** @deprecated Use userId instead */
+  instanceKey?: string;
   signalingUrl?: string;
   onTranscript?: (text: string, isFinal: boolean) => void;
 }
@@ -34,10 +36,13 @@ export function useVoice(options: UseVoiceOptions): UseVoiceReturn {
       voiceRef.current.disconnect();
     }
 
+    const id = options.userId;
     const config: VoiceConfig = {
       signalingUrl:
-        options.signalingUrl || `wss://gateway.helix-project.org/v1/voice/${options.instanceKey}`,
-      instanceKey: options.instanceKey,
+        options.signalingUrl || (import.meta.env.DEV
+          ? `ws://127.0.0.1:18789/v1/voice/${id}`
+          : `wss://gateway.helix-project.org/v1/voice/${id}`),
+      instanceKey: options.instanceKey || id,
       authToken: options.authToken,
       onStateChange: setState,
       onAudioLevel: setAudioLevel,
@@ -47,7 +52,7 @@ export function useVoice(options: UseVoiceOptions): UseVoiceReturn {
 
     voiceRef.current = new WebRTCVoice(config);
     await voiceRef.current.connect();
-  }, [options.instanceKey, options.authToken, options.signalingUrl, options.onTranscript]);
+  }, [options.userId, options.instanceKey, options.authToken, options.signalingUrl, options.onTranscript]);
 
   const disconnect = useCallback(() => {
     voiceRef.current?.disconnect();

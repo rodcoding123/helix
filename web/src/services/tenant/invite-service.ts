@@ -1,4 +1,10 @@
 /**
+ * @deprecated Multi-tenant system removed. User account = instance.
+ * Invitations are no longer needed. This file is kept for backward compatibility
+ * and will be removed in a future cleanup pass.
+ */
+
+/**
  * Phase 11 Week 2: Tenant Invitation Service
  * Manages team member invitations and onboarding
  */
@@ -33,7 +39,7 @@ export interface TenantMember {
 }
 
 /**
- * Tenant invitation service
+ * @deprecated Tenant invitation service - no longer needed.
  */
 export class TenantInviteService {
   /**
@@ -577,8 +583,9 @@ export class TenantInviteService {
 }
 
 /**
- * Factory function
+ * @deprecated Multi-tenant system removed.
  */
 export function getTenantInviteService(): TenantInviteService {
+  console.warn('[TenantInviteService] DEPRECATED: Multi-tenant system removed. Invitations no longer needed.');
   return new TenantInviteService();
 }

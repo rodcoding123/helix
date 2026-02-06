@@ -35,6 +35,7 @@ export interface Subscription {
   updated_at: string;
 }
 
+/** @deprecated Instances removed. User account = instance. */
 export interface Instance {
   id: string;
   user_id: string;

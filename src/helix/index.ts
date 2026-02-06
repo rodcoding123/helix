@@ -366,10 +366,12 @@ export async function initializeHelix(options: HelixInitOptions = {}): Promise<v
   const { requireValidEnvironment } = await import('../lib/env-validator.js');
   try {
     requireValidEnvironment();
-  } catch {
+  } catch (error) {
     console.error('[Helix] ENVIRONMENT VALIDATION FAILED');
     console.error('[Helix] Cannot proceed without all required secrets');
-    process.exit(1);
+    throw new Error(
+      `Environment validation failed: ${error instanceof Error ? error.message : String(error)}`
+    );
   }
 
   // ============================================
@@ -547,6 +549,10 @@ export async function shutdownHelix(reason: string = 'graceful'): Promise<void> 
     stopOnePasswordAuditScheduler(auditSchedulerInterval);
     auditSchedulerInterval = null;
   }
+
+  // Stop auto-flush interval for resilience middleware
+  const { stopAutoFlush } = await import('./resilience-middleware.js');
+  stopAutoFlush();
 
   // Final hash chain entry
   const { createHashChainEntry } = await import('./hash-chain.js');

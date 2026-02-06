@@ -127,7 +127,7 @@ export function logGatewaySecurityStatus(config: GatewayBindConfig): void {
 
   if (!validation.valid) {
     console.error('[Helix] ❌ Gateway configuration INVALID - security checks failed');
-    process.exit(1);
+    throw new Error('Gateway configuration validation failed - security checks did not pass');
   } else {
     console.log('[Helix] ✓ Gateway security check passed');
   }

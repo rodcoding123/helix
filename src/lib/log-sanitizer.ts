@@ -89,8 +89,9 @@ export class LogSanitizer {
       name: 'ssh_private_key',
     },
 
-    // Hex strings that look like secrets (32-128 chars, bounded to prevent ReDoS)
-    { pattern: /[a-f0-9]{32,128}/g, name: 'hex_secret' },
+    // Hex strings in secret context only (prevent false positives on git hashes/SHA hashes)
+    // Only match hex strings adjacent to secret-related keywords
+    { pattern: /(?:key|secret|token|password|credential|hash|mac)[:=\s]*[a-f0-9]{32,128}/gi, name: 'hex_secret_contextual' },
   ];
 
   /**

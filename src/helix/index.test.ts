@@ -359,18 +359,12 @@ describe('Helix Index Module', () => {
         throw new Error('Missing environment variable');
       });
 
-      const processExitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
-        throw new Error('Process.exit called');
-      });
-
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-      await expect(initializeHelix()).rejects.toThrow('Process.exit called');
+      await expect(initializeHelix()).rejects.toThrow('Environment validation failed');
 
       expect(consoleErrorSpy).toHaveBeenCalledWith('[Helix] ENVIRONMENT VALIDATION FAILED');
-      expect(processExitSpy).toHaveBeenCalledWith(1);
 
-      processExitSpy.mockRestore();
       consoleErrorSpy.mockRestore();
     });
   });

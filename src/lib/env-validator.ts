@@ -243,6 +243,8 @@ export function requireValidEnvironment(): void {
   printValidationReport(result);
 
   if (!result.valid) {
-    process.exit(1);
+    throw new Error(
+      'Environment validation failed. Please check configuration and try again.'
+    );
   }
 }

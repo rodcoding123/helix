@@ -21,7 +21,7 @@
     "noFallthroughCasesInSwitch": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noImplicitThis": false
+    "noImplicitThis": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "helix-runtime/**/*", "src/helix/*-multitenant.*"]

@@ -296,7 +296,9 @@ describe('Gateway Security - logGatewaySecurityStatus', () => {
       authRequired: false,
     };
 
-    expect(() => logGatewaySecurityStatus(config)).toThrow('Process.exit called');
+    expect(() => logGatewaySecurityStatus(config)).toThrow(
+      'Gateway configuration validation failed - security checks did not pass'
+    );
 
     expect(consoleErrorSpy).toHaveBeenCalledWith('[Helix] ❌ SECURITY ERRORS:');
     expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -328,15 +330,16 @@ describe('Gateway Security - logGatewaySecurityStatus', () => {
     expect(consoleWarnSpy).toHaveBeenCalledWith('[Helix] 💡 RECOMMENDATIONS:');
   });
 
-  it('should exit with code 1 when validation fails', () => {
+  it('should throw when validation fails', () => {
     const config: GatewayBindConfig = {
       host: '0.0.0.0',
       port: 8080,
       authRequired: false,
     };
 
-    expect(() => logGatewaySecurityStatus(config)).toThrow('Process.exit called');
-    expect(processExitSpy).toHaveBeenCalledWith(1);
+    expect(() => logGatewaySecurityStatus(config)).toThrow(
+      'Gateway configuration validation failed - security checks did not pass'
+    );
   });
 
   it('should log success message when validation passes', () => {

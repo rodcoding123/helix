@@ -4,17 +4,11 @@ import { X, ChevronRight, ChevronLeft, Check } from 'lucide-react';
 import clsx from 'clsx';
 
 import { WelcomeStep } from './steps/WelcomeStep';
-import { InstanceKeyStep } from './steps/InstanceKeyStep';
 import { PlatformInstaller } from './steps/PlatformInstaller';
-import { EnvConfigStep } from './steps/EnvConfigStep';
-import { ConnectionVerifyStep } from './steps/ConnectionVerifyStep';
 import { SuccessStep } from './steps/SuccessStep';
 
 export interface OnboardingData {
-  instanceKey: string;
-  keySaved: boolean;
   cliInstalled: boolean;
-  envConfigured: boolean;
   connectionVerified: boolean;
 }
 
@@ -22,10 +16,7 @@ const STORAGE_KEY = 'helix_onboarding_progress';
 
 const STEPS = [
   { id: 'welcome', title: 'Welcome', description: 'Understand Helix architecture' },
-  { id: 'instance-key', title: 'Instance Key', description: 'Generate your unique key' },
   { id: 'install-cli', title: 'Install CLI', description: 'Get Helix running locally' },
-  { id: 'configure-env', title: 'Configure', description: 'Set up environment' },
-  { id: 'verify', title: 'Connect', description: 'Verify connection' },
   { id: 'success', title: 'Complete', description: 'Start using Helix' },
 ] as const;
 
@@ -33,7 +24,6 @@ export function OnboardingWizard() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [data, setData] = useState<OnboardingData>(() => {
-    // Load saved progress from localStorage
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
@@ -43,15 +33,11 @@ export function OnboardingWizard() {
       }
     }
     return {
-      instanceKey: '',
-      keySaved: false,
       cliInstalled: false,
-      envConfigured: false,
       connectionVerified: false,
     };
   });
 
-  // Save progress to localStorage on change
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   }, [data]);
@@ -64,15 +50,9 @@ export function OnboardingWizard() {
     switch (currentStep) {
       case 0: // Welcome
         return true;
-      case 1: // Instance Key
-        return data.instanceKey.length > 0 && data.keySaved;
-      case 2: // Install CLI
+      case 1: // Install CLI
         return data.cliInstalled;
-      case 3: // Configure Env
-        return data.envConfigured;
-      case 4: // Verify Connection
-        return data.connectionVerified;
-      case 5: // Success
+      case 2: // Success
         return true;
       default:
         return false;
@@ -96,11 +76,8 @@ export function OnboardingWizard() {
   }, [navigate]);
 
   const completeOnboarding = useCallback(() => {
-    // Clear saved progress
     localStorage.removeItem(STORAGE_KEY);
-    // Mark onboarding complete
     localStorage.setItem('helix_onboarding_complete', 'true');
-    // Navigate to dashboard
     navigate('/dashboard');
   }, [navigate]);
 
@@ -109,14 +86,8 @@ export function OnboardingWizard() {
       case 0:
         return <WelcomeStep />;
       case 1:
-        return <InstanceKeyStep data={data} updateData={updateData} />;
-      case 2:
         return <PlatformInstaller data={data} updateData={updateData} />;
-      case 3:
-        return <EnvConfigStep data={data} updateData={updateData} />;
-      case 4:
-        return <ConnectionVerifyStep data={data} updateData={updateData} />;
-      case 5:
+      case 2:
         return <SuccessStep onComplete={completeOnboarding} />;
       default:
         return null;
@@ -160,7 +131,6 @@ export function OnboardingWizard() {
                     index < STEPS.length - 1 && 'flex-1'
                   )}
                 >
-                  {/* Step indicator */}
                   <div
                     className={clsx(
                       'relative flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full border-2 transition-all duration-300',
@@ -178,7 +148,6 @@ export function OnboardingWizard() {
                     )}
                   </div>
 
-                  {/* Connector line */}
                   {index < STEPS.length - 1 && (
                     <div className="flex-1 mx-1 sm:mx-2">
                       <div
@@ -193,7 +162,6 @@ export function OnboardingWizard() {
               ))}
             </div>
 
-            {/* Step labels (only on larger screens) */}
             <div className="hidden sm:flex items-center justify-between">
               {STEPS.map((step, index) => (
                 <div

@@ -9,6 +9,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import DOMPurify from 'dompurify';
 import type { EmailMessage } from '@/hooks/useEmailClient';
 
 // =====================================================
@@ -29,43 +30,18 @@ interface EmailMessageItemProps {
 
 /**
  * Sanitize HTML content to prevent XSS attacks.
- * Uses a simple allowlist approach for safe HTML rendering.
+ * Uses DOMPurify library with comprehensive XSS protection.
+ * Allows safe email-related HTML tags while blocking all potentially dangerous content.
  */
 function sanitizeHtml(html: string): string {
-  // Create a temporary div to parse HTML
-  const doc = new DOMParser().parseFromString(html, 'text/html');
+  // DOMPurify configuration for email content
+  const config = {
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'a', 'ul', 'ol', 'li', 'blockquote', 'hr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'pre', 'code', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'img'],
+    ALLOWED_ATTR: ['href', 'title', 'src', 'alt', 'style'],
+    KEEP_CONTENT: true,
+  };
 
-  // Remove potentially dangerous elements
-  const dangerousTags = ['script', 'style', 'iframe', 'object', 'embed', 'form', 'input', 'link'];
-  dangerousTags.forEach((tag) => {
-    const elements = doc.getElementsByTagName(tag);
-    while (elements.length > 0) {
-      elements[0].parentNode?.removeChild(elements[0]);
-    }
-  });
-
-  // Remove dangerous attributes from all elements
-  const dangerousAttrs = ['onclick', 'onerror', 'onload', 'onmouseover', 'onfocus', 'onblur'];
-  const allElements = doc.body.getElementsByTagName('*');
-  for (let i = 0; i < allElements.length; i++) {
-    const element = allElements[i];
-    dangerousAttrs.forEach((attr) => {
-      element.removeAttribute(attr);
-    });
-
-    // Remove javascript: URLs
-    const href = element.getAttribute('href');
-    if (href && href.toLowerCase().startsWith('javascript:')) {
-      element.removeAttribute('href');
-    }
-
-    const src = element.getAttribute('src');
-    if (src && src.toLowerCase().startsWith('javascript:')) {
-      element.removeAttribute('src');
-    }
-  }
-
-  return doc.body.innerHTML;
+  return DOMPurify.sanitize(html, config);
 }
 
 // =====================================================

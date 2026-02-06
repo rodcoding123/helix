@@ -8,7 +8,8 @@ export type SessionStatus = 'local' | 'syncing' | 'synced' | 'observatory' | 'er
 
 export interface Session {
   id: string;
-  instance_key: string;
+  /** @deprecated Use user_id instead */
+  instance_key?: string;
   user_id: string;
   started_at: string;
   ended_at?: string;
@@ -30,8 +31,9 @@ export interface SessionMessage {
 }
 
 export interface SessionManagerConfig {
-  instanceKey: string;
   userId: string;
+  /** @deprecated Use userId instead */
+  instanceKey?: string;
   onStatusChange: (status: SessionStatus) => void;
   onSessionUpdate: (session: Session) => void;
   onError: (error: Error) => void;
@@ -50,7 +52,6 @@ export class SessionManager {
   async startSession(): Promise<Session> {
     const session: Session = {
       id: crypto.randomUUID(),
-      instance_key: this.config.instanceKey,
       user_id: this.config.userId,
       started_at: new Date().toISOString(),
       source: 'local',
@@ -75,7 +76,6 @@ export class SessionManager {
   async syncSession(session: Session): Promise<void> {
     const { error } = await supabase.from('sessions').upsert({
       id: session.id,
-      instance_key: session.instance_key,
       user_id: session.user_id,
       started_at: session.started_at,
       ended_at: session.ended_at,

@@ -23,16 +23,14 @@ import type { GatewayErrorCode } from '@/components/help/TroubleshootingPanel';
 import { GatewayConnectionError } from '@/lib/gateway-connection';
 
 interface CodeInterfaceProps {
-  instanceKey: string;
+  userId: string;
   authToken: string;
-  gatewayUrl?: string;
   className?: string;
 }
 
 export function CodeInterface({
-  instanceKey,
+  userId,
   authToken,
-  gatewayUrl,
   className,
 }: CodeInterfaceProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -49,9 +47,8 @@ export function CodeInterface({
 
   // Connection hook
   const { status, messages, connect, sendMessage, interrupt, isConnected, error } = useGatewayConnection({
-    instanceKey,
+    userId,
     authToken,
-    gatewayUrl,
     autoConnect: true,
   });
 
@@ -320,7 +317,7 @@ export function CodeInterface({
       {/* Status bar */}
       <StatusBar
         connectionStatus={status}
-        instanceName={`Instance ${instanceKey.slice(0, 8)}`}
+        instanceName={`User ${userId.slice(0, 8)}`}
         sessionDuration={sessionDuration}
         className="border-t border-white/5"
       />
