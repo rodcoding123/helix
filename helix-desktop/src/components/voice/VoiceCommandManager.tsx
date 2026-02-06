@@ -4,11 +4,11 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useCustomTools } from '../../hooks/useCustomTools';
+import { useCustomTools, type CustomTool } from '../../hooks/useCustomTools';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { Select } from '../common/Select';
-import '../../../styles/components/voice.css';
+import '../../styles/components/voice.css';
 
 interface VoiceCommand {
   id: string;
@@ -109,7 +109,7 @@ export function VoiceCommandManager() {
   };
 
   const getToolName = (toolId: string) => {
-    return customTools.find((t: any) => t.id === toolId)?.name || 'Unknown Tool';
+    return customTools.find((t: CustomTool) => t.id === toolId)?.name || 'Unknown Tool';
   };
 
   return (
@@ -143,7 +143,7 @@ export function VoiceCommandManager() {
             disabled={isLoading || customTools.length === 0}
             options={[
               { value: '', label: 'Select a tool...' },
-              ...customTools.map((tool: any) => ({
+              ...customTools.map((tool: CustomTool) => ({
                 value: tool.id,
                 label: tool.name,
               })),

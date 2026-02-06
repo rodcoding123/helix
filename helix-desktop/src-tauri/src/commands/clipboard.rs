@@ -1,9 +1,6 @@
 /// Clipboard Command Module
 /// Provides cross-platform clipboard operations
 
-use tauri::State;
-use std::sync::Mutex;
-
 #[tauri::command]
 pub async fn copy_to_clipboard(text: String) -> Result<(), String> {
     #[cfg(target_os = "windows")]

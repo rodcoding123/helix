@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
-use tauri::{AppHandle, Emitter, Manager, Runtime};
+use tauri::{AppHandle, Emitter, Runtime};
 use tokio::sync::RwLock;
 use tokio::time::interval;
 
@@ -264,6 +264,7 @@ fn current_timestamp() -> u64 {
 }
 
 /// Create a global gateway monitor instance
+#[allow(dead_code)]
 pub fn create_monitor() -> GatewayMonitor {
     GatewayMonitor::new()
 }

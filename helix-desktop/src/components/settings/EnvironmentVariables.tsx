@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getGatewayClient } from '../../lib/gateway-client';
 import './EnvironmentVariables.css';
 
@@ -82,25 +82,85 @@ export function EnvironmentVariables() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newVar, setNewVar] = useState({ key: '', value: '', isSecret: false, description: '' });
   const [hasChanges, setHasChanges] = useState(false);
+  const [_loading, setLoading] = useState(true);
+  const [_saving, setSaving] = useState(false);
+
+  const loadVariables = useCallback(async () => {
+    setLoading(true);
+    try {
+      const client = getGatewayClient();
+      if (client?.connected) {
+        const config = await client.getFullConfig();
+
+        // Extract environment variables from config
+        const envConfig = config?.environment || {};
+
+        // Transform to EnvVariable[] format
+        const vars: EnvVariable[] = Object.entries(envConfig)
+          .filter(([_, value]) => typeof value === 'object' && value !== null)
+          .map(([key, value]) => {
+            const v = value as Record<string, unknown>;
+            return {
+              id: key,
+              key,
+              value: (v.value as string) || '',
+              isSecret: (v.isSecret as boolean) || false,
+              description: v.description as string | undefined,
+              source: (v.source as 'user' | 'system' | 'inherited') || 'user',
+              lastModified: v.lastModified as number | undefined,
+            };
+          });
+
+        setVariables(vars);
+      } else {
+        // Fallback to placeholder data if gateway offline
+        setVariables(PLACEHOLDER_VARIABLES);
+      }
+    } catch (err) {
+      console.error('[env-vars] Failed to load:', err);
+      setVariables(PLACEHOLDER_VARIABLES);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     loadVariables();
-  }, []);
+  }, [loadVariables]);
 
-  const loadVariables = async () => {
-    const client = getGatewayClient();
-    if (client?.connected) {
-      // Load from backend
-    }
-  };
+  const saveVariables = useCallback(async () => {
+    setSaving(true);
+    try {
+      const client = getGatewayClient();
+      if (client?.connected) {
+        // Transform to gateway config format
+        const envConfig = variables
+          .filter(v => v.source === 'user') // Only save user variables
+          .reduce((acc, v) => ({
+            ...acc,
+            [v.key]: {
+              value: v.value,
+              isSecret: v.isSecret,
+              description: v.description,
+              source: v.source,
+              lastModified: Date.now(),
+            }
+          }), {} as Record<string, unknown>);
 
-  const saveVariables = async () => {
-    const client = getGatewayClient();
-    if (client?.connected) {
-      // Save to backend
+        await client.patchFullConfig({
+          patch: {
+            environment: envConfig
+          }
+        });
+
+        setHasChanges(false);
+      }
+    } catch (err) {
+      console.error('[env-vars] Failed to save:', err);
+    } finally {
+      setSaving(false);
     }
-    setHasChanges(false);
-  };
+  }, [variables]);
 
   const addVariable = () => {
     if (!newVar.key.trim()) return;
@@ -128,12 +188,32 @@ export function EnvironmentVariables() {
     setHasChanges(true);
   };
 
-  const deleteVariable = (id: string) => {
+  const deleteVariable = useCallback((id: string) => {
     const variable = variables.find(v => v.id === id);
     if (!variable || variable.source !== 'user') return;
+
+    // Optimistic update
     setVariables(prev => prev.filter(v => v.id !== id));
     setHasChanges(true);
-  };
+
+    // Sync to gateway
+    (async () => {
+      try {
+        const client = getGatewayClient();
+        if (client?.connected) {
+          await client.patchFullConfig({
+            patch: {
+              [`environment.${variable.key}`]: null // null = delete
+            }
+          });
+        }
+      } catch (err) {
+        console.error('[env-vars] Failed to delete:', err);
+        // Revert optimistic update on error
+        loadVariables();
+      }
+    })();
+  }, [variables, loadVariables]);
 
   const copyValue = async (value: string) => {
     await navigator.clipboard.writeText(value);

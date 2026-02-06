@@ -4,9 +4,9 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 import {
-  Microphone,
+  Mic,
   Square,
   Play,
   Pause,
@@ -215,7 +215,7 @@ export const DesktopVoiceMemos: React.FC = () => {
                 onClick={startRecording}
                 className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-4 rounded-lg transition"
               >
-                <Microphone className="w-5 h-5" />
+                <Mic className="w-5 h-5" />
                 Start Recording
               </button>
             ) : (
@@ -295,7 +295,7 @@ export const DesktopVoiceMemos: React.FC = () => {
 
           {!loading && memos.length === 0 && (
             <div className="text-center py-12">
-              <Microphone className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+              <Mic className="w-12 h-12 text-gray-600 mx-auto mb-4" />
               <p className="text-gray-400">
                 {searchQuery
                   ? `No memos found matching "${searchQuery}"`

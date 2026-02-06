@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { useVoiceRecorder } from '../../hooks/useVoiceRecorder';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
-import '../../../styles/components/voice.css';
+import '../../styles/components/voice.css';
 
 interface VoiceMemoRecorderProps {
   onMemoUploaded?: (memoId: string) => void;

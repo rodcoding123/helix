@@ -1,8 +1,15 @@
 export { SettingsLayout } from './SettingsLayout';
 export { GeneralSettings } from './GeneralSettings';
 export { ModelSettings } from './ModelSettings';
+export { ChannelsSettings } from './ChannelsSettings';
+export { VoiceSettings } from './VoiceSettings';
+export { ToolsSettings } from './ToolsSettings';
+export { SkillsSettings } from './SkillsSettings';
+export { AutomationSettings } from './AutomationSettings';
+export { AgentsSettings } from './AgentsSettings';
 export { PrivacySettings } from './PrivacySettings';
 export { PsychologySettings } from './PsychologySettings';
+export { SecretsSettings } from './SecretsSettings';
 export { ChannelSettings } from './ChannelSettings';
 export { AdvancedSettings } from './AdvancedSettings';
 export { AccountSettings } from './AccountSettings';

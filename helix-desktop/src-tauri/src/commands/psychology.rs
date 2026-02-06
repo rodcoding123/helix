@@ -24,6 +24,7 @@ pub struct LayerResponse {
 }
 
 /// Psychology configuration that maps to the GUI settings
+#[allow(dead_code)]
 #[derive(Deserialize, Serialize, Clone)]
 pub struct MemoryDecayConfig {
     pub enabled: bool,

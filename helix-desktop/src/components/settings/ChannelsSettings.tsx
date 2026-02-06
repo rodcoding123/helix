@@ -4,6 +4,8 @@
 
 import { useState, useEffect } from 'react';
 import { useGateway } from '../../hooks/useGateway';
+import { ChannelSetupModal } from '../channels';
+import type { ChannelConfig } from '../channels';
 import './SettingsSection.css';
 
 interface ChannelStatus {
@@ -16,10 +18,66 @@ interface ChannelStatus {
   messageCount?: number;
 }
 
+// Channel configuration templates
+const CHANNEL_CONFIGS: Record<string, ChannelConfig> = {
+  whatsapp: {
+    id: 'whatsapp',
+    name: 'WhatsApp',
+    icon: '💬',
+    description: 'Personal and business messaging with QR code pairing',
+    authType: 'qr',
+    authHint: 'Scan QR code with WhatsApp on your phone',
+    category: 'builtin',
+    features: ['Groups', 'Media', 'Reactions', 'Voice messages'],
+  },
+  telegram: {
+    id: 'telegram',
+    name: 'Telegram',
+    icon: '✈️',
+    description: 'Bot API with groups, topics, and inline mode',
+    authType: 'bot-token',
+    authHint: 'Get your bot token from @BotFather',
+    category: 'builtin',
+    features: ['Groups', 'Topics', 'Inline mode', 'Webhooks'],
+  },
+  discord: {
+    id: 'discord',
+    name: 'Discord',
+    icon: '🎮',
+    description: 'Servers, channels, threads, and DMs',
+    authType: 'bot-token',
+    authHint: 'Create a bot at discord.com/developers',
+    category: 'builtin',
+    features: ['Servers', 'Threads', 'Slash commands', 'Voice'],
+  },
+  slack: {
+    id: 'slack',
+    name: 'Slack',
+    icon: '📊',
+    description: 'Workspace apps with channels and DMs',
+    authType: 'oauth',
+    authHint: 'Install via Slack App Directory or custom app',
+    category: 'builtin',
+    features: ['Channels', 'DMs', 'Threads', 'Slash commands'],
+  },
+  'google-chat': {
+    id: 'google-chat',
+    name: 'Google Chat',
+    icon: '🔷',
+    description: 'Google Workspace chat integration',
+    authType: 'webhook',
+    authHint: 'Configure webhook in Google Chat space settings',
+    category: 'builtin',
+    features: ['Spaces', 'DMs', 'Cards', 'Dialogs'],
+  },
+};
+
 export function ChannelsSettings() {
   const { getClient } = useGateway();
   const [channels, setChannels] = useState<ChannelStatus[]>([]);
   const [loading, setLoading] = useState(true);
+  const [setupModalOpen, setSetupModalOpen] = useState(false);
+  const [selectedChannel, setSelectedChannel] = useState<ChannelConfig | null>(null);
 
   useEffect(() => {
     loadChannelStatus();
@@ -49,9 +107,31 @@ export function ChannelsSettings() {
     }
   };
 
-  const handleConnect = async (channelId: string) => {
-    // TODO: Open channel setup modal
-    console.log('Connect channel:', channelId);
+  const handleConnect = (channelId: string) => {
+    const config = CHANNEL_CONFIGS[channelId];
+    if (config) {
+      setSelectedChannel(config);
+      setSetupModalOpen(true);
+    }
+  };
+
+  const handleModalSave = async (config: Record<string, unknown>) => {
+    if (!selectedChannel) return;
+
+    const client = getClient();
+    if (!client?.connected) return;
+
+    try {
+      await client.request('channels.login', {
+        channelId: selectedChannel.id,
+        config,
+      });
+      setSetupModalOpen(false);
+      setSelectedChannel(null);
+      loadChannelStatus();
+    } catch (err) {
+      console.error('Failed to configure channel:', err);
+    }
   };
 
   const handleDisconnect = async (channelId: string) => {
@@ -176,6 +256,16 @@ export function ChannelsSettings() {
           <button className="btn-secondary btn-sm">Configure</button>
         </div>
       </section>
+
+      {/* Channel Setup Modal */}
+      {selectedChannel && (
+        <ChannelSetupModal
+          isOpen={setupModalOpen}
+          onClose={() => setSetupModalOpen(false)}
+          channel={selectedChannel}
+          onSave={handleModalSave}
+        />
+      )}
     </div>
   );
 }

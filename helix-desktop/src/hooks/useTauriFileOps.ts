@@ -14,7 +14,8 @@ import {
   notifyCompletion,
   copyToClipboard,
   pasteFromClipboard,
-  type NotificationType
+  type NotificationType,
+  type Exportable
 } from '../services/tauri-commands';
 
 interface FileOpState {
@@ -36,7 +37,7 @@ export function useTauriFileOps() {
   /**
    * Handle tool export
    */
-  const handleExportTool = useCallback(async (tool: any): Promise<void> => {
+  const handleExportTool = useCallback(async (tool: Exportable): Promise<void> => {
     try {
       setState({ isLoading: true, error: null, progress: 0 });
       setState(prev => ({ ...prev, progress: 25 }));
@@ -56,7 +57,7 @@ export function useTauriFileOps() {
   /**
    * Handle skill export
    */
-  const handleExportSkill = useCallback(async (skill: any): Promise<void> => {
+  const handleExportSkill = useCallback(async (skill: Exportable): Promise<void> => {
     try {
       setState({ isLoading: true, error: null, progress: 0 });
       setState(prev => ({ ...prev, progress: 25 }));
@@ -124,7 +125,7 @@ export function useTauriFileOps() {
    */
   const handleSaveResult = useCallback(
     async (
-      result: any,
+      result: unknown,
       name: string,
       type: 'tool' | 'skill'
     ): Promise<void> => {

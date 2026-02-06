@@ -73,6 +73,14 @@
   "plugins": {
     "shell": {
       "open": true
+    },
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://releases.project-helix.org/updates/{{target}}/{{arch}}/{{current_version}}"
+      ],
+      "dialog": false,
+      "pubkey": "pub_PLACEHOLDER_CONFIGURE_SIGNING_KEYS"
     }
   }
 }

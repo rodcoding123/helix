@@ -24,3 +24,4 @@ export {
   type CommandDefinition,
   type CommandAction,
 } from './CommandPalette';
+export { UpdateNotification } from './UpdateNotification';

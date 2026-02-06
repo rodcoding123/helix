@@ -197,7 +197,6 @@ export function KeyboardShortcuts() {
     void saveOverrides(newOverrides);
 
     recorder.clearRecorded();
-  // eslint-disable-next-line -- only react to new recorded bindings
   }, [recorder.recordedBinding, recorder.recordingForId]);
 
   /* ── Cleanup ── */

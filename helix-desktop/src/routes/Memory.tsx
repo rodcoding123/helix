@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { useGateway } from '../hooks/useGateway';
 import {
   MemorySearch,
   MemoryList,
@@ -13,8 +14,10 @@ import './Memory.css';
 
 /**
  * Memory route - browse and search memory entries from the knowledge graph
+ * Uses gateway memory.* API when connected, falls back to placeholder data
  */
 export default function Memory() {
+  const { getClient } = useGateway();
   const [entries, setEntries] = useState<MemoryListEntry[]>(PLACEHOLDER_MEMORY_ENTRIES);
   const [selectedEntry, setSelectedEntry] = useState<MemoryListEntry | null>(null);
   const [loading, setLoading] = useState(false);
@@ -23,11 +26,36 @@ export default function Memory() {
   const handleSearch = useCallback(async (query: string, filters: MemoryFilter) => {
     setLoading(true);
     try {
-      // TODO: Connect to actual memory API via gateway
-      // For now, filter placeholder data
-      await new Promise(resolve => setTimeout(resolve, 300));
-
+      const client = getClient();
       let filtered = PLACEHOLDER_MEMORY_ENTRIES;
+
+      // Try to use gateway API if connected
+      if (client?.connected) {
+        try {
+          const result = await client.request<{ entries: MemoryListEntry[] }>('memory.search', {
+            query: query.trim(),
+            filters: {
+              type: filters.type,
+              tags: filters.tags,
+              minScore: filters.minRelevance,
+            },
+          });
+
+          if (result && typeof result === 'object' && 'entries' in result) {
+            const entries = result as { entries: MemoryListEntry[] };
+            filtered = entries.entries;
+            setEntries(filtered);
+            setSelectedEntry(null);
+            return;
+          }
+        } catch (apiErr) {
+          // Fall back to placeholder data if API fails
+          console.debug('[memory-search] gateway API failed, using placeholder data:', apiErr);
+        }
+      }
+
+      // Fallback: filter placeholder data locally
+      await new Promise(resolve => setTimeout(resolve, 300));
 
       // Apply query filter
       if (query.trim()) {
@@ -66,9 +94,26 @@ export default function Memory() {
     }
   }, []);
 
+  // Load initial entries on mount and when gateway connects
+  useEffect(() => {
+    const client = getClient();
+    if (client?.connected) {
+      // Trigger search with empty query to load all/recent entries
+      void handleSearch('', { tags: [] });
+    }
+  }, [getClient, handleSearch]);
+
   const handleDelete = async (id: string) => {
-    // TODO: Implement delete via API
-    console.log('Delete memory:', id);
+    const client = getClient();
+    if (client?.connected) {
+      try {
+        await client.request('memory.delete', { entryId: id });
+      } catch (err) {
+        console.error('[memory-delete] API failed:', err);
+      }
+    }
+
+    // Optimistic update
     setEntries(prev => prev.filter(e => e.id !== id));
     if (selectedEntry?.id === id) {
       setSelectedEntry(null);

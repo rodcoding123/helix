@@ -13,6 +13,11 @@ import { sendNotification } from '@tauri-apps/plugin-notification';
  */
 export type NotificationType = 'success' | 'error' | 'info' | 'warning';
 
+/** Minimal shape for items that can be exported as JSON files */
+export interface Exportable {
+  name: string;
+}
+
 /**
  * Send desktop notification
  */
@@ -159,7 +164,7 @@ export async function getDataDir(): Promise<string> {
 /**
  * Export tool as JSON
  */
-export async function exportTool(tool: any): Promise<void> {
+export async function exportTool(tool: Exportable): Promise<void> {
   try {
     const filePath = await pickExportFile('tool', tool.name);
     if (!filePath) return;
@@ -185,7 +190,7 @@ export async function exportTool(tool: any): Promise<void> {
 /**
  * Export skill as JSON
  */
-export async function exportSkill(skill: any): Promise<void> {
+export async function exportSkill(skill: Exportable): Promise<void> {
   try {
     const filePath = await pickExportFile('skill', skill.name);
     if (!filePath) return;
@@ -266,7 +271,7 @@ export async function importSkill(): Promise<string | null> {
  * Save execution result to file
  */
 export async function saveExecutionResult(
-  result: any,
+  result: unknown,
   toolOrSkillName: string,
   _type: 'tool' | 'skill'
 ): Promise<void> {

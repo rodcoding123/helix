@@ -7,7 +7,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useWebRTCVoice } from '../../hooks/useWebRTCVoice';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
-import '../../../styles/components/voice-conversation.css';
+import '../../styles/components/voice-conversation.css';
 
 export function VoiceConversation() {
   const [state, controls] = useWebRTCVoice();

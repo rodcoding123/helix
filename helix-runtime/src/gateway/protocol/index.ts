@@ -13,6 +13,18 @@ import {
   AgentsListParamsSchema,
   type AgentsListResult,
   AgentsListResultSchema,
+  type AgentsAddParams,
+  AgentsAddParamsSchema,
+  type AgentsAddResult,
+  AgentsAddResultSchema,
+  type AgentsDeleteParams,
+  AgentsDeleteParamsSchema,
+  type AgentsDeleteResult,
+  AgentsDeleteResultSchema,
+  type AgentsSetDefaultParams,
+  AgentsSetDefaultParamsSchema,
+  type AgentsSetDefaultResult,
+  AgentsSetDefaultResultSchema,
   type AgentWaitParams,
   AgentWaitParamsSchema,
   type ChannelsLogoutParams,
@@ -209,6 +221,11 @@ export const validateAgentIdentityParams =
 export const validateAgentWaitParams = ajv.compile<AgentWaitParams>(AgentWaitParamsSchema);
 export const validateWakeParams = ajv.compile<WakeParams>(WakeParamsSchema);
 export const validateAgentsListParams = ajv.compile<AgentsListParams>(AgentsListParamsSchema);
+export const validateAgentsAddParams = ajv.compile<AgentsAddParams>(AgentsAddParamsSchema);
+export const validateAgentsDeleteParams = ajv.compile<AgentsDeleteParams>(AgentsDeleteParamsSchema);
+export const validateAgentsSetDefaultParams = ajv.compile<AgentsSetDefaultParams>(
+  AgentsSetDefaultParamsSchema,
+);
 export const validateNodePairRequestParams = ajv.compile<NodePairRequestParams>(
   NodePairRequestParamsSchema,
 );

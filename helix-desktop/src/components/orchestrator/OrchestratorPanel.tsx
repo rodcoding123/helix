@@ -77,7 +77,7 @@ export function OrchestratorPanel() {
     setIsLoading(true);
     try {
       const result = await client.request('getRecentJobs', { limit: 10 });
-      setJobs((result as any).jobs || []);
+      setJobs((result as { jobs?: OrchestratorJob[] }).jobs || []);
       setError(null);
     } catch (err) {
       setError(`Failed to load jobs: ${String(err)}`);
@@ -110,14 +110,15 @@ export function OrchestratorPanel() {
         budget_cents: budget,
       });
 
-      if ((result as any).success) {
+      const submitResult = result as { success?: boolean; error?: string };
+      if (submitResult.success) {
         setTaskInput('');
         setPriority('normal');
         setBudget(10000);
         // Refresh jobs list
         loadJobs();
       } else {
-        setError((result as any).error || 'Failed to submit job');
+        setError(submitResult.error || 'Failed to submit job');
       }
     } catch (err) {
       setError(`Job submission failed: ${String(err)}`);
@@ -223,7 +224,7 @@ export function OrchestratorPanel() {
               <select
                 id="priority"
                 value={priority}
-                onChange={(e) => setPriority(e.target.value as any)}
+                onChange={(e) => setPriority(e.target.value as 'low' | 'normal' | 'high' | 'urgent')}
                 disabled={isSubmitting || !connected}
               >
                 <option value="low">Low</option>

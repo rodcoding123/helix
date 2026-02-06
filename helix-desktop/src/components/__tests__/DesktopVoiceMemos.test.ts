@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 
 describe('DesktopVoiceMemos', () => {
   beforeEach(() => {
@@ -34,12 +34,12 @@ describe('DesktopVoiceMemos', () => {
         },
       ];
 
-      (invoke as any).mockResolvedValue(mockMemos);
+      vi.mocked(invoke).mockResolvedValue(mockMemos);
 
       const result = await invoke('voice_get_memos', {
         limit: 50,
         offset: 0,
-      });
+      }) as Record<string, unknown>[];
 
       expect(invoke).toHaveBeenCalledWith('voice_get_memos', {
         limit: 50,
@@ -51,12 +51,12 @@ describe('DesktopVoiceMemos', () => {
     });
 
     it('should handle empty memo list', async () => {
-      (invoke as any).mockResolvedValue([]);
+      vi.mocked(invoke).mockResolvedValue([]);
 
       const result = await invoke('voice_get_memos', {
         limit: 50,
         offset: 0,
-      });
+      }) as unknown[];
 
       expect(result).toHaveLength(0);
     });
@@ -75,12 +75,12 @@ describe('DesktopVoiceMemos', () => {
         },
       ];
 
-      (invoke as any).mockResolvedValue(mockResults);
+      vi.mocked(invoke).mockResolvedValue(mockResults);
 
       const result = await invoke('voice_search_transcripts', {
         query: 'features',
         tags: [],
-      });
+      }) as Record<string, unknown>[];
 
       expect(invoke).toHaveBeenCalledWith('voice_search_transcripts', {
         query: 'features',
@@ -102,12 +102,12 @@ describe('DesktopVoiceMemos', () => {
         },
       ];
 
-      (invoke as any).mockResolvedValue(mockResults);
+      vi.mocked(invoke).mockResolvedValue(mockResults);
 
       const result = await invoke('voice_search_transcripts', {
         query: '',
         tags: ['work', 'urgent'],
-      });
+      }) as Record<string, unknown>[];
 
       expect(invoke).toHaveBeenCalledWith('voice_search_transcripts', {
         query: '',
@@ -118,12 +118,12 @@ describe('DesktopVoiceMemos', () => {
     });
 
     it('should return empty results for no matches', async () => {
-      (invoke as any).mockResolvedValue([]);
+      vi.mocked(invoke).mockResolvedValue([]);
 
       const result = await invoke('voice_search_transcripts', {
         query: 'nonexistent',
         tags: [],
-      });
+      }) as unknown[];
 
       expect(result).toHaveLength(0);
     });
@@ -170,9 +170,9 @@ describe('DesktopVoiceMemos', () => {
     it('should load all available tags', async () => {
       const mockTags = ['work', 'personal', 'meeting', 'important'];
 
-      (invoke as any).mockResolvedValue(mockTags);
+      vi.mocked(invoke).mockResolvedValue(mockTags);
 
-      const result = await invoke('voice_get_tags', {});
+      const result = await invoke('voice_get_tags', {}) as string[];
 
       expect(invoke).toHaveBeenCalledWith('voice_get_tags', {});
       expect(result).toHaveLength(4);
@@ -181,9 +181,9 @@ describe('DesktopVoiceMemos', () => {
     });
 
     it('should handle empty tag list', async () => {
-      (invoke as any).mockResolvedValue([]);
+      vi.mocked(invoke).mockResolvedValue([]);
 
-      const result = await invoke('voice_get_tags', {});
+      const result = await invoke('voice_get_tags', {}) as unknown[];
 
       expect(result).toHaveLength(0);
     });
@@ -220,11 +220,11 @@ describe('DesktopVoiceMemos', () => {
 
   describe('Memo Deletion', () => {
     it('should delete memo via Tauri IPC', async () => {
-      (invoke as any).mockResolvedValue({ ok: true });
+      vi.mocked(invoke).mockResolvedValue({ ok: true });
 
       const result = await invoke('voice_delete_memo', {
         memo_id: 'memo_to_delete',
-      });
+      }) as Record<string, unknown>;
 
       expect(invoke).toHaveBeenCalledWith('voice_delete_memo', {
         memo_id: 'memo_to_delete',
@@ -234,7 +234,7 @@ describe('DesktopVoiceMemos', () => {
 
     it('should handle deletion errors', async () => {
       const error = new Error('Memo not found');
-      (invoke as any).mockRejectedValue(error);
+      vi.mocked(invoke).mockRejectedValue(error);
 
       try {
         await invoke('voice_delete_memo', { memo_id: 'invalid_id' });
@@ -256,13 +256,13 @@ describe('DesktopVoiceMemos', () => {
         created_at: '2026-02-03T10:30:00Z',
       };
 
-      (invoke as any).mockResolvedValue(mockSaveResponse);
+      vi.mocked(invoke).mockResolvedValue(mockSaveResponse);
 
       const result = await invoke('voice_save_memo', {
         audio_data: 'base64_encoded_audio',
         title: 'Voice Memo 2026-02-03 10:30:00',
         duration_ms: 45000,
-      });
+      }) as Record<string, unknown>;
 
       expect(result.id).toBeDefined();
       expect(result.title).toContain('Voice Memo');
@@ -271,7 +271,7 @@ describe('DesktopVoiceMemos', () => {
 
     it('should handle recording save errors', async () => {
       const error = new Error('Failed to save audio');
-      (invoke as any).mockRejectedValue(error);
+      vi.mocked(invoke).mockRejectedValue(error);
 
       try {
         await invoke('voice_save_memo', {
@@ -320,7 +320,7 @@ describe('DesktopVoiceMemos', () => {
   describe('Error Handling', () => {
     it('should handle IPC communication failures', async () => {
       const error = new Error('IPC connection failed');
-      (invoke as any).mockRejectedValue(error);
+      vi.mocked(invoke).mockRejectedValue(error);
 
       try {
         await invoke('voice_get_memos', { limit: 50, offset: 0 });
@@ -334,9 +334,9 @@ describe('DesktopVoiceMemos', () => {
       const malformedMemo = {
         id: 'memo1',
         title: '',
-        transcript: null as any,
-        duration_ms: 'invalid' as any,
-        tags: 'not_array' as any,
+        transcript: null as unknown as string,
+        duration_ms: 'invalid' as unknown as number,
+        tags: 'not_array' as unknown as string[],
         created_at: '',
       };
 

@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 import { Brain, Heart, Users, Target, TrendingUp, Search, Filter, AlertCircle } from 'lucide-react';
 
 interface Pattern {

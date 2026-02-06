@@ -341,7 +341,6 @@ export function useDeepLink(): UseDeepLinkReturn {
     };
 
     checkLaunchUrl();
-  // eslint-disable-next-line -- mount-only effect
   }, []);
 
   return { lastDeepLink, clearDeepLink };

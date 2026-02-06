@@ -1,4 +1,7 @@
-/* App Layout */
+/* ================================================================
+   App Layout
+   ================================================================ */
+
 .app-layout {
   display: flex;
   flex-direction: column;
@@ -6,7 +9,182 @@
   background: var(--color-bg);
 }
 
+.app-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
 .app-content {
   flex: 1;
   overflow: hidden;
+}
+
+/* ================================================================
+   NavSidebar
+   ================================================================ */
+
+.nav-sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 48px;
+  min-width: 48px;
+  background: var(--void-soft);
+  border-right: 1px solid var(--border-default);
+  overflow: hidden;
+  transition: width 200ms ease, min-width 200ms ease;
+  user-select: none;
+  z-index: 10;
+}
+
+.nav-sidebar:hover {
+  width: 192px;
+  min-width: 192px;
+}
+
+/* ── Scrollable main area ─────────────────── */
+
+.nav-sidebar-main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 0 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+}
+
+.nav-sidebar-main::-webkit-scrollbar {
+  width: 4px;
+}
+
+.nav-sidebar-main::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.nav-sidebar-main::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+}
+
+.nav-sidebar-main::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ── Group ────────────────────────────────── */
+
+.nav-sidebar-group {
+  margin-bottom: 4px;
+}
+
+.nav-sidebar-group-label {
+  padding: 10px 14px 4px;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.nav-sidebar:hover .nav-sidebar-group-label {
+  opacity: 1;
+}
+
+/* ── Nav item (button) ────────────────────── */
+
+.nav-sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  margin: 0;
+  border: none;
+  border-left: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-tertiary);
+  font-family: var(--font-body);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.nav-sidebar-item:hover {
+  background: var(--void-light);
+  color: var(--text-secondary);
+}
+
+.nav-sidebar-item:focus-visible {
+  outline: 1px solid var(--helix-blue);
+  outline-offset: -1px;
+}
+
+/* ── Active state ─────────────────────────── */
+
+.nav-sidebar-item--active {
+  border-left-color: var(--helix-blue);
+  background: rgba(6, 134, 212, 0.1);
+  color: var(--text-primary);
+}
+
+.nav-sidebar-item--active:hover {
+  background: rgba(6, 134, 212, 0.14);
+}
+
+/* ── Icon ─────────────────────────────────── */
+
+.nav-sidebar-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  color: inherit;
+}
+
+.nav-sidebar-item--active .nav-sidebar-item-icon {
+  color: var(--helix-blue);
+}
+
+.nav-sidebar-item-icon svg {
+  display: block;
+}
+
+/* ── Label (hidden when collapsed) ────────── */
+
+.nav-sidebar-item-label {
+  opacity: 0;
+  color: var(--text-secondary);
+  transition: opacity 200ms ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-sidebar:hover .nav-sidebar-item-label {
+  opacity: 1;
+}
+
+.nav-sidebar-item--active .nav-sidebar-item-label {
+  color: var(--text-primary);
+}
+
+/* ── Bottom pinned section ────────────────── */
+
+.nav-sidebar-bottom {
+  border-top: 1px solid var(--border-default);
+  padding: 4px 0;
+  flex-shrink: 0;
 }

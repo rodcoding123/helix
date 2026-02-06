@@ -10,7 +10,7 @@ vi.stubGlobal('__TAURI__', {
   invoke: vi.fn(),
 });
 
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 
 describe('Desktop Layer 5 E2E Integration', () => {
   beforeEach(() => {
@@ -40,9 +40,9 @@ describe('Desktop Layer 5 E2E Integration', () => {
         },
       ];
 
-      (invoke as any).mockResolvedValue(mockPatterns);
+      vi.mocked(invoke).mockResolvedValue(mockPatterns);
 
-      const result = await invoke('get_memory_patterns', {});
+      const result = await invoke('get_memory_patterns', {}) as Record<string, unknown>[];
 
       expect(invoke).toHaveBeenCalledWith('get_memory_patterns', {});
       expect(result).toHaveLength(2);
@@ -166,9 +166,9 @@ describe('Desktop Layer 5 E2E Integration', () => {
         timeout_seconds: 1800,
       };
 
-      (invoke as any).mockResolvedValue(mockConfig);
+      vi.mocked(invoke).mockResolvedValue(mockConfig);
 
-      const result = await invoke('get_scheduler_config', {});
+      const result = await invoke('get_scheduler_config', {}) as Record<string, unknown>;
 
       expect(result.enabled).toBe(true);
       expect(result.consolidation_time).toBe('06:00');
@@ -192,12 +192,12 @@ describe('Desktop Layer 5 E2E Integration', () => {
         result: null,
       };
 
-      (invoke as any).mockResolvedValue(mockJob);
+      vi.mocked(invoke).mockResolvedValue(mockJob);
 
       const result = await invoke('create_job', {
         job_type: 'consolidation',
         cron_expression: '0 6 * * *',
-      });
+      }) as Record<string, unknown>;
 
       expect(result.job_type).toBe('consolidation');
       expect(result.status).toBe('pending');
@@ -213,9 +213,9 @@ describe('Desktop Layer 5 E2E Integration', () => {
         started_at: 1707000000,
       };
 
-      (invoke as any).mockResolvedValue(mockRunningJob);
+      vi.mocked(invoke).mockResolvedValue(mockRunningJob);
 
-      const result = await invoke('trigger_job', { job_id: jobId });
+      const result = await invoke('trigger_job', { job_id: jobId }) as Record<string, unknown>;
 
       expect(result.status).toBe('running');
       expect(result.started_at).toBeDefined();
@@ -224,7 +224,7 @@ describe('Desktop Layer 5 E2E Integration', () => {
     it('should pause and resume jobs', async () => {
       const jobId = 'job_pause_test';
 
-      (invoke as any).mockResolvedValue({ ok: true });
+      vi.mocked(invoke).mockResolvedValue({ ok: true });
 
       // Pause
       await invoke('pause_job', { job_id: jobId });
@@ -244,9 +244,9 @@ describe('Desktop Layer 5 E2E Integration', () => {
         paused: 0,
       };
 
-      (invoke as any).mockResolvedValue(mockHealth);
+      vi.mocked(invoke).mockResolvedValue(mockHealth);
 
-      const result = await invoke('get_scheduler_health', {});
+      const result = await invoke('get_scheduler_health', {}) as Record<string, unknown>;
 
       expect(result.healthy).toBe(true);
       expect(result.total_jobs).toBe(3);
@@ -320,7 +320,7 @@ describe('Desktop Layer 5 E2E Integration', () => {
   describe('Error Handling', () => {
     it('should handle IPC failures gracefully', async () => {
       const error = new Error('IPC communication failed');
-      (invoke as any).mockRejectedValue(error);
+      vi.mocked(invoke).mockRejectedValue(error);
 
       try {
         await invoke('get_memory_patterns', {});
@@ -331,7 +331,7 @@ describe('Desktop Layer 5 E2E Integration', () => {
     });
 
     it('should handle missing jobs', async () => {
-      (invoke as any).mockRejectedValue(new Error('Job not found: invalid_id'));
+      vi.mocked(invoke).mockRejectedValue(new Error('Job not found: invalid_id'));
 
       try {
         await invoke('get_job', { job_id: 'invalid_id' });
@@ -382,7 +382,7 @@ describe('Desktop Layer 5 E2E Integration', () => {
       };
 
       // Simulate workflow execution
-      (invoke as any).mockImplementation((cmd: string) => {
+      vi.mocked(invoke).mockImplementation((cmd: string) => {
         if (cmd === 'get_memory_patterns') {
           workflow.step1_get_patterns.invoked = true;
           return Promise.resolve([

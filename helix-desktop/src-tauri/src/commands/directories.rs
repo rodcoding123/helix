@@ -2,7 +2,6 @@
 /// Provides application path management
 
 use tauri::AppHandle;
-use std::path::PathBuf;
 
 #[tauri::command]
 pub async fn get_cache_dir(_app: AppHandle) -> Result<String, String> {

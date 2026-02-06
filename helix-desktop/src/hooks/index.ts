@@ -28,6 +28,9 @@ export { useTauriFileOps } from './useTauriFileOps';
 // Gateway config synchronization
 export { useGatewayConfig } from './useGatewayConfig';
 
+// Phase J2: System Tray live state sync
+export { useTraySync } from './useTraySync';
+
 // Phase J: Deep Linking
 export { useDeepLink } from './useDeepLink';
 export type { DeepLinkAction, DeepLinkActionType, UseDeepLinkReturn } from './useDeepLink';

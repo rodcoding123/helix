@@ -57,6 +57,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'System',
     items: [
+      { id: 'environment', label: 'Environment Variables', icon: '🔐', path: ROUTES.SETTINGS_ENVIRONMENT },
       { id: 'shortcuts', label: 'Keyboard Shortcuts', icon: '⌨️', path: ROUTES.SETTINGS_SHORTCUTS },
       { id: 'advanced', label: 'Advanced', icon: '🔬', path: ROUTES.SETTINGS_ADVANCED },
     ],

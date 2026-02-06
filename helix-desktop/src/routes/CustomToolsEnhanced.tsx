@@ -5,17 +5,18 @@
 
 import { useEffect, useState, memo } from 'react';
 import { Plus, Search, Zap, Loader, X, Copy, Share2, Trash2, Code, Download, Upload, Save } from 'lucide-react';
-import { useCustomTools } from '../hooks/useCustomTools';
+import { useCustomTools, type CustomTool } from '../hooks/useCustomTools';
 import { useTauriFileOps } from '../hooks/useTauriFileOps';
+import type { Exportable } from '../services/tauri-commands';
 import '../components/tools/ToolsEnhanced.css';
 
 // Memoized tool card component for performance
 interface ToolCardProps {
-  tool: any;
+  tool: CustomTool;
   activeTab: string;
-  onExecute: (tool: any) => void;
+  onExecute: (tool: CustomTool) => void;
   onCopyCode: (code: string) => void;
-  onExport: (tool: any) => void;
+  onExport: (tool: Exportable) => void;
   onDelete: (toolId: string) => void;
   tauriLoading: boolean;
 }
@@ -146,7 +147,7 @@ export default function CustomToolsEnhanced() {
   const [activeTab, setActiveTab] = useState<'my-tools' | 'marketplace' | 'templates'>('my-tools');
   const [searchQuery, setSearchQuery] = useState('');
   const [showBuilder, setShowBuilder] = useState(false);
-  const [selectedTool, setSelectedTool] = useState<any>(null);
+  const [selectedTool, setSelectedTool] = useState<CustomTool | null>(null);
   const [showExecute, setShowExecute] = useState(false);
   const [executionResult, setExecutionResult] = useState<ExecutionResult | null>(null);
   const [executionParams, setExecutionParams] = useState<string>('{}');
@@ -274,7 +275,7 @@ export default function CustomToolsEnhanced() {
       ? customTools
       : activeTab === 'marketplace'
         ? publicTools
-        : ([] as any[]);
+        : ([] as CustomTool[]);
 
   const filteredTools = tools.filter(
     tool =>
@@ -512,7 +513,7 @@ export default function CustomToolsEnhanced() {
               <label>Sandbox Profile</label>
               <select
                 value={sandboxProfile}
-                onChange={e => setSandboxProfile(e.target.value as any)}
+                onChange={e => setSandboxProfile(e.target.value as 'strict' | 'standard' | 'permissive')}
               >
                 <option value="strict">Strict</option>
                 <option value="standard">Standard</option>
@@ -522,7 +523,7 @@ export default function CustomToolsEnhanced() {
 
             <div className="form-group">
               <label>Visibility</label>
-              <select value={visibility} onChange={e => setVisibility(e.target.value as any)}>
+              <select value={visibility} onChange={e => setVisibility(e.target.value as 'private' | 'public')}>
                 <option value="private">Private</option>
                 <option value="public">Public</option>
               </select>

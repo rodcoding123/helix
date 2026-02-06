@@ -270,6 +270,7 @@ export const ROUTES = {
   SETTINGS_SHORTCUTS: '/settings/shortcuts',
   SETTINGS_AUTH_PROFILES: '/settings/auth-profiles',
   SETTINGS_FAILOVER: '/settings/failover',
+  SETTINGS_ENVIRONMENT: '/settings/environment',
   PSYCHOLOGY: '/psychology',
   PSYCHOLOGY_LAYER: (layer: string) => `/psychology/${layer}`,
   MEMORY: '/memory',

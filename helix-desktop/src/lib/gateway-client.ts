@@ -3,6 +3,74 @@
  * Implements the OpenClaw protocol for Helix Desktop
  */
 
+// ============================================
+// Type definitions for common gateway responses
+// ============================================
+
+export interface ExecApprovalSnapshot {
+  approvals: Array<{
+    id: string;
+    command: string;
+    actor?: string;
+    timestamp: number;
+    status: 'pending' | 'approved' | 'rejected';
+    reason?: string;
+  }>;
+}
+
+export interface ExecApprovalConfig {
+  mode: 'strict' | 'permissive' | 'sandbox';
+  requireApproval: boolean;
+  auditLog?: boolean;
+}
+
+export interface BrowserSnapshot {
+  open: boolean;
+  lastUrl?: string;
+  lastViewport?: { width: number; height: number };
+  lastError?: string;
+}
+
+export interface SkillInfo {
+  name: string;
+  version?: string;
+  description?: string;
+  builtin?: boolean;
+  enabled: boolean;
+}
+
+export interface ChannelStatus {
+  [key: string]: { enabled: boolean; connected?: boolean };
+}
+
+export interface SessionInfo {
+  id: string;
+  created: number;
+  lastActive: number;
+  metadata?: unknown;
+}
+
+export interface NodeInfo {
+  id: string;
+  name?: string;
+  status: 'online' | 'offline' | 'error';
+  version?: string;
+  capabilities?: string[];
+}
+
+export interface DeviceInfo {
+  id: string;
+  name: string;
+  status: 'approved' | 'pending' | 'rejected';
+  pairedAt?: number;
+}
+
+export interface ConfigResponse {
+  config: Record<string, unknown>;
+  environment?: Record<string, unknown>;
+  hash?: string;
+}
+
 export type GatewayEventFrame = {
   type: 'event';
   event: string;
@@ -59,6 +127,59 @@ export interface GatewayClientOptions {
 // Protocol version
 const PROTOCOL_VERSION = 3;
 
+/**
+ * Method alias map: translates desktop-friendly method names to actual gateway
+ * protocol method names. This allows components to use semantic method names
+ * while the client sends the correct protocol method.
+ *
+ * Format: { desktopMethod: actualGatewayMethod }
+ */
+const METHOD_ALIASES: Record<string, string> = {
+  // Device management (desktop uses "devices.*", gateway uses "device.pair.*" / "device.token.*")
+  'devices.list': 'device.pair.list',
+  'devices.approve': 'device.pair.approve',
+  'devices.deny': 'device.pair.reject',
+  'devices.reject': 'device.pair.reject',
+  'devices.revoke': 'device.token.revoke',
+  'devices.rotate': 'device.token.rotate',
+
+  // Node management (desktop uses "nodes.*", gateway uses "node.*")
+  'nodes.discover': 'node.list',
+  'nodes.list': 'node.list',
+  'nodes.status': 'node.list',
+  'nodes.describe': 'node.describe',
+  'nodes.invoke': 'node.invoke',
+  'nodes.rename': 'node.rename',
+
+  // Exec approvals (desktop uses "exec.approval.snapshot", gateway uses "exec.approvals.get")
+  'exec.approval.snapshot': 'exec.approvals.get',
+  'exec.approval.configure': 'exec.approvals.set',
+
+  // System (desktop uses "system.health", gateway uses "health")
+  'system.health': 'health',
+  'system.status': 'status',
+
+  // Skills (desktop uses "skills.list", gateway has "skills.status")
+  'skills.list': 'skills.status',
+
+  // Models (desktop calls "models.scan" which doesn't exist - fall back to models.list)
+  'models.scan': 'models.list',
+
+  // Node pairing (normalize both naming conventions)
+  'node.pair.request': 'node.pair.request',
+  'node.pair.list': 'node.pair.list',
+  'node.pair.approve': 'node.pair.approve',
+  'node.pair.reject': 'node.pair.reject',
+  'node.pair.verify': 'node.pair.verify',
+
+  // Channels (desktop calls "channels.login" - not in gateway, route through config.patch)
+  // These stay as-is since the gateway may add them later, and config.patch is used for writes
+
+  // Memory search (desktop calls "memory_search" - route to memory.list_patterns as closest match)
+  'memory_search': 'memory.list_patterns',
+  'memory.search': 'memory.list_patterns',
+};
+
 export class GatewayClient {
   private ws: WebSocket | null = null;
   private pending = new Map<string, Pending>();
@@ -69,8 +190,33 @@ export class GatewayClient {
   private connectTimer: number | null = null;
   private backoffMs = 800;
   private reconnectTimer: number | null = null;
+  private eventListeners = new Map<string, Set<(evt: unknown) => void>>();
 
   constructor(private opts: GatewayClientOptions) {}
+
+  /** Register event listener (for test compatibility) */
+  on(event: string, handler: (evt: unknown) => void): void {
+    if (!this.eventListeners.has(event)) {
+      this.eventListeners.set(event, new Set());
+    }
+    this.eventListeners.get(event)!.add(handler);
+  }
+
+  /** Unregister event listener (for test compatibility) */
+  off(event: string, handler: (evt: unknown) => void): void {
+    this.eventListeners.get(event)?.delete(handler);
+  }
+
+  /** Emit event to all listeners */
+  private emitEvent(event: string, data: unknown): void {
+    this.eventListeners.get(event)?.forEach((handler) => {
+      try {
+        handler(data);
+      } catch (err) {
+        console.error(`[gateway-client] Event handler error for ${event}:`, err);
+      }
+    });
+  }
 
   /** Get the last received sequence number (for monitoring) */
   get lastReceivedSeq() {
@@ -103,6 +249,15 @@ export class GatewayClient {
 
   get url() {
     return this.opts.url;
+  }
+
+  get role() {
+    return this.opts.role ?? 'dual';
+  }
+
+  /** Alias for stop() - for test compatibility */
+  disconnect(): void {
+    this.stop();
   }
 
   private connect() {
@@ -241,6 +396,9 @@ export class GatewayClient {
         this.lastSeq = seq;
       }
 
+      // Emit event to listeners (for test compatibility)
+      this.emitEvent(evt.event, evt.payload ?? evt);
+
       try {
         this.opts.onEvent?.(evt);
       } catch (err) {
@@ -261,15 +419,21 @@ export class GatewayClient {
   }
 
   /**
-   * Send a request to the gateway
+   * Send a request to the gateway.
+   * Method names are transparently translated via METHOD_ALIASES so that
+   * components can use semantic names (e.g. "devices.list") while the wire
+   * protocol receives the actual method (e.g. "device.pair.list").
    */
   request<T = unknown>(method: string, params?: unknown): Promise<T> {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       return Promise.reject(new Error('gateway not connected'));
     }
 
+    // Resolve method alias (transparent to callers)
+    const resolvedMethod = METHOD_ALIASES[method] ?? method;
+
     const id = crypto.randomUUID();
-    const frame = { type: 'req', id, method, params };
+    const frame = { type: 'req', id, method: resolvedMethod, params };
 
     const p = new Promise<T>((resolve, reject) => {
       this.pending.set(id, { resolve: (v) => resolve(v as T), reject });
@@ -393,14 +557,235 @@ export class GatewayClient {
    * List available node capabilities for this client
    */
   async nodeCapabilities(): Promise<unknown> {
-    return this.request('nodes.describe', { nodeId: 'self' });
+    return this.request('node.describe', { nodeId: 'self' });
   }
 
   /**
    * Get node status for this client
    */
   async nodeStatus(): Promise<unknown> {
-    return this.request('nodes.status');
+    return this.request('node.list');
+  }
+
+  // ============================================
+  // Exec Approval API methods (typed)
+  // ============================================
+
+  /**
+   * Get snapshot of pending exec approvals
+   */
+  async getExecApprovals(): Promise<ExecApprovalSnapshot> {
+    return this.request('exec.approval.snapshot');
+  }
+
+  /**
+   * Resolve (approve/reject) an exec approval
+   */
+  async resolveExecApproval(params: {
+    approvalId: string;
+    decision: 'approve' | 'reject';
+    reason?: string;
+  }): Promise<{ success: boolean }> {
+    return this.request('exec.approval.resolve', params);
+  }
+
+  /**
+   * Configure exec approval policy
+   */
+  async configureExecPolicy(params: ExecApprovalConfig): Promise<{ success: boolean }> {
+    return this.request('exec.approval.configure', params);
+  }
+
+  // ============================================
+  // Browser Automation API methods (typed)
+  // ============================================
+
+  /**
+   * Start browser session
+   */
+  async browserStart(params?: { headless?: boolean }): Promise<{ sessionId: string }> {
+    return this.request('browser.start', params);
+  }
+
+  /**
+   * Stop browser session
+   */
+  async browserStop(params?: { sessionId?: string }): Promise<void> {
+    return this.request('browser.stop', params);
+  }
+
+  /**
+   * Get browser snapshot
+   */
+  async browserSnapshot(params?: { sessionId?: string }): Promise<BrowserSnapshot> {
+    return this.request('browser.snapshot', params);
+  }
+
+  /**
+   * Navigate to URL in browser
+   */
+  async browserNavigate(params: { url: string; sessionId?: string }): Promise<{ success: boolean }> {
+    return this.request('browser.navigate', params);
+  }
+
+  // ============================================
+  // Skills API methods (typed)
+  // ============================================
+
+  /**
+   * Install a skill from ClawHub
+   */
+  async installSkill(params: { name: string; version?: string }): Promise<{ success: boolean }> {
+    return this.request('skills.install', params);
+  }
+
+  /**
+   * Uninstall a skill
+   */
+  async uninstallSkill(params: { name: string }): Promise<{ success: boolean }> {
+    return this.request('skills.uninstall', params);
+  }
+
+  /**
+   * Get list of installed skills
+   */
+  async getSkills(): Promise<SkillInfo[]> {
+    return this.request('skills.list');
+  }
+
+  /**
+   * Update skill configuration
+   */
+  async configureSkill(params: { name: string; config: unknown }): Promise<{ success: boolean }> {
+    return this.request('skills.configure', params);
+  }
+
+  // ============================================
+  // Channels API methods (typed)
+  // ============================================
+
+  /**
+   * Login to a channel (e.g., Discord, Slack)
+   */
+  async channelLogin(params: { channel: string; credentials: unknown }): Promise<{ success: boolean }> {
+    return this.request('channels.login', params);
+  }
+
+  /**
+   * Logout from a channel
+   */
+  async channelLogout(params: { channel: string }): Promise<{ success: boolean }> {
+    return this.request('channels.logout', params);
+  }
+
+  /**
+   * Get channel status
+   */
+  async getChannelStatus(): Promise<ChannelStatus> {
+    return this.request('channels.status');
+  }
+
+  // ============================================
+  // Sessions API methods (typed)
+  // ============================================
+
+  /**
+   * List active sessions
+   */
+  async getSessions(): Promise<SessionInfo[]> {
+    return this.request('sessions.list');
+  }
+
+  /**
+   * Compact a session (optimize memory)
+   */
+  async compactSession(params: { sessionId: string }): Promise<{ success: boolean }> {
+    return this.request('sessions.compact', params);
+  }
+
+  /**
+   * Create a new session
+   */
+  async createSession(params?: { metadata?: unknown }): Promise<{ sessionId: string }> {
+    return this.request('sessions.create', params);
+  }
+
+  // ============================================
+  // Nodes API methods (typed)
+  // ============================================
+
+  /**
+   * List available nodes
+   */
+  async getNodes(): Promise<NodeInfo[]> {
+    return this.request('nodes.list');
+  }
+
+  /**
+   * Invoke a command on a node
+   */
+  async invokeNode(params: { nodeId: string; command: string; args?: unknown }): Promise<unknown> {
+    return this.request('nodes.invoke', params);
+  }
+
+  /**
+   * Get node information
+   */
+  async getNodeInfo(params: { nodeId: string }): Promise<NodeInfo> {
+    return this.request('nodes.describe', params);
+  }
+
+  // ============================================
+  // Device API methods (typed)
+  // ============================================
+
+  /**
+   * List paired devices
+   */
+  async listDevices(): Promise<DeviceInfo[]> {
+    return this.request('devices.list');
+  }
+
+  /**
+   * Approve a device pairing request
+   */
+  async approveDevice(params: { deviceId: string }): Promise<{ success: boolean }> {
+    return this.request('devices.approve', params);
+  }
+
+  /**
+   * Reject a device pairing request
+   */
+  async rejectDevice(params: { deviceId: string }): Promise<{ success: boolean }> {
+    return this.request('devices.reject', params);
+  }
+
+  /**
+   * Revoke a device token
+   */
+  async revokeDevice(params: { deviceId: string }): Promise<{ success: boolean }> {
+    return this.request('devices.revoke', params);
+  }
+
+  // ============================================
+  // Config API methods (typed)
+  // ============================================
+
+  /**
+   * Get full gateway config
+   */
+  async getFullConfig(): Promise<ConfigResponse> {
+    return this.request('config.get');
+  }
+
+  /**
+   * Patch gateway config (optimistic concurrency via baseHash)
+   */
+  async patchFullConfig(params: {
+    patch: Record<string, unknown>;
+    baseHash?: string;
+  }): Promise<ConfigResponse> {
+    return this.request('config.patch', params);
   }
 }
 

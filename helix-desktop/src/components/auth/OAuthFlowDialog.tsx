@@ -293,7 +293,6 @@ export function OAuthFlowDialog({ provider, onComplete, onCancel }: OAuthFlowDia
   // --- Initiate flow on mount ---
   useEffect(() => {
     startFlow();
-  // eslint-disable-next-line -- mount-only effect
   }, []);
 
   // --- Copy URL to clipboard ---

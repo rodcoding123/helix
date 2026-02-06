@@ -720,7 +720,6 @@ function SemanticSearchOverlay({
     if (query.trim()) {
       executeSearch(query);
     }
-  // eslint-disable-next-line -- re-search when mode changes
   }, [mode]);
 
   // Cleanup debounce

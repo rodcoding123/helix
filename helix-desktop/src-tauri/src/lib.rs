@@ -4,6 +4,7 @@ mod commands;
 mod config;
 mod gateway;
 mod tray;
+#[allow(dead_code)]
 mod updater;
 
 use std::sync::Arc;
@@ -29,7 +30,7 @@ pub fn run() {
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_process::init())
-        // .plugin(tauri_plugin_updater::Builder::new().build()) // Enable when signing keys are set up
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(AppState {
             gateway_monitor: Arc::new(RwLock::new(GatewayMonitor::new())),
             config_watcher: Arc::new(RwLock::new(ConfigWatcher::new())),
@@ -65,8 +66,8 @@ pub fn run() {
                 log::warn!("Failed to auto-start gateway: {}", e);
             }
 
-            // Initialize auto-updater (disabled until signing keys are configured)
-            // updater::init(app.handle());
+            // Initialize auto-updater
+            updater::init(app.handle());
 
             Ok(())
         })
@@ -179,10 +180,10 @@ pub fn run() {
             // Phase J2: Enhanced System Tray
             tray::update_tray_menu,
 
-            // Updater commands (disabled until signing keys are configured)
-            // updater::check_for_update,
-            // updater::install_update,
-            // updater::get_app_version,
+            // Phase J4: Auto-Updater
+            updater::check_for_update,
+            updater::install_update,
+            updater::get_app_version,
         ])
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {

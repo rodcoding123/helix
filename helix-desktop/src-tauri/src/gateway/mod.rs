@@ -2,4 +2,4 @@
 
 pub mod monitor;
 
-pub use monitor::{GatewayMonitor, GatewayStatus};
+pub use monitor::GatewayMonitor;

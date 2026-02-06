@@ -148,7 +148,6 @@ export function SemanticSearch({ onSelectResult, onClose }: SemanticSearchProps)
     if (query.trim()) {
       executeSearch(query);
     }
-  // eslint-disable-next-line -- re-search when mode changes
   }, [mode]);
 
   // Cleanup debounce timer

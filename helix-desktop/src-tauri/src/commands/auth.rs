@@ -415,6 +415,7 @@ pub struct HeartbeatResponse {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct SupabaseSubscription {
+    #[allow(dead_code)]
     user_id: String,
     tier: String,
 }

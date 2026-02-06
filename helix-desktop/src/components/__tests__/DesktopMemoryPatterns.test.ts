@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 
 describe('DesktopMemoryPatterns', () => {
   beforeEach(() => {
@@ -24,9 +24,9 @@ describe('DesktopMemoryPatterns', () => {
       },
     ];
 
-    (invoke as any).mockResolvedValue(mockPatterns);
+    vi.mocked(invoke).mockResolvedValue(mockPatterns);
 
-    const result = await invoke('get_memory_patterns', {});
+    const result = await invoke('get_memory_patterns', {}) as Record<string, unknown>[];
 
     expect(invoke).toHaveBeenCalledWith('get_memory_patterns', {});
     expect(result).toEqual(mockPatterns);
@@ -35,7 +35,7 @@ describe('DesktopMemoryPatterns', () => {
 
   it('should handle Tauri IPC errors gracefully', async () => {
     const error = new Error('IPC failed');
-    (invoke as any).mockRejectedValue(error);
+    vi.mocked(invoke).mockRejectedValue(error);
 
     try {
       await invoke('get_memory_patterns', {});

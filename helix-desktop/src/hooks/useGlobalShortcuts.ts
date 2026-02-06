@@ -407,7 +407,6 @@ export function useShortcutListener(
   callback: () => void,
   deps: React.DependencyList = []
 ): void {
-  // eslint-disable-next-line -- dynamic deps passed by caller
   const stableCallback = useCallback(callback, deps);
 
   useEffect(() => {

@@ -5,8 +5,9 @@
 
 import { useEffect, useState, memo } from 'react';
 import { Plus, Search, Loader, X, Trash2, ChevronDown, Play, Download, Upload, Save } from 'lucide-react';
-import { useCompositeSkills } from '../hooks/useCompositeSkills';
+import { useCompositeSkills, type CompositeSkill } from '../hooks/useCompositeSkills';
 import { useTauriFileOps } from '../hooks/useTauriFileOps';
+import type { Exportable } from '../services/tauri-commands';
 import '../components/skills/SkillsEnhanced.css';
 
 interface SkillStep {
@@ -21,9 +22,9 @@ interface SkillStep {
 
 // Memoized skill card component for performance
 interface SkillCardProps {
-  skill: any;
-  onExecute: (skill: any) => void;
-  onExport: (skill: any) => void;
+  skill: CompositeSkill;
+  onExecute: (skill: CompositeSkill) => void;
+  onExport: (skill: Exportable) => void;
   onDelete: (skillId: string) => void;
   tauriLoading: boolean;
 }
@@ -72,7 +73,7 @@ export default function CompositeSkillsEnhanced() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showBuilder, setShowBuilder] = useState(false);
-  const [selectedSkill, setSelectedSkill] = useState<any>(null);
+  const [selectedSkill, setSelectedSkill] = useState<CompositeSkill | null>(null);
   const [showExecute, setShowExecute] = useState(false);
 
   // Builder state
@@ -416,7 +417,7 @@ export default function CompositeSkillsEnhanced() {
                               value={step.errorHandling || 'stop'}
                               onChange={e =>
                                 handleUpdateStep(step.stepId, {
-                                  errorHandling: e.target.value as any
+                                  errorHandling: e.target.value as SkillStep['errorHandling']
                                 })
                               }
                             >

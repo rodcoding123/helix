@@ -12,6 +12,7 @@ export interface CustomTool {
   name: string;
   description: string;
   code: string;
+  icon?: string;
   capabilities?: string[];
   sandboxProfile?: 'strict' | 'standard' | 'permissive';
   parameters?: Record<string, unknown>;

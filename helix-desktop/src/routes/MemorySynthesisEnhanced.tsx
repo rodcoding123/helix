@@ -5,7 +5,7 @@
 
 import { useEffect, useState, memo } from 'react';
 import { Loader, Brain, TrendingUp, Clock, CheckCircle, AlertCircle, Zap, Save } from 'lucide-react';
-import { useMemorySynthesis } from '../hooks/useMemorySynthesis';
+import { useMemorySynthesis, type MemoryPattern } from '../hooks/useMemorySynthesis';
 import { useTauriFileOps } from '../hooks/useTauriFileOps';
 import '../components/synthesis/SynthesisEnhanced.css';
 
@@ -20,7 +20,7 @@ interface SynthesisOption {
 
 // Memoized pattern card component for performance
 interface PatternCardProps {
-  pattern: any;
+  pattern: MemoryPattern;
   expandedPattern: string | null;
   onToggleExpand: (patternId: string | null) => void;
 }
@@ -163,7 +163,7 @@ export default function MemorySynthesisEnhanced() {
         }
       ];
 
-      const job = await submitSynthesisJob(synthesisType as any, mockConversations);
+      const job = await submitSynthesisJob(synthesisType, mockConversations);
 
       if (job) {
         await pollJobStatus(job.jobId);

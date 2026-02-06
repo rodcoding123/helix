@@ -45,6 +45,59 @@ export const AgentsListResultSchema = Type.Object(
   { additionalProperties: false },
 );
 
+export const AgentsAddParamsSchema = Type.Object(
+  {
+    name: NonEmptyString,
+    workspace: NonEmptyString,
+    model: Type.Optional(NonEmptyString),
+    bind: Type.Optional(Type.Array(NonEmptyString)),
+  },
+  { additionalProperties: false },
+);
+
+export const AgentsAddResultSchema = Type.Object(
+  {
+    agentId: NonEmptyString,
+    workspace: NonEmptyString,
+    agentDir: NonEmptyString,
+    name: Type.Optional(NonEmptyString),
+  },
+  { additionalProperties: false },
+);
+
+export const AgentsDeleteParamsSchema = Type.Object(
+  {
+    id: NonEmptyString,
+    force: Type.Optional(Type.Boolean()),
+  },
+  { additionalProperties: false },
+);
+
+export const AgentsDeleteResultSchema = Type.Object(
+  {
+    agentId: NonEmptyString,
+    workspace: NonEmptyString,
+    agentDir: NonEmptyString,
+    sessionsDir: NonEmptyString,
+  },
+  { additionalProperties: false },
+);
+
+export const AgentsSetDefaultParamsSchema = Type.Object(
+  {
+    id: NonEmptyString,
+  },
+  { additionalProperties: false },
+);
+
+export const AgentsSetDefaultResultSchema = Type.Object(
+  {
+    defaultId: NonEmptyString,
+    previousId: NonEmptyString,
+  },
+  { additionalProperties: false },
+);
+
 export const ModelsListParamsSchema = Type.Object({}, { additionalProperties: false });
 
 export const ModelsListResultSchema = Type.Object(

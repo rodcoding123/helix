@@ -72,6 +72,7 @@ pub fn show_window<R: Runtime>(app: &AppHandle<R>) {
 }
 
 /// Hide the main window.
+#[allow(dead_code)]
 pub fn hide_window<R: Runtime>(app: &AppHandle<R>) {
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.hide();

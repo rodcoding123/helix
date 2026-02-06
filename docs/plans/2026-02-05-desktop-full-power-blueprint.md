@@ -1,6 +1,6 @@
 # Helix Desktop App: Full Power Blueprint
 
-> **Status:** PHASES A-J COMPLETE (2026-02-06). Integration work (routing, nav, typecheck) in progress.
+> **Status:** ALL PHASES COMPLETE (2026-02-06). All 10 phases (A-J) implemented, integrated, and verified. Vite build passes. Gateway method aliases wired.
 
 **Goal:** Transform the Helix desktop app into the PRIMARY platform with FULL POWER over every helix-runtime capability. Currently the desktop surfaces ~30% of gateway methods. Target: 90%+.
 
@@ -12,20 +12,22 @@
 
 ## Completion Tracker
 
-| Phase | Name                                    | Status      | Session      |
-| ----- | --------------------------------------- | ----------- | ------------ |
-| A     | Foundation & Onboarding Fix             | DONE        | Session 2    |
-| B     | Agent Command Center                    | DONE        | Session 2    |
-| C     | Skills Marketplace & Management         | DONE        | Sessions 2-3 |
-| D     | Tools & Security Control                | DONE        | Session 3    |
-| E     | Channel Powerhouse                      | DONE        | Session 3    |
-| F     | Voice & Media Center                    | DONE        | Session 3    |
-| G     | Session & Memory Intelligence           | DONE        | Session 3    |
-| H     | Node & Device Network                   | DONE        | Session 3    |
-| I     | Advanced Configuration                  | DONE        | Session 4    |
-| J     | Polish & Distribution                   | DONE        | Session 4    |
-| --    | Route Wiring + Nav + J5 Command Palette | IN PROGRESS | Session 4    |
-| --    | TypeScript / Lint / Build Verification  | PENDING     | Session 4    |
+| Phase | Name                                    | Status | Session      |
+| ----- | --------------------------------------- | ------ | ------------ |
+| A     | Foundation & Onboarding Fix             | DONE   | Session 2    |
+| B     | Agent Command Center                    | DONE   | Session 2    |
+| C     | Skills Marketplace & Management         | DONE   | Sessions 2-3 |
+| D     | Tools & Security Control                | DONE   | Session 3    |
+| E     | Channel Powerhouse                      | DONE   | Session 3    |
+| F     | Voice & Media Center                    | DONE   | Session 3    |
+| G     | Session & Memory Intelligence           | DONE   | Session 3    |
+| H     | Node & Device Network                   | DONE   | Session 3    |
+| I     | Advanced Configuration                  | DONE   | Session 4    |
+| J     | Polish & Distribution                   | DONE   | Session 4    |
+| --    | Route Wiring + Nav + J5 Command Palette | DONE   | Session 4    |
+| --    | TypeScript / Lint / Build Verification  | DONE   | Session 5    |
+| --    | Gateway Method Alias Fix                | DONE   | Session 5    |
+| --    | NavSidebar + AppLayout Integration      | DONE   | Session 5    |
 
 ---
 
@@ -49,12 +51,22 @@
 | OS keyring         | Working | Secure secrets                           |
 | File browser       | Working | Basic                                    |
 | Git panel          | Working | Basic                                    |
-| Sessions           | Partial | List only, no deep config                |
-| Agent editor       | Partial | Basic CRUD, no routing                   |
-| Skills             | Partial | Basic toggles only                       |
-| Tools              | Partial | Basic toggles only                       |
-| Channels           | Partial | Enable/disable only                      |
-| Voice              | Partial | TTS/STT config, no Talk Mode             |
+| Sessions           | Working | Full config, compaction, history, detail |
+| Agent editor       | Working | Full CRUD, routing, bindings, workspaces |
+| Skills             | Working | Dashboard, ClawHub, editor, per-agent    |
+| Tools              | Working | Policy editor, group toggles, per-agent  |
+| Channels           | Working | Deep config, per-channel setup wizards   |
+| Voice              | Working | Talk mode, TTS config, media capture     |
+| Exec Approvals     | Working | Dashboard, approve/deny, policy config   |
+| Browser Automation | Working | Panel, preview, actions, tabs, profiles  |
+| Nodes/Devices      | Working | Discovery, pairing, invoke, exec policy  |
+| Model Failover     | Working | Chain editor, per-agent overrides, scan  |
+| Auth Profiles      | Working | CRUD, OAuth flow, health check           |
+| Hooks Management   | Working | List, enable/disable, custom editor      |
+| Deep Linking       | Working | helix:// URL scheme routing              |
+| Command Palette    | Working | Ctrl+K, 33 commands, fuzzy search        |
+| Keyboard Shortcuts | Working | 7 defaults, customizable, recording      |
+| Nav Sidebar        | Working | VS Code style, 13 icons, 4 groups        |
 
 ### What helix-runtime Provides (UNUSED by desktop)
 

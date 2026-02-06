@@ -16,6 +16,7 @@ import { AdvancedSettings } from '../components/settings/AdvancedSettings';
 import { KeyboardShortcuts } from '../components/settings/KeyboardShortcuts';
 import { AuthProfileManager } from '../components/auth';
 import { FailoverChainEditor } from '../components/models';
+import { EnvironmentVariables } from '../components/settings/EnvironmentVariables';
 
 type SettingsSection =
   | 'general'
@@ -33,7 +34,8 @@ type SettingsSection =
   | 'advanced'
   | 'shortcuts'
   | 'auth-profiles'
-  | 'failover';
+  | 'failover'
+  | 'environment';
 
 const SETTINGS_COMPONENTS: Record<SettingsSection, React.ComponentType> = {
   general: GeneralSettings,
@@ -52,6 +54,7 @@ const SETTINGS_COMPONENTS: Record<SettingsSection, React.ComponentType> = {
   shortcuts: KeyboardShortcuts,
   'auth-profiles': AuthProfileManager,
   failover: FailoverChainEditor,
+  environment: EnvironmentVariables,
 };
 
 /**

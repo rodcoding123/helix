@@ -137,6 +137,14 @@ const mockInvokeHandlers: Record<string, InvokeHandler> = {
   // Discord
   test_webhook: () => ({ success: true, status_code: 200, error: null }),
 
+  // Phase J2: System Tray (no-op in browser)
+  update_tray_menu: () => undefined,
+
+  // Phase J4: Auto-Updater (no-op in browser)
+  check_for_update: () => null,
+  install_update: () => undefined,
+  get_app_version: () => '1.0.0',
+
   // Deep Linking (Phase J)
   handle_deep_link: (args: unknown) => {
     const { url } = args as { url: string };

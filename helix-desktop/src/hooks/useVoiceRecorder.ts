@@ -92,7 +92,8 @@ export function useVoiceRecorder(): [VoiceRecorderState, VoiceRecorderControls] 
 
       // Set up audio analysis
       if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        audioContextRef.current = new AudioContextClass();
       }
 
       const source = audioContextRef.current.createMediaStreamSource(stream);
@@ -112,7 +113,7 @@ export function useVoiceRecorder(): [VoiceRecorderState, VoiceRecorderControls] 
       };
 
       mediaRecorder.onerror = (event: Event) => {
-        const errorEvent = event as any;
+        const errorEvent = event as { error?: { name?: string } };
         setState(prev => ({
           ...prev,
           error: `Recording error: ${errorEvent.error?.name || 'Unknown error'}`,

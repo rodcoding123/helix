@@ -5,6 +5,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::{LazyLock, Mutex};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 /// Scheduler job status
@@ -88,8 +90,9 @@ impl Default for SchedulerConfig {
 }
 
 /// In-memory job registry (in production, this would be backed by SQLite)
-static mut JOB_REGISTRY: Option<HashMap<String, SchedulerJob>> = None;
-static mut JOB_COUNTER: u64 = 0;
+static JOB_REGISTRY: LazyLock<Mutex<HashMap<String, SchedulerJob>>> =
+    LazyLock::new(|| Mutex::new(HashMap::new()));
+static JOB_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 fn get_helix_dir() -> Result<PathBuf, String> {
     if let Ok(dir) = std::env::var("HELIX_PROJECT_DIR") {
@@ -107,12 +110,8 @@ fn get_config_path() -> Result<PathBuf, String> {
     Ok(helix_dir.join("config").join("scheduler.json"))
 }
 
-fn ensure_registry() {
-    unsafe {
-        if JOB_REGISTRY.is_none() {
-            JOB_REGISTRY = Some(HashMap::new());
-        }
-    }
+fn lock_registry() -> std::sync::MutexGuard<'static, HashMap<String, SchedulerJob>> {
+    JOB_REGISTRY.lock().expect("Job registry mutex poisoned")
 }
 
 /// Get current scheduler configuration
@@ -151,35 +150,20 @@ pub fn set_scheduler_config(config: SchedulerConfig) -> Result<(), String> {
 /// Get all scheduled jobs
 #[tauri::command]
 pub fn get_scheduled_jobs() -> Result<Vec<SchedulerJob>, String> {
-    ensure_registry();
-
-    unsafe {
-        if let Some(registry) = &JOB_REGISTRY {
-            let mut jobs: Vec<_> = registry.values().cloned().collect();
-            // Sort by next_run time
-            jobs.sort_by_key(|j| j.next_run);
-            Ok(jobs)
-        } else {
-            Ok(Vec::new())
-        }
-    }
+    let registry = lock_registry();
+    let mut jobs: Vec<_> = registry.values().cloned().collect();
+    jobs.sort_by_key(|j| j.next_run);
+    Ok(jobs)
 }
 
 /// Get a specific job by ID
 #[tauri::command]
 pub fn get_job(job_id: String) -> Result<SchedulerJob, String> {
-    ensure_registry();
-
-    unsafe {
-        if let Some(registry) = &JOB_REGISTRY {
-            registry
-                .get(&job_id)
-                .cloned()
-                .ok_or_else(|| format!("Job not found: {}", job_id))
-        } else {
-            Err("Job registry not initialized".to_string())
-        }
-    }
+    let registry = lock_registry();
+    registry
+        .get(&job_id)
+        .cloned()
+        .ok_or_else(|| format!("Job not found: {}", job_id))
 }
 
 /// Create a new scheduled job
@@ -188,20 +172,15 @@ pub fn create_job(
     job_type: JobType,
     cron_expression: String,
 ) -> Result<SchedulerJob, String> {
-    ensure_registry();
-
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map_err(|e| format!("Failed to get current time: {}", e))?
         .as_secs();
 
+    let counter = JOB_COUNTER.fetch_add(1, Ordering::Relaxed).wrapping_add(1);
+
     let job = SchedulerJob {
-        id: {
-            unsafe {
-                JOB_COUNTER = JOB_COUNTER.wrapping_add(1);
-                format!("job_{}_{}", now, JOB_COUNTER)
-            }
-        },
+        id: format!("job_{}_{}", now, counter),
         job_type,
         status: JobStatus::Pending,
         scheduled_at: now,
@@ -216,12 +195,7 @@ pub fn create_job(
     };
 
     let job_id = job.id.clone();
-
-    unsafe {
-        if let Some(registry) = &mut JOB_REGISTRY {
-            registry.insert(job_id, job.clone());
-        }
-    }
+    lock_registry().insert(job_id, job.clone());
 
     Ok(job)
 }
@@ -229,142 +203,97 @@ pub fn create_job(
 /// Pause a scheduled job
 #[tauri::command]
 pub fn pause_job(job_id: String) -> Result<(), String> {
-    ensure_registry();
-
-    unsafe {
-        if let Some(registry) = &mut JOB_REGISTRY {
-            if let Some(job) = registry.get_mut(&job_id) {
-                job.status = JobStatus::Paused;
-                Ok(())
-            } else {
-                Err(format!("Job not found: {}", job_id))
-            }
-        } else {
-            Err("Job registry not initialized".to_string())
-        }
+    let mut registry = lock_registry();
+    if let Some(job) = registry.get_mut(&job_id) {
+        job.status = JobStatus::Paused;
+        Ok(())
+    } else {
+        Err(format!("Job not found: {}", job_id))
     }
 }
 
 /// Resume a paused job
 #[tauri::command]
 pub fn resume_job(job_id: String) -> Result<(), String> {
-    ensure_registry();
-
-    unsafe {
-        if let Some(registry) = &mut JOB_REGISTRY {
-            if let Some(job) = registry.get_mut(&job_id) {
-                job.status = JobStatus::Pending;
-                Ok(())
-            } else {
-                Err(format!("Job not found: {}", job_id))
-            }
-        } else {
-            Err("Job registry not initialized".to_string())
-        }
+    let mut registry = lock_registry();
+    if let Some(job) = registry.get_mut(&job_id) {
+        job.status = JobStatus::Pending;
+        Ok(())
+    } else {
+        Err(format!("Job not found: {}", job_id))
     }
 }
 
 /// Delete a scheduled job
 #[tauri::command]
 pub fn delete_job(job_id: String) -> Result<(), String> {
-    ensure_registry();
-
-    unsafe {
-        if let Some(registry) = &mut JOB_REGISTRY {
-            registry.remove(&job_id);
-            Ok(())
-        } else {
-            Err("Job registry not initialized".to_string())
-        }
-    }
+    lock_registry().remove(&job_id);
+    Ok(())
 }
 
 /// Manually trigger a job execution (for testing)
 #[tauri::command]
 pub fn trigger_job(job_id: String) -> Result<SchedulerJob, String> {
-    ensure_registry();
-
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map_err(|e| format!("Failed to get current time: {}", e))?
         .as_secs();
 
-    unsafe {
-        if let Some(registry) = &mut JOB_REGISTRY {
-            if let Some(job) = registry.get_mut(&job_id) {
-                job.status = JobStatus::Running;
-                job.started_at = Some(now);
-                Ok(job.clone())
-            } else {
-                Err(format!("Job not found: {}", job_id))
-            }
-        } else {
-            Err("Job registry not initialized".to_string())
-        }
+    let mut registry = lock_registry();
+    if let Some(job) = registry.get_mut(&job_id) {
+        job.status = JobStatus::Running;
+        job.started_at = Some(now);
+        Ok(job.clone())
+    } else {
+        Err(format!("Job not found: {}", job_id))
     }
 }
 
 /// Mark a job as completed
 #[tauri::command]
 pub fn complete_job(job_id: String, result: Option<serde_json::Value>) -> Result<(), String> {
-    ensure_registry();
-
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map_err(|e| format!("Failed to get current time: {}", e))?
         .as_secs();
 
-    unsafe {
-        if let Some(registry) = &mut JOB_REGISTRY {
-            if let Some(job) = registry.get_mut(&job_id) {
-                job.status = JobStatus::Completed;
-                job.completed_at = Some(now);
-                job.last_run = Some(now);
-                if let Some(started) = job.started_at {
-                    job.duration_ms = Some((now - started) * 1000);
-                }
-                job.result = result;
-                Ok(())
-            } else {
-                Err(format!("Job not found: {}", job_id))
-            }
-        } else {
-            Err("Job registry not initialized".to_string())
+    let mut registry = lock_registry();
+    if let Some(job) = registry.get_mut(&job_id) {
+        job.status = JobStatus::Completed;
+        job.completed_at = Some(now);
+        job.last_run = Some(now);
+        if let Some(started) = job.started_at {
+            job.duration_ms = Some((now - started) * 1000);
         }
+        job.result = result;
+        Ok(())
+    } else {
+        Err(format!("Job not found: {}", job_id))
     }
 }
 
 /// Mark a job as failed
 #[tauri::command]
 pub fn fail_job(job_id: String, error: String) -> Result<(), String> {
-    ensure_registry();
-
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map_err(|e| format!("Failed to get current time: {}", e))?
         .as_secs();
 
-    unsafe {
-        if let Some(registry) = &mut JOB_REGISTRY {
-            if let Some(job) = registry.get_mut(&job_id) {
-                job.status = JobStatus::Failed;
-                job.completed_at = Some(now);
-                job.error = Some(error);
-                Ok(())
-            } else {
-                Err(format!("Job not found: {}", job_id))
-            }
-        } else {
-            Err("Job registry not initialized".to_string())
-        }
+    let mut registry = lock_registry();
+    if let Some(job) = registry.get_mut(&job_id) {
+        job.status = JobStatus::Failed;
+        job.completed_at = Some(now);
+        job.error = Some(error);
+        Ok(())
+    } else {
+        Err(format!("Job not found: {}", job_id))
     }
 }
 
 /// Get scheduler health status (for monitoring)
 #[tauri::command]
 pub fn get_scheduler_health() -> Result<SchedulerHealth, String> {
-    ensure_registry();
-
     let jobs = get_scheduled_jobs()?;
 
     let running_count = jobs.iter().filter(|j| j.status == JobStatus::Running).count();

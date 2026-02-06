@@ -12,6 +12,12 @@ import type {
   AgentSummarySchema,
   AgentsListParamsSchema,
   AgentsListResultSchema,
+  AgentsAddParamsSchema,
+  AgentsAddResultSchema,
+  AgentsDeleteParamsSchema,
+  AgentsDeleteResultSchema,
+  AgentsSetDefaultParamsSchema,
+  AgentsSetDefaultResultSchema,
   ModelChoiceSchema,
   ModelsListParamsSchema,
   ModelsListResultSchema,
@@ -174,6 +180,12 @@ export type WebLoginWaitParams = Static<typeof WebLoginWaitParamsSchema>;
 export type AgentSummary = Static<typeof AgentSummarySchema>;
 export type AgentsListParams = Static<typeof AgentsListParamsSchema>;
 export type AgentsListResult = Static<typeof AgentsListResultSchema>;
+export type AgentsAddParams = Static<typeof AgentsAddParamsSchema>;
+export type AgentsAddResult = Static<typeof AgentsAddResultSchema>;
+export type AgentsDeleteParams = Static<typeof AgentsDeleteParamsSchema>;
+export type AgentsDeleteResult = Static<typeof AgentsDeleteResultSchema>;
+export type AgentsSetDefaultParams = Static<typeof AgentsSetDefaultParamsSchema>;
+export type AgentsSetDefaultResult = Static<typeof AgentsSetDefaultResultSchema>;
 export type ModelChoice = Static<typeof ModelChoiceSchema>;
 export type ModelsListParams = Static<typeof ModelsListParamsSchema>;
 export type ModelsListResult = Static<typeof ModelsListResultSchema>;
