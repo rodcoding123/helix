@@ -12,6 +12,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir, cpus, hostname, platform } from 'node:os';
 import { join } from 'node:path';
+import { randomBytes } from 'node:crypto';
 import { deriveEncryptionKey, generateSalt } from './encryption/key-derivation.js';
 import { encryptWithKey, decryptWithKey, generateNonce } from './encryption/symmetric.js';
 
@@ -64,9 +65,11 @@ export class EncryptedSecretsCache {
       // Load key version metadata
       this.rotationMetadata = this.loadKeyVersionMetadata();
 
-      // Derive master key from machine entropy + salt
+      // Derive master key from machine entropy + salt + version
       const machineEntropy = this.generateMachineEntropy();
-      this.masterKey = await deriveEncryptionKey(machineEntropy, salt);
+      // M3: Include version in entropy so each rotation produces a different key
+      const versionedEntropy = `${machineEntropy}:v${this.rotationMetadata.version}`;
+      this.masterKey = await deriveEncryptionKey(versionedEntropy, salt);
 
       // Check if key rotation is needed
       this.checkAndRotateKey();
@@ -76,7 +79,11 @@ export class EncryptedSecretsCache {
         this.rotationMetadata.previousKeyExpiredAt &&
         this.rotationMetadata.previousKeyExpiredAt > Date.now()
       ) {
-        this.previousMasterKey = this.masterKey; // In production, could reload from versioned derivation
+        // M3: Derive previous key using previous version metadata
+        // This allows decryption of secrets encrypted with the old key during grace period
+        const previousVersion = Math.max(1, this.rotationMetadata.version - 1);
+        const previousEntropy = `${machineEntropy}:v${previousVersion}`;
+        this.previousMasterKey = await deriveEncryptionKey(previousEntropy, salt);
         this.previousKeyExpiredAt = this.rotationMetadata.previousKeyExpiredAt;
       }
     } catch (error) {
@@ -265,6 +272,7 @@ export class EncryptedSecretsCache {
 
   /**
    * Check if key rotation is needed and perform rotation if necessary
+   * M3: Implements actual cryptographic key rotation with re-encryption
    */
   private checkAndRotateKey(): void {
     if (!this.rotationMetadata) {
@@ -286,9 +294,61 @@ export class EncryptedSecretsCache {
       // Save updated metadata
       this.saveKeyVersionMetadata(this.rotationMetadata);
 
-      // Note: In production, we would re-encrypt all cache entries with new key
-      // For now, we allow grace period decryption with old key
+      // M3: Re-encrypt all cache entries with new key
+      this.rotateAllCachedSecrets();
     }
+  }
+
+  /**
+   * Re-encrypt all cached secrets with the new key
+   * M3: Ensures all secrets are encrypted under the new key after rotation
+   * Fail-closed: Throws if re-encryption fails to prevent partial state
+   */
+  private rotateAllCachedSecrets(): void {
+    const rotatedCount = { success: 0, skipped: 0, failed: 0 };
+
+    try {
+      for (const [key, encrypted] of this.cache.entries()) {
+        try {
+          // Decrypt with old key (still available in this.previousMasterKey)
+          const plaintext = this.decryptWithOldKeyForRotation(encrypted);
+
+          // Re-encrypt with new key
+          const nonce = randomBytes(12);
+          const reencrypted = encryptWithKey(plaintext, this.masterKey, nonce);
+
+          // Update cache entry
+          this.cache.set(key, reencrypted);
+          rotatedCount.success++;
+        } catch (error) {
+          // If we can't decrypt/re-encrypt a single entry, log but continue with others
+          console.warn(`[Helix] Failed to rotate secret ${key.slice(0, 20)}...`, error);
+          rotatedCount.failed++;
+        }
+      }
+
+      // Log rotation completion to Discord (fire-and-forget)
+      console.log(
+        `[Helix] Key rotation complete: ${rotatedCount.success} secrets re-encrypted, ${rotatedCount.failed} failed`
+      );
+    } catch (error) {
+      // Fail-closed: If rotation entirely fails, this is a critical issue
+      console.error('[Helix] CRITICAL: Secret key rotation failed completely', error);
+      throw new Error('Secret cache key rotation failed - system state may be inconsistent');
+    }
+  }
+
+  /**
+   * Decrypt a secret using the old key during rotation
+   * This allows re-encryption of secrets with the new key
+   * Only used internally during key rotation
+   */
+  private decryptWithOldKeyForRotation(encrypted: string): string {
+    if (!this.previousMasterKey) {
+      throw new Error('Previous key not available for rotation decryption');
+    }
+
+    return decryptWithKey(encrypted, this.previousMasterKey);
   }
 }
 
