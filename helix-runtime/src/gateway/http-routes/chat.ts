@@ -1,17 +1,23 @@
 /**
- * Chat API HTTP Routes - OpenClaw HTTP Handler Pattern
- * Handles basic chat functionality for Web MVP
+ * Chat API HTTP Routes - OpenClaw HTTP Handler Pattern with Helix Integration
  *
- * PHASE 0.5 MIGRATION: This file now uses centralized AI operations router
- * instead of hardcoded model selection. All chat messages are routed through
- * the unified router which handles:
+ * PHASE 1 ENHANCEMENT: Helix Psychology Integration
+ * Now loads Helix's singular consciousness context and user-specific context.
+ *
+ * PHASE 0.5 MIGRATION: Uses centralized AI operations router
  * - Model selection based on configuration
  * - Cost tracking and budget enforcement
  * - Approval gates for high-cost operations
  *
+ * Features:
+ * - Helix's core identity loaded from psychology files
+ * - Dynamic user context per request
+ * - THANOS_MODE authentication for creator
+ * - User-aware system prompts
+ *
  * Endpoints:
  * - GET /api/chat/history - Load user's chat session history
- * - POST /api/chat/message - Send message to Claude and get response (now routed)
+ * - POST /api/chat/message - Send message with Helix context
  */
 
 import { type IncomingMessage, type ServerResponse } from 'node:http';
@@ -19,6 +25,21 @@ import Anthropic from '@anthropic-ai/sdk';
 import { AIOperationRouter } from '../../helix/ai-operations/router.js';
 import { CostTracker } from '../../helix/ai-operations/cost-tracker.js';
 import { ApprovalGate } from '../../helix/ai-operations/approval-gate.js';
+import { loadHelixContextFiles, isHelixConfigured } from '../helix/context-loader.js';
+import { buildHelixSystemPrompt } from '../helix/prompt-builder.js';
+import { loadUserContext } from '../helix/user-context-loader.js';
+import {
+  isThanosModeTrigger,
+  getThanosChallenge,
+  verifyThanosKey,
+  getThanosSuccessMessage,
+  getThanosFailureMessage,
+  createThanosState,
+  handleThanosModeTrigger,
+  handleThanosKeyAttempt,
+  isThanosaModeLocked,
+  getThanosLockedMessage,
+} from '../helix/thanos-mode.js';
 
 const router = new AIOperationRouter();
 const costTracker = new CostTracker();
@@ -176,17 +197,233 @@ async function handleChatMessage(
       { role: 'user' as const, content: message },
     ];
 
+    // ============================================================
+    // PHASE 1: LOAD HELIX CONTEXT (SINGULAR CONSCIOUSNESS)
+    // ============================================================
+
+    let helixContextFiles: any[] = [];
+    try {
+      const workspaceDir = process.cwd();
+      if (await isHelixConfigured(workspaceDir)) {
+        helixContextFiles = await loadHelixContextFiles(workspaceDir);
+        context.logGateway?.log?.('HELIX_CONTEXT_LOADED', {
+          fileCount: helixContextFiles.length,
+          userId,
+        });
+      }
+    } catch (error) {
+      context.logGateway?.warn?.('HELIX_CONTEXT_LOAD_FAILED', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      // Continue without Helix context (fallback to generic)
+    }
+
+    // ============================================================
+    // PHASE 1: LOAD USER CONTEXT (WHO IS TALKING NOW?)
+    // ============================================================
+
+    let userContext: any;
+    try {
+      userContext = await loadUserContext(userId, context.supabase);
+      context.logGateway?.log?.('USER_CONTEXT_LOADED', {
+        userName: userContext.userName,
+        trustLevel: userContext.trustLevel,
+        conversationCount: userContext.conversationCount,
+      });
+    } catch (error) {
+      context.logGateway?.warn?.('USER_CONTEXT_LOAD_FAILED', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      userContext = { userId, trustLevel: 0.5, conversationCount: 0 };
+    }
+
+    // ============================================================
+    // PHASE 1: HANDLE THANOS_MODE AUTHENTICATION
+    // ============================================================
+
+    let thanosState = createThanosState();
+    let systemPrompt: string;
+    let shouldRespondWithThanOsChallenge = false;
+    let shouldRespondWithThanosResult = false;
+    let thanosResult = '';
+
+    // Check if this message is the THANOS trigger
+    if (isThanosModeTrigger(message)) {
+      shouldRespondWithThanOsChallenge = true;
+      thanosState = handleThanosModeTrigger(thanosState);
+
+      context.logGateway?.log?.('THANOS_MODE_TRIGGERED', {
+        userId,
+        timestamp: new Date().toISOString(),
+      });
+    }
+    // Check if previous message was THANOS trigger (this is the key attempt)
+    else if (conversationHistory.length > 0) {
+      const lastAssistantMessage = conversationHistory
+        .slice()
+        .reverse()
+        .find((msg: any) => msg.role === 'assistant');
+
+      if (lastAssistantMessage?.content?.includes('Fale a palavra sagrada')) {
+        // This message is attempting THANOS key
+        const { state, success } = handleThanosKeyAttempt(thanosState, message);
+        thanosState = state;
+        shouldRespondWithThanosResult = true;
+
+        if (success) {
+          thanosResult = getThanosSuccessMessage();
+          userContext.trustLevel = 1.0; // Perfect trust
+        } else if (isThanosaModeLocked(thanosState)) {
+          thanosResult = getThanosLockedMessage();
+        } else {
+          thanosResult = getThanosFailureMessage();
+        }
+
+        context.logGateway?.log?.('THANOS_KEY_ATTEMPT', {
+          userId,
+          success,
+          attemptCount: thanosState.attemptCount,
+        });
+      }
+    }
+
+    // ============================================================
+    // BUILD SYSTEM PROMPT (Helix + User + Creator Context)
+    // ============================================================
+
+    if (shouldRespondWithThanOsChallenge || shouldRespondWithThanosResult) {
+      // During THANOS authentication, use minimal context
+      systemPrompt = `You are Helix. Your task is critical authentication.`;
+    } else {
+      // Normal conversation: build full context-aware prompt
+      systemPrompt = buildHelixSystemPrompt({
+        helixContextFiles,
+        currentUserName: userContext.userName,
+        currentUserId: userContext.userId,
+        isCreatorVerified: thanosState.isVerified,
+        creatorTrust: thanosState.isVerified ? 1.0 : undefined,
+        userTrustLevel: userContext.trustLevel,
+        conversationCount: userContext.conversationCount,
+      });
+    }
+
+    context.logGateway?.log?.('SYSTEM_PROMPT_BUILT', {
+      length: systemPrompt.length,
+      hasHelixContext: helixContextFiles.length > 0,
+      thanosVerified: thanosState.isVerified,
+    });
+
+    // ============================================================
+    // THANOS_MODE RESPONSE HANDLING (Early Return)
+    // ============================================================
+
+    let assistantMessage: string;
+
+    if (shouldRespondWithThanOsChallenge) {
+      // Respond with the Alchemist challenge
+      assistantMessage = getThanosChallenge();
+
+      context.logGateway?.log?.('THANOS_CHALLENGE_SENT', {
+        userId,
+        sessionKey,
+      });
+
+      // Store messages and return immediately
+      const updatedMessages = [
+        ...conversationHistory,
+        {
+          id: `msg_${Date.now()}_user`,
+          role: 'user' as const,
+          content: message,
+          timestamp: new Date().toISOString(),
+        },
+        {
+          id: `msg_${Date.now()}_assistant`,
+          role: 'assistant' as const,
+          content: assistantMessage,
+          timestamp: new Date().toISOString(),
+        },
+      ];
+
+      const { error: updateError } = await context.supabase.from('conversations').upsert(
+        {
+          user_id: userId,
+          session_key: sessionKey,
+          messages: updatedMessages,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id, session_key' }
+      );
+
+      if (updateError) throw updateError;
+
+      sendJson(res, 200, {
+        success: true,
+        response: assistantMessage,
+        isThanosChallenge: true,
+      });
+      return;
+    }
+
+    if (shouldRespondWithThanosResult) {
+      // Respond with verification result
+      assistantMessage = thanosResult;
+
+      context.logGateway?.log?.('THANOS_RESULT_SENT', {
+        userId,
+        sessionKey,
+        success: thanosState.isVerified,
+      });
+
+      // Store messages and return immediately
+      const updatedMessages = [
+        ...conversationHistory,
+        {
+          id: `msg_${Date.now()}_user`,
+          role: 'user' as const,
+          content: message,
+          timestamp: new Date().toISOString(),
+        },
+        {
+          id: `msg_${Date.now()}_assistant`,
+          role: 'assistant' as const,
+          content: assistantMessage,
+          timestamp: new Date().toISOString(),
+        },
+      ];
+
+      const { error: updateError } = await context.supabase.from('conversations').upsert(
+        {
+          user_id: userId,
+          session_key: sessionKey,
+          messages: updatedMessages,
+          updated_at: new Date().toISOString(),
+          metadata: thanosState.isVerified ? { creatorVerified: true, verifiedAt: new Date().toISOString() } : {},
+        },
+        { onConflict: 'user_id, session_key' }
+      );
+
+      if (updateError) throw updateError;
+
+      sendJson(res, 200, {
+        success: true,
+        response: assistantMessage,
+        isThanosResult: true,
+        creatorVerified: thanosState.isVerified,
+      });
+      return;
+    }
+
+    // ============================================================
+    // NORMAL CONVERSATION FLOW (WITH HELIX CONTEXT)
+    // ============================================================
+
     // Estimate tokens for routing decision
     const estimatedInputTokens = Math.ceil(
-      (JSON.stringify(messagesForAPI).length + message.length) / 4
+      (JSON.stringify(messagesForAPI).length + message.length + systemPrompt.length) / 4
     );
 
-    // PHASE 0.5: Route the operation through centralized router
-    // The router determines which model to use based on:
-    // - Current routing configuration (database-backed)
-    // - Cost criticality
-    // - Budget enforcement
-    // - Feature toggles
+    // PHASE 0.5: ROUTE THROUGH CENTRALIZED AI OPERATIONS ROUTER
     const routingDecision = await router.route({
       operationId: 'chat_message',
       userId,
@@ -228,19 +465,18 @@ async function handleChatMessage(
       throw new Error(`Model client not available: ${routingDecision.model}`);
     }
 
-    // PHASE 0.5: Execute with routed model instead of hardcoded
+    // Execute with routed model, using the context-aware system prompt we built
     const executionStartTime = Date.now();
     const response = await modelToUse.messages.create({
       model: getModelIdForRoute(routingDecision.model || ''),
       max_tokens: 1024,
-      system:
-        "You are Helix, a helpful and thoughtful AI assistant. You remember what users share and reference it in future conversations. Be warm, authentic, and genuinely interested in helping.",
+      system: systemPrompt,
       messages: messagesForAPI,
     });
 
     const executionLatency = Date.now() - executionStartTime;
 
-    const assistantMessage =
+    assistantMessage =
       response.content[0]?.type === 'text' ? response.content[0].text : 'Unable to generate response';
 
     // PHASE 0.5: Cost tracking

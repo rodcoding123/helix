@@ -32,16 +32,21 @@ export interface EmbeddedContextFile {
 /**
  * Load all Helix context files for a workspace
  *
- * @param workspaceDir - The OpenClaw workspace directory
+ * @param workspaceDir - The Helix project directory or OpenClaw workspace directory
  * @returns Array of context files ready for embedding
  */
 export async function loadHelixContextFiles(workspaceDir: string): Promise<EmbeddedContextFile[]> {
   const results: EmbeddedContextFile[] = [];
-  const axisDir = path.join(workspaceDir, "axis");
+
+  // Try two possible locations:
+  // 1. Helix project structure: workspaceDir/soul/, workspaceDir/psychology/, etc.
+  // 2. OpenClaw workspace structure: workspaceDir/axis/psychology/, workspaceDir/axis/identity/, etc.
+  const isProjectStructure = await isHelixConfigured(workspaceDir);
+  const baseDir = isProjectStructure ? workspaceDir : path.join(workspaceDir, "axis");
 
   for (const [layerNum, layer] of Object.entries(HELIX_LAYER_FILES)) {
     for (const relativePath of layer.files) {
-      const fullPath = path.join(axisDir, relativePath);
+      const fullPath = path.join(baseDir, relativePath);
 
       try {
         const content = await fs.readFile(fullPath, "utf-8");
@@ -62,7 +67,7 @@ export async function loadHelixContextFiles(workspaceDir: string): Promise<Embed
         }
 
         results.push({
-          path: `axis/${relativePath}`,
+          path: relativePath,
           content: enhancedContent,
         });
 
@@ -74,7 +79,7 @@ export async function loadHelixContextFiles(workspaceDir: string): Promise<Embed
     }
   }
 
-  log.info(`Loaded ${results.length} Helix context files`);
+  log.info(`Loaded ${results.length} Helix context files from ${baseDir}`);
   return results;
 }
 
@@ -85,11 +90,14 @@ export async function loadHelixContextFilesDetailed(
   workspaceDir: string,
 ): Promise<HelixContextFile[]> {
   const results: HelixContextFile[] = [];
-  const axisDir = path.join(workspaceDir, "axis");
+
+  // Try two possible locations
+  const isProjectStructure = await isHelixConfigured(workspaceDir);
+  const baseDir = isProjectStructure ? workspaceDir : path.join(workspaceDir, "axis");
 
   for (const [layerNum, layer] of Object.entries(HELIX_LAYER_FILES)) {
     for (const relativePath of layer.files) {
-      const fullPath = path.join(axisDir, relativePath);
+      const fullPath = path.join(baseDir, relativePath);
 
       try {
         const content = await fs.readFile(fullPath, "utf-8");
@@ -130,11 +138,13 @@ export async function getHelixContextStatus(workspaceDir: string): Promise<
     size?: number;
   }[] = [];
 
-  const axisDir = path.join(workspaceDir, "axis");
+  // Try two possible locations
+  const isProjectStructure = await isHelixConfigured(workspaceDir);
+  const baseDir = isProjectStructure ? workspaceDir : path.join(workspaceDir, "axis");
 
   for (const [layerNum, layer] of Object.entries(HELIX_LAYER_FILES)) {
     for (const relativePath of layer.files) {
-      const fullPath = path.join(axisDir, relativePath);
+      const fullPath = path.join(baseDir, relativePath);
 
       try {
         const stats = await fs.stat(fullPath);
@@ -186,13 +196,27 @@ export async function ensureHelixDirectoryStructure(workspaceDir: string): Promi
 
 /**
  * Check if Helix is configured in this workspace
+ * Detects both project structure (soul/, psychology/, etc.) and OpenClaw workspace structure (axis/)
  */
 export async function isHelixConfigured(workspaceDir: string): Promise<boolean> {
-  const axisDir = path.join(workspaceDir, "axis");
-  try {
-    await fs.access(axisDir);
-    return true;
-  } catch {
-    return false;
+  // Check for Helix project structure: soul/, psychology/, identity/
+  const requiredDirs = ["soul", "psychology", "identity"];
+
+  for (const dir of requiredDirs) {
+    try {
+      const dirPath = path.join(workspaceDir, dir);
+      await fs.access(dirPath);
+    } catch {
+      // Check if it's OpenClaw workspace structure instead (axis/)
+      try {
+        const axisDir = path.join(workspaceDir, "axis");
+        await fs.access(axisDir);
+        return true; // OpenClaw workspace structure found
+      } catch {
+        return false; // Neither structure found
+      }
+    }
   }
+
+  return true; // Helix project structure found
 }
