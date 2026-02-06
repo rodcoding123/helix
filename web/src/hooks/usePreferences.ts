@@ -18,20 +18,28 @@ export function usePreferences() {
 
   // Load preferences on mount or user change
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
 
     const loadPreferences = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        const [ops, theme] = await Promise.all([
+        // Load independently so one failure doesn't block the other
+        const [opsResult, themeResult] = await Promise.allSettled([
           service.getOperationPreferences(user.id),
           service.getThemePreferences(user.id),
         ]);
 
-        setOperationPrefs(ops);
-        setThemePrefs(theme);
+        if (opsResult.status === 'fulfilled') {
+          setOperationPrefs(opsResult.value);
+        }
+        if (themeResult.status === 'fulfilled') {
+          setThemePrefs(themeResult.value);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load preferences');
       } finally {

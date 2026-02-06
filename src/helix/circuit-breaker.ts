@@ -27,7 +27,7 @@ export interface CircuitBreakerMetrics {
 /**
  * Generic circuit breaker for any async operation
  */
-export class CircuitBreaker<T = any> {
+export class CircuitBreaker<T = unknown> {
   private state: CircuitBreakerState = 'closed';
   private failureCount = 0;
   private successCount = 0;

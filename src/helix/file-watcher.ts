@@ -61,7 +61,7 @@ async function sendWebhook(embed: DiscordEmbed): Promise<void> {
 function hashFile(filePath: string): string | null {
   try {
     const content = fs.readFileSync(filePath);
-    return crypto.createHash('md5').update(content).digest('hex');
+    return crypto.createHash('sha256').update(content).digest('hex');
   } catch {
     return null;
   }

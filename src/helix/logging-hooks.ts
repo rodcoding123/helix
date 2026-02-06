@@ -9,7 +9,12 @@
  */
 
 import crypto from 'node:crypto';
-import type { InternalHookEvent, WebhookHealthStatus, SecurityConfigStatus } from './types.js';
+import type {
+  InternalHookEvent,
+  WebhookHealthStatus,
+  SecurityConfigStatus,
+  DiscordEmbed,
+} from './types.js';
 import { HelixSecurityError, REQUIRED_WEBHOOKS, OPTIONAL_WEBHOOKS } from './types.js';
 import { loadSecret } from '../lib/secrets-loader.js';
 import { globalSanitizer } from '../lib/log-sanitizer.js';
@@ -77,20 +82,6 @@ export function setFailClosedMode(enabled: boolean): void {
     );
   }
   failClosedMode = enabled;
-}
-
-interface DiscordEmbed {
-  title: string;
-  color: number;
-  fields: Array<{
-    name: string;
-    value: string;
-    inline?: boolean;
-  }>;
-  timestamp?: string;
-  footer?: {
-    text: string;
-  };
 }
 
 interface DiscordPayload {
@@ -534,7 +525,7 @@ export async function logConsciousnessObservation(
  *
  * @returns Resilience status including circuit breaker states and queue metrics
  */
-export function getDiscordResilienceStatus() {
+export function getDiscordResilienceStatus(): ReturnType<typeof getResilienceStatus> {
   try {
     return getResilienceStatus();
   } catch (error) {

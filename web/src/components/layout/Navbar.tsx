@@ -46,8 +46,6 @@ export function Navbar() {
         { href: '/chat', label: 'Chat', icon: <MessageSquare className="h-3.5 w-3.5" /> },
         { href: '/observatory', label: 'Observatory' },
         { href: '/code', label: 'Code' },
-        { href: '/secrets', label: 'Secrets' },
-        { href: '/settings/tenants', label: 'Team' },
         { href: '/settings', label: 'Settings' },
       ]
     : [

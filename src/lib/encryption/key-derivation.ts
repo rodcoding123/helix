@@ -1,4 +1,4 @@
-import { randomBytes, pbkdf2 } from 'crypto';
+import { randomBytes, pbkdf2, timingSafeEqual } from 'crypto';
 import { promisify } from 'util';
 import type { KeyDerivationConfig } from './types.js';
 
@@ -54,7 +54,16 @@ export async function verifyKeyDerivation(
   const attemptedKey = await deriveEncryptionKey(password, salt);
 
   // Timing-safe comparison (prevent timing attacks)
-  return attemptedKey.length === derivedKey.length && attemptedKey.equals(derivedKey);
+  // Must check length first, then use constant-time comparison
+  if (attemptedKey.length !== derivedKey.length) {
+    return false;
+  }
+
+  try {
+    return timingSafeEqual(attemptedKey, derivedKey);
+  } catch {
+    return false;
+  }
 }
 
 /**

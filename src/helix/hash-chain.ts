@@ -272,6 +272,8 @@ export async function createHashChainEntry(): Promise<HashChainEntry> {
  */
 export async function logSecretOperation(entry: SecretOperationEntry): Promise<boolean> {
   const DISCORD_WEBHOOK_SECRET = process.env.DISCORD_WEBHOOK_HASH_CHAIN;
+  let discordSuccess = false;
+
   if (!DISCORD_WEBHOOK_SECRET) {
     if (failClosedMode) {
       throw new HelixSecurityError(
@@ -283,75 +285,75 @@ export async function logSecretOperation(entry: SecretOperationEntry): Promise<b
     console.warn(
       '[Helix] Secret operation webhook not configured, operation not logged to Discord'
     );
-    return false;
+    discordSuccess = false;
+  } else {
+    // Build detailed description of operation
+    let description = `**Operation**: ${entry.operation}\n`;
+    description += `**Success**: ${entry.success ? '✅' : '❌'}\n`;
+    if (entry.secretName) description += `**Secret**: ${entry.secretName}\n`;
+    if (entry.pluginId) description += `**Plugin**: ${entry.pluginId}\n`;
+    description += `**Source**: ${entry.source}\n`;
+    if (entry.durationMs) description += `**Duration**: ${entry.durationMs}ms\n`;
+    if (entry.keyVersion) description += `**Key Version**: ${entry.keyVersion}\n`;
+    if (entry.details) description += `**Details**: ${entry.details}\n`;
+
+    const embed: DiscordEmbed = {
+      title: '🔐 Secret Operation',
+      color: entry.success ? 0x2ecc71 : 0xe74c3c, // Green if success, red if failure
+      description,
+      fields: [
+        { name: 'Timestamp', value: entry.timestamp, inline: true },
+        { name: 'Operation Type', value: entry.operation, inline: true },
+        { name: 'Source', value: entry.source, inline: true },
+      ],
+      timestamp: entry.timestamp,
+      footer: { text: 'Audit trail for secret operations - fail-closed enabled' },
+    };
+
+    try {
+      const response = await fetch(DISCORD_WEBHOOK_SECRET, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ embeds: [embed] }),
+      });
+
+      if (!response.ok && failClosedMode) {
+        throw new HelixSecurityError(
+          `Secret operation logging failed (HTTP ${response.status}) - integrity compromised`,
+          'LOGGING_FAILED',
+          { status: response.status }
+        );
+      }
+
+      discordSuccess = response.ok;
+      if (!response.ok) {
+        console.warn(`[Helix] Secret operation log failed (HTTP ${response.status})`);
+      }
+    } catch (error) {
+      if (error instanceof HelixSecurityError) throw error;
+
+      if (failClosedMode) {
+        throw new HelixSecurityError(
+          'Discord unreachable - secret operation logging cannot be guaranteed',
+          'DISCORD_UNREACHABLE',
+          { error: error instanceof Error ? error.message : String(error) }
+        );
+      }
+
+      console.error('[Helix] Secret operation Discord webhook failed:', error);
+      discordSuccess = false;
+    }
   }
 
-  // Build detailed description of operation
-  let description = `**Operation**: ${entry.operation}\n`;
-  description += `**Success**: ${entry.success ? '✅' : '❌'}\n`;
-  if (entry.secretName) description += `**Secret**: ${entry.secretName}\n`;
-  if (entry.pluginId) description += `**Plugin**: ${entry.pluginId}\n`;
-  description += `**Source**: ${entry.source}\n`;
-  if (entry.durationMs) description += `**Duration**: ${entry.durationMs}ms\n`;
-  if (entry.keyVersion) description += `**Key Version**: ${entry.keyVersion}\n`;
-  if (entry.details) description += `**Details**: ${entry.details}\n`;
-
-  const embed: DiscordEmbed = {
-    title: '🔐 Secret Operation',
-    color: entry.success ? 0x2ecc71 : 0xe74c3c, // Green if success, red if failure
-    description,
-    fields: [
-      { name: 'Timestamp', value: entry.timestamp, inline: true },
-      { name: 'Operation Type', value: entry.operation, inline: true },
-      { name: 'Source', value: entry.source, inline: true },
-    ],
-    timestamp: entry.timestamp,
-    footer: { text: 'Audit trail for secret operations - fail-closed enabled' },
-  };
-
-  try {
-    const response = await fetch(DISCORD_WEBHOOK_SECRET, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ embeds: [embed] }),
-    });
-
-    if (!response.ok && failClosedMode) {
-      throw new HelixSecurityError(
-        `Secret operation logging failed (HTTP ${response.status}) - integrity compromised`,
-        'LOGGING_FAILED',
-        { status: response.status }
-      );
-    }
-
-    if (!response.ok) {
-      console.warn(`[Helix] Secret operation log failed (HTTP ${response.status})`);
-      return false;
-    }
-
-    return true;
-  } catch (error) {
-    if (error instanceof HelixSecurityError) throw error;
-
-    if (failClosedMode) {
-      throw new HelixSecurityError(
-        'Discord unreachable - secret operation logging cannot be guaranteed',
-        'DISCORD_UNREACHABLE',
-        { error: error instanceof Error ? error.message : String(error) }
-      );
-    }
-
-    console.error('[Helix] Secret operation Discord webhook failed:', error);
-    return false;
-  }
-
-  // Also add to hash chain for immutable record
+  // Also add to hash chain for immutable record (always, regardless of Discord success)
   try {
     await createHashChainEntry();
   } catch (error) {
     console.error('[Helix] Failed to add secret operation to hash chain:', error);
     // Don't throw - hash chain failure shouldn't block secret operation
   }
+
+  return discordSuccess;
 }
 
 /**

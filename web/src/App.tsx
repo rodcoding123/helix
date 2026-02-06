@@ -5,6 +5,7 @@ import { SecretsProvider } from '@/lib/context/SecretsContext';
 import { TenantProvider } from '@/components/TenantProvider';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AdminGuard } from '@/components/guards/AdminGuard';
 import { Landing } from '@/pages/Landing';
@@ -24,13 +25,11 @@ const Docs = lazy(() => import('@/pages/Docs').then(m => ({ default: m.Docs })))
 const Agents = lazy(() => import('@/pages/Agents'));
 const AutonomySettings = lazy(() => import('@/pages/AutonomySettings'));
 const ActionApprovals = lazy(() => import('@/pages/ActionApprovals'));
-const SecretsPage = lazy(() => import('@/pages/SecretsPage').then(m => ({ default: m.SecretsPage })));
 const Voice = lazy(() => import('@/pages/Voice').then(m => ({ default: m.Voice })));
 const Email = lazy(() => import('@/pages/Email').then(m => ({ default: m.Email })));
 const Calendar = lazy(() => import('@/pages/Calendar').then(m => ({ default: m.CalendarPage })));
 const Tasks = lazy(() => import('@/pages/Tasks').then(m => ({ default: m.TasksPage })));
 const ControlPlane = lazy(() => import('@/pages/ControlPlane'));
-const TenantSettings = lazy(() => import('@/pages/TenantSettings'));
 const InvitationAccept = lazy(() => import('@/pages/InvitationAccept'));
 const OperationAnalytics = lazy(() => import('@/pages/OperationAnalytics').then(m => ({ default: m.OperationAnalytics })));
 const RealtimeMonitoringDashboard = lazy(() => import('@/pages/RealtimeMonitoringDashboard').then(m => ({ default: m.RealtimeMonitoringDashboard })));
@@ -61,7 +60,8 @@ export function App() {
             <div className="flex min-h-screen flex-col bg-slate-950 text-white">
               <Navbar />
               <main className="flex-1">
-            <Routes>
+                <ErrorBoundary>
+                  <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/login" element={<Login />} />
@@ -185,16 +185,6 @@ export function App() {
                 }
               />
               <Route
-                path="/secrets"
-                element={
-                  <Suspense fallback={<LoadingFallback />}>
-                    <ProtectedRoute>
-                      <SecretsPage />
-                    </ProtectedRoute>
-                  </Suspense>
-                }
-              />
-              <Route
                 path="/voice"
                 element={
                   <Suspense fallback={<LoadingFallback />}>
@@ -255,16 +245,6 @@ export function App() {
                 }
               />
               <Route
-                path="/settings/tenants"
-                element={
-                  <Suspense fallback={<LoadingFallback />}>
-                    <ProtectedRoute>
-                      <TenantSettings />
-                    </ProtectedRoute>
-                  </Suspense>
-                }
-              />
-              <Route
                 path="/analytics/operations"
                 element={
                   <Suspense fallback={<LoadingFallback />}>
@@ -302,7 +282,8 @@ export function App() {
                   </Suspense>
                 }
               />
-            </Routes>
+                  </Routes>
+                </ErrorBoundary>
               </main>
               <Footer />
             </div>

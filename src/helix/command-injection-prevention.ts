@@ -8,7 +8,7 @@
  * - Validating command whitelist
  */
 
-import { spawn, exec } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { sendAlert } from './logging-hooks.js';
 
 /**
@@ -276,32 +276,6 @@ export async function executeCommandSafe(
         stderr,
         exitCode,
       });
-    });
-  });
-}
-
-/**
- * UNSAFE: Legacy exec() function (DEPRECATED)
- * DO NOT USE - shell interprets all metacharacters
- *
- * Only use if absolutely necessary and inputs are 100% trusted
- *
- * @deprecated Use executeCommandSafe() instead
- */
-export async function executeCommandUnsafe(
-  cmd: string,
-  options?: { cwd?: string; timeout?: number }
-): Promise<string> {
-  return new Promise((resolve, reject) => {
-    // WARN: This is unsafe!
-    console.warn('[DEPRECATED] Using executeCommandUnsafe - consider using executeCommandSafe');
-
-    exec(cmd, { timeout: options?.timeout || 30000, cwd: options?.cwd }, (error, stdout) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(stdout);
-      }
     });
   });
 }
