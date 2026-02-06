@@ -10,6 +10,11 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useGateway } from '../../hooks/useGateway';
+import {
+  getClawHubClient,
+  type ClawHubSkill as ClawHubSkillFromAPI,
+  type ClawHubCategory as ClawHubCategoryType,
+} from '../../lib/clawhub-client';
 import './SettingsSection.css';
 
 /* ═══════════════════════════════════════════
@@ -35,27 +40,22 @@ interface SkillInfo {
   icon?: string;
 }
 
-interface ClawHubSkill {
-  name: string;
-  description: string;
-  author: string;
-  version: string;
-  rating: number;
-  downloads: number;
-  category: ClawHubCategory;
+interface ClawHubSkill extends ClawHubSkillFromAPI {
   installed: boolean;
 }
 
 type Tab = 'installed' | 'clawhub';
 type InstalledFilter = 'all' | 'enabled' | 'builtin' | 'plugins';
-type ClawHubCategory = 'Development' | 'Communication' | 'Productivity' | 'Automation' | 'AI';
+type ClawHubCategory = ClawHubCategoryType | 'all';
 
-const CLAWHUB_CATEGORIES: ClawHubCategory[] = [
+const CLAWHUB_CATEGORIES: ClawHubCategoryType[] = [
   'Development',
   'Communication',
   'Productivity',
   'Automation',
   'AI',
+  'Integration',
+  'Utility',
 ];
 
 /* ═══════════════════════════════════════════
@@ -90,10 +90,11 @@ function getSkillIcon(name: string, icon?: string): string {
 }
 
 /* ═══════════════════════════════════════════
-   ClawHub mock registry
+   ClawHub Registry (Fallback Skills)
    ═══════════════════════════════════════════ */
 
-const CLAWHUB_SKILLS: ClawHubSkill[] = [
+// Fallback skills in case the ClawHub API is unavailable
+const FALLBACK_CLAWHUB_SKILLS: ClawHubSkill[] = [
   {
     name: 'github-pr',
     description: 'Create and manage GitHub pull requests with auto-review support',
@@ -102,6 +103,10 @@ const CLAWHUB_SKILLS: ClawHubSkill[] = [
     rating: 4.8,
     downloads: 12500,
     category: 'Development',
+    tags: ['github', 'automation', 'review'],
+    created: 1609459200000,
+    updated: 1707091200000,
+    reviews: 240,
     installed: false,
   },
   {
@@ -112,6 +117,10 @@ const CLAWHUB_SKILLS: ClawHubSkill[] = [
     rating: 4.6,
     downloads: 8200,
     category: 'Development',
+    tags: ['linear', 'project-management'],
+    created: 1612137600000,
+    updated: 1707091200000,
+    reviews: 164,
     installed: false,
   },
   {
@@ -122,26 +131,10 @@ const CLAWHUB_SKILLS: ClawHubSkill[] = [
     rating: 4.4,
     downloads: 5600,
     category: 'Communication',
-    installed: false,
-  },
-  {
-    name: 'jira-sync',
-    description: 'Sync with Jira projects, boards, and sprint planning',
-    author: 'atlassian',
-    version: '1.0.0',
-    rating: 4.2,
-    downloads: 3400,
-    category: 'Development',
-    installed: false,
-  },
-  {
-    name: 'analytics-report',
-    description: 'Generate analytics dashboards and usage reports',
-    author: 'specterops',
-    version: '1.5.0',
-    rating: 4.5,
-    downloads: 4500,
-    category: 'Productivity',
+    tags: ['slack', 'notifications'],
+    created: 1614556800000,
+    updated: 1707091200000,
+    reviews: 140,
     installed: false,
   },
   {
@@ -152,16 +145,10 @@ const CLAWHUB_SKILLS: ClawHubSkill[] = [
     rating: 4.7,
     downloads: 9800,
     category: 'Automation',
-    installed: false,
-  },
-  {
-    name: 'pdf-reader',
-    description: 'Read, extract text, and summarize PDF documents',
-    author: 'community',
-    version: '2.0.0',
-    rating: 4.3,
-    downloads: 7100,
-    category: 'Productivity',
+    tags: ['docker', 'containers', 'devops'],
+    created: 1617235200000,
+    updated: 1707091200000,
+    reviews: 196,
     installed: false,
   },
   {
@@ -172,6 +159,10 @@ const CLAWHUB_SKILLS: ClawHubSkill[] = [
     rating: 4.9,
     downloads: 15000,
     category: 'AI',
+    tags: ['ai', 'image-generation', 'dall-e', 'stable-diffusion'],
+    created: 1619913600000,
+    updated: 1707091200000,
+    reviews: 301,
     installed: false,
   },
 ];
@@ -211,6 +202,9 @@ export function SkillsSettings() {
   const [selectedSkill, setSelectedSkill] = useState<SkillInfo | null>(null);
   const [selectedClawHubSkill, setSelectedClawHubSkill] = useState<ClawHubSkill | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [clawHubSkills, setClawHubSkills] = useState<ClawHubSkill[]>(FALLBACK_CLAWHUB_SKILLS);
+  const [clawHubLoading, setClawHubLoading] = useState(true);
+  const [clawHubError, setClawHubError] = useState<string | null>(null);
 
   // ── load skills from gateway ──
   const loadSkills = useCallback(async () => {
@@ -239,6 +233,37 @@ export function SkillsSettings() {
   useEffect(() => {
     loadSkills();
   }, [loadSkills, connected]);
+
+  // ── load ClawHub skills from API ──
+  const loadClawHubSkills = useCallback(async () => {
+    setClawHubLoading(true);
+    setClawHubError(null);
+    try {
+      const client = getClawHubClient();
+      const result = await client.search({
+        limit: 50,
+        sortBy: 'downloads',
+      });
+      setClawHubSkills(
+        result.skills.map((s) => ({
+          ...s,
+          installed: false,
+        }))
+      );
+    } catch (err) {
+      console.warn('Failed to load ClawHub skills, using fallback:', err);
+      setClawHubError(err instanceof Error ? err.message : 'Failed to load ClawHub skills');
+      // Use fallback skills
+      setClawHubSkills(FALLBACK_CLAWHUB_SKILLS);
+    } finally {
+      setClawHubLoading(false);
+    }
+  }, []);
+
+  // Load ClawHub skills on mount
+  useEffect(() => {
+    loadClawHubSkills();
+  }, [loadClawHubSkills]);
 
   // ── gateway actions ──
   const toggleSkill = useCallback(
@@ -345,7 +370,7 @@ export function SkillsSettings() {
   }, [skills, searchQuery, installedFilter]);
 
   const filteredClawHub = useMemo(() => {
-    let list = CLAWHUB_SKILLS.map((s) => ({
+    let list = clawHubSkills.map((s) => ({
       ...s,
       installed: installedNames.has(s.name),
     }));
@@ -355,14 +380,15 @@ export function SkillsSettings() {
         (s) =>
           s.name.toLowerCase().includes(q) ||
           s.description.toLowerCase().includes(q) ||
-          s.author.toLowerCase().includes(q)
+          s.author.toLowerCase().includes(q) ||
+          (s.tags && s.tags.some((tag) => tag.toLowerCase().includes(q)))
       );
     }
     if (clawHubCategory !== 'all') {
       list = list.filter((s) => s.category === clawHubCategory);
     }
     return list;
-  }, [searchQuery, clawHubCategory, installedNames]);
+  }, [searchQuery, clawHubCategory, installedNames, clawHubSkills]);
 
   const enabledCount = skills.filter((s) => s.enabled).length;
   const builtinCount = skills.filter((s) => s.builtin).length;
