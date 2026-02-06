@@ -11,9 +11,9 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import os from 'node:os';
 import type { HashChainEntry, DiscordEmbed, SecretOperationEntry } from './types.js';
 import { HelixSecurityError } from './types.js';
+import { appendToChain as rotationAppend, startRotationScheduler } from './hash-chain-rotation.js';
 
 // Security mode - when true, operations fail if Discord logging fails
 let failClosedMode = true;
@@ -257,13 +257,17 @@ export async function createHashChainEntry(): Promise<HashChainEntry> {
 
   // >>>>>> THEN write locally <<<<<<
   try {
-    // Ensure directory exists
-    const chainDir = path.dirname(CHAIN_FILE);
-    await fs.mkdir(chainDir, { recursive: true }).catch(() => {});
-
-    await fs.appendFile(CHAIN_FILE, JSON.stringify(entry) + '\n');
-  } catch (error) {
-    console.error('[Helix] Failed to write hash chain locally:', error);
+    // Use rotation system for efficient log management
+    await rotationAppend(entry);
+  } catch {
+    // Fall back to legacy single-file approach if rotation fails
+    try {
+      const chainDir = path.dirname(CHAIN_FILE);
+      await fs.mkdir(chainDir, { recursive: true }).catch(() => {});
+      await fs.appendFile(CHAIN_FILE, JSON.stringify(entry) + '\n');
+    } catch (fallbackError) {
+      console.error('[Helix] Failed to write hash chain locally:', fallbackError);
+    }
   }
 
   // Update in-memory state
@@ -618,7 +622,7 @@ export async function verifyAgainstDiscord(): Promise<DiscordVerificationResult>
 }
 
 // setHashChainFailClosedMode is exported via its declaration above
-export { computeEntryHash, hashLogFiles };
+export { computeEntryHash, hashLogFiles, startRotationScheduler };
 
 /**
  * Hash chain singleton object for unified interface

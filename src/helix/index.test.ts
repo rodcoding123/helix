@@ -30,6 +30,7 @@ vi.mock('./hash-chain.js', () => ({
   setHashChainFailClosedMode: vi.fn(),
   startHashChainScheduler: vi.fn(),
   stopHashChainScheduler: vi.fn(),
+  startRotationScheduler: vi.fn(),
   createHashChainEntry: vi.fn().mockResolvedValue(undefined),
   verifyChain: vi.fn(),
   getChainState: vi.fn().mockResolvedValue({

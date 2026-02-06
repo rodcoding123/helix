@@ -94,8 +94,19 @@ export {
   verifyAgainstDiscord,
   computeEntryHash,
   hashLogFiles,
+  startRotationScheduler,
   // setHashChainFailClosedMode is internal-only for security
 } from './hash-chain.js';
+
+// Hash chain rotation (efficient log management)
+export {
+  appendToChain,
+  getEntryBySequence,
+  getLastEntries,
+  getEntriesByDateRange,
+  rotateAndArchiveLogs,
+  getChainStats,
+} from './hash-chain-rotation.js';
 
 // Re-export the type
 export type { DiscordVerificationResult } from './hash-chain.js';
@@ -440,8 +451,9 @@ export async function initializeHelix(options: HelixInitOptions = {}): Promise<v
 
   // 5. Start hash chain scheduler (if not skipped)
   if (!skipHashChain) {
-    const { startHashChainScheduler } = await import('./hash-chain.js');
+    const { startHashChainScheduler, startRotationScheduler } = await import('./hash-chain.js');
     startHashChainScheduler(hashChainInterval);
+    startRotationScheduler(); // Start log rotation (daily at midnight UTC)
   }
 
   // 5b. Start 1Password audit scheduler (if not skipped)
