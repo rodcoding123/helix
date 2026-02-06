@@ -6,15 +6,33 @@
 import { getHashChainForTenant } from './hash-chain-multitenant.js';
 
 /**
+ * Supabase-like database client interface
+ */
+interface DbQueryResult<T = Record<string, unknown>> {
+  data: T | null;
+  error: { message: string; code?: string } | null;
+}
+
+interface DbQueryBuilder<T = Record<string, unknown>> {
+  select(columns: string): DbQueryBuilder<T>;
+  eq(column: string, value: string | number): DbQueryBuilder<T>;
+  single(): Promise<DbQueryResult<T>>;
+}
+
+interface DbClient {
+  from(table: string): DbQueryBuilder;
+}
+
+/**
  * Database client factory - can be mocked in tests
  */
-let dbClient: any = null;
+let dbClient: DbClient | null = null;
 
-export function setDbClient(client: any): void {
+export function setDbClient(client: DbClient): void {
   dbClient = client;
 }
 
-export function getDb(): any {
+export function getDb(): DbClient {
   if (!dbClient) {
     throw new Error('Database client not initialized');
   }
@@ -25,6 +43,27 @@ export function getDb(): any {
  * Tenant-specific Discord logging
  * Completely isolated per tenant - cannot access other tenants' webhooks
  */
+/**
+ * Command execution result
+ */
+interface CommandResult {
+  error?: string;
+  output?: string;
+  exitCode?: number;
+}
+
+/**
+ * Discord webhook log payload
+ */
+interface LogPayload {
+  type: string;
+  content: string;
+  tenantId: string;
+  timestamp: number;
+  status: string;
+  metadata: Record<string, unknown>;
+}
+
 export class TenantDiscordLogger {
   private tenantId: string;
   private webhookUrl: string | null = null;
@@ -80,7 +119,7 @@ export class TenantDiscordLogger {
     content: string;
     timestamp?: number;
     status?: 'pending' | 'completed' | 'failed';
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): Promise<void> {
     try {
       if (!this.initialized) {
@@ -117,7 +156,7 @@ export class TenantDiscordLogger {
   /**
    * Log command execution
    */
-  async logCommand(cmd: string, result?: any): Promise<void> {
+  async logCommand(cmd: string, result?: CommandResult): Promise<void> {
     const status = result?.error ? 'failed' : 'completed';
     const metadata = result ? { result } : undefined;
 
@@ -132,7 +171,12 @@ export class TenantDiscordLogger {
   /**
    * Log API call
    */
-  async logAPI(method: string, path: string, statusCode: number, durationMs: number): Promise<void> {
+  async logAPI(
+    method: string,
+    path: string,
+    statusCode: number,
+    durationMs: number
+  ): Promise<void> {
     const status = statusCode < 400 ? 'completed' : 'failed';
 
     await this.log({
@@ -150,7 +194,7 @@ export class TenantDiscordLogger {
     operationId: string,
     operationType: string,
     success: boolean,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<void> {
     const status = success ? 'completed' : 'failed';
 
@@ -170,7 +214,7 @@ export class TenantDiscordLogger {
    * Send webhook payload to Discord
    * Uses tenant's isolated webhook URL
    */
-  private async sendToWebhook(payload: any): Promise<void> {
+  private async sendToWebhook(payload: LogPayload): Promise<void> {
     if (!this.webhookUrl) {
       throw new Error('Webhook URL not initialized');
     }
@@ -196,7 +240,7 @@ export class TenantDiscordLogger {
   /**
    * Format payload as Discord embed
    */
-  private formatEmbedFromPayload(payload: any) {
+  private formatEmbedFromPayload(payload: LogPayload): Record<string, unknown> {
     const colors: Record<string, number> = {
       completed: 0x00ff00, // Green
       failed: 0xff0000, // Red
@@ -220,11 +264,13 @@ export class TenantDiscordLogger {
           inline: true,
         },
         ...(payload.metadata && Object.keys(payload.metadata).length > 0
-          ? [{
-              name: 'Details',
-              value: `\`\`\`json\n${JSON.stringify(payload.metadata, null, 2)}\n\`\`\``,
-              inline: false,
-            }]
+          ? [
+              {
+                name: 'Details',
+                value: `\`\`\`json\n${JSON.stringify(payload.metadata, null, 2)}\n\`\`\``,
+                inline: false,
+              },
+            ]
           : []),
       ],
     };
@@ -248,11 +294,13 @@ export class TenantDiscordLogger {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          embeds: [{
-            title: 'Webhook Verification',
-            description: 'Testing Discord webhook connectivity',
-            color: 0x0099ff,
-          }],
+          embeds: [
+            {
+              title: 'Webhook Verification',
+              description: 'Testing Discord webhook connectivity',
+              color: 0x0099ff,
+            },
+          ],
         }),
       });
 
@@ -304,7 +352,7 @@ export class GlobalDiscordLogger {
     this.webhookUrl = webhookUrl || null;
   }
 
-  async initialize(webhookUrl: string): Promise<void> {
+  initialize(webhookUrl: string): void {
     this.webhookUrl = webhookUrl;
     this.initialized = true;
   }
@@ -313,7 +361,7 @@ export class GlobalDiscordLogger {
     type: string;
     content: string;
     status?: 'pending' | 'completed' | 'failed';
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): Promise<void> {
     if (!this.webhookUrl) {
       console.warn('Global Discord logger not initialized');
@@ -331,18 +379,22 @@ export class GlobalDiscordLogger {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          embeds: [{
-            title: `[GLOBAL] ${message.type}`,
-            description: message.content,
-            timestamp: new Date().toISOString(),
-            color: colors[message.status || 'completed'] || 0x0099ff,
-            fields: message.metadata
-              ? [{
-                  name: 'Metadata',
-                  value: `\`\`\`json\n${JSON.stringify(message.metadata, null, 2)}\n\`\`\``,
-                }]
-              : [],
-          }],
+          embeds: [
+            {
+              title: `[GLOBAL] ${message.type}`,
+              description: message.content,
+              timestamp: new Date().toISOString(),
+              color: colors[message.status || 'completed'] || 0x0099ff,
+              fields: message.metadata
+                ? [
+                    {
+                      name: 'Metadata',
+                      value: `\`\`\`json\n${JSON.stringify(message.metadata, null, 2)}\n\`\`\``,
+                    },
+                  ]
+                : [],
+            },
+          ],
         }),
       });
 

@@ -4,21 +4,55 @@
  */
 
 /**
+ * Supabase-like database client interface
+ */
+interface DbQueryResult<T = Record<string, unknown>> {
+  data: T | T[] | null;
+  error: { message: string; code?: string } | null;
+  count?: number;
+}
+
+interface DbQueryBuilder<T = Record<string, unknown>> {
+  select(columns: string, options?: { count?: string; head?: boolean }): DbQueryBuilder<T>;
+  insert(rows: Record<string, unknown>[]): Promise<DbQueryResult<T>>;
+  eq(column: string, value: string | number): DbQueryBuilder<T>;
+  order(column: string, options?: { ascending?: boolean }): DbQueryBuilder<T>;
+  limit(n: number): DbQueryBuilder<T>;
+  single(): Promise<DbQueryResult<T>>;
+  then(resolve: (result: DbQueryResult<T>) => void): Promise<void>;
+}
+
+interface DbClient {
+  from(table: string): DbQueryBuilder;
+}
+
+/**
  * Database client factory - can be mocked in tests
  */
-let dbClient: any = null;
+let dbClient: DbClient | null = null;
 
-export function setDbClient(client: any): void {
+export function setDbClient(client: DbClient): void {
   dbClient = client;
 }
 
-export function getDb(): any {
+export function getDb(): DbClient {
   if (!dbClient) {
     throw new Error('Database client not initialized');
   }
   return dbClient;
 }
 
+/**
+ * Database row for hash chain entries
+ */
+interface HashChainEntryRow {
+  index: number;
+  tenant_id: string;
+  timestamp: number;
+  data: string;
+  previous_hash: string;
+  hash: string;
+}
 
 export interface TenantHashChainEntry {
   index: number;
@@ -77,14 +111,16 @@ export class TenantHashChain {
       // Persist to database
       const { error } = await getDb()
         .from('hash_chain_entries')
-        .insert([{
-          tenant_id: this.tenantId,
-          index: entry.index,
-          timestamp: entry.timestamp,
-          data: entry.data,
-          previous_hash: entry.previousHash,
-          hash: entry.hash,
-        }]);
+        .insert([
+          {
+            tenant_id: this.tenantId,
+            index: entry.index,
+            timestamp: entry.timestamp,
+            data: entry.data,
+            previous_hash: entry.previousHash,
+            hash: entry.hash,
+          },
+        ]);
 
       if (error) {
         throw new Error(`Failed to persist hash chain entry: ${error.message}`);
@@ -128,7 +164,7 @@ export class TenantHashChain {
         if (current.previousHash !== previous.hash) {
           console.error(
             `Tenant ${this.tenantId} chain broken at entry ${i}: ` +
-            `expected previous_hash=${previous.hash}, got ${current.previousHash}`
+              `expected previous_hash=${previous.hash}, got ${current.previousHash}`
           );
           return false;
         }
@@ -169,22 +205,23 @@ export class TenantHashChain {
    */
   async getEntry(index: number): Promise<TenantHashChainEntry | null> {
     try {
-      const { data } = await getDb()
+      const result = await getDb()
         .from('hash_chain_entries')
         .select('*')
         .eq('tenant_id', this.tenantId)
         .eq('index', index)
         .single();
 
-      if (!data) return null;
+      const row = result.data as HashChainEntryRow | null;
+      if (!row) return null;
 
       return {
-        index: data.index,
-        tenantId: data.tenant_id,
-        timestamp: data.timestamp,
-        data: data.data,
-        previousHash: data.previous_hash,
-        hash: data.hash,
+        index: row.index,
+        tenantId: row.tenant_id,
+        timestamp: row.timestamp,
+        data: row.data,
+        previousHash: row.previous_hash,
+        hash: row.hash,
       };
     } catch (error) {
       console.error(`Failed to get hash chain entry ${index}:`, error);
@@ -197,13 +234,13 @@ export class TenantHashChain {
    */
   async getEntryCount(): Promise<number> {
     try {
-      const { count, error } = await getDb()
+      const result = await getDb()
         .from('hash_chain_entries')
         .select('*', { count: 'exact', head: true })
         .eq('tenant_id', this.tenantId);
 
-      if (error) throw error;
-      return count || 0;
+      if (result.error) throw new Error(result.error.message);
+      return result.count || 0;
     } catch (error) {
       console.error(`Failed to get entry count:`, error);
       return 0;
@@ -215,7 +252,7 @@ export class TenantHashChain {
    */
   private async getLatestEntry(): Promise<TenantHashChainEntry | null> {
     try {
-      const { data } = await getDb()
+      const result = await getDb()
         .from('hash_chain_entries')
         .select('*')
         .eq('tenant_id', this.tenantId)
@@ -223,15 +260,16 @@ export class TenantHashChain {
         .limit(1)
         .single();
 
-      if (!data) return null;
+      const row = result.data as HashChainEntryRow | null;
+      if (!row) return null;
 
       return {
-        index: data.index,
-        tenantId: data.tenant_id,
-        timestamp: data.timestamp,
-        data: data.data,
-        previousHash: data.previous_hash,
-        hash: data.hash,
+        index: row.index,
+        tenantId: row.tenant_id,
+        timestamp: row.timestamp,
+        data: row.data,
+        previousHash: row.previous_hash,
+        hash: row.hash,
       };
     } catch {
       return null;
@@ -240,24 +278,25 @@ export class TenantHashChain {
 
   private async loadAllEntries(): Promise<TenantHashChainEntry[]> {
     try {
-      const { data, error } = await getDb()
+      const result = await getDb()
         .from('hash_chain_entries')
         .select('*')
         .eq('tenant_id', this.tenantId)
         .order('index', { ascending: true });
 
-      if (error) {
-        console.error('Failed to load hash chain entries:', error);
+      if (result.error) {
+        console.error('Failed to load hash chain entries:', result.error);
         return [];
       }
 
-      return (data || []).map(entry => ({
-        index: entry.index,
-        tenantId: entry.tenant_id,
-        timestamp: entry.timestamp,
-        data: entry.data,
-        previousHash: entry.previous_hash,
-        hash: entry.hash,
+      const rows = (result.data || []) as HashChainEntryRow[];
+      return rows.map(row => ({
+        index: row.index,
+        tenantId: row.tenant_id,
+        timestamp: row.timestamp,
+        data: row.data,
+        previousHash: row.previous_hash,
+        hash: row.hash,
       }));
     } catch (error) {
       console.error('Failed to load hash chain entries:', error);
