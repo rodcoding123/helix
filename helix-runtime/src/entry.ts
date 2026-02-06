@@ -262,6 +262,26 @@ if (!ensureExperimentalWarningSuppressed()) {
       process.env.HELIX_GATEWAY_CONFIG = JSON.stringify(gatewayConfig);
 
       console.log(`[helix] Gateway security ready: ${bindHost}:${port} (${environment})`);
+
+      // Auto-start gateway if enabled (desktop app mode)
+      // Set HELIX_GATEWAY_AUTOSTART=true for friction-free desktop experience
+      const autoStart = process.env.HELIX_GATEWAY_AUTOSTART === "true";
+      if (autoStart) {
+        console.log("[helix] Auto-starting gateway server...");
+        const { startGatewayServer } = await import("./gateway/server.js");
+        const gateway = await startGatewayServer(port, {
+          bind: "loopback",
+          controlUiEnabled: true,
+          auth: gatewayConfig.authConfig.mode === "token"
+            ? { mode: "token" as const }
+            : undefined,
+        });
+
+        // Store reference for graceful shutdown
+        (process as NodeJS.Process & { __helixGateway?: { close: (opts?: { reason?: string }) => Promise<void> } }).__helixGateway = gateway;
+
+        console.log(`[helix] Gateway auto-started on ${bindHost}:${port}`);
+      }
     } catch (err) {
       // Gateway security failure is CRITICAL - fail-closed
       console.error(

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Network Security Configuration - Android
+  CRITICAL FIX 7.1: Enforces TLS/SSL for all network connections
+  Blocks cleartext HTTP traffic and enforces certificate pinning
+-->
+<network-security-config>
+    <!-- Default domain configuration: enforce HTTPS -->
+    <domain-config cleartextTrafficPermitted="false">
+        <!-- Block all cleartext traffic by default -->
+        <domain includeSubdomains="true">.</domain>
+
+        <!-- Trust system certificates -->
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+
+    <!-- Specific domain configuration for Helix Gateway -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">gateway.helix-project.org</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+        <!-- Certificate pinning for gateway (SHA256 hashes of public keys) -->
+        <pin-set expiration="2026-12-31">
+            <pin digest="SHA-256">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</pin>
+            <pin digest="SHA-256">BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=</pin>
+            <!-- Backup pins for certificate rotation -->
+            <pin digest="SHA-256">CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC=</pin>
+        </pin-set>
+    </domain-config>
+
+    <!-- Supabase domain configuration -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">supabase.com</domain>
+        <domain includeSubdomains="true">supabase.co</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+
+    <!-- Local testing configuration (only for DEBUG builds) -->
+    <debug-overrides>
+        <!-- Allow localhost cleartext for development only -->
+        <domain-config cleartextTrafficPermitted="true">
+            <domain includeSubdomains="true">localhost</domain>
+            <domain includeSubdomains="true">127.0.0.1</domain>
+            <trust-anchors>
+                <certificates src="system" />
+            </trust-anchors>
+        </domain-config>
+    </debug-overrides>
+</network-security-config>

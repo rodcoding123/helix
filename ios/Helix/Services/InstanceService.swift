@@ -26,7 +26,7 @@ actor InstanceService {
     static let shared = InstanceService()
 
     private let supabaseUrl: String
-    private let supabaseAnonKey: String
+    private let backendProxyUrl: String
     private let auth = SupabaseAuthService.shared
 
     private let decoder: JSONDecoder = {
@@ -36,13 +36,13 @@ actor InstanceService {
         return decoder
     }()
 
-    init(supabaseUrl: String = "", supabaseAnonKey: String = "") {
+    init(supabaseUrl: String = "", backendProxyUrl: String = "") {
         self.supabaseUrl = supabaseUrl.isEmpty
             ? Bundle.main.infoDictionary?["SUPABASE_URL"] as? String ?? "https://supabase.com"
             : supabaseUrl
-        self.supabaseAnonKey = supabaseAnonKey.isEmpty
-            ? Bundle.main.infoDictionary?["SUPABASE_ANON_KEY"] as? String ?? ""
-            : supabaseAnonKey
+        self.backendProxyUrl = backendProxyUrl.isEmpty
+            ? Bundle.main.infoDictionary?["BACKEND_PROXY_URL"] as? String ?? "\(supabaseUrl)/functions/v1/mobile-instance-api"
+            : backendProxyUrl
     }
 
     func createInstance(name: String, instanceKey: String) async throws -> Instance {
@@ -50,16 +50,14 @@ actor InstanceService {
             throw NSError(domain: "InstanceService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not signed in"])
         }
 
-        let urlString = "\(supabaseUrl)/rest/v1/instances"
-        guard let url = URL(string: urlString) else {
+        // CRITICAL FIX 5.1: Use backend proxy instead of direct Supabase API call
+        guard let url = URL(string: backendProxyUrl) else {
             throw NSError(domain: "InstanceService", code: 400, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
         }
 
         let body: [String: AnyCodable] = [
-            "user_id": .string(session.user.id),
             "name": .string(name),
-            "instance_key": .string(instanceKey),
-            "is_active": .bool(false)
+            "instance_key": .string(instanceKey)
         ]
 
         let bodyData = try JSONSerialization.data(withJSONObject: body.mapValues { value -> Any in
@@ -79,7 +77,6 @@ actor InstanceService {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(session.access_token)", forHTTPHeaderField: "Authorization")
-        request.setValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
         request.httpBody = bodyData
 
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -101,7 +98,8 @@ actor InstanceService {
             throw NSError(domain: "InstanceService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not signed in"])
         }
 
-        let urlString = "\(supabaseUrl)/rest/v1/instances?user_id=eq.\(session.user.id)"
+        // CRITICAL FIX 5.1: Use backend proxy instead of direct Supabase API call
+        let urlString = "\(backendProxyUrl)?user_id=\(session.user.id)"
         guard let url = URL(string: urlString) else {
             throw NSError(domain: "InstanceService", code: 400, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
         }
@@ -110,7 +108,6 @@ actor InstanceService {
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(session.access_token)", forHTTPHeaderField: "Authorization")
-        request.setValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
 
         let (data, response) = try await URLSession.shared.data(for: request)
 
@@ -131,7 +128,8 @@ actor InstanceService {
             throw NSError(domain: "InstanceService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not signed in"])
         }
 
-        let urlString = "\(supabaseUrl)/rest/v1/instances?id=eq.\(id)"
+        // CRITICAL FIX 5.1: Use backend proxy instead of direct Supabase API call
+        let urlString = "\(backendProxyUrl)?id=\(id)"
         guard let url = URL(string: urlString) else {
             throw NSError(domain: "InstanceService", code: 400, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
         }
@@ -140,7 +138,6 @@ actor InstanceService {
         request.httpMethod = "DELETE"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(session.access_token)", forHTTPHeaderField: "Authorization")
-        request.setValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
 
         let (_, response) = try await URLSession.shared.data(for: request)
 
@@ -148,7 +145,7 @@ actor InstanceService {
             throw NSError(domain: "InstanceService", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])
         }
 
-        guard httpResponse.statusCode == 204 else {
+        guard httpResponse.statusCode == 200 else {
             throw NSError(domain: "InstanceService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "HTTP \(httpResponse.statusCode)"])
         }
     }

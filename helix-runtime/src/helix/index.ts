@@ -310,6 +310,19 @@ export async function shutdownHelix(reason: string = "graceful"): Promise<void> 
 
   log.info("Shutting down Helix logging system");
 
+  // Stop auto-started gateway (if running)
+  const gateway = (process as NodeJS.Process & { __helixGateway?: { close: (opts?: { reason?: string }) => Promise<void> } }).__helixGateway;
+  if (gateway) {
+    try {
+      log.info("Stopping gateway server...");
+      await gateway.close({ reason: `helix_shutdown: ${reason}` });
+      (process as NodeJS.Process & { __helixGateway?: unknown }).__helixGateway = undefined;
+      log.info("Gateway server stopped");
+    } catch (err) {
+      log.warn("Error stopping gateway:", { error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+
   // Load both modules in parallel
   const [heartbeatModule, telemetryModule] = await Promise.all([
     import("./heartbeat.js"),

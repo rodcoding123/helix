@@ -501,6 +501,23 @@ export async function initializeHelix(options: HelixInitOptions = {}): Promise<v
 export async function shutdownHelix(reason: string = 'graceful'): Promise<void> {
   console.log('[Helix] Shutting down logging system...');
 
+  // Stop auto-started gateway (if running)
+  const gateway = (
+    process as NodeJS.Process & {
+      __helixGateway?: { close: (opts?: { reason?: string }) => Promise<void> };
+    }
+  ).__helixGateway;
+  if (gateway) {
+    try {
+      console.log('[Helix] Stopping gateway server...');
+      await gateway.close({ reason: `helix_shutdown: ${reason}` });
+      (process as NodeJS.Process & { __helixGateway?: unknown }).__helixGateway = undefined;
+      console.log('[Helix] Gateway server stopped');
+    } catch (err) {
+      console.warn('[Helix] Error stopping gateway:', err);
+    }
+  }
+
   // Stop Phase 0 ConductorLoop first (highest priority)
   try {
     const { conductorLoop } = await import('./orchestration/index.js');

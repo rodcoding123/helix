@@ -34,9 +34,11 @@ sealed class ApiResult<T> {
 
 class InstanceService(
     private val supabaseUrl: String,
-    private val supabaseAnonKey: String,
     private val authTokenProvider: suspend () -> String?
 ) {
+    // CRITICAL FIX 5.1: Use backend proxy URL instead of direct Supabase
+    private val backendProxyUrl = "$supabaseUrl/functions/v1/mobile-instance-api"
+
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
@@ -49,24 +51,17 @@ class InstanceService(
         withContext(Dispatchers.IO) {
             try {
                 val authToken = authTokenProvider() ?: ""
-                val url = "$supabaseUrl/rest/v1/instances"
-
-                val body = mapOf(
-                    "user_id" to userId,
+                // CRITICAL FIX 5.1: Use backend proxy instead of direct Supabase API call
+                val requestBody = json.encodeToString(mapOf(
                     "name" to name,
-                    "instance_key" to instanceKey,
-                    "is_active" to false
-                )
-
-                val bodyString = json.encodeToString(body)
-                val requestBody = bodyString.toRequestBody("application/json".toMediaType())
+                    "instance_key" to instanceKey
+                )).toRequestBody("application/json".toMediaType())
 
                 val request = Request.Builder()
-                    .url(url)
+                    .url(backendProxyUrl)
                     .post(requestBody)
                     .header("Content-Type", "application/json")
                     .header("Authorization", "Bearer $authToken")
-                    .header("apikey", supabaseAnonKey)
                     .build()
 
                 val response = httpClient.newCall(request).execute()
@@ -79,7 +74,8 @@ class InstanceService(
                 }
 
                 val body = response.body?.string() ?: ""
-                val instance = json.decodeFromString<Instance>(body)
+                val responseBody = json.decodeFromString<Map<String, Instance>>(body)
+                val instance = responseBody["data"] ?: throw Exception("No data in response")
                 ApiResult.Success(instance)
             } catch (e: Exception) {
                 ApiResult.Error(e.message ?: "Unknown error")
@@ -90,13 +86,13 @@ class InstanceService(
         withContext(Dispatchers.IO) {
             try {
                 val authToken = authTokenProvider() ?: ""
-                val url = "$supabaseUrl/rest/v1/instances?user_id=eq.$userId"
+                // CRITICAL FIX 5.1: Use backend proxy instead of direct Supabase API call
+                val url = "$backendProxyUrl?user_id=$userId"
 
                 val request = Request.Builder()
                     .url(url)
                     .header("Content-Type", "application/json")
                     .header("Authorization", "Bearer $authToken")
-                    .header("apikey", supabaseAnonKey)
                     .build()
 
                 val response = httpClient.newCall(request).execute()
@@ -109,7 +105,8 @@ class InstanceService(
                 }
 
                 val body = response.body?.string() ?: "[]"
-                val instances = json.decodeFromString<List<Instance>>(body)
+                val responseBody = json.decodeFromString<Map<String, List<Instance>>>(body)
+                val instances = responseBody["data"] ?: emptyList()
                 ApiResult.Success(instances)
             } catch (e: Exception) {
                 ApiResult.Error(e.message ?: "Unknown error")
@@ -120,14 +117,14 @@ class InstanceService(
         withContext(Dispatchers.IO) {
             try {
                 val authToken = authTokenProvider() ?: ""
-                val url = "$supabaseUrl/rest/v1/instances?id=eq.$instanceId"
+                // CRITICAL FIX 5.1: Use backend proxy instead of direct Supabase API call
+                val url = "$backendProxyUrl?id=$instanceId"
 
                 val request = Request.Builder()
                     .url(url)
                     .delete()
                     .header("Content-Type", "application/json")
                     .header("Authorization", "Bearer $authToken")
-                    .header("apikey", supabaseAnonKey)
                     .build()
 
                 val response = httpClient.newCall(request).execute()
