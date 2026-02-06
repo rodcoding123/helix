@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import percyHealthCheck from '@percy/playwright';
 
 /**
  * Playwright E2E Test Configuration for Helix Desktop
@@ -9,6 +10,10 @@ import { defineConfig, devices } from '@playwright/test';
  *   npx playwright test --debug            # Debug mode
  *   npx playwright test --headed           # Show browser
  *   npx playwright test -g "keyword"       # Filter by test name
+ *
+ * Visual Regression Testing (Percy):
+ *   percy exec -- npx playwright test      # Run with Percy snapshots
+ *   Set PERCY_TOKEN environment variable for CI
  */
 
 export default defineConfig({

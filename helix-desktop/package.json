@@ -16,6 +16,8 @@
     "lint:fix": "eslint src --fix",
     "test": "vitest",
     "test:e2e": "playwright test",
+    "test:visual": "percy exec -- playwright test e2e/visual-regression.spec.ts",
+    "test:visual:debug": "percy exec -- playwright test e2e/visual-regression.spec.ts --debug",
     "prepare:openclaw": "cd ../helix-runtime && pnpm install && pnpm build",
     "prepare:node": "node scripts/bundle-node.js",
     "prepare:all": "npm run prepare:openclaw && npm run prepare:node",

@@ -129,6 +129,77 @@ jobs:
           name: e2e-videos-${{ matrix.browser }}
           path: helix-desktop/test-results/**/*.webm
 
+  visual-regression-tests:
+    runs-on: ubuntu-latest
+    name: Visual Regression Tests (Percy)
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+        working-directory: helix-desktop
+
+      - name: Start dev server
+        run: npm run dev &
+        working-directory: helix-desktop
+        timeout-minutes: 2
+
+      - name: Wait for dev server
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:5173 > /dev/null; then
+              echo "Dev server is ready"
+              exit 0
+            fi
+            echo "Waiting for dev server... ($i/30)"
+            sleep 2
+          done
+          echo "Dev server failed to start"
+          exit 1
+
+      - name: Install Percy CLI
+        run: npm install --save-dev @percy/cli @percy/playwright
+
+      - name: Run visual regression tests with Percy
+        run: npx percy exec -- npx playwright test e2e/visual-regression.spec.ts --reporter=json --reporter=html
+        working-directory: helix-desktop
+        env:
+          PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
+        continue-on-error: true
+
+      - name: Upload Percy snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: percy-snapshots
+          path: |
+            helix-desktop/playwright-report/
+            helix-desktop/test-results/
+
+      - name: Comment PR with Percy link
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 📸 Visual Regression Tests\n\nVisual snapshots have been captured with Percy. [View comparison](${process.env.PERCY_BUILD_URL || 'https://app.percy.io'})`
+            })
+        continue-on-error: true
+
   accessibility-tests:
     runs-on: ubuntu-latest
     name: Accessibility Tests
@@ -205,7 +276,7 @@ jobs:
   notify-results:
     runs-on: ubuntu-latest
     name: Notify Test Results
-    needs: [unit-tests, e2e-tests, accessibility-tests, security-check]
+    needs: [unit-tests, e2e-tests, visual-regression-tests, accessibility-tests, security-check]
     if: always()
 
     steps:
