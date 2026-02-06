@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /**
  * StateGraph Tests
  *
@@ -49,37 +47,32 @@ describe('StateGraph', () => {
 
   describe('addNode', () => {
     it('should add a node successfully', () => {
-      const nodeFn: NodeFunction<TestState> = (state) => ({ ...state, count: state.count + 1 });
+      const nodeFn: NodeFunction<TestState> = state => ({ ...state, count: state.count + 1 });
       const result = graph.addNode('increment', nodeFn);
 
       expect(result).toBe(graph); // Fluent API
     });
 
     it('should add multiple nodes', () => {
-      graph.addNode('node1', (state) => state).addNode('node2', (state) => state);
+      graph.addNode('node1', state => state).addNode('node2', state => state);
 
-      const compiled = graph
-        .setEntryPoint('node1')
-        .addEdge('node1', 'node2')
-        .compile();
+      const compiled = graph.setEntryPoint('node1').addEdge('node1', 'node2').compile();
       expect(compiled).toBeInstanceOf(CompiledGraph);
     });
 
     it('should throw if adding node with reserved END name', () => {
       expect(() => {
-        graph.addNode(END, (state) => state);
+        graph.addNode(END, state => state);
       }).toThrow('Cannot add node with name "END"');
     });
 
     it('should allow async node functions', async () => {
-      const asyncNode: NodeFunction<TestState> = async (state) => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
+      const asyncNode: NodeFunction<TestState> = async state => {
+        await new Promise(resolve => setTimeout(resolve, 10));
         return { ...state, processed: true };
       };
 
-      graph
-        .addNode('async_node', asyncNode)
-        .setEntryPoint('async_node');
+      graph.addNode('async_node', asyncNode).setEntryPoint('async_node');
 
       const compiled = graph.compile();
       const result = await compiled.invoke(initialState);
@@ -88,13 +81,11 @@ describe('StateGraph', () => {
     });
 
     it('should return partial state updates', async () => {
-      const partialNode: NodeFunction<TestState> = (state) => ({
+      const partialNode: NodeFunction<TestState> = state => ({
         count: state.count + 5,
       });
 
-      graph
-        .addNode('partial', partialNode)
-        .setEntryPoint('partial');
+      graph.addNode('partial', partialNode).setEntryPoint('partial');
 
       const compiled = graph.compile();
       const result = await compiled.invoke(initialState);
@@ -106,14 +97,14 @@ describe('StateGraph', () => {
 
   describe('addEdge', () => {
     it('should add a simple edge', () => {
-      graph.addNode('node1', (state) => state).addNode('node2', (state) => state);
+      graph.addNode('node1', state => state).addNode('node2', state => state);
 
       const result = graph.addEdge('node1', 'node2');
       expect(result).toBe(graph); // Fluent API
     });
 
     it('should throw if source node does not exist', () => {
-      graph.addNode('node2', (state) => state);
+      graph.addNode('node2', state => state);
 
       expect(() => {
         graph.addEdge('nonexistent', 'node2');
@@ -121,7 +112,7 @@ describe('StateGraph', () => {
     });
 
     it('should allow edge from any node to END', () => {
-      graph.addNode('node1', (state) => state);
+      graph.addNode('node1', state => state);
 
       expect(() => {
         graph.addEdge('node1', END);
@@ -129,9 +120,9 @@ describe('StateGraph', () => {
     });
 
     it('should add conditional edge parameter', () => {
-      graph.addNode('node1', (state) => state).addNode('node2', (state) => state);
+      graph.addNode('node1', state => state).addNode('node2', state => state);
 
-      const condition = (state: TestState) => state.count > 0;
+      const condition = (state: TestState): boolean => state.count > 0;
       const result = graph.addEdge('node1', 'node2', condition);
 
       expect(result).toBe(graph);
@@ -139,9 +130,9 @@ describe('StateGraph', () => {
 
     it('should support edge chain', () => {
       graph
-        .addNode('a', (state) => state)
-        .addNode('b', (state) => state)
-        .addNode('c', (state) => state)
+        .addNode('a', state => state)
+        .addNode('b', state => state)
+        .addNode('c', state => state)
         .addEdge('a', 'b')
         .addEdge('b', 'c');
 
@@ -151,13 +142,13 @@ describe('StateGraph', () => {
 
   describe('addConditionalEdges', () => {
     it('should add conditional edges with mapping', () => {
-      const conditionalFn: ConditionalEdgeFn<TestState> = (state) =>
+      const conditionalFn: ConditionalEdgeFn<TestState> = state =>
         state.count > 5 ? 'high' : 'low';
 
       graph
-        .addNode('check', (state) => state)
-        .addNode('high_path', (state) => state)
-        .addNode('low_path', (state) => state);
+        .addNode('check', state => state)
+        .addNode('high_path', state => state)
+        .addNode('low_path', state => state);
 
       const result = graph.addConditionalEdges('check', conditionalFn, {
         high: 'high_path',
@@ -170,7 +161,7 @@ describe('StateGraph', () => {
     it('should throw if source node does not exist', () => {
       const conditionalFn: ConditionalEdgeFn<TestState> = () => 'outcome';
 
-      graph.addNode('dest', (state) => state);
+      graph.addNode('dest', state => state);
 
       expect(() => {
         graph.addConditionalEdges('nonexistent', conditionalFn, {
@@ -182,7 +173,7 @@ describe('StateGraph', () => {
     it('should throw if destination node does not exist', () => {
       const conditionalFn: ConditionalEdgeFn<TestState> = () => 'outcome';
 
-      graph.addNode('source', (state) => state);
+      graph.addNode('source', state => state);
 
       expect(() => {
         graph.addConditionalEdges('source', conditionalFn, {
@@ -194,7 +185,7 @@ describe('StateGraph', () => {
     it('should allow mapping to END', () => {
       const conditionalFn: ConditionalEdgeFn<TestState> = () => 'done';
 
-      graph.addNode('source', (state) => state);
+      graph.addNode('source', state => state);
 
       expect(() => {
         graph.addConditionalEdges('source', conditionalFn, {
@@ -204,13 +195,13 @@ describe('StateGraph', () => {
     });
 
     it('should execute conditional routing correctly', async () => {
-      const conditionalFn: ConditionalEdgeFn<TestState> = (state) =>
+      const conditionalFn: ConditionalEdgeFn<TestState> = state =>
         state.count > 0 ? 'high' : 'low';
 
       graph
-        .addNode('init', (state) => ({ ...state, count: 10 }))
-        .addNode('high', (state) => ({ ...state, message: 'high' }))
-        .addNode('low', (state) => ({ ...state, message: 'low' }))
+        .addNode('init', state => ({ ...state, count: 10 }))
+        .addNode('high', state => ({ ...state, message: 'high' }))
+        .addNode('low', state => ({ ...state, message: 'low' }))
         .addConditionalEdges('init', conditionalFn, {
           high: 'high',
           low: 'low',
@@ -227,7 +218,7 @@ describe('StateGraph', () => {
 
   describe('setEntryPoint', () => {
     it('should set entry point successfully', () => {
-      graph.addNode('start', (state) => state);
+      graph.addNode('start', state => state);
 
       const result = graph.setEntryPoint('start');
       expect(result).toBe(graph);
@@ -240,9 +231,7 @@ describe('StateGraph', () => {
     });
 
     it('should allow changing entry point', () => {
-      graph
-        .addNode('first', (state) => state)
-        .addNode('second', (state) => state);
+      graph.addNode('first', state => state).addNode('second', state => state);
 
       graph.setEntryPoint('first');
       graph.setEntryPoint('second');
@@ -253,16 +242,14 @@ describe('StateGraph', () => {
 
   describe('compile', () => {
     it('should compile successfully with valid configuration', () => {
-      graph
-        .addNode('start', (state) => state)
-        .setEntryPoint('start');
+      graph.addNode('start', state => state).setEntryPoint('start');
 
       const compiled = graph.compile();
       expect(compiled).toBeInstanceOf(CompiledGraph);
     });
 
     it('should throw if entry point not set', () => {
-      graph.addNode('node', (state) => state);
+      graph.addNode('node', state => state);
 
       expect(() => {
         graph.compile();
@@ -271,7 +258,7 @@ describe('StateGraph', () => {
 
     it('should throw if edge destination does not exist', () => {
       graph
-        .addNode('source', (state) => state)
+        .addNode('source', state => state)
         .setEntryPoint('source')
         .addEdge('source', 'nonexistent');
 
@@ -285,9 +272,7 @@ describe('StateGraph', () => {
         save: vi.fn().mockResolvedValue(undefined),
       };
 
-      graph
-        .addNode('node', (state) => state)
-        .setEntryPoint('node');
+      graph.addNode('node', state => state).setEntryPoint('node');
 
       const compiled = graph.compile(mockCheckpointer);
       expect(compiled).toBeInstanceOf(CompiledGraph);
@@ -295,7 +280,7 @@ describe('StateGraph', () => {
 
     it('should allow END in edges', () => {
       graph
-        .addNode('node', (state) => state)
+        .addNode('node', state => state)
         .setEntryPoint('node')
         .addEdge('node', END);
 
@@ -322,7 +307,7 @@ describe('CompiledGraph', () => {
   describe('invoke', () => {
     it('should execute single node graph', async () => {
       graph
-        .addNode('increment', (state) => ({
+        .addNode('increment', state => ({
           ...state,
           count: state.count + 1,
         }))
@@ -336,12 +321,12 @@ describe('CompiledGraph', () => {
 
     it('should execute multi-node graph in order', async () => {
       graph
-        .addNode('step1', (state) => ({
+        .addNode('step1', state => ({
           ...state,
           count: state.count + 1,
           steps: [...state.steps, 'step1'],
         }))
-        .addNode('step2', (state) => ({
+        .addNode('step2', state => ({
           ...state,
           count: state.count + 2,
           steps: [...state.steps, 'step2'],
@@ -358,18 +343,18 @@ describe('CompiledGraph', () => {
 
     it('should handle conditional routing', async () => {
       graph
-        .addNode('check', (state) => ({ ...state, count: 10 }))
-        .addNode('high', (state) => ({
+        .addNode('check', state => ({ ...state, count: 10 }))
+        .addNode('high', state => ({
           ...state,
           message: 'high',
           steps: [...state.steps, 'high'],
         }))
-        .addNode('low', (state) => ({
+        .addNode('low', state => ({
           ...state,
           message: 'low',
           steps: [...state.steps, 'low'],
         }))
-        .addConditionalEdges('check', (state) => (state.count > 5 ? 'high' : 'low'), {
+        .addConditionalEdges('check', state => (state.count > 5 ? 'high' : 'low'), {
           high: 'high',
           low: 'low',
         })
@@ -384,7 +369,7 @@ describe('CompiledGraph', () => {
 
     it('should terminate at END node', async () => {
       graph
-        .addNode('start', (state) => ({
+        .addNode('start', state => ({
           ...state,
           steps: [...state.steps, 'start'],
         }))
@@ -399,10 +384,10 @@ describe('CompiledGraph', () => {
 
     it('should apply conditional edge correctly', async () => {
       graph
-        .addNode('check', (state) => ({ ...state, count: 3 }))
-        .addNode('yes', (state) => ({ ...state, message: 'yes' }))
-        .addNode('no', (state) => ({ ...state, message: 'no' }))
-        .addConditionalEdges('check', (state) => (state.count > 5 ? 'yes' : 'no'), {
+        .addNode('check', state => ({ ...state, count: 3 }))
+        .addNode('yes', state => ({ ...state, message: 'yes' }))
+        .addNode('no', state => ({ ...state, message: 'no' }))
+        .addConditionalEdges('check', state => (state.count > 5 ? 'yes' : 'no'), {
           yes: 'yes',
           no: 'no',
         })
@@ -414,11 +399,11 @@ describe('CompiledGraph', () => {
       expect(result.message).toBe('no');
     });
 
-    it('should throw if node not found', async () => {
+    it('should throw if node not found', (): void => {
       // Manually create a compiled graph with invalid node reference
       const invalidGraph = new StateGraph<TestState>();
       invalidGraph
-        .addNode('valid', (state) => state)
+        .addNode('valid', state => state)
         .setEntryPoint('valid')
         .addEdge('valid', 'invalid');
 
@@ -430,7 +415,7 @@ describe('CompiledGraph', () => {
 
     it('should throw on max steps exceeded', async () => {
       graph
-        .addNode('loop', (state) => state)
+        .addNode('loop', state => state)
         .addEdge('loop', 'loop')
         .setEntryPoint('loop');
 
@@ -443,8 +428,8 @@ describe('CompiledGraph', () => {
 
     it('should handle async nodes', async () => {
       graph
-        .addNode('async_node', async (state) => {
-          await new Promise((resolve) => setTimeout(resolve, 5));
+        .addNode('async_node', async state => {
+          await new Promise(resolve => setTimeout(resolve, 5));
           return { ...state, count: 42 };
         })
         .setEntryPoint('async_node');
@@ -457,7 +442,7 @@ describe('CompiledGraph', () => {
 
     it('should merge partial state updates', async () => {
       graph
-        .addNode('partial', (state) => ({
+        .addNode('partial', _state => ({
           count: 99,
         }))
         .setEntryPoint('partial');
@@ -472,7 +457,7 @@ describe('CompiledGraph', () => {
 
     it('should preserve state when node returns undefined', async () => {
       graph
-        .addNode('noop', (state) => {
+        .addNode('noop', state => {
           // Returns undefined implicitly
           void state;
           return undefined;
@@ -490,8 +475,8 @@ describe('CompiledGraph', () => {
       const mockCheckpointer = { save: mockSave };
 
       graph
-        .addNode('step1', (state) => ({ ...state, count: 1 }))
-        .addNode('step2', (state) => ({ ...state, count: 2 }))
+        .addNode('step1', state => ({ ...state, count: 1 }))
+        .addNode('step2', state => ({ ...state, count: 2 }))
         .addEdge('step1', 'step2')
         .setEntryPoint('step1');
 
@@ -507,9 +492,7 @@ describe('CompiledGraph', () => {
         save: vi.fn().mockRejectedValue(new Error('Checkpoint failed')),
       };
 
-      graph
-        .addNode('step', (state) => ({ ...state, count: 1 }))
-        .setEntryPoint('step');
+      graph.addNode('step', state => ({ ...state, count: 1 })).setEntryPoint('step');
 
       const compiled = graph.compile(mockCheckpointer);
       const result = await compiled.invoke(initialState, { thread_id: 'test' });
@@ -521,12 +504,12 @@ describe('CompiledGraph', () => {
   describe('stream', () => {
     it('should yield state after each node', async () => {
       graph
-        .addNode('step1', (state) => ({
+        .addNode('step1', state => ({
           ...state,
           count: 1,
           steps: [...state.steps, 'step1'],
         }))
-        .addNode('step2', (state) => ({
+        .addNode('step2', state => ({
           ...state,
           count: 2,
           steps: [...state.steps, 'step2'],
@@ -550,9 +533,9 @@ describe('CompiledGraph', () => {
 
     it('should yield state at each step', async () => {
       graph
-        .addNode('a', (state) => ({ ...state, steps: [...state.steps, 'a'] }))
-        .addNode('b', (state) => ({ ...state, steps: [...state.steps, 'b'] }))
-        .addNode('c', (state) => ({ ...state, steps: [...state.steps, 'c'] }))
+        .addNode('a', state => ({ ...state, steps: [...state.steps, 'a'] }))
+        .addNode('b', state => ({ ...state, steps: [...state.steps, 'b'] }))
+        .addNode('c', state => ({ ...state, steps: [...state.steps, 'c'] }))
         .addEdge('a', 'b')
         .addEdge('b', 'c')
         .setEntryPoint('a');
@@ -569,8 +552,8 @@ describe('CompiledGraph', () => {
 
     it('should handle conditional edges in stream', async () => {
       graph
-        .addNode('check', (state) => ({ ...state, count: 10 }))
-        .addNode('branch', (state) => ({ ...state, message: 'branched' }))
+        .addNode('check', state => ({ ...state, count: 10 }))
+        .addNode('branch', state => ({ ...state, message: 'branched' }))
         .addConditionalEdges('check', () => 'next', {
           next: 'branch',
         })
@@ -588,15 +571,16 @@ describe('CompiledGraph', () => {
 
     it('should throw on max steps in stream', async () => {
       graph
-        .addNode('loop', (state) => state)
+        .addNode('loop', state => state)
         .addEdge('loop', 'loop')
         .setEntryPoint('loop');
 
       const compiled = graph.compile();
 
-      const streamFn = async () => {
-        for await (const _ of compiled.stream(initialState)) {
+      const streamFn = async (): Promise<void> => {
+        for await (const item of compiled.stream(initialState)) {
           // Iterate through stream
+          void item;
         }
       };
 
@@ -613,24 +597,24 @@ describe('Helper Functions', () => {
       expect(update).toEqual({ count: 5 });
     });
 
-    it('should work with any type', () => {
+    it('should work with any type', (): void => {
       interface ComplexState {
         data: { nested: string };
         items: number[];
       }
 
-      const update = updateState({ data: { nested: 'old' }, items: [1, 2] }, {
-        data: { nested: 'new' },
-      });
+      const update = updateState<ComplexState>(
+        { data: { nested: 'old' }, items: [1, 2] },
+        {
+          data: { nested: 'new' },
+        }
+      );
 
       expect(update).toEqual({ data: { nested: 'new' } });
     });
 
     it('should allow multiple fields', () => {
-      const update = updateState(
-        { a: 1, b: 'test', c: true },
-        { a: 2, b: 'updated' }
-      );
+      const update = updateState({ a: 1, b: 'test', c: true }, { a: 2, b: 'updated' });
 
       expect(update).toEqual({ a: 2, b: 'updated' });
     });
@@ -653,7 +637,7 @@ describe('Helper Functions', () => {
       let called = false;
 
       const passthroughFn = passthrough(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 5));
+        await new Promise(resolve => setTimeout(resolve, 5));
         called = true;
       });
 
@@ -672,10 +656,13 @@ describe('Helper Functions', () => {
       const logs: string[] = [];
 
       graph
-        .addNode('log_node', passthrough((state) => {
-          logs.push('executed');
-          void state;
-        }))
+        .addNode(
+          'log_node',
+          passthrough(state => {
+            logs.push('executed');
+            void state;
+          })
+        )
         .setEntryPoint('log_node');
 
       const compiled = graph.compile();
@@ -699,24 +686,24 @@ describe('Integration Scenarios', () => {
     const graph = new StateGraph<AgentState>();
 
     graph
-      .addNode('analyze', (state) => ({
+      .addNode('analyze', state => ({
         ...state,
         analysis: `Analyzed: ${state.task}`,
       }))
-      .addNode('decide', (state) => ({
+      .addNode('decide', state => ({
         ...state,
         decision: state.analysis.length > 10 ? 'proceed' : 'reject',
       }))
-      .addNode('execute', (state) => ({
+      .addNode('execute', state => ({
         ...state,
         result: `Executed: ${state.decision}`,
       }))
-      .addNode('reject', (state) => ({
+      .addNode('reject', state => ({
         ...state,
         result: 'Rejected',
       }))
       .addEdge('analyze', 'decide')
-      .addConditionalEdges('decide', (state) => state.decision, {
+      .addConditionalEdges('decide', state => state.decision, {
         proceed: 'execute',
         reject: 'reject',
       })
@@ -739,19 +726,19 @@ describe('Integration Scenarios', () => {
     const graph = new StateGraph<{ value: number; path: string }>();
 
     graph
-      .addNode('init', (state) => ({
+      .addNode('init', state => ({
         ...state,
         value: Math.random() * 100,
       }))
-      .addNode('high_path', (state) => ({
+      .addNode('high_path', state => ({
         ...state,
         path: 'high',
       }))
-      .addNode('low_path', (state) => ({
+      .addNode('low_path', state => ({
         ...state,
         path: 'low',
       }))
-      .addConditionalEdges('init', (state) => (state.value > 50 ? 'high' : 'low'), {
+      .addConditionalEdges('init', state => (state.value > 50 ? 'high' : 'low'), {
         high: 'high_path',
         low: 'low_path',
       })
