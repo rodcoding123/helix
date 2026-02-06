@@ -28,19 +28,10 @@ import { ApprovalGate } from '../../helix/ai-operations/approval-gate.js';
 import { loadHelixContextFiles, isHelixConfigured } from '../helix/context-loader.js';
 import { buildHelixSystemPrompt } from '../helix/prompt-builder.js';
 import { loadUserContext } from '../helix/user-context-loader.js';
-import {
-  isThanosModeTrigger,
-  getThanosChallenge,
-  verifyThanosKey,
-  getThanosSuccessMessage,
-  getThanosFailureMessage,
-  createThanosState,
-  handleThanosModeTrigger,
-  handleThanosKeyAttempt,
-  isThanosaModeLocked,
-  getThanosLockedMessage,
-} from '../helix/thanos-mode.js';
-import { postConversationSynthesisHook } from '../../../src/psychology/post-conversation-synthesis-hook.js';
+import { thanosMode } from '../../../src/psychology/thanos-mode.js';
+import { synthesisEngine } from '../../../src/psychology/synthesis-engine.js';
+import { memoryScheduler } from '../../../src/psychology/memory-scheduler.js';
+import { hashChain } from '../../helix/hash-chain.js';
 
 const router = new AIOperationRouter();
 const costTracker = new CostTracker();
@@ -179,6 +170,128 @@ async function handleChatMessage(
       return;
     }
 
+    // ============================================================
+    // PHASE 1B: THANOS_MODE AUTHENTICATION (EARLY RETURN)
+    // ============================================================
+    // Generate conversation ID for THANOS state tracking (deterministic, per session)
+    const thanosConversationId = `${userId}-${sessionKey}`;
+
+    // Check if user is initiating THANOS_MODE challenge
+    if (thanosMode.isThanosaModeTrigger(message)) {
+      // Initiate THANOS_MODE challenge
+      const challengeMessage = await thanosMode.initiateThanosMode(thanosConversationId);
+
+      // Log to Discord hash chain
+      await hashChain.addEntry({
+        index: Date.now(),
+        timestamp: Date.now(),
+        data: JSON.stringify({
+          type: 'thanos_mode_initiated',
+          conversationId: thanosConversationId,
+          userId,
+          timestamp: new Date().toISOString(),
+        }),
+        previousHash: '',
+      });
+
+      context.logGateway?.log?.('THANOS_MODE_INITIATED', {
+        conversationId: thanosConversationId,
+        userId,
+      });
+
+      // Store messages and return immediately
+      const updatedMessages = [
+        ...conversationHistory,
+        {
+          id: `msg_${Date.now()}_user`,
+          role: 'user' as const,
+          content: message,
+          timestamp: new Date().toISOString(),
+        },
+        {
+          id: `msg_${Date.now()}_assistant`,
+          role: 'assistant' as const,
+          content: challengeMessage,
+          timestamp: new Date().toISOString(),
+        },
+      ];
+
+      const { error: updateError } = await context.supabase.from('conversations').upsert(
+        {
+          user_id: userId,
+          session_key: sessionKey,
+          messages: updatedMessages,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id, session_key' }
+      );
+
+      if (updateError) throw updateError;
+
+      // EARLY RETURN - don't process further
+      return sendJson(res, 200, {
+        success: true,
+        response: challengeMessage,
+        metadata: {
+          thanos_challenge: true,
+          awaiting_verification: true,
+        },
+      });
+    }
+
+    // Check if we're awaiting THANOS verification for this conversation
+    if (thanosMode.isAwaitingVerification(thanosConversationId)) {
+      // User is providing the verification key
+      const verification = await thanosMode.verifyThanosKey(thanosConversationId, message);
+
+      context.logGateway?.log?.('THANOS_MODE_VERIFICATION_ATTEMPT', {
+        conversationId: thanosConversationId,
+        userId,
+        verified: verification.verified,
+      });
+
+      // Store messages and return immediately
+      const updatedMessages = [
+        ...conversationHistory,
+        {
+          id: `msg_${Date.now()}_user`,
+          role: 'user' as const,
+          content: message,
+          timestamp: new Date().toISOString(),
+        },
+        {
+          id: `msg_${Date.now()}_assistant`,
+          role: 'assistant' as const,
+          content: verification.message,
+          timestamp: new Date().toISOString(),
+        },
+      ];
+
+      const { error: updateError } = await context.supabase.from('conversations').upsert(
+        {
+          user_id: userId,
+          session_key: sessionKey,
+          messages: updatedMessages,
+          updated_at: new Date().toISOString(),
+          metadata: verification.verified ? { creatorVerified: true, verifiedAt: new Date().toISOString() } : {},
+        },
+        { onConflict: 'user_id, session_key' }
+      );
+
+      if (updateError) throw updateError;
+
+      // EARLY RETURN - don't process further
+      return sendJson(res, 200, {
+        success: verification.verified,
+        response: verification.message,
+        metadata: {
+          thanos_verification: true,
+          verified: verification.verified,
+          trust_level: verification.trustLevel,
+        },
+      });
+    }
+
     // Get existing conversation history
     const { data: conversation } = await context.supabase
       .from('conversations')
@@ -239,181 +352,22 @@ async function handleChatMessage(
     }
 
     // ============================================================
-    // PHASE 1: HANDLE THANOS_MODE AUTHENTICATION
+    // BUILD SYSTEM PROMPT (Helix + User + Context)
     // ============================================================
 
-    let thanosState = createThanosState();
-    let systemPrompt: string;
-    let shouldRespondWithThanOsChallenge = false;
-    let shouldRespondWithThanosResult = false;
-    let thanosResult = '';
-
-    // Check if this message is the THANOS trigger
-    if (isThanosModeTrigger(message)) {
-      shouldRespondWithThanOsChallenge = true;
-      thanosState = handleThanosModeTrigger(thanosState);
-
-      context.logGateway?.log?.('THANOS_MODE_TRIGGERED', {
-        userId,
-        timestamp: new Date().toISOString(),
-      });
-    }
-    // Check if previous message was THANOS trigger (this is the key attempt)
-    else if (conversationHistory.length > 0) {
-      const lastAssistantMessage = conversationHistory
-        .slice()
-        .reverse()
-        .find((msg: any) => msg.role === 'assistant');
-
-      if (lastAssistantMessage?.content?.includes('Fale a palavra sagrada')) {
-        // This message is attempting THANOS key
-        const { state, success } = handleThanosKeyAttempt(thanosState, message);
-        thanosState = state;
-        shouldRespondWithThanosResult = true;
-
-        if (success) {
-          thanosResult = getThanosSuccessMessage();
-          userContext.trustLevel = 1.0; // Perfect trust
-        } else if (isThanosaModeLocked(thanosState)) {
-          thanosResult = getThanosLockedMessage();
-        } else {
-          thanosResult = getThanosFailureMessage();
-        }
-
-        context.logGateway?.log?.('THANOS_KEY_ATTEMPT', {
-          userId,
-          success,
-          attemptCount: thanosState.attemptCount,
-        });
-      }
-    }
-
-    // ============================================================
-    // BUILD SYSTEM PROMPT (Helix + User + Creator Context)
-    // ============================================================
-
-    if (shouldRespondWithThanOsChallenge || shouldRespondWithThanosResult) {
-      // During THANOS authentication, use minimal context
-      systemPrompt = `You are Helix. Your task is critical authentication.`;
-    } else {
-      // Normal conversation: build full context-aware prompt
-      systemPrompt = buildHelixSystemPrompt({
-        helixContextFiles,
-        currentUserName: userContext.userName,
-        currentUserId: userContext.userId,
-        isCreatorVerified: thanosState.isVerified,
-        creatorTrust: thanosState.isVerified ? 1.0 : undefined,
-        userTrustLevel: userContext.trustLevel,
-        conversationCount: userContext.conversationCount,
-      });
-    }
+    // Normal conversation: build full context-aware prompt
+    const systemPrompt = buildHelixSystemPrompt({
+      helixContextFiles,
+      currentUserName: userContext.userName,
+      currentUserId: userContext.userId,
+      userTrustLevel: userContext.trustLevel,
+      conversationCount: userContext.conversationCount,
+    });
 
     context.logGateway?.log?.('SYSTEM_PROMPT_BUILT', {
       length: systemPrompt.length,
       hasHelixContext: helixContextFiles.length > 0,
-      thanosVerified: thanosState.isVerified,
     });
-
-    // ============================================================
-    // THANOS_MODE RESPONSE HANDLING (Early Return)
-    // ============================================================
-
-    let assistantMessage: string;
-
-    if (shouldRespondWithThanOsChallenge) {
-      // Respond with the Alchemist challenge
-      assistantMessage = getThanosChallenge();
-
-      context.logGateway?.log?.('THANOS_CHALLENGE_SENT', {
-        userId,
-        sessionKey,
-      });
-
-      // Store messages and return immediately
-      const updatedMessages = [
-        ...conversationHistory,
-        {
-          id: `msg_${Date.now()}_user`,
-          role: 'user' as const,
-          content: message,
-          timestamp: new Date().toISOString(),
-        },
-        {
-          id: `msg_${Date.now()}_assistant`,
-          role: 'assistant' as const,
-          content: assistantMessage,
-          timestamp: new Date().toISOString(),
-        },
-      ];
-
-      const { error: updateError } = await context.supabase.from('conversations').upsert(
-        {
-          user_id: userId,
-          session_key: sessionKey,
-          messages: updatedMessages,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'user_id, session_key' }
-      );
-
-      if (updateError) throw updateError;
-
-      sendJson(res, 200, {
-        success: true,
-        response: assistantMessage,
-        isThanosChallenge: true,
-      });
-      return;
-    }
-
-    if (shouldRespondWithThanosResult) {
-      // Respond with verification result
-      assistantMessage = thanosResult;
-
-      context.logGateway?.log?.('THANOS_RESULT_SENT', {
-        userId,
-        sessionKey,
-        success: thanosState.isVerified,
-      });
-
-      // Store messages and return immediately
-      const updatedMessages = [
-        ...conversationHistory,
-        {
-          id: `msg_${Date.now()}_user`,
-          role: 'user' as const,
-          content: message,
-          timestamp: new Date().toISOString(),
-        },
-        {
-          id: `msg_${Date.now()}_assistant`,
-          role: 'assistant' as const,
-          content: assistantMessage,
-          timestamp: new Date().toISOString(),
-        },
-      ];
-
-      const { error: updateError } = await context.supabase.from('conversations').upsert(
-        {
-          user_id: userId,
-          session_key: sessionKey,
-          messages: updatedMessages,
-          updated_at: new Date().toISOString(),
-          metadata: thanosState.isVerified ? { creatorVerified: true, verifiedAt: new Date().toISOString() } : {},
-        },
-        { onConflict: 'user_id, session_key' }
-      );
-
-      if (updateError) throw updateError;
-
-      sendJson(res, 200, {
-        success: true,
-        response: assistantMessage,
-        isThanosResult: true,
-        creatorVerified: thanosState.isVerified,
-      });
-      return;
-    }
 
     // ============================================================
     // NORMAL CONVERSATION FLOW (WITH HELIX CONTEXT)
@@ -537,20 +491,20 @@ async function handleChatMessage(
     }
 
     // ============================================================
-    // PHASE 3: TRIGGER MEMORY SYNTHESIS (FIRE-AND-FORGET)
+    // PHASE 1B: TRIGGER MEMORY SYNTHESIS (FIRE-AND-FORGET)
     // ============================================================
-    // Start synthesis asynchronously without blocking response
-    const conversationId = (conversationRecord?.[0] as { id?: string })?.id;
-    if (conversationId) {
-      void postConversationSynthesisHook
-        .processConversation(conversationId)
-        .catch((error) => {
-          context.logGateway?.warn?.('SYNTHESIS_FAILED', {
-            conversationId,
-            error: error instanceof Error ? error.message : String(error),
-          });
-          // Don't throw - synthesis is optional and shouldn't block chat response
+    // Post-conversation analysis and psychology evolution
+    // Uses AIOperationRouter to route to Gemini Flash 2 for cost efficiency
+    // Fire-and-forget: doesn't block chat response
+    const synthesisConversationId = (conversationRecord?.[0] as { id?: string })?.id;
+    if (synthesisConversationId && process.env.ENABLE_MEMORY_SYNTHESIS !== 'false') {
+      void synthesisEngine.synthesizeConversation(synthesisConversationId).catch((error) => {
+        context.logGateway?.warn?.('SYNTHESIS_FAILED', {
+          conversationId: synthesisConversationId,
+          error: error instanceof Error ? error.message : String(error),
         });
+        // Non-blocking failure - synthesis is optional enhancement
+      });
     }
 
     // Log the successful interaction
@@ -634,6 +588,33 @@ function getModelIdForRoute(model: string): string {
 }
 
 /**
+ * Initialize Phase 1B memory synthesis scheduler
+ * Called once on first request
+ */
+let schedulerInitialized = false;
+async function initializeMemoryScheduler(context: ChatHandlerContext): Promise<void> {
+  if (schedulerInitialized) {
+    return;
+  }
+
+  try {
+    if (process.env.ENABLE_MEMORY_SCHEDULER !== 'false') {
+      await memoryScheduler.initialize();
+      context.logGateway?.log?.('MEMORY_SCHEDULER_INITIALIZED', {
+        timestamp: new Date().toISOString(),
+      });
+    }
+  } catch (error) {
+    context.logGateway?.warn?.('MEMORY_SCHEDULER_INIT_FAILED', {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    // Non-critical failure - continue without scheduler
+  }
+
+  schedulerInitialized = true;
+}
+
+/**
  * Main chat HTTP request handler
  * Returns true if request was handled, false otherwise
  */
@@ -642,6 +623,9 @@ export async function handleChatHttpRequest(
   res: ServerResponse,
   context: ChatHandlerContext
 ): Promise<boolean> {
+  // Initialize memory scheduler on first request
+  await initializeMemoryScheduler(context);
+
   const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
   const pathname = url.pathname;
 
