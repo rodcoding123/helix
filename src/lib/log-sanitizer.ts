@@ -37,17 +37,17 @@ export class LogSanitizer {
     { pattern: /eyJ[a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*/g, name: 'jwt_token' },
 
     // Bearer tokens
-    { pattern: /Bearer\s+[a-zA-Z0-9_\-\.]{8,}/gi, name: 'bearer_token' },
-    { pattern: /Authorization:\s*Bearer\s+[a-zA-Z0-9_\-\.]{8,}/gi, name: 'bearer_auth_header' },
+    { pattern: /Bearer\s+[a-zA-Z0-9_.-]{8,}/gi, name: 'bearer_token' },
+    { pattern: /Authorization:\s*Bearer\s+[a-zA-Z0-9_.-]{8,}/gi, name: 'bearer_auth_header' },
 
     // API keys (generic)
-    { pattern: /api[_-]?key[=:\s]+[a-zA-Z0-9_\-\.]{8,}/gi, name: 'generic_api_key' },
-    { pattern: /apikey[=:\s]+[a-zA-Z0-9_\-\.]{8,}/gi, name: 'generic_apikey' },
+    { pattern: /api[_-]?key[=:\s]+[a-zA-Z0-9_.-]{8,}/gi, name: 'generic_api_key' },
+    { pattern: /apikey[=:\s]+[a-zA-Z0-9_.-]{8,}/gi, name: 'generic_apikey' },
 
     // Supabase
-    { pattern: /supabase[_-]?key[=:\s]+[a-zA-Z0-9_\-\.]{8,}/gi, name: 'supabase_key' },
+    { pattern: /supabase[_-]?key[=:\s]+[a-zA-Z0-9_.-]{8,}/gi, name: 'supabase_key' },
     {
-      pattern: /supabase[_-]?url[=:\s]+https:\/\/[a-zA-Z0-9\-\.]+\.supabase\.co/gi,
+      pattern: /supabase[_-]?url[=:\s]+https:\/\/[a-zA-Z0-9.-]+\.supabase\.co/gi,
       name: 'supabase_url',
     },
 
@@ -55,7 +55,7 @@ export class LogSanitizer {
     { pattern: /sk-[a-zA-Z0-9]{8,}/g, name: 'deepseek_api_key' },
 
     // Gemini API key
-    { pattern: /AIzaSy[a-zA-Z0-9_\-]{33}/g, name: 'gemini_api_key' },
+    { pattern: /AIzaSy[a-zA-Z0-9_-]{33}/g, name: 'gemini_api_key' },
 
     // OpenAI/Generic sk- keys
     { pattern: /sk-[a-zA-Z0-9]{48,}/g, name: 'openai_api_key' },
@@ -70,7 +70,7 @@ export class LogSanitizer {
 
     // Generic secrets in URLs
     {
-      pattern: /[?&](?:api_?key|secret|token|password|auth)[=]([a-zA-Z0-9_\-\.]{8,})/gi,
+      pattern: /[?&](?:api_?key|secret|token|password|auth)[=]([a-zA-Z0-9_.-]{8,})/gi,
       name: 'secret_in_url',
     },
 
@@ -81,7 +81,7 @@ export class LogSanitizer {
 
     // Generic secrets
     { pattern: /secret[=:\s]+[^\s]{8,}/gi, name: 'generic_secret' },
-    { pattern: /token[=:\s]+[a-zA-Z0-9_\-\.]{8,}/gi, name: 'token_assignment' },
+    { pattern: /token[=:\s]+[a-zA-Z0-9_.-]{8,}/gi, name: 'token_assignment' },
 
     // SSH keys
     {
@@ -89,8 +89,8 @@ export class LogSanitizer {
       name: 'ssh_private_key',
     },
 
-    // Hex strings that look like secrets (32+ chars)
-    { pattern: /[a-f0-9]{32,}/g, name: 'hex_secret' },
+    // Hex strings that look like secrets (32-128 chars, bounded to prevent ReDoS)
+    { pattern: /[a-f0-9]{32,128}/g, name: 'hex_secret' },
   ];
 
   /**
@@ -159,11 +159,17 @@ export class LogSanitizer {
       try {
         return JSON.stringify(input);
       } catch {
-        return String(input);
+        // Fallback for non-JSON-serializable objects
+        return typeof input === 'object' && input !== null
+          ? Object.prototype.toString.call(input)
+          : String(input);
       }
     }
 
-    return String(input);
+    return typeof input === 'object' && input !== null
+      ? Object.prototype.toString.call(input)
+      : // eslint-disable-next-line @typescript-eslint/no-base-to-string
+        String(input);
   }
 
   /**

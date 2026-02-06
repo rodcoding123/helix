@@ -69,7 +69,7 @@ export class EncryptedSecretsCache {
       this.masterKey = await deriveEncryptionKey(machineEntropy, salt);
 
       // Check if key rotation is needed
-      await this.checkAndRotateKey();
+      this.checkAndRotateKey();
 
       // Load previous key if still in grace period
       if (
@@ -127,7 +127,7 @@ export class EncryptedSecretsCache {
     try {
       // Try to decrypt with current master key
       return decryptWithKey(encrypted, this.masterKey);
-    } catch (error) {
+    } catch {
       // If current key fails and we have a previous key in grace period, try that
       if (this.previousMasterKey && this.previousKeyExpiredAt > Date.now()) {
         try {
@@ -221,7 +221,14 @@ export class EncryptedSecretsCache {
 
     // Generate and store new salt
     const salt = generateSalt();
-    writeFileSync(SALT_FILE, salt, { mode: 0o600 });
+    // CRITICAL FIX: Use umask to ensure file is created with secure permissions atomically
+    // Prevents race condition where file is created with default permissions before mode is applied
+    const oldMask = process.umask(0o077); // Restrict to owner only
+    try {
+      writeFileSync(SALT_FILE, salt, { mode: 0o600 });
+    } finally {
+      process.umask(oldMask);
+    }
     return salt;
   }
 
@@ -259,7 +266,7 @@ export class EncryptedSecretsCache {
   /**
    * Check if key rotation is needed and perform rotation if necessary
    */
-  private async checkAndRotateKey(): Promise<void> {
+  private checkAndRotateKey(): void {
     if (!this.rotationMetadata) {
       return;
     }

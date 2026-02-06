@@ -266,8 +266,11 @@ export async function createHashChainEntry(): Promise<HashChainEntry> {
  * Log a secret operation to the hash chain and Discord
  * Used for auditing all secret management activities
  * SECURITY: In fail-closed mode, throws if Discord unreachable
+ * CRITICAL FIX: Returns boolean to enforce fail-closed design - callers MUST check return value
+ * @returns true if Discord logging succeeded, false if failed (only in non-fail-closed mode)
+ * @throws HelixSecurityError in fail-closed mode if logging fails
  */
-export async function logSecretOperation(entry: SecretOperationEntry): Promise<void> {
+export async function logSecretOperation(entry: SecretOperationEntry): Promise<boolean> {
   const DISCORD_WEBHOOK_SECRET = process.env.DISCORD_WEBHOOK_HASH_CHAIN;
   if (!DISCORD_WEBHOOK_SECRET) {
     if (failClosedMode) {
@@ -280,7 +283,7 @@ export async function logSecretOperation(entry: SecretOperationEntry): Promise<v
     console.warn(
       '[Helix] Secret operation webhook not configured, operation not logged to Discord'
     );
-    return;
+    return false;
   }
 
   // Build detailed description of operation
@@ -323,7 +326,10 @@ export async function logSecretOperation(entry: SecretOperationEntry): Promise<v
 
     if (!response.ok) {
       console.warn(`[Helix] Secret operation log failed (HTTP ${response.status})`);
+      return false;
     }
+
+    return true;
   } catch (error) {
     if (error instanceof HelixSecurityError) throw error;
 
@@ -336,6 +342,7 @@ export async function logSecretOperation(entry: SecretOperationEntry): Promise<v
     }
 
     console.error('[Helix] Secret operation Discord webhook failed:', error);
+    return false;
   }
 
   // Also add to hash chain for immutable record

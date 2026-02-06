@@ -1,10 +1,12 @@
 /**
  * Keychain Manager - Secure credential storage for iOS
  * CRITICAL FIX 1.1: Instance keys stored in Keychain only, not in UserDefaults
+ * CRITICAL FIX 3.2: Add biometric access control requirement for sensitive credentials
  */
 
 import Foundation
 import Security
+import LocalAuthentication
 
 enum KeychainError: LocalizedError {
     case saveFailed(OSStatus)
@@ -35,6 +37,25 @@ final actor KeychainManager {
     private let service = "ai.helix.onboarding"
 
     /**
+     * Create access control with biometric requirement
+     * CRITICAL FIX 3.2: Require biometric authentication for sensitive operations
+     * - Returns: SecAccessControl with biometryAny flag set
+     * - Throws: KeychainError if access control creation fails
+     */
+    private func createBiometricAccessControl() throws -> SecAccessControl {
+        var error: Unmanaged<CFError>?
+        guard let accessControl = SecAccessControlCreateWithFlags(
+            kCFAllocatorDefault,
+            kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+            .biometryAny,
+            &error
+        ) else {
+            throw KeychainError.saveFailed(errSecParam)
+        }
+        return accessControl
+    }
+
+    /**
      * Save a string value to Keychain
      * - Parameters:
      *   - value: String value to save
@@ -42,12 +63,15 @@ final actor KeychainManager {
      * - Throws: KeychainError if save fails
      */
     func save(_ value: String, for key: String) throws {
-        let query: [String: Any] = [
+        // CRITICAL FIX 3.2: Add biometric access control for sensitive credentials
+        let accessControl = try createBiometricAccessControl()
+
+        var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: key,
             kSecValueData as String: value.data(using: .utf8)!,
-            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+            kSecAttrAccessControl as String: accessControl,
         ]
 
         // Delete existing if present
