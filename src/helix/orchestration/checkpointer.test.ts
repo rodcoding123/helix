@@ -4,7 +4,7 @@
  */
 
 /* @ts-nocheck */
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-call,@typescript-eslint/require-await,@typescript-eslint/no-unused-vars,@typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/require-await,@typescript-eslint/no-unsafe-argument */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -26,26 +26,30 @@ function createMockSupabase(): SupabaseClient {
     from: vi.fn(() => ({
       insert: vi.fn(async () => ({ data: null, error: null })),
       select: vi.fn(() => ({
-        eq: vi.fn(function (field: string, value: unknown) {
-          (this as Record<string, unknown>)._eq = { field, value };
+        eq: vi.fn(function (this: Record<string, unknown>, field: string, value: unknown) {
+          this._eq = { field, value };
           return this;
         }),
-        order: vi.fn(function (field: string, opts?: Record<string, unknown>) {
-          (this as Record<string, unknown>)._order = { field, ...opts };
+        order: vi.fn(function (
+          this: Record<string, unknown>,
+          field: string,
+          opts?: Record<string, unknown>
+        ) {
+          this._order = { field, ...opts };
           return this;
         }),
-        limit: vi.fn(function (count: number) {
-          (this as Record<string, unknown>)._limit = count;
+        limit: vi.fn(function (this: Record<string, unknown>, count: number) {
+          this._limit = count;
           return this;
         }),
-        single: vi.fn(async function () {
+        single: vi.fn(async function (this: Record<string, unknown>) {
           return { data: null, error: null };
         }),
         execute: vi.fn(),
       })),
       delete: vi.fn(() => ({
-        eq: vi.fn(function (field: string, value: unknown) {
-          (this as Record<string, unknown>)._eq = { field, value };
+        eq: vi.fn(function (this: Record<string, unknown>, field: string, value: unknown) {
+          this._eq = { field, value };
           return this;
         }),
         execute: vi.fn(async () => ({ data: null, error: null })),
@@ -367,7 +371,7 @@ describe('Checkpoint System', () => {
         };
 
         // Setup async iteration
-        queryMock.order = vi.fn(async (field: string, opts?: any) => {
+        queryMock.order = vi.fn(async (_field: string, opts?: any) => {
           if (opts?.ascending === true) {
             return { data: checkpointRows, error: null };
           }
@@ -377,7 +381,7 @@ describe('Checkpoint System', () => {
         // Simplified - just return data
         fromMock.mockReturnValue({
           select: vi.fn(() => ({
-            eq: vi.fn(function () {
+            eq: vi.fn(function (this: Record<string, unknown>) {
               return this;
             }),
             order: vi.fn(async () => ({ data: checkpointRows, error: null })),
@@ -394,16 +398,14 @@ describe('Checkpoint System', () => {
 
       it('should order by created_at ascending', async () => {
         const fromMock = vi.mocked((mockSupabase as any).from);
-        let orderField: string = '';
         let orderOpts: any = {};
 
         fromMock.mockReturnValue({
           select: vi.fn(() => ({
-            eq: vi.fn(function () {
+            eq: vi.fn(function (this: Record<string, unknown>) {
               return this;
             }),
-            order: vi.fn((field: string, opts?: any) => {
-              orderField = field;
+            order: vi.fn((_field: string, opts?: any) => {
               orderOpts = opts || {};
               return {
                 eq: vi.fn(() => Promise.resolve({ data: [], error: null })),
@@ -423,7 +425,7 @@ describe('Checkpoint System', () => {
         const fromMock = vi.mocked((mockSupabase as any).from);
         fromMock.mockReturnValue({
           select: vi.fn(() => ({
-            eq: vi.fn(function () {
+            eq: vi.fn(function (this: Record<string, unknown>) {
               return this;
             }),
             order: vi.fn(async () => ({ data: null, error: null })),
@@ -438,7 +440,7 @@ describe('Checkpoint System', () => {
         const fromMock = vi.mocked((mockSupabase as any).from);
         fromMock.mockReturnValue({
           select: vi.fn(() => ({
-            eq: vi.fn(function () {
+            eq: vi.fn(function (this: Record<string, unknown>) {
               return this;
             }),
             order: vi.fn(async () => {

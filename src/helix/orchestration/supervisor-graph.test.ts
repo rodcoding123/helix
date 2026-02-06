@@ -4,7 +4,7 @@
  */
 
 /* @ts-nocheck */
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-argument,@typescript-eslint/require-await,@typescript-eslint/no-unused-vars,@typescript-eslint/explicit-function-return-type,@typescript-eslint/no-unsafe-function-type,@typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-argument,@typescript-eslint/require-await,@typescript-eslint/no-unused-vars,@typescript-eslint/explicit-function-return-type,@typescript-eslint/no-unsafe-function-type,@typescript-eslint/no-explicit-any,@typescript-eslint/unbound-method */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { ICheckpointer, Checkpoint } from './checkpointer.js';
@@ -45,7 +45,6 @@ vi.mock('./state-graph.js', () => ({
     private nodes: Map<string, Function> = new Map();
     private edges: Map<string, string[]> = new Map();
     private conditionalEdges: Map<string, [Function, Record<string, string>]> = new Map();
-    private entryPointValue: string | null = null;
     schema: any;
 
     constructor(schema: any) {
@@ -270,7 +269,6 @@ describe('Supervisor Graph', () => {
 
     it('should return orchestrator state', async () => {
       const { createInitialState } = await import('./agents.js');
-      // @ts-expect-error Test mock with partial state object
       const expectedState = {
         task: 'test task',
         messages: [{ role: 'assistant', content: 'final result' }],
@@ -299,7 +297,7 @@ describe('Supervisor Graph', () => {
       } as any);
 
       let callCount = 0;
-      const callback = vi.fn((node: string, state: OrchestratorState) => {
+      const callback = vi.fn((_node: string, _state: OrchestratorState) => {
         callCount++;
       });
 
@@ -321,7 +319,7 @@ describe('Supervisor Graph', () => {
 
       const callback = vi.fn();
 
-      const result = await streamOrchestrator('test task', callback);
+      await streamOrchestrator('test task', callback);
 
       expect(callback).toHaveBeenCalled();
     });
@@ -411,7 +409,7 @@ describe('Supervisor Graph', () => {
       } as any);
 
       const states: OrchestratorState[] = [];
-      const callback = (node: string, state: OrchestratorState) => {
+      const callback = (_node: string, state: OrchestratorState) => {
         states.push(state);
       };
 

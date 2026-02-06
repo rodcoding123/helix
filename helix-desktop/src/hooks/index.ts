@@ -65,3 +65,19 @@ export type {
   UseGlobalShortcutsReturn,
   UseShortcutRecorderReturn,
 } from './useGlobalShortcuts';
+
+// Phase 2.3: Orchestrator Metrics Monitoring
+export { useOrchestratorMetrics, useOrchestratorMetricsController } from './useOrchestratorMetrics';
+export type {
+  OrchestratorMetricsSnapshot,
+  OrchestratorCheckpointSnapshot,
+  OrchestratorCostBurnRate,
+  OrchestratorEvent,
+  OrchestratorEventType,
+  OrchestratorStateChangeEvent,
+  OrchestratorCostUpdateEvent,
+  OrchestratorAgentActiveEvent,
+  OrchestratorCheckpointSavedEvent,
+  OrchestratorMetricsState,
+  UseOrchestratorMetricsOptions,
+} from '../lib/types/orchestrator-metrics';

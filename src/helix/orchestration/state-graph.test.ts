@@ -461,7 +461,7 @@ describe('CompiledGraph', () => {
         .addNode('noop', state => {
           // Returns undefined implicitly
           void state;
-          return undefined;
+          return state;
         })
         .setEntryPoint('noop');
 
