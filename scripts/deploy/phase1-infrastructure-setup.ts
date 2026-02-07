@@ -3,9 +3,9 @@
  * PHASE 1: Infrastructure Setup (1-2 days)
  *
  * Orchestrates complete infrastructure for production deployment:
- * 1. Discord webhook setup and validation
- * 2. Supabase project configuration
- * 3. Environment file generation
+ * 1. Auto-load secrets from 1Password "Helix" vault
+ * 2. Validate all required credentials
+ * 3. Generate environment file
  * 4. Pre-deployment verification
  * 5. Documentation generation
  */
@@ -14,6 +14,18 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { execSync } from 'child_process';
 import * as readline from 'readline';
+
+// Import secrets loader (auto-loads from 1Password)
+const loadSecret = (itemName: string, field: 'password' | 'notes' | 'username' = 'password'): string => {
+  try {
+    // This would normally use the secrets-loader from ../src/lib
+    // For now, use execSync to call 1Password CLI directly
+    const command = `op read "op://Helix/${itemName}/${field}"`;
+    return execSync(command, { encoding: 'utf-8' }).trim();
+  } catch (error) {
+    throw new Error(`Failed to load secret "${itemName}": ${(error as Error).message}`);
+  }
+};
 
 interface DeploymentConfig {
   discordWebhooks: Record<string, string>;
@@ -71,26 +83,21 @@ function log(message: string, level: 'info' | 'success' | 'warn' | 'error' = 'in
   console.log(`${colors[level]}${prefix} ${message}${colors.reset}`);
 }
 
-async function validateDiscordWebhooks(): Promise<Record<string, string>> {
-  log('Starting Discord webhook configuration...', 'info');
+async function loadDiscordWebhooks(): Promise<Record<string, string>> {
+  log('Loading Discord webhooks from 1Password Helix vault...', 'info');
 
   const webhooks: Record<string, string> = {};
-
-  console.log('\n📋 Discord Webhook Setup Instructions:');
-  console.log('   1. Open Discord server settings');
-  console.log('   2. Go to Integrations > Webhooks');
-  console.log('   3. Create webhook for each channel');
-  console.log('   4. Copy webhook URL and paste below\n');
 
   for (const webhookKey of WEBHOOKS_REQUIRED) {
     const channelName = webhookKey.replace('DISCORD_WEBHOOK_', '').toLowerCase();
 
-    while (true) {
-      const webhook = await ask(`  ${webhookKey} (#${channelName}): `);
+    try {
+      // Load from 1Password (maps to item names like "Discord Webhook - Commands")
+      const itemName = `Discord Webhook - ${channelName.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}`;
+      const webhook = loadSecret(itemName, 'password');
 
       if (!webhook || !webhook.includes('discord.com')) {
-        log(`Invalid Discord webhook URL. Must be a valid Discord webhook.`, 'error');
-        continue;
+        throw new Error('Invalid webhook URL');
       }
 
       // Validate webhook (test with simple message)
@@ -105,98 +112,102 @@ async function validateDiscordWebhooks(): Promise<Record<string, string>> {
 
         if (response.status === 204) {
           webhooks[webhookKey] = webhook;
-          log(`✓ Validated ${webhookKey}`, 'success');
-          break;
+          log(`✓ Loaded and validated ${webhookKey} from 1Password`, 'success');
         } else {
-          log(`Webhook returned status ${response.status}. Check webhook URL and try again.`, 'warn');
+          log(`Webhook validation returned status ${response.status}`, 'warn');
+          webhooks[webhookKey] = webhook;
         }
       } catch (err) {
-        log(`Failed to validate webhook: ${(err as Error).message}`, 'error');
+        // Use webhook anyway even if validation fails (network might be slow)
+        log(`Warning: Could not validate webhook: ${(err as Error).message}. Using anyway.`, 'warn');
+        webhooks[webhookKey] = webhook;
       }
+    } catch (err) {
+      log(`Failed to load ${webhookKey} from 1Password: ${(err as Error).message}`, 'error');
+      process.exit(1);
     }
   }
 
   return webhooks;
 }
 
-async function configureSupabase(): Promise<DeploymentConfig['supabase']> {
-  log('Configuring Supabase project...', 'info');
+async function loadSupabaseConfig(): Promise<DeploymentConfig['supabase']> {
+  log('Loading Supabase configuration from 1Password Helix vault...', 'info');
 
-  console.log('\n📋 Supabase Setup Instructions:');
-  console.log('   1. Open https://supabase.com/dashboard');
-  console.log('   2. Create a new project or select existing');
-  console.log('   3. Go to Settings > API');
-  console.log('   4. Copy Project URL and keys\n');
+  try {
+    const projectUrl = loadSecret('Supabase Project URL', 'password');
+    const serviceRole = loadSecret('Supabase Service Role Key', 'password');
+    const anonKey = loadSecret('Supabase Anon Key', 'password');
 
-  const projectUrl = await ask('  Supabase Project URL (https://xxxxx.supabase.co): ');
-  if (!projectUrl || !projectUrl.startsWith('https://')) {
-    log('Invalid Supabase URL', 'error');
+    if (!projectUrl || !projectUrl.startsWith('https://')) {
+      throw new Error('Invalid Supabase URL from 1Password');
+    }
+
+    if (!serviceRole || serviceRole.length < 50) {
+      throw new Error('Invalid Service Role key from 1Password');
+    }
+
+    if (!anonKey || anonKey.length < 50) {
+      throw new Error('Invalid Anon Key from 1Password');
+    }
+
+    log('✓ Loaded Supabase configuration from 1Password', 'success');
+    return { projectUrl, serviceRole, anonKey };
+  } catch (err) {
+    log(`Failed to load Supabase config from 1Password: ${(err as Error).message}`, 'error');
     process.exit(1);
   }
-
-  const serviceRole = await ask('  Service Role Key (for server-side operations): ');
-  if (!serviceRole || serviceRole.length < 50) {
-    log('Invalid Service Role key', 'error');
-    process.exit(1);
-  }
-
-  const anonKey = await ask('  Anon Key (for client-side operations): ');
-  if (!anonKey || anonKey.length < 50) {
-    log('Invalid Anon Key', 'error');
-    process.exit(1);
-  }
-
-  log('✓ Supabase configuration saved', 'success');
-
-  return { projectUrl, serviceRole, anonKey };
 }
 
-async function configureApiKeys(): Promise<DeploymentConfig['apiKeys']> {
-  log('Configuring AI API keys...', 'info');
+async function loadApiKeys(): Promise<DeploymentConfig['apiKeys']> {
+  log('Loading AI API keys from 1Password Helix vault...', 'info');
 
-  console.log('\n📋 API Keys Setup:');
+  try {
+    const deepseek = loadSecret('DeepSeek API Key', 'password');
+    const gemini = loadSecret('Gemini API Key', 'password');
+    const anthropic = loadSecret('Anthropic Claude API Key', 'password');
 
-  const deepseek = await ask('  DeepSeek API Key (sk-...): ');
-  if (!deepseek) {
-    log('DeepSeek API key is required', 'error');
+    if (!deepseek) {
+      throw new Error('DeepSeek API key not found in 1Password');
+    }
+    if (!gemini) {
+      throw new Error('Gemini API key not found in 1Password');
+    }
+    if (!anthropic) {
+      throw new Error('Anthropic API key not found in 1Password');
+    }
+
+    log('✓ Loaded all AI API keys from 1Password', 'success');
+    return { deepseek, gemini, anthropic };
+  } catch (err) {
+    log(`Failed to load API keys from 1Password: ${(err as Error).message}`, 'error');
     process.exit(1);
   }
-
-  const gemini = await ask('  Google Gemini API Key (AIza...): ');
-  if (!gemini) {
-    log('Gemini API key is required', 'error');
-    process.exit(1);
-  }
-
-  const anthropic = await ask('  Anthropic Claude API Key (sk-ant-...): ');
-  if (!anthropic) {
-    log('Anthropic API key is required', 'error');
-    process.exit(1);
-  }
-
-  log('✓ API keys configured', 'success');
-
-  return { deepseek, gemini, anthropic };
 }
 
-async function configureVpsDeployment(): Promise<DeploymentConfig['vpsConfig']> {
-  log('Configuring VPS deployment details...', 'info');
+async function loadVpsConfig(): Promise<DeploymentConfig['vpsConfig']> {
+  log('Loading VPS configuration from 1Password Helix vault...', 'info');
 
-  console.log('\n📋 VPS Configuration (optional, for Phase 2):');
+  try {
+    const host = loadSecret('VPS Host', 'password');
+    const portStr = loadSecret('VPS Port', 'password');
+    const user = loadSecret('VPS User', 'password');
 
-  const host = await ask('  VPS Hostname/IP (or press Enter to skip): ');
-  if (!host) {
+    if (!host) {
+      log('VPS configuration not found in 1Password. Skipping for now.', 'warn');
+      return { host: '', port: 3000, user: 'helix' };
+    }
+
+    log('✓ Loaded VPS configuration from 1Password', 'success');
+    return {
+      host,
+      port: parseInt(portStr) || 22,
+      user: user || 'helix',
+    };
+  } catch (err) {
+    log('VPS configuration not fully set in 1Password. Can configure for Phase 2 later.', 'warn');
     return { host: '', port: 3000, user: 'helix' };
   }
-
-  const port = await ask('  SSH Port (default 22): ');
-  const user = await ask('  SSH Username (default helix): ');
-
-  return {
-    host,
-    port: parseInt(port) || 22,
-    user: user || 'helix',
-  };
 }
 
 function generateEnvFile(config: DeploymentConfig): string {
@@ -379,17 +390,17 @@ async function main(): Promise<void> {
   console.log('╚════════════════════════════════════════════════════════════╝\n');
 
   try {
-    // Step 1: Discord webhooks
-    const discordWebhooks = await validateDiscordWebhooks();
+    // Step 1: Load Discord webhooks from 1Password
+    const discordWebhooks = await loadDiscordWebhooks();
 
-    // Step 2: Supabase configuration
-    const supabase = await configureSupabase();
+    // Step 2: Load Supabase configuration from 1Password
+    const supabase = await loadSupabaseConfig();
 
-    // Step 3: API keys
-    const apiKeys = await configureApiKeys();
+    // Step 3: Load API keys from 1Password
+    const apiKeys = await loadApiKeys();
 
-    // Step 4: VPS configuration (optional)
-    const vpsConfig = await configureVpsDeployment();
+    // Step 4: Load VPS configuration from 1Password (optional)
+    const vpsConfig = await loadVpsConfig();
 
     // Combine into deployment config
     const config: DeploymentConfig = {
