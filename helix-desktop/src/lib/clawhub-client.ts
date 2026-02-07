@@ -2,8 +2,12 @@
  * ClawHub API Client
  *
  * Fetches skill metadata, versions, and availability from the ClawHub registry.
+ * Primary: Uses local gateway methods (clawhub.*) via Helix Desktop
+ * Fallback: External clawhub.com API if gateway unavailable
  * Supports search, filtering, pagination, and dependency resolution.
  */
+
+import { getGatewayClient } from './gateway-client';
 
 export interface ClawHubSkill {
   name: string;
@@ -72,10 +76,37 @@ class ClawHubClient {
 
   /**
    * Search skills in the ClawHub registry
+   * Primary: Uses local gateway (clawhub.search method)
+   * Fallback: External API
    */
   async search(options: ClawHubSearchOptions = {}): Promise<ClawHubSearchResult> {
-    const params = new URLSearchParams();
+    // Try gateway first
+    const gatewayClient = getGatewayClient();
+    if (gatewayClient?.connected) {
+      try {
+        const result = (await gatewayClient.request('clawhub.search', {
+          query: options.query,
+          category: options.category,
+          tags: options.tags,
+          sortBy: options.sortBy,
+          limit: options.limit ?? 20,
+          offset: options.offset ?? 0,
+        })) as any;
 
+        if (result && result.skills) {
+          return {
+            total: result.total ?? result.skills.length,
+            skills: result.skills,
+            hasMore: result.hasMore ?? false,
+          };
+        }
+      } catch (err) {
+        console.warn('Gateway clawhub.search failed, falling back to external API:', err);
+      }
+    }
+
+    // Fallback to external API
+    const params = new URLSearchParams();
     if (options.query) params.append("q", options.query);
     if (options.category) params.append("category", options.category);
     if (options.tags?.length) params.append("tags", options.tags.join(","));
@@ -88,8 +119,27 @@ class ClawHubClient {
 
   /**
    * Get featured skills
+   * Primary: Uses local gateway (clawhub.featured method)
+   * Fallback: External API
    */
   async getFeatured(limit: number = 12): Promise<ClawHubSkill[]> {
+    // Try gateway first
+    const gatewayClient = getGatewayClient();
+    if (gatewayClient?.connected) {
+      try {
+        const result = (await gatewayClient.request('clawhub.featured', {
+          limit,
+        })) as any;
+
+        if (result && result.skills) {
+          return result.skills;
+        }
+      } catch (err) {
+        console.warn('Gateway clawhub.featured failed, falling back to external API:', err);
+      }
+    }
+
+    // Fallback to external API
     const result = await this.fetch<{ skills: ClawHubSkill[] }>(
       `/skills/featured?limit=${limit}`
     );
@@ -98,12 +148,37 @@ class ClawHubClient {
 
   /**
    * Get skills by category
+   * Primary: Uses local gateway (clawhub.category method)
+   * Fallback: External API
    */
   async getByCategory(
     category: ClawHubCategory,
     limit: number = 20,
     offset: number = 0
   ): Promise<ClawHubSearchResult> {
+    // Try gateway first
+    const gatewayClient = getGatewayClient();
+    if (gatewayClient?.connected) {
+      try {
+        const result = (await gatewayClient.request('clawhub.category', {
+          category,
+          limit,
+          offset,
+        })) as any;
+
+        if (result && result.skills) {
+          return {
+            total: result.total ?? result.skills.length,
+            skills: result.skills,
+            hasMore: result.hasMore ?? false,
+          };
+        }
+      } catch (err) {
+        console.warn('Gateway clawhub.category failed, falling back to external API:', err);
+      }
+    }
+
+    // Fallback to external API
     return this.fetch<ClawHubSearchResult>(
       `/skills/category/${encodeURIComponent(category)}?limit=${limit}&offset=${offset}`
     );
@@ -128,8 +203,29 @@ class ClawHubClient {
 
   /**
    * Get registry statistics
+   * Primary: Uses local gateway (clawhub.stats method)
+   * Fallback: External API
    */
   async getStats(): Promise<ClawHubStats> {
+    // Try gateway first
+    const gatewayClient = getGatewayClient();
+    if (gatewayClient?.connected) {
+      try {
+        const result = (await gatewayClient.request('clawhub.stats', {})) as any;
+
+        if (result) {
+          return {
+            totalSkills: result.totalSkills ?? 0,
+            categories: result.categories ?? {},
+            featured: result.featured ?? [],
+          };
+        }
+      } catch (err) {
+        console.warn('Gateway clawhub.stats failed, falling back to external API:', err);
+      }
+    }
+
+    // Fallback to external API
     return this.fetch<ClawHubStats>("/stats");
   }
 
@@ -146,8 +242,27 @@ class ClawHubClient {
 
   /**
    * Get trending skills this week
+   * Primary: Uses local gateway (clawhub.trending method)
+   * Fallback: External API
    */
   async getTrending(limit: number = 10): Promise<ClawHubSkill[]> {
+    // Try gateway first
+    const gatewayClient = getGatewayClient();
+    if (gatewayClient?.connected) {
+      try {
+        const result = (await gatewayClient.request('clawhub.trending', {
+          limit,
+        })) as any;
+
+        if (result && result.skills) {
+          return result.skills;
+        }
+      } catch (err) {
+        console.warn('Gateway clawhub.trending failed, falling back to external API:', err);
+      }
+    }
+
+    // Fallback to external API
     const result = await this.fetch<{ skills: ClawHubSkill[] }>(
       `/skills/trending?limit=${limit}&period=week`
     );
