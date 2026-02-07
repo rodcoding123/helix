@@ -1,285 +1,183 @@
 /**
- * Policy Engine
+ * Channel Policy Engine
  *
- * Evaluates channel policies to make routing and blocking decisions.
- * Supports DM allowlists, group policies, and custom rule evaluation.
- * 
- * Decision hierarchy (first match wins):
- * 1. Account-specific policy
- * 2. Channel-specific policy
- * 3. Global default policy
+ * Resolves effective channel policies based on scope hierarchy:
+ * Account > Channel > Global
  */
 
-import { randomUUID } from 'crypto';
+import type { OpenClawConfig } from '../../config/config.js';
 import type {
-  PolicyConfig,
-  PolicyRule,
-  PolicyEvaluationResult,
-  PolicyDecision,
+  ChannelPolicy,
   DmPolicyMode,
   GroupPolicyMode,
-  POLICY_PROFILES,
+  PolicyResolution,
 } from './types.js';
 
-export class PolicyEngine {
-  private policies: Map<string, PolicyConfig> = new Map();
-  private decisions: PolicyDecision[] = [];
-  private decisionLimit = 10000; // Keep last 10k decisions in memory
+const DEFAULT_DM_MODE: DmPolicyMode = 'pairing';
+const DEFAULT_GROUP_MODE: GroupPolicyMode = 'open';
 
-  /**
-   * Set policy for a scope
-   */
-  setPolicy(scope: string, config: PolicyConfig): void {
-    this.policies.set(scope, config);
+/**
+ * Get channel policies from config
+ */
+export function getChannelPolicies(
+  cfg: OpenClawConfig,
+  channelId: string,
+  accountId?: string
+): ChannelPolicy | undefined {
+  const policies = (cfg.channels as any)?.[channelId]?.policies;
+  if (!policies) return undefined;
+
+  // Account-level policy takes precedence
+  if (accountId) {
+    const accountPolicy = policies.find(
+      (p: ChannelPolicy) => p.accountId === accountId
+    );
+    if (accountPolicy) return accountPolicy;
   }
 
-  /**
-   * Get policy for a scope (with fallback to parent scopes)
-   */
-  getPolicy(
-    channelId: string,
-    accountId?: string,
-    scope: 'account' | 'channel' | 'global' = 'global'
-  ): PolicyConfig | null {
-    // Try account-specific first
-    if (accountId) {
-      const accountKey = `${channelId}:${accountId}`;
-      const policy = this.policies.get(accountKey);
-      if (policy) return policy;
-    }
-
-    // Try channel-specific
-    const channelPolicy = this.policies.get(channelId);
-    if (channelPolicy) return channelPolicy;
-
-    // Fall back to global
-    const globalPolicy = this.policies.get('global');
-    return globalPolicy || null;
-  }
-
-  /**
-   * Evaluate if a DM should be allowed
-   */
-  evaluateDmPolicy(
-    channelId: string,
-    sender: string,
-    accountId?: string
-  ): PolicyEvaluationResult {
-    const config = this.getPolicy(channelId, accountId);
-    if (!config) {
-      return {
-        allowed: true,
-        actions: [],
-        reason: 'No policy configured',
-        confidence: 0.5,
-      };
-    }
-
-    const { dmPolicy, customRules } = config;
-
-    // Check custom rules first (highest priority)
-    for (const rule of customRules.sort((a, b) => b.priority - a.priority)) {
-      if (!rule.enabled) continue;
-
-      const ruleMatch = this.evaluateRule(rule, {
-        sender,
-        channel: channelId,
-        type: 'dm',
-      });
-
-      if (ruleMatch) {
-        const result: PolicyEvaluationResult = {
-          allowed: rule.actions.some(a => a.type === 'allow'),
-          actions: rule.actions,
-          matchedRule: rule,
-          reason: `Matched rule: ${rule.name}`,
-          confidence: 0.95,
-        };
-
-        this.logDecision({
-          id: randomUUID(),
-          timestamp: Date.now(),
-          channelId,
-          sender,
-          type: 'dm',
-          result,
-          responseTimeMs: 0,
-        });
-
-        return result;
-      }
-    }
-
-    // Apply DM policy mode
-    switch (dmPolicy.mode) {
-      case 'disabled':
-        return {
-          allowed: false,
-          actions: [{ type: 'block' }],
-          reason: 'DM disabled for this channel',
-          confidence: 1.0,
-        };
-
-      case 'pairing': {
-        // Only allow if sender is known (paired)
-        const isPaired = await this.isSenderPaired(channelId, sender);
-        return {
-          allowed: isPaired,
-          actions: isPaired ? [{ type: 'allow' }] : [{ type: 'block' }],
-          reason: isPaired ? 'Sender is paired' : 'Sender requires pairing',
-          confidence: 0.9,
-          requiresApproval: !isPaired,
-        };
-      }
-
-      case 'allowlist': {
-        const isAllowed = dmPolicy.allowlist?.includes(sender) ?? false;
-        return {
-          allowed: isAllowed,
-          actions: isAllowed ? [{ type: 'allow' }] : [{ type: 'block' }],
-          reason: isAllowed ? 'Sender in allowlist' : 'Sender not in allowlist',
-          confidence: 1.0,
-          requiresApproval: !isAllowed,
-        };
-      }
-
-      case 'open':
-        return {
-          allowed: true,
-          actions: [{ type: 'allow' }],
-          reason: 'DM policy is open',
-          confidence: 1.0,
-        };
-
-      default:
-        return {
-          allowed: true,
-          actions: [],
-          reason: 'Unknown policy mode',
-          confidence: 0.3,
-        };
-    }
-  }
-
-  /**
-   * Evaluate if a group message should be allowed
-   */
-  evaluateGroupPolicy(
-    channelId: string,
-    groupId: string,
-    accountId?: string
-  ): PolicyEvaluationResult {
-    const config = this.getPolicy(channelId, accountId);
-    if (!config) {
-      return {
-        allowed: true,
-        actions: [],
-        reason: 'No policy configured',
-        confidence: 0.5,
-      };
-    }
-
-    const { groupPolicy } = config;
-
-    // Apply group policy mode
-    switch (groupPolicy.mode) {
-      case 'allowlist': {
-        const isAllowed = groupPolicy.allowlist?.includes(groupId) ?? false;
-        return {
-          allowed: isAllowed,
-          actions: isAllowed ? [{ type: 'allow' }] : [{ type: 'block' }],
-          reason: isAllowed ? 'Group in allowlist' : 'Group not in allowlist',
-          confidence: 1.0,
-        };
-      }
-
-      case 'open':
-        return {
-          allowed: true,
-          actions: [{ type: 'allow' }],
-          reason: 'Group policy is open',
-          confidence: 1.0,
-        };
-
-      default:
-        return {
-          allowed: true,
-          actions: [],
-          reason: 'Unknown policy mode',
-          confidence: 0.3,
-        };
-    }
-  }
-
-  /**
-   * Check if a sender is paired (implementation depends on channel)
-   */
-  private async isSenderPaired(channelId: string, sender: string): Promise<boolean> {
-    // This would call into channel-specific pairing logic
-    // For now, return false (all unpaired)
-    return false;
-  }
-
-  /**
-   * Evaluate if a custom rule matches
-   */
-  private evaluateRule(
-    rule: PolicyRule,
-    context: Record<string, unknown>
-  ): boolean {
-    return rule.conditions.every(condition => {
-      const contextValue = context[condition.type];
-      if (!contextValue) return false;
-
-      const operator = condition.operator || 'equals';
-
-      switch (operator) {
-        case 'equals':
-          return contextValue === condition.value;
-        case 'contains':
-          return String(contextValue).includes(String(condition.value));
-        case 'matches': {
-          const pattern = new RegExp(condition.value as string);
-          return pattern.test(String(contextValue));
-        }
-        case 'in':
-          return (condition.value as unknown[]).includes(contextValue);
-        case 'greater':
-          return (contextValue as number) > (condition.value as number);
-        case 'less':
-          return (contextValue as number) < (condition.value as number);
-        default:
-          return false;
-      }
-    });
-  }
-
-  /**
-   * Log a policy decision
-   */
-  private logDecision(decision: PolicyDecision): void {
-    this.decisions.push(decision);
-    if (this.decisions.length > this.decisionLimit) {
-      this.decisions.shift();
-    }
-  }
-
-  /**
-   * Get decision history for a channel
-   */
-  getDecisions(channelId: string, limit = 100): PolicyDecision[] {
-    return this.decisions
-      .filter(d => d.channelId === channelId)
-      .slice(-limit);
-  }
-
-  /**
-   * Clear all decisions (for testing)
-   */
-  clearDecisions(): void {
-    this.decisions = [];
-  }
+  // Channel-level policy
+  return policies.find((p: ChannelPolicy) => !p.accountId);
 }
 
-// Export singleton instance
-export const policyEngine = new PolicyEngine();
+/**
+ * Get global channel policies
+ */
+export function getGlobalChannelPolicy(cfg: OpenClawConfig): {
+  dmMode: DmPolicyMode;
+  groupMode: GroupPolicyMode;
+} {
+  const globalPolicy = (cfg as any).policies?.channels;
+  if (!globalPolicy) {
+    return {
+      dmMode: DEFAULT_DM_MODE,
+      groupMode: DEFAULT_GROUP_MODE,
+    };
+  }
+
+  return {
+    dmMode: globalPolicy.dmMode ?? DEFAULT_DM_MODE,
+    groupMode: globalPolicy.groupMode ?? DEFAULT_GROUP_MODE,
+  };
+}
+
+/**
+ * Resolve effective policy for a channel/account
+ *
+ * Priority: Account > Channel > Global > Default
+ */
+export function resolvePolicyForChannel(
+  cfg: OpenClawConfig,
+  channelId: string,
+  accountId?: string
+): PolicyResolution {
+  const channelPolicy = getChannelPolicies(cfg, channelId, accountId);
+  const globalPolicy = getGlobalChannelPolicy(cfg);
+
+  if (channelPolicy) {
+    return {
+      dmMode: channelPolicy.dmMode ?? globalPolicy.dmMode,
+      groupMode: channelPolicy.groupMode ?? globalPolicy.groupMode,
+      appliedRules: channelPolicy.rules?.filter((r) => r.enabled) ?? [],
+      rateLimit: channelPolicy.rateLimit,
+      mediaSettings: channelPolicy.mediaSettings,
+    };
+  }
+
+  return {
+    dmMode: globalPolicy.dmMode,
+    groupMode: globalPolicy.groupMode,
+    appliedRules: [],
+  };
+}
+
+/**
+ * Check if a sender is allowed by DM policy
+ */
+export function isDmAllowed(
+  policy: PolicyResolution,
+  senderId: string,
+  senderAllowlist?: string[]
+): boolean {
+  if (policy.dmMode === 'disabled') return false;
+  if (policy.dmMode === 'open') return true;
+  if (policy.dmMode === 'pairing') return true; // Assume paired if we got here
+  if (policy.dmMode === 'allowlist') {
+    return senderAllowlist?.includes(senderId) ?? false;
+  }
+  return false;
+}
+
+/**
+ * Check if a group is allowed by group policy
+ */
+export function isGroupAllowed(
+  policy: PolicyResolution,
+  groupId: string,
+  groupAllowlist?: string[]
+): boolean {
+  if (policy.groupMode === 'disabled') return false;
+  if (policy.groupMode === 'open') return true;
+  if (policy.groupMode === 'allowlist') {
+    return groupAllowlist?.includes(groupId) ?? false;
+  }
+  return false;
+}
+
+/**
+ * Validate media based on policy settings
+ */
+export function validateMedia(
+  policy: PolicyResolution,
+  mediaSize: number,
+  mediaType: string
+): { valid: boolean; reason?: string } {
+  const { mediaSettings } = policy;
+
+  if (!mediaSettings) return { valid: true };
+
+  // Check size limit
+  if (mediaSettings.maxSizeMb && mediaSize > mediaSettings.maxSizeMb * 1024 * 1024) {
+    return {
+      valid: false,
+      reason: `Media exceeds size limit (${mediaSettings.maxSizeMb}MB)`,
+    };
+  }
+
+  // Check allowed types (whitelist takes precedence)
+  if (mediaSettings.allowedTypes?.length) {
+    const isAllowed = mediaSettings.allowedTypes.some((type) =>
+      mediaType.toLowerCase().includes(type.toLowerCase())
+    );
+    if (!isAllowed) {
+      return {
+        valid: false,
+        reason: `Media type not allowed (${mediaType})`,
+      };
+    }
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Save channel policies to config
+ */
+export function savePolicies(
+  cfg: OpenClawConfig,
+  channelId: string,
+  policies: ChannelPolicy[]
+): OpenClawConfig {
+  const channels = cfg.channels ?? {};
+  const channelConfig = (channels as any)[channelId] ?? {};
+
+  return {
+    ...cfg,
+    channels: {
+      ...channels,
+      [channelId]: {
+        ...channelConfig,
+        policies,
+      },
+    },
+  };
+}

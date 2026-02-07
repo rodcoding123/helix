@@ -1,99 +1,40 @@
 /**
- * Filter Builder Component
+ * Message Filter Builder
  *
- * Visual message filter creator with regex testing and complexity analysis.
- * - Regex pattern testing with live preview
- * - Catastrophic backtracking detection
- * - DoS protection warnings
- * - Filter action selection (block, allow, route, flag, mute)
+ * Visual interface for creating and testing regex/keyword filters
+ * with real-time validation and DoS protection feedback.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
-import { Plus, Trash2, AlertTriangle, CheckCircle, Play } from 'lucide-react';
+import { useState, useCallback } from 'react';
 import { getGatewayClient } from '../../lib/gateway-client';
-import type { MessageFilter } from '../../lib/types/orchestrator-metrics';
+import type { MessageFilter } from '../../lib/types/message-filter';
 
 interface FilterBuilderProps {
-  channelId?: string;
-  className?: string;
-  onFilterCreated?: (filter: MessageFilter) => void;
+  onSave: (filter: Partial<MessageFilter>) => void;
+  onCancel: () => void;
+  initialFilter?: MessageFilter;
 }
 
-type FilterType = 'regex' | 'keyword' | 'sender' | 'time';
-type FilterAction = 'block' | 'allow' | 'route' | 'flag' | 'mute';
-
-interface ComplexityWarning {
-  level: 'safe' | 'warning' | 'danger';
-  message: string;
-}
-
-export const FilterBuilder: React.FC<FilterBuilderProps> = ({
-  channelId,
-  className = '',
-  onFilterCreated,
-}) => {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [type, setType] = useState<FilterType>('keyword');
-  const [pattern, setPattern] = useState('');
-  const [action, setAction] = useState<FilterAction>('block');
-  const [routeAgent, setRouteAgent] = useState('');
-  const [caseSensitive, setCaseSensitive] = useState(false);
-  const [matchMode, setMatchMode] = useState<'any' | 'all'>('any');
-
-  // Testing
+export function FilterBuilder({ onSave, onCancel, initialFilter }: FilterBuilderProps) {
+  const [name, setName] = useState(initialFilter?.name ?? '');
+  const [type, setType] = useState<'regex' | 'keyword'>(initialFilter?.type ?? 'keyword');
+  const [pattern, setPattern] = useState(initialFilter?.pattern ?? '');
+  const [action, setAction] = useState<'block' | 'allow' | 'route'>(initialFilter?.action ?? 'block');
+  const [priority, setPriority] = useState(initialFilter?.priority ?? 0);
   const [testMessage, setTestMessage] = useState('');
-  const [testResult, setTestResult] = useState<{
-    matched: boolean;
-    executionTimeMs: number;
-  } | null>(null);
-
-  const [filters, setFilters] = useState<MessageFilter[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [testResult, setTestResult] = useState<{ blocked?: boolean; reason?: string } | null>(null);
+  const [testing, setTesting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Analyze regex complexity
-  const complexity = useMemo((): ComplexityWarning => {
-    if (type !== 'regex') {
-      return { level: 'safe', message: 'Non-regex filters are always safe' };
-    }
-
-    // Check for catastrophic backtracking patterns
-    if (/(\.\*\+|\.\+\+|\*\+|\+\+|\{\d+,\}\+)/.test(pattern)) {
-      return {
-        level: 'danger',
-        message: 'Catastrophic backtracking detected: nested quantifiers',
-      };
-    }
-
-    // Check for negative lookahead (expensive)
-    if (/\(\?!/.test(pattern)) {
-      return {
-        level: 'warning',
-        message: 'Negative lookahead can be slow on large messages',
-      };
-    }
-
-    // Check for alternation with quantifiers
-    if (/\|.*[\*\+]/.test(pattern) || /[\*\+].*\|/.test(pattern)) {
-      return {
-        level: 'warning',
-        message: 'Alternation with quantifiers may impact performance',
-      };
-    }
-
-    // Basic patterns are safe
-    return { level: 'safe', message: 'Regex pattern looks safe' };
-  }, [type, pattern]);
-
-  // Test regex/keyword pattern
   const testFilter = useCallback(async () => {
-    if (!testMessage || !pattern) {
-      setTestResult(null);
+    if (!testMessage.trim()) {
+      setError('Enter a test message');
       return;
     }
 
-    setLoading(true);
+    setTesting(true);
+    setError(null);
+
     try {
       const client = getGatewayClient();
       if (!client?.connected) {
@@ -101,372 +42,138 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
         return;
       }
 
-      const result = await client.request('filters.test', {
+      const result = (await client.request('filters.test', {
+        message: testMessage,
         pattern,
         type,
-        testMessage,
-      });
+        action,
+      })) as any;
 
-      setTestResult({
-        matched: result.matched,
-        executionTimeMs: result.executionTimeMs,
-      });
+      setTestResult(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Test failed');
     } finally {
-      setLoading(false);
+      setTesting(false);
     }
-  }, [pattern, type, testMessage]);
+  }, [testMessage, pattern, type, action]);
 
-  // Create and save filter
-  const createFilter = useCallback(async () => {
-    if (!name || !pattern) {
+  const handleSave = () => {
+    if (!name.trim() || !pattern.trim()) {
       setError('Name and pattern required');
       return;
     }
 
-    if (complexity.level === 'danger') {
-      setError('Cannot create filter with catastrophic backtracking');
-      return;
-    }
-
-    const filter: MessageFilter = {
-      id: `filter-${Date.now()}`,
+    onSave({
+      id: initialFilter?.id,
       name,
-      description,
-      enabled: true,
       type,
       pattern,
       action,
-      routeToAgent: action === 'route' ? routeAgent : undefined,
-      caseSensitive,
-      matchMode: type === 'keyword' ? matchMode : undefined,
-      priority: 0,
-      createdAt: Date.now(),
+      priority,
+      enabled: true,
+      createdAt: initialFilter?.createdAt ?? Date.now(),
       updatedAt: Date.now(),
-    };
-
-    setLoading(true);
-    try {
-      const client = getGatewayClient();
-      if (!client?.connected) {
-        setError('Gateway not connected');
-        return;
-      }
-
-      await client.request('filters.create', filter);
-      setFilters([...filters, filter]);
-
-      // Reset form
-      setName('');
-      setDescription('');
-      setPattern('');
-      setAction('block');
-      setTestResult(null);
-      setError(null);
-
-      onFilterCreated?.(filter);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create filter');
-    } finally {
-      setLoading(false);
-    }
-  }, [name, pattern, description, type, action, routeAgent, caseSensitive, matchMode, complexity, filters, onFilterCreated]);
-
-  // Delete filter
-  const deleteFilter = useCallback(
-    async (filterId: string) => {
-      setLoading(true);
-      try {
-        const client = getGatewayClient();
-        if (!client?.connected) {
-          setError('Gateway not connected');
-          return;
-        }
-
-        await client.request('filters.delete', { id: filterId });
-        setFilters(filters.filter(f => f.id !== filterId));
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to delete filter');
-      } finally {
-        setLoading(false);
-      }
-    },
-    [filters]
-  );
+    });
+  };
 
   return (
-    <div className={`space-y-4 ${className}`}>
-      {/* Header */}
-      <div className="flex items-center gap-2">
-        <Play className="w-5 h-5 text-helix-400" />
-        <h3 className="text-sm font-semibold text-text-secondary">Message Filters</h3>
+    <div className="filter-builder">
+      <div className="filter-section">
+        <label>Filter Name</label>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="e.g., Block spam keywords"
+        />
       </div>
 
-      {/* Error state */}
-      {error && (
-        <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 flex items-start gap-2">
-          <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-          <p className="text-xs text-red-300">{error}</p>
+      <div className="filter-row">
+        <div className="filter-section">
+          <label>Type</label>
+          <select value={type} onChange={(e) => setType(e.target.value as any)}>
+            <option value="keyword">Keyword (fast)</option>
+            <option value="regex">Regex (powerful)</option>
+          </select>
         </div>
-      )}
 
-      {/* Filter builder form */}
-      <div className="space-y-3 p-3 rounded-lg bg-bg-secondary/20 border border-border-secondary/30">
-        {/* Basic info */}
-        <div>
-          <label className="text-xs font-semibold text-text-secondary block mb-1">
-            Filter Name
-          </label>
+        <div className="filter-section">
+          <label>Action</label>
+          <select value={action} onChange={(e) => setAction(e.target.value as any)}>
+            <option value="block">🚫 Block</option>
+            <option value="allow">✅ Allow</option>
+            <option value="route">➡️ Route to Agent</option>
+          </select>
+        </div>
+
+        <div className="filter-section">
+          <label>Priority</label>
           <input
-            type="text"
-            placeholder="e.g., Block spam keywords"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            className="w-full px-2 py-1 bg-bg-secondary/50 border border-border-secondary/50 rounded text-xs text-text-secondary placeholder-text-tertiary focus:outline-none focus:border-helix-500/50"
+            type="number"
+            value={priority}
+            onChange={(e) => setPriority(Number(e.target.value))}
+            min="0"
+            max="100"
           />
         </div>
+      </div>
 
-        <div>
-          <label className="text-xs font-semibold text-text-secondary block mb-1">
-            Description
-          </label>
+      <div className="filter-section">
+        <label>Pattern</label>
+        {type === 'keyword' ? (
           <input
             type="text"
-            placeholder="Optional description"
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-            className="w-full px-2 py-1 bg-bg-secondary/50 border border-border-secondary/50 rounded text-xs text-text-secondary placeholder-text-tertiary focus:outline-none focus:border-helix-500/50"
-          />
-        </div>
-
-        {/* Type selector */}
-        <div>
-          <label className="text-xs font-semibold text-text-secondary block mb-2">
-            Filter Type
-          </label>
-          <div className="grid grid-cols-2 gap-2">
-            {(['regex', 'keyword', 'sender', 'time'] as FilterType[]).map(t => (
-              <button
-                key={t}
-                onClick={() => setType(t)}
-                className={`p-2 rounded text-xs font-medium transition-colors ${
-                  type === t
-                    ? 'bg-helix-500/30 border border-helix-500/40 text-helix-300'
-                    : 'bg-bg-secondary/30 border border-border-secondary/30 text-text-tertiary'
-                }`}
-              >
-                {t === 'regex' && 'Regex'}
-                {t === 'keyword' && 'Keyword'}
-                {t === 'sender' && 'Sender'}
-                {t === 'time' && 'Time'}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Pattern input */}
-        <div>
-          <label className="text-xs font-semibold text-text-secondary block mb-1">
-            {type === 'regex' && 'Regex Pattern'}
-            {type === 'keyword' && 'Keywords (comma-separated)'}
-            {type === 'sender' && 'Sender ID'}
-            {type === 'time' && 'Time Range'}
-          </label>
-          <input
-            type="text"
-            placeholder={
-              type === 'regex'
-                ? '^spam|casino|prize$'
-                : type === 'keyword'
-                  ? 'spam, casino, prize'
-                  : 'Enter pattern'
-            }
             value={pattern}
-            onChange={e => setPattern(e.target.value)}
-            className="w-full px-2 py-1 bg-bg-secondary/50 border border-border-secondary/50 rounded text-xs font-mono text-text-secondary placeholder-text-tertiary focus:outline-none focus:border-helix-500/50"
+            onChange={(e) => setPattern(e.target.value)}
+            placeholder="Separate keywords with | (pipe)"
           />
+        ) : (
+          <textarea
+            value={pattern}
+            onChange={(e) => setPattern(e.target.value)}
+            placeholder="Enter regex pattern (e.g., /casino|prize|winner/i)"
+            rows={4}
+          />
+        )}
+        <div className="pattern-hint">
+          {type === 'keyword'
+            ? 'Example: casino|prize|winner'
+            : 'Regex with DoS protection (100ms timeout)'}
         </div>
-
-        {/* Options */}
-        {type === 'regex' && (
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={caseSensitive}
-              onChange={e => setCaseSensitive(e.target.checked)}
-              className="cursor-pointer"
-            />
-            <span className="text-xs text-text-secondary">Case sensitive</span>
-          </label>
-        )}
-
-        {type === 'keyword' && (
-          <div>
-            <label className="text-xs font-semibold text-text-secondary block mb-2">
-              Match Mode
-            </label>
-            <div className="flex gap-2">
-              {(['any', 'all'] as const).map(mode => (
-                <button
-                  key={mode}
-                  onClick={() => setMatchMode(mode)}
-                  className={`flex-1 p-2 rounded text-xs font-medium transition-colors ${
-                    matchMode === mode
-                      ? 'bg-helix-500/30 border border-helix-500/40 text-helix-300'
-                      : 'bg-bg-secondary/30 border border-border-secondary/30 text-text-tertiary'
-                  }`}
-                >
-                  {mode === 'any' ? 'Any keyword' : 'All keywords'}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Complexity warning */}
-        {type === 'regex' && pattern && (
-          <div
-            className={`p-2 rounded-lg flex items-start gap-2 ${
-              complexity.level === 'danger'
-                ? 'bg-red-500/10 border border-red-500/20'
-                : complexity.level === 'warning'
-                  ? 'bg-yellow-500/10 border border-yellow-500/20'
-                  : 'bg-emerald-500/10 border border-emerald-500/20'
-            }`}
-          >
-            {complexity.level === 'danger' ? (
-              <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-            ) : complexity.level === 'warning' ? (
-              <AlertTriangle className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
-            ) : (
-              <CheckCircle className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-            )}
-            <p
-              className={`text-xs ${
-                complexity.level === 'danger'
-                  ? 'text-red-300'
-                  : complexity.level === 'warning'
-                    ? 'text-yellow-300'
-                    : 'text-emerald-300'
-              }`}
-            >
-              {complexity.message}
-            </p>
-          </div>
-        )}
-
-        {/* Action selector */}
-        <div>
-          <label className="text-xs font-semibold text-text-secondary block mb-2">
-            Action
-          </label>
-          <div className="grid grid-cols-2 gap-2">
-            {(['block', 'allow', 'route', 'flag', 'mute'] as FilterAction[]).map(act => (
-              <button
-                key={act}
-                onClick={() => setAction(act)}
-                className={`p-2 rounded text-xs font-medium transition-colors ${
-                  action === act
-                    ? 'bg-helix-500/30 border border-helix-500/40 text-helix-300'
-                    : 'bg-bg-secondary/30 border border-border-secondary/30 text-text-tertiary'
-                }`}
-              >
-                {act === 'block' && 'Block'}
-                {act === 'allow' && 'Allow'}
-                {act === 'route' && 'Route'}
-                {act === 'flag' && 'Flag'}
-                {act === 'mute' && 'Mute'}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {action === 'route' && (
-          <div>
-            <label className="text-xs font-semibold text-text-secondary block mb-1">
-              Route to Agent
-            </label>
-            <input
-              type="text"
-              placeholder="Agent ID"
-              value={routeAgent}
-              onChange={e => setRouteAgent(e.target.value)}
-              className="w-full px-2 py-1 bg-bg-secondary/50 border border-border-secondary/50 rounded text-xs text-text-secondary focus:outline-none focus:border-helix-500/50"
-            />
-          </div>
-        )}
       </div>
 
-      {/* Test section */}
-      <div className="space-y-2 p-3 rounded-lg bg-bg-secondary/20 border border-border-secondary/30">
-        <label className="text-xs font-semibold text-text-secondary block">
-          Test Filter
-        </label>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="Enter test message"
-            value={testMessage}
-            onChange={e => setTestMessage(e.target.value)}
-            className="flex-1 px-2 py-1 bg-bg-secondary/50 border border-border-secondary/50 rounded text-xs text-text-secondary placeholder-text-tertiary focus:outline-none focus:border-helix-500/50"
-          />
-          <button
-            onClick={testFilter}
-            disabled={!pattern || !testMessage || loading}
-            className="px-3 py-1 rounded bg-helix-500/30 border border-helix-500/40 hover:bg-helix-500/40 disabled:opacity-50 transition-colors text-xs font-medium text-helix-300"
-          >
-            Test
-          </button>
-        </div>
-
-        {testResult && (
-          <div
-            className={`p-2 rounded text-xs ${
-              testResult.matched
-                ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-300'
-                : 'bg-blue-500/10 border border-blue-500/20 text-blue-300'
-            }`}
-          >
-            {testResult.matched ? '✓ Matched' : '✗ No match'} ({testResult.executionTimeMs.toFixed(2)}ms)
-          </div>
-        )}
+      <div className="filter-section">
+        <label>Test Pattern</label>
+        <textarea
+          value={testMessage}
+          onChange={(e) => setTestMessage(e.target.value)}
+          placeholder="Enter a test message to validate the filter"
+          rows={2}
+        />
+        <button onClick={testFilter} disabled={testing} className="btn-secondary btn-sm">
+          {testing ? '🔄 Testing...' : '▶️ Test Filter'}
+        </button>
       </div>
 
-      {/* Create button */}
-      <button
-        onClick={createFilter}
-        disabled={!name || !pattern || loading || complexity.level === 'danger'}
-        className="w-full p-2 rounded bg-helix-500/30 border border-helix-500/40 hover:bg-helix-500/40 disabled:opacity-50 transition-colors text-xs font-medium text-helix-300"
-      >
-        {loading ? 'Creating...' : 'Create Filter'}
-      </button>
-
-      {/* Filters list */}
-      {filters.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-xs font-semibold text-text-secondary">Created Filters</p>
-          {filters.map(filter => (
-            <div
-              key={filter.id}
-              className="p-2 rounded bg-bg-secondary/30 border border-border-secondary/30 flex items-center justify-between"
-            >
-              <div>
-                <p className="text-xs font-semibold text-text-secondary">{filter.name}</p>
-                <p className="text-xs text-text-tertiary">{filter.pattern}</p>
-              </div>
-              <button
-                onClick={() => deleteFilter(filter.id)}
-                className="p-1 hover:bg-red-500/20 rounded transition-colors"
-              >
-                <Trash2 className="w-3 h-3 text-red-400" />
-              </button>
-            </div>
-          ))}
+      {testResult && (
+        <div className={`filter-test-result ${testResult.blocked ? 'blocked' : 'allowed'}`}>
+          <div className="result-badge">
+            {testResult.blocked ? '🚫 BLOCKED' : '✅ ALLOWED'}
+          </div>
+          {testResult.reason && <div className="result-reason">{testResult.reason}</div>}
         </div>
       )}
+
+      {error && <div className="error-message">{error}</div>}
+
+      <div className="filter-actions">
+        <button onClick={onCancel} className="btn-secondary">
+          Cancel
+        </button>
+        <button onClick={handleSave} className="btn-primary">
+          {initialFilter ? 'Update Filter' : 'Create Filter'}
+        </button>
+      </div>
     </div>
   );
-};
-
-export default FilterBuilder;
+}
