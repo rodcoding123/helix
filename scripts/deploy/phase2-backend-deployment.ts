@@ -368,23 +368,39 @@ async function main(): Promise<void> {
   console.log('║              Backend Deployment                           ║');
   console.log('╚════════════════════════════════════════════════════════════╝\n');
 
-  // Load environment
-  if (!fs.existsSync('.env')) {
-    log('Missing .env file. Run Phase 1 first.', 'error');
-    process.exit(1);
+  // Load VPS config from 1Password or .env
+  let vpsHost: string;
+  let vpsUser: string;
+  let vpsPort: number;
+
+  try {
+    // Try loading from 1Password first
+    const execSync = require('child_process').execSync;
+    vpsHost = execSync('op read "op://Helix/VPS Host/password"', { encoding: 'utf-8' }).trim();
+    vpsUser = execSync('op read "op://Helix/VPS User/password"', { encoding: 'utf-8' }).trim();
+    const vpsPortStr = execSync('op read "op://Helix/VPS Port/password"', { encoding: 'utf-8' }).trim();
+    vpsPort = parseInt(vpsPortStr) || 22;
+    log('✓ Loaded VPS config from 1Password', 'info');
+  } catch {
+    // Fall back to .env
+    if (!fs.existsSync('.env')) {
+      log('Missing VPS config in 1Password or .env. Run Phase 1 first.', 'error');
+      process.exit(1);
+    }
+
+    const env = Object.fromEntries(
+      fs
+        .readFileSync('.env', 'utf-8')
+        .split('\n')
+        .filter(line => !line.startsWith('#') && line.includes('='))
+        .map(line => line.split('=') as [string, string])
+    );
+
+    vpsHost = env.VPS_HOST;
+    vpsUser = env.VPS_USER || 'helix';
+    vpsPort = parseInt(env.VPS_PORT || '22');
+    log('✓ Loaded VPS config from .env (fallback)', 'info');
   }
-
-  const env = Object.fromEntries(
-    fs
-      .readFileSync('.env', 'utf-8')
-      .split('\n')
-      .filter(line => !line.startsWith('#') && line.includes('='))
-      .map(line => line.split('=') as [string, string])
-  );
-
-  const vpsHost = env.VPS_HOST;
-  const vpsUser = env.VPS_USER || 'helix';
-  const vpsPort = parseInt(env.VPS_PORT || '22');
 
   if (!vpsHost) {
     log('Missing VPS_HOST in .env file', 'error');

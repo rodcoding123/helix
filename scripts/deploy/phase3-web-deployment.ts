@@ -70,13 +70,26 @@ function executeCommand(command: string, cwd: string = process.cwd()): string {
 }
 
 async function selectDeploymentPlatform(): Promise<'vercel' | 'netlify'> {
-  console.log('\n🌐 Select Web Hosting Platform:');
-  console.log('   1. Vercel (recommended - better Next.js support)');
-  console.log('   2. Netlify (alternative - good React support)\n');
+  // Try loading from 1Password first
+  try {
+    const { execSync } = require('child_process');
+    const platform = execSync('op read "op://Helix/Web Platform/password"', { encoding: 'utf-8' }).trim().toLowerCase();
+    if (platform === 'netlify') {
+      log('✓ Loaded platform selection from 1Password: Netlify', 'success');
+      return 'netlify';
+    } else {
+      log('✓ Loaded platform selection from 1Password: Vercel', 'success');
+      return 'vercel';
+    }
+  } catch {
+    // Fall back to interactive selection
+    console.log('\n🌐 Select Web Hosting Platform:');
+    console.log('   1. Vercel (recommended - better Next.js support)');
+    console.log('   2. Netlify (alternative - good React support)\n');
 
-  const choice = await ask('  Select platform (1 or 2): ');
-
-  return choice === '2' ? 'netlify' : 'vercel';
+    const choice = await ask('  Select platform (1 or 2): ');
+    return choice === '2' ? 'netlify' : 'vercel';
+  }
 }
 
 async function buildReactApplication(): Promise<void> {

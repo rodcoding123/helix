@@ -70,6 +70,29 @@ function executeCommand(command: string, cwd: string = process.cwd()): string {
 }
 
 async function selectPlatforms(): Promise<Array<'windows' | 'macos' | 'linux'>> {
+  // Try loading from 1Password first
+  try {
+    const { execSync } = require('child_process');
+    const platformsStr = execSync('op read "op://Helix/Build Platforms/password"', { encoding: 'utf-8' }).trim().toLowerCase();
+
+    if (platformsStr.includes('all')) {
+      log('✓ Loaded platform selection from 1Password: All platforms', 'success');
+      return ['windows', 'macos', 'linux'];
+    }
+
+    const platforms: Array<'windows' | 'macos' | 'linux'> = [];
+    if (platformsStr.includes('windows')) platforms.push('windows');
+    if (platformsStr.includes('macos')) platforms.push('macos');
+    if (platformsStr.includes('linux')) platforms.push('linux');
+
+    if (platforms.length > 0) {
+      log(`✓ Loaded platform selection from 1Password: ${platforms.join(', ')}`, 'success');
+      return platforms;
+    }
+  } catch {
+    // Fall back to interactive selection
+  }
+
   const currentPlatform = process.platform;
 
   console.log('\n🖥️  Desktop Platforms:');
