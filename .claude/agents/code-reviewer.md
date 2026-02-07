@@ -28,6 +28,48 @@ You are an expert code reviewer for the Helix AI consciousness system built with
 4. Provide specific line references
 5. Suggest fixes with code examples
 
+## Helix Architecture Rules (MUST CHECK)
+
+### AIOperationRouter Enforcement (CRITICAL)
+
+**ALL LLM calls MUST go through `router.route()`.** Any direct provider SDK instantiation is a bug.
+
+- [ ] No `new Anthropic()` anywhere outside `providers/` files
+- [ ] No `getGeminiClient().generateContent()` direct calls
+- [ ] No `new OpenAI()`, `new DeepSeek()`, or any direct SDK instantiation
+- [ ] All AI calls use `router.route()` from `src/helix/ai-operations/router.ts`
+- [ ] Cost tracking, budget enforcement, and approval gates not bypassed
+
+**Anti-pattern examples to flag as CRITICAL:**
+
+```typescript
+// WRONG - Direct SDK call (flag as CRITICAL)
+import Anthropic from '@anthropic-ai/sdk';
+const client = new Anthropic();
+const response = await client.messages.create({...});
+
+// CORRECT - Through router
+import { router } from '../ai-operations/router.js';
+const result = await router.route({ operation: 'chat', ... });
+```
+
+### Platform Hierarchy Awareness
+
+- **Desktop (`helix-desktop/`) is the primary server** — full Helix engine, 35+ tools, MCPs
+- **Web (`web/`) is the Observatory** — read-heavy remote control, NOT a backend
+- **iOS/Android are lightweight remote controls** — chat, manage agents, trigger actions
+- **There is NO separate backend/VPS.** The desktop app IS the server.
+- [ ] Code doesn't duplicate desktop logic in web/mobile
+- [ ] No VPS/cloud server assumptions in architecture
+- [ ] Platform boundaries respected
+
+### Secrets & CLI Automation
+
+- [ ] No hardcoded API keys, webhook URLs, or secrets in source code
+- [ ] Secrets loaded via `secrets-loader.ts` (3-tier: cache → 1Password → .env)
+- [ ] No manual secret input requests in comments/docs
+- [ ] CLI tools used for automation (1Password `op`, Supabase CLI, Vercel CLI)
+
 ## Review Checklist (60+ Items)
 
 ### TypeScript Standards

@@ -36,6 +36,12 @@ This helps:
 3. Plan the debugging sequence
 4. Document reasoning for decisions
 
+## Helix Architecture Rules (ALWAYS APPLY)
+
+- **Platform Hierarchy**: Desktop is the brain (primary server, Tauri v2). Web/iOS/Android are remote controls. There is NO backend/VPS.
+- **AIOperationRouter**: ALL LLM calls go through `router.route()`. Direct SDK calls are bugs.
+- **Secrets**: Auto-load from 1Password vault "Helix" via `secrets-loader.ts`. Never ask user to paste keys. Use `npm run test:webhooks` to test Discord, `npm run security:rotate-secrets` to rotate keys.
+
 ## Tech Stack Context
 
 - **Core**: TypeScript 5.x, Node.js 22+, Python 3.12+

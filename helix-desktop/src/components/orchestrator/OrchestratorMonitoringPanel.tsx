@@ -12,7 +12,7 @@
  * - Checkpoint history
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { CostBurnRate } from './CostBurnRate';
 import { AgentActivityTimeline } from './AgentActivityTimeline';
 import { useOrchestratorMetrics } from '../../hooks/useOrchestratorMetrics';

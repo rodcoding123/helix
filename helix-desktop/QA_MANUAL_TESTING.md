@@ -400,7 +400,7 @@ Required ratio: **4.5:1** for normal text, **3:1** for large text
 ## Security QA
 
 - [ ] **No console errors** - Open DevTools, check console
-- [ ] **No exposed API keys** - Search DOM for sk-, api_, secret
+- [ ] **No exposed API keys** - Search DOM for sk-, api\_, secret
 - [ ] **No hardcoded credentials** - Check localStorage, sessionStorage
 - [ ] **HTTPS enforced** - All external requests use HTTPS
 - [ ] **CSP headers** - Content Security Policy present
@@ -439,18 +439,18 @@ After each update/build:
 
 ## Test Results Summary
 
-**Date**: ___________
-**Tester**: ___________
+**Date**: ****\_\_\_****
+**Tester**: ****\_\_\_****
 **Environment**: macOS / Windows / Linux
-**Browser/Platform**: ___________
+**Browser/Platform**: ****\_\_\_****
 
 ### Results
 
-- **Total Tests**: ___
-- **Passed**: ___
-- **Failed**: ___
-- **Blocked**: ___
-- **Pass Rate**: ___%
+- **Total Tests**: \_\_\_
+- **Passed**: \_\_\_
+- **Failed**: \_\_\_
+- **Blocked**: \_\_\_
+- **Pass Rate**: \_\_\_%
 
 ### Critical Issues Found
 

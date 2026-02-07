@@ -10,12 +10,12 @@ import { getGatewayClient } from '../../lib/gateway-client';
 export function PolicyEditor({ channelId }: { channelId?: string }) {
   const [dmMode, setDmMode] = useState('pairing');
   const [groupMode, setGroupMode] = useState('open');
-  const [dmAllowlist, setDmAllowlist] = useState([]);
-  const [groupAllowlist, setGroupAllowlist] = useState([]);
-  const [blockList, setBlockList] = useState([]);
+  const [dmAllowlist, setDmAllowlist] = useState<string[]>([]);
+  const [groupAllowlist, setGroupAllowlist] = useState<string[]>([]);
+  const [blockList, setBlockList] = useState<string[]>([]);
   const [newEntry, setNewEntry] = useState('');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   const loadPolicy = useCallback(async () => {
     if (!channelId) return;
@@ -76,15 +76,15 @@ export function PolicyEditor({ channelId }: { channelId?: string }) {
     }
   }, [channelId, dmMode, groupMode, dmAllowlist, groupAllowlist, blockList]);
 
-  const addToList = (list, setter) => {
+  const addToList = (list: string[], setter: (value: string[]) => void) => {
     if (newEntry.trim()) {
       setter([...list, newEntry.trim()]);
       setNewEntry('');
     }
   };
 
-  const removeFromList = (list, setter, index) => {
-    setter(list.filter((_, i) => i !== index));
+  const removeFromList = (list: string[], setter: (value: string[]) => void, index: number) => {
+    setter(list.filter((_: string, i: number) => i !== index));
   };
 
   if (loading) return <div className="loading">Loading policy...</div>;

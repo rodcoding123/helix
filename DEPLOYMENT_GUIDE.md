@@ -28,6 +28,7 @@ npx ts-node scripts/deploy/phase5-production-verification.ts
 ### Phase 1: Infrastructure Setup (1-2 Days)
 
 **What Gets Done:**
+
 - Configure Discord webhooks (7 channels)
 - Set up Supabase project
 - Obtain AI API keys (DeepSeek, Gemini, Anthropic)
@@ -36,12 +37,14 @@ npx ts-node scripts/deploy/phase5-production-verification.ts
 - Create deployment checklist
 
 **Key Files Created:**
+
 - `.env` - Production environment variables
 - `DEPLOYMENT_CHECKLIST.md` - Tracking document
 
 **Time Required:** 1-2 hours (includes waiting for Supabase setup)
 
 **Success Criteria:**
+
 - All 7 Discord webhooks validated
 - Supabase project created with tables
 - API keys obtained and verified
@@ -55,6 +58,7 @@ npx ts-node scripts/deploy/phase5-production-verification.ts
 ### Phase 2: Backend Deployment (1 Day)
 
 **What Gets Done:**
+
 - Check VPS prerequisites (Docker, ports)
 - Build Docker image
 - Deploy to VPS via docker-compose
@@ -63,12 +67,14 @@ npx ts-node scripts/deploy/phase5-production-verification.ts
 - Monitor system health for 24 hours
 
 **Key Files Created:**
+
 - `PHASE2_DEPLOYMENT_REPORT.md` - Deployment details
 - Health monitoring logs
 
 **Time Required:** 2-4 hours (includes 24-hour monitoring)
 
 **Success Criteria:**
+
 - VPS prerequisites verified
 - Docker image built successfully
 - Containers deployed and healthy
@@ -83,6 +89,7 @@ npx ts-node scripts/deploy/phase5-production-verification.ts
 ### Phase 3: Web Deployment (1 Day)
 
 **What Gets Done:**
+
 - Build React application
 - Select Vercel or Netlify
 - Deploy web application
@@ -92,12 +99,14 @@ npx ts-node scripts/deploy/phase5-production-verification.ts
 - Test real-time sync
 
 **Key Files Created:**
+
 - `PHASE3_DEPLOYMENT_REPORT.md` - Web deployment details
 - `vercel.json` or `netlify.toml` - Platform config
 
 **Time Required:** 2-3 hours
 
 **Success Criteria:**
+
 - React build successful
 - Application deployed and live
 - Authentication working
@@ -112,6 +121,7 @@ npx ts-node scripts/deploy/phase5-production-verification.ts
 ### Phase 4: Desktop Packaging (1 Day)
 
 **What Gets Done:**
+
 - Select platforms (Windows, macOS, Linux)
 - Configure code signing (optional but recommended)
 - Configure auto-updater (optional)
@@ -120,12 +130,14 @@ npx ts-node scripts/deploy/phase5-production-verification.ts
 - Create installers
 
 **Key Files Created:**
+
 - `PHASE4_DEPLOYMENT_REPORT.md` - Desktop packaging details
 - Platform-specific installers (.exe, .dmg, .deb, .AppImage)
 
 **Time Required:** 3-4 hours
 
 **Success Criteria:**
+
 - Application builds for selected platforms
 - Installers created successfully
 - Desktop app installs and runs
@@ -140,6 +152,7 @@ npx ts-node scripts/deploy/phase5-production-verification.ts
 ### Phase 5: Production Verification (1 Day)
 
 **What Gets Done:**
+
 - Run 7 manual test scenarios
 - Load test with 100+ concurrent users
 - Verify cost tracking accuracy
@@ -147,12 +160,14 @@ npx ts-node scripts/deploy/phase5-production-verification.ts
 - Generate final verification report
 
 **Key Files Created:**
+
 - `PHASE5_FINAL_VERIFICATION_REPORT.md` - Verification results
 - `DEPLOYMENT_COMPLETE.md` - Overall summary
 
 **Time Required:** 4-6 hours
 
 **Success Criteria:**
+
 - All 7 test scenarios passing
 - Load test sustains 100+ concurrent users
 - Cost tracking verified ($35-86/month)
@@ -267,14 +282,14 @@ npx ts-node scripts/deploy/phase5-production-verification.ts
 
 ### Phase 1 Analysis (Verified)
 
-| Component | Monthly Cost | Notes |
-|-----------|--------------|-------|
-| Supabase | $25-50 | Database, auth, realtime |
-| DeepSeek API | $10-20 | Primary LLM provider |
-| Gemini API | $5-10 | Fallback provider |
-| Vercel/Netlify | $0-20 | Web hosting |
-| VPS (Backend) | $5-10 | 2GB RAM, 2 CPU, 20GB SSD |
-| **TOTAL** | **$45-110** | **Actual observed: $35-86** |
+| Component      | Monthly Cost | Notes                       |
+| -------------- | ------------ | --------------------------- |
+| Supabase       | $25-50       | Database, auth, realtime    |
+| DeepSeek API   | $10-20       | Primary LLM provider        |
+| Gemini API     | $5-10        | Fallback provider           |
+| Vercel/Netlify | $0-20        | Web hosting                 |
+| VPS (Backend)  | $5-10        | 2GB RAM, 2 CPU, 20GB SSD    |
+| **TOTAL**      | **$45-110**  | **Actual observed: $35-86** |
 
 ### Cost Savings
 
@@ -337,12 +352,12 @@ time curl -s https://api.deepseek.com/status
 
 ## 📞 Support & Contacts
 
-| Role | Purpose |
-|------|---------|
-| Lead Engineer | Deployment decisions, escalations |
-| DevOps | Infrastructure, VPS, Docker |
-| Backend Support | API issues, provider problems |
-| On-Call | 24/7 emergency response |
+| Role            | Purpose                           |
+| --------------- | --------------------------------- |
+| Lead Engineer   | Deployment decisions, escalations |
+| DevOps          | Infrastructure, VPS, Docker       |
+| Backend Support | API issues, provider problems     |
+| On-Call         | 24/7 emergency response           |
 
 See `PRODUCTION_RUNBOOK.md` for detailed contact information and procedures.
 
@@ -350,12 +365,12 @@ See `PRODUCTION_RUNBOOK.md` for detailed contact information and procedures.
 
 ## 📚 Additional Resources
 
-| Document | Purpose |
-|----------|---------|
-| `PRODUCTION_RUNBOOK.md` | Daily operations, incident response |
-| `DEPLOYMENT_CHECKLIST.md` | Phase 1 tracking document |
-| `PHASE*_DEPLOYMENT_REPORT.md` | Individual phase details |
-| `DEPLOYMENT_COMPLETE.md` | Final summary and status |
+| Document                      | Purpose                             |
+| ----------------------------- | ----------------------------------- |
+| `PRODUCTION_RUNBOOK.md`       | Daily operations, incident response |
+| `DEPLOYMENT_CHECKLIST.md`     | Phase 1 tracking document           |
+| `PHASE*_DEPLOYMENT_REPORT.md` | Individual phase details            |
+| `DEPLOYMENT_COMPLETE.md`      | Final summary and status            |
 
 ---
 
@@ -382,16 +397,16 @@ Before enabling production traffic:
 
 Production is successful when achieved within 7 days:
 
-| Metric | Target |
-|--------|--------|
-| All Deployments Complete | ✓ |
-| Uptime | > 99.9% |
-| Error Rate | < 0.1% |
-| API Latency (p95) | < 2 sec |
-| Monthly Cost | $35-86 |
-| Test Pass Rate | 100% |
-| User Satisfaction | > 4.5/5 |
-| Zero Security Issues | ✓ |
+| Metric                   | Target  |
+| ------------------------ | ------- |
+| All Deployments Complete | ✓       |
+| Uptime                   | > 99.9% |
+| Error Rate               | < 0.1%  |
+| API Latency (p95)        | < 2 sec |
+| Monthly Cost             | $35-86  |
+| Test Pass Rate           | 100%    |
+| User Satisfaction        | > 4.5/5 |
+| Zero Security Issues     | ✓       |
 
 ---
 

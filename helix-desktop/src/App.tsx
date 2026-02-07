@@ -3,6 +3,7 @@ import { RouterProvider } from 'react-router-dom';
 import { useSystem } from './hooks/useSystem';
 import { useGateway } from './hooks/useGateway';
 import { useTheme } from './hooks/useTheme';
+import { useDeepLink } from './hooks/useDeepLink';
 import { Onboarding } from './components/onboarding/Onboarding';
 import { TenantProvider } from './lib/tenant-context';
 import { router } from './routes';
@@ -16,6 +17,9 @@ function App() {
 
   // Initialize theme
   useTheme();
+
+  // Initialize deep linking
+  useDeepLink();
 
   // Dev mode: Check for ?onboarding=true in URL or Ctrl+Shift+O shortcut
   useEffect(() => {

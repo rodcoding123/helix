@@ -27,11 +27,12 @@ if (!process.env.HELIX_ISOLATED_MODE) {
 ### Two Layers of Isolation
 
 #### Layer 1: Global Plugin Discovery Blocking (discovery.ts:348)
+
 ```typescript
-const isolatedMode = process.env.HELIX_ISOLATED_MODE === "1";
+const isolatedMode = process.env.HELIX_ISOLATED_MODE === '1';
 if (!isolatedMode) {
   // Load global plugins from ~/.openclaw/extensions/
-  const globalDir = path.join(resolveConfigDir(), "extensions");
+  const globalDir = path.join(resolveConfigDir(), 'extensions');
   // ... discovery code
 }
 ```
@@ -39,13 +40,14 @@ if (!isolatedMode) {
 **Risk**: If `HELIX_ISOLATED_MODE` cannot be set, global plugins WILL load.
 
 #### Layer 2: Bundled Plugin Override (bundled-dir.ts:9-23)
+
 ```typescript
 const override = process.env.OPENCLAW_BUNDLED_PLUGINS_DIR?.trim();
 if (override) {
   return override; // Use Helix's bundled plugins
 }
 
-if (process.env.HELIX_ISOLATED_MODE === "1") {
+if (process.env.HELIX_ISOLATED_MODE === '1') {
   // Use local resolution, don't walk directory tree
 }
 ```
@@ -57,6 +59,7 @@ if (process.env.HELIX_ISOLATED_MODE === "1") {
 ## OpenClaw 2026.2.1 Security Feature
 
 ### What We Know
+
 - Release notes mention: "Environment variable override blocking"
 - Categorized as security fix
 - Likely prevents plugins from overriding critical env vars
@@ -76,18 +79,18 @@ if (process.env.HELIX_ISOLATED_MODE === "1") {
 
 3. **Potential Outcomes**:
    - **BEST CASE**: Override blocking applies only to plugin-initiated writes (doesn't affect entry.ts)
-   - **MEDIUM CASE**: Override blocking applies to specific env var patterns (HELIX_* might be whitelisted)
-   - **WORST CASE**: Override blocking applies to all OPENCLAW_* and HELIX_* writes (breaks isolation)
+   - **MEDIUM CASE**: Override blocking applies to specific env var patterns (HELIX\_\* might be whitelisted)
+   - **WORST CASE**: Override blocking applies to all OPENCLAW*\* and HELIX*\* writes (breaks isolation)
 
 ---
 
 ## Investigation Matrix
 
-| Variable | Set By | Set When | Used When | Blocked? |
-| --- | --- | --- | --- | --- |
-| HELIX_ISOLATED_MODE | entry.ts:45 | Very early startup | Plugin discovery | ❓ |
-| OPENCLAW_STATE_DIR | entry.ts:46 | Very early startup | OpenClaw initialization | ❓ |
-| OPENCLAW_BUNDLED_PLUGINS_DIR | entry.ts:47 | Very early startup | Plugin discovery | ❓ |
+| Variable                     | Set By      | Set When           | Used When               | Blocked? |
+| ---------------------------- | ----------- | ------------------ | ----------------------- | -------- |
+| HELIX_ISOLATED_MODE          | entry.ts:45 | Very early startup | Plugin discovery        | ❓       |
+| OPENCLAW_STATE_DIR           | entry.ts:46 | Very early startup | OpenClaw initialization | ❓       |
+| OPENCLAW_BUNDLED_PLUGINS_DIR | entry.ts:47 | Very early startup | Plugin discovery        | ❓       |
 
 ---
 
@@ -96,12 +99,14 @@ if (process.env.HELIX_ISOLATED_MODE === "1") {
 **Source**: https://github.com/openclaw/openclaw/releases/tag/v2026.2.1
 
 Looking for:
+
 1. Environment variable override blocking implementation
 2. Which variables are protected
 3. When blocking applies (startup? plugin load? both?)
 4. If there's a whitelist or escape hatch
 
 **Likely files to check**:
+
 - `src/common/env.ts` or similar
 - `src/plugins/loader.ts` override protection
 - Release changelog for specific patterns
@@ -119,15 +124,15 @@ If OpenClaw blocks all env var writes after initialization, create a shim:
 if (!process.env.HELIX_ISOLATED_MODE) {
   const helixConfig = {
     isolated: true,
-    stateDir: path.join(helixRoot, ".helix-state"),
-    bundledPluginsDir: path.join(runtimeRoot, "extensions"),
+    stateDir: path.join(helixRoot, '.helix-state'),
+    bundledPluginsDir: path.join(runtimeRoot, 'extensions'),
   };
 
   // Store in global scope before OpenClaw can block
   global.__HELIX_CONFIG__ = helixConfig;
 
   // Still set env vars while we can
-  process.env.HELIX_ISOLATED_MODE = "1";
+  process.env.HELIX_ISOLATED_MODE = '1';
   process.env.OPENCLAW_STATE_DIR = helixConfig.stateDir;
   process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = helixConfig.bundledPluginsDir;
 }
@@ -138,13 +143,15 @@ Then modify discovery.ts and bundled-dir.ts to check `global.__HELIX_CONFIG__` f
 ### Strategy B: Patch OpenClaw (if incompatible)
 
 If override blocking is fundamentally incompatible:
+
 1. Fork OpenClaw or patch locally
-2. Disable override blocking for HELIX_* and OPENCLAW_* set in entry.ts
+2. Disable override blocking for HELIX*\* and OPENCLAW*\* set in entry.ts
 3. Add whitelist: variables set before plugin initialization are exempt
 
 ### Strategy C: Work With OpenClaw (PREFERRED)
 
 If override blocking allows setup-time writes (most likely):
+
 - No changes needed
 - Just verify via testing
 
@@ -167,6 +174,7 @@ If override blocking allows setup-time writes (most likely):
 ### Findings
 
 **OpenClaw 2026.2.1's "Environment Variable Override Blocking":**
+
 - **What it does**: Blocks dangerous env vars (LD_PRELOAD, NODE_OPTIONS, PYTHONPATH, etc.) when executing host commands via the exec tool
 - **When it applies**: ONLY during command execution (before spawning child processes), NOT at startup
 - **How it works**: Validates user-supplied params.env to exec tool, not the base process.env
@@ -179,6 +187,7 @@ If override blocking allows setup-time writes (most likely):
 The perceived "blocker" is actually a **security feature that protects both OpenClaw and Helix**. It prevents command injection attacks, which Helix also has protections against.
 
 **Helix's Setup Timeline:**
+
 1. entry.ts line 14: `normalizeEnv()` runs
 2. entry.ts line 24-47: **HELIX_ISOLATED_MODE set here** ← Before any OpenClaw code
 3. entry.ts line 202-207: `initializeHelix()` called
@@ -192,12 +201,12 @@ The perceived "blocker" is actually a **security feature that protects both Open
 
 ## Risk Assessment (FINAL)
 
-| Scenario | Probability | Result |
-| --- | --- | --- |
-| Setup-time writes allowed (Strategy C) | 95% | ✅ CONFIRMED |
-| Pattern-based blocking (Strategy B) | 0% | N/A |
-| All writes blocked (Strategy A) | 0% | N/A |
-| No migration issues | 99% | ✅ CONFIRMED |
+| Scenario                               | Probability | Result       |
+| -------------------------------------- | ----------- | ------------ |
+| Setup-time writes allowed (Strategy C) | 95%         | ✅ CONFIRMED |
+| Pattern-based blocking (Strategy B)    | 0%          | N/A          |
+| All writes blocked (Strategy A)        | 0%          | N/A          |
+| No migration issues                    | 99%         | ✅ CONFIRMED |
 
 **Overall Risk**: **ZERO** - Safe to proceed with merge
 
@@ -209,6 +218,7 @@ The perceived "blocker" is actually a **security feature that protects both Open
 **Next Phase**: Phase 2 - Selective Integration (can proceed without concerns)
 
 **Tasks Completed:**
+
 - ✅ Task 1: Analyzed entry.ts isolation setup
 - ✅ Task 2: Analyzed discovery.ts and bundled-dir.ts
 - ✅ Task 3: Researched OpenClaw 2026.2.1 override blocking
@@ -217,11 +227,12 @@ The perceived "blocker" is actually a **security feature that protects both Open
 - ✅ Task 6: Documented all findings
 
 **Deliverables:**
+
 - Investigation Report (this file)
 - Integration analysis in main sync report (updated)
 - Risk assessment showing ZERO blocker risk
 
 ---
 
-*Report completed during Phase 1 Investigation*
-*Ready to proceed: Phase 2 Selective Integration*
+_Report completed during Phase 1 Investigation_
+_Ready to proceed: Phase 2 Selective Integration_

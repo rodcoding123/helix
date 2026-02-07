@@ -81,7 +81,7 @@ const SYSTEM_TEMPLATES: SessionTemplate[] = [
 
 export function SessionTemplatesManager() {
   const { getClient, connected } = useGateway();
-  const [templates, setTemplates] = useState<SessionTemplate[]>(SYSTEM_TEMPLATES);
+  const [templates, _setTemplates] = useState<SessionTemplate[]>(SYSTEM_TEMPLATES);
   const [userTemplates, setUserTemplates] = useState<SessionTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<SessionTemplate | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);

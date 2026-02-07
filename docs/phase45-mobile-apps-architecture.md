@@ -7,6 +7,7 @@ Comprehensive plan for iOS (SwiftUI) and Android (Jetpack Compose) implementatio
 **Goal:** Build native mobile apps for iOS and Android that share the same Supabase backend as web and desktop.
 
 **Architecture:**
+
 ```
 ┌─────────────────────────────────────────────────┐
 │        Helix Mobile Apps (iOS + Android)        │
@@ -939,6 +940,7 @@ fun formatTime(timestamp: String): String {
 Both platforms implement offline message queueing:
 
 **iOS:** UserDefaults serialization
+
 ```swift
 let encoder = JSONEncoder()
 let data = try encoder.encode(queuedMessage)
@@ -946,6 +948,7 @@ UserDefaults.standard.setValue(data, forKey: "message_queue")
 ```
 
 **Android:** Room database
+
 ```kotlin
 @Dao
 interface OfflineSyncDao {
@@ -963,6 +966,7 @@ interface OfflineSyncDao {
 ### Push Notifications
 
 **iOS:** APNs with UserNotifications framework
+
 ```swift
 UNUserNotificationCenter.current()
   .requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
@@ -975,6 +979,7 @@ UNUserNotificationCenter.current()
 ```
 
 **Android:** Firebase Cloud Messaging (FCM)
+
 ```kotlin
 FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
   if (task.isSuccessful) {
@@ -987,6 +992,7 @@ FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
 ### Biometric Authentication
 
 **iOS:** LocalAuthentication framework
+
 ```swift
 let context = LAContext()
 let reason = "Authenticate to unlock Helix"
@@ -1004,6 +1010,7 @@ if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: ni
 ```
 
 **Android:** BiometricPrompt API
+
 ```kotlin
 val biometricPrompt = BiometricPrompt(
   activity,
@@ -1098,18 +1105,21 @@ class ChatViewModelTest {
 ## Timeline
 
 **Phase 4.5 (iOS):** 3-4 weeks
+
 - Week 1: Project setup, models, services
 - Week 2: ViewModels, Supabase integration
 - Week 3: UI implementation (ChatView, SessionList)
 - Week 4: Features (offline, notifications, biometric), testing
 
 **Phase 4.6 (Android):** 3-4 weeks
+
 - Week 1: Project setup, models, services
 - Week 2: ViewModels, Supabase integration, Room database
 - Week 3: UI implementation (ChatScreen, SessionList)
 - Week 4: Features (offline, notifications, biometric), testing
 
 **Phase 4.7 (Quality):** 1 week
+
 - Integration testing across platforms
 - Cross-platform sync testing
 - Performance profiling
@@ -1131,11 +1141,13 @@ class ChatViewModelTest {
 ## Deployment
 
 **iOS:**
+
 - TestFlight for beta testing
 - App Store distribution
 - Automatic updates via App Store
 
 **Android:**
+
 - Google Play Internal Testing
 - Google Play Beta
 - Google Play distribution

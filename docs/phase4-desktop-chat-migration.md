@@ -5,6 +5,7 @@ This document provides the migration path for desktop chat components from the g
 ## Overview
 
 **Current Architecture (Gateway-based):**
+
 ```
 DesktopChat Component
     ↓ (uses gateway-client.ts)
@@ -16,6 +17,7 @@ Cloud API
 ```
 
 **New Architecture (Supabase-based):**
+
 ```
 DesktopChat Component
     ↓ (uses useSupabaseChat hook)
@@ -28,6 +30,7 @@ PostgreSQL Database
 ```
 
 **Key Benefits:**
+
 - ✅ Cross-platform consistency (web, desktop, mobile all use same backend)
 - ✅ Offline-first architecture with automatic sync
 - ✅ Real-time updates via Supabase channels
@@ -39,6 +42,7 @@ PostgreSQL Database
 ### Step 1: Update Imports in Chat Component
 
 **Before:**
+
 ```typescript
 import { getGatewayClient, GatewayClient } from '../lib/gateway-client';
 
@@ -60,6 +64,7 @@ export function DesktopChat() {
 ```
 
 **After:**
+
 ```typescript
 import { useSupabaseChat } from '../hooks/useSupabaseChat';
 
@@ -72,6 +77,7 @@ export function DesktopChat() {
 ### Step 2: Replace Chat Send Logic
 
 **Before:**
+
 ```typescript
 const sendMessage = async (content: string) => {
   try {
@@ -88,6 +94,7 @@ const sendMessage = async (content: string) => {
 ```
 
 **After:**
+
 ```typescript
 // Hook handles all the complexity internally
 const { sendMessage } = useSupabaseChat();
@@ -102,6 +109,7 @@ const handleSendMessage = async (content: string) => {
 ### Step 3: Replace Conversation Management
 
 **Before:**
+
 ```typescript
 const [chatHistory, setChatHistory] = useState<Message[]>([]);
 
@@ -119,6 +127,7 @@ useEffect(() => {
 ```
 
 **After:**
+
 ```typescript
 const { messages, conversation, selectConversation } = useSupabaseChat();
 
@@ -132,6 +141,7 @@ const handleSelectSession = async (sessionKey: string) => {
 ### Step 4: Replace Session List
 
 **Before:**
+
 ```typescript
 const [sessions, setSessions] = useState<any[]>([]);
 
@@ -146,6 +156,7 @@ useEffect(() => {
 ```
 
 **After:**
+
 ```typescript
 const { conversations } = useSupabaseChat();
 // Automatically includes real-time subscription updates
@@ -154,6 +165,7 @@ const { conversations } = useSupabaseChat();
 ### Step 5: Add Offline Status Indicator
 
 **New Capability:**
+
 ```typescript
 const { syncStatus } = useSupabaseChat();
 
@@ -387,7 +399,7 @@ The new architecture automatically handles offline scenarios:
 
 ```typescript
 // User sends message while offline
-await sendMessage("Hello"); // Message queued locally
+await sendMessage('Hello'); // Message queued locally
 
 // Messages are persisted in localStorage
 // When online, automatically synced to Supabase
@@ -395,6 +407,7 @@ await sendMessage("Hello"); // Message queued locally
 ```
 
 **Status Monitoring:**
+
 ```typescript
 const { syncStatus } = useSupabaseChat();
 
@@ -419,6 +432,7 @@ The OpenClaw gateway is still used for non-chat operations:
 - Channels management
 
 **Combined Architecture:**
+
 ```
 Desktop App
   ├── useSupabaseChat (REST API)
@@ -507,24 +521,29 @@ Gateway client is not removed, only supplemented.
 ## Performance Considerations
 
 **Message Loading:**
+
 - OLD: Single request to gateway, then polling
 - NEW: Initial REST query, then real-time subscription (faster, less polling)
 
 **Conversation List:**
+
 - OLD: Single request to gateway periodically
 - NEW: Real-time subscription, instant updates
 
 **Offline:**
+
 - OLD: Messages lost when offline
 - NEW: Messages queued locally with automatic sync
 
 **Storage:**
+
 - Queue persisted to localStorage (5-10KB per 100 messages)
 - Automatic cleanup on successful sync
 
 ## Next Steps
 
 After desktop chat migration:
+
 1. Phase 4.5: iOS Swift app
 2. Phase 4.6: Android Kotlin app
 3. Phase 4.7: Quality checks

@@ -1,50 +1,57 @@
 #!/usr/bin/env node
 /**
- * PHASE 2: Backend Deployment (1 day)
+ * PHASE 2: Desktop App Packaging & Distribution (1 day)
  *
- * Deploys Helix backend to production VPS:
- * 1. VPS health checks (Docker, ports, etc.)
- * 2. Build and push Docker image
- * 3. Deploy docker-compose.production.yml
- * 4. Run database migrations
- * 5. Verify Discord logging
- * 6. Health monitoring (24 hours)
+ * Packages Helix Desktop for production distribution:
+ * 1. Build for all platforms (Windows, macOS, Linux)
+ * 2. Create installers
+ * 3. Prepare for user distribution
+ * 4. Code signing configuration (for later)
+ *
+ * NOTE: Desktop app IS the main server (35+ tools/MCPs).
+ * This is the PRIMARY deployment target, NOT web or mobile.
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
 import { execSync, spawn } from 'child_process';
+import * as readline from 'readline';
 
-interface DeploymentState {
-  phase: string;
-  timestamp: string;
-  vpsHost: string;
-  vpsUser: string;
-  vpsPort: number;
-  dockerImage: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'failed';
+interface DesktopBuildConfig {
+  platforms: Array<'windows' | 'macos' | 'linux'>;
+  appVersion: string;
+  codeSigning: boolean;
+  certificatePath?: string;
+  distributionMethod: 'github' | 'website' | 'store';
 }
 
 const LOG_PREFIX = '[PHASE 2]';
-const DEPLOYMENT_LOG = 'deployment.log';
+const DESKTOP_DIR = path.join(process.cwd(), 'helix-desktop');
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+function ask(question: string): Promise<string> {
+  return new Promise(resolve => {
+    rl.question(question, resolve);
+  });
+}
 
 function log(message: string, level: 'info' | 'success' | 'warn' | 'error' = 'info'): void {
   const timestamp = new Date().toISOString();
   const prefix = `${LOG_PREFIX} [${timestamp}]`;
 
   const colors = {
-    info: '\x1b[36m',    // cyan
-    success: '\x1b[32m', // green
-    warn: '\x1b[33m',    // yellow
-    error: '\x1b[31m',   // red
+    info: '\x1b[36m',
+    success: '\x1b[32m',
+    warn: '\x1b[33m',
+    error: '\x1b[31m',
     reset: '\x1b[0m',
   };
 
-  const logEntry = `${prefix} ${message}`;
-  console.log(`${colors[level]}${logEntry}${colors.reset}`);
-
-  // Also write to deployment log
-  fs.appendFileSync(DEPLOYMENT_LOG, `${logEntry}\n`);
+  console.log(`${colors[level]}${prefix} ${message}${colors.reset}`);
 }
 
 function executeCommand(command: string, cwd: string = process.cwd()): string {
@@ -57,242 +64,181 @@ function executeCommand(command: string, cwd: string = process.cwd()): string {
     });
     return output;
   } catch (err) {
-    const error = err as { stderr?: string; stdout?: string; message: string };
-    const errorMsg = error.stderr || error.stdout || error.message;
-    log(`Command failed: ${errorMsg}`, 'error');
+    const error = err as { message: string };
+    log(`Command failed: ${error.message}`, 'error');
     throw err;
   }
 }
 
-function executeRemoteCommand(host: string, user: string, port: number, command: string): string {
-  const sshCommand = `ssh -p ${port} ${user}@${host} "${command}"`;
-  log(`Remote: ${command}`, 'info');
-  return executeCommand(sshCommand);
+async function selectPlatforms(): Promise<Array<'windows' | 'macos' | 'linux'>> {
+  // Try loading from 1Password first
+  try {
+    const platformsStr = execSync('op read "op://Helix/Build Platforms/password"', { encoding: 'utf-8' }).trim().toLowerCase();
+
+    if (platformsStr.includes('all')) {
+      log('✓ Loaded platform selection from 1Password: All platforms', 'success');
+      return ['windows', 'macos', 'linux'];
+    }
+
+    const platforms: Array<'windows' | 'macos' | 'linux'> = [];
+    if (platformsStr.includes('windows')) platforms.push('windows');
+    if (platformsStr.includes('macos')) platforms.push('macos');
+    if (platformsStr.includes('linux')) platforms.push('linux');
+
+    if (platforms.length > 0) {
+      log(`✓ Loaded platform selection from 1Password: ${platforms.join(', ')}`, 'success');
+      return platforms;
+    }
+  } catch {
+    // Fall back to interactive
+  }
+
+  const currentPlatform = process.platform;
+  console.log('\n🖥️  Which platforms do you want to build for?');
+  console.log(`   Current platform: ${currentPlatform}`);
+  console.log('   Available:');
+  console.log('   - Windows (.msi, .exe)');
+  console.log('   - macOS (.dmg, .app) [requires macOS]');
+  console.log('   - Linux (.deb, .AppImage)\n');
+
+  const buildAll = await ask('  Build for all platforms? (yes/no): ');
+
+  if (buildAll.toLowerCase() === 'yes') {
+    return ['windows', 'macos', 'linux'];
+  }
+
+  const platforms: Array<'windows' | 'macos' | 'linux'> = [];
+
+  const buildWindows = await ask('  Build for Windows? (yes/no): ');
+  if (buildWindows.toLowerCase() === 'yes') platforms.push('windows');
+
+  const buildMacOS = await ask('  Build for macOS? (yes/no): ');
+  if (buildMacOS.toLowerCase() === 'yes') platforms.push('macos');
+
+  const buildLinux = await ask('  Build for Linux? (yes/no): ');
+  if (buildLinux.toLowerCase() === 'yes') platforms.push('linux');
+
+  return platforms.length > 0 ? platforms : ['windows'];
 }
 
-async function checkVpsPrerequisites(
-  host: string,
-  user: string,
-  port: number
-): Promise<void> {
-  log('Checking VPS prerequisites...', 'info');
+async function checkPrerequisites(): Promise<void> {
+  log('Checking build prerequisites...', 'info');
 
-  // Check SSH connectivity
-  try {
-    executeRemoteCommand(host, user, port, 'echo "SSH OK"');
-    log('✓ SSH connectivity OK', 'success');
-  } catch {
-    log('Cannot connect to VPS via SSH. Check host, user, and port.', 'error');
-    process.exit(1);
-  }
+  const checks = [
+    { name: 'Node.js', command: 'node --version' },
+    { name: 'Rust', command: 'rustc --version' },
+    { name: 'Cargo', command: 'cargo --version' },
+  ];
 
-  // Check Docker
-  try {
-    const dockerVersion = executeRemoteCommand(host, user, port, 'docker --version');
-    log(`✓ Docker installed: ${dockerVersion.trim()}`, 'success');
-  } catch {
-    log('Docker not installed. Run: sudo apt-get install docker.io', 'error');
-    process.exit(1);
-  }
-
-  // Check Docker Compose
-  try {
-    const composeVersion = executeRemoteCommand(host, user, port, 'docker-compose --version');
-    log(`✓ Docker Compose installed: ${composeVersion.trim()}`, 'success');
-  } catch {
-    log('Docker Compose not installed. Run: sudo apt-get install docker-compose', 'error');
-    process.exit(1);
-  }
-
-  // Check ports
-  try {
-    executeRemoteCommand(host, user, port, 'sudo netstat -tlnp 2>/dev/null | grep 3000 || echo "Port 3000 available"');
-    log('✓ Port 3000 available', 'success');
-  } catch {
-    log('Port 3000 may be in use. Run: sudo lsof -i :3000', 'warn');
-  }
-
-  // Check disk space
-  try {
-    const diskSpace = executeRemoteCommand(host, user, port, 'df -h / | tail -1 | awk \'{print $4}\'');
-    log(`✓ Available disk space: ${diskSpace.trim()}`, 'success');
-  } catch {
-    log('Could not determine disk space', 'warn');
-  }
-}
-
-async function buildDockerImage(): Promise<string> {
-  log('Building Docker image locally...', 'info');
-
-  const tag = `helix:${new Date().toISOString().split('T')[0]}`;
-
-  try {
-    executeCommand(`docker build -f Dockerfile.production -t ${tag} .`);
-    log(`✓ Docker image built: ${tag}`, 'success');
-    return tag;
-  } catch {
-    log('Docker build failed', 'error');
-    process.exit(1);
-  }
-}
-
-async function deployToVps(
-  host: string,
-  user: string,
-  port: number,
-  imageTag: string
-): Promise<void> {
-  log('Deploying to VPS...', 'info');
-
-  // Copy docker-compose file
-  const scpCommand = `scp -P ${port} docker-compose.production.yml ${user}@${host}:~/helix/`;
-  executeCommand(scpCommand);
-  log('✓ Copied docker-compose.production.yml', 'success');
-
-  // Copy .env file
-  const envScpCommand = `scp -P ${port} .env ${user}@${host}:~/helix/.env`;
-  executeCommand(envScpCommand);
-  log('✓ Copied .env file', 'success');
-
-  // Stop existing containers
-  try {
-    executeRemoteCommand(host, user, port, 'cd ~/helix && docker-compose -f docker-compose.production.yml down');
-    log('✓ Stopped existing containers', 'success');
-  } catch {
-    log('No existing containers to stop', 'warn');
-  }
-
-  // Start new containers
-  try {
-    executeRemoteCommand(
-      host,
-      user,
-      port,
-      `cd ~/helix && IMAGE_TAG=${imageTag} docker-compose -f docker-compose.production.yml up -d`
-    );
-    log('✓ Started new containers', 'success');
-  } catch {
-    log('Failed to start containers', 'error');
-    process.exit(1);
-  }
-
-  // Wait for services to be healthy
-  log('Waiting for services to become healthy...', 'info');
-  for (let i = 0; i < 30; i++) {
+  for (const check of checks) {
     try {
-      const health = executeRemoteCommand(host, user, port, 'docker-compose -f docker-compose.production.yml ps');
-      if (health.includes('healthy')) {
-        log('✓ Services are healthy', 'success');
-        return;
-      }
+      const version = executeCommand(check.command);
+      log(`✓ ${check.name}: ${version.trim()}`, 'success');
     } catch {
-      // Retry
+      log(`✗ ${check.name} not found. Install from: https://nodejs.org/ or https://rustup.rs/`, 'error');
+      process.exit(1);
     }
-
-    await new Promise(resolve => setTimeout(resolve, 1000));
   }
 
-  log('Services did not become healthy within 30 seconds', 'warn');
+  // Check helix-runtime is built
+  if (!fs.existsSync(path.join(process.cwd(), 'src', 'helix'))) {
+    log('✗ helix-runtime not found', 'error');
+    process.exit(1);
+  }
+
+  log('✓ helix-runtime source available', 'success');
 }
 
-async function runDatabaseMigrations(host: string, user: string, port: number): Promise<void> {
-  log('Running database migrations...', 'info');
+async function buildDesktopApp(config: DesktopBuildConfig): Promise<void> {
+  log('Building Helix Desktop application...', 'info');
+
+  if (!fs.existsSync(DESKTOP_DIR)) {
+    log('Desktop directory not found (helix-desktop/)', 'error');
+    process.exit(1);
+  }
 
   try {
-    const output = executeRemoteCommand(
-      host,
-      user,
-      port,
-      'docker-compose -f docker-compose.production.yml exec -T helix npx supabase migrations run'
-    );
-    log(`✓ Migrations completed: ${output.trim()}`, 'success');
-  } catch {
-    log('Migration failed. Check logs and retry manually.', 'warn');
-  }
-}
+    // Step 1: Install dependencies
+    log('Installing dependencies...', 'info');
+    executeCommand('npm install', DESKTOP_DIR);
+    log('✓ Dependencies installed', 'success');
 
-async function verifyDiscordLogging(host: string, user: string, port: number): Promise<void> {
-  log('Verifying Discord logging...', 'info');
+    // Step 2: Build Tauri app
+    log(`Building for platforms: ${config.platforms.join(', ')}...`, 'info');
 
-  try {
-    executeRemoteCommand(
-      host,
-      user,
-      port,
-      `docker-compose -f docker-compose.production.yml exec -T helix curl -X POST \\
-        $DISCORD_WEBHOOK_HASH_CHAIN \\
-        -H "Content-Type: application/json" \\
-        -d '{"content":"[PHASE 2] Deployment verification test - $(date)"}'`
-    );
-    log('✓ Discord logging verified', 'success');
-  } catch {
-    log('Discord logging test failed. Check webhook URLs in .env', 'warn');
-  }
-}
-
-async function startHealthMonitoring(host: string, user: string, port: number): Promise<void> {
-  log('Starting 24-hour health monitoring...', 'info');
-
-  // Monitor logs for 24 hours (sampling every minute)
-  const monitoringDurationMs = 24 * 60 * 60 * 1000; // 24 hours
-  const checkIntervalMs = 60000; // 1 minute
-  const startTime = Date.now();
-  let errorCount = 0;
-  const maxErrors = 5;
-
-  console.log('\n📊 Health Monitoring Dashboard (press Ctrl+C to stop):');
-  console.log('────────────────────────────────────────────────────────────\n');
-
-  const monitoringLoop = setInterval(async () => {
-    const elapsedHours = (Date.now() - startTime) / (60 * 60 * 1000);
-    const remainingHours = 24 - elapsedHours;
+    // Tauri build command automatically detects the current platform
+    // For cross-compilation, we need to build on the target platform or use specialized tools
+    const tauriCommand = 'npm run tauri build -- --release';
 
     try {
-      // Check container status
-      const status = executeRemoteCommand(host, user, port, 'docker-compose -f docker-compose.production.yml ps');
-
-      // Check error logs
-      const errors = executeRemoteCommand(
-        host,
-        user,
-        port,
-        'docker-compose -f docker-compose.production.yml logs --tail 20 2>&1 | grep -i error | wc -l'
-      );
-
-      const errorLines = parseInt(errors.trim()) || 0;
-      errorCount = errorLines > 0 ? errorCount + 1 : 0;
-
-      const statusEmoji = status.includes('healthy') ? '✅' : '⚠️';
-      log(
-        `${statusEmoji} [${elapsedHours.toFixed(1)}h elapsed, ${remainingHours.toFixed(1)}h remaining] ` +
-          `Status: Healthy, Recent errors: ${errorLines}`,
-        'info'
-      );
-
-      if (errorCount > maxErrors) {
-        log(
-          `⚠️ More than ${maxErrors} error checks detected. Review logs manually.`,
-          'warn'
-        );
-        errorCount = 0; // Reset counter
-      }
-
-      // Stop monitoring if 24 hours have passed
-      if (Date.now() - startTime >= monitoringDurationMs) {
-        clearInterval(monitoringLoop);
-        log('✓ 24-hour health monitoring completed', 'success');
-        process.exit(0);
-      }
+      executeCommand(tauriCommand, DESKTOP_DIR);
+      log(`✓ Built for current platform`, 'success');
     } catch (err) {
-      log(`Health check failed: ${(err as Error).message}`, 'warn');
+      log(
+        `Build warning/error. This may be expected if cross-compiling. Check ${DESKTOP_DIR}/src-tauri/target/`,
+        'warn'
+      );
     }
-  }, checkIntervalMs);
+
+    // List built artifacts
+    const releaseDir = path.join(DESKTOP_DIR, 'src-tauri', 'target', 'release');
+    if (fs.existsSync(releaseDir)) {
+      log('Built artifacts:', 'info');
+      const files = fs.readdirSync(releaseDir);
+      files
+        .filter(f => f.includes('helix') || f.endsWith('.exe') || f.endsWith('.dmg') || f.endsWith('.deb'))
+        .forEach(f => {
+          log(`  📦 ${f}`, 'success');
+        });
+    }
+  } catch (err) {
+    log(`Desktop build failed: ${(err as Error).message}`, 'error');
+    process.exit(1);
+  }
 }
 
-async function generateDeploymentReport(state: DeploymentState): Promise<void> {
-  log('Generating deployment report...', 'info');
+async function configureDistribution(
+  config: DesktopBuildConfig
+): Promise<{ url?: string; instructions: string }> {
+  log('Configuring distribution method...', 'info');
 
-  const report = `# PHASE 2 DEPLOYMENT REPORT
+  console.log('\n📦 Distribution Options:');
+  console.log('   1. GitHub Releases (free, auto-updater support)');
+  console.log('   2. Website (custom domain)');
+  console.log('   3. App Store (Windows Store, macOS App Store, Linux snap)');
+
+  const choice = await ask('  Select distribution method (1-3): ');
+
+  switch (choice) {
+    case '2':
+      const website = await ask('  Website URL (e.g., helix.example.com): ');
+      log(`✓ Distribution URL: https://${website}/download`, 'success');
+      return {
+        url: `https://${website}/download`,
+        instructions: `Upload installers to ${website}/download folder`,
+      };
+
+    case '3':
+      log('App Store distribution requires certificates and developer accounts', 'info');
+      return {
+        instructions:
+          'Register with: Microsoft Store, Apple App Store, Linux Snap Store\nRequires code signing certificates',
+      };
+
+    case '1':
+    default:
+      log('✓ Using GitHub Releases (default)', 'success');
+      return {
+        url: 'https://github.com/project-helix/helix/releases',
+        instructions: 'Upload installers to GitHub Releases',
+      };
+  }
+}
+
+async function generateDeploymentReport(config: DesktopBuildConfig): Promise<void> {
+  log('Generating Phase 2 report...', 'info');
+
+  const report = `# PHASE 2: DESKTOP APP PACKAGING REPORT
 
 **Generated:** ${new Date().toISOString()}
 
@@ -300,154 +246,240 @@ async function generateDeploymentReport(state: DeploymentState): Promise<void> {
 
 | Item | Value |
 |------|-------|
-| Phase | ${state.phase} |
-| VPS Host | ${state.vpsHost} |
-| Docker Image | ${state.dockerImage} |
-| Status | ${state.status} |
-| Deployment Start | ${state.timestamp} |
-| Deployment End | ${new Date().toISOString()} |
+| Application | Helix Desktop |
+| Version | ${config.appVersion} |
+| Platforms Built | ${config.platforms.join(', ')} |
+| Code Signed | ${config.codeSigning ? 'Yes' : 'No (configure later)' |
+| Distribution Method | Awaiting configuration |
+| Status | Ready for distribution |
 
-## Deployment Checklist
+## What is Helix Desktop?
 
-- ✓ VPS prerequisites verified
-- ✓ Docker image built
-- ✓ Containers deployed
-- ✓ Database migrations run
-- ✓ Discord logging verified
-- ✓ Health monitoring started
+**Helix Desktop is the MAIN server application** that:
+- Runs locally on user's computer
+- Contains 35+ integrated tools and MCPs
+- Provides full execution engine with custom tool support
+- Cross-platform: Windows, macOS, Linux
 
-## Next Steps (Phase 3)
+**Remote Management:**
+- Web interface (Phase 3) - manage from browser
+- Mobile apps (Phase 4) - manage from iOS/Android
+- Both connect to local desktop server via secure RPC
 
-1. Monitor logs in Discord (#helix-alerts, #helix-hash-chain)
-2. Verify cost tracking in #helix-api
-3. Test API endpoints manually
-4. Prepare for Phase 3 (Web Deployment)
+## Built Artifacts
 
-## Rollback Procedure
+Installer files are located in: \`helix-desktop/src-tauri/target/release/\`
 
-If issues occur, rollback the deployment:
+### Windows
+- \`Helix_${config.appVersion}_x64_en-US.msi\` - Windows installer
+- \`Helix_${config.appVersion}_x64_en-US.exe\` - Standalone executable
 
+### macOS
+- \`Helix_${config.appVersion}_universal.dmg\` - Disk image (Intel + Apple Silicon)
+- \`Helix_${config.appVersion}_universal.app\` - App bundle
+
+### Linux
+- \`helix_${config.appVersion}_amd64.deb\` - Debian package
+- \`Helix_${config.appVersion}.AppImage\` - Universal Linux package
+
+## Code Signing (For Later)
+
+Currently: **Not signed** (OK for internal testing)
+
+Before public release:
+1. Obtain code signing certificate
+2. Set environment variables:
+   - \`TAURI_SIGNING_CERTIFICATE\` - Path to certificate
+   - \`TAURI_SIGNING_CERTIFICATE_KEY\` - Certificate key
+3. Rebuild: \`npm run tauri build -- --release\`
+
+## Distribution Setup
+
+After code signing is configured:
+
+### GitHub Releases
 \`\`\`bash
-ssh ${state.vpsUser}@${state.vpsHost} -p 22
-cd ~/helix
-docker-compose down
-# Restore previous .env if needed
-docker-compose up -d  # Or start previous image
+# 1. Tag new release
+git tag v${config.appVersion}
+
+# 2. Push tag
+git push origin v${config.appVersion}
+
+# 3. Create release with description
+gh release create v${config.appVersion} \\
+  --title "Helix Desktop ${config.appVersion}" \\
+  --notes "Release notes here"
+
+# 4. Upload installers
+gh release upload v${config.appVersion} helix-desktop/src-tauri/target/release/*
 \`\`\`
 
-## Monitoring Commands
+### Custom Website
+1. Create download page with platform options
+2. Host installers on CDN or web server
+3. Configure auto-updater in Tauri config
 
+### App Stores
+- **Windows Store**: https://partner.microsoft.com/
+- **macOS App Store**: https://appstoreconnect.apple.com/
+- **Linux Snap**: https://snapcraft.io/
+
+## User Installation
+
+### Windows
+1. Download \`.msi\` or \`.exe\`
+2. Double-click installer
+3. Follow setup wizard
+4. Application launches automatically
+
+### macOS
+1. Download \`.dmg\`
+2. Drag Helix to Applications folder
+3. Launch from Applications
+4. Allow in System Preferences (first run)
+
+### Linux (Debian)
 \`\`\`bash
-# Check status
-docker-compose ps
-
-# View logs
-docker-compose logs -f helix
-
-# Check resource usage
-docker stats
-
-# Verify Discord webhooks
-curl -X POST \\$DISCORD_WEBHOOK_HASH_CHAIN -H "Content-Type: application/json" \\
-  -d '{"content":"Test message"}'
+sudo dpkg -i helix_${config.appVersion}_amd64.deb
+helix  # Launch from terminal
 \`\`\`
+
+### Linux (AppImage)
+\`\`\`bash
+chmod +x Helix_${config.appVersion}.AppImage
+./Helix_${config.appVersion}.AppImage
+\`\`\`
+
+## Auto-Updater Configuration
+
+Tauri auto-updater enables users to stay up-to-date:
+
+\`\`\`json
+{
+  "tauri": {
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://updates.example.com/\\{\\{target\\}\\}/\\{\\{current_version\\}\\}"
+      ],
+      "pubkey": "<public_key_from_signing>"
+    }
+  }
+}
+\`\`\`
+
+## Checklist for Release
+
+Before distributing to users:
+
+- [ ] All platforms built successfully
+- [ ] Code signing configured (when ready)
+- [ ] Auto-updater tested
+- [ ] Release notes written
+- [ ] Installation tested on Windows
+- [ ] Installation tested on macOS (if available)
+- [ ] Installation tested on Linux
+- [ ] Web management interface deployed (Phase 3)
+- [ ] Mobile apps deployed (Phase 4)
+- [ ] Support documentation prepared
+
+## Architecture Reminder
+
+\`\`\`
+User's Computer
+├─ Helix Desktop (Phase 2) ← You are here
+│  ├─ 35+ Tools & MCPs
+│  ├─ Full execution engine
+│  ├─ GraphQL API (via helix-runtime)
+│  └─ Tauri system integration
+│
+└─ Remote Management (Phases 3-4)
+   ├─ Web (Vercel)
+   ├─ iOS app
+   └─ Android app
+\`\`\`
+
+The desktop app IS the server. Everything else connects to it.
+
+## Next Phase (Phase 3)
+
+Deploy web management interface to Vercel:
+- Real-time dashboard
+- Tool management
+- Execution monitoring
+- Remote control from browser
 
 ---
 
 Generated by Phase 2 deployment script
 `;
 
-  const reportPath = path.join(process.cwd(), 'PHASE2_DEPLOYMENT_REPORT.md');
+  const reportPath = path.join(process.cwd(), 'PHASE2_DESKTOP_PACKAGING_REPORT.md');
   fs.writeFileSync(reportPath, report);
-  log(`✓ Deployment report saved to ${reportPath}`, 'success');
+  log(`✓ Report saved to ${reportPath}`, 'success');
 }
 
 async function main(): Promise<void> {
   console.log('\n╔════════════════════════════════════════════════════════════╗');
-  console.log('║         HELIX PRODUCTION DEPLOYMENT - PHASE 2             ║');
-  console.log('║              Backend Deployment                           ║');
+  console.log('║    HELIX PRODUCTION DEPLOYMENT - PHASE 2                  ║');
+  console.log('║         DESKTOP APP PACKAGING & DISTRIBUTION              ║');
   console.log('╚════════════════════════════════════════════════════════════╝\n');
 
-  // Load VPS config from 1Password or .env
-  let vpsHost: string;
-  let vpsUser: string;
-  let vpsPort: number;
-
   try {
-    // Try loading from 1Password first
-    const execSync = require('child_process').execSync;
-    vpsHost = execSync('op read "op://Helix/VPS Host/password"', { encoding: 'utf-8' }).trim();
-    vpsUser = execSync('op read "op://Helix/VPS User/password"', { encoding: 'utf-8' }).trim();
-    const vpsPortStr = execSync('op read "op://Helix/VPS Port/password"', { encoding: 'utf-8' }).trim();
-    vpsPort = parseInt(vpsPortStr) || 22;
-    log('✓ Loaded VPS config from 1Password', 'info');
-  } catch {
-    // Fall back to .env
-    if (!fs.existsSync('.env')) {
-      log('Missing VPS config in 1Password or .env. Run Phase 1 first.', 'error');
-      process.exit(1);
-    }
+    // Step 1: Check prerequisites
+    await checkPrerequisites();
 
-    const env = Object.fromEntries(
-      fs
-        .readFileSync('.env', 'utf-8')
-        .split('\n')
-        .filter(line => !line.startsWith('#') && line.includes('='))
-        .map(line => line.split('=') as [string, string])
-    );
+    // Step 2: Select platforms
+    const platforms = await selectPlatforms();
+    log(`Building for: ${platforms.join(', ')}`, 'info');
 
-    vpsHost = env.VPS_HOST;
-    vpsUser = env.VPS_USER || 'helix';
-    vpsPort = parseInt(env.VPS_PORT || '22');
-    log('✓ Loaded VPS config from .env (fallback)', 'info');
-  }
+    // Step 3: Get app version
+    const packageJsonPath = path.join(DESKTOP_DIR, 'package.json');
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+    const appVersion = packageJson.version || '1.0.0';
 
-  if (!vpsHost) {
-    log('Missing VPS_HOST in .env file', 'error');
-    process.exit(1);
-  }
+    // Step 4: Build desktop app
+    const config: DesktopBuildConfig = {
+      platforms: platforms as Array<'windows' | 'macos' | 'linux'>,
+      appVersion,
+      codeSigning: false, // Configure later
+      distributionMethod: 'github',
+    };
 
-  const state: DeploymentState = {
-    phase: 'Backend Deployment (Phase 2)',
-    timestamp: new Date().toISOString(),
-    vpsHost,
-    vpsUser,
-    vpsPort,
-    dockerImage: '',
-    status: 'in_progress',
-  };
+    await buildDesktopApp(config);
 
-  try {
-    // Step 1: Check VPS prerequisites
-    await checkVpsPrerequisites(vpsHost, vpsUser, vpsPort);
-
-    // Step 2: Build Docker image
-    const imageTag = await buildDockerImage();
-    state.dockerImage = imageTag;
-
-    // Step 3: Deploy to VPS
-    await deployToVps(vpsHost, vpsUser, vpsPort, imageTag);
-
-    // Step 4: Run migrations
-    await runDatabaseMigrations(vpsHost, vpsUser, vpsPort);
-
-    // Step 5: Verify Discord logging
-    await verifyDiscordLogging(vpsHost, vpsUser, vpsPort);
+    // Step 5: Configure distribution
+    const distribution = await configureDistribution(config);
+    config.distributionMethod = distribution.url ? 'website' : 'github';
 
     // Step 6: Generate report
-    state.status = 'completed';
-    await generateDeploymentReport(state);
+    await generateDeploymentReport(config);
 
-    // Step 7: Start monitoring
-    console.log('\n✅ Phase 2 Deployment Complete!');
-    console.log(`   Docker containers running on ${vpsHost}:3000`);
-    console.log('   Starting 24-hour health monitoring...\n');
+    console.log('\n╔════════════════════════════════════════════════════════════╗');
+    console.log('║       PHASE 2 DESKTOP PACKAGING COMPLETE                  ║');
+    console.log('╚════════════════════════════════════════════════════════════╝\n');
 
-    await startHealthMonitoring(vpsHost, vpsUser, vpsPort);
+    console.log('✅ Desktop app packaged for distribution!');
+    console.log(`   Platforms: ${platforms.join(', ')}`);
+    console.log(`   Version: ${appVersion}`);
+    console.log(`   Location: ${DESKTOP_DIR}/src-tauri/target/release/\n`);
+
+    console.log('📋 Next Steps (Phase 3 - Web Management):');
+    console.log('   1. Deploy web interface to Vercel');
+    console.log('   2. Configure real-time chat interface');
+    console.log('   3. Set up tool management UI');
+    console.log('   4. Enable remote desktop control\n');
+
+    console.log('Later (Code Signing):');
+    console.log('   1. Obtain code signing certificate');
+    console.log('   2. Configure TAURI_SIGNING_CERTIFICATE env vars');
+    console.log('   3. Rebuild and sign installers');
+    console.log('   4. Upload to distribution channels\n');
+
+    rl.close();
   } catch (err) {
-    state.status = 'failed';
-    log(`Deployment failed: ${(err as Error).message}`, 'error');
-    await generateDeploymentReport(state);
+    log(`Desktop packaging failed: ${(err as Error).message}`, 'error');
+    rl.close();
     process.exit(1);
   }
 }

@@ -11,6 +11,12 @@
   },
   "app": {
     "withGlobalTauri": true,
+    "protocol": {
+      "assetScope": {
+        "enable": true,
+        "scope": ["**"]
+      }
+    },
     "windows": [
       {
         "title": "Helix",
@@ -70,6 +76,22 @@
       }
     }
   },
+  "protocol": [
+    {
+      "schemes": ["helix"],
+      "frozenScheme": false,
+      "handlers": [
+        {
+          "multipleInstances": false,
+          "protocol": "helix",
+          "command": {
+            "name": "handle_deep_link",
+            "args": ["--deep-link", "$PAYLOAD"]
+          }
+        }
+      ]
+    }
+  ],
   "plugins": {
     "shell": {
       "open": true

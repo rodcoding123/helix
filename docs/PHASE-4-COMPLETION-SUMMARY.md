@@ -14,6 +14,7 @@ Phase 4 unified Helix's chat experience across web, desktop, and mobile platform
 ### Architecture Transformation
 
 **Before Phase 4:**
+
 ```
 Web (React)          Desktop (Tauri)       Mobile (None)
     ↓                      ↓
@@ -23,6 +24,7 @@ PostgreSQL          OpenClaw Gateway
 ```
 
 **After Phase 4:**
+
 ```
 Web (React)        Desktop (Tauri)        iOS (SwiftUI)        Android (Compose)
     ↓                  ↓                      ↓                      ↓
@@ -38,6 +40,7 @@ Web (React)        Desktop (Tauri)        iOS (SwiftUI)        Android (Compose)
 ### Phase 4.1: Desktop Supabase Integration ✅
 
 **Files Created:**
+
 - `helix-desktop/src/lib/supabase-desktop-client.ts` (285 lines)
   - Main Supabase client for desktop
   - Message queueing for offline support
@@ -45,6 +48,7 @@ Web (React)        Desktop (Tauri)        iOS (SwiftUI)        Android (Compose)
   - Conversation management
 
 **Key Features:**
+
 - Message send/receive with optimistic UI
 - Offline message queueing (persisted)
 - Real-time channel subscriptions
@@ -52,6 +56,7 @@ Web (React)        Desktop (Tauri)        iOS (SwiftUI)        Android (Compose)
 - Session management
 
 **Code Quality:**
+
 - ✅ TypeScript strict mode
 - ✅ Full type safety
 - ✅ Error handling with graceful degradation
@@ -61,9 +66,11 @@ Web (React)        Desktop (Tauri)        iOS (SwiftUI)        Android (Compose)
 ### Phase 4.2: Offline Sync Queue ✅
 
 **Files Created:**
+
 - `helix-desktop/src/lib/offline-sync-queue.ts` (220 lines)
 
 **Features:**
+
 - Message persistence to localStorage
 - Exponential backoff retry logic
 - Duplicate prevention
@@ -71,16 +78,17 @@ Web (React)        Desktop (Tauri)        iOS (SwiftUI)        Android (Compose)
 - Observer pattern for sync notifications
 
 **Implementation Details:**
+
 ```typescript
 // Automatic persistence
-queue.queueMessage(message);  // Saved to localStorage
+queue.queueMessage(message); // Saved to localStorage
 
 // Automatic retry with backoff
 // Failed messages retry up to 5 times
 // Delay grows: 1s → 2s → 4s → 8s → 16s
 
 // Status subscription
-queue.onStatusChange((status) => {
+queue.onStatusChange(status => {
   console.log(`Queue: ${status.queueLength} messages pending`);
 });
 ```
@@ -90,9 +98,11 @@ queue.onStatusChange((status) => {
 ### Phase 4.3: React Hooks for Desktop ✅
 
 **Files Created:**
+
 - `helix-desktop/src/hooks/useSupabaseChat.ts` (280 lines)
 
 **Features:**
+
 - Complete chat state management
 - Real-time message sync
 - Conversation lifecycle
@@ -100,6 +110,7 @@ queue.onStatusChange((status) => {
 - Helix context loading
 
 **API:**
+
 ```typescript
 const {
   // State
@@ -123,10 +134,12 @@ const {
 ### Phase 4.4: Reference UI Implementation ✅
 
 **Files Created:**
+
 - `helix-desktop/src/components/chat/DesktopChatRefactored.tsx` (450 lines)
 - `docs/phase4-desktop-chat-migration.md` (Comprehensive migration guide)
 
 **Features:**
+
 - Fixed scrolling bug (tracks user scroll position)
 - Conversation sidebar with search
 - Real-time message updates
@@ -136,6 +149,7 @@ const {
 
 **Migration Path:**
 The migration guide provides:
+
 - Side-by-side before/after code comparisons
 - Step-by-step migration instructions
 - Component-level examples
@@ -147,11 +161,13 @@ The migration guide provides:
 ### Phase 4.5: iOS App Architecture ✅
 
 **Files Created:**
+
 - `docs/phase45-mobile-apps-architecture.md` (1200+ lines)
 
 **Comprehensive Plan Includes:**
 
 1. **Project Structure**
+
    ```
    HelixApp/
    ├── Models/          (Message, Conversation, User)
@@ -191,6 +207,7 @@ The migration guide provides:
 **Comprehensive Plan Includes:**
 
 1. **Project Structure**
+
    ```
    helix-mobile/android/
    ├── data/           (Models, Repository, Local DB)
@@ -228,6 +245,7 @@ The migration guide provides:
 ### Phase 4.7: Quality Assurance ✅
 
 **Test Results:**
+
 ```
 ✅ 2376 / 2377 tests passing (99.96%)
 ✅ All existing tests still pass
@@ -237,6 +255,7 @@ The migration guide provides:
 ```
 
 **Verification:**
+
 - ✅ TypeScript type checking
 - ✅ Unit tests
 - ✅ Integration tests
@@ -248,25 +267,30 @@ The migration guide provides:
 ## Key Achievements
 
 ### 1. Unified Backend
+
 - **Before:** Web (Supabase), Desktop (Gateway), Mobile (N/A)
 - **After:** All platforms use Supabase REST + Realtime
 
 ### 2. Offline-First Architecture
+
 - Messages queue locally when offline
 - Automatic sync when reconnected
 - Persistence via localStorage (web) / UserDefaults (iOS) / Room (Android)
 
 ### 3. Real-Time Synchronization
+
 - Message updates via Supabase channels
 - <100ms sync latency across platforms
 - Automatic subscription management
 
 ### 4. Cross-Platform Code Sharing
+
 - Shared data models (Message, Conversation)
 - Shared Supabase schema
 - Platform-specific UI implementations
 
 ### 5. Complete Documentation
+
 - Migration guides
 - Code examples
 - Architecture diagrams
@@ -277,17 +301,20 @@ The migration guide provides:
 ## Files Created
 
 ### TypeScript/JavaScript (Desktop)
+
 1. `helix-desktop/src/lib/supabase-desktop-client.ts` (285 lines)
 2. `helix-desktop/src/lib/offline-sync-queue.ts` (220 lines)
 3. `helix-desktop/src/hooks/useSupabaseChat.ts` (280 lines)
 4. `helix-desktop/src/components/chat/DesktopChatRefactored.tsx` (450 lines)
 
 ### Documentation
+
 1. `docs/phase4-desktop-chat-migration.md` (600+ lines)
 2. `docs/phase45-mobile-apps-architecture.md` (1200+ lines)
 3. `docs/PHASE-4-COMPLETION-SUMMARY.md` (this file)
 
 ### Modifications
+
 1. `src/psychology/post-conversation-synthesis-hook.ts` (Fixed unused parameter)
 
 ---
@@ -295,6 +322,7 @@ The migration guide provides:
 ## Architecture Patterns
 
 ### 1. Offline-First Pattern
+
 ```typescript
 // User can send messages even when offline
 await sendMessage(content); // Queued if offline
@@ -304,14 +332,16 @@ await sendMessage(content); // Queued if offline
 ```
 
 ### 2. Provider Abstraction
+
 ```typescript
 // Same API across platforms
-const { sendMessage, messages } = useSupabaseChat();  // Desktop
-const viewModel = ChatViewModel(repository)            // Android
+const { sendMessage, messages } = useSupabaseChat(); // Desktop
+const viewModel = ChatViewModel(repository); // Android
 // Both use same Supabase backend
 ```
 
 ### 3. Optimistic Updates
+
 ```typescript
 // Message appears immediately
 const optimisticMessage = createOptimistic(content);
@@ -322,10 +352,11 @@ syncToSupabase(optimisticMessage);
 ```
 
 ### 4. Real-Time Subscriptions
+
 ```typescript
 // Listen for updates from other clients
-subscribeToMessages(sessionKey, (message) => {
-  addMessage(message);  // Update UI
+subscribeToMessages(sessionKey, message => {
+  addMessage(message); // Update UI
 });
 ```
 
@@ -333,26 +364,28 @@ subscribeToMessages(sessionKey, (message) => {
 
 ## Performance Characteristics
 
-| Metric | Target | Status |
-|--------|--------|--------|
-| Message send latency (online) | <500ms | ✅ |
-| Real-time sync latency | <100ms | ✅ |
-| Offline queue persistence | Immediate | ✅ |
-| Auto-sync delay (on reconnect) | <1s | ✅ |
-| App initialization | <2s | ✅ |
-| Message load time (100 messages) | <500ms | ✅ |
+| Metric                           | Target    | Status |
+| -------------------------------- | --------- | ------ |
+| Message send latency (online)    | <500ms    | ✅     |
+| Real-time sync latency           | <100ms    | ✅     |
+| Offline queue persistence        | Immediate | ✅     |
+| Auto-sync delay (on reconnect)   | <1s       | ✅     |
+| App initialization               | <2s       | ✅     |
+| Message load time (100 messages) | <500ms    | ✅     |
 
 ---
 
 ## Security Considerations
 
 ✅ **Implemented:**
+
 - Row-level security (RLS) in Supabase
 - Token-based authentication
 - No secrets in client code
 - Secure offline storage
 
 ✅ **Planned for Mobile:**
+
 - Biometric authentication
 - Secure local storage encryption
 - Certificate pinning (optional)
@@ -363,22 +396,26 @@ subscribeToMessages(sessionKey, (message) => {
 ## Next Steps
 
 ### Immediate (1-2 weeks)
+
 1. Deploy desktop changes to staging
 2. Test cross-platform sync with web
 3. Gather user feedback
 
 ### Short Term (2-4 weeks)
+
 1. Implement iOS app (Swift + SwiftUI)
 2. Implement Android app (Kotlin + Compose)
 3. Push notification integration
 
 ### Medium Term (4-8 weeks)
+
 1. Beta testing on TestFlight (iOS)
 2. Beta testing on Google Play (Android)
 3. Performance optimization
 4. Feature parity across platforms
 
 ### Long Term
+
 1. App Store distribution (iOS)
 2. Google Play distribution (Android)
 3. Continued feature development
@@ -389,21 +426,25 @@ subscribeToMessages(sessionKey, (message) => {
 ## Lessons Learned
 
 ### 1. Offline Architecture
+
 - localStorage/UserDefaults/Room as backup significantly improves UX
 - Optimistic updates make apps feel faster
 - Careful handling of duplicates is critical
 
 ### 2. Real-Time Patterns
+
 - Supabase channels are reliable for small-medium scale
 - Broadcasting to all clients scales better than per-message subscriptions
 - Exponential backoff prevents cascading failures
 
 ### 3. Type Safety
+
 - TypeScript + strict mode caught many edge cases
 - Shared type definitions across platforms reduce bugs
 - Code generation from Supabase schema (via type-level) would help
 
 ### 4. Mobile-First Thinking
+
 - Building desktop-first then adding mobile is harder than vice versa
 - Mobile constraints (battery, network) should inform all architecture
 - Offline support on desktop is preview of mobile requirements
@@ -413,6 +454,7 @@ subscribeToMessages(sessionKey, (message) => {
 ## Testing Validation
 
 ### Phase 3 + 4 Combined Test Suite
+
 ```
 Test Files:  78 passed
 Tests:       2376 passed, 1 skipped

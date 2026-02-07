@@ -39,9 +39,23 @@ export class MockGatewayServer {
     this.server.on('connection', (socket) => {
       this.clients.add(socket);
 
-      socket.on('message', (data: string | ArrayBuffer | Blob) => {
+      socket.on('message', (data: string | ArrayBuffer | Blob | ArrayBufferView<ArrayBufferLike>) => {
         try {
-          const str = typeof data === 'string' ? data : new TextDecoder().decode(data as ArrayBuffer);
+          let str: string;
+          if (typeof data === 'string') {
+            str = data;
+          } else if (data instanceof ArrayBuffer) {
+            str = new TextDecoder().decode(data);
+          } else if (ArrayBuffer.isView(data)) {
+            str = new TextDecoder().decode(data);
+          } else if (data instanceof Blob) {
+            // For Blob, we'd need async handling - just skip for mock
+            console.warn('[mock-gateway] Blob messages not supported in mock');
+            return;
+          } else {
+            console.warn('[mock-gateway] Unknown message type');
+            return;
+          }
           const msg = JSON.parse(str);
           this.handleMessage(socket, msg);
         } catch (err) {

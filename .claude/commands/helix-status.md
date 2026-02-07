@@ -9,6 +9,11 @@ Comprehensive status check of all Helix subsystems.
 /helix-status --quick      # Quick overview only
 ```
 
+## Helix Architecture Rules
+
+- **Platform Hierarchy**: Desktop is the brain (primary server, Tauri v2). Web/iOS/Android are remote controls. No VPS.
+- **Secrets**: All secrets auto-load from 1Password. Use `npm run test:webhooks` to test Discord connectivity, not manual curl with pasted URLs.
+
 ## Purpose
 
 Quick health check of all Helix subsystems - logging, psychological architecture, OpenClaw integration, and code quality.

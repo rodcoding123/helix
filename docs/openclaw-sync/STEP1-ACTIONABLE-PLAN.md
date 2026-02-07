@@ -15,15 +15,17 @@ Based on detailed source analysis, here are the **actual files** that changed:
 
 **File**: `src/agents/bash-tools.exec.ts`
 **Change**: Added `validateHostEnv()` to block dangerous env vars during command execution
-**Blocked Vars**: LD_PRELOAD, LD_AUDIT, GCONV_PATH, SSLKEYLOGFILE, DYLD_*, NODE_OPTIONS, PYTHONPATH, PATH (on gateway/node hosts)
+**Blocked Vars**: LD*PRELOAD, LD_AUDIT, GCONV_PATH, SSLKEYLOGFILE, DYLD*\*, NODE_OPTIONS, PYTHONPATH, PATH (on gateway/node hosts)
 
 **Helix Action**: ✅ ALREADY COMPATIBLE
+
 - Helix's EnvironmentProxy (environment-proxy.ts) blocks at plugin level
 - OpenClaw's blocking validates at exec level
 - Both layers work together → Defense in depth
 - **NO CODE CHANGE NEEDED** - Just merge as-is
 
 **Merge Steps**:
+
 ```bash
 # Copy src/agents/bash-tools.exec.ts from OpenClaw v2026.2.1
 cp /tmp/openclaw-merge/src/agents/bash-tools.exec.ts helix-runtime/src/agents/bash-tools.exec.ts
@@ -35,6 +37,7 @@ cp /tmp/openclaw-merge/src/agents/bash-tools.exec.ts helix-runtime/src/agents/ba
 ```
 
 **Test**:
+
 ```bash
 npm run test -- --grep "exec|command|bash"
 # Expected: All tests pass, Helix pre-execution logging works
@@ -45,6 +48,7 @@ npm run test -- --grep "exec|command|bash"
 ### Priority 2: CRITICAL - Message Tool Path Validation (PR #6398)
 
 **Files**:
+
 - `src/agents/tools/message-tool.ts` (main change)
 - `src/agents/openclaw-tools.ts` (tool registration)
 - `src/agents/tools/message-tool.test.ts` (tests)
@@ -52,6 +56,7 @@ npm run test -- --grep "exec|command|bash"
 **Change**: Validates file paths against sandbox root, prevents `../` traversal
 
 **Helix Impact**: HIGH
+
 - Helix uses message tools in agent conversations
 - Path validation adds security layer
 - **May conflict** if Helix has custom message tool handling
@@ -59,11 +64,13 @@ npm run test -- --grep "exec|command|bash"
 **Merge Steps**:
 
 1. Check if Helix customizes message-tool.ts:
+
    ```bash
    grep -r "message-tool\|messageToString\|createMessageTool" helix-runtime/src/agents/
    ```
 
 2. If NO customizations found:
+
    ```bash
    # Copy files from OpenClaw v2026.2.1
    cp /tmp/openclaw-merge/src/agents/tools/message-tool.ts helix-runtime/src/agents/tools/
@@ -80,6 +87,7 @@ npm run test -- --grep "exec|command|bash"
    ```
 
 **Test**:
+
 ```bash
 npm run test -- --grep "message|tool|sandbox"
 # Expected: Path validation tests pass, no unauthorized paths allowed
@@ -90,6 +98,7 @@ npm run test -- --grep "message|tool|sandbox"
 ### Priority 3: MEDIUM - Gateway Timestamp Injection (PR #3705)
 
 **Files**:
+
 - `src/server-methods/agent.ts`
 - `src/server-methods/chat.ts`
 - `src/auto-reply/envelope.ts` (exports formatZonedTimestamp)
@@ -97,6 +106,7 @@ npm run test -- --grep "message|tool|sandbox"
 **Change**: Injects formatted timestamps into messages for audit trail
 
 **Helix Impact**: MEDIUM
+
 - Helix gateway uses OpenClaw server methods
 - Timestamps improve audit trail quality
 - Coordinates with Helix's Discord logging timestamps
@@ -104,11 +114,13 @@ npm run test -- --grep "message|tool|sandbox"
 **Merge Steps**:
 
 1. Check for Helix customizations:
+
    ```bash
    grep -r "formatZonedTimestamp\|injectTimestamp\|envelope" helix-runtime/src/
    ```
 
 2. If NO customizations:
+
    ```bash
    # Copy files
    cp /tmp/openclaw-merge/src/server-methods/agent.ts helix-runtime/src/server-methods/
@@ -123,6 +135,7 @@ npm run test -- --grep "message|tool|sandbox"
    ```
 
 **Test**:
+
 ```bash
 npm run test -- --grep "timestamp|gateway"
 # Expected: Timestamps injected, formatted correctly
@@ -137,6 +150,7 @@ npm run test -- --grep "timestamp|gateway"
 **Change**: Validates install paths, prevents `../` traversal in plugin names
 
 **Helix Impact**: LOW
+
 - Helix uses bundled plugins only (isolation mode)
 - Plugin installation validation is a CLI feature
 - Won't break Helix's isolated mode
@@ -144,6 +158,7 @@ npm run test -- --grep "timestamp|gateway"
 **Merge Steps**:
 
 1. Determine if Helix needs custom plugin installation:
+
    ```bash
    # If Helix users never install plugins (bundled only), can skip this
    # If Helix exposes plugin installation UI, merge it
@@ -156,6 +171,7 @@ npm run test -- --grep "timestamp|gateway"
    ```
 
 **Test**:
+
 ```bash
 npm run test -- --grep "plugin|install|validation"
 # Expected: Plugin paths validated, traversal prevented
@@ -166,22 +182,27 @@ npm run test -- --grep "plugin|install|validation"
 ### Skip These (Not Applicable to Helix)
 
 **TLS 1.3 Enforcement** (`src/infra/tls/gateway.ts`)
+
 - Reason: Helix gateway uses WebSocket (ws://) not TLS
 - Action: Skip
 
 **System Prompt Guardrails** (`src/agents/system-prompt.ts`)
+
 - Reason: Helix has own HELIX_SOUL.md psychological system
 - Action: Skip
 
 **WhatsApp Path Sanitization** (`src/web/accounts.ts`)
+
 - Reason: Helix doesn't use WhatsApp channel
 - Action: Skip
 
 **Lobster Tool Protection** (`extensions/lobster/src/lobster-tool.ts`)
+
 - Reason: Helix doesn't use Lobster
 - Action: Skip
 
 **MEDIA Path Validation** (`src/media/parse.ts`)
+
 - Reason: Check if Helix processes media - if yes, merge; if no, skip
 - Action: Review, likely skip
 
@@ -370,6 +391,7 @@ Testing:
 **Issue**: Helix logging imports might be in different location
 
 **Solution**:
+
 1. Check import location in current file
 2. Merge validateHostEnv() function separately
 3. Preserve Helix imports (logCommandPreExecution, logCommandPostExecution)
@@ -379,6 +401,7 @@ Testing:
 **Issue**: Helix might have custom message tool implementation
 
 **Solution**:
+
 1. Check for assertSandboxPath() usage pattern
 2. Apply same validation to Helix's custom version
 3. Test with `npm run test -- --grep "message"`
@@ -388,6 +411,7 @@ Testing:
 **Issue**: Entry.ts or discovery.ts may have changed unexpectedly
 
 **Solution**:
+
 1. Revert to previous version
 2. Check git diff for unexpected changes to isolation blocks
 3. Manually re-apply only OpenClaw improvements (non-isolation)
@@ -429,6 +453,7 @@ npm run quality
 ## Next: Step 2
 
 After Step 1 passes all tests:
+
 - **2026.2.2** merge (SSRF checks + Windows hardening)
 - **2026.2.3** merge (Telegram + Cloudflare)
 - **Phase 3** comprehensive testing
@@ -439,5 +464,5 @@ After Step 1 passes all tests:
 **Effort**: 1-2 hours (careful merge + testing)
 **Risk**: LOW (all Helix preservation documented & tested)
 
-*Phase 2, Step 1 Actionable Plan*
-*Updated: 2026-02-05*
+_Phase 2, Step 1 Actionable Plan_
+_Updated: 2026-02-05_

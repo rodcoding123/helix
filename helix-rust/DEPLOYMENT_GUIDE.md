@@ -30,6 +30,7 @@ cargo build --release --workspace
 ```
 
 **Output**: 5 release binaries in `target/release/`
+
 - memory-synthesis.exe
 - psychology-decay.exe
 - skill-sandbox.exe
@@ -78,13 +79,13 @@ cargo build --workspace
 
 ### Debug vs Release Comparison
 
-| Aspect | Debug | Release |
-|--------|-------|---------|
-| Build time | ~2 min | ~2 min |
-| Binary size | ~100-200 MB | ~4-13 MB |
-| Execution speed | Slow | Fast (optimized) |
-| Debug symbols | Full | Stripped |
-| Use case | Development | Production |
+| Aspect          | Debug       | Release          |
+| --------------- | ----------- | ---------------- |
+| Build time      | ~2 min      | ~2 min           |
+| Binary size     | ~100-200 MB | ~4-13 MB         |
+| Execution speed | Slow        | Fast (optimized) |
+| Debug symbols   | Full        | Stripped         |
+| Use case        | Development | Production       |
 
 ---
 
@@ -150,18 +151,18 @@ export SUPABASE_DB_URL=postgresql://[CREDENTIALS]
 
 #### Required Variables
 
-| Variable | Value | Source |
-|----------|-------|--------|
-| `SUPABASE_URL` | Project URL | Supabase dashboard → Settings → API |
-| `SUPABASE_SERVICE_ROLE_KEY` | Service role key | Supabase dashboard → Settings → API |
-| `SUPABASE_DB_URL` | PostgreSQL connection | Supabase dashboard → Settings → Database |
+| Variable                    | Value                 | Source                                   |
+| --------------------------- | --------------------- | ---------------------------------------- |
+| `SUPABASE_URL`              | Project URL           | Supabase dashboard → Settings → API      |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role key      | Supabase dashboard → Settings → API      |
+| `SUPABASE_DB_URL`           | PostgreSQL connection | Supabase dashboard → Settings → Database |
 
 #### Optional Variables
 
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `RUST_LOG` | info | Logging level (debug, info, warn, error) |
-| `DEEPGRAM_API_KEY` | (none) | Deepgram API key (voice-pipeline only) |
+| Variable           | Default | Purpose                                  |
+| ------------------ | ------- | ---------------------------------------- |
+| `RUST_LOG`         | info    | Logging level (debug, info, warn, error) |
+| `DEEPGRAM_API_KEY` | (none)  | Deepgram API key (voice-pipeline only)   |
 
 #### Deepgram API Key
 
@@ -190,6 +191,7 @@ Base URL: http://localhost:18788
 **Endpoints**:
 
 #### POST /detect-patterns
+
 Detect patterns in input sequence
 
 ```bash
@@ -202,6 +204,7 @@ curl -X POST http://localhost:18788/detect-patterns \
 ```
 
 **Response**:
+
 ```json
 {
   "patterns": [
@@ -216,6 +219,7 @@ curl -X POST http://localhost:18788/detect-patterns \
 ```
 
 #### GET /status
+
 Health check
 
 ```bash
@@ -223,6 +227,7 @@ curl http://localhost:18788/status
 ```
 
 **Response**:
+
 ```json
 {
   "status": "healthy",
@@ -243,6 +248,7 @@ RPC WebSocket: ws://localhost:18790/ws
 **Endpoints**:
 
 #### POST /execute-skill
+
 Execute a WASM skill
 
 ```bash
@@ -259,6 +265,7 @@ curl -X POST http://localhost:18790/execute-skill \
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -270,6 +277,7 @@ curl -X POST http://localhost:18790/execute-skill \
 ```
 
 #### GET /skill/:skill_id
+
 Fetch skill from Supabase
 
 ```bash
@@ -277,6 +285,7 @@ curl http://localhost:18790/skill/uuid-1234
 ```
 
 **Response**:
+
 ```json
 {
   "skill_id": "uuid-1234",
@@ -298,6 +307,7 @@ Base URL: http://localhost:18791
 **Endpoints**:
 
 #### POST /transcribe
+
 Transcribe audio file
 
 ```bash
@@ -309,6 +319,7 @@ curl -X POST http://localhost:18791/transcribe \
 ```
 
 **Response**:
+
 ```json
 {
   "transcript": "Hello world",
@@ -320,6 +331,7 @@ curl -X POST http://localhost:18791/transcribe \
 ```
 
 #### POST /process-audio
+
 Convert and process audio
 
 ```bash
@@ -329,6 +341,7 @@ curl -X POST http://localhost:18791/process-audio \
 ```
 
 **Response**:
+
 ```json
 {
   "format": "wav",
@@ -340,6 +353,7 @@ curl -X POST http://localhost:18791/process-audio \
 ```
 
 #### GET /status
+
 Health check
 
 ```bash
@@ -347,6 +361,7 @@ curl http://localhost:18791/status
 ```
 
 **Response**:
+
 ```json
 {
   "status": "healthy",
@@ -367,27 +382,31 @@ WebSocket: ws://localhost:18792/sync
 **Endpoints**:
 
 #### WebSocket: /sync
+
 Real-time sync relay
 
 ```javascript
 const ws = new WebSocket('ws://localhost:18792/sync');
 
-ws.onmessage = (event) => {
+ws.onmessage = event => {
   const message = JSON.parse(event.data);
   console.log('Sync update:', message);
 };
 
-ws.send(JSON.stringify({
-  event_type: 'entity_update',
-  entity_id: 'uuid-1234',
-  data: { field: 'value' },
-  device_id: 'device-uuid',
-  user_id: 'user-uuid',
-  timestamp: Date.now()
-}));
+ws.send(
+  JSON.stringify({
+    event_type: 'entity_update',
+    entity_id: 'uuid-1234',
+    data: { field: 'value' },
+    device_id: 'device-uuid',
+    user_id: 'user-uuid',
+    timestamp: Date.now(),
+  })
+);
 ```
 
 #### POST /resolve-conflict
+
 Resolve concurrent modifications
 
 ```bash
@@ -407,6 +426,7 @@ curl -X POST http://localhost:18792/resolve-conflict \
 ```
 
 **Response**:
+
 ```json
 {
   "resolution": "remote_wins",
@@ -416,6 +436,7 @@ curl -X POST http://localhost:18792/resolve-conflict \
 ```
 
 #### GET /vector-clock/:device_id
+
 Get vector clock state
 
 ```bash
@@ -423,6 +444,7 @@ curl http://localhost:18792/vector-clock/device-uuid
 ```
 
 **Response**:
+
 ```json
 {
   "device_id": "device-uuid",
@@ -762,6 +784,7 @@ nohup ./target/release/psychology-decay.exe > /var/log/psychology-decay.log 2>&1
 **Cause**: Environment variable not loaded
 
 **Solution**:
+
 ```bash
 # Check environment
 echo $SUPABASE_URL
@@ -778,6 +801,7 @@ echo $SUPABASE_URL  # Should output URL
 **Cause**: Service not running or port in use
 
 **Solution**:
+
 ```bash
 # Check if running
 netstat -tuln | grep 18788
@@ -797,6 +821,7 @@ kill -9 $(lsof -t -i :18788)
 **Cause**: Voice pipeline started without API key
 
 **Solution**:
+
 ```bash
 # Only voice-pipeline needs this
 export DEEPGRAM_API_KEY=[DEEPGRAM_KEY]
@@ -810,6 +835,7 @@ export DEEPGRAM_API_KEY=[DEEPGRAM_KEY]
 **Cause**: PostgreSQL connection string invalid
 
 **Solution**:
+
 ```bash
 # Test connection directly
 psql -U postgres -h db.[PROJECT_ID].supabase.co -d postgres -c "SELECT 1;"
@@ -826,6 +852,7 @@ cargo run --bin memory-synthesis -- --test-connection
 **Cause**: Debug build instead of release
 
 **Solution**:
+
 ```bash
 # Make sure you built release
 ls -lh target/release/*.exe
@@ -844,6 +871,7 @@ cargo build --release --workspace
 **Cause**: Skill takes too long to execute
 
 **Solution**:
+
 ```bash
 # Increase timeout in request
 curl -X POST http://localhost:18790/execute-skill \
@@ -859,6 +887,7 @@ curl -X POST http://localhost:18790/execute-skill \
 **Cause**: Deepgram API rate limit or network issue
 
 **Solution**:
+
 ```bash
 # Check Deepgram quota
 curl http://localhost:18791/status

@@ -252,34 +252,34 @@ export function TokenBudgetManager() {
           <div className="detail-content">
             <div className="detail-row">
               <label>Total Tokens Used</label>
-              <value>{selectedSessionData.totalTokens.toLocaleString()}</value>
+              <span className="value">{selectedSessionData.totalTokens.toLocaleString()}</span>
             </div>
 
             <div className="detail-row">
               <label>Budget Limit</label>
-              <value>{selectedSessionData.budgetLimit.toLocaleString()}</value>
+              <span className="value">{selectedSessionData.budgetLimit.toLocaleString()}</span>
             </div>
 
             <div className="detail-row">
               <label>Remaining Tokens</label>
-              <value className={selectedSessionData.percentageUsed > 0.8 ? 'warning' : ''}>
+              <span className={`value ${selectedSessionData.percentageUsed > 0.8 ? 'warning' : ''}`}>
                 {selectedSessionData.remainingTokens.toLocaleString()}
-              </value>
+              </span>
             </div>
 
             <div className="detail-row">
               <label>Usage</label>
-              <value>{Math.round(selectedSessionData.percentageUsed * 100)}%</value>
+              <span className="value">{Math.round(selectedSessionData.percentageUsed * 100)}%</span>
             </div>
 
             <div className="detail-row">
               <label>Auto-Compact Enabled</label>
-              <value>{selectedSessionData.autoCompactEnabled ? 'Yes' : 'No'}</value>
+              <span className="value">{selectedSessionData.autoCompactEnabled ? 'Yes' : 'No'}</span>
             </div>
 
             <div className="detail-row">
               <label>Auto-Compact Threshold</label>
-              <value>{Math.round(selectedSessionData.autoCompactThreshold * 100)}%</value>
+              <span className="value">{Math.round(selectedSessionData.autoCompactThreshold * 100)}%</span>
             </div>
 
             {selectedSessionData.percentageUsed > 0.85 && (
@@ -559,13 +559,13 @@ const tokenBudgetManagerStyles = `
   color: var(--text-secondary, #a0a0c0);
 }
 
-.detail-row value {
+.detail-row .value {
   font-size: 0.8125rem;
   color: #818cf8;
   font-weight: 600;
 }
 
-.detail-row value.warning {
+.detail-row .value.warning {
   color: #f59e0b;
 }
 

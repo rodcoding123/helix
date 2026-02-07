@@ -19,6 +19,12 @@ This audit is informed by:
 - **Supply chain attack** achieving 4,000+ downloads in hours
 - **Active exploitation** observed in the wild
 
+## Helix Architecture Rules (VERIFY DURING AUDIT)
+
+- **AIOperationRouter**: ALL LLM calls MUST go through `router.route()`. Direct SDK calls are a security finding (unaudited, untracked AI calls).
+- **Secrets**: All 16 secrets in 1Password vault "Helix". `secrets-loader.ts` handles 3-tier loading. Hardcoded secrets are P0 critical.
+- **Platform Hierarchy**: Desktop is the brain. No VPS. Gateway runs inside desktop app.
+
 ## Usage
 
 ```bash

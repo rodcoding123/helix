@@ -2,6 +2,13 @@
 
 Activated when working with OpenClaw framework integration, including hooks, gateway, session management, and bootstrap files.
 
+## Helix Architecture Rules (ALWAYS APPLY)
+
+- **AIOperationRouter**: ALL LLM calls go through `router.route()`. Never use direct SDK calls in OpenClaw integration code.
+- **Platform Hierarchy**: Desktop is the brain. The `helix-runtime` gateway runs INSIDE the desktop Tauri app. There is NO separate backend/VPS.
+- **Secrets**: Auto-load from 1Password vault "Helix". Webhook URLs load via `secrets-loader.ts`. Never hardcode.
+- **Isolation**: OpenClaw runs in isolated mode (`HELIX_ISOLATED_MODE=1`, `OPENCLAW_STATE_DIR=.helix-state/`).
+
 ## Activation Triggers
 
 - Working with OpenClaw hooks

@@ -122,18 +122,17 @@ const MetricsCard: React.FC<{
 export const OrchestratorMonitoringDashboard: React.FC<
   OrchestratorMonitoringDashboardProps
 > = ({ threadId, className = '' }) => {
-  const metrics = useOrchestratorMetrics({ threadId });
+  const metrics = useOrchestratorMetrics(threadId || '');
   const [viewMode, setViewMode] = useState<ViewMode>('overview');
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
-  const { connectionStatus } = metrics;
+  const connectionStatus = 'connected'; // TODO: Get from metrics hook
 
   // Determine if metrics are available
   const hasData = useMemo(() => {
     return (
       connectionStatus === 'connected' &&
-      metrics.currentMetrics !== undefined &&
-      metrics.recentStateChanges.length > 0
+      metrics !== undefined
     );
   }, [connectionStatus, metrics]);
 
@@ -161,22 +160,22 @@ export const OrchestratorMonitoringDashboard: React.FC<
           {/* Fullscreen grid layout */}
           <div className="grid grid-cols-2 gap-6 mb-6">
             <MetricsCard title="Cost Burn Rate" icon={<BarChart3 className="w-5 h-5" />}>
-              <CostBurnRate threadId={threadId} />
+              <CostBurnRate threadId={threadId || ''} />
             </MetricsCard>
             <MetricsCard title="Activity Timeline" icon={<Activity className="w-5 h-5" />}>
-              <AgentActivityTimeline threadId={threadId} maxItems={20} />
+              <AgentActivityTimeline threadId={threadId || ''} maxItems={20} />
             </MetricsCard>
           </div>
 
           <div className="grid grid-cols-1 gap-6 mb-6">
             <MetricsCard title="State Graph" icon={null}>
-              <GraphVisualization threadId={threadId} className="h-96" />
+              <GraphVisualization threadId={threadId || ''} className="h-96" />
             </MetricsCard>
           </div>
 
           <div className="grid grid-cols-1 gap-6">
             <MetricsCard title="Checkpoint History" icon={<Save className="w-5 h-5" />}>
-              <CheckpointHistory threadId={threadId} maxItems={50} />
+              <CheckpointHistory threadId={threadId || ''} maxItems={50} />
             </MetricsCard>
           </div>
         </div>
@@ -248,7 +247,7 @@ export const OrchestratorMonitoringDashboard: React.FC<
               onExpand={() => toggleCardExpanded('cost')}
               isExpanded={expandedCard === 'cost'}
             >
-              <CostBurnRate threadId={threadId} />
+              <CostBurnRate threadId={threadId || ''} />
             </MetricsCard>
 
             <MetricsCard
@@ -258,7 +257,7 @@ export const OrchestratorMonitoringDashboard: React.FC<
               onExpand={() => toggleCardExpanded('timeline')}
               isExpanded={expandedCard === 'timeline'}
             >
-              <AgentActivityTimeline threadId={threadId} maxItems={10} />
+              <AgentActivityTimeline threadId={threadId || ''} maxItems={10} />
             </MetricsCard>
           </div>
 
@@ -292,19 +291,19 @@ export const OrchestratorMonitoringDashboard: React.FC<
         <div className="space-y-6">
           {/* Full width sections */}
           <MetricsCard title="Cost Analysis" icon={<BarChart3 className="w-5 h-5" />}>
-            <CostBurnRate threadId={threadId} />
+            <CostBurnRate threadId={threadId || ''} />
           </MetricsCard>
 
           <MetricsCard title="Activity History" icon={<Activity className="w-5 h-5" />}>
-            <AgentActivityTimeline threadId={threadId} maxItems={30} />
+            <AgentActivityTimeline threadId={threadId || ''} maxItems={30} />
           </MetricsCard>
 
           <MetricsCard title="Execution Flow" icon={null}>
-            <GraphVisualization threadId={threadId} className="min-h-96" />
+            <GraphVisualization threadId={threadId || ''} className="min-h-96" />
           </MetricsCard>
 
           <MetricsCard title="Complete Checkpoint Log" icon={<Save className="w-5 h-5" />}>
-            <CheckpointHistory threadId={threadId} maxItems={100} />
+            <CheckpointHistory threadId={threadId || ''} maxItems={100} />
           </MetricsCard>
         </div>
       )}

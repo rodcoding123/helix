@@ -2,6 +2,11 @@
 
 Run all quality checks across the entire Helix system (core + OpenClaw).
 
+## Helix Architecture Rules
+
+- **AIOperationRouter**: Flag any direct LLM SDK calls (`new Anthropic()`, etc.) as quality violations. All calls must use `router.route()`.
+- **Secrets**: Never ask for manual input. 1Password CLI, Supabase CLI, Vercel CLI handle automation.
+
 ## Usage
 
 ```bash

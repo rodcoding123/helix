@@ -5,6 +5,7 @@
 Simple, non-breaking port allocation system that handles port conflicts gracefully.
 
 **Why This Works:**
+
 - ✅ No external dependencies (uses Node.js `net` module)
 - ✅ Cross-platform (works on Windows, Mac, Linux)
 - ✅ Doesn't break Supabase real-time (uses HTTP abstraction)
@@ -20,6 +21,7 @@ Simple, non-breaking port allocation system that handles port conflicts graceful
 **File:** `helix-runtime/src/entry.ts` or similar startup file
 
 **Before:**
+
 ```typescript
 const PORT = 3000;
 server.listen(PORT);
@@ -27,6 +29,7 @@ console.log(`Gateway running on port ${PORT}`);
 ```
 
 **After:**
+
 ```typescript
 import { findAvailablePort, formatPortMessage } from '../../../src/lib/port-discovery.js';
 import { setActualPort } from '../../../src/lib/server-config.js';
@@ -44,15 +47,17 @@ console.log(formatPortMessage('Gateway', port, primaryPort));
 **File:** `web/vite.config.ts`
 
 **Before:**
+
 ```typescript
 export default {
   server: {
     port: 5173,
-  }
-}
+  },
+};
 ```
 
 **After:**
+
 ```typescript
 import { findAvailablePort, formatPortMessage } from '../src/lib/port-discovery.js';
 import { setActualPort } from '../src/lib/server-config.js';
@@ -67,9 +72,9 @@ export default {
       setActualPort('web', port);
       console.log(formatPortMessage('Web', port, primaryPort));
       return { port };
-    }
-  }
-}
+    },
+  },
+};
 ```
 
 ### For CLI/OpenClaw
@@ -99,7 +104,7 @@ const gatewayUrl = getServiceUrl('gateway', '/api/chat/message');
 // Use in fetch or HTTP client
 const response = await fetch(gatewayUrl, {
   method: 'POST',
-  body: JSON.stringify({ message: 'Hello' })
+  body: JSON.stringify({ message: 'Hello' }),
 });
 ```
 
@@ -111,7 +116,9 @@ const gatewayPort = window.env.GATEWAY_ACTUAL_PORT || 3000;
 const gatewayUrl = `http://localhost:${gatewayPort}/api/chat/message`;
 
 // Use in fetch
-fetch(gatewayUrl, { /* ... */ });
+fetch(gatewayUrl, {
+  /* ... */
+});
 ```
 
 ### For Supabase Real-Time
@@ -163,21 +170,25 @@ CLI_ACTUAL_PORT=3100          # Actual port being used
 ## Why This Doesn't Break Anything
 
 ### 1. Supabase Real-Time
+
 - ✅ Uses Supabase client library (HTTP abstraction)
 - ✅ Doesn't connect to localhost:3000
 - ✅ Port discovery is only for local services
 
 ### 2. Cross-Platform Sync
+
 - ✅ All communication through Supabase (cloud)
 - ✅ Local ports don't affect sync
 - ✅ Each device discovers its own local ports independently
 
 ### 3. Existing Code
+
 - ✅ Still respects GATEWAY_PORT env var
 - ✅ Falls back to 3000 if env var not set
 - ✅ Only adds 2-3 lines per service
 
 ### 4. Performance
+
 - ✅ Port check: < 1ms per attempt
 - ✅ Total startup overhead: < 50ms in worst case
 - ✅ No continuous polling

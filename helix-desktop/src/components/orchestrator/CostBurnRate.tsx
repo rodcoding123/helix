@@ -11,7 +11,7 @@
  * - Time remaining estimate
  */
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { useOrchestratorMetrics } from '../../hooks/useOrchestratorMetrics';
 import './CostBurnRate.css';
 

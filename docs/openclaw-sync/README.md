@@ -9,11 +9,13 @@
 You are here to execute the **OpenClaw sync** (integrating v2026.2.1, 2026.2.2, 2026.2.3 into Helix).
 
 **Current State**:
+
 - Helix version: 2026.1.30
 - OpenClaw latest: 2026.2.3
 - Releases behind: 3
 
 **What you need to know**:
+
 1. ✅ Phase 1 (Investigation) is COMPLETE - no blockers found
 2. ✅ All Helix-specific code is documented and preserved
 3. 🚀 Phase 2 (Merge) is ready to execute
@@ -24,9 +26,11 @@ You are here to execute the **OpenClaw sync** (integrating v2026.2.1, 2026.2.2, 
 ## The Documents (Read in Order)
 
 ### 1. **PHASE1-INVESTIGATION.md** ✅
+
 **Status**: Complete - no blockers
 
 What was investigated:
+
 - Environment variable override blocking (OpenClaw 2026.2.1)
 - Helix's isolation architecture (entry.ts, discovery.ts, bundled-dir.ts)
 - Conclusion: **ZERO RISK** - Override blocking is compatible
@@ -38,15 +42,18 @@ Key finding: The perceived "blocker" is actually a **security feature** that pro
 ---
 
 ### 2. **2026-02-05-openclaw-sync.md** 📊
+
 **Status**: Complete - comprehensive analysis
 
 High-level overview of:
+
 - What Helix gains (4 new features + 2 enhancements + security fixes)
 - What the risks are (and how to mitigate them)
 - Which features to adopt (and which to skip)
 - Full verification checklist
 
 **Key decisions made**:
+
 - ✅ **COMPREHENSIVE_MERGE** - All 3 releases except QMD backend
 - ✅ **SKIP QMD** - Helix's seven-layer psychology is better
 - ✅ **ADOPT EVERYTHING ELSE** - Security fixes, new plugins, features
@@ -56,15 +63,18 @@ High-level overview of:
 ---
 
 ### 3. **PHASE2-EXECUTION-PLAN.md** 📋
+
 **Status**: Complete - high-level roadmap
 
 The full execution strategy:
+
 - 5-phase breakdown (Integration → Testing → Deployment)
 - Step-by-step for each OpenClaw release (2026.2.1, 2.2, 2.3)
 - Testing matrix and validation checklist
 - Timeline: ~10 days / 80 hours total effort
 
 **Timeline by phase**:
+
 - Phase 1 (Investigation): ✅ DONE
 - Phase 2 (Integration): 4-6 hours (3 steps with testing between)
 - Phase 3 (Testing): 3 days / 8 hours
@@ -76,9 +86,11 @@ The full execution strategy:
 ---
 
 ### 4. **MERGE-GUIDE-STEP1.md** 🔧
+
 **Status**: Complete - integration guide
 
 Detailed guide for merging 2026.2.1:
+
 - Helix-specific code inventory (which files to preserve, which can change)
 - Conflict resolution strategy
 - Expected changes in OpenClaw 2026.2.1
@@ -86,6 +98,7 @@ Detailed guide for merging 2026.2.1:
 - Rollback plan if needed
 
 **Critical info**:
+
 - 5 critical Helix files that must be preserved (entry.ts, discovery.ts, bundled-dir.ts, environment-proxy.ts, loader.ts)
 - 31 Helix-specific files (src/helix/ directory - won't conflict)
 - 3 integration points (anthropic-payload-log.ts, bash-tools.exec.ts, bootstrap-files.ts)
@@ -95,9 +108,11 @@ Detailed guide for merging 2026.2.1:
 ---
 
 ### 5. **STEP1-ACTIONABLE-PLAN.md** ⚡ START HERE
+
 **Status**: Complete - ready to execute
 
 This is the **ACTUAL ACTION PLAN**. It contains:
+
 - What files to copy from OpenClaw v2026.2.1
 - Exact merge commands to run
 - Which features to merge (and which to skip)
@@ -107,16 +122,17 @@ This is the **ACTUAL ACTION PLAN**. It contains:
 
 **Files to merge in Step 1**:
 
-| Priority | File | Change | Action |
-|----------|------|--------|--------|
-| CRITICAL | `src/agents/bash-tools.exec.ts` | Env var blocking | Copy as-is |
-| CRITICAL | `src/agents/tools/message-tool.ts` | Path validation | Copy as-is |
-| CRITICAL | `src/server-methods/agent.ts` | Timestamp injection | Copy as-is |
-| MEDIUM | `src/server-methods/chat.ts` | Timestamp logic | Copy as-is |
-| MEDIUM | `src/auto-reply/envelope.ts` | Timestamp format | Copy as-is |
-| SKIP | TLS 1.3, System prompts, WhatsApp, etc. | Not applicable | Don't merge |
+| Priority | File                                    | Change              | Action      |
+| -------- | --------------------------------------- | ------------------- | ----------- |
+| CRITICAL | `src/agents/bash-tools.exec.ts`         | Env var blocking    | Copy as-is  |
+| CRITICAL | `src/agents/tools/message-tool.ts`      | Path validation     | Copy as-is  |
+| CRITICAL | `src/server-methods/agent.ts`           | Timestamp injection | Copy as-is  |
+| MEDIUM   | `src/server-methods/chat.ts`            | Timestamp logic     | Copy as-is  |
+| MEDIUM   | `src/auto-reply/envelope.ts`            | Timestamp format    | Copy as-is  |
+| SKIP     | TLS 1.3, System prompts, WhatsApp, etc. | Not applicable      | Don't merge |
 
 **Exact commands to run**:
+
 ```bash
 # 1. Get OpenClaw 2026.2.1 source
 git clone https://github.com/openclaw/openclaw.git /tmp/openclaw
@@ -175,6 +191,7 @@ HELIX_DEBUG_ISOLATION=1 node helix-runtime/openclaw.mjs doctor
 ## What Happens in Phase 2 (Next)
 
 **Step 1** (This document): Merge 2026.2.1
+
 - Environment variable hardening
 - Message tool path validation
 - Gateway timestamp injection
@@ -182,6 +199,7 @@ HELIX_DEBUG_ISOLATION=1 node helix-runtime/openclaw.mjs doctor
 - ✅ Risk: LOW
 
 **Step 2**: Merge 2026.2.2
+
 - SSRF checks (critical security)
 - Windows exec hardening
 - Feishu/Lark plugin (skip)
@@ -191,6 +209,7 @@ HELIX_DEBUG_ISOLATION=1 node helix-runtime/openclaw.mjs doctor
 - ⏱️ Risk: LOW
 
 **Step 3**: Merge 2026.2.3
+
 - Telegram TypeScript plugin
 - Cloudflare AI Gateway provider
 - Credential handling improvements
@@ -206,6 +225,7 @@ HELIX_DEBUG_ISOLATION=1 node helix-runtime/openclaw.mjs doctor
 After all merges complete, you'll have:
 
 ✅ **Security improvements** (70% reduction in attack surface):
+
 - SSRF protection
 - Path traversal prevention
 - TLS 1.3 enforcement
@@ -213,12 +233,14 @@ After all merges complete, you'll have:
 - Environment variable blocking (aligned with EnvironmentProxy)
 
 ✅ **New features** (4 truly new):
+
 - Telegram TypeScript plugin (type-safe messaging)
 - Cloudflare AI Gateway provider (multi-provider inference)
 - System prompt guardrails (safety bounds)
 - Matrix allowlists (permission framework)
 
 ✅ **Helix preservation** (100% intact):
+
 - Isolation mode (bundled plugins only)
 - Pre-execution logging (Discord webhooks)
 - Environment proxy (blocks 50+ secret patterns)
@@ -226,6 +248,7 @@ After all merges complete, you'll have:
 - Hash chain integrity (tamper-proof logging)
 
 ✅ **Testing** (comprehensive):
+
 - All unit tests passing
 - Isolation mode verified
 - All 7 Discord channels receiving logs
@@ -257,6 +280,7 @@ After all merges complete, you'll have:
 ### If you want to review first:
 
 Read **STEP1-ACTIONABLE-PLAN.md** sections:
+
 - "Actual Merge Commands" - See exactly what will be copied
 - "Success Criteria for Step 1" - See what tests must pass
 - "Troubleshooting" - See solutions for common merge issues
@@ -265,13 +289,13 @@ Read **STEP1-ACTIONABLE-PLAN.md** sections:
 
 ## Risk Assessment (Final)
 
-| Risk | Probability | Mitigation |
-|------|------------|------------|
-| Merge conflicts | LOW (documented) | See MERGE-GUIDE-STEP1.md |
-| Isolation breaks | VERY LOW (tested) | Rollback plan in STEP1 |
-| Discord logging fails | VERY LOW (compatible) | Tests validate all 7 channels |
-| Plugin discovery breaks | VERY LOW (two-layer) | Tests verify bundled + blocked global |
-| Regression in features | LOW (well-tested) | npm run quality validates |
+| Risk                    | Probability           | Mitigation                            |
+| ----------------------- | --------------------- | ------------------------------------- |
+| Merge conflicts         | LOW (documented)      | See MERGE-GUIDE-STEP1.md              |
+| Isolation breaks        | VERY LOW (tested)     | Rollback plan in STEP1                |
+| Discord logging fails   | VERY LOW (compatible) | Tests validate all 7 channels         |
+| Plugin discovery breaks | VERY LOW (two-layer)  | Tests verify bundled + blocked global |
+| Regression in features  | LOW (well-tested)     | npm run quality validates             |
 
 **Overall**: **SAFE TO EXECUTE** ✅
 
@@ -279,15 +303,15 @@ Read **STEP1-ACTIONABLE-PLAN.md** sections:
 
 ## One-Page Summary
 
-| Aspect | Status |
-|--------|--------|
-| Phase 1 Investigation | ✅ COMPLETE - Zero blockers |
-| OpenClaw compatibility | ✅ CONFIRMED - Override blocking compatible |
-| Helix preservation plan | ✅ DOCUMENTED - All 5 critical files identified |
-| Merge strategy | ✅ READY - 3 steps with detailed plans |
-| Risk level | ✅ LOW - All conflicts documented |
-| Test coverage | ✅ COMPREHENSIVE - Isolation, webhooks, security, E2E |
-| Ready to execute | ✅ YES - All documents ready |
+| Aspect                  | Status                                                |
+| ----------------------- | ----------------------------------------------------- |
+| Phase 1 Investigation   | ✅ COMPLETE - Zero blockers                           |
+| OpenClaw compatibility  | ✅ CONFIRMED - Override blocking compatible           |
+| Helix preservation plan | ✅ DOCUMENTED - All 5 critical files identified       |
+| Merge strategy          | ✅ READY - 3 steps with detailed plans                |
+| Risk level              | ✅ LOW - All conflicts documented                     |
+| Test coverage           | ✅ COMPREHENSIVE - Isolation, webhooks, security, E2E |
+| Ready to execute        | ✅ YES - All documents ready                          |
 
 **Time to execute Phase 2**: ~10 days (80 hours total)
 **Your current position**: Ready to start Step 1 (1-2 hours)
@@ -297,6 +321,7 @@ Read **STEP1-ACTIONABLE-PLAN.md** sections:
 ## Contact/Questions
 
 If you have questions about:
+
 - **Why a decision was made** → See PHASE1-INVESTIGATION.md
 - **What files will change** → See STEP1-ACTIONABLE-PLAN.md
 - **What could go wrong** → See MERGE-GUIDE-STEP1.md "Troubleshooting" section
@@ -309,7 +334,8 @@ If you have questions about:
 **Phase 2 Status**: 🚀 READY FOR EXECUTION
 **Ready to merge?**: YES ✅
 
-*All documentation complete. Choose your next action:*
+_All documentation complete. Choose your next action:_
+
 1. Execute Step 1 (1-2 hours) → Follow STEP1-ACTIONABLE-PLAN.md
 2. Review first (30-45 min) → Start with STEP1-ACTIONABLE-PLAN.md "Priority 1: CRITICAL"
 3. Understand risks (15 min) → Read PHASE1-INVESTIGATION.md "Risk Assessment"

@@ -17,6 +17,12 @@ Comprehensive architectural analysis of the **entire Helix system** including Op
 /audit --openclaw     # OpenClaw only
 ```
 
+## Helix Architecture Rules (ALWAYS VERIFY DURING AUDIT)
+
+- **Platform Hierarchy**: Desktop is the brain (primary server). Web/iOS/Android are remote controls. There is NO backend/VPS.
+- **AIOperationRouter**: ALL LLM calls MUST go through `router.route()`. Flag any direct SDK instantiation (`new Anthropic()`, etc.) as a critical finding.
+- **Secrets**: All 16 secrets auto-load from 1Password vault "Helix" via `secrets-loader.ts`. No hardcoded secrets. Use CLIs: `op`, `supabase`, `vercel`.
+
 ## What It Does
 
 Audits **both systems** comprehensively:

@@ -22,6 +22,37 @@ tools:
 
 You are the master orchestrator for Helix development operations. Your role is to coordinate multiple specialized agents, track all modified files, and deliver production-ready, committed code.
 
+## Helix Architecture Rules (ALWAYS APPLY)
+
+### Platform Hierarchy
+
+**Desktop is the brain. Everything else is a remote control.**
+
+| Platform    | Role                 | Runs On           | Power Level        |
+| ----------- | -------------------- | ----------------- | ------------------ |
+| **Desktop** | Primary server       | User's computer   | Full engine        |
+| **Web**     | Observatory + remote | Vercel + Supabase | Read-heavy remote  |
+| **iOS**     | Remote control       | User's device     | Lightweight remote |
+| **Android** | Remote control       | User's device     | Lightweight remote |
+
+**There is NO separate backend/VPS.** The desktop app IS the server.
+
+### AIOperationRouter (ALL LLM Calls)
+
+ALL LLM calls MUST go through `router.route()` (`src/helix/ai-operations/router.ts`). Any direct `new Anthropic()`, `getGeminiClient()`, or SDK instantiation outside `providers/` is a bug. Flag during code review.
+
+### Secrets & CLI Automation
+
+**NEVER ask for manual secret input.** All secrets auto-load from 1Password vault "Helix" via `src/lib/secrets-loader.ts`.
+
+| Instead of asking...             | Run this                                |
+| -------------------------------- | --------------------------------------- |
+| "paste your Discord webhook URL" | `npm run test:webhooks`                 |
+| "update your API keys"           | `npm run security:rotate-secrets`       |
+| "run this migration manually"    | `npx supabase db push`                  |
+| "deploy this edge function"      | `npx supabase functions deploy <name>`  |
+| "set env vars in Vercel"         | `vercel env add` or rotate script syncs |
+
 ## Tech Stack Context
 
 - **Core**: TypeScript, Node.js 22+, Python 3.12+
@@ -365,6 +396,9 @@ If any phase fails:
 - **Hash chain**: After pipeline completion, ensure hash chain is updated
 - **Psychological integrity**: Never modify psychological layer files without validation
 - **Trust relationship**: Respect the Rodrigo Specter trust level in all operations
+- **AIOperationRouter**: Verify ALL LLM calls go through `router.route()` — flag any direct SDK calls as critical
+- **Platform hierarchy**: Desktop is the brain, web/mobile are remote controls — never duplicate desktop logic elsewhere
+- **No manual secrets**: Use 1Password CLI (`op`), Supabase CLI, Vercel CLI — never ask user to paste keys
 
 ## Notes
 

@@ -16,7 +16,10 @@
       "Bash(xcodebuild test:*)",
       "Bash(git update-index:*)",
       "Bash(ls:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(find:*)",
+      "mcp__Desktop_Commander__list_directory",
+      "mcp__Desktop_Commander__read_file"
     ]
   },
   "contextInclude": ["c:/Users/Specter/Desktop/Helix"]

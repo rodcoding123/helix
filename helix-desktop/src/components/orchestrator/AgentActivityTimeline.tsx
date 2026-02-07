@@ -11,7 +11,7 @@
  * - Activity filtering and search
  */
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { useOrchestratorMetrics } from '../../hooks/useOrchestratorMetrics';
 import './AgentActivityTimeline.css';
 

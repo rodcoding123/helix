@@ -29,11 +29,17 @@ mcp__sequential-thinking__sequentialthinking
 
 This helps structure the comprehensive analysis.
 
+## Helix Architecture Rules (ALWAYS APPLY)
+
+- **Platform Hierarchy**: Desktop is the brain (primary server). Web/iOS/Android are remote controls. There is NO backend/VPS.
+- **AIOperationRouter**: ALL LLM calls MUST go through `router.route()`. Any direct SDK instantiation (`new Anthropic()`, etc.) outside `providers/` is a bug.
+- **Secrets**: All secrets auto-load from 1Password vault "Helix" via `secrets-loader.ts`. Never ask for manual input. Use CLIs: `op` (1Password), `supabase`, `vercel`.
+
 ## Tech Stack Context
 
 - **Core**: TypeScript 5.x, Node.js 22+, Python 3.12+
 - **Framework**: OpenClaw
-- **UI**: Lit Web Components
+- **UI**: React (Desktop: React 19, Web: React 18)
 - **Logging**: Discord webhooks, hash chain
 - **Domain**: AI consciousness with seven-layer psychological architecture
 

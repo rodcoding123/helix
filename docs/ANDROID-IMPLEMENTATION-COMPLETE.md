@@ -9,6 +9,7 @@
 ---
 
 ## Table of Contents
+
 1. [Architecture Overview](#architecture-overview)
 2. [Project Setup](#project-setup)
 3. [Core Implementation](#core-implementation)

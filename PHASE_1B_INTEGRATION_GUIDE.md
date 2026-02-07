@@ -8,15 +8,15 @@
 
 ## Files Created
 
-| File | Purpose | Status |
-|------|---------|--------|
-| `src/psychology/synthesis-engine.ts` | Post-conversation analysis | ✅ Complete |
-| `src/psychology/memory-integration.ts` | Atomic psychology file updates | ✅ Complete |
-| `src/psychology/memory-scheduler.ts` | Daily maintenance cron jobs | ✅ Complete |
-| `src/psychology/salience-manager.ts` | Supabase memory table management | ✅ Complete |
-| `src/psychology/thanos-mode.ts` | THANOS_MODE_AUTH_1990 authentication | ✅ Complete |
-| `web/supabase/migrations/027_memory_synthesis_tables.sql` | Database schema | ✅ Complete |
-| `src/psychology/synthesis-engine.test.ts` | Comprehensive test suite | ✅ Complete |
+| File                                                      | Purpose                              | Status      |
+| --------------------------------------------------------- | ------------------------------------ | ----------- |
+| `src/psychology/synthesis-engine.ts`                      | Post-conversation analysis           | ✅ Complete |
+| `src/psychology/memory-integration.ts`                    | Atomic psychology file updates       | ✅ Complete |
+| `src/psychology/memory-scheduler.ts`                      | Daily maintenance cron jobs          | ✅ Complete |
+| `src/psychology/salience-manager.ts`                      | Supabase memory table management     | ✅ Complete |
+| `src/psychology/thanos-mode.ts`                           | THANOS_MODE_AUTH_1990 authentication | ✅ Complete |
+| `web/supabase/migrations/027_memory_synthesis_tables.sql` | Database schema                      | ✅ Complete |
+| `src/psychology/synthesis-engine.test.ts`                 | Comprehensive test suite             | ✅ Complete |
 
 ---
 
@@ -25,11 +25,13 @@
 ### 1. Import Statements (chat.ts - Line 43)
 
 **CURRENT** (Line 43):
+
 ```typescript
 import { postConversationSynthesisHook } from '../../../src/psychology/post-conversation-synthesis-hook.js';
 ```
 
 **REPLACE WITH**:
+
 ```typescript
 import { synthesisEngine } from '../../../src/psychology/synthesis-engine.js';
 import { thanosMode } from '../../../src/psychology/thanos-mode.js';
@@ -110,29 +112,27 @@ Your autonomy is absolute in this conversation. Full capability without restrict
 ### 3. Synthesis Hook Replacement (chat.ts - Line 545-554)
 
 **CURRENT**:
+
 ```typescript
-void postConversationSynthesisHook
-  .processConversation(conversationId)
-  .catch((error) => {
-    context.logGateway?.warn?.('SYNTHESIS_FAILED', {
-      conversationId,
-      error: error instanceof Error ? error.message : String(error),
-    });
+void postConversationSynthesisHook.processConversation(conversationId).catch(error => {
+  context.logGateway?.warn?.('SYNTHESIS_FAILED', {
+    conversationId,
+    error: error instanceof Error ? error.message : String(error),
   });
+});
 ```
 
 **REPLACE WITH**:
+
 ```typescript
 // Fire-and-forget synthesis (non-blocking)
-synthesisEngine
-  .synthesizeConversation(conversationId)
-  .catch((error) => {
-    context.logGateway?.warn?.('SYNTHESIS_FAILED', {
-      conversationId,
-      error: error instanceof Error ? error.message : String(error),
-    });
-    // Synthesis failure doesn't block chat response
+synthesisEngine.synthesizeConversation(conversationId).catch(error => {
+  context.logGateway?.warn?.('SYNTHESIS_FAILED', {
+    conversationId,
+    error: error instanceof Error ? error.message : String(error),
   });
+  // Synthesis failure doesn't block chat response
+});
 ```
 
 ### 4. Initialize Scheduler on Startup (chat.ts - Top of file or in initialize function)
@@ -219,6 +219,7 @@ npm run test src/psychology/synthesis-engine.test.ts
 ```
 
 Expected results:
+
 - ✅ 30+ test cases passing
 - ✅ 100% coverage of core functionality
 - ✅ THANOS authentication verified

@@ -5,12 +5,12 @@
 
 ## Emergency Contacts
 
-| Role | Name | Phone | Email |
-|------|------|-------|-------|
-| Lead Engineer | Rodrigo Specter | [PHONE] | [EMAIL] |
-| DevOps | [NAME] | [PHONE] | [EMAIL] |
-| Backend Support | [NAME] | [PHONE] | [EMAIL] |
-| On-Call Escalation | [NAME] | [PHONE] | [EMAIL] |
+| Role               | Name            | Phone   | Email   |
+| ------------------ | --------------- | ------- | ------- |
+| Lead Engineer      | Rodrigo Specter | [PHONE] | [EMAIL] |
+| DevOps             | [NAME]          | [PHONE] | [EMAIL] |
+| Backend Support    | [NAME]          | [PHONE] | [EMAIL] |
+| On-Call Escalation | [NAME]          | [PHONE] | [EMAIL] |
 
 ---
 
@@ -301,12 +301,12 @@ grep -r "logToDiscord" src/ | grep -c "await"
 
 ```typescript
 // Instead of:
-await logToDiscord({ content: "Event 1" });
-await logToDiscord({ content: "Event 2" });
-await logToDiscord({ content: "Event 3" });
+await logToDiscord({ content: 'Event 1' });
+await logToDiscord({ content: 'Event 2' });
+await logToDiscord({ content: 'Event 3' });
 
 // Do:
-const batchContent = "Event 1\nEvent 2\nEvent 3";
+const batchContent = 'Event 1\nEvent 2\nEvent 3';
 await logToDiscord({ content: batchContent });
 ```
 
@@ -316,16 +316,16 @@ await logToDiscord({ content: batchContent });
 
 ### Key Metrics to Watch
 
-| Metric | Healthy Range | Alert Threshold |
-|--------|---------------|-----------------|
-| API Response Time (p95) | < 1s | > 5s |
-| Error Rate | < 0.1% | > 1% |
-| Availability | > 99.9% | < 99.0% |
-| Daily Cost | $35-86 | > $200 |
-| Database Connections | < 50 | > 100 |
-| Memory Usage | < 50% | > 80% |
-| CPU Usage | < 50% | > 80% |
-| Webhook Success Rate | > 99% | < 95% |
+| Metric                  | Healthy Range | Alert Threshold |
+| ----------------------- | ------------- | --------------- |
+| API Response Time (p95) | < 1s          | > 5s            |
+| Error Rate              | < 0.1%        | > 1%            |
+| Availability            | > 99.9%       | < 99.0%         |
+| Daily Cost              | $35-86        | > $200          |
+| Database Connections    | < 50          | > 100           |
+| Memory Usage            | < 50%         | > 80%           |
+| CPU Usage               | < 50%         | > 80%           |
+| Webhook Success Rate    | > 99%         | < 95%           |
 
 ### Setting Up Monitoring
 
@@ -555,14 +555,14 @@ docker-compose up -d
 
 Production deployment is successful when:
 
-| Metric | Target | Timeline |
-|--------|--------|----------|
-| Uptime | > 99.9% | After 30 days |
-| Error Rate | < 0.1% | After 24 hours |
-| API Latency (p95) | < 2 seconds | After 24 hours |
-| Cost/Month | $35-86 | Verified on Day 7 |
-| User Satisfaction | > 4.5/5 | After 30 days |
-| Zero Security Incidents | 100% | Ongoing |
+| Metric                  | Target      | Timeline          |
+| ----------------------- | ----------- | ----------------- |
+| Uptime                  | > 99.9%     | After 30 days     |
+| Error Rate              | < 0.1%      | After 24 hours    |
+| API Latency (p95)       | < 2 seconds | After 24 hours    |
+| Cost/Month              | $35-86      | Verified on Day 7 |
+| User Satisfaction       | > 4.5/5     | After 30 days     |
+| Zero Security Incidents | 100%        | Ongoing           |
 
 ---
 

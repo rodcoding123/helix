@@ -23,7 +23,7 @@ type Tab = 'accounts' | 'policies' | 'filters' | 'settings';
 
 export function ChannelDetail({ channelId, channelName, onClose }: ChannelDetailProps) {
   const [activeTab, setActiveTab] = useState<Tab>('accounts');
-  const [activeAccountId, setActiveAccountId] = useState<string | null>(null);
+  const [_activeAccountId, setActiveAccountId] = useState<string | null>(null);
 
   return (
     <div className="channel-detail">

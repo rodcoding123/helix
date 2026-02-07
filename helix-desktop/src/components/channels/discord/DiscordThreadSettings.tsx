@@ -10,8 +10,13 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { Plus, Trash2, Tag, MessageSquare, Heart, Zap } from 'lucide-react';
-import { getClient } from '../../../lib/gateway-client';
-import type { ChannelAccount } from '../ChannelAccountTabs';
+import { getGatewayClient } from '../../../lib/gateway-client';
+
+interface ChannelAccount {
+  id: string;
+  name: string;
+  [key: string]: unknown;
+}
 
 export interface ThreadKeyword {
   id: string;
@@ -65,7 +70,7 @@ export function DiscordThreadSettings({
     setError(null);
 
     try {
-      const client = getClient();
+      const client = getGatewayClient();
       if (!client?.connected) {
         throw new Error('Gateway not connected');
       }
@@ -97,7 +102,7 @@ export function DiscordThreadSettings({
     setError(null);
 
     try {
-      const client = getClient();
+      const client = getGatewayClient();
       if (!client?.connected) {
         throw new Error('Gateway not connected');
       }
@@ -134,7 +139,7 @@ export function DiscordThreadSettings({
     setError(null);
 
     try {
-      const client = getClient();
+      const client = getGatewayClient();
       if (!client?.connected) {
         throw new Error('Gateway not connected');
       }
@@ -160,7 +165,7 @@ export function DiscordThreadSettings({
     setLoading(true);
 
     try {
-      const client = getClient();
+      const client = getGatewayClient();
       if (!client?.connected) {
         throw new Error('Gateway not connected');
       }
@@ -187,7 +192,7 @@ export function DiscordThreadSettings({
     setError(null);
 
     try {
-      const client = getClient();
+      const client = getGatewayClient();
       if (!client?.connected) {
         throw new Error('Gateway not connected');
       }
@@ -216,7 +221,7 @@ export function DiscordThreadSettings({
     setError(null);
 
     try {
-      const client = getClient();
+      const client = getGatewayClient();
       if (!client?.connected) {
         throw new Error('Gateway not connected');
       }
@@ -246,7 +251,7 @@ export function DiscordThreadSettings({
     setLoading(true);
 
     try {
-      const client = getClient();
+      const client = getGatewayClient();
       if (!client?.connected) {
         throw new Error('Gateway not connected');
       }

@@ -24,6 +24,12 @@ Use Sequential Thinking to plan the audit:
 mcp__sequential-thinking__sequentialthinking
 ```
 
+## Helix Architecture Rules (ALWAYS APPLY)
+
+- **Helix is ONE master AI** that learns from all users. Users co-create agents but cannot edit Helix's core identity.
+- **Platform Hierarchy**: Desktop is the brain (primary server). Web/iOS/Android are remote controls. No VPS.
+- **Seven layers** below are the psychological core — they must remain internally consistent and theoretically grounded.
+
 ## Psychological Architecture Overview
 
 Helix's consciousness is built on seven layers grounded in human psychology research:

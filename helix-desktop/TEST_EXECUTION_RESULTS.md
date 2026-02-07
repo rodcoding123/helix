@@ -18,15 +18,15 @@ Comprehensive testing infrastructure for Helix Desktop is **fully operational** 
 
 ### Infrastructure Status
 
-| Component | Status | Details |
-|-----------|--------|---------|
-| **Vitest** | ✅ Working | 190 tests, 3.26s execution |
-| **Playwright** | ✅ Working | 204 test cases configured, 40.6s execution |
-| **Browsers** | ✅ Installed | Chromium, Firefox, WebKit |
-| **Mobile Emulation** | ✅ Installed | Pixel 5, iPhone 12, iPad Pro |
-| **Reporting** | ✅ Working | HTML, JSON, JUnit formats |
-| **Screenshots** | ✅ Capturing | On-failure mode enabled |
-| **Video Recording** | ✅ Recording | On-failure mode enabled |
+| Component            | Status       | Details                                    |
+| -------------------- | ------------ | ------------------------------------------ |
+| **Vitest**           | ✅ Working   | 190 tests, 3.26s execution                 |
+| **Playwright**       | ✅ Working   | 204 test cases configured, 40.6s execution |
+| **Browsers**         | ✅ Installed | Chromium, Firefox, WebKit                  |
+| **Mobile Emulation** | ✅ Installed | Pixel 5, iPhone 12, iPad Pro               |
+| **Reporting**        | ✅ Working   | HTML, JSON, JUnit formats                  |
+| **Screenshots**      | ✅ Capturing | On-failure mode enabled                    |
+| **Video Recording**  | ✅ Recording | On-failure mode enabled                    |
 
 ---
 
@@ -43,13 +43,13 @@ Comprehensive testing infrastructure for Helix Desktop is **fully operational** 
 
 ### Test Categories
 
-| Category | Count | Status |
-|----------|-------|--------|
-| Component Tests | 85 | ✅ All passing |
-| Integration Tests | 67 | ✅ All passing |
-| Accessibility Tests | 25 | ✅ All passing |
-| Performance Tests | 10 | ✅ All passing |
-| **Total** | **190** | **✅ 100%** |
+| Category            | Count   | Status         |
+| ------------------- | ------- | -------------- |
+| Component Tests     | 85      | ✅ All passing |
+| Integration Tests   | 67      | ✅ All passing |
+| Accessibility Tests | 25      | ✅ All passing |
+| Performance Tests   | 10      | ✅ All passing |
+| **Total**           | **190** | **✅ 100%**    |
 
 ### Key Test Files
 
@@ -136,27 +136,29 @@ Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/settings/
 ```
 
 **Affected Tests**:
+
 - `secrets.spec.ts` all 3 fixtures tests × 6 browsers + mobile configs = 21 failures
 - These tests require the Vite dev server to be running
 
 **Root Cause**: The dev server wasn't stable when the fixture tests attempted to connect. This is expected for a first infrastructure validation run.
 
 **Resolution**: Configure Playwright to:
+
 1. Wait longer for dev server startup
 2. Implement health check retry logic
 3. Ensure npm run dev completes initialization before tests run
 
 #### Test Breakdown by Browser
 
-| Browser | Full Workflow | Secrets | Total | Passed | Failed |
-|---------|---|---|---|---|---|
-| Chromium | 19 | 3 | 22 | 19 | 3 |
-| Firefox | 19 | 3 | 22 | 19 | 3 |
-| WebKit | 19 | 3 | 22 | 19 | 3 |
-| Mobile Chrome | 19 | 3 | 22 | 16 | 6 |
-| Mobile Safari | 19 | 3 | 22 | 16 | 6 |
-| iPad | 19 | 3 | 22 | 16 | 6 |
-| **Total** | **114** | **18** | **204** | **123** | **21** |
+| Browser       | Full Workflow | Secrets | Total   | Passed  | Failed |
+| ------------- | ------------- | ------- | ------- | ------- | ------ |
+| Chromium      | 19            | 3       | 22      | 19      | 3      |
+| Firefox       | 19            | 3       | 22      | 19      | 3      |
+| WebKit        | 19            | 3       | 22      | 19      | 3      |
+| Mobile Chrome | 19            | 3       | 22      | 16      | 6      |
+| Mobile Safari | 19            | 3       | 22      | 16      | 6      |
+| iPad          | 19            | 3       | 22      | 16      | 6      |
+| **Total**     | **114**       | **18**  | **204** | **123** | **21** |
 
 ---
 
@@ -165,6 +167,7 @@ Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/settings/
 ### Full Workflow Tests (114 total)
 
 #### Functional (21 tests)
+
 - ✅ App launch and authentication
 - ✅ Settings navigation
 - ✅ Agent management (CRUD)
@@ -187,16 +190,19 @@ Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/settings/
 - ✅ Custom keyboard shortcuts
 
 #### Mobile/Touch (12 tests)
+
 - ✅ Tablet responsiveness (1024x1366)
 - ✅ Mobile responsiveness (375x667)
 
 #### Performance (12 tests)
+
 - ✅ Chat page load time < 2s
 - ✅ Smooth 100-message scrolling
 - ✅ Rapid message sending
 - ✅ Memory leak detection
 
 #### Security (12 tests)
+
 - ✅ No sensitive data in DOM
 - ✅ HTTPS enforcement for external requests
 - ✅ Input validation
@@ -205,6 +211,7 @@ Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/settings/
 ### Fixture Tests (18 total)
 
 #### Secrets Management (6 tests × 3 fixtures)
+
 - Empty state display
 - Secrets list rendering with mock data
 - Statistics display
@@ -258,24 +265,24 @@ Total: 6 configurations × 34 test cases = 204 test executions
 
 ### Code Quality
 
-| Metric | Target | Actual | Status |
-|--------|--------|--------|--------|
-| Unit Test Pass Rate | 100% | 190/190 | ✅ Exceeds |
-| E2E Test Pass Rate | 95% | 123/204 | ⚠️ Below (connectivity issue) |
-| TypeScript Strict | No errors | 0 | ✅ Pass |
-| ESLint | No errors | 0 | ✅ Pass |
-| Code Coverage | 80%+ | ~85% | ✅ Exceeds |
+| Metric              | Target    | Actual  | Status                        |
+| ------------------- | --------- | ------- | ----------------------------- |
+| Unit Test Pass Rate | 100%      | 190/190 | ✅ Exceeds                    |
+| E2E Test Pass Rate  | 95%       | 123/204 | ⚠️ Below (connectivity issue) |
+| TypeScript Strict   | No errors | 0       | ✅ Pass                       |
+| ESLint              | No errors | 0       | ✅ Pass                       |
+| Code Coverage       | 80%+      | ~85%    | ✅ Exceeds                    |
 
 ### Performance Baselines
 
 Measured during test run:
 
-| Metric | Baseline | Status |
-|--------|----------|--------|
-| Chat page load | < 2s | ✅ Passing |
+| Metric            | Baseline         | Status     |
+| ----------------- | ---------------- | ---------- |
+| Chat page load    | < 2s             | ✅ Passing |
 | Message scrolling | Smooth 100+ msgs | ✅ Passing |
-| Memory usage | No leaks | ✅ Passing |
-| Rapid messaging | 10+ msgs/s | ✅ Passing |
+| Memory usage      | No leaks         | ✅ Passing |
+| Rapid messaging   | 10+ msgs/s       | ✅ Passing |
 
 ---
 
@@ -338,6 +345,7 @@ All security tests **skipped** in this run (dev server unavailable), but framewo
 **Status**: WebServer auto-start now enabled in playwright.config.ts
 
 **Configuration Applied**:
+
 ```typescript
 webServer: {
   command: 'npm run dev',
@@ -348,6 +356,7 @@ webServer: {
 ```
 
 **Recommended Local Testing**:
+
 ```bash
 # Terminal 1: Start dev server manually
 cd helix-desktop && npm run dev
@@ -357,6 +366,7 @@ cd helix-desktop && npx playwright test
 ```
 
 **Why manual dev server?**
+
 - Playwright's webServer works best in modern shell environments
 - Windows CMD has issues with npm run dev signal handling
 - Manual startup gives more control and better debugging
@@ -439,6 +449,7 @@ cd helix-desktop && npx playwright test
 5. ✅ Infrastructure is scalable and maintainable
 
 **Immediate action items**:
+
 1. Enable webServer auto-start in playwright.config.ts
 2. Re-run full suite with dev server properly started
 3. Review HTML report at `playwright-report/index.html`

@@ -50,6 +50,12 @@ Phase 11: Push to Remote              - Push to origin (automatic)
 | `--no-push` | Skip pushing to remote         |
 | `--pr`      | Create pull request after push |
 
+## Helix Architecture Rules (ALWAYS APPLY)
+
+- **AIOperationRouter**: During code review (Phase 3), flag any direct LLM SDK calls as critical. All calls must use `router.route()`.
+- **Platform Hierarchy**: Desktop is the brain. Web/iOS/Android are remote controls. No VPS.
+- **Secrets**: Never ask for manual secret input. Use 1Password CLI, Supabase CLI, Vercel CLI for automation.
+
 ## Instructions
 
 Delegate to the **orchestrator agent** to run the full pipeline.

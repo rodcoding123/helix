@@ -5,7 +5,7 @@
  * Phase G.1 - Session Configuration & Token Management
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 
 export interface ConfigChange {
   field: string;

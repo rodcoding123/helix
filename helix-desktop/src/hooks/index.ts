@@ -33,7 +33,6 @@ export { useTraySync } from './useTraySync';
 
 // Phase J: Deep Linking
 export { useDeepLink } from './useDeepLink';
-export type { DeepLinkAction, DeepLinkActionType, UseDeepLinkReturn } from './useDeepLink';
 
 // Phase J: Keyboard Shortcuts System
 export {
@@ -67,17 +66,9 @@ export type {
 } from './useGlobalShortcuts';
 
 // Phase 2.3: Orchestrator Metrics Monitoring
-export { useOrchestratorMetrics, useOrchestratorMetricsController } from './useOrchestratorMetrics';
+export { useOrchestratorMetrics } from './useOrchestratorMetrics';
 export type {
-  OrchestratorMetricsSnapshot,
-  OrchestratorCheckpointSnapshot,
-  OrchestratorCostBurnRate,
-  OrchestratorEvent,
-  OrchestratorEventType,
-  OrchestratorStateChangeEvent,
-  OrchestratorCostUpdateEvent,
-  OrchestratorAgentActiveEvent,
-  OrchestratorCheckpointSavedEvent,
   OrchestratorMetricsState,
-  UseOrchestratorMetricsOptions,
-} from '../lib/types/orchestrator-metrics';
+  CostBurnRate,
+  UseOrchestratorMetricsReturn,
+} from './useOrchestratorMetrics';

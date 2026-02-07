@@ -10,7 +10,7 @@
 
 import { useState, useCallback } from 'react';
 import { Plus, Trash2, Copy, Download, GripVertical } from 'lucide-react';
-import { getClient } from '../../../lib/gateway-client';
+import { getGatewayClient } from '../../../lib/gateway-client';
 import type { ChannelAccount } from '../ChannelAccountTabs';
 
 export interface KeyboardButton {
@@ -59,7 +59,7 @@ export function TelegramKeyboardBuilder({
     setError(null);
 
     try {
-      const client = getClient();
+      const client = getGatewayClient();
       if (!client?.connected) {
         throw new Error('Gateway not connected');
       }
@@ -89,7 +89,7 @@ export function TelegramKeyboardBuilder({
     setError(null);
 
     try {
-      const client = getClient();
+      const client = getGatewayClient();
       if (!client?.connected) {
         throw new Error('Gateway not connected');
       }
@@ -149,7 +149,7 @@ export function TelegramKeyboardBuilder({
       setError(null);
 
       try {
-        const client = getClient();
+        const client = getGatewayClient();
         if (!client?.connected) {
           throw new Error('Gateway not connected');
         }

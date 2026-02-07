@@ -250,6 +250,7 @@ SELECT * FROM user_instances WHERE user_id = '<user_id>';
    - Instance recorded with name "DESKTOP-ABC (windows)"
 
 3. **Verify instances**
+
    ```sql
    SELECT
      instance_id,
@@ -273,6 +274,7 @@ SELECT * FROM user_instances WHERE user_id = '<user_id>';
    - Heartbeat should fire automatically every 60 seconds (or can manually trigger)
 
 3. **Verify heartbeat updated**
+
    ```sql
    SELECT last_heartbeat, is_online
    FROM user_instances
@@ -293,6 +295,7 @@ SELECT * FROM user_instances WHERE user_id = '<user_id>';
    - Supabase can run trigger to set `is_online = false` based on heartbeat timeout
 
 4. **Verify offline**
+
    ```sql
    SELECT is_online,
      EXTRACT(EPOCH FROM (NOW() - last_heartbeat)) as seconds_since_heartbeat

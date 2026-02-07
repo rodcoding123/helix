@@ -3,19 +3,58 @@
  * Tests for post-conversation analysis and memory integration
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { SynthesisEngine } from './synthesis-engine.js';
 import { ThanosMode } from './thanos-mode.js';
+
+// Mock fetch for Discord webhook calls
+const mockFetch = vi.fn(async (url: string | Request) => {
+  const urlStr = typeof url === 'string' ? url : url.url;
+
+  // Mock Discord webhook endpoint
+  if (urlStr && urlStr.includes('discord.com')) {
+    return {
+      ok: true,
+      status: 204,
+      statusText: 'No Content',
+      json: async () => ({}),
+      text: async () => '',
+      blob: async () => new Blob(),
+    };
+  }
+
+  // Default mock response
+  return {
+    ok: true,
+    status: 200,
+    statusText: 'OK',
+    json: async () => ({ ok: true }),
+    text: async () => '{"ok":true}',
+    blob: async () => new Blob(),
+  };
+});
+
+vi.stubGlobal('fetch', mockFetch);
 
 describe('SynthesisEngine', () => {
   let engine: SynthesisEngine;
 
   beforeEach(() => {
+    // Set Discord webhook for hash chain
+    process.env.DISCORD_WEBHOOK_HASH_CHAIN = 'https://discord.com/api/webhooks/test/test';
+    // Disable fail-closed for tests to allow graceful Discord failures
+    process.env.HELIX_FAIL_CLOSED = 'false';
+
     engine = new SynthesisEngine(
       process.env.SUPABASE_URL || '',
       process.env.SUPABASE_SERVICE_KEY || '',
       { dryRun: true } // Dry run mode for tests
     );
+  });
+
+  afterEach(() => {
+    delete process.env.DISCORD_WEBHOOK_HASH_CHAIN;
+    delete process.env.HELIX_FAIL_CLOSED;
   });
 
   describe('Configuration', () => {
@@ -57,8 +96,18 @@ describe('ThanosMode', () => {
   let thanos: ThanosMode;
 
   beforeEach(() => {
+    // Set Discord webhook for hash chain
+    process.env.DISCORD_WEBHOOK_HASH_CHAIN = 'https://discord.com/api/webhooks/test/test';
+    // Disable fail-closed for tests to allow graceful Discord failures
+    process.env.HELIX_FAIL_CLOSED = 'false';
+
     thanos = new ThanosMode();
     thanos.clearAllStates();
+  });
+
+  afterEach(() => {
+    delete process.env.DISCORD_WEBHOOK_HASH_CHAIN;
+    delete process.env.HELIX_FAIL_CLOSED;
   });
 
   describe('Trigger Detection', () => {

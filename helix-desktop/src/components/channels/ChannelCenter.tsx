@@ -8,7 +8,17 @@ import { useState, useEffect, useCallback } from 'react';
 import { getGatewayClient } from '../../lib/gateway-client';
 import { ChannelDetail } from './ChannelDetail';
 
-const CHANNEL_METADATA = {
+interface ChannelInfo {
+  id: string;
+  name: string;
+  icon: string;
+  color?: string;
+  enabled: boolean;
+  connected: boolean;
+  accounts: number;
+}
+
+const CHANNEL_METADATA: Record<string, { name: string; icon: string; color: string }> = {
   whatsapp: { name: 'WhatsApp', icon: '💬', color: '#25D366' },
   telegram: { name: 'Telegram', icon: '✈️', color: '#0088cc' },
   discord: { name: 'Discord', icon: '🎮', color: '#5865F2' },
@@ -20,10 +30,10 @@ const CHANNEL_METADATA = {
 };
 
 export function ChannelCenter() {
-  const [channels, setChannels] = useState([]);
-  const [selectedChannel, setSelectedChannel] = useState(null);
+  const [channels, setChannels] = useState<ChannelInfo[]>([]);
+  const [selectedChannel, setSelectedChannel] = useState<ChannelInfo | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   const loadChannels = useCallback(async () => {
@@ -37,15 +47,17 @@ export function ChannelCenter() {
         return;
       }
 
-      const result = await client.request('channels.status', {});
-      const channels = Object.entries(result.channels || {}).map(([id, config]) => {
-        const meta = CHANNEL_METADATA[id] || { name: id, icon: '📱' };
+      const result = await client.request('channels.status', {}) as {
+        channels?: Record<string, { enabled: boolean; connected: boolean; accounts?: unknown[] }>;
+      };
+      const channels: ChannelInfo[] = Object.entries(result.channels || {}).map(([id, config]) => {
+        const meta = CHANNEL_METADATA[id] || { name: id, icon: '📱', color: '#999999' };
         return {
           id,
           ...meta,
           enabled: config.enabled,
           connected: config.connected,
-          accounts: config.accounts?.length || 1,
+          accounts: (config.accounts as unknown[] | undefined)?.length || 1,
         };
       });
 

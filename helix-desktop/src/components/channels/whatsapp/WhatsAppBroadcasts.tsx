@@ -10,7 +10,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { Plus, Trash2, Send, Phone, CheckCircle, Clock, AlertCircle } from 'lucide-react';
-import { getClient } from '../../../lib/gateway-client';
+import { getGatewayClient } from '../../../lib/gateway-client';
 import type { ChannelAccount } from '../ChannelAccountTabs';
 
 export interface BroadcastList {
@@ -56,7 +56,7 @@ export function WhatsAppBroadcasts({
     setError(null);
 
     try {
-      const client = getClient();
+      const client = getGatewayClient();
       if (!client?.connected) {
         throw new Error('Gateway not connected');
       }
@@ -82,7 +82,7 @@ export function WhatsAppBroadcasts({
       setLoading(true);
 
       try {
-        const client = getClient();
+        const client = getGatewayClient();
         if (!client?.connected) {
           throw new Error('Gateway not connected');
         }
@@ -115,7 +115,7 @@ export function WhatsAppBroadcasts({
     setError(null);
 
     try {
-      const client = getClient();
+      const client = getGatewayClient();
       if (!client?.connected) {
         throw new Error('Gateway not connected');
       }
@@ -157,7 +157,7 @@ export function WhatsAppBroadcasts({
     setError(null);
 
     try {
-      const client = getClient();
+      const client = getGatewayClient();
       if (!client?.connected) {
         throw new Error('Gateway not connected');
       }
@@ -201,7 +201,7 @@ export function WhatsAppBroadcasts({
       setError(null);
 
       try {
-        const client = getClient();
+        const client = getGatewayClient();
         if (!client?.connected) {
           throw new Error('Gateway not connected');
         }

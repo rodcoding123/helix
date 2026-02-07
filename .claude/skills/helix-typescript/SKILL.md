@@ -2,6 +2,12 @@
 
 Activated when working with Helix's TypeScript codebase, including logging, hash chain, and psychological context loading.
 
+## Helix Architecture Rules (ALWAYS APPLY)
+
+- **AIOperationRouter**: ALL LLM calls go through `router.route()` (`src/helix/ai-operations/router.ts`). Never `new Anthropic()` or direct SDK calls.
+- **Platform Hierarchy**: Desktop is the brain (Tauri v2). Web/iOS/Android are remote controls. No VPS.
+- **Secrets**: Auto-load from 1Password vault "Helix" via `secrets-loader.ts`. Never hardcode secrets.
+
 ## Activation Triggers
 
 - Writing TypeScript code in `src/helix/`

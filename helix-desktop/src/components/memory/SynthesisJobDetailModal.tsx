@@ -6,7 +6,6 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useGateway } from '../../hooks/useGateway';
 
 export interface SynthesisJob {
   id: string;
