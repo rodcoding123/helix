@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { invoke } from '../../lib/tauri-compat';
 import { useConfigStore } from '../../stores/configStore';
+import { OAuthFlowDialog } from '../auth/OAuthFlowDialog';
+import type { AuthProfile } from '../auth/AuthProfileManager';
 
 export function AccountSettings() {
   const { config, updateConfig } = useConfigStore();
@@ -8,6 +10,7 @@ export function AccountSettings() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showOAuthDialog, setShowOAuthDialog] = useState(false);
 
   const isCloudConnected = config.account?.cloudSync ?? false;
 
@@ -23,11 +26,40 @@ export function AccountSettings() {
   };
 
   const handleCloudSyncToggle = async (enabled: boolean) => {
-    updateConfig('account', { cloudSync: enabled });
-
     if (enabled) {
-      // TODO: Trigger OAuth flow for Helix Cloud
-      console.log('Cloud sync enabled - OAuth flow would start here');
+      // Show OAuth dialog to connect account
+      setShowOAuthDialog(true);
+    } else {
+      updateConfig('account', { cloudSync: false });
+    }
+  };
+
+  const handleOAuthComplete = (profile: AuthProfile) => {
+    console.log('OAuth completed:', profile);
+    setShowOAuthDialog(false);
+    updateConfig('account', { cloudSync: true });
+  };
+
+  const handleOAuthCancel = () => {
+    setShowOAuthDialog(false);
+  };
+
+  const handleExportData = async () => {
+    try {
+      const data = await invoke('export_all_data');
+      const dataStr = JSON.stringify(data, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `helix-export-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to export data:', error);
+      alert('Failed to export data. Check console for details.');
     }
   };
 
@@ -188,9 +220,9 @@ export function AccountSettings() {
             <button
               className="settings-button primary"
               style={{ marginTop: '12px' }}
-              disabled
+              onClick={() => setShowOAuthDialog(true)}
             >
-              Sign in to Helix Cloud (Coming Soon)
+              Sign in to Helix Cloud
             </button>
           </div>
         )}
@@ -206,7 +238,7 @@ export function AccountSettings() {
               Download all your data including conversations and memories
             </div>
           </div>
-          <button className="settings-button secondary">
+          <button className="settings-button secondary" onClick={handleExportData}>
             Export Data
           </button>
         </div>
@@ -289,6 +321,14 @@ export function AccountSettings() {
             </div>
           </div>
         </div>
+      )}
+
+      {showOAuthDialog && (
+        <OAuthFlowDialog
+          provider="anthropic"
+          onComplete={handleOAuthComplete}
+          onCancel={handleOAuthCancel}
+        />
       )}
     </div>
   );

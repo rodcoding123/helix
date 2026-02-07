@@ -36,8 +36,8 @@ interface AutoReplyRule {
 export function AutomationSettings() {
   const { getClient } = useGateway();
   const [cronJobs, setCronJobs] = useState<CronJob[]>([]);
-  const [webhooks] = useState<Webhook[]>([]);
-  const [autoReplies] = useState<AutoReplyRule[]>([]);
+  const [webhooks, setWebhooks] = useState<Webhook[]>([]);
+  const [autoReplies, setAutoReplies] = useState<AutoReplyRule[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'cron' | 'webhooks' | 'autoreplies'>('cron');
   const [showAddCron, setShowAddCron] = useState(false);
@@ -129,6 +129,20 @@ export function AutomationSettings() {
     } catch (err) {
       console.error('Failed to delete cron job:', err);
     }
+  };
+
+  const editCronJob = (jobId: string) => {
+    // TODO: Implement edit modal with pre-filled form
+    console.log('Edit cron job:', jobId);
+    setShowAddCron(true);
+  };
+
+  const deleteWebhook = (webhookId: string) => {
+    setWebhooks(prev => prev.filter(w => w.id !== webhookId));
+  };
+
+  const deleteAutoReply = (ruleId: string) => {
+    setAutoReplies(prev => prev.filter(r => r.id !== ruleId));
   };
 
   return (
@@ -223,7 +237,7 @@ export function AutomationSettings() {
                         >
                           Run Now
                         </button>
-                        <button className="btn-sm btn-secondary">Edit</button>
+                        <button className="btn-sm btn-secondary" onClick={() => editCronJob(job.id)}>Edit</button>
                         <button
                           className="btn-sm btn-danger"
                           onClick={() => deleteCronJob(job.id)}
@@ -242,14 +256,31 @@ export function AutomationSettings() {
             <section className="settings-group">
               <div className="group-header">
                 <h2>Webhooks</h2>
-                <button className="btn-primary btn-sm">+ Add Webhook</button>
+                <button className="btn-primary btn-sm" onClick={() => console.log('Add webhook modal - TODO')}>+ Add Webhook</button>
               </div>
 
-              <div className="empty-state">
-                <span className="empty-icon">🪝</span>
-                <p>No webhooks configured.</p>
-                <button className="btn-primary">Create your first webhook</button>
-              </div>
+              {webhooks.length === 0 ? (
+                <div className="empty-state">
+                  <span className="empty-icon">🪝</span>
+                  <p>No webhooks configured.</p>
+                  <button className="btn-primary" onClick={() => console.log('Add webhook modal - TODO')}>Create your first webhook</button>
+                </div>
+              ) : (
+                <div className="webhooks-list">
+                  {webhooks.map(webhook => (
+                    <div key={webhook.id} className="cron-job-card">
+                      <div className="cron-job-info">
+                        <h3>{webhook.name}</h3>
+                        <p>{webhook.url}</p>
+                        <span className="cron-schedule">{webhook.events.join(', ')}</span>
+                      </div>
+                      <div className="cron-job-actions">
+                        <button className="btn-sm btn-danger" onClick={() => deleteWebhook(webhook.id)}>Delete</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </section>
           )}
 
@@ -257,14 +288,31 @@ export function AutomationSettings() {
             <section className="settings-group">
               <div className="group-header">
                 <h2>Auto-Reply Rules</h2>
-                <button className="btn-primary btn-sm">+ Add Rule</button>
+                <button className="btn-primary btn-sm" onClick={() => console.log('Add auto-reply modal - TODO')}>+ Add Rule</button>
               </div>
 
-              <div className="empty-state">
-                <span className="empty-icon">⚡</span>
-                <p>No auto-reply rules configured.</p>
-                <button className="btn-primary">Create your first rule</button>
-              </div>
+              {autoReplies.length === 0 ? (
+                <div className="empty-state">
+                  <span className="empty-icon">⚡</span>
+                  <p>No auto-reply rules configured.</p>
+                  <button className="btn-primary" onClick={() => console.log('Add auto-reply modal - TODO')}>Create your first rule</button>
+                </div>
+              ) : (
+                <div className="autoreplies-list">
+                  {autoReplies.map(rule => (
+                    <div key={rule.id} className="cron-job-card">
+                      <div className="cron-job-info">
+                        <h3>{rule.pattern}</h3>
+                        <p>{rule.response}</p>
+                        <span className="cron-schedule">{rule.channels.join(', ')}</span>
+                      </div>
+                      <div className="cron-job-actions">
+                        <button className="btn-sm btn-danger" onClick={() => deleteAutoReply(rule.id)}>Delete</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <div className="settings-item">
                 <div className="settings-item-info">

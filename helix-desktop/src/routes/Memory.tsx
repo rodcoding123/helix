@@ -22,6 +22,7 @@ export default function Memory() {
   const [selectedEntry, setSelectedEntry] = useState<MemoryListEntry | null>(null);
   const [loading, setLoading] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const [usingPlaceholder, setUsingPlaceholder] = useState(true);
 
   const handleSearch = useCallback(async (query: string, filters: MemoryFilter) => {
     setLoading(true);
@@ -46,12 +47,16 @@ export default function Memory() {
             filtered = entries.entries;
             setEntries(filtered);
             setSelectedEntry(null);
+            setUsingPlaceholder(false);
             return;
           }
         } catch (apiErr) {
           // Fall back to placeholder data if API fails
           console.debug('[memory-search] gateway API failed, using placeholder data:', apiErr);
+          setUsingPlaceholder(true);
         }
+      } else {
+        setUsingPlaceholder(true);
       }
 
       // Fallback: filter placeholder data locally
@@ -121,7 +126,7 @@ export default function Memory() {
   };
 
   const availableTags = Array.from(
-    new Set(PLACEHOLDER_MEMORY_ENTRIES.flatMap(e => e.tags || []))
+    new Set(entries.flatMap(e => e.tags || []))
   );
 
   return (
@@ -130,6 +135,11 @@ export default function Memory() {
         <div className="memory-header-content">
           <h1>Memory Browser</h1>
           <p>Search and explore the knowledge graph</p>
+          {usingPlaceholder && (
+            <div className="data-source-banner warning">
+              ⚠️ Using cached demo data - gateway unavailable
+            </div>
+          )}
         </div>
         <button
           className={`memory-stats-toggle ${showStats ? 'active' : ''}`}

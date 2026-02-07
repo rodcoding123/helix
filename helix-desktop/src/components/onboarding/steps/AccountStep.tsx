@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { OAuthFlowDialog } from '../../auth/OAuthFlowDialog';
+import type { AuthProfile } from '../../auth/AuthProfileManager';
 import './Steps.css';
 
 interface AccountStepProps {
@@ -7,10 +10,25 @@ interface AccountStepProps {
 }
 
 export function AccountStep({ onNext, onBack, onSkip }: AccountStepProps) {
+  const [showOAuthDialog, setShowOAuthDialog] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState<string>('');
+
   const handleOAuthClick = (provider: 'github' | 'google' | 'email') => {
-    // TODO: Implement actual OAuth flow
-    console.log(`OAuth sign in with ${provider} - not yet implemented`);
-    // For now, just show a coming soon message
+    // Map email to anthropic since we're using Anthropic as the backend
+    const actualProvider = provider === 'email' ? 'anthropic' : provider;
+    setSelectedProvider(actualProvider);
+    setShowOAuthDialog(true);
+  };
+
+  const handleOAuthComplete = (profile: AuthProfile) => {
+    console.log('OAuth completed:', profile);
+    setShowOAuthDialog(false);
+    // Move to next step after successful authentication
+    onNext();
+  };
+
+  const handleOAuthCancel = () => {
+    setShowOAuthDialog(false);
   };
 
   return (
@@ -110,6 +128,14 @@ export function AccountStep({ onNext, onBack, onSkip }: AccountStepProps) {
           Continue
         </button>
       </div>
+
+      {showOAuthDialog && (
+        <OAuthFlowDialog
+          provider={selectedProvider}
+          onComplete={handleOAuthComplete}
+          onCancel={handleOAuthCancel}
+        />
+      )}
     </div>
   );
 }

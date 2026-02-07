@@ -78,7 +78,7 @@ const LAYER_INFO: Record<PsychologyLayer, { name: string; description: string; t
 export default function Psychology() {
   const { layer = 'overview' } = useParams<{ layer?: string }>();
   const navigate = useNavigate();
-  const { loading, error } = usePsychology();
+  const { soul, layers, loading, error } = usePsychology();
 
   const normalizedLayer = layer as PsychologyLayer;
   const layerInfo = LAYER_INFO[normalizedLayer] || LAYER_INFO.overview;
@@ -110,7 +110,7 @@ export default function Psychology() {
       case 'overview':
         return (
           <LayerOverview
-            layers={PLACEHOLDER_LAYERS}
+            layers={(layers.overview as any) || PLACEHOLDER_LAYERS}
             onLayerClick={handleLayerClick}
           />
         );
@@ -118,7 +118,7 @@ export default function Psychology() {
       case 'narrative':
         return (
           <SoulViewer
-            content={PLACEHOLDER_SOUL_CONTENT}
+            content={soul || PLACEHOLDER_SOUL_CONTENT}
             title="HELIX_SOUL.md"
             lastModified="2 days ago"
           />
@@ -127,7 +127,7 @@ export default function Psychology() {
       case 'emotional':
         return (
           <EmotionalMemoryMap
-            tags={PLACEHOLDER_EMOTIONAL_TAGS}
+            tags={(layers.emotional as any) || PLACEHOLDER_EMOTIONAL_TAGS}
             onTagClick={(tag) => console.log('Tag clicked:', tag)}
           />
         );
@@ -135,7 +135,7 @@ export default function Psychology() {
       case 'relational':
         return (
           <TrustMap
-            relationships={PLACEHOLDER_TRUST_RELATIONSHIPS}
+            relationships={(layers.relational as any) || PLACEHOLDER_TRUST_RELATIONSHIPS}
             onRelationshipClick={(rel) => console.log('Relationship clicked:', rel)}
           />
         );
@@ -143,7 +143,7 @@ export default function Psychology() {
       case 'prospective':
         return (
           <GoalsTimeline
-            goals={PLACEHOLDER_GOALS}
+            goals={(layers.prospective as any) || PLACEHOLDER_GOALS}
             onGoalClick={(goal) => console.log('Goal clicked:', goal)}
           />
         );
@@ -163,7 +163,7 @@ export default function Psychology() {
       case 'transformation':
         return (
           <TransformationHistory
-            events={PLACEHOLDER_TRANSFORMATION_EVENTS}
+            events={(layers.transformation as any) || PLACEHOLDER_TRANSFORMATION_EVENTS}
             currentPhase="change"
             onEventClick={(event) => console.log('Event clicked:', event)}
           />
@@ -172,8 +172,8 @@ export default function Psychology() {
       case 'purpose':
         return (
           <PurposeEngine
-            ikigai={PLACEHOLDER_IKIGAI}
-            meaningSources={PLACEHOLDER_MEANING_SOURCES}
+            ikigai={((layers.purpose as any)?.ikigai) || PLACEHOLDER_IKIGAI}
+            meaningSources={((layers.purpose as any)?.meaningSources) || PLACEHOLDER_MEANING_SOURCES}
             onElementClick={(element) => console.log('Element clicked:', element)}
           />
         );
