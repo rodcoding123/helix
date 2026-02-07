@@ -230,11 +230,11 @@ export function ResetModeSelector({ sessionKey }: { sessionKey?: string }) {
                   className="timeout-slider"
                 />
                 <div className="timeout-display">
-                  {resetConfig.idleTimeoutMinutes} minutes
-                  {resetConfig.idleTimeoutMinutes >= 60 && (
+                  {resetConfig.idleTimeoutMinutes ?? 30} minutes
+                  {(resetConfig.idleTimeoutMinutes ?? 30) >= 60 && (
                     <span className="timeout-hours">
-                      ({Math.floor(resetConfig.idleTimeoutMinutes / 60)}h{' '}
-                      {resetConfig.idleTimeoutMinutes % 60}m)
+                      ({Math.floor((resetConfig.idleTimeoutMinutes ?? 30) / 60)}h{' '}
+                      {(resetConfig.idleTimeoutMinutes ?? 30) % 60}m)
                     </span>
                   )}
                 </div>
