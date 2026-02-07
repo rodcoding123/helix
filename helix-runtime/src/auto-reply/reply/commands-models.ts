@@ -75,34 +75,30 @@ function parseModelsArgs(raw: string): {
   };
 }
 
-export async function resolveModelsCommandReply(params: {
-  cfg: OpenClawConfig;
-  commandBodyNormalized: string;
-}): Promise<ReplyPayload | null> {
-  const body = params.commandBodyNormalized.trim();
-  if (!body.startsWith("/models")) {
-    return null;
-  }
-
-  const argText = body.replace(/^\/models\b/i, "").trim();
-  const { provider, page, pageSize, all } = parseModelsArgs(argText);
-
+/**
+ * Build provider data structure for model selection UIs (e.g., Telegram bot callbacks)
+ * Returns a map of providers to their available models
+ */
+export async function buildModelsProviderData(cfg: OpenClawConfig): Promise<{
+  byProvider: Map<string, Set<string>>;
+  providers: string[];
+}> {
   const resolvedDefault = resolveConfiguredModelRef({
-    cfg: params.cfg,
+    cfg,
     defaultProvider: DEFAULT_PROVIDER,
     defaultModel: DEFAULT_MODEL,
   });
 
-  const catalog = await loadModelCatalog({ config: params.cfg });
+  const catalog = await loadModelCatalog({ config: cfg });
   const allowed = buildAllowedModelSet({
-    cfg: params.cfg,
+    cfg,
     catalog,
     defaultProvider: resolvedDefault.provider,
     defaultModel: resolvedDefault.model,
   });
 
   const aliasIndex = buildModelAliasIndex({
-    cfg: params.cfg,
+    cfg,
     defaultProvider: resolvedDefault.provider,
   });
 
@@ -131,7 +127,7 @@ export async function resolveModelsCommandReply(params: {
   };
 
   const addModelConfigEntries = () => {
-    const modelConfig = params.cfg.agents?.defaults?.model;
+    const modelConfig = cfg.agents?.defaults?.model;
     if (typeof modelConfig === "string") {
       addRawModelRef(modelConfig);
     } else if (modelConfig && typeof modelConfig === "object") {
@@ -141,7 +137,7 @@ export async function resolveModelsCommandReply(params: {
       }
     }
 
-    const imageConfig = params.cfg.agents?.defaults?.imageModel;
+    const imageConfig = cfg.agents?.defaults?.imageModel;
     if (typeof imageConfig === "string") {
       addRawModelRef(imageConfig);
     } else if (imageConfig && typeof imageConfig === "object") {
@@ -157,7 +153,7 @@ export async function resolveModelsCommandReply(params: {
   }
 
   // Include config-only allowlist keys that aren't in the curated catalog.
-  for (const raw of Object.keys(params.cfg.agents?.defaults?.models ?? {})) {
+  for (const raw of Object.keys(cfg.agents?.defaults?.models ?? {})) {
     addRawModelRef(raw);
   }
 
@@ -167,6 +163,24 @@ export async function resolveModelsCommandReply(params: {
   addModelConfigEntries();
 
   const providers = [...byProvider.keys()].toSorted();
+
+  return { byProvider, providers };
+}
+
+export async function resolveModelsCommandReply(params: {
+  cfg: OpenClawConfig;
+  commandBodyNormalized: string;
+}): Promise<ReplyPayload | null> {
+  const body = params.commandBodyNormalized.trim();
+  if (!body.startsWith("/models")) {
+    return null;
+  }
+
+  const argText = body.replace(/^\/models\b/i, "").trim();
+  const { provider, page, pageSize, all } = parseModelsArgs(argText);
+
+  // Use the shared provider data builder
+  const { byProvider, providers } = await buildModelsProviderData(params.cfg);
 
   if (!provider) {
     const lines: string[] = [

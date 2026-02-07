@@ -75,7 +75,7 @@ function resolveParentSessionKeyCandidate(params) {
     }
     return null;
 }
-function resolveStoredModelOverride(params) {
+export function resolveStoredModelOverride(params) {
     const direct = resolveModelOverrideFromEntry(params.sessionEntry);
     if (direct) {
         return { ...direct, source: "session" };

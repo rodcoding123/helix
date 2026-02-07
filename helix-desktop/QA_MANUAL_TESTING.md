@@ -439,10 +439,10 @@ After each update/build:
 
 ## Test Results Summary
 
-**Date**: ****\_\_\_****
-**Tester**: ****\_\_\_****
+**Date**: \***\*\_\_\_\*\***
+**Tester**: \***\*\_\_\_\*\***
 **Environment**: macOS / Windows / Linux
-**Browser/Platform**: ****\_\_\_****
+**Browser/Platform**: \***\*\_\_\_\*\***
 
 ### Results
 
