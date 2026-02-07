@@ -39,3 +39,12 @@ export function createReplyPrefixContext(params: {
     onModelSelected,
   };
 }
+
+// Alias for backward compatibility with gateway server methods
+export function createReplyPrefixOptions(params: {
+  cfg: OpenClawConfig;
+  agentId: string;
+  channel?: string;
+}): ReplyPrefixContextBundle {
+  return createReplyPrefixContext({ cfg: params.cfg, agentId: params.agentId });
+}

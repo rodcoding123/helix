@@ -19,4 +19,8 @@ export function createReplyPrefixContext(params) {
         onModelSelected,
     };
 }
+// Alias for backward compatibility with gateway server methods
+export function createReplyPrefixOptions(params) {
+    return createReplyPrefixContext({ cfg: params.cfg, agentId: params.agentId });
+}
 //# sourceMappingURL=reply-prefix.js.map

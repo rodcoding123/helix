@@ -181,7 +181,9 @@ export function validateConfigObjectWithPlugins(raw) {
         }
     }
     const memorySlot = normalizedPlugins.slots.memory;
-    if (typeof memorySlot === "string" && memorySlot.trim() && !knownIds.has(memorySlot)) {
+    // Skip validation for bundled plugins (memory-core, memory-lancedb) which are always available
+    const bundledPlugins = ["memory-core", "memory-lancedb"];
+    if (typeof memorySlot === "string" && memorySlot.trim() && !bundledPlugins.includes(memorySlot) && !knownIds.has(memorySlot)) {
         issues.push({
             path: "plugins.slots.memory",
             message: `plugin not found: ${memorySlot}`,
