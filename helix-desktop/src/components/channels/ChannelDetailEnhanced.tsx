@@ -123,7 +123,15 @@ export function ChannelDetailEnhanced(props: ChannelDetailEnhancedProps) {
             </p>
             <div className="feature-content">
               {selectedAccountId && (
-                <AccountCredentialManager accountId={selectedAccountId} channelId={props.channelId} />
+                <AccountCredentialManager
+                  account={{ id: selectedAccountId, name: selectedAccountId }}
+                  channelId={props.channelId}
+                  credentialTypes={[
+                    { type: 'token', label: 'API Token', required: false },
+                    { type: 'api_key', label: 'API Key', required: false },
+                    { type: 'password', label: 'Password', required: false },
+                  ]}
+                />
               )}
             </div>
           </div>
@@ -146,19 +154,31 @@ export function ChannelDetailEnhanced(props: ChannelDetailEnhancedProps) {
 
             <div className="feature-content">
               {props.channelType === 'whatsapp' && (
-                <WhatsAppBroadcasts channelId={props.channelId} />
+                <WhatsAppBroadcasts
+                  account={{ id: selectedAccountId, name: selectedAccountId }}
+                  _channelId={props.channelId}
+                />
               )}
 
               {props.channelType === 'telegram' && (
-                <TelegramKeyboardBuilder channelId={props.channelId} />
+                <TelegramKeyboardBuilder
+                  account={{ id: selectedAccountId, name: selectedAccountId }}
+                  _channelId={props.channelId}
+                />
               )}
 
               {props.channelType === 'discord' && (
-                <DiscordThreadSettings channelId={props.channelId} />
+                <DiscordThreadSettings
+                  account={{ id: selectedAccountId, name: selectedAccountId }}
+                  channelId={props.channelId}
+                />
               )}
 
               {props.channelType === 'slack' && (
-                <SlackBlockKitBuilder channelId={props.channelId} />
+                <SlackBlockKitBuilder
+                  account={{ id: selectedAccountId, name: selectedAccountId }}
+                  _channelId={props.channelId}
+                />
               )}
 
               {!['whatsapp', 'telegram', 'discord', 'slack'].includes(props.channelType) && (
@@ -192,7 +212,7 @@ export function ChannelDetailEnhanced(props: ChannelDetailEnhancedProps) {
               View real-time metrics, connection status, message flow, and error logs
             </p>
             <div className="feature-content">
-              <ChannelMonitoringDashboard channelId={props.channelId} />
+              <ChannelMonitoringDashboard selectedChannel={props.channelId} />
             </div>
           </div>
         );

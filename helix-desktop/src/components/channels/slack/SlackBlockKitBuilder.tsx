@@ -37,7 +37,7 @@ export interface BlockTemplate {
 
 interface SlackBlockKitBuilderProps {
   account?: ChannelAccount;
-  channelId: string;
+  _channelId?: string;
 }
 
 interface SlackBlockResponse {
@@ -56,7 +56,7 @@ const BLOCK_TYPE_OPTIONS: Array<{ value: BlockType; label: string; icon: React.R
 
 export function SlackBlockKitBuilder({
   account: propsAccount,
-  channelId,
+  _channelId: _unusedChannelId,
 }: SlackBlockKitBuilderProps) {
   const account = propsAccount || { id: 'default', name: 'Primary' };
   const [templates, setTemplates] = useState<BlockTemplate[]>([]);
@@ -68,7 +68,7 @@ export function SlackBlockKitBuilder({
   const [blockPlaceholder, setBlockPlaceholder] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showPreview, _setShowPreview] = useState(false);
+  const [_showPreview] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [templateName, setTemplateName] = useState('');
 

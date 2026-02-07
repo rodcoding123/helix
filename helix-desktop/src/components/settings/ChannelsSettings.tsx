@@ -22,6 +22,7 @@ interface ChannelStatus {
 const CHANNEL_CONFIGS: Record<string, ChannelConfig> = {
   whatsapp: {
     id: 'whatsapp',
+    enabled: false,
     name: 'WhatsApp',
     icon: '💬',
     description: 'Personal and business messaging with QR code pairing',
@@ -32,6 +33,7 @@ const CHANNEL_CONFIGS: Record<string, ChannelConfig> = {
   },
   telegram: {
     id: 'telegram',
+    enabled: false,
     name: 'Telegram',
     icon: '✈️',
     description: 'Bot API with groups, topics, and inline mode',
@@ -42,6 +44,7 @@ const CHANNEL_CONFIGS: Record<string, ChannelConfig> = {
   },
   discord: {
     id: 'discord',
+    enabled: false,
     name: 'Discord',
     icon: '🎮',
     description: 'Servers, channels, threads, and DMs',
@@ -52,6 +55,7 @@ const CHANNEL_CONFIGS: Record<string, ChannelConfig> = {
   },
   slack: {
     id: 'slack',
+    enabled: false,
     name: 'Slack',
     icon: '📊',
     description: 'Workspace apps with channels and DMs',
@@ -62,6 +66,7 @@ const CHANNEL_CONFIGS: Record<string, ChannelConfig> = {
   },
   'google-chat': {
     id: 'google-chat',
+    enabled: false,
     name: 'Google Chat',
     icon: '🔷',
     description: 'Google Workspace chat integration',

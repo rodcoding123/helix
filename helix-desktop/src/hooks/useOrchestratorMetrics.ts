@@ -62,7 +62,6 @@ export function useOrchestratorMetrics(
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const subscriptionRef = useRef<(() => void) | null>(null);
   const updateTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Fetch initial metrics snapshot

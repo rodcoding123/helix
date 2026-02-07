@@ -30,7 +30,7 @@ export function PolicyEditor({ channelId }: { channelId?: string }) {
         return;
       }
 
-      const result = await client.request('policies.get', { channel: channelId });
+      const result = (await client.request('policies.get', { channel: channelId })) as { policies?: any[] };
       const policy = result.policies?.[0];
 
       if (policy) {

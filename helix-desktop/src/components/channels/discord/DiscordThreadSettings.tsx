@@ -57,10 +57,10 @@ interface DiscordThreadResponse {
 }
 
 export function DiscordThreadSettings({
-  account,
-  _channelId,
+  account: _account,
+  channelId: _channelId,
 }: DiscordThreadSettingsProps) {
-  const _unused_channelId = _channelId;
+  const account = _account || { id: 'default', name: 'Primary' };
   const [keywords, setKeywords] = useState<ThreadKeyword[]>([]);
   const [embedColor, setEmbedColor] = useState('#3498DB');
   const [newKeyword, setNewKeyword] = useState('');

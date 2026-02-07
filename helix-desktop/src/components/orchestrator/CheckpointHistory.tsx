@@ -11,7 +11,6 @@
 
 import React, { useMemo, useState } from 'react';
 import { Save, ChevronDown, Zap, Coins } from 'lucide-react';
-import { useOrchestratorMetrics } from '../../hooks';
 import type { OrchestratorCheckpointSnapshot } from '../../lib/types/orchestrator-metrics';
 
 interface CheckpointHistoryProps {
@@ -176,11 +175,11 @@ const CheckpointRow: React.FC<CheckpointRowProps> = ({
 };
 
 export const CheckpointHistory: React.FC<CheckpointHistoryProps> = ({
-  threadId,
+  _threadId,
   className = '',
   maxItems = 30,
 }) => {
-  const _metrics = useOrchestratorMetrics(threadId || '');
+  // Note: _threadId could be used for fetching metrics in current implementation
   const [expandedIndices, setExpandedIndices] = useState<Set<number>>(new Set());
 
   const recentCheckpoints: OrchestratorCheckpointSnapshot[] = [];

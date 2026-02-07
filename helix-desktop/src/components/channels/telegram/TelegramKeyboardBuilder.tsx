@@ -8,7 +8,7 @@
  * - Save keyboard templates
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Plus, Trash2, Copy, Download } from 'lucide-react';
 import { getGatewayClient } from '../../../lib/gateway-client';
 import type { ChannelAccount } from '../ChannelAccountTabs';
@@ -31,7 +31,7 @@ export interface KeyboardTemplate {
 
 interface TelegramKeyboardBuilderProps {
   account?: ChannelAccount;
-  channelId: string;
+  _channelId?: string;
 }
 
 interface TelegramKeyboardResponse {
@@ -42,7 +42,7 @@ interface TelegramKeyboardResponse {
 
 export function TelegramKeyboardBuilder({
   account: propsAccount,
-  _channelId,
+  _channelId: _unusedChannelId,
 }: TelegramKeyboardBuilderProps) {
   const account = propsAccount || { id: 'default', name: 'Primary' };
   const [templates, setTemplates] = useState<KeyboardTemplate[]>([]);
@@ -50,7 +50,7 @@ export function TelegramKeyboardBuilder({
   const [buttons, setButtons] = useState<KeyboardButton[]>([]);
   const [loading, setLoading] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
-  const [showButtonModal, _setShowButtonModal] = useState(false);
+  const [_showButtonModal] = useState(false);
   const [templateName, setTemplateName] = useState('');
   const [newButton, setNewButton] = useState({
     label: '',
@@ -58,10 +58,10 @@ export function TelegramKeyboardBuilder({
     row: 0,
   });
   const [error, setError] = useState<string | null>(null);
-  const [editingButtonId, _setEditingButtonId] = useState<string | null>(null);
+  const [_editingButtonId] = useState<string | null>(null);
 
   // Load templates
-  const _loadTemplates = useCallback(async () => {
+  const loadTemplates = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -84,6 +84,11 @@ export function TelegramKeyboardBuilder({
       setLoading(false);
     }
   }, [account.id]);
+
+  // Load templates on mount
+  useEffect(() => {
+    loadTemplates();
+  }, [loadTemplates]);
 
   // Save template
   const handleSaveTemplate = useCallback(async () => {

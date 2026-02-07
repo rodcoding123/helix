@@ -32,7 +32,7 @@ export interface BroadcastMessage {
 
 interface WhatsAppBroadcastsProps {
   account?: ChannelAccount;
-  channelId: string;
+  _channelId?: string;
 }
 
 interface WhatsAppBroadcastResponse {
@@ -46,7 +46,7 @@ interface WhatsAppBroadcastResponse {
 
 export function WhatsAppBroadcasts({
   account: propsAccount,
-  _channelId,
+  _channelId: _unusedChannelId,
 }: WhatsAppBroadcastsProps) {
   const account = propsAccount || { id: 'default', name: 'Primary' };
   const [broadcasts, setBroadcasts] = useState<BroadcastList[]>([]);
@@ -186,7 +186,7 @@ export function WhatsAppBroadcasts({
           content: messageContent,
           sentAt: Date.now(),
           status: 'sent',
-          recipientStatus: result.recipientStatus || {},
+          recipientStatus: (result.recipientStatus || {}) as Record<string, 'pending' | 'sent' | 'failed' | 'delivery_ack'>,
         };
 
         setMessages(prev => [newMessage, ...prev]);

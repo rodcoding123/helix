@@ -8,10 +8,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  getDesktopChatClient,
-  type DesktopChatResponse,
-} from '../lib/supabase-chat-client';
+import { getDesktopChatClient } from '../lib/supabase-chat-client';
 
 export interface ChatStreamMessage {
   type: 'thinking' | 'tool_call' | 'tool_result' | 'message' | 'error' | 'complete';
@@ -136,7 +133,7 @@ export function useSupabaseChat(baseUrl?: string) {
   /**
    * Interrupt current operation
    */
-  const interrupt = useCallback((key?: string) => {
+  const interrupt = useCallback((_key?: string) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
@@ -168,7 +165,7 @@ export function useSupabaseChat(baseUrl?: string) {
   const getClient = useCallback(() => {
     return {
       connected,
-      request: async (handler: string, args: unknown) => {
+      request: async (handler: string, _args: unknown) => {
         throw new Error(`Command ${handler} not supported in HTTP mode`);
       },
     };
