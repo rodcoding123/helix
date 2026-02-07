@@ -11,10 +11,6 @@
 import React, { useMemo } from 'react';
 import { TrendingUp, AlertTriangle, Clock } from 'lucide-react';
 import { useOrchestratorMetrics } from '../../hooks';
-import type {
-  OrchestratorCostBurnRate,
-  OrchestratorMetricsSnapshot,
-} from '../../lib/types/orchestrator-metrics';
 
 interface CostBurnRateProps {
   threadId?: string;
@@ -86,10 +82,9 @@ function calculateBudgetHealth(
 }
 
 /**
- * Determine health color based on burn rate and remaining budget
+ * Determine health color based on remaining budget
  */
 function getHealthColor(
-  burnRatePerHour: number,
   estimatedRemainingMinutes: number | undefined
 ): 'success' | 'warning' | 'danger' {
   if (!estimatedRemainingMinutes || estimatedRemainingMinutes === undefined) {
@@ -174,7 +169,6 @@ export const CostBurnRate: React.FC<CostBurnRateProps> = ({
     }
 
     const health = getHealthColor(
-      burnRate.burnRatePerHour,
       burnRate.estimatedRemainingMinutes
     );
 

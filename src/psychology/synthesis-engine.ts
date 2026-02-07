@@ -1,4 +1,3 @@
-/* @ts-nocheck */
 /**
  * Synthesis Engine - Post-Conversation Memory Analysis & Integration
  *
@@ -20,6 +19,7 @@ import { createClient } from '@supabase/supabase-js';
 import { AIOperationRouter } from '../helix/ai-operations/router.js';
 import { memoryIntegration } from './memory-integration.js';
 import { salienceManager } from './salience-manager.js';
+import { synthesisOptimizer } from './synthesis-optimizer.js';
 import { logToDiscord } from '../helix/logging.js';
 import { hashChain } from '../helix/hash-chain.js';
 
@@ -47,6 +47,19 @@ interface SynthesisConfig {
   batchHour: number; // 0-23, defaults to 2 (2 AM)
   minConfidenceThreshold: number; // 0-1, only apply if confidence > this
   dryRun: boolean; // Log but don't apply changes
+}
+
+interface PatternDetectionResult {
+  emotionalTags: string[];
+  goalMentions: string[];
+  transformationEvents: string[];
+  meaningfulTopics: string[];
+  confidence: number;
+}
+
+interface RoutingResponse {
+  model: string;
+  estimatedCost: number;
 }
 
 const DEFAULT_CONFIG: SynthesisConfig = {
@@ -98,27 +111,71 @@ export class SynthesisEngine {
         return;
       }
 
-      // Log synthesis started
-      await logToDiscord({
+      // Log synthesis started (fire-and-forget, don't await)
+      void logToDiscord({
         type: 'synthesis_started',
         conversationId,
         messageCount: messages.length,
         timestamp: new Date().toISOString(),
       });
 
-      // STEP 2: Route synthesis through AIOperationRouter (should select Gemini Flash 2)
-      const routingResponse = await this.router.route({
-        operationId: 'memory_synthesis',
-        userId,
-        estimatedInputTokens: this.estimateTokens(messages),
-      });
+      // STEP 2: COST OPTIMIZATION - Check if synthesis is worth running
+      const optimizationResult = synthesisOptimizer.optimizeSynthesis(messages);
 
-      // STEP 3: Analyze conversation using routed model
-      const synthesis = await this.analyzeConversation(messages, routingResponse);
+      if (!optimizationResult.shouldSynthesize) {
+        void logToDiscord({
+          type: 'synthesis_skipped',
+          conversationId,
+          reason: optimizationResult.reason,
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+
+      // STEP 3: Use local patterns if available (free synthesis)
+      let synthesis: SynthesisResult;
+
+      if (optimizationResult.method === 'local' && optimizationResult.patterns) {
+        // FREE: Use local pattern detection
+        synthesis = this.createSynthesisFromLocalPatterns(
+          conversationId,
+          messages,
+          optimizationResult.patterns
+        );
+
+        void logToDiscord({
+          type: 'synthesis_local_patterns',
+          conversationId,
+          method: 'local_detection',
+          costEstimate: '$0.00',
+          patternCount: Object.keys(optimizationResult.patterns).length,
+          confidence: (optimizationResult.patterns as PatternDetectionResult).confidence,
+          timestamp: new Date().toISOString(),
+        });
+      } else {
+        // HAIKU SYNTHESIS: Route through AIOperationRouter (should select Gemini Flash 2 or Haiku)
+        const routingResponse = await this.router.route({
+          operationId: 'memory_synthesis',
+          userId,
+          estimatedInputTokens: this.estimateTokens(messages),
+        });
+
+        // Analyze conversation using routed model
+        synthesis = this.analyzeConversation(messages, routingResponse as RoutingResponse);
+
+        void logToDiscord({
+          type: 'synthesis_llm_analysis',
+          conversationId,
+          method: 'haiku_model',
+          model: (routingResponse as RoutingResponse).model,
+          costEstimate: optimizationResult.costEstimate,
+          timestamp: new Date().toISOString(),
+        });
+      }
 
       // Only apply if confidence exceeds threshold
       if (synthesis.synthesisConfidence < this.config.minConfidenceThreshold) {
-        await logToDiscord({
+        void logToDiscord({
           type: 'synthesis_low_confidence',
           conversationId,
           confidence: synthesis.synthesisConfidence,
@@ -156,7 +213,7 @@ export class SynthesisEngine {
         previousHash: '',
       });
 
-      await logToDiscord({
+      void logToDiscord({
         type: 'synthesis_complete',
         conversationId,
         userId,
@@ -173,7 +230,7 @@ export class SynthesisEngine {
       const errorMessage = error instanceof Error ? error.message : String(error);
 
       // Log failure but don't throw (synthesis is non-blocking)
-      await logToDiscord({
+      void logToDiscord({
         type: 'synthesis_failed',
         conversationId,
         error: errorMessage,
@@ -241,18 +298,41 @@ export class SynthesisEngine {
   }
 
   /**
+   * Create synthesis result from local pattern detection (free, no API call)
+   */
+  private createSynthesisFromLocalPatterns(
+    conversationId: string,
+    _messages: ConversationMessage[],
+    patterns: PatternDetectionResult
+  ): SynthesisResult {
+    return {
+      conversationId,
+      emotionalTags: patterns.emotionalTags.map((tag: string) => ({
+        tag,
+        intensity: 0.7, // Medium intensity for detected emotions
+      })),
+      goalMentions: patterns.goalMentions.map((goal: string) => ({
+        goal,
+        progress: 'detected',
+      })),
+      relationshipShifts: [], // Local detection doesn't capture these
+      transformationTriggers: patterns.transformationEvents,
+      meaningfulTopics: patterns.meaningfulTopics,
+      synthesisConfidence: Math.max(patterns.confidence, 0.5), // At least 50% confidence
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  /**
    * Analyze conversation using LLM (routed through AIOperationRouter)
    * This is where Helix learns from the conversation
+   * TODO: Implement actual synthesis using routed model (Gemini Flash 2)
    */
-  private async analyzeConversation(
-    messages: ConversationMessage[],
-    _routing: any
-  ): Promise<SynthesisResult> {
-    // TODO: Implement actual synthesis using routed model (Gemini Flash 2)
-    // Currently returns placeholder results
-    void _routing; // Use parameter to avoid unused variable warning
-    void messages; // Use parameter to avoid unused variable warning
-
+  private analyzeConversation(
+    _messages: ConversationMessage[],
+    _routing: RoutingResponse
+  ): SynthesisResult {
+    // Currently returns placeholder results pending LLM integration
     return {
       conversationId: '', // Would be set from conversation
       emotionalTags: [],

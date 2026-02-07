@@ -9,7 +9,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { ChevronDown, Activity, ArrowRight, Clock } from 'lucide-react';
+import { ChevronDown, Activity, ArrowRight } from 'lucide-react';
 import { useOrchestratorMetrics } from '../../hooks';
 import type { OrchestratorStateChangeEvent } from '../../lib/types/orchestrator-metrics';
 
@@ -73,8 +73,8 @@ function groupStateChanges(
 ): Array<{ from: string; to: string; count: number; latestTime: number; duration: number }> {
   if (changes.length === 0) return [];
 
-  const grouped: typeof Array<any> = [];
-  let current = null;
+  const grouped: Array<{ from: string; to: string; count: number; latestTime: number; duration: number }> = [];
+  let current: { from: string; to: string; count: number; latestTime: number; duration: number } | null = null;
 
   for (const change of changes) {
     if (!current || current.from !== change.from || current.to !== change.to) {

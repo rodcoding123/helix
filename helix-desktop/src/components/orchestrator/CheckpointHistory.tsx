@@ -76,7 +76,6 @@ interface CheckpointRowProps {
   checkpoint: OrchestratorCheckpointSnapshot;
   isExpanded: boolean;
   onToggleExpand: () => void;
-  index: number;
 }
 
 /**
@@ -86,7 +85,6 @@ const CheckpointRow: React.FC<CheckpointRowProps> = ({
   checkpoint,
   isExpanded,
   onToggleExpand,
-  index,
 }) => {
   return (
     <div className="bg-bg-secondary/20 rounded-lg border border-border-secondary/30 overflow-hidden transition-all duration-200">
@@ -306,13 +304,12 @@ export const CheckpointHistory: React.FC<CheckpointHistoryProps> = ({
         <>
           {/* Checkpoint list */}
           <div className="space-y-2 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-bg-secondary/50 scrollbar-track-bg-secondary/20">
-            {checkpointList.map((checkpoint, index) => (
+            {checkpointList.map((checkpoint, idx) => (
               <CheckpointRow
                 key={checkpoint.checkpointId}
                 checkpoint={checkpoint}
-                isExpanded={expandedIndices.has(index)}
-                onToggleExpand={() => toggleExpanded(index)}
-                index={index}
+                isExpanded={expandedIndices.has(idx)}
+                onToggleExpand={() => toggleExpanded(idx)}
               />
             ))}
           </div>

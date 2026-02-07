@@ -1,0 +1,287 @@
+/* ═══════════════════════════════════════════
+   Config Export/Import Panel Styles
+   ═══════════════════════════════════════════ */
+
+.ceip-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ─────────────────────────────────────────
+   Tabs
+   ───────────────────────────────────────── */
+
+.ceip-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid #334155;
+  margin-bottom: 1rem;
+}
+
+.ceip-tab {
+  padding: 0.75rem 1.25rem;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color 0.2s;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.ceip-tab:hover {
+  color: #cbd5e1;
+}
+
+.ceip-tab.active {
+  color: #60a5fa;
+  border-bottom-color: #60a5fa;
+}
+
+/* ─────────────────────────────────────────
+   Error Display
+   ───────────────────────────────────────── */
+
+.ceip-error {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid #ef4444;
+  border-radius: 6px;
+  color: #fca5a5;
+  font-size: 0.875rem;
+}
+
+.ceip-error button {
+  border: none;
+  background: transparent;
+  color: #fca5a5;
+  cursor: pointer;
+  padding: 0;
+}
+
+.ceip-error button:hover {
+  color: #f87171;
+}
+
+/* ─────────────────────────────────────────
+   Tab Content
+   ───────────────────────────────────────── */
+
+.ceip-tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.ceip-description {
+  padding: 1rem;
+  background: rgba(96, 165, 250, 0.05);
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  border-radius: 6px;
+  color: #cbd5e1;
+  font-size: 0.875rem;
+}
+
+.ceip-description p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ─────────────────────────────────────────
+   Export Actions
+   ───────────────────────────────────────── */
+
+.ceip-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ceip-btn {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  color: #e2e8f0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ceip-btn-primary {
+  background: linear-gradient(135deg, rgba(96, 165, 250, 0.2), rgba(59, 130, 246, 0.2));
+  color: #60a5fa;
+}
+
+.ceip-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(96, 165, 250, 0.3), rgba(59, 130, 246, 0.3));
+  border-color: #60a5fa;
+  box-shadow: 0 0 12px rgba(96, 165, 250, 0.3);
+}
+
+.ceip-btn-secondary {
+  background: transparent;
+  border-color: #475569;
+  color: #cbd5e1;
+}
+
+.ceip-btn-secondary:hover:not(:disabled) {
+  background: rgba(96, 165, 250, 0.1);
+  border-color: #64748b;
+  color: #e2e8f0;
+}
+
+.ceip-btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+}
+
+.ceip-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─────────────────────────────────────────
+   Export Result
+   ───────────────────────────────────────── */
+
+.ceip-export-result {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(16, 185, 129, 0.05);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 8px;
+}
+
+.ceip-result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.ceip-result-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.ceip-result-subtitle {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+/* ─────────────────────────────────────────
+   Textarea
+   ───────────────────────────────────────── */
+
+.ceip-data-textarea {
+  padding: 1rem;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.8);
+  color: #e2e8f0;
+  font-family: monospace;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+
+.ceip-data-textarea:focus {
+  outline: none;
+  border-color: #60a5fa;
+  box-shadow: 0 0 8px rgba(96, 165, 250, 0.3);
+}
+
+.ceip-data-textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─────────────────────────────────────────
+   Result Actions
+   ───────────────────────────────────────── */
+
+.ceip-result-actions,
+.ceip-import-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* ─────────────────────────────────────────
+   Format Selector
+   ───────────────────────────────────────── */
+
+.ceip-format-selector {
+  display: flex;
+  gap: 2rem;
+}
+
+.ceip-format-selector label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.ceip-format-selector input {
+  cursor: pointer;
+  accent-color: #60a5fa;
+}
+
+/* ─────────────────────────────────────────
+   Warning
+   ───────────────────────────────────────── */
+
+.ceip-warning {
+  padding: 1rem;
+  background: rgba(245, 158, 11, 0.05);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 6px;
+  color: #fbbf24;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.ceip-warning strong {
+  color: #f59e0b;
+}
+
+/* ─────────────────────────────────────────
+   Responsive
+   ───────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .ceip-actions,
+  .ceip-result-actions,
+  .ceip-import-actions {
+    flex-direction: column;
+  }
+
+  .ceip-btn {
+    width: 100%;
+  }
+
+  .ceip-result-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .ceip-format-selector {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}

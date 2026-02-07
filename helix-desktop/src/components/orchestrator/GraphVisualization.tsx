@@ -98,11 +98,12 @@ async function renderMermaidDiagram(
 ): Promise<void> {
   try {
     // Dynamically import mermaid
-    const mermaid = await import('mermaid');
+    const mermaidModule = await import('mermaid');
+    const mermaid = mermaidModule.default || mermaidModule;
 
     // Initialize mermaid if not already done
     if (!window.__mermaidInitialized) {
-      mermaid.initialize({
+      (mermaid as any).initialize?.({
         startOnLoad: false,
         theme: 'dark',
         securityLevel: 'loose',
@@ -125,8 +126,12 @@ async function renderMermaidDiagram(
     container.textContent = diagramDefinition;
 
     // Render diagram
-    await mermaid.contentLoaderAsync();
-    await mermaid.run();
+    if ((mermaid as any).contentLoaderAsync) {
+      await (mermaid as any).contentLoaderAsync();
+    }
+    if ((mermaid as any).run) {
+      await (mermaid as any).run();
+    }
   } catch (err) {
     console.debug('[graph-viz] Failed to render Mermaid diagram:', err);
   }

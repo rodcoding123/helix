@@ -1,0 +1,280 @@
+/* ═══════════════════════════════════════════
+   Channel Monitoring Dashboard Styles
+   ═══════════════════════════════════════════ */
+
+.cmd-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, #0f172a 0%, #1a1f3a 100%);
+  border-radius: 12px;
+  color: #e2e8f0;
+}
+
+/* ─────────────────────────────────────────
+   Header
+   ───────────────────────────────────────── */
+
+.cmd-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  border-bottom: 1px solid #334155;
+  padding-bottom: 1.5rem;
+}
+
+.cmd-header-left h2 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.cmd-subtitle {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  margin-top: 0.25rem;
+}
+
+.cmd-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cmd-channel-select {
+  padding: 0.5rem 1rem;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.8);
+  color: #e2e8f0;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.cmd-channel-select:hover {
+  border-color: #475569;
+}
+
+.cmd-channel-select:focus {
+  outline: none;
+  border-color: #60a5fa;
+  box-shadow: 0 0 8px rgba(96, 165, 250, 0.3);
+}
+
+.cmd-auto-refresh {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #cbd5e1;
+}
+
+.cmd-auto-refresh input {
+  cursor: pointer;
+  accent-color: #60a5fa;
+}
+
+.cmd-refresh-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  background: rgba(96, 165, 250, 0.1);
+  color: #60a5fa;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cmd-refresh-btn:hover:not(:disabled) {
+  background: rgba(96, 165, 250, 0.2);
+  border-color: #60a5fa;
+}
+
+.cmd-refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ─────────────────────────────────────────
+   Error Banner
+   ───────────────────────────────────────── */
+
+.cmd-error-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid #ef4444;
+  border-radius: 8px;
+  color: #fca5a5;
+}
+
+.cmd-error-banner button {
+  padding: 0.25rem 0.75rem;
+  border: none;
+  background: transparent;
+  color: #fca5a5;
+  cursor: pointer;
+  font-size: 0.75rem;
+  text-decoration: underline;
+}
+
+.cmd-error-banner button:hover {
+  color: #f87171;
+}
+
+/* ─────────────────────────────────────────
+   Quick Stats
+   ───────────────────────────────────────── */
+
+.cmd-quick-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+.cmd-stat {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.cmd-stat-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.05em;
+}
+
+.cmd-stat-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #60a5fa;
+}
+
+.cmd-stat-value.cmd-stat-warning {
+  color: #f59e0b;
+}
+
+/* ─────────────────────────────────────────
+   Tabs
+   ───────────────────────────────────────── */
+
+.cmd-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid #334155;
+  overflow-x: auto;
+}
+
+.cmd-tab {
+  position: relative;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.cmd-tab:hover {
+  color: #cbd5e1;
+}
+
+.cmd-tab-active {
+  color: #60a5fa;
+  border-bottom: 2px solid #60a5fa;
+  margin-bottom: -1px;
+}
+
+.cmd-tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  margin-left: 0.5rem;
+  padding: 0 0.25rem;
+  background: #60a5fa;
+  color: #0f172a;
+  border-radius: 50%;
+  font-size: 0.625rem;
+  font-weight: 700;
+}
+
+.cmd-tab-badge-error {
+  background: #ef4444;
+  color: #fff;
+}
+
+/* ─────────────────────────────────────────
+   Tab Content
+   ───────────────────────────────────────── */
+
+.cmd-tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─────────────────────────────────────────
+   Responsive
+   ───────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .cmd-dashboard {
+    padding: 1rem;
+  }
+
+  .cmd-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .cmd-header-controls {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .cmd-channel-select {
+    width: 100%;
+  }
+
+  .cmd-quick-stats {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  }
+
+  .cmd-tabs {
+    flex-wrap: wrap;
+  }
+
+  .cmd-stat-value {
+    font-size: 1.25rem;
+  }
+}

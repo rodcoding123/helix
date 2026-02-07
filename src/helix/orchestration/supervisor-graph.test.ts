@@ -45,6 +45,7 @@ vi.mock('./state-graph.js', () => ({
     private nodes: Map<string, Function> = new Map();
     private edges: Map<string, string[]> = new Map();
     private conditionalEdges: Map<string, [Function, Record<string, string>]> = new Map();
+    private entryPointValue: string = '';
     schema: any;
 
     constructor(schema: any) {

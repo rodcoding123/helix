@@ -3,13 +3,37 @@
  *
  * Manages message queueing, persistence, and automatic syncing when connection restored.
  * Features:
- * - Automatic persistence to localStorage
+ * - Persistent storage (Tauri filesystem or localStorage)
  * - Exponential backoff retry logic
  * - Optimistic UI updates
  * - Conflict resolution (last-write-wins)
+ * - Network status detection
  */
 
 import { Message } from './supabase-desktop-client.js';
+
+// ============================================================================
+// Storage Backend Detection
+// ============================================================================
+
+let tauri: any = null;
+let isTauriAvailable = false;
+
+// Try to import Tauri at runtime (browser-safe)
+// This is set to false initially and set to true if Tauri is detected
+const initTauri = async () => {
+  try {
+    tauri = await import('@tauri-apps/api/core').catch(() => null);
+    isTauriAvailable = !!tauri;
+  } catch {
+    isTauriAvailable = false;
+  }
+};
+
+// Start async initialization immediately
+initTauri().catch(() => {
+  isTauriAvailable = false;
+});
 
 // ============================================================================
 // Types
@@ -38,14 +62,38 @@ export interface SyncStatus {
 
 export class OfflineSyncQueue {
   private queue: QueuedOperation[] = [];
-  private isOnline = navigator.onLine;
+  private isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
   private isSyncing = false;
   private syncListeners = new Set<(status: SyncStatus) => void>();
   private storageKey = 'helix-offline-queue';
+  private storageDir = '.helix/queue';
+  private storageFile = 'queue.json';
+  private usesTauri = false;
 
   constructor(private storageEnabled = true) {
-    this.loadFromStorage();
+    this.usesTauri = isTauriAvailable;
     this.setupEventListeners();
+    // Load synchronously from localStorage if available
+    if (!this.usesTauri && this.storageEnabled) {
+      try {
+        const serialized = localStorage.getItem(this.storageKey);
+        if (serialized) {
+          this.queue = JSON.parse(serialized) as QueuedOperation[];
+          console.log(`[sync-queue] Loaded ${this.queue.length} operations from localStorage`);
+        }
+      } catch (err) {
+        console.error('[sync-queue] Failed to load from localStorage:', err);
+      }
+    }
+  }
+
+  /**
+   * Async initialization (required for Tauri filesystem access)
+   */
+  async initialize(): Promise<void> {
+    if (this.usesTauri && this.storageEnabled) {
+      await this.loadFromStorage();
+    }
   }
 
   /**
@@ -53,7 +101,7 @@ export class OfflineSyncQueue {
    */
   async queueMessage(message: Message): Promise<void> {
     const operation: QueuedOperation = {
-      id: message.id || crypto.randomUUID(),
+      id: message.id || (typeof crypto !== 'undefined' ? crypto.randomUUID() : `msg-${Date.now()}`),
       type: 'send_message',
       data: message,
       timestamp: Date.now(),
@@ -62,18 +110,18 @@ export class OfflineSyncQueue {
     };
 
     this.queue.push(operation);
-    this.saveToStorage();
+    await this.saveToStorage();
     this.notifyListeners();
   }
 
   /**
    * Remove operation from queue
    */
-  removeOperation(operationId: string): void {
+  async removeOperation(operationId: string): Promise<void> {
     const index = this.queue.findIndex((op) => op.id === operationId);
     if (index >= 0) {
       this.queue.splice(index, 1);
-      this.saveToStorage();
+      await this.saveToStorage();
       this.notifyListeners();
     }
   }
@@ -135,7 +183,7 @@ export class OfflineSyncQueue {
 
       try {
         await syncFn(operation);
-        this.removeOperation(operation.id);
+        await this.removeOperation(operation.id);
         synced++;
       } catch (err) {
         operation.retries++;
@@ -153,7 +201,7 @@ export class OfflineSyncQueue {
             `[sync-queue] Operation exceeded max retries, removing from queue:`,
             operation.id
           );
-          this.removeOperation(operation.id);
+          await this.removeOperation(operation.id);
           failed++;
         } else {
           // Wait before retrying
@@ -163,7 +211,7 @@ export class OfflineSyncQueue {
     }
 
     this.isSyncing = false;
-    this.saveToStorage();
+    await this.saveToStorage();
     this.notifyListeners();
 
     return { synced, failed };
@@ -172,9 +220,9 @@ export class OfflineSyncQueue {
   /**
    * Clear all queued operations
    */
-  clear(): void {
+  async clear(): Promise<void> {
     this.queue = [];
-    this.saveToStorage();
+    await this.saveToStorage();
     this.notifyListeners();
   }
 
@@ -183,6 +231,8 @@ export class OfflineSyncQueue {
   // ==========================================
 
   private setupEventListeners(): void {
+    if (typeof window === 'undefined') return;
+
     window.addEventListener('online', () => this.handleOnline());
     window.addEventListener('offline', () => this.handleOffline());
   }
@@ -199,22 +249,56 @@ export class OfflineSyncQueue {
     this.notifyListeners();
   }
 
-  private saveToStorage(): void {
+  private async saveToStorage(): Promise<void> {
     if (!this.storageEnabled) return;
 
     try {
       const serialized = JSON.stringify(this.queue);
-      localStorage.setItem(this.storageKey, serialized);
+
+      if (this.usesTauri && tauri?.fs) {
+        // Use Tauri filesystem for persistent storage
+        try {
+          await tauri.fs.createDir(this.storageDir, { recursive: true });
+          const filePath = `${this.storageDir}/${this.storageFile}`;
+          await tauri.fs.writeTextFile(filePath, serialized);
+          console.log(`[sync-queue] Saved ${this.queue.length} operations to Tauri filesystem`);
+        } catch (tauriErr) {
+          console.warn('[sync-queue] Tauri save failed, falling back to localStorage:', tauriErr);
+          localStorage.setItem(this.storageKey, serialized);
+        }
+      } else {
+        // Fallback to localStorage
+        localStorage.setItem(this.storageKey, serialized);
+      }
     } catch (err) {
       console.error('[sync-queue] Failed to save to storage:', err);
     }
   }
 
-  private loadFromStorage(): void {
+  private async loadFromStorage(): Promise<void> {
     if (!this.storageEnabled) return;
 
     try {
-      const serialized = localStorage.getItem(this.storageKey);
+      let serialized: string | null = null;
+
+      if (this.usesTauri && tauri?.fs) {
+        // Try Tauri filesystem first
+        try {
+          const filePath = `${this.storageDir}/${this.storageFile}`;
+          serialized = await tauri.fs.readTextFile(filePath);
+          console.log(`[sync-queue] Loaded from Tauri filesystem`);
+        } catch (tauriErr) {
+          // File doesn't exist yet or Tauri error - fall back to localStorage
+          if (localStorage.getItem(this.storageKey)) {
+            console.log('[sync-queue] Tauri load failed, checking localStorage');
+            serialized = localStorage.getItem(this.storageKey);
+          }
+        }
+      } else {
+        // Use localStorage only
+        serialized = localStorage.getItem(this.storageKey);
+      }
+
       if (serialized) {
         this.queue = JSON.parse(serialized) as QueuedOperation[];
         console.log(`[sync-queue] Loaded ${this.queue.length} operations from storage`);
@@ -242,15 +326,43 @@ export class OfflineSyncQueue {
 // ============================================================================
 
 let syncQueue: OfflineSyncQueue | null = null;
+let initializePromise: Promise<void> | null = null;
 
-export function getOfflineSyncQueue(): OfflineSyncQueue {
+/**
+ * Get or create the singleton instance (with async initialization)
+ */
+export async function getOfflineSyncQueue(): Promise<OfflineSyncQueue> {
   if (!syncQueue) {
     syncQueue = new OfflineSyncQueue(true);
+    initializePromise = syncQueue.initialize();
+    await initializePromise;
+  } else if (initializePromise) {
+    await initializePromise;
   }
   return syncQueue;
 }
 
-export function createOfflineSyncQueue(storageEnabled = true): OfflineSyncQueue {
+/**
+ * Create a new instance with async initialization
+ */
+export async function createOfflineSyncQueue(storageEnabled = true): Promise<OfflineSyncQueue> {
   syncQueue = new OfflineSyncQueue(storageEnabled);
+  initializePromise = syncQueue.initialize();
+  await initializePromise;
+  return syncQueue;
+}
+
+/**
+ * Get the sync queue synchronously (may not have loaded yet if Tauri)
+ * Use getOfflineSyncQueue() instead for guaranteed initialization
+ */
+export function getOfflineSyncQueueSync(): OfflineSyncQueue {
+  if (!syncQueue) {
+    syncQueue = new OfflineSyncQueue(true);
+    // Initialize asynchronously in the background
+    syncQueue.initialize().catch((err) => {
+      console.error('[sync-queue] Failed to initialize:', err);
+    });
+  }
   return syncQueue;
 }

@@ -1,0 +1,282 @@
+/* ═══════════════════════════════════════════
+   Error Log Panel Styles
+   ═══════════════════════════════════════════ */
+
+.elp-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ─────────────────────────────────────────
+   Empty State
+   ───────────────────────────────────────── */
+
+.elp-empty {
+  padding: 2rem;
+  text-align: center;
+  background: rgba(16, 185, 129, 0.05);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 8px;
+  color: #94a3b8;
+}
+
+.elp-empty-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.elp-empty-subtitle {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.875rem;
+  color: #94a3b8;
+}
+
+/* ─────────────────────────────────────────
+   Summary
+   ───────────────────────────────────────── */
+
+.elp-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.elp-summary-item {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.elp-summary-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.05em;
+}
+
+.elp-summary-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #60a5fa;
+}
+
+.elp-summary-value.warning {
+  color: #f59e0b;
+}
+
+.elp-summary-value.success {
+  color: #10b981;
+}
+
+/* ─────────────────────────────────────────
+   Error List
+   ───────────────────────────────────────── */
+
+.elp-error-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.elp-error-item {
+  border: 1px solid #334155;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.4);
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.elp-error-item:hover {
+  border-color: #475569;
+}
+
+.elp-error-item.unresolved {
+  border-left: 3px solid #ef4444;
+}
+
+.elp-error-item.resolved {
+  border-left: 3px solid #10b981;
+  opacity: 0.75;
+}
+
+/* ─────────────────────────────────────────
+   Error Header
+   ───────────────────────────────────────── */
+
+.elp-error-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.elp-error-header:hover {
+  background: rgba(96, 165, 250, 0.05);
+}
+
+.elp-error-status {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.elp-error-info {
+  flex: 1;
+  text-align: left;
+}
+
+.elp-error-code {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin-bottom: 0.25rem;
+  font-family: monospace;
+}
+
+.elp-error-message {
+  font-size: 0.875rem;
+  color: #cbd5e1;
+  line-height: 1.4;
+}
+
+.elp-error-time {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  margin: 0 1rem;
+}
+
+.elp-error-toggle {
+  display: inline-block;
+  width: 16px;
+  text-align: center;
+  color: #64748b;
+  transition: transform 0.2s;
+}
+
+.elp-error-toggle.open {
+  transform: rotate(180deg);
+}
+
+/* ─────────────────────────────────────────
+   Error Details
+   ───────────────────────────────────────── */
+
+.elp-error-details {
+  border-top: 1px solid #334155;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.elp-details-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.elp-details-content {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  font-family: monospace;
+  font-size: 0.8rem;
+}
+
+.elp-detail-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  color: #cbd5e1;
+}
+
+.elp-detail-row:last-child {
+  margin-bottom: 0;
+}
+
+.elp-detail-key {
+  color: #60a5fa;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.elp-detail-value {
+  color: #94a3b8;
+  word-break: break-all;
+  overflow-wrap: break-word;
+}
+
+/* ─────────────────────────────────────────
+   Actions
+   ───────────────────────────────────────── */
+
+.elp-error-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.elp-action-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  background: rgba(96, 165, 250, 0.1);
+  color: #60a5fa;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.elp-action-btn:hover {
+  background: rgba(96, 165, 250, 0.2);
+  border-color: #60a5fa;
+}
+
+.elp-action-btn-secondary {
+  background: transparent;
+  border-color: #475569;
+  color: #cbd5e1;
+}
+
+.elp-action-btn-secondary:hover {
+  background: rgba(96, 165, 250, 0.1);
+  border-color: #64748b;
+  color: #e2e8f0;
+}
+
+/* ─────────────────────────────────────────
+   Responsive
+   ───────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .elp-error-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .elp-error-time {
+    margin: 0;
+  }
+
+  .elp-error-toggle {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+  }
+}

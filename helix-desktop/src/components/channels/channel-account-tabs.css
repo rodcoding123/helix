@@ -1,0 +1,524 @@
+/**
+ * Channel Account Tabs Styles
+ */
+
+.channel-account-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.channel-account-tabs.loading {
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  gap: 0.75rem;
+}
+
+.channel-account-tabs .loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error banner */
+.channel-account-tabs .error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 6px;
+  color: #ef4444;
+  font-size: 0.875rem;
+}
+
+.channel-account-tabs .error-banner button {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 1.25rem;
+  padding: 0;
+  line-height: 1;
+}
+
+/* Tabs container */
+.channel-account-tabs .tabs-container {
+  overflow: hidden;
+}
+
+.channel-account-tabs .tabs-scroll {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.5rem 0;
+  scroll-behavior: smooth;
+}
+
+.channel-account-tabs .tabs-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.channel-account-tabs .tabs-scroll::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+}
+
+.channel-account-tabs .tabs-scroll::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+/* No accounts state */
+.channel-account-tabs .no-accounts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem 1rem;
+  color: var(--text-secondary);
+}
+
+.channel-account-tabs .no-accounts p {
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.channel-account-tabs .btn-primary-small {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.channel-account-tabs .btn-primary-small:hover {
+  background: var(--primary-hover);
+}
+
+/* Tab */
+.channel-account-tabs .tab {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s;
+  min-width: 200px;
+  flex-shrink: 0;
+}
+
+.channel-account-tabs .tab:hover {
+  background: var(--bg-secondary);
+  border-color: var(--primary);
+}
+
+.channel-account-tabs .tab.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.channel-account-tabs .tab.active .tab-identifier {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Tab status indicator */
+.channel-account-tabs .tab-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.channel-account-tabs .status-icon {
+  width: 10px;
+  height: 10px;
+}
+
+.channel-account-tabs .status-connected {
+  background: #10b981;
+}
+
+.channel-account-tabs .status-connecting {
+  background: #f59e0b;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.channel-account-tabs .status-disconnected {
+  background: #9ca3af;
+}
+
+.channel-account-tabs .status-paused {
+  background: #6366f1;
+}
+
+.channel-account-tabs .status-error {
+  background: #ef4444;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Tab content */
+.channel-account-tabs .tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.channel-account-tabs .tab-name {
+  font-weight: 500;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.channel-account-tabs .active-badge {
+  display: inline-block;
+  color: #10b981;
+  font-size: 0.625rem;
+  line-height: 1;
+}
+
+.channel-account-tabs .tab-identifier {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Tab actions */
+.channel-account-tabs .tab-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.channel-account-tabs .btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 4px;
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.channel-account-tabs .btn-icon:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.channel-account-tabs .btn-icon.danger:hover {
+  background: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+/* Add account tab */
+.channel-account-tabs .tab.add-account {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px dashed var(--primary);
+  color: var(--primary);
+  gap: 0.5rem;
+  min-width: 120px;
+}
+
+.channel-account-tabs .tab.add-account:hover {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+/* Account info */
+.channel-account-tabs .account-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg-primary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.channel-account-tabs .info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.channel-account-tabs .info-row label {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.channel-account-tabs .info-row span {
+  color: var(--text-primary);
+  font-family: monospace;
+}
+
+.channel-account-tabs .info-row span.status-connected {
+  color: #10b981;
+}
+
+.channel-account-tabs .info-row span.status-disconnected {
+  color: #9ca3af;
+}
+
+.channel-account-tabs .info-row span.status-error {
+  color: #ef4444;
+}
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--bg-primary);
+  border-radius: 12px;
+  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  sticky: top 0;
+  background: var(--bg-primary);
+  z-index: 10;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.modal-header .btn-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  line-height: 1;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.modal-header .btn-close:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* Form groups */
+.modal-content form {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.form-group input,
+.form-group select {
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.875rem;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.form-group input:disabled,
+.form-group select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.read-only-field {
+  padding: 0.75rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  user-select: all;
+}
+
+/* Error message */
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 6px;
+  color: #ef4444;
+  font-size: 0.875rem;
+}
+
+.error-message svg {
+  flex-shrink: 0;
+}
+
+/* Success message */
+.success-message {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 6px;
+  color: #10b981;
+  font-size: 0.875rem;
+}
+
+.success-message svg {
+  flex-shrink: 0;
+}
+
+/* Modal actions */
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--bg-tertiary);
+  border-color: var(--primary);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

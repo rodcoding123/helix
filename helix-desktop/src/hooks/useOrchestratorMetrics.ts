@@ -17,7 +17,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { getClient } from '../lib/gateway-client';
+import { getGatewayClient } from '../lib/gateway-client';
 import type {
   OrchestratorMetricsState,
   OrchestratorMetricsSnapshot,
@@ -66,7 +66,7 @@ export function useOrchestratorMetrics(
    * Initialize subscription to orchestrator metrics
    */
   const subscribe = useCallback(async () => {
-    const client = getClient();
+    const client = getGatewayClient();
     if (!client?.connected) {
       setState(prev => ({
         ...prev,
@@ -119,7 +119,7 @@ export function useOrchestratorMetrics(
    * Fetch burn rate from gateway
    */
   const fetchBurnRate = useCallback(async (tid: string) => {
-    const client = getClient();
+    const client = getGatewayClient();
     if (!client?.connected || !tid) return;
 
     try {
@@ -144,7 +144,7 @@ export function useOrchestratorMetrics(
    * Fetch checkpoint history from gateway
    */
   const fetchCheckpointHistory = useCallback(async (tid: string) => {
-    const client = getClient();
+    const client = getGatewayClient();
     if (!client?.connected || !tid) return;
 
     try {
@@ -229,9 +229,7 @@ export function useOrchestratorMetrics(
         }
 
         case 'checkpoint.saved': {
-          // Add checkpoint to recent list
-          const checkpointEvent = event as any;
-          // Note: We rely on periodic polling for full checkpoint data
+          // Add checkpoint to recent list via periodic polling
           // This event just signals that a checkpoint was saved
           break;
         }
@@ -270,7 +268,7 @@ export function useOrchestratorMetrics(
    * Setup WebSocket event listeners
    */
   const setupEventListeners = useCallback((): string => {
-    const client = getClient();
+    const client = getGatewayClient();
     if (!client) return '';
 
     // Set up listeners for each event type
@@ -300,7 +298,7 @@ export function useOrchestratorMetrics(
       }
 
       // Remove event listeners
-      const client = getClient();
+      const client = getGatewayClient();
       if (client && subscriptionRef.current) {
         client.off('orchestrator.state.changed', handleEvent as any);
         client.off('orchestrator.cost.updated', handleEvent as any);
@@ -318,7 +316,7 @@ export function useOrchestratorMetrics(
 
     if (!autoSubscribe) return;
 
-    const client = getClient();
+    const client = getGatewayClient();
     if (!client?.connected) {
       setState(prev => ({
         ...prev,
@@ -350,7 +348,7 @@ export function useOrchestratorMetrics(
 export function useOrchestratorMetricsController(
   state: OrchestratorMetricsState
 ) {
-  const client = getClient();
+  const client = getGatewayClient();
 
   return useMemo(
     () => ({

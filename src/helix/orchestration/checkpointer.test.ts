@@ -371,7 +371,7 @@ describe('Checkpoint System', () => {
         };
 
         // Setup async iteration
-        queryMock.order = vi.fn(async (_field: string, opts?: any) => {
+        queryMock.order = vi.fn((_field: string, opts?: any) => {
           if (opts?.ascending === true) {
             return { data: checkpointRows, error: null };
           }
