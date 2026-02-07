@@ -88,10 +88,7 @@ function getSkillIcon(name: string, icon?: string): string {
 /**
  * Resolve the current override state for a skill given the persisted config.
  */
-function resolveOverride(
-  skillName: string,
-  config: AgentSkillsConfig | undefined
-): SkillOverride {
+function resolveOverride(skillName: string, config: AgentSkillsConfig | undefined): SkillOverride {
   if (config?.enabled?.includes(skillName)) return 'enabled';
   if (config?.disabled?.includes(skillName)) return 'disabled';
   return 'default';
@@ -150,7 +147,7 @@ function extractAgentSkillsConfig(
 
   if (!agents?.list) return undefined;
 
-  const agentEntry = agents.list.find((a) => a.id === agentId);
+  const agentEntry = agents.list.find(a => a.id === agentId);
   return agentEntry?.skills;
 }
 
@@ -158,11 +155,7 @@ function extractAgentSkillsConfig(
    Component
    ===================================================================== */
 
-export function AgentSkillConfig({
-  agentId,
-  agentName,
-  onClose,
-}: AgentSkillConfigProps) {
+export function AgentSkillConfig({ agentId, agentName, onClose }: AgentSkillConfigProps) {
   const { getClient, connected } = useGateway();
   const { gatewayConfig, patchGatewayConfig } = useGatewayConfig();
 
@@ -178,9 +171,7 @@ export function AgentSkillConfig({
   const [overrides, setOverrides] = useState<Record<string, SkillOverride>>({});
 
   // Per-skill env var overrides: skillName -> { VAR_NAME: value }
-  const [envOverrides, setEnvOverrides] = useState<
-    Record<string, Record<string, string>>
-  >({});
+  const [envOverrides, setEnvOverrides] = useState<Record<string, Record<string, string>>>({});
 
   // Track which skills have their env section expanded
   const [expandedSkills, setExpandedSkills] = useState<Set<string>>(new Set());
@@ -218,18 +209,12 @@ export function AgentSkillConfig({
 
   // -- Initialize overrides from existing agent config --
   useEffect(() => {
-    const existingConfig = extractAgentSkillsConfig(
-      gatewayConfig._raw,
-      agentId
-    );
+    const existingConfig = extractAgentSkillsConfig(gatewayConfig._raw, agentId);
 
     if (existingConfig && skills.length > 0) {
       const initialOverrides: Record<string, SkillOverride> = {};
       for (const skill of skills) {
-        initialOverrides[skill.name] = resolveOverride(
-          skill.name,
-          existingConfig
-        );
+        initialOverrides[skill.name] = resolveOverride(skill.name, existingConfig);
       }
       setOverrides(initialOverrides);
 
@@ -242,7 +227,7 @@ export function AgentSkillConfig({
 
   // -- Toggle expanded env section --
   const toggleExpanded = useCallback((skillName: string) => {
-    setExpandedSkills((prev) => {
+    setExpandedSkills(prev => {
       const next = new Set(prev);
       if (next.has(skillName)) {
         next.delete(skillName);
@@ -255,7 +240,7 @@ export function AgentSkillConfig({
 
   // -- Toggle env value visibility --
   const toggleEnvVisibility = useCallback((compositeKey: string) => {
-    setVisibleEnvKeys((prev) => {
+    setVisibleEnvKeys(prev => {
       const next = new Set(prev);
       if (next.has(compositeKey)) {
         next.delete(compositeKey);
@@ -267,18 +252,15 @@ export function AgentSkillConfig({
   }, []);
 
   // -- Update an env var override --
-  const updateEnvVar = useCallback(
-    (skillName: string, varName: string, value: string) => {
-      setEnvOverrides((prev) => ({
-        ...prev,
-        [skillName]: {
-          ...(prev[skillName] ?? {}),
-          [varName]: value,
-        },
-      }));
-    },
-    []
-  );
+  const updateEnvVar = useCallback((skillName: string, varName: string, value: string) => {
+    setEnvOverrides(prev => ({
+      ...prev,
+      [skillName]: {
+        ...(prev[skillName] ?? {}),
+        [varName]: value,
+      },
+    }));
+  }, []);
 
   // -- Save --
   const handleSave = useCallback(async () => {
@@ -287,22 +269,18 @@ export function AgentSkillConfig({
     setSaveMessage('');
 
     try {
-      const agentSkillsConfig = buildAgentSkillsConfig(
-        overrides,
-        envOverrides
-      );
+      const agentSkillsConfig = buildAgentSkillsConfig(overrides, envOverrides);
 
       // Read the current agents list from raw config
       const rawAgents = gatewayConfig._raw?.agents as
         | { list?: Array<Record<string, unknown>> }
         | undefined;
 
-      const currentList: Array<Record<string, unknown>> =
-        rawAgents?.list ?? [];
+      const currentList: Array<Record<string, unknown>> = rawAgents?.list ?? [];
 
       // Update or append the agent entry with the new skills config
       let found = false;
-      const updatedList = currentList.map((entry) => {
+      const updatedList = currentList.map(entry => {
         if ((entry as { id: string }).id === agentId) {
           found = true;
           return { ...entry, skills: agentSkillsConfig };
@@ -332,19 +310,11 @@ export function AgentSkillConfig({
     } catch (err) {
       console.error('Failed to save agent skill config:', err);
       setSaveStatus('error');
-      setSaveMessage(
-        `Failed to save: ${err instanceof Error ? err.message : String(err)}`
-      );
+      setSaveMessage(`Failed to save: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setSaving(false);
     }
-  }, [
-    overrides,
-    envOverrides,
-    agentId,
-    gatewayConfig._raw,
-    patchGatewayConfig,
-  ]);
+  }, [overrides, envOverrides, agentId, gatewayConfig._raw, patchGatewayConfig]);
 
   // -- Summary statistics --
   const summary = useMemo(() => {
@@ -382,13 +352,10 @@ export function AgentSkillConfig({
   const getEffectiveStatus = useCallback(
     (skill: SkillInfo): { text: string; cls: string } => {
       const override = overrides[skill.name] ?? 'default';
-      if (override === 'enabled')
-        return { text: 'Force Enabled', cls: 'asc-status-force-on' };
-      if (override === 'disabled')
-        return { text: 'Force Disabled', cls: 'asc-status-force-off' };
+      if (override === 'enabled') return { text: 'Force Enabled', cls: 'asc-status-force-on' };
+      if (override === 'disabled') return { text: 'Force Disabled', cls: 'asc-status-force-off' };
       // default follows global
-      if (skill.enabled)
-        return { text: 'Enabled (global)', cls: 'asc-status-global-on' };
+      if (skill.enabled) return { text: 'Enabled (global)', cls: 'asc-status-global-on' };
       return { text: 'Disabled (global)', cls: 'asc-status-global-off' };
     },
     [overrides]
@@ -409,18 +376,8 @@ export function AgentSkillConfig({
           <span className="asc-agent-id">{agentId}</span>
         </div>
         {onClose && (
-          <button
-            className="asc-close-btn"
-            onClick={onClose}
-            title="Close"
-            type="button"
-          >
-            <svg
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              width="20"
-              height="20"
-            >
+          <button className="asc-close-btn" onClick={onClose} title="Close" type="button">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="20" height="20">
               <path
                 fillRule="evenodd"
                 d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
@@ -434,20 +391,14 @@ export function AgentSkillConfig({
       {/* -- Disconnected banner -- */}
       {!connected && (
         <div className="asc-banner asc-banner-warn">
-          <svg
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            width="16"
-            height="16"
-          >
+          <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
             <path
               fillRule="evenodd"
               d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
               clipRule="evenodd"
             />
           </svg>
-          Gateway disconnected. Skill configuration requires an active
-          connection.
+          Gateway disconnected. Skill configuration requires an active connection.
         </div>
       )}
 
@@ -476,13 +427,12 @@ export function AgentSkillConfig({
           </div>
         ) : (
           <div className="asc-skills-list">
-            {skills.map((skill) => {
+            {skills.map(skill => {
               const override = overrides[skill.name] ?? 'default';
               const effectiveStatus = getEffectiveStatus(skill);
               const isExpanded = expandedSkills.has(skill.name);
               const hasEnvRequirements =
-                skill.requirements?.env &&
-                skill.requirements.env.length > 0;
+                skill.requirements?.env && skill.requirements.env.length > 0;
 
               return (
                 <div
@@ -500,15 +450,11 @@ export function AgentSkillConfig({
                   >
                     {/* Icon + name */}
                     <div className="asc-skill-identity">
-                      <span className="asc-skill-icon">
-                        {getSkillIcon(skill.name, skill.icon)}
-                      </span>
+                      <span className="asc-skill-icon">{getSkillIcon(skill.name, skill.icon)}</span>
                       <div className="asc-skill-info">
                         <span className="asc-skill-name">{skill.name}</span>
                         {skill.description && (
-                          <span className="asc-skill-desc">
-                            {skill.description}
-                          </span>
+                          <span className="asc-skill-desc">{skill.description}</span>
                         )}
                       </div>
                     </div>
@@ -524,14 +470,11 @@ export function AgentSkillConfig({
                     </div>
 
                     {/* Three-state override toggle */}
-                    <div
-                      className="asc-override-toggle"
-                      onClick={(e) => e.stopPropagation()}
-                    >
+                    <div className="asc-override-toggle" onClick={e => e.stopPropagation()}>
                       <button
                         className={`asc-override-btn ${override === 'default' ? 'asc-override-active' : ''}`}
                         onClick={() =>
-                          setOverrides((prev) => ({
+                          setOverrides(prev => ({
                             ...prev,
                             [skill.name]: 'default',
                           }))
@@ -544,7 +487,7 @@ export function AgentSkillConfig({
                       <button
                         className={`asc-override-btn asc-override-on ${override === 'enabled' ? 'asc-override-active' : ''}`}
                         onClick={() =>
-                          setOverrides((prev) => ({
+                          setOverrides(prev => ({
                             ...prev,
                             [skill.name]: 'enabled',
                           }))
@@ -557,7 +500,7 @@ export function AgentSkillConfig({
                       <button
                         className={`asc-override-btn asc-override-off ${override === 'disabled' ? 'asc-override-active' : ''}`}
                         onClick={() =>
-                          setOverrides((prev) => ({
+                          setOverrides(prev => ({
                             ...prev,
                             [skill.name]: 'disabled',
                           }))
@@ -570,9 +513,7 @@ export function AgentSkillConfig({
                     </div>
 
                     {/* Effective status */}
-                    <span
-                      className={`asc-effective-status ${effectiveStatus.cls}`}
-                    >
+                    <span className={`asc-effective-status ${effectiveStatus.cls}`}>
                       {effectiveStatus.text}
                     </span>
 
@@ -580,19 +521,14 @@ export function AgentSkillConfig({
                     {hasEnvRequirements && (
                       <button
                         className={`asc-expand-btn ${isExpanded ? 'asc-expand-btn-open' : ''}`}
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           toggleExpanded(skill.name);
                         }}
                         title="Environment variables"
                         type="button"
                       >
-                        <svg
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                          width="14"
-                          height="14"
-                        >
+                        <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
                           <path
                             fillRule="evenodd"
                             d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
@@ -607,51 +543,35 @@ export function AgentSkillConfig({
                   {isExpanded && hasEnvRequirements && (
                     <div className="asc-env-section">
                       <div className="asc-env-header">
-                        <span className="asc-env-title">
-                          Environment Variable Overrides
-                        </span>
+                        <span className="asc-env-title">Environment Variable Overrides</span>
                         <span className="asc-env-hint">
-                          Override env vars for this agent only. Leave empty to
-                          use the global value.
+                          Override env vars for this agent only. Leave empty to use the global
+                          value.
                         </span>
                       </div>
                       <div className="asc-env-fields">
-                        {skill.requirements!.env!.map((varName) => {
+                        {skill.requirements!.env!.map(varName => {
                           const compositeKey = `${skill.name}:${varName}`;
-                          const currentValue =
-                            envOverrides[skill.name]?.[varName] ?? '';
-                          const isVisible =
-                            visibleEnvKeys.has(compositeKey);
+                          const currentValue = envOverrides[skill.name]?.[varName] ?? '';
+                          const isVisible = visibleEnvKeys.has(compositeKey);
 
                           return (
                             <div key={varName} className="asc-env-field">
-                              <label className="asc-env-label">
-                                {varName}
-                              </label>
+                              <label className="asc-env-label">{varName}</label>
                               <div className="asc-env-input-wrapper">
                                 <input
                                   type={isVisible ? 'text' : 'password'}
                                   className="asc-env-input"
                                   value={currentValue}
-                                  onChange={(e) =>
-                                    updateEnvVar(
-                                      skill.name,
-                                      varName,
-                                      e.target.value
-                                    )
-                                  }
+                                  onChange={e => updateEnvVar(skill.name, varName, e.target.value)}
                                   placeholder={`Override ${varName} for this agent`}
                                   spellCheck={false}
                                   autoComplete="off"
                                 />
                                 <button
                                   className="asc-env-toggle-vis"
-                                  onClick={() =>
-                                    toggleEnvVisibility(compositeKey)
-                                  }
-                                  title={
-                                    isVisible ? 'Hide value' : 'Show value'
-                                  }
+                                  onClick={() => toggleEnvVisibility(compositeKey)}
+                                  title={isVisible ? 'Hide value' : 'Show value'}
                                   type="button"
                                 >
                                   {isVisible ? (
@@ -702,19 +622,13 @@ export function AgentSkillConfig({
       <footer className="asc-footer">
         <div className="asc-footer-left">
           <span className="asc-summary">
-            {summary.enabledCount} skill{summary.enabledCount !== 1 ? 's' : ''}{' '}
-            enabled, {summary.overriddenCount} overridden,{' '}
-            {summary.envVarCount} env var{summary.envVarCount !== 1 ? 's' : ''}{' '}
-            configured
+            {summary.enabledCount} skill{summary.enabledCount !== 1 ? 's' : ''} enabled,{' '}
+            {summary.overriddenCount} overridden, {summary.envVarCount} env var
+            {summary.envVarCount !== 1 ? 's' : ''} configured
           </span>
           {saveStatus === 'saved' && (
             <span className="asc-save-ok">
-              <svg
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                width="12"
-                height="12"
-              >
+              <svg viewBox="0 0 20 20" fill="currentColor" width="12" height="12">
                 <path
                   fillRule="evenodd"
                   d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -726,12 +640,7 @@ export function AgentSkillConfig({
           )}
           {saveStatus === 'error' && (
             <span className="asc-save-err">
-              <svg
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                width="12"
-                height="12"
-              >
+              <svg viewBox="0 0 20 20" fill="currentColor" width="12" height="12">
                 <path
                   fillRule="evenodd"
                   d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
@@ -743,9 +652,7 @@ export function AgentSkillConfig({
           )}
         </div>
         <div className="asc-footer-right">
-          {!connected && (
-            <span className="asc-gateway-badge">Gateway offline</span>
-          )}
+          {!connected && <span className="asc-gateway-badge">Gateway offline</span>}
           <button
             className="asc-btn asc-btn-primary"
             onClick={handleSave}
@@ -759,12 +666,7 @@ export function AgentSkillConfig({
               </>
             ) : (
               <>
-                <svg
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  width="14"
-                  height="14"
-                >
+                <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
                   <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
                 </svg>
                 Save Configuration

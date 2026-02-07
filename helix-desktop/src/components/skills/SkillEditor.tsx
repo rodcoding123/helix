@@ -279,17 +279,14 @@ function TagInput({
   );
 
   return (
-    <div
-      className="se-tag-input-wrapper"
-      onClick={() => inputRef.current?.focus()}
-    >
+    <div className="se-tag-input-wrapper" onClick={() => inputRef.current?.focus()}>
       {tags.map((tag, idx) => (
         <span key={`${tag}-${idx}`} className="se-tag">
           <span className="se-tag-text">{tag}</span>
           <button
             type="button"
             className="se-tag-remove"
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               removeTag(idx);
             }}
@@ -307,7 +304,7 @@ function TagInput({
         type="text"
         className="se-tag-input-field"
         value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
+        onChange={e => setInputValue(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={tags.length === 0 ? placeholder : ''}
       />
@@ -319,12 +316,7 @@ function TagInput({
    SkillEditor component
    ===================================================================== */
 
-export function SkillEditor({
-  workspacePath,
-  existingSkill,
-  onBack,
-  onSave,
-}: SkillEditorProps) {
+export function SkillEditor({ workspacePath, existingSkill, onBack, onSave }: SkillEditorProps) {
   const { connected } = useGateway();
 
   // ── Core state ──
@@ -341,10 +333,7 @@ export function SkillEditor({
 
   // ── Derived ──
   const isEditing = Boolean(existingSkill);
-  const currentContent = useMemo(
-    () => assembleSkillMd(frontmatter, body),
-    [frontmatter, body]
-  );
+  const currentContent = useMemo(() => assembleSkillMd(frontmatter, body), [frontmatter, body]);
   const isModified = currentContent !== originalContent;
 
   const filePath = useMemo(() => {
@@ -402,9 +391,7 @@ export function SkillEditor({
         if (cancelled) return;
         console.error('Failed to load skill:', err);
         setSaveStatus('error');
-        setSaveMessage(
-          `Failed to load skill: ${err instanceof Error ? err.message : String(err)}`
-        );
+        setSaveMessage(`Failed to load skill: ${err instanceof Error ? err.message : String(err)}`);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -457,9 +444,7 @@ export function SkillEditor({
     } catch (err) {
       console.error('Failed to save skill:', err);
       setSaveStatus('error');
-      setSaveMessage(
-        `Failed to save: ${err instanceof Error ? err.message : String(err)}`
-      );
+      setSaveMessage(`Failed to save: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setSaving(false);
     }
@@ -497,47 +482,45 @@ export function SkillEditor({
   const updateName = useCallback(
     (raw: string) => {
       const converted = toKebabCase(raw);
-      setFrontmatter((prev) => ({ ...prev, name: converted }));
+      setFrontmatter(prev => ({ ...prev, name: converted }));
       setNameError(validateName(converted));
     },
     [validateName]
   );
 
   const updateDescription = useCallback((value: string) => {
-    setFrontmatter((prev) => ({ ...prev, description: value }));
+    setFrontmatter(prev => ({ ...prev, description: value }));
   }, []);
 
   const updateVersion = useCallback((value: string) => {
-    setFrontmatter((prev) => ({ ...prev, version: value }));
+    setFrontmatter(prev => ({ ...prev, version: value }));
   }, []);
 
   const updateBins = useCallback((bins: string[]) => {
-    setFrontmatter((prev) => ({
+    setFrontmatter(prev => ({
       ...prev,
       requirements: { ...prev.requirements, bins },
     }));
   }, []);
 
   const updateEnv = useCallback((env: string[]) => {
-    setFrontmatter((prev) => ({
+    setFrontmatter(prev => ({
       ...prev,
       requirements: { ...prev.requirements, env },
     }));
   }, []);
 
   const updateConfig = useCallback((config: string[]) => {
-    setFrontmatter((prev) => ({
+    setFrontmatter(prev => ({
       ...prev,
       requirements: { ...prev.requirements, config },
     }));
   }, []);
 
   const toggleOs = useCallback((os: string) => {
-    setFrontmatter((prev) => {
+    setFrontmatter(prev => {
       const current = prev.requirements.os;
-      const next = current.includes(os)
-        ? current.filter((o) => o !== os)
-        : [...current, os];
+      const next = current.includes(os) ? current.filter(o => o !== os) : [...current, os];
       return {
         ...prev,
         requirements: { ...prev.requirements, os: next },
@@ -546,7 +529,7 @@ export function SkillEditor({
   }, []);
 
   const updateGating = useCallback((gating: string[]) => {
-    setFrontmatter((prev) => ({ ...prev, gating }));
+    setFrontmatter(prev => ({ ...prev, gating }));
   }, []);
 
   // ── Line numbers for body editor ──
@@ -587,11 +570,7 @@ export function SkillEditor({
       {/* ── Top bar ── */}
       <header className="se-topbar">
         <div className="se-topbar-left">
-          <button
-            className="se-btn se-btn-ghost"
-            onClick={onBack}
-            title="Back to Skills"
-          >
+          <button className="se-btn se-btn-ghost" onClick={onBack} title="Back to Skills">
             <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
               <path
                 fillRule="evenodd"
@@ -604,7 +583,13 @@ export function SkillEditor({
             <span className="se-breadcrumb-parent" onClick={onBack}>
               Skills
             </span>
-            <svg viewBox="0 0 20 20" fill="currentColor" width="12" height="12" className="se-breadcrumb-sep">
+            <svg
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              width="12"
+              height="12"
+              className="se-breadcrumb-sep"
+            >
               <path
                 fillRule="evenodd"
                 d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
@@ -630,7 +615,7 @@ export function SkillEditor({
           )}
           <button
             className={`se-btn se-btn-toggle ${preview ? 'se-btn-toggle-active' : ''}`}
-            onClick={() => setPreview((p) => !p)}
+            onClick={() => setPreview(p => !p)}
             title={preview ? 'Switch to editor' : 'Preview assembled SKILL.md'}
           >
             <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
@@ -679,9 +664,7 @@ export function SkillEditor({
           <div className="se-preview">
             <div className="se-preview-header">
               <span className="se-preview-badge">Preview</span>
-              <span className="se-preview-label">
-                Assembled SKILL.md as the agent will see it
-              </span>
+              <span className="se-preview-label">Assembled SKILL.md as the agent will see it</span>
             </div>
             <pre className="se-preview-content">{currentContent}</pre>
           </div>
@@ -703,14 +686,12 @@ export function SkillEditor({
                       type="text"
                       className={`se-input ${nameError ? 'se-input-error' : ''}`}
                       value={frontmatter.name}
-                      onChange={(e) => updateName(e.target.value)}
+                      onChange={e => updateName(e.target.value)}
                       placeholder="my-custom-skill"
                       spellCheck={false}
                       autoComplete="off"
                     />
-                    {nameError && (
-                      <span className="se-field-error">{nameError}</span>
-                    )}
+                    {nameError && <span className="se-field-error">{nameError}</span>}
                     <span className="se-field-hint">kebab-case, lowercase</span>
                   </div>
 
@@ -723,7 +704,7 @@ export function SkillEditor({
                       id="se-desc"
                       className="se-textarea"
                       value={frontmatter.description}
-                      onChange={(e) => updateDescription(e.target.value)}
+                      onChange={e => updateDescription(e.target.value)}
                       placeholder="Brief description of what this skill does"
                       rows={2}
                     />
@@ -743,7 +724,7 @@ export function SkillEditor({
                           : ''
                       }`}
                       value={frontmatter.version}
-                      onChange={(e) => updateVersion(e.target.value)}
+                      onChange={e => updateVersion(e.target.value)}
                       placeholder="1.0.0"
                       spellCheck={false}
                     />
@@ -768,9 +749,7 @@ export function SkillEditor({
                       onChange={updateBins}
                       placeholder="e.g. node, python (Enter to add)"
                     />
-                    <span className="se-field-hint">
-                      CLIs that must exist on PATH
-                    </span>
+                    <span className="se-field-hint">CLIs that must exist on PATH</span>
                   </div>
 
                   {/* Environment Variables */}
@@ -784,16 +763,14 @@ export function SkillEditor({
                       onChange={updateEnv}
                       placeholder="e.g. MY_API_KEY (Enter to add)"
                     />
-                    <span className="se-field-hint">
-                      Env vars that must be set
-                    </span>
+                    <span className="se-field-hint">Env vars that must be set</span>
                   </div>
 
                   {/* Operating Systems */}
                   <div className="se-field">
                     <label className="se-label">Operating Systems</label>
                     <div className="se-os-group">
-                      {OS_OPTIONS.map((opt) => (
+                      {OS_OPTIONS.map(opt => (
                         <label key={opt.value} className="se-checkbox-label">
                           <input
                             type="checkbox"
@@ -806,9 +783,7 @@ export function SkillEditor({
                         </label>
                       ))}
                     </div>
-                    <span className="se-field-hint">
-                      Leave unchecked for all platforms
-                    </span>
+                    <span className="se-field-hint">Leave unchecked for all platforms</span>
                   </div>
 
                   {/* Config Keys */}
@@ -822,9 +797,7 @@ export function SkillEditor({
                       onChange={updateConfig}
                       placeholder="e.g. github.token (Enter to add)"
                     />
-                    <span className="se-field-hint">
-                      Required config entries
-                    </span>
+                    <span className="se-field-hint">Required config entries</span>
                   </div>
                 </div>
 
@@ -841,9 +814,7 @@ export function SkillEditor({
                       onChange={updateGating}
                       placeholder="e.g. requires approval (Enter to add)"
                     />
-                    <span className="se-field-hint">
-                      Safety gates before execution
-                    </span>
+                    <span className="se-field-hint">Safety gates before execution</span>
                   </div>
                 </div>
               </div>
@@ -854,12 +825,13 @@ export function SkillEditor({
               <div className="se-editor-header">
                 <span className="se-editor-title">Skill Instructions (Markdown)</span>
                 <span className="se-editor-stats">
-                  {bodyStats.lines} line{bodyStats.lines !== 1 ? 's' : ''} | {bodyStats.chars} char{bodyStats.chars !== 1 ? 's' : ''}
+                  {bodyStats.lines} line{bodyStats.lines !== 1 ? 's' : ''} | {bodyStats.chars} char
+                  {bodyStats.chars !== 1 ? 's' : ''}
                 </span>
               </div>
               <div className="se-editor-body">
                 <div className="se-line-numbers" ref={lineNumberRef}>
-                  {lineNumbers.map((n) => (
+                  {lineNumbers.map(n => (
                     <div key={n} className="se-line-number">
                       {n}
                     </div>
@@ -869,7 +841,7 @@ export function SkillEditor({
                   ref={bodyRef}
                   className="se-editor-textarea"
                   value={body}
-                  onChange={(e) => setBody(e.target.value)}
+                  onChange={e => setBody(e.target.value)}
                   onScroll={handleBodyScroll}
                   spellCheck={false}
                   placeholder="# Skill Title&#10;&#10;Write instructions for the agent here..."
@@ -920,9 +892,7 @@ export function SkillEditor({
               {filePath}
             </span>
           )}
-          {!connected && (
-            <span className="se-gateway-status">Gateway offline</span>
-          )}
+          {!connected && <span className="se-gateway-status">Gateway offline</span>}
         </div>
       </footer>
     </div>

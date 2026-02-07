@@ -1,188 +1,188 @@
-import { ErrorCodes, errorShape } from "./protocol/index.js";
-import { agentHandlers } from "./server-methods/agent.js";
-import { agentsHandlers } from "./server-methods/agents.js";
-import { authProfilesHandlers } from "./server-methods/auth-profiles.js";
-import { browserHandlers } from "./server-methods/browser.js";
-import { channelsHandlers } from "./server-methods/channels.js";
-import { channelAccountsHandlers } from "./server-methods/channel-accounts.js";
-import { chatHandlers } from "./server-methods/chat.js";
-import { compositeSkillHandlers } from "./server-methods/composite-skills.js";
-import { configHandlers } from "./server-methods/config.js";
-import { connectHandlers } from "./server-methods/connect.js";
-import { cronHandlers } from "./server-methods/cron.js";
-import { customToolHandlers } from "./server-methods/custom-tools.js";
-import { deviceHandlers } from "./server-methods/devices.js";
-import { calendarHandlers } from "./server-methods/calendar.js";
-import { emailHandlers } from "./server-methods/email.js";
-import { execApprovalsHandlers } from "./server-methods/exec-approvals.js";
-import { healthHandlers } from "./server-methods/health.js";
-import { hooksHandlers } from "./server-methods/hooks.js";
-import { logsHandlers } from "./server-methods/logs.js";
-import { memorySynthesisHandlers } from "./server-methods/memory-synthesis.js";
-import { modelsHandlers } from "./server-methods/models.js";
-import { nodeHandlers } from "./server-methods/nodes.js";
-import { orchestratorHandlers } from "./server-methods/orchestrator.js";
-import { sendHandlers } from "./server-methods/send.js";
-import { sessionsHandlers } from "./server-methods/sessions.js";
-import { skillsHandlers } from "./server-methods/skills.js";
-import { systemHandlers } from "./server-methods/system.js";
-import { talkHandlers } from "./server-methods/talk.js";
-import { ttsHandlers } from "./server-methods/tts.js";
-import type { GatewayRequestHandlers, GatewayRequestOptions } from "./server-methods/types.js";
-import { updateHandlers } from "./server-methods/update.js";
-import { usageHandlers } from "./server-methods/usage.js";
-import { voiceHandlers } from "./server-methods/voice.js";
-import { voicewakeHandlers } from "./server-methods/voicewake.js";
-import { webHandlers } from "./server-methods/web.js";
-import { wizardHandlers } from "./server-methods/wizard.js";
+import { ErrorCodes, errorShape } from './protocol/index.js';
+import { agentHandlers } from './server-methods/agent.js';
+import { agentsHandlers } from './server-methods/agents.js';
+import { authProfilesHandlers } from './server-methods/auth-profiles.js';
+import { browserHandlers } from './server-methods/browser.js';
+import { channelsHandlers } from './server-methods/channels.js';
+import { channelAccountsHandlers } from './server-methods/channel-accounts.js';
+import { chatHandlers } from './server-methods/chat.js';
+import { compositeSkillHandlers } from './server-methods/composite-skills.js';
+import { configHandlers } from './server-methods/config.js';
+import { connectHandlers } from './server-methods/connect.js';
+import { cronHandlers } from './server-methods/cron.js';
+import { customToolHandlers } from './server-methods/custom-tools.js';
+import { deviceHandlers } from './server-methods/devices.js';
+import { calendarHandlers } from './server-methods/calendar.js';
+import { emailHandlers } from './server-methods/email.js';
+import { execApprovalsHandlers } from './server-methods/exec-approvals.js';
+import { healthHandlers } from './server-methods/health.js';
+import { hooksHandlers } from './server-methods/hooks.js';
+import { logsHandlers } from './server-methods/logs.js';
+import { memorySynthesisHandlers } from './server-methods/memory-synthesis.js';
+import { modelsHandlers } from './server-methods/models.js';
+import { nodeHandlers } from './server-methods/nodes.js';
+import { orchestratorHandlers } from './server-methods/orchestrator.js';
+import { sendHandlers } from './server-methods/send.js';
+import { sessionsHandlers } from './server-methods/sessions.js';
+import { skillsHandlers } from './server-methods/skills.js';
+import { systemHandlers } from './server-methods/system.js';
+import { talkHandlers } from './server-methods/talk.js';
+import { ttsHandlers } from './server-methods/tts.js';
+import type { GatewayRequestHandlers, GatewayRequestOptions } from './server-methods/types.js';
+import { updateHandlers } from './server-methods/update.js';
+import { usageHandlers } from './server-methods/usage.js';
+import { voiceHandlers } from './server-methods/voice.js';
+import { voicewakeHandlers } from './server-methods/voicewake.js';
+import { webHandlers } from './server-methods/web.js';
+import { wizardHandlers } from './server-methods/wizard.js';
 
-const ADMIN_SCOPE = "operator.admin";
-const READ_SCOPE = "operator.read";
-const WRITE_SCOPE = "operator.write";
-const APPROVALS_SCOPE = "operator.approvals";
-const PAIRING_SCOPE = "operator.pairing";
+const ADMIN_SCOPE = 'operator.admin';
+const READ_SCOPE = 'operator.read';
+const WRITE_SCOPE = 'operator.write';
+const APPROVALS_SCOPE = 'operator.approvals';
+const PAIRING_SCOPE = 'operator.pairing';
 
-const APPROVAL_METHODS = new Set(["exec.approval.request", "exec.approval.resolve"]);
-const NODE_ROLE_METHODS = new Set(["node.invoke.result", "node.event", "skills.bins"]);
+const APPROVAL_METHODS = new Set(['exec.approval.request', 'exec.approval.resolve']);
+const NODE_ROLE_METHODS = new Set(['node.invoke.result', 'node.event', 'skills.bins']);
 const PAIRING_METHODS = new Set([
-  "node.pair.request",
-  "node.pair.list",
-  "node.pair.approve",
-  "node.pair.reject",
-  "node.pair.verify",
-  "device.pair.list",
-  "device.pair.approve",
-  "device.pair.reject",
-  "device.token.rotate",
-  "device.token.revoke",
-  "node.rename",
+  'node.pair.request',
+  'node.pair.list',
+  'node.pair.approve',
+  'node.pair.reject',
+  'node.pair.verify',
+  'device.pair.list',
+  'device.pair.approve',
+  'device.pair.reject',
+  'device.token.rotate',
+  'device.token.revoke',
+  'node.rename',
 ]);
-const ADMIN_METHOD_PREFIXES = ["exec.approvals.", "hooks."];
+const ADMIN_METHOD_PREFIXES = ['exec.approvals.', 'hooks.'];
 const READ_METHODS = new Set([
-  "health",
-  "logs.tail",
-  "channels.status",
-  "status",
-  "usage.status",
-  "usage.cost",
-  "tts.status",
-  "tts.providers",
-  "models.list",
-  "agents.list",
-  "agent.identity.get",
-  "skills.status",
-  "voicewake.get",
-  "sessions.list",
-  "sessions.preview",
-  "cron.list",
-  "cron.status",
-  "cron.runs",
-  "system-presence",
-  "last-heartbeat",
-  "node.list",
-  "node.describe",
-  "chat.history",
+  'health',
+  'logs.tail',
+  'channels.status',
+  'status',
+  'usage.status',
+  'usage.cost',
+  'tts.status',
+  'tts.providers',
+  'models.list',
+  'agents.list',
+  'agent.identity.get',
+  'skills.status',
+  'voicewake.get',
+  'sessions.list',
+  'sessions.preview',
+  'cron.list',
+  'cron.status',
+  'cron.runs',
+  'system-presence',
+  'last-heartbeat',
+  'node.list',
+  'node.describe',
+  'chat.history',
   // Phase 2.3: Orchestrator Metrics
-  "orchestrator.metrics.subscribe",
-  "orchestrator.metrics.history",
-  "orchestrator.cost.burn_rate",
+  'orchestrator.metrics.subscribe',
+  'orchestrator.metrics.history',
+  'orchestrator.cost.burn_rate',
   // Phase I: Auth Profiles (read-only operations)
-  "auth.profiles.list",
-  "auth.profiles.check",
+  'auth.profiles.list',
+  'auth.profiles.check',
   // Phase I: Hooks (read-only operations)
-  "hooks.list",
-  "hooks.getConfig",
-  "hooks.validate",
+  'hooks.list',
+  'hooks.getConfig',
+  'hooks.validate',
 ]);
 const WRITE_METHODS = new Set([
-  "send",
-  "agent",
-  "agent.wait",
-  "wake",
-  "talk.mode",
-  "tts.enable",
-  "tts.disable",
-  "tts.convert",
-  "tts.setProvider",
-  "voicewake.set",
-  "node.invoke",
-  "chat.send",
-  "chat.abort",
-  "browser.request",
+  'send',
+  'agent',
+  'agent.wait',
+  'wake',
+  'talk.mode',
+  'tts.enable',
+  'tts.disable',
+  'tts.convert',
+  'tts.setProvider',
+  'voicewake.set',
+  'node.invoke',
+  'chat.send',
+  'chat.abort',
+  'browser.request',
   // Phase 3 Custom Tools
-  "tools.execute_custom",
-  "tools.get_metadata",
-  "tools.list",
+  'tools.execute_custom',
+  'tools.get_metadata',
+  'tools.list',
   // Phase 3 Composite Skills
-  "skills.execute_composite",
-  "skills.validate_composite",
-  "skills.get_skill_metadata",
-  "skills.list_user_skills",
+  'skills.execute_composite',
+  'skills.validate_composite',
+  'skills.get_skill_metadata',
+  'skills.list_user_skills',
   // Phase 3 Memory Synthesis
-  "memory.synthesize",
-  "memory.synthesis_status",
-  "memory.list_patterns",
+  'memory.synthesize',
+  'memory.synthesis_status',
+  'memory.list_patterns',
   // Email Integration
-  "email.add_account",
-  "email.get_accounts",
-  "email.remove_account",
-  "email.sync_inbox",
-  "email.get_sync_status",
-  "email.get_conversations",
-  "email.search_conversations",
-  "email.get_conversation",
-  "email.send_message",
-  "email.mark_read",
-  "email.star_conversation",
-  "email.delete_conversation",
-  "email.get_attachment",
-  "email.preview_attachment",
+  'email.add_account',
+  'email.get_accounts',
+  'email.remove_account',
+  'email.sync_inbox',
+  'email.get_sync_status',
+  'email.get_conversations',
+  'email.search_conversations',
+  'email.get_conversation',
+  'email.send_message',
+  'email.mark_read',
+  'email.star_conversation',
+  'email.delete_conversation',
+  'email.get_attachment',
+  'email.preview_attachment',
   // Calendar Integration
-  "calendar.add_event",
-  "calendar.get_events",
-  "calendar.search_events",
-  "calendar.get_event",
-  "calendar.update_event",
-  "calendar.delete_event",
-  "calendar.create_recurring",
-  "calendar.update_attendees",
-  "calendar.sync_calendar",
-  "calendar.get_sync_status",
-  "calendar.get_calendar_view",
+  'calendar.add_event',
+  'calendar.get_events',
+  'calendar.search_events',
+  'calendar.get_event',
+  'calendar.update_event',
+  'calendar.delete_event',
+  'calendar.create_recurring',
+  'calendar.update_attendees',
+  'calendar.sync_calendar',
+  'calendar.get_sync_status',
+  'calendar.get_calendar_view',
 ]);
 
-function authorizeGatewayMethod(method: string, client: GatewayRequestOptions["client"]) {
+function authorizeGatewayMethod(method: string, client: GatewayRequestOptions['client']) {
   if (!client?.connect) {
     return null;
   }
-  const role = client.connect.role ?? "operator";
+  const role = client.connect.role ?? 'operator';
   const scopes = client.connect.scopes ?? [];
   if (NODE_ROLE_METHODS.has(method)) {
-    if (role === "node") {
+    if (role === 'node') {
       return null;
     }
     return errorShape(ErrorCodes.INVALID_REQUEST, `unauthorized role: ${role}`);
   }
-  if (role === "node") {
+  if (role === 'node') {
     return errorShape(ErrorCodes.INVALID_REQUEST, `unauthorized role: ${role}`);
   }
-  if (role !== "operator") {
+  if (role !== 'operator') {
     return errorShape(ErrorCodes.INVALID_REQUEST, `unauthorized role: ${role}`);
   }
   if (scopes.includes(ADMIN_SCOPE)) {
     return null;
   }
   if (APPROVAL_METHODS.has(method) && !scopes.includes(APPROVALS_SCOPE)) {
-    return errorShape(ErrorCodes.INVALID_REQUEST, "missing scope: operator.approvals");
+    return errorShape(ErrorCodes.INVALID_REQUEST, 'missing scope: operator.approvals');
   }
   if (PAIRING_METHODS.has(method) && !scopes.includes(PAIRING_SCOPE)) {
-    return errorShape(ErrorCodes.INVALID_REQUEST, "missing scope: operator.pairing");
+    return errorShape(ErrorCodes.INVALID_REQUEST, 'missing scope: operator.pairing');
   }
   if (READ_METHODS.has(method) && !(scopes.includes(READ_SCOPE) || scopes.includes(WRITE_SCOPE))) {
-    return errorShape(ErrorCodes.INVALID_REQUEST, "missing scope: operator.read");
+    return errorShape(ErrorCodes.INVALID_REQUEST, 'missing scope: operator.read');
   }
   if (WRITE_METHODS.has(method) && !scopes.includes(WRITE_SCOPE)) {
-    return errorShape(ErrorCodes.INVALID_REQUEST, "missing scope: operator.write");
+    return errorShape(ErrorCodes.INVALID_REQUEST, 'missing scope: operator.write');
   }
   if (APPROVAL_METHODS.has(method)) {
     return null;
@@ -196,32 +196,32 @@ function authorizeGatewayMethod(method: string, client: GatewayRequestOptions["c
   if (WRITE_METHODS.has(method)) {
     return null;
   }
-  if (ADMIN_METHOD_PREFIXES.some((prefix) => method.startsWith(prefix))) {
-    return errorShape(ErrorCodes.INVALID_REQUEST, "missing scope: operator.admin");
+  if (ADMIN_METHOD_PREFIXES.some(prefix => method.startsWith(prefix))) {
+    return errorShape(ErrorCodes.INVALID_REQUEST, 'missing scope: operator.admin');
   }
   if (
-    method.startsWith("config.") ||
-    method.startsWith("wizard.") ||
-    method.startsWith("update.") ||
-    method.startsWith("auth.") ||
-    method === "channels.logout" ||
-    method === "skills.install" ||
-    method === "skills.update" ||
-    method === "cron.add" ||
-    method === "cron.update" ||
-    method === "cron.remove" ||
-    method === "cron.run" ||
-    method === "sessions.patch" ||
-    method === "sessions.reset" ||
-    method === "sessions.delete" ||
-    method === "sessions.compact" ||
-    method === "agents.add" ||
-    method === "agents.delete" ||
-    method === "agents.setDefault"
+    method.startsWith('config.') ||
+    method.startsWith('wizard.') ||
+    method.startsWith('update.') ||
+    method.startsWith('auth.') ||
+    method === 'channels.logout' ||
+    method === 'skills.install' ||
+    method === 'skills.update' ||
+    method === 'cron.add' ||
+    method === 'cron.update' ||
+    method === 'cron.remove' ||
+    method === 'cron.run' ||
+    method === 'sessions.patch' ||
+    method === 'sessions.reset' ||
+    method === 'sessions.delete' ||
+    method === 'sessions.compact' ||
+    method === 'agents.add' ||
+    method === 'agents.delete' ||
+    method === 'agents.setDefault'
   ) {
-    return errorShape(ErrorCodes.INVALID_REQUEST, "missing scope: operator.admin");
+    return errorShape(ErrorCodes.INVALID_REQUEST, 'missing scope: operator.admin');
   }
-  return errorShape(ErrorCodes.INVALID_REQUEST, "missing scope: operator.admin");
+  return errorShape(ErrorCodes.INVALID_REQUEST, 'missing scope: operator.admin');
 }
 
 export const coreGatewayHandlers: GatewayRequestHandlers = {
@@ -264,7 +264,7 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
 };
 
 export async function handleGatewayRequest(
-  opts: GatewayRequestOptions & { extraHandlers?: GatewayRequestHandlers },
+  opts: GatewayRequestOptions & { extraHandlers?: GatewayRequestHandlers }
 ): Promise<void> {
   const { req, respond, client, isWebchatConnect, context } = opts;
   const authError = authorizeGatewayMethod(req.method, client);
@@ -277,7 +277,7 @@ export async function handleGatewayRequest(
     respond(
       false,
       undefined,
-      errorShape(ErrorCodes.INVALID_REQUEST, `unknown method: ${req.method}`),
+      errorShape(ErrorCodes.INVALID_REQUEST, `unknown method: ${req.method}`)
     );
     return;
   }

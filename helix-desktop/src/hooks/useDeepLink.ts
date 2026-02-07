@@ -25,17 +25,17 @@ export function useDeepLink() {
     });
 
     // Register chat handler
-    registerChatHandler(async (sessionId) => {
+    registerChatHandler(async sessionId => {
       navigate(`/chat/${sessionId}`);
     });
 
     // Register device handlers
     registerDeviceHandler(
-      async (code) => {
+      async code => {
         // Navigate to device pairing with code pre-filled
         navigate('/settings/devices', { state: { pairingCode: code } });
       },
-      async (deviceId) => {
+      async deviceId => {
         // Navigate to device detail
         navigate(`/settings/devices/${deviceId}`);
       }
@@ -44,16 +44,18 @@ export function useDeepLink() {
     // Register approval handler
     registerApprovalHandler(async (requestId, decision) => {
       // Navigate to approvals dashboard
-      navigate('/settings/security/approvals', { state: { selectedRequest: requestId, action: decision } });
+      navigate('/settings/security/approvals', {
+        state: { selectedRequest: requestId, action: decision },
+      });
     });
 
     // Register settings handler
-    registerSettingsHandler(async (path) => {
+    registerSettingsHandler(async path => {
       navigate(`/settings/${path}`);
     });
 
     // Register synthesis handler
-    registerSynthesisHandler(async (synthesisType) => {
+    registerSynthesisHandler(async synthesisType => {
       navigate('/memory/synthesis', { state: { synthesisType } });
     });
 

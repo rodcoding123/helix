@@ -38,10 +38,24 @@ interface SkillCardProps {
 }
 
 const SKILL_ICONS: Record<string, string> = {
-  web: '🌐', browser: '🌐', memory: '🧠', git: '📦', code: '💻',
-  file: '📁', search: '🔍', chat: '💬', image: '🖼️', audio: '🎵',
-  video: '🎬', data: '📊', security: '🔒', automation: '🤖',
-  api: '🔌', database: '🗄️', deploy: '🚀', test: '🧪',
+  web: '🌐',
+  browser: '🌐',
+  memory: '🧠',
+  git: '📦',
+  code: '💻',
+  file: '📁',
+  search: '🔍',
+  chat: '💬',
+  image: '🖼️',
+  audio: '🎵',
+  video: '🎬',
+  data: '📊',
+  security: '🔒',
+  automation: '🤖',
+  api: '🔌',
+  database: '🗄️',
+  deploy: '🚀',
+  test: '🧪',
 };
 
 function getSkillIcon(name: string, icon?: string): string {
@@ -86,7 +100,9 @@ export function SkillCard({
   const isMarketplace = variant === 'marketplace';
 
   return (
-    <div className={`skill-card ${skill.enabled ? 'enabled' : ''} ${isMarketplace ? 'marketplace' : ''}`}>
+    <div
+      className={`skill-card ${skill.enabled ? 'enabled' : ''} ${isMarketplace ? 'marketplace' : ''}`}
+    >
       <style>{skillCardStyles}</style>
 
       {/* Header */}
@@ -98,9 +114,7 @@ export function SkillCard({
             {skill.builtin && <span className="badge builtin">Built-in</span>}
             {skill.hasUpdate && <span className="badge update">Update</span>}
           </div>
-          {skill.version && (
-            <span className="skill-version">v{skill.version}</span>
-          )}
+          {skill.version && <span className="skill-version">v{skill.version}</span>}
         </div>
 
         {/* Toggle for installed skills */}
@@ -118,16 +132,16 @@ export function SkillCard({
       </div>
 
       {/* Description */}
-      {skill.description && (
-        <p className="skill-description">{skill.description}</p>
-      )}
+      {skill.description && <p className="skill-description">{skill.description}</p>}
 
       {/* Marketplace metadata */}
       {isMarketplace && (
         <div className="skill-meta">
           {skill.author && <span className="meta-item">by {skill.author}</span>}
           {skill.rating != null && (
-            <span className="meta-item rating">{renderStars(skill.rating)} {skill.rating.toFixed(1)}</span>
+            <span className="meta-item rating">
+              {renderStars(skill.rating)} {skill.rating.toFixed(1)}
+            </span>
           )}
           {skill.downloads != null && (
             <span className="meta-item">{skill.downloads.toLocaleString()} downloads</span>
@@ -139,7 +153,9 @@ export function SkillCard({
       {skill.tags && skill.tags.length > 0 && (
         <div className="skill-tags">
           {skill.tags.slice(0, 4).map(tag => (
-            <span key={tag} className="tag">{tag}</span>
+            <span key={tag} className="tag">
+              {tag}
+            </span>
           ))}
         </div>
       )}
@@ -193,27 +209,19 @@ export function SkillCard({
         )}
 
         {onViewDetails && (
-          <button
-            className="btn-action details"
-            onClick={() => onViewDetails(skill.name)}
-          >
+          <button className="btn-action details" onClick={() => onViewDetails(skill.name)}>
             <ExternalLink className="w-3.5 h-3.5" />
           </button>
         )}
 
         {!isMarketplace && onConfigure && (
-          <button
-            className="btn-action configure"
-            onClick={() => onConfigure(skill.name)}
-          >
+          <button className="btn-action configure" onClick={() => onConfigure(skill.name)}>
             Configure
           </button>
         )}
       </div>
 
-      {actionError && (
-        <div className="action-error">{actionError}</div>
-      )}
+      {actionError && <div className="action-error">{actionError}</div>}
     </div>
   );
 }

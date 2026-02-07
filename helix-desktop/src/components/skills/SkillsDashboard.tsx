@@ -64,7 +64,7 @@ export function SkillsDashboard() {
 
       if (result?.skills) {
         setInstalledSkills(
-          result.skills.map((s) => ({
+          result.skills.map(s => ({
             name: s.name,
             description: s.description,
             version: s.version,
@@ -101,8 +101,7 @@ export function SkillsDashboard() {
   // Initial load
   useEffect(() => {
     setLoading(true);
-    Promise.all([loadInstalledSkills(), loadMarketplaceSkills()])
-      .finally(() => setLoading(false));
+    Promise.all([loadInstalledSkills(), loadMarketplaceSkills()]).finally(() => setLoading(false));
   }, [loadInstalledSkills, loadMarketplaceSkills]);
 
   // Toggle skill enabled state
@@ -115,22 +114,23 @@ export function SkillsDashboard() {
         patch: { [`skills.${name}.enabled`]: enabled },
       });
 
-      setInstalledSkills((prev) =>
-        prev.map((s) => (s.name === name ? { ...s, enabled } : s))
-      );
+      setInstalledSkills(prev => prev.map(s => (s.name === name ? { ...s, enabled } : s)));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to toggle skill');
     }
   }, []);
 
   // Install skill from marketplace
-  const handleInstall = useCallback(async (name: string) => {
-    const client = getGatewayClient();
-    if (!client?.connected) throw new Error('Gateway not connected');
+  const handleInstall = useCallback(
+    async (name: string) => {
+      const client = getGatewayClient();
+      if (!client?.connected) throw new Error('Gateway not connected');
 
-    await client.request('skills.install', { name });
-    await loadInstalledSkills();
-  }, [loadInstalledSkills]);
+      await client.request('skills.install', { name });
+      await loadInstalledSkills();
+    },
+    [loadInstalledSkills]
+  );
 
   // Uninstall skill
   const handleUninstall = useCallback(async (name: string) => {
@@ -138,17 +138,20 @@ export function SkillsDashboard() {
     if (!client?.connected) throw new Error('Gateway not connected');
 
     await client.request('skills.uninstall', { name });
-    setInstalledSkills((prev) => prev.filter((s) => s.name !== name));
+    setInstalledSkills(prev => prev.filter(s => s.name !== name));
   }, []);
 
   // Update skill
-  const handleUpdate = useCallback(async (name: string) => {
-    const client = getGatewayClient();
-    if (!client?.connected) throw new Error('Gateway not connected');
+  const handleUpdate = useCallback(
+    async (name: string) => {
+      const client = getGatewayClient();
+      if (!client?.connected) throw new Error('Gateway not connected');
 
-    await client.request('skills.update', { name });
-    await loadInstalledSkills();
-  }, [loadInstalledSkills]);
+      await client.request('skills.update', { name });
+      await loadInstalledSkills();
+    },
+    [loadInstalledSkills]
+  );
 
   // Filter installed skills
   const filteredInstalled = useMemo(() => {
@@ -157,21 +160,19 @@ export function SkillsDashboard() {
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       filtered = filtered.filter(
-        (s) =>
-          s.name.toLowerCase().includes(q) ||
-          s.description?.toLowerCase().includes(q)
+        s => s.name.toLowerCase().includes(q) || s.description?.toLowerCase().includes(q)
       );
     }
 
     switch (installedFilter) {
       case 'enabled':
-        return filtered.filter((s) => s.enabled);
+        return filtered.filter(s => s.enabled);
       case 'disabled':
-        return filtered.filter((s) => !s.enabled);
+        return filtered.filter(s => !s.enabled);
       case 'builtin':
-        return filtered.filter((s) => s.builtin);
+        return filtered.filter(s => s.builtin);
       case 'plugins':
-        return filtered.filter((s) => !s.builtin);
+        return filtered.filter(s => !s.builtin);
       default:
         return filtered;
     }
@@ -179,15 +180,15 @@ export function SkillsDashboard() {
 
   // Map marketplace skills with install status
   const marketplaceWithStatus = useMemo(() => {
-    const installedNames = new Set(installedSkills.map((s) => s.name));
-    return marketplaceSkills.map((s) => ({
+    const installedNames = new Set(installedSkills.map(s => s.name));
+    return marketplaceSkills.map(s => ({
       ...s,
       installed: installedNames.has(s.name),
     }));
   }, [marketplaceSkills, installedSkills]);
 
   const installedCount = installedSkills.length;
-  const enabledCount = installedSkills.filter((s) => s.enabled).length;
+  const enabledCount = installedSkills.filter(s => s.enabled).length;
 
   return (
     <div className="skills-dashboard">
@@ -205,8 +206,9 @@ export function SkillsDashboard() {
           className="sd-refresh"
           onClick={() => {
             setLoading(true);
-            Promise.all([loadInstalledSkills(), loadMarketplaceSkills()])
-              .finally(() => setLoading(false));
+            Promise.all([loadInstalledSkills(), loadMarketplaceSkills()]).finally(() =>
+              setLoading(false)
+            );
           }}
           disabled={loading}
         >
@@ -240,8 +242,10 @@ export function SkillsDashboard() {
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={activeTab === 'installed' ? 'Search installed skills...' : 'Search ClawHub...'}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder={
+              activeTab === 'installed' ? 'Search installed skills...' : 'Search ClawHub...'
+            }
           />
         </div>
 
@@ -249,7 +253,7 @@ export function SkillsDashboard() {
           <div className="sd-filters">
             <Filter className="w-3.5 h-3.5" />
             {(['all', 'enabled', 'disabled', 'builtin', 'plugins'] as InstalledFilter[]).map(
-              (filter) => (
+              filter => (
                 <button
                   key={filter}
                   className={`sd-filter-btn ${installedFilter === filter ? 'active' : ''}`}
@@ -263,17 +267,23 @@ export function SkillsDashboard() {
         ) : (
           <div className="sd-filters">
             <Filter className="w-3.5 h-3.5" />
-            {['all', 'Development', 'Communication', 'Productivity', 'Automation', 'AI', 'Integration'].map(
-              (cat) => (
-                <button
-                  key={cat}
-                  className={`sd-filter-btn ${marketplaceCategory === cat ? 'active' : ''}`}
-                  onClick={() => setMarketplaceCategory(cat)}
-                >
-                  {cat === 'all' ? 'All' : cat}
-                </button>
-              )
-            )}
+            {[
+              'all',
+              'Development',
+              'Communication',
+              'Productivity',
+              'Automation',
+              'AI',
+              'Integration',
+            ].map(cat => (
+              <button
+                key={cat}
+                className={`sd-filter-btn ${marketplaceCategory === cat ? 'active' : ''}`}
+                onClick={() => setMarketplaceCategory(cat)}
+              >
+                {cat === 'all' ? 'All' : cat}
+              </button>
+            ))}
           </div>
         )}
       </div>
@@ -294,7 +304,7 @@ export function SkillsDashboard() {
               <p>No skills match your filter</p>
             </div>
           ) : (
-            filteredInstalled.map((skill) => (
+            filteredInstalled.map(skill => (
               <SkillCard
                 key={skill.name}
                 skill={skill as SkillCardSkill}
@@ -311,7 +321,7 @@ export function SkillsDashboard() {
             <p>{loading ? 'Loading marketplace...' : 'No skills found'}</p>
           </div>
         ) : (
-          marketplaceWithStatus.map((skill) => (
+          marketplaceWithStatus.map(skill => (
             <SkillCard
               key={skill.name}
               skill={{

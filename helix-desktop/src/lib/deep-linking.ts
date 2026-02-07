@@ -81,75 +81,101 @@ export function parseDeepLink(url: string): DeepLink | null {
 }
 
 export function registerChatHandler(onNavigate: (sessionId: string) => Promise<void>): void {
-  registry.register(/^chat\//, async (link) => {
-    const sessionId = link.path;
-    if (sessionId) {
-      await onNavigate(sessionId);
-    }
-  }, 100);
+  registry.register(
+    /^chat\//,
+    async link => {
+      const sessionId = link.path;
+      if (sessionId) {
+        await onNavigate(sessionId);
+      }
+    },
+    100
+  );
 }
 
 export function registerDeviceHandler(
   onPair: (code: string) => Promise<void>,
   onDetail: (deviceId: string) => Promise<void>
 ): void {
-  registry.register(/^device\/pair/, async (link) => {
-    const code = link.params.code;
-    if (code) {
-      await onPair(code);
-    }
-  }, 100);
+  registry.register(
+    /^device\/pair/,
+    async link => {
+      const code = link.params.code;
+      if (code) {
+        await onPair(code);
+      }
+    },
+    100
+  );
 
-  registry.register(/^device\/detail/, async (link) => {
-    const deviceId = link.path?.replace('detail/', '');
-    if (deviceId) {
-      await onDetail(deviceId);
-    }
-  }, 100);
+  registry.register(
+    /^device\/detail/,
+    async link => {
+      const deviceId = link.path?.replace('detail/', '');
+      if (deviceId) {
+        await onDetail(deviceId);
+      }
+    },
+    100
+  );
 }
 
 export function registerOAuthHandler(
   onCallback: (code: string, state?: string) => Promise<void>
 ): void {
-  registry.register(/^oauth\/callback/, async (link) => {
-    const code = link.params.code;
-    if (code) {
-      await onCallback(code, link.params.state);
-    }
-  }, 100);
+  registry.register(
+    /^oauth\/callback/,
+    async link => {
+      const code = link.params.code;
+      if (code) {
+        await onCallback(code, link.params.state);
+      }
+    },
+    100
+  );
 }
 
 export function registerApprovalHandler(
   onResolve: (requestId: string, decision: 'approve' | 'deny') => Promise<void>
 ): void {
-  registry.register(/^approval\//, async (link) => {
-    const requestId = link.path;
-    const decision = link.params.decision as 'approve' | 'deny';
-    if (requestId && decision) {
-      await onResolve(requestId, decision);
-    }
-  }, 100);
+  registry.register(
+    /^approval\//,
+    async link => {
+      const requestId = link.path;
+      const decision = link.params.decision as 'approve' | 'deny';
+      if (requestId && decision) {
+        await onResolve(requestId, decision);
+      }
+    },
+    100
+  );
 }
 
-export function registerSettingsHandler(
-  onNavigate: (path: string) => Promise<void>
-): void {
-  registry.register(/^settings\//, async (link) => {
-    if (link.path) {
-      await onNavigate(link.path);
-    }
-  }, 100);
+export function registerSettingsHandler(onNavigate: (path: string) => Promise<void>): void {
+  registry.register(
+    /^settings\//,
+    async link => {
+      if (link.path) {
+        await onNavigate(link.path);
+      }
+    },
+    100
+  );
 }
 
 export function registerSynthesisHandler(
   onNavigate: (synthesisType: string) => Promise<void>
 ): void {
-  registry.register(/^synthesis\//, async (link) => {
-    const synthesisType = link.path;
-    if (synthesisType) {
-      await onNavigate(synthesisType);
-    }
-  }, 100);
+  registry.register(
+    /^synthesis\//,
+    async link => {
+      const synthesisType = link.path;
+      if (synthesisType) {
+        await onNavigate(synthesisType);
+      }
+    },
+    100
+  );
 }
 
 let unlistenDeepLink: UnlistenFn | null = null;
@@ -164,7 +190,7 @@ export async function initializeDeepLinking(): Promise<void> {
       const { invoke } = await import('@tauri-apps/api/core');
 
       // Listen for deep-link events from the Rust backend
-      unlistenDeepLink = await listen<string>('deep-link', async (event) => {
+      unlistenDeepLink = await listen<string>('deep-link', async event => {
         const url = event.payload;
         console.log('[deep-link] Received:', url);
         const link = parseDeepLink(url);
@@ -269,7 +295,10 @@ export async function copyDeepLinkToClipboard(uri: string): Promise<void> {
   }
 }
 
-export async function copySessionLinkToClipboard(sessionId: string, sessionName?: string): Promise<void> {
+export async function copySessionLinkToClipboard(
+  sessionId: string,
+  sessionName?: string
+): Promise<void> {
   const link = generateSessionLink(sessionId, sessionName);
   await copyDeepLinkToClipboard(link);
 }

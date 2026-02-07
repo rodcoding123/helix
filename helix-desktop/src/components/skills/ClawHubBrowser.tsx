@@ -8,15 +8,18 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
-  Search, TrendingUp, ChevronRight,
-  Sparkles, Grid3X3, List, SortAsc, Loader2, AlertCircle,
+  Search,
+  TrendingUp,
+  ChevronRight,
+  Sparkles,
+  Grid3X3,
+  List,
+  SortAsc,
+  Loader2,
+  AlertCircle,
 } from 'lucide-react';
 import { getClawHubClient } from '../../lib/clawhub-client';
-import type {
-  ClawHubSkill,
-  ClawHubCategory,
-  ClawHubSearchOptions,
-} from '../../lib/clawhub-client';
+import type { ClawHubSkill, ClawHubCategory, ClawHubSearchOptions } from '../../lib/clawhub-client';
 import { getGatewayClient } from '../../lib/gateway-client';
 import { SkillCard, type SkillCardSkill } from './SkillCard';
 
@@ -83,42 +86,45 @@ export function ClawHubBrowser({ onInstall, installedSkillNames }: ClawHubBrowse
   }, [clawhub]);
 
   // Search skills
-  const searchSkills = useCallback(async (reset = true) => {
-    if (reset) {
-      setLoading(true);
-      offsetRef.current = 0;
-    } else {
-      setLoadingMore(true);
-    }
-    setError(null);
-
-    try {
-      const options: ClawHubSearchOptions = {
-        query: searchQuery || undefined,
-        category: category !== 'all' ? category : undefined,
-        sortBy,
-        limit: 20,
-        offset: offsetRef.current,
-      };
-
-      const result = await clawhub.search(options);
-
+  const searchSkills = useCallback(
+    async (reset = true) => {
       if (reset) {
-        setSkills(result.skills);
+        setLoading(true);
+        offsetRef.current = 0;
       } else {
-        setSkills((prev) => [...prev, ...result.skills]);
+        setLoadingMore(true);
       }
+      setError(null);
 
-      setTotal(result.total);
-      setHasMore(result.hasMore);
-      offsetRef.current += result.skills.length;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to search skills');
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-    }
-  }, [clawhub, searchQuery, category, sortBy]);
+      try {
+        const options: ClawHubSearchOptions = {
+          query: searchQuery || undefined,
+          category: category !== 'all' ? category : undefined,
+          sortBy,
+          limit: 20,
+          offset: offsetRef.current,
+        };
+
+        const result = await clawhub.search(options);
+
+        if (reset) {
+          setSkills(result.skills);
+        } else {
+          setSkills(prev => [...prev, ...result.skills]);
+        }
+
+        setTotal(result.total);
+        setHasMore(result.hasMore);
+        offsetRef.current += result.skills.length;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to search skills');
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+      }
+    },
+    [clawhub, searchQuery, category, sortBy]
+  );
 
   // Trigger search on filter changes
   useEffect(() => {
@@ -126,25 +132,31 @@ export function ClawHubBrowser({ onInstall, installedSkillNames }: ClawHubBrowse
   }, [searchSkills]);
 
   // Debounced search input
-  const handleSearchInput = useCallback((value: string) => {
-    setSearchQuery(value);
-    setShowFeatured(!value);
-    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-    searchTimeoutRef.current = setTimeout(() => {
-      searchSkills(true);
-    }, 400);
-  }, [searchSkills]);
+  const handleSearchInput = useCallback(
+    (value: string) => {
+      setSearchQuery(value);
+      setShowFeatured(!value);
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+      searchTimeoutRef.current = setTimeout(() => {
+        searchSkills(true);
+      }, 400);
+    },
+    [searchSkills]
+  );
 
   // Install handler
-  const handleInstall = useCallback(async (name: string) => {
-    if (onInstall) {
-      await onInstall(name);
-    } else {
-      const client = getGatewayClient();
-      if (!client?.connected) throw new Error('Gateway not connected');
-      await client.request('skills.install', { name });
-    }
-  }, [onInstall]);
+  const handleInstall = useCallback(
+    async (name: string) => {
+      if (onInstall) {
+        await onInstall(name);
+      } else {
+        const client = getGatewayClient();
+        if (!client?.connected) throw new Error('Gateway not connected');
+        await client.request('skills.install', { name });
+      }
+    },
+    [onInstall]
+  );
 
   const isSearchActive = searchQuery || category !== 'all';
 
@@ -159,7 +171,7 @@ export function ClawHubBrowser({ onInstall, installedSkillNames }: ClawHubBrowse
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => handleSearchInput(e.target.value)}
+            onChange={e => handleSearchInput(e.target.value)}
             placeholder="Search ClawHub skills..."
           />
         </div>
@@ -167,11 +179,13 @@ export function ClawHubBrowser({ onInstall, installedSkillNames }: ClawHubBrowse
         <div className="chb-controls">
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortOption)}
+            onChange={e => setSortBy(e.target.value as SortOption)}
             className="chb-sort-select"
           >
-            {SORT_OPTIONS.map((opt) => (
-              <option key={opt.id} value={opt.id}>{opt.label}</option>
+            {SORT_OPTIONS.map(opt => (
+              <option key={opt.id} value={opt.id}>
+                {opt.label}
+              </option>
             ))}
           </select>
 
@@ -196,7 +210,7 @@ export function ClawHubBrowser({ onInstall, installedSkillNames }: ClawHubBrowse
 
       {/* Categories */}
       <div className="chb-categories">
-        {CATEGORIES.map((cat) => (
+        {CATEGORIES.map(cat => (
           <button
             key={cat.id}
             className={`chb-cat-btn ${category === cat.id ? 'active' : ''}`}
@@ -222,7 +236,7 @@ export function ClawHubBrowser({ onInstall, installedSkillNames }: ClawHubBrowse
             <h3>Featured Skills</h3>
           </div>
           <div className="chb-featured-row">
-            {featured.map((skill) => (
+            {featured.map(skill => (
               <SkillCard
                 key={skill.name}
                 skill={mapToSkillCard(skill, installedSkillNames)}
@@ -242,7 +256,7 @@ export function ClawHubBrowser({ onInstall, installedSkillNames }: ClawHubBrowse
             <h3>Trending This Week</h3>
           </div>
           <div className="chb-featured-row">
-            {trending.map((skill) => (
+            {trending.map(skill => (
               <SkillCard
                 key={skill.name}
                 skill={mapToSkillCard(skill, installedSkillNames)}
@@ -274,14 +288,19 @@ export function ClawHubBrowser({ onInstall, installedSkillNames }: ClawHubBrowse
           <div className="chb-empty">
             <Search className="w-8 h-8" />
             <p>No skills match your search</p>
-            <button onClick={() => { setSearchQuery(''); setCategory('all'); }}>
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setCategory('all');
+              }}
+            >
               Clear filters
             </button>
           </div>
         ) : (
           <>
             <div className={`chb-results ${viewMode}`}>
-              {skills.map((skill) => (
+              {skills.map(skill => (
                 <SkillCard
                   key={skill.name}
                   skill={mapToSkillCard(skill, installedSkillNames)}
@@ -295,9 +314,13 @@ export function ClawHubBrowser({ onInstall, installedSkillNames }: ClawHubBrowse
               <div className="chb-load-more">
                 <button onClick={() => searchSkills(false)} disabled={loadingMore}>
                   {loadingMore ? (
-                    <><Loader2 className="w-4 h-4 animate-spin" /> Loading...</>
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" /> Loading...
+                    </>
                   ) : (
-                    <><ChevronRight className="w-4 h-4" /> Load More</>
+                    <>
+                      <ChevronRight className="w-4 h-4" /> Load More
+                    </>
                   )}
                 </button>
               </div>
@@ -309,10 +332,7 @@ export function ClawHubBrowser({ onInstall, installedSkillNames }: ClawHubBrowse
   );
 }
 
-function mapToSkillCard(
-  skill: ClawHubSkill,
-  installedNames?: Set<string>
-): SkillCardSkill {
+function mapToSkillCard(skill: ClawHubSkill, installedNames?: Set<string>): SkillCardSkill {
   return {
     name: skill.name,
     description: skill.description,

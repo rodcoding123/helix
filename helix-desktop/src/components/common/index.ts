@@ -15,8 +15,19 @@ export {
   type ToastContainerProps,
 } from './Toast';
 export { Tooltip, type TooltipProps, type TooltipPosition } from './Tooltip';
-export { Spinner, SpinnerOverlay, type SpinnerProps, type SpinnerSize, type SpinnerOverlayProps } from './Spinner';
-export { ErrorBoundary, withErrorBoundary, type ErrorBoundaryProps, type ErrorBoundaryState } from './ErrorBoundary';
+export {
+  Spinner,
+  SpinnerOverlay,
+  type SpinnerProps,
+  type SpinnerSize,
+  type SpinnerOverlayProps,
+} from './Spinner';
+export {
+  ErrorBoundary,
+  withErrorBoundary,
+  type ErrorBoundaryProps,
+  type ErrorBoundaryState,
+} from './ErrorBoundary';
 export {
   CommandPalette,
   type CommandPaletteProps,
