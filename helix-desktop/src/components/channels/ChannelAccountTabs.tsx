@@ -7,13 +7,25 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getGatewayClient } from '../../lib/gateway-client';
 
-export function ChannelAccountTabs({ channelId, onAccountChange }) {
-  const [accounts, setAccounts] = useState([]);
-  const [activeId, setActiveId] = useState(null);
+interface Account {
+  id: string;
+  name: string;
+  [key: string]: unknown;
+}
+
+export function ChannelAccountTabs({
+  channelId,
+  onAccountChange
+}: {
+  channelId: string;
+  onAccountChange: (accountId: string) => void;
+}) {
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const [showNewForm, setShowNewForm] = useState(false);
   const [newAccountName, setNewAccountName] = useState('');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   const loadAccounts = useCallback(async () => {
     if (!channelId) return;
@@ -23,12 +35,12 @@ export function ChannelAccountTabs({ channelId, onAccountChange }) {
       const client = getGatewayClient();
       if (!client?.connected) return;
 
-      const result = await client.request('channels.accounts.list', { 
-        channel: channelId 
-      });
-      
+      const result = await client.request('channels.accounts.list', {
+        channel: channelId
+      }) as { accounts: Account[] };
+
       setAccounts(result.accounts ?? []);
-      setActiveId(result.accounts?.[0]?.id ?? null);
+      setActiveId((result.accounts?.[0]?.id as string | null) ?? null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load accounts');
     } finally {
@@ -50,9 +62,9 @@ export function ChannelAccountTabs({ channelId, onAccountChange }) {
       const result = await client.request('channels.accounts.create', {
         channel: channelId,
         name: newAccountName.trim(),
-      });
+      }) as { account: Account };
 
-      setAccounts((prev) => [...prev, result.account]);
+      setAccounts((prev) => [...prev, result.account as Account]);
       setNewAccountName('');
       setShowNewForm(false);
     } catch (err) {
@@ -61,7 +73,7 @@ export function ChannelAccountTabs({ channelId, onAccountChange }) {
   }, [newAccountName, channelId]);
 
   const deleteAccount = useCallback(
-    async (id) => {
+    async (id: string) => {
       if (!confirm('Delete this account?') || !channelId) return;
 
       try {
@@ -75,7 +87,7 @@ export function ChannelAccountTabs({ channelId, onAccountChange }) {
 
         setAccounts((prev) => prev.filter((a) => a.id !== id));
         if (activeId === id) {
-          setActiveId(accounts[0]?.id ?? null);
+          setActiveId((accounts[0]?.id as string | null) ?? null);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to delete account');

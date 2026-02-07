@@ -11,7 +11,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { Lock, Unlock, Eye, EyeOff, Plus, Trash2, Check, AlertCircle } from 'lucide-react';
+import { Lock, Eye, EyeOff, Plus, Trash2, Check, AlertCircle } from 'lucide-react';
 import { getGatewayClient } from '../../lib/gateway-client';
 import './account-credential-manager.css';
 
@@ -40,7 +40,6 @@ interface AccountCredentialManagerProps {
 
 export const AccountCredentialManager: React.FC<AccountCredentialManagerProps> = ({
   accountId,
-  channelId,
   credentialTypes,
   className = '',
 }) => {
@@ -75,10 +74,10 @@ export const AccountCredentialManager: React.FC<AccountCredentialManagerProps> =
           type: selectedType,
           label: credentialLabel || selectedType,
           value: credentialValue,
-        });
+        }) as { credential?: Credential };
 
         if (result?.credential) {
-          setCredentials(prev => [...prev, result.credential]);
+          setCredentials(prev => [...prev, result.credential as Credential]);
           setCredentialValue('');
           setCredentialLabel('');
           setShowAddForm(false);
@@ -128,7 +127,7 @@ export const AccountCredentialManager: React.FC<AccountCredentialManagerProps> =
         const result = await client.request('channels.accounts.testCredential', {
           accountId,
           credentialId,
-        });
+        }) as { ok?: boolean; error?: string };
 
         if (result?.ok) {
           alert('Credential test passed! ✅');

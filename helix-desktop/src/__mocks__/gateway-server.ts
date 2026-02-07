@@ -32,7 +32,6 @@ export class MockGatewayServer {
   private server: MockWebSocketServer;
   private clients: Set<any> = new Set();
   private messageHandlers: Map<string, (msg: GatewayMessage) => any> = new Map();
-  private eventBroadcasters: Map<string, () => void> = new Map();
 
   constructor(url: string = 'ws://localhost:8765') {
     this.server = new MockWebSocketServer(url);
@@ -40,9 +39,10 @@ export class MockGatewayServer {
     this.server.on('connection', (socket) => {
       this.clients.add(socket);
 
-      socket.on('message', (data: string) => {
+      socket.on('message', (data: string | ArrayBuffer | Blob) => {
         try {
-          const msg = JSON.parse(data);
+          const str = typeof data === 'string' ? data : new TextDecoder().decode(data as ArrayBuffer);
+          const msg = JSON.parse(str);
           this.handleMessage(socket, msg);
         } catch (err) {
           console.error('[mock-gateway] Failed to parse message:', err);
