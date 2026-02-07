@@ -36,6 +36,7 @@ export type ExecApprovalsFile = {
   };
   defaults?: ExecApprovalsDefaults;
   agents?: Record<string, ExecApprovalsAgent>;
+  nodes?: Record<string, ExecApprovalsAgent>; // Phase H.2: Per-node exec policies
 };
 
 export type ExecApprovalsSnapshot = {
@@ -153,6 +154,7 @@ export function normalizeExecApprovals(file: ExecApprovalsFile): ExecApprovalsFi
   const socketPath = file.socket?.path?.trim();
   const token = file.socket?.token?.trim();
   const agents = { ...file.agents };
+  const nodes = { ...file.nodes }; // Phase H.2: Handle nodes
   const legacyDefault = agents.default;
   if (legacyDefault) {
     const main = agents[DEFAULT_AGENT_ID];
@@ -163,6 +165,13 @@ export function normalizeExecApprovals(file: ExecApprovalsFile): ExecApprovalsFi
     const allowlist = ensureAllowlistIds(agent.allowlist);
     if (allowlist !== agent.allowlist) {
       agents[key] = { ...agent, allowlist };
+    }
+  }
+  // Phase H.2: Ensure node allowlist IDs
+  for (const [key, node] of Object.entries(nodes)) {
+    const allowlist = ensureAllowlistIds(node.allowlist);
+    if (allowlist !== node.allowlist) {
+      nodes[key] = { ...node, allowlist };
     }
   }
   const normalized: ExecApprovalsFile = {
@@ -178,6 +187,7 @@ export function normalizeExecApprovals(file: ExecApprovalsFile): ExecApprovalsFi
       autoAllowSkills: file.defaults?.autoAllowSkills,
     },
     agents,
+    nodes: Object.keys(nodes).length > 0 ? nodes : undefined, // Phase H.2: Include nodes if present
   };
   return normalized;
 }
@@ -296,6 +306,76 @@ export function resolveExecApprovals(
     socketPath: expandHome(file.socket?.path ?? resolveExecApprovalsSocketPath()),
     token: file.socket?.token ?? "",
   });
+}
+
+/**
+ * Phase H.2: Resolve exec approvals with node-specific policies
+ * Priority: node > agent > wildcard > defaults
+ */
+export function resolveExecApprovalsWithNode(params: {
+  agentId?: string;
+  nodeId?: string;
+  overrides?: ExecApprovalsDefaultOverrides;
+}): ExecApprovalsResolved {
+  const file = ensureExecApprovals();
+  const normalized = normalizeExecApprovals(file);
+  const defaults = normalized.defaults ?? {};
+  const agentKey = params.agentId ?? DEFAULT_AGENT_ID;
+  const nodeKey = params.nodeId;
+
+  // Priority: node > agent > wildcard > defaults
+  const nodePolicy = nodeKey ? normalized.nodes?.[nodeKey] : undefined;
+  const agentPolicy = normalized.agents?.[agentKey];
+  const wildcardPolicy = normalized.agents?.["*"];
+
+  const fallbackSecurity = params.overrides?.security ?? DEFAULT_SECURITY;
+  const fallbackAsk = params.overrides?.ask ?? DEFAULT_ASK;
+  const fallbackAskFallback = params.overrides?.askFallback ?? DEFAULT_ASK_FALLBACK;
+  const fallbackAutoAllowSkills = params.overrides?.autoAllowSkills ?? DEFAULT_AUTO_ALLOW_SKILLS;
+
+  const resolvedDefaults: Required<ExecApprovalsDefaults> = {
+    security: normalizeSecurity(defaults.security, fallbackSecurity),
+    ask: normalizeAsk(defaults.ask, fallbackAsk),
+    askFallback: normalizeSecurity(
+      defaults.askFallback ?? fallbackAskFallback,
+      fallbackAskFallback,
+    ),
+    autoAllowSkills: Boolean(defaults.autoAllowSkills ?? fallbackAutoAllowSkills),
+  };
+
+  const resolvedNode: Required<ExecApprovalsDefaults> = {
+    security: normalizeSecurity(
+      nodePolicy?.security ?? agentPolicy?.security ?? wildcardPolicy?.security ?? resolvedDefaults.security,
+      resolvedDefaults.security,
+    ),
+    ask: normalizeAsk(
+      nodePolicy?.ask ?? agentPolicy?.ask ?? wildcardPolicy?.ask ?? resolvedDefaults.ask,
+      resolvedDefaults.ask,
+    ),
+    askFallback: normalizeSecurity(
+      nodePolicy?.askFallback ?? agentPolicy?.askFallback ?? wildcardPolicy?.askFallback ?? resolvedDefaults.askFallback,
+      resolvedDefaults.askFallback,
+    ),
+    autoAllowSkills: Boolean(
+      nodePolicy?.autoAllowSkills ?? agentPolicy?.autoAllowSkills ?? wildcardPolicy?.autoAllowSkills ?? resolvedDefaults.autoAllowSkills,
+    ),
+  };
+
+  const allowlist = [
+    ...(Array.isArray(wildcardPolicy?.allowlist) ? wildcardPolicy.allowlist : []),
+    ...(Array.isArray(agentPolicy?.allowlist) ? agentPolicy.allowlist : []),
+    ...(Array.isArray(nodePolicy?.allowlist) ? nodePolicy.allowlist : []),
+  ];
+
+  return {
+    path: resolveExecApprovalsPath(),
+    socketPath: expandHome(normalized.socket?.path ?? resolveExecApprovalsSocketPath()),
+    token: normalized.socket?.token ?? "",
+    defaults: resolvedDefaults,
+    agent: resolvedNode,
+    allowlist,
+    file: normalized,
+  };
 }
 
 export function resolveExecApprovalsFromFile(params: {
