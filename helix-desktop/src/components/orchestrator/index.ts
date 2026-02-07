@@ -1,6 +1,9 @@
-export { OrchestratorPanel } from './OrchestratorPanel';
-export { OrchestratorMonitoringDashboard } from './OrchestratorMonitoringDashboard';
+/**
+ * Orchestrator Monitoring Components
+ *
+ * Real-time visualization of orchestrator job execution and metrics.
+ */
+
+export { OrchestratorMonitoringPanel } from './OrchestratorMonitoringPanel';
 export { CostBurnRate } from './CostBurnRate';
 export { AgentActivityTimeline } from './AgentActivityTimeline';
-export { GraphVisualization } from './GraphVisualization';
-export { CheckpointHistory } from './CheckpointHistory';

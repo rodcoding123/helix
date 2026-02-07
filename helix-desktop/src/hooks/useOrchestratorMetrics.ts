@@ -1,405 +1,225 @@
 /**
  * useOrchestratorMetrics Hook
  *
- * Real-time orchestration metrics with debounced cost updates and live state transitions.
- * Subscribes to gateway WebSocket events and maintains aggregated metrics state.
+ * Real-time metrics subscription for orchestrator jobs.
+ * Auto-subscribes on mount, handles WebSocket reconnection,
+ * and provides both live updates and historical data.
  *
  * Usage:
- * ```typescript
- * const metrics = useOrchestratorMetrics({ threadId: 'my-thread' });
- *
- * // Components can now access:
- * metrics.currentMetrics.currentNode       // Active node in StateGraph
- * metrics.burnRate.burnRatePerHour        // $/hour burn rate
- * metrics.recentStateChanges              // Timeline of state transitions
- * metrics.connectionStatus                // 'connected' | 'connecting' | 'disconnected'
- * ```
+ *   const { metrics, costBurnRate, stateTransitions } = useOrchestratorMetrics(threadId);
+ *   // metrics updates in real-time
+ *   // costBurnRate shows $/hour and $/minute
  */
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getGatewayClient } from '../lib/gateway-client';
-import type {
-  OrchestratorMetricsState,
-  OrchestratorMetricsSnapshot,
-  OrchestratorCostBurnRate,
-  OrchestratorEvent,
-  OrchestratorStateChangeEvent,
-  OrchestratorCostUpdateEvent,
-  OrchestratorCheckpointSnapshot,
-  UseOrchestratorMetricsOptions,
-} from '../lib/types/orchestrator-metrics';
 
-const DEFAULT_DEBOUNCE_MS = 500;
-const DEFAULT_MAX_STATE_CHANGES = 50;
-const DEFAULT_MAX_COST_UPDATES = 20;
-const DEFAULT_MAX_CHECKPOINTS = 30;
+export interface OrchestratorMetricsState {
+  threadId: string;
+  status: 'idle' | 'running' | 'paused' | 'completed' | 'failed';
+  currentNode: string;
+  costCents: number;
+  budgetRemainingCents: number;
+  inputTokens: number;
+  outputTokens: number;
+  checkpointCount: number;
+  agentActivityLog: Array<{
+    agent: string;
+    task: string;
+    startedAt: number;
+    duration?: number;
+  }>;
+  stateTransitions: Array<{
+    from: string;
+    to: string;
+    timestamp: number;
+  }>;
+  percentBudgetUsed: number;
+}
+
+export interface CostBurnRate {
+  threadId: string;
+  burnRatePerHour: number;
+  burnRatePerMinute: number;
+  estimatedMinutesRemaining: number;
+  costTrendPercentage: number;
+}
+
+export interface UseOrchestratorMetricsReturn {
+  metrics: OrchestratorMetricsState | null;
+  costBurnRate: CostBurnRate | null;
+  isConnected: boolean;
+  isLoading: boolean;
+  error: string | null;
+  stateTransitions: OrchestratorMetricsState['stateTransitions'];
+}
 
 export function useOrchestratorMetrics(
-  options: UseOrchestratorMetricsOptions = {}
-): OrchestratorMetricsState {
-  const {
-    threadId: optionalThreadId,
-    autoSubscribe = true,
-    debounceMs = DEFAULT_DEBOUNCE_MS,
-    maxStateChanges = DEFAULT_MAX_STATE_CHANGES,
-    maxCostUpdates = DEFAULT_MAX_COST_UPDATES,
-    maxCheckpoints = DEFAULT_MAX_CHECKPOINTS,
-  } = options;
+  threadId: string | null
+): UseOrchestratorMetricsReturn {
+  const [metrics, setMetrics] = useState<OrchestratorMetricsState | null>(null);
+  const [costBurnRate, setCostBurnRate] = useState<CostBurnRate | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const subscriptionRef = useRef<(() => void) | null>(null);
+  const updateTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // State management
-  const [state, setState] = useState<OrchestratorMetricsState>({
-    recentStateChanges: [],
-    recentCostUpdates: [],
-    recentCheckpoints: [],
-    activeAgents: new Map(),
-    connectionStatus: autoSubscribe ? 'connecting' : 'disconnected',
-    lastUpdated: Date.now(),
-  });
+  // Fetch initial metrics snapshot
+  const fetchMetrics = useCallback(async () => {
+    if (!threadId) return;
 
-  // Refs for debouncing and subscription management
-  const threadIdRef = useRef(optionalThreadId);
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const subscriptionRef = useRef<string | null>(null);
-  const pendingCostUpdateRef = useRef<OrchestratorCostUpdateEvent | null>(null);
-
-  /**
-   * Initialize subscription to orchestrator metrics
-   */
-  const subscribe = useCallback(async () => {
     const client = getGatewayClient();
-    if (!client?.connected) {
-      setState(prev => ({
-        ...prev,
-        connectionStatus: 'error',
-        error: 'Gateway not connected',
-      }));
-      return;
-    }
+    if (!client?.connected) return;
 
     try {
-      setState(prev => ({ ...prev, connectionStatus: 'connecting' }));
+      setIsLoading(true);
+      setError(null);
 
-      // Subscribe to metrics via gateway method
-      const result = await client.request('orchestrator.metrics.subscribe', {
-        threadId: threadIdRef.current,
-      } as any);
+      // Get initial snapshot
+      const snapshot = await client.request('orchestrator.metrics.subscribe', {
+        threadId,
+      });
 
-      if (result && typeof result === 'object' && 'subscribed' in result) {
-        const subscribeResult = result as any;
-        const snapshot = subscribeResult.currentMetrics;
+      const metricsSnapshot = snapshot as OrchestratorMetricsState;
 
-        setState(prev => ({
-          ...prev,
-          threadId: snapshot.threadId,
-          currentMetrics: snapshot,
-          connectionStatus: 'connected',
-          error: undefined,
-          lastUpdated: Date.now(),
-        }));
+      setMetrics({
+        ...metricsSnapshot,
+        percentBudgetUsed: metricsSnapshot.budgetRemainingCents
+          ? Math.round(
+              ((metricsSnapshot.costCents / metricsSnapshot.budgetRemainingCents) * 100)
+            )
+          : 0,
+      });
 
-        // Request initial burn rate
-        fetchBurnRate(snapshot.threadId);
-
-        // Request checkpoint history
-        fetchCheckpointHistory(snapshot.threadId);
-
-        // Listen for real-time events
-        subscriptionRef.current = setupEventListeners();
-      }
+      setIsConnected(true);
     } catch (err) {
-      setState(prev => ({
-        ...prev,
-        connectionStatus: 'error',
-        error: err instanceof Error ? err.message : String(err),
-      }));
+      setError(err instanceof Error ? err.message : 'Failed to fetch metrics');
+      setIsConnected(false);
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
+  }, [threadId]);
 
-  /**
-   * Fetch burn rate from gateway
-   */
-  const fetchBurnRate = useCallback(async (tid: string) => {
+  // Fetch burn rate
+  const fetchBurnRate = useCallback(async () => {
+    if (!threadId) return;
+
     const client = getGatewayClient();
-    if (!client?.connected || !tid) return;
+    if (!client?.connected) return;
 
     try {
-      const result = await client.request('orchestrator.cost.burn_rate', {
-        threadId: tid,
-      } as any);
-
-      if (result && typeof result === 'object') {
-        const burnRate = result as OrchestratorCostBurnRate;
-        setState(prev => ({
-          ...prev,
-          burnRate,
-          lastUpdated: Date.now(),
-        }));
-      }
+      const rate = (await client.request('orchestrator.cost.burn_rate', {
+        threadId,
+      })) as CostBurnRate;
+      setCostBurnRate(rate);
     } catch (err) {
       console.debug('[metrics] Failed to fetch burn rate:', err);
     }
-  }, []);
+  }, [threadId]);
 
-  /**
-   * Fetch checkpoint history from gateway
-   */
-  const fetchCheckpointHistory = useCallback(async (tid: string) => {
+  // Subscribe to real-time events
+  useEffect(() => {
+    if (!threadId) return;
+
     const client = getGatewayClient();
-    if (!client?.connected || !tid) return;
+    if (!client?.connected) return;
 
-    try {
-      const result = await client.request('orchestrator.metrics.history', {
-        threadId: tid,
-        minutes: 60,
-        limit: maxCheckpoints,
-        offset: 0,
-      } as any);
+    // Initial fetch
+    fetchMetrics();
+    fetchBurnRate();
 
-      if (result && typeof result === 'object' && 'metrics' in result) {
-        const historyResult = result as any;
-        setState(prev => ({
+    // Subscribe to cost.updated events (real-time)
+    const handleCostUpdated = (event: { payload: any }) => {
+      const { costCents, budgetRemainingCents } = event.payload;
+      setMetrics((prev) => {
+        if (!prev) return prev;
+        return {
           ...prev,
-          recentCheckpoints: historyResult.metrics || [],
-          lastUpdated: Date.now(),
-        }));
-      }
-    } catch (err) {
-      console.debug('[metrics] Failed to fetch checkpoint history:', err);
-    }
-  }, [maxCheckpoints]);
-
-  /**
-   * Process incoming WebSocket event
-   */
-  const handleEvent = useCallback((event: OrchestratorEvent) => {
-    setState(prev => {
-      let updatedState = { ...prev };
-
-      switch (event.type) {
-        case 'state.changed': {
-          // Real-time state change - no debounce
-          const stateChangeEvent = event as OrchestratorStateChangeEvent;
-          updatedState.recentStateChanges = [
-            stateChangeEvent,
-            ...prev.recentStateChanges,
-          ].slice(0, maxStateChanges);
-
-          // Update current metrics
-          if (updatedState.currentMetrics && stateChangeEvent.threadId === prev.threadId) {
-            updatedState.currentMetrics = {
-              ...updatedState.currentMetrics,
-              currentNode: stateChangeEvent.to,
-              stepCount: stateChangeEvent.stepCount,
-            };
-          }
-
-          // Fetch updated burn rate
-          setTimeout(() => {
-            if (prev.threadId) fetchBurnRate(prev.threadId);
-          }, 100);
-          break;
-        }
-
-        case 'cost.updated': {
-          // Debounced cost update
-          const costEvent = event as OrchestratorCostUpdateEvent;
-          pendingCostUpdateRef.current = costEvent;
-
-          // Clear existing debounce timer
-          if (debounceTimerRef.current) {
-            clearTimeout(debounceTimerRef.current);
-          }
-
-          // Set new debounce timer
-          debounceTimerRef.current = setTimeout(() => {
-            if (pendingCostUpdateRef.current) {
-              setState(prevState => ({
-                ...prevState,
-                recentCostUpdates: [
-                  pendingCostUpdateRef.current!,
-                  ...prevState.recentCostUpdates,
-                ].slice(0, maxCostUpdates),
-                lastUpdated: Date.now(),
-              }));
-              pendingCostUpdateRef.current = null;
-            }
-          }, debounceMs);
-
-          break;
-        }
-
-        case 'checkpoint.saved': {
-          // Add checkpoint to recent list via periodic polling
-          // This event just signals that a checkpoint was saved
-          break;
-        }
-
-        case 'agent.active': {
-          // Track active agents
-          const agentEvent = event as any;
-          const newActiveAgents = new Map(prev.activeAgents);
-          newActiveAgents.set(agentEvent.agent, {
-            agent: agentEvent.agent,
-            task: agentEvent.task,
-            timestamp: agentEvent.timestamp,
-          });
-
-          // Auto-expire agents after 30 seconds of inactivity
-          const now = Date.now();
-          for (const [agent, data] of newActiveAgents.entries()) {
-            if (now - data.timestamp > 30000) {
-              newActiveAgents.delete(agent);
-            }
-          }
-
-          updatedState.activeAgents = newActiveAgents;
-          break;
-        }
-      }
-
-      return {
-        ...updatedState,
-        lastUpdated: Date.now(),
-      };
-    });
-  }, [maxStateChanges, maxCostUpdates, debounceMs, fetchBurnRate]);
-
-  /**
-   * Setup WebSocket event listeners
-   */
-  const setupEventListeners = useCallback((): string => {
-    const client = getGatewayClient();
-    if (!client) return '';
-
-    // Set up listeners for each event type
-    const handlers = {
-      'orchestrator.state.changed': handleEvent,
-      'orchestrator.cost.updated': handleEvent,
-      'orchestrator.agent.active': handleEvent,
-      'orchestrator.checkpoint.saved': handleEvent,
+          costCents,
+          budgetRemainingCents,
+          percentBudgetUsed:
+            budgetRemainingCents > 0
+              ? Math.round((costCents / budgetRemainingCents) * 100)
+              : 0,
+        };
+      });
     };
 
-    for (const [event, handler] of Object.entries(handlers)) {
-      client.on(event, handler as any);
-    }
+    // Subscribe to state transitions
+    const handleStateChanged = (event: { payload: any }) => {
+      const { from, to, timestamp } = event.payload;
+      setMetrics((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          currentNode: to,
+          stateTransitions: [
+            ...prev.stateTransitions,
+            { from, to, timestamp },
+          ].slice(-20), // Keep last 20
+        };
+      });
+    };
 
-    // Return unsubscribe function ID for cleanup
-    return 'orchestrator-metrics-listeners';
-  }, [handleEvent]);
+    // Subscribe to agent activity
+    const handleAgentActive = (event: { payload: any }) => {
+      const { agent, task } = event.payload;
+      setMetrics((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          agentActivityLog: [
+            ...prev.agentActivityLog,
+            {
+              agent,
+              task,
+              startedAt: Date.now(),
+            },
+          ].slice(-10), // Keep last 10
+        };
+      });
+    };
 
-  /**
-   * Cleanup on unmount
-   */
-  useEffect(() => {
-    return () => {
-      // Clear debounce timer
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
+    // Subscribe to checkpoint saves
+    const handleCheckpointSaved = () => {
+      setMetrics((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          checkpointCount: prev.checkpointCount + 1,
+        };
+      });
+    };
 
-      // Remove event listeners
-      const client = getGatewayClient();
-      if (client && subscriptionRef.current) {
-        client.off('orchestrator.state.changed', handleEvent as any);
-        client.off('orchestrator.cost.updated', handleEvent as any);
-        client.off('orchestrator.agent.active', handleEvent as any);
-        client.off('orchestrator.checkpoint.saved', handleEvent as any);
+    client.on('orchestrator.cost.updated', handleCostUpdated);
+    client.on('orchestrator.state.changed', handleStateChanged);
+    client.on('orchestrator.agent.active', handleAgentActive);
+    client.on('orchestrator.checkpoint.saved', handleCheckpointSaved);
+
+    // Periodically update burn rate (every 30s)
+    updateTimerRef.current = setInterval(fetchBurnRate, 30_000);
+
+    const cleanup = () => {
+      client.off('orchestrator.cost.updated', handleCostUpdated);
+      client.off('orchestrator.state.changed', handleStateChanged);
+      client.off('orchestrator.agent.active', handleAgentActive);
+      client.off('orchestrator.checkpoint.saved', handleCheckpointSaved);
+
+      if (updateTimerRef.current) {
+        clearInterval(updateTimerRef.current);
       }
     };
-  }, [handleEvent]);
 
-  /**
-   * Auto-subscribe on mount and when threadId changes
-   */
-  useEffect(() => {
-    threadIdRef.current = optionalThreadId;
+    return cleanup;
+  }, [threadId, fetchMetrics, fetchBurnRate]);
 
-    if (!autoSubscribe) return;
-
-    const client = getGatewayClient();
-    if (!client?.connected) {
-      setState(prev => ({
-        ...prev,
-        connectionStatus: 'error',
-        error: 'Gateway not connected',
-      }));
-      return;
-    }
-
-    subscribe();
-
-    // Periodically refresh burn rate and checkpoint history
-    const refreshInterval = setInterval(() => {
-      if (state.threadId) {
-        fetchBurnRate(state.threadId);
-        fetchCheckpointHistory(state.threadId);
-      }
-    }, 5000); // Every 5 seconds
-
-    return () => clearInterval(refreshInterval);
-  }, [autoSubscribe, subscribe, fetchBurnRate, fetchCheckpointHistory, state.threadId]);
-
-  return state;
-}
-
-/**
- * Hook to manually control orchestrator subscription
- */
-export function useOrchestratorMetricsController(
-  state: OrchestratorMetricsState
-) {
-  const client = getGatewayClient();
-
-  return useMemo(
-    () => ({
-      /**
-       * Manually fetch latest burn rate
-       */
-      refreshBurnRate: async () => {
-        if (!state.threadId || !client?.connected) return;
-        try {
-          const result = await client.request('orchestrator.cost.burn_rate', {
-            threadId: state.threadId,
-          } as any);
-          return result as OrchestratorCostBurnRate;
-        } catch (err) {
-          console.debug('[metrics-controller] Failed to refresh burn rate:', err);
-        }
-      },
-
-      /**
-       * Manually fetch checkpoint history with custom params
-       */
-      fetchCheckpointHistory: async (minutes: number, limit: number) => {
-        if (!state.threadId || !client?.connected) return;
-        try {
-          const result = await client.request('orchestrator.metrics.history', {
-            threadId: state.threadId,
-            minutes,
-            limit,
-            offset: 0,
-          } as any);
-          return (result as any)?.metrics as OrchestratorCheckpointSnapshot[];
-        } catch (err) {
-          console.debug('[metrics-controller] Failed to fetch history:', err);
-        }
-      },
-
-      /**
-       * Re-subscribe to a different thread
-       */
-      switchThread: async (newThreadId: string) => {
-        if (!client?.connected) return;
-        try {
-          const result = await client.request('orchestrator.metrics.subscribe', {
-            threadId: newThreadId,
-          } as any);
-          return (result as any)?.currentMetrics as OrchestratorMetricsSnapshot;
-        } catch (err) {
-          console.debug('[metrics-controller] Failed to switch thread:', err);
-        }
-      },
-    }),
-    [state.threadId, client]
-  );
+  return {
+    metrics,
+    costBurnRate,
+    isConnected,
+    isLoading,
+    error,
+    stateTransitions: metrics?.stateTransitions ?? [],
+  };
 }
