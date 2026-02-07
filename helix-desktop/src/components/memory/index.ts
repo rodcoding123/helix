@@ -15,3 +15,9 @@ export { MemoryBrowser } from './MemoryBrowser';
 // Phase G2: Memory file browser with semantic search
 export { MemoryFileBrowser } from './MemoryFileBrowser';
 export { SemanticSearch } from './SemanticSearch';
+
+// Phase G3: Synthesis monitoring and templates
+export { SynthesisMonitoringDashboard } from './SynthesisMonitoringDashboard';
+export { SynthesisJobDetailModal } from './SynthesisJobDetailModal';
+export type { SynthesisJob } from './SynthesisJobDetailModal';
+export { ManualSynthesisTrigger } from './ManualSynthesisTrigger';
