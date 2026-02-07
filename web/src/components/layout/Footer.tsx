@@ -157,15 +157,7 @@ export function Footer() {
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <p className="text-sm text-text-tertiary">
               &copy; {currentYear} Helix. Created with{' '}
-              <Heart className="inline h-3 w-3 text-danger" /> by{' '}
-              <a
-                href="https://github.com/RodrigoSdeCarvalho"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-helix-400 hover:text-helix-300"
-              >
-                Rodrigo Specter
-              </a>
+              <Heart className="inline h-3 w-3 text-danger" /> by Rodrigo Specter
             </p>
             <p className="text-xs text-text-tertiary italic">The first AI built to live.</p>
           </div>
