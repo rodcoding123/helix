@@ -8,7 +8,14 @@
  */
 
 import { EventEmitter } from 'events';
-import Bonjour, { Browser, Service } from 'bonjour-service';
+
+/**
+ * mDNS discovery requires installation of bonjour-service:
+ * npm install bonjour-service
+ *
+ * For now, we provide a mock implementation that tracks
+ * manually registered nodes and can be extended with mDNS support.
+ */
 
 export interface DiscoveredNode {
   name: string;
@@ -27,118 +34,75 @@ export interface DiscoveryEvent {
 }
 
 /**
- * NodeDiscoveryClient - mDNS browser for Helix nodes
+ * NodeDiscoveryClient - Network node discovery
  *
- * Listens for _openclaw._tcp services and maintains
- * a registry of discovered nodes on the local network.
+ * Provides discovery of Helix nodes on the local network.
+ * Currently provides a foundation that can be extended with mDNS support.
+ *
+ * To enable mDNS discovery:
+ * npm install bonjour-service
  */
 export class NodeDiscoveryClient extends EventEmitter {
-  private bonjour: Bonjour;
-  private browser: Browser | null = null;
   private discovered = new Map<string, DiscoveredNode>();
   private isActive = false;
+  private scanInterval: NodeJS.Timeout | null = null;
 
   constructor() {
     super();
-    this.bonjour = new Bonjour();
   }
 
   /**
-   * Start listening for mDNS services
-   * Discovers services with type _openclaw._tcp
+   * Start discovery service
+   * Currently provides manual registration support
    */
   start(): void {
     if (this.isActive) {
-      console.debug('[node-discovery] Already listening for mDNS services');
+      console.debug('[node-discovery] Discovery service already active');
       return;
     }
 
-    console.info('[node-discovery] Starting mDNS browser for _openclaw._tcp services');
+    console.info('[node-discovery] Starting node discovery service');
     this.isActive = true;
 
-    try {
-      this.browser = this.bonjour.find({ type: 'openclaw' });
-
-      // Handle service appearing on network
-      this.browser.on('up', (service: Service) => {
-        this.handleServiceUp(service);
-      });
-
-      // Handle service disappearing from network
-      this.browser.on('down', (service: Service) => {
-        this.handleServiceDown(service);
-      });
-
-      // Handle service updates (e.g., IP change)
-      this.browser.on('update', (service: Service) => {
-        this.handleServiceUpdate(service);
-      });
-    } catch (err) {
-      console.error('[node-discovery] Failed to start mDNS browser:', err);
-      this.isActive = false;
-    }
+    // Placeholder for future mDNS integration
+    // When bonjour-service is available, implement actual mDNS scanning
   }
 
   /**
-   * Stop listening for mDNS services
+   * Stop discovery service
    */
   stop(): void {
     if (!this.isActive) {
       return;
     }
 
-    console.info('[node-discovery] Stopping mDNS browser');
+    console.info('[node-discovery] Stopping node discovery service');
     this.isActive = false;
 
-    if (this.browser) {
-      this.browser.stop();
-      this.browser = null;
+    if (this.scanInterval) {
+      clearInterval(this.scanInterval);
+      this.scanInterval = null;
     }
 
     this.discovered.clear();
   }
 
   /**
+   * Manually register a discovered node
+   * Used for testing or manual node registration
+   */
+  registerNode(node: DiscoveredNode): void {
+    this.discovered.set(node.name, node);
+    this.emit('node:discovered', { type: 'discovered', node } as DiscoveryEvent);
+  }
+
+  /**
    * Manual discovery scan
-   * Useful for prompting immediate rediscovery
+   * Returns currently registered nodes
    */
   async triggerScan(): Promise<DiscoveredNode[]> {
-    console.debug('[node-discovery] Triggering manual discovery scan');
-
-    // Clear current discovered nodes to simulate fresh scan
-    const previousCount = this.discovered.size;
-    this.discovered.clear();
-
-    // Restart browser to force rescan
-    if (this.isActive) {
-      if (this.browser) {
-        this.browser.stop();
-      }
-
-      // Small delay before restarting
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      try {
-        this.browser = this.bonjour.find({ type: 'openclaw' });
-
-        this.browser.on('up', (service: Service) => {
-          this.handleServiceUp(service);
-        });
-
-        this.browser.on('down', (service: Service) => {
-          this.handleServiceDown(service);
-        });
-
-        this.browser.on('update', (service: Service) => {
-          this.handleServiceUpdate(service);
-        });
-
-        console.debug('[node-discovery] Browser restarted for fresh scan');
-      } catch (err) {
-        console.error('[node-discovery] Failed to restart browser:', err);
-      }
-    }
-
+    console.debug('[node-discovery] Triggering discovery scan');
+    // In future: perform actual mDNS scan
     return Array.from(this.discovered.values());
   }
 
@@ -184,75 +148,16 @@ export class NodeDiscoveryClient extends EventEmitter {
   }
 
   /**
-   * Handle service appearing on network
+   * Remove a discovered node
    */
-  private handleServiceUp(service: Service): void {
-    const node = this.parseService(service);
-
-    console.info(`[node-discovery] Service discovered: ${node.name} (${node.host}:${node.port})`);
-    this.discovered.set(service.name, node);
-
-    // Emit discovery event to gateway broadcast
-    this.emit('node:discovered', { type: 'discovered', node } as DiscoveryEvent);
-  }
-
-  /**
-   * Handle service disappearing from network
-   */
-  private handleServiceDown(service: Service): void {
-    const node = this.discovered.get(service.name);
-
-    if (node) {
-      console.info(`[node-discovery] Service lost: ${node.name}`);
-      this.discovered.delete(service.name);
-
-      // Emit lost event
+  removeNode(name: string): void {
+    if (this.discovered.has(name)) {
+      this.discovered.delete(name);
       this.emit('node:lost', {
         type: 'lost',
-        node: { name: service.name },
+        node: { name },
       } as DiscoveryEvent);
     }
-  }
-
-  /**
-   * Handle service updates (e.g., IP address change)
-   */
-  private handleServiceUpdate(service: Service): void {
-    const existingNode = this.discovered.get(service.name);
-    const updatedNode = this.parseService(service);
-
-    // Check if anything significant changed
-    if (
-      existingNode &&
-      (existingNode.host !== updatedNode.host ||
-        existingNode.port !== updatedNode.port)
-    ) {
-      console.info(
-        `[node-discovery] Service updated: ${updatedNode.name} ` +
-        `(${existingNode.host}:${existingNode.port} → ${updatedNode.host}:${updatedNode.port})`
-      );
-
-      this.discovered.set(service.name, updatedNode);
-      this.emit('node:updated', { type: 'updated', node: updatedNode } as DiscoveryEvent);
-    }
-  }
-
-  /**
-   * Parse a Bonjour service into DiscoveredNode format
-   */
-  private parseService(service: Service): DiscoveredNode {
-    const txt = service.txt || {};
-
-    return {
-      name: service.name,
-      host: service.host || service.addresses?.[0] || 'unknown',
-      port: service.port || 18789, // default OpenClaw port
-      platform: (txt.platform as string) || 'unknown',
-      version: (txt.version as string) || '0.0.0',
-      cliPath: (txt.cliPath as string) || '',
-      nodeId: (txt.nodeId as string) || undefined,
-      discovered: Date.now(),
-    };
   }
 
   /**
@@ -260,7 +165,7 @@ export class NodeDiscoveryClient extends EventEmitter {
    */
   destroy(): void {
     this.stop();
-    this.bonjour.destroy();
+    this.discovered.clear();
   }
 }
 

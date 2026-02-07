@@ -1,14 +1,16 @@
 /**
  * Provider Registry - Central management of AI provider clients
- * Supports: Anthropic, Google Gemini, Deepgram, ElevenLabs
+ * Supports: Anthropic, Google Gemini, DeepSeek, Deepgram, ElevenLabs
  */
 
 import Anthropic from '@anthropic-ai/sdk';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { DeepSeekClient } from './deepseek.js';
 
 // Lazy-loaded provider clients
 let anthropicClient: Anthropic | null = null;
 let geminiClient: GoogleGenerativeAI | null = null;
+let deepseekClient: DeepSeekClient | null = null;
 
 /**
  * Get or initialize Anthropic client
@@ -36,6 +38,16 @@ export function getGeminiClient(): GoogleGenerativeAI {
     geminiClient = new GoogleGenerativeAI(apiKey);
   }
   return geminiClient;
+}
+
+/**
+ * Get or initialize DeepSeek client
+ */
+export function getDeepSeekClient(): DeepSeekClient {
+  if (!deepseekClient) {
+    deepseekClient = new DeepSeekClient();
+  }
+  return deepseekClient;
 }
 
 /**

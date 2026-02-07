@@ -14,7 +14,9 @@
       "WebFetch(domain:www.volcengine.com)",
       "Bash(xcodegen generate:*)",
       "Bash(xcodebuild test:*)",
-      "Bash(git update-index:*)"
+      "Bash(git update-index:*)",
+      "Bash(ls:*)",
+      "Bash(wc:*)"
     ]
   },
   "contextInclude": ["c:/Users/Specter/Desktop/Helix"]

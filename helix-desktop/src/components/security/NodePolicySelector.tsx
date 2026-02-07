@@ -8,7 +8,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { getClient } from '../../lib/gateway-client';
+import { getGatewayClient } from '../../lib/gateway-client';
 
 export interface NodePolicySelectorProps {
   existingNodeIds: string[];
@@ -31,7 +31,7 @@ export function NodePolicySelector({ existingNodeIds, onAddNode, disabled }: Nod
   const loadAvailableNodes = useCallback(async () => {
     setLoading(true);
     try {
-      const client = getClient();
+      const client = getGatewayClient();
       if (!client?.connected) {
         setAvailableNodes([]);
         return;
@@ -40,8 +40,8 @@ export function NodePolicySelector({ existingNodeIds, onAddNode, disabled }: Nod
       // Request list of paired devices/nodes
       const result = await client.request('device.pair.list', {});
 
-      if (result?.paired) {
-        const nodes: PairedNode[] = result.paired.map((device: any) => ({
+      if (result && typeof result === 'object' && 'paired' in result) {
+        const nodes: PairedNode[] = (result as any).paired.map((device: any) => ({
           id: device.id,
           displayName: device.displayName,
           platform: device.platform,

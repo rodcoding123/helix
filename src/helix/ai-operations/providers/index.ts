@@ -5,6 +5,7 @@
 export {
   getAnthropicClient,
   getGeminiClient,
+  getDeepSeekClient,
   PROVIDER_PRICING,
   calculateProviderCost,
   isProviderAvailable,
@@ -25,6 +26,15 @@ export {
   type GeminiVideoAnalysisOptions,
   type GeminiVideoAnalysisResult,
 } from './gemini.js';
+
+export {
+  executeWithDeepSeek,
+  simpleRequest as deepSeekSimpleRequest,
+  conversation as deepSeekConversation,
+  DeepSeekClient,
+  type ExecuteWithDeepSeekOptions,
+  type ExecuteWithDeepSeekResult,
+} from './deepseek.js';
 
 export {
   getDeepgramClient,
