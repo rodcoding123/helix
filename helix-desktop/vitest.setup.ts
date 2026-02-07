@@ -1,4 +1,8 @@
 import '@testing-library/jest-dom/vitest';
+import { WebSocket as MockWebSocket } from 'mock-socket';
+
+// Make mock-socket available as WebSocket for tests
+(global as any).WebSocket = MockWebSocket;
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {

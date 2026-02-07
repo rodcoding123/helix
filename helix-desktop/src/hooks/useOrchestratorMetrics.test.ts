@@ -11,7 +11,7 @@ import { useOrchestratorMetrics, useOrchestratorMetricsController } from './useO
 
 // Mock the gateway client
 vi.mock('../lib/gateway-client', () => ({
-  getClient: vi.fn(() => ({
+  getGatewayClient: vi.fn(() => ({
     connected: true,
     request: vi.fn(async (method: string) => {
       if (method === 'orchestrator.metrics.subscribe') {

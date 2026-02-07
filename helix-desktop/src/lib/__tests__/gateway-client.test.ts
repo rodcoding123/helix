@@ -43,7 +43,23 @@ describe('GatewayClient', () => {
   describe('Connection', () => {
     it('should connect to gateway', async () => {
       const client = new GatewayClient({ url: 'ws://localhost:8765' });
-      await client.connect();
+      client.start();
+
+      // Wait for connection to establish
+      await new Promise((resolve) => {
+        const maxAttempts = 20;
+        let attempts = 0;
+        const checkConnection = () => {
+          if (client.connected || attempts >= maxAttempts) {
+            resolve(null);
+          } else {
+            attempts++;
+            setTimeout(checkConnection, 50);
+          }
+        };
+        checkConnection();
+      });
+
       expect(client.connected).toBe(true);
       client.disconnect();
     });
@@ -55,26 +71,75 @@ describe('GatewayClient', () => {
         emitted = true;
       });
 
-      await client.connect();
+      client.start();
+
+      // Wait for connected event
+      await new Promise((resolve) => {
+        const maxAttempts = 20;
+        let attempts = 0;
+        const check = () => {
+          if (emitted || attempts >= maxAttempts) {
+            resolve(null);
+          } else {
+            attempts++;
+            setTimeout(check, 50);
+          }
+        };
+        check();
+      });
+
       expect(emitted).toBe(true);
       client.disconnect();
     });
 
     it('should disconnect cleanly', async () => {
       const client = new GatewayClient({ url: 'ws://localhost:8765' });
-      await client.connect();
+      client.start();
+
+      // Wait for connection
+      await new Promise((resolve) => {
+        const maxAttempts = 20;
+        let attempts = 0;
+        const check = () => {
+          if (client.connected || attempts >= maxAttempts) {
+            resolve(null);
+          } else {
+            attempts++;
+            setTimeout(check, 50);
+          }
+        };
+        check();
+      });
+
       expect(client.connected).toBe(true);
 
       client.disconnect();
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       expect(client.connected).toBe(false);
     });
   });
 
   describe('Gateway Methods', () => {
+    const waitForConnection = async (client: GatewayClient) => {
+      return new Promise((resolve) => {
+        const maxAttempts = 20;
+        let attempts = 0;
+        const check = () => {
+          if (client.connected || attempts >= maxAttempts) {
+            resolve(null);
+          } else {
+            attempts++;
+            setTimeout(check, 50);
+          }
+        };
+        check();
+      });
+    };
+
     it('should call health check method', async () => {
       const client = new GatewayClient({ url: 'ws://localhost:8765' });
-      await client.connect();
+      client.start();
+      await waitForConnection(client);
 
       const result = await client.request('health', {});
       expect((result as any).status).toBe('ok');
@@ -85,7 +150,8 @@ describe('GatewayClient', () => {
 
     it('should call config.get method', async () => {
       const client = new GatewayClient({ url: 'ws://localhost:8765' });
-      await client.connect();
+      client.start();
+      await waitForConnection(client);
 
       const result = await client.request('config.get', {});
       expect((result as any).config).toBeDefined();
@@ -95,7 +161,8 @@ describe('GatewayClient', () => {
 
     it('should call device.pair.list method', async () => {
       const client = new GatewayClient({ url: 'ws://localhost:8765' });
-      await client.connect();
+      client.start();
+      await waitForConnection(client);
 
       const result = await client.request('device.pair.list', {});
       expect((result as any).paired).toBeDefined();
@@ -106,7 +173,8 @@ describe('GatewayClient', () => {
 
     it('should call node.list method', async () => {
       const client = new GatewayClient({ url: 'ws://localhost:8765' });
-      await client.connect();
+      client.start();
+      await waitForConnection(client);
 
       const result = await client.request('node.list', {});
       expect((result as any).nodes).toBeDefined();
@@ -117,7 +185,8 @@ describe('GatewayClient', () => {
 
     it('should call hooks.list method', async () => {
       const client = new GatewayClient({ url: 'ws://localhost:8765' });
-      await client.connect();
+      client.start();
+      await waitForConnection(client);
 
       const result = await client.request('hooks.list', {});
       expect((result as any).hooks).toBeDefined();
@@ -127,9 +196,26 @@ describe('GatewayClient', () => {
   });
 
   describe('Events', () => {
+    const waitForConnection = async (client: GatewayClient) => {
+      return new Promise((resolve) => {
+        const maxAttempts = 20;
+        let attempts = 0;
+        const check = () => {
+          if (client.connected || attempts >= maxAttempts) {
+            resolve(null);
+          } else {
+            attempts++;
+            setTimeout(check, 50);
+          }
+        };
+        check();
+      });
+    };
+
     it('should register and trigger event listener', async () => {
       const client = new GatewayClient({ url: 'ws://localhost:8765' });
-      await client.connect();
+      client.start();
+      await waitForConnection(client);
 
       let eventReceived = false;
       client.on('test-event', () => {
@@ -146,7 +232,8 @@ describe('GatewayClient', () => {
 
     it('should remove event listener', async () => {
       const client = new GatewayClient({ url: 'ws://localhost:8765' });
-      await client.connect();
+      client.start();
+      await waitForConnection(client);
 
       let eventReceived = false;
       const handler = () => {
@@ -166,7 +253,8 @@ describe('GatewayClient', () => {
 
     it('should handle exec approval events', async () => {
       const client = new GatewayClient({ url: 'ws://localhost:8765' });
-      await client.connect();
+      client.start();
+      await waitForConnection(client);
 
       let approvalReceived = false;
       client.on('exec.approval.requested', () => {
@@ -186,11 +274,28 @@ describe('GatewayClient', () => {
   });
 
   describe('Integration', () => {
+    const waitForConnection = async (client: GatewayClient) => {
+      return new Promise((resolve) => {
+        const maxAttempts = 20;
+        let attempts = 0;
+        const check = () => {
+          if (client.connected || attempts >= maxAttempts) {
+            resolve(null);
+          } else {
+            attempts++;
+            setTimeout(check, 50);
+          }
+        };
+        check();
+      });
+    };
+
     it('should handle complete workflow: connect, request, disconnect', async () => {
       const client = new GatewayClient({ url: 'ws://localhost:8765' });
 
       // Step 1: Connect
-      await client.connect();
+      client.start();
+      await waitForConnection(client);
       expect(client.connected).toBe(true);
 
       // Step 2: Make a request
@@ -209,7 +314,8 @@ describe('GatewayClient', () => {
         token: 'custom-token-123',
       });
 
-      await client.connect();
+      client.start();
+      await waitForConnection(client);
       expect(client.connected).toBe(true);
 
       const result = await client.request('health', {});
@@ -220,7 +326,8 @@ describe('GatewayClient', () => {
 
     it('should support multiple gateway methods in sequence', async () => {
       const client = new GatewayClient({ url: 'ws://localhost:8765' });
-      await client.connect();
+      client.start();
+      await waitForConnection(client);
 
       const results = await Promise.all([
         client.request('health', {}),
