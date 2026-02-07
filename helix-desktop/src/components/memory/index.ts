@@ -21,3 +21,4 @@ export { SynthesisMonitoringDashboard } from './SynthesisMonitoringDashboard';
 export { SynthesisJobDetailModal } from './SynthesisJobDetailModal';
 export type { SynthesisJob } from './SynthesisJobDetailModal';
 export { ManualSynthesisTrigger } from './ManualSynthesisTrigger';
+export { MemorySearchPanel } from './MemorySearchPanel';

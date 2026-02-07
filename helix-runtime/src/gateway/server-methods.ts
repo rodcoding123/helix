@@ -4,6 +4,7 @@ import { agentsHandlers } from "./server-methods/agents.js";
 import { authProfilesHandlers } from "./server-methods/auth-profiles.js";
 import { browserHandlers } from "./server-methods/browser.js";
 import { channelsHandlers } from "./server-methods/channels.js";
+import { channelAccountsHandlers } from "./server-methods/channel-accounts.js";
 import { chatHandlers } from "./server-methods/chat.js";
 import { compositeSkillHandlers } from "./server-methods/composite-skills.js";
 import { configHandlers } from "./server-methods/config.js";
@@ -229,6 +230,7 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...voicewakeHandlers,
   ...healthHandlers,
   ...channelsHandlers,
+  ...channelAccountsHandlers,
   ...chatHandlers,
   ...compositeSkillHandlers,
   ...cronHandlers,

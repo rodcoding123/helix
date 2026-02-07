@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   initializeDeepLinking,
+  cleanupDeepLinking,
   registerChatHandler,
   registerDeviceHandler,
   registerApprovalHandler,
@@ -55,5 +56,9 @@ export function useDeepLink() {
     registerSynthesisHandler(async (synthesisType) => {
       navigate('/memory/synthesis', { state: { synthesisType } });
     });
+
+    return () => {
+      cleanupDeepLinking();
+    };
   }, [navigate]);
 }

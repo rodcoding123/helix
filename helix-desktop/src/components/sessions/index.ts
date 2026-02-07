@@ -10,3 +10,5 @@ export { ConfigPreview } from './ConfigPreview';
 export { ContextWindowVisualizer } from './ContextWindowVisualizer';
 export { SessionDetailView } from './SessionDetailView';
 export { SessionTemplatesManager } from './SessionTemplatesManager';
+export { IdentityLinksEditor } from './IdentityLinksEditor';
+export { MessageTimeline } from './MessageTimeline';

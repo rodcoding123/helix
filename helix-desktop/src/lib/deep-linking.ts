@@ -2,8 +2,9 @@
  * Deep Linking System for Helix Desktop
  * Implements helix:// URI scheme handler
  */
-// import { appWindow } from '@tauri-apps/api/window';
-// import { writeText } from '@tauri-apps/plugin-clipboard-manager';
+import { isTauri } from './tauri-compat';
+
+type UnlistenFn = () => void;
 
 export interface DeepLink {
   action: string;
@@ -151,31 +152,66 @@ export function registerSynthesisHandler(
   }, 100);
 }
 
+let unlistenDeepLink: UnlistenFn | null = null;
+
 export async function initializeDeepLinking(): Promise<void> {
   try {
     await registerURIScheme();
-    // Deep linking requires Tauri API integration
-    // const unlisten = await appWindow.listen<string>('deep-link', async (event: any) => {
-    //   const url = event.payload;
-    //   console.log('[deep-link] Received:', url);
-    //   const link = parseDeepLink(url);
-    //   if (link) {
-    //     await handleDeepLink(link);
-    //   }
-    // });
-    console.log('[deep-link] Initialized (listening disabled in test mode)');
-    return; // return unlisten;
+
+    if (isTauri) {
+      // Dynamic import Tauri APIs to avoid bundling issues in non-Tauri environments
+      const { listen } = await import('@tauri-apps/api/event');
+      const { invoke } = await import('@tauri-apps/api/core');
+
+      // Listen for deep-link events from the Rust backend
+      unlistenDeepLink = await listen<string>('deep-link', async (event) => {
+        const url = event.payload;
+        console.log('[deep-link] Received:', url);
+        const link = parseDeepLink(url);
+        if (link) {
+          await handleDeepLink(link);
+        }
+      });
+
+      // Check for cold-start deep link (app launched via helix:// URL)
+      try {
+        const launchUrl = await invoke<string | null>('get_launch_deep_link');
+        if (launchUrl) {
+          console.log('[deep-link] Cold start URL:', launchUrl);
+          const link = parseDeepLink(launchUrl);
+          if (link) {
+            await handleDeepLink(link);
+          }
+        }
+      } catch {
+        // get_launch_deep_link may not be available in dev mode
+      }
+
+      console.log('[deep-link] Initialized with Tauri event listener');
+    } else {
+      console.log('[deep-link] Initialized (non-Tauri mode, no listener)');
+    }
   } catch (err) {
     console.error('[deep-link] Initialization error:', err);
   }
 }
 
+export function cleanupDeepLinking(): void {
+  if (unlistenDeepLink) {
+    unlistenDeepLink();
+    unlistenDeepLink = null;
+  }
+}
+
 export async function handleDeepLink(link: DeepLink): Promise<void> {
   console.log('[deep-link] Handling:', link.action, link.path);
-  try {
-    // await appWindow.setFocus();
-  } catch {
-    // Window focus may not be available
+  if (isTauri) {
+    try {
+      const { getCurrentWindow } = await import('@tauri-apps/api/window');
+      await getCurrentWindow().setFocus();
+    } catch {
+      // Window focus may not be available
+    }
   }
   const success = await registry.handle(link);
   if (!success) {
@@ -222,9 +258,11 @@ export function generateSettingsLink(section: string, subsection?: string): stri
 
 export async function copyDeepLinkToClipboard(uri: string): Promise<void> {
   try {
-    // Clipboard API requires Tauri plugin integration
-    // await writeText(uri);
-    console.log('[deep-link] Copy to clipboard:', uri);
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      await navigator.clipboard.writeText(uri);
+    } else {
+      console.log('[deep-link] Clipboard not available, URI:', uri);
+    }
   } catch (err) {
     console.error('[deep-link] Clipboard error:', err);
     throw err;
