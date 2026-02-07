@@ -27,6 +27,20 @@ import {
   AgentsSetDefaultResultSchema,
   type AgentWaitParams,
   AgentWaitParamsSchema,
+  type AuthProfilesListParams,
+  AuthProfilesListParamsSchema,
+  type AuthProfilesAddParams,
+  AuthProfilesAddParamsSchema,
+  type AuthProfilesDeleteParams,
+  AuthProfilesDeleteParamsSchema,
+  type AuthProfilesCheckParams,
+  AuthProfilesCheckParamsSchema,
+  type AuthProfilesReorderParams,
+  AuthProfilesReorderParamsSchema,
+  type OAuthStartParams,
+  OAuthStartParamsSchema,
+  type OAuthStatusParams,
+  OAuthStatusParamsSchema,
   type ChannelsLogoutParams,
   ChannelsLogoutParamsSchema,
   type ChannelsStatusParams,
@@ -226,6 +240,23 @@ export const validateAgentsDeleteParams = ajv.compile<AgentsDeleteParams>(Agents
 export const validateAgentsSetDefaultParams = ajv.compile<AgentsSetDefaultParams>(
   AgentsSetDefaultParamsSchema,
 );
+export const validateAuthProfilesListParams = ajv.compile<AuthProfilesListParams>(
+  AuthProfilesListParamsSchema,
+);
+export const validateAuthProfilesAddParams = ajv.compile<AuthProfilesAddParams>(
+  AuthProfilesAddParamsSchema,
+);
+export const validateAuthProfilesDeleteParams = ajv.compile<AuthProfilesDeleteParams>(
+  AuthProfilesDeleteParamsSchema,
+);
+export const validateAuthProfilesCheckParams = ajv.compile<AuthProfilesCheckParams>(
+  AuthProfilesCheckParamsSchema,
+);
+export const validateAuthProfilesReorderParams = ajv.compile<AuthProfilesReorderParams>(
+  AuthProfilesReorderParamsSchema,
+);
+export const validateOAuthStartParams = ajv.compile<OAuthStartParams>(OAuthStartParamsSchema);
+export const validateOAuthStatusParams = ajv.compile<OAuthStatusParams>(OAuthStatusParamsSchema);
 export const validateNodePairRequestParams = ajv.compile<NodePairRequestParams>(
   NodePairRequestParamsSchema,
 );
@@ -427,6 +458,13 @@ export {
   AgentSummarySchema,
   AgentsListParamsSchema,
   AgentsListResultSchema,
+  AuthProfilesListParamsSchema,
+  AuthProfilesAddParamsSchema,
+  AuthProfilesDeleteParamsSchema,
+  AuthProfilesCheckParamsSchema,
+  AuthProfilesReorderParamsSchema,
+  OAuthStartParamsSchema,
+  OAuthStatusParamsSchema,
   ModelsListParamsSchema,
   SkillsStatusParamsSchema,
   SkillsInstallParamsSchema,

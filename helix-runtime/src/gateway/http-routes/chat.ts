@@ -21,7 +21,6 @@
  */
 
 import { type IncomingMessage, type ServerResponse } from 'node:http';
-import Anthropic from '@anthropic-ai/sdk';
 import { AIOperationRouter } from '../../helix/ai-operations/router.js';
 import { CostTracker } from '../../helix/ai-operations/cost-tracker.js';
 import { ApprovalGate } from '../../helix/ai-operations/approval-gate.js';
@@ -32,6 +31,14 @@ import { thanosHandler, isThanosModeTrigger } from '../../helix/thanos-mode.js';
 import { synthesisEngine } from '../../../src/psychology/synthesis-engine.js';
 import { memoryScheduler } from '../../../src/psychology/memory-scheduler.js';
 import { hashChain } from '../../helix/hash-chain.js';
+import {
+  executeWithAnthropic,
+  executeWithDeepSeek,
+  analyzeVideoWithGemini,
+  calculateProviderCost,
+  type ExecuteWithDeepSeekOptions,
+  type ExecuteWithDeepSeekResult,
+} from '../../../src/helix/ai-operations/providers/index.js';
 
 const router = new AIOperationRouter();
 const costTracker = new CostTracker();
@@ -423,31 +430,63 @@ async function handleChatMessage(
       // For now, continue with execution
     }
 
-    // Get the model client based on routing decision
-    const modelToUse = getModelClientForOperation(routingDecision.model || '');
+    // Execute with routed provider
+    const executionStartTime = Date.now();
 
-    if (!modelToUse) {
-      throw new Error(`Model client not available: ${routingDecision.model}`);
+    let assistantMessage = '';
+    let outputTokens = 0;
+    let costUsd = 0;
+
+    // Call the appropriate provider based on routing decision
+    const selectedModel = routingDecision.model || 'claude-3-5-sonnet-20241022';
+
+    try {
+      if (selectedModel.startsWith('deepseek')) {
+        // Use DeepSeek provider
+        const result = await executeWithDeepSeek(messagesForAPI, {
+          maxTokens: 1024,
+          temperature: 0.7,
+          topP: 1.0,
+        });
+        assistantMessage = result.content;
+        outputTokens = result.outputTokens;
+        costUsd = result.costUsd;
+      } else if (selectedModel.startsWith('gemini')) {
+        // Gemini routing - currently placeholder, would use Gemini for video/complex tasks
+        // For now, route to Claude as fallback
+        const result = await executeWithAnthropic({
+          model: 'claude-3-5-sonnet-20241022',
+          messages: messagesForAPI,
+          maxTokens: 1024,
+          systemPrompt,
+        });
+        assistantMessage = result.content;
+        outputTokens = result.outputTokens;
+        costUsd = result.costUsd;
+      } else {
+        // Default to Claude for all other models
+        const result = await executeWithAnthropic({
+          model: selectedModel,
+          messages: messagesForAPI,
+          maxTokens: 1024,
+          systemPrompt,
+        });
+        assistantMessage = result.content;
+        outputTokens = result.outputTokens;
+        costUsd = result.costUsd;
+      }
+    } catch (error) {
+      context.logGateway?.error?.('CHAT_EXECUTION_FAILED', {
+        userId,
+        sessionKey,
+        model: selectedModel,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
     }
 
-    // Execute with routed model, using the context-aware system prompt we built
-    const executionStartTime = Date.now();
-    const response = await modelToUse.messages.create({
-      model: getModelIdForRoute(routingDecision.model || ''),
-      max_tokens: 1024,
-      system: systemPrompt,
-      messages: messagesForAPI,
-    });
-
     const executionLatency = Date.now() - executionStartTime;
-
-    let assistantMessage =
-      response.content[0]?.type === 'text' ? response.content[0].text : 'Unable to generate response';
-
-    // PHASE 0.5: Cost tracking
-    const outputTokens = response.usage?.output_tokens || Math.ceil(assistantMessage.length / 4);
     const operationLatency = Date.now() - operationStartTime;
-    const costUsd = router['estimateCost'](routingDecision.model || '', estimatedInputTokens, outputTokens);
 
     // Log the operation to cost tracker for audit trail and budget enforcement
     await costTracker.logOperation(userId, {
@@ -565,36 +604,6 @@ async function handleChatMessage(
       details: error instanceof Error ? error.message : 'Unknown error',
     });
   }
-}
-
-/**
- * Get the model client for the routed model
- * PHASE 0.5: This abstracts model client selection from business logic
- */
-function getModelClientForOperation(model: string): any {
-  // Map model names to actual clients
-  // In production, these would be properly initialized clients
-  const clients: Record<string, any> = {
-    deepseek: new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }),
-    gemini_flash: new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }),
-    openai: new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }),
-  };
-
-  return clients[model] || new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-}
-
-/**
- * Get the full model ID for API calls
- * PHASE 0.5: This maps model names to actual API model IDs
- */
-function getModelIdForRoute(model: string): string {
-  const modelIds: Record<string, string> = {
-    deepseek: 'claude-3-5-sonnet-20241022', // Placeholder - would use actual DeepSeek when available
-    gemini_flash: 'claude-3-5-sonnet-20241022', // Placeholder
-    openai: 'claude-3-5-sonnet-20241022', // Placeholder
-  };
-
-  return modelIds[model] || 'claude-3-5-sonnet-20241022';
 }
 
 /**

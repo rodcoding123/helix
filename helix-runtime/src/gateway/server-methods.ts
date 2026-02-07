@@ -1,6 +1,7 @@
 import { ErrorCodes, errorShape } from "./protocol/index.js";
 import { agentHandlers } from "./server-methods/agent.js";
 import { agentsHandlers } from "./server-methods/agents.js";
+import { authProfilesHandlers } from "./server-methods/auth-profiles.js";
 import { browserHandlers } from "./server-methods/browser.js";
 import { channelsHandlers } from "./server-methods/channels.js";
 import { chatHandlers } from "./server-methods/chat.js";
@@ -83,6 +84,9 @@ const READ_METHODS = new Set([
   "orchestrator.metrics.subscribe",
   "orchestrator.metrics.history",
   "orchestrator.cost.burn_rate",
+  // Phase I: Auth Profiles (read-only operations)
+  "auth.profiles.list",
+  "auth.profiles.check",
 ]);
 const WRITE_METHODS = new Set([
   "send",
@@ -193,6 +197,7 @@ function authorizeGatewayMethod(method: string, client: GatewayRequestOptions["c
     method.startsWith("config.") ||
     method.startsWith("wizard.") ||
     method.startsWith("update.") ||
+    method.startsWith("auth.") ||
     method === "channels.logout" ||
     method === "skills.install" ||
     method === "skills.update" ||
@@ -240,6 +245,7 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...usageHandlers,
   ...agentHandlers,
   ...agentsHandlers,
+  ...authProfilesHandlers,
   ...memorySynthesisHandlers,
   ...voiceHandlers,
   ...browserHandlers,
