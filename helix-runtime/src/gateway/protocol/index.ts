@@ -109,6 +109,24 @@ import {
   ExecApprovalRequestParamsSchema,
   type ExecApprovalResolveParams,
   ExecApprovalResolveParamsSchema,
+  type HooksListParams,
+  HooksListParamsSchema,
+  type HooksGetConfigParams,
+  HooksGetConfigParamsSchema,
+  type HooksUpdateConfigParams,
+  HooksUpdateConfigParamsSchema,
+  type HooksEnableParams,
+  HooksEnableParamsSchema,
+  type HooksDisableParams,
+  HooksDisableParamsSchema,
+  type HooksInstallParams,
+  HooksInstallParamsSchema,
+  type HooksUninstallParams,
+  HooksUninstallParamsSchema,
+  type HooksValidateParams,
+  HooksValidateParamsSchema,
+  type HooksPriorityParams,
+  HooksPriorityParamsSchema,
   ErrorCodes,
   type ErrorShape,
   ErrorShapeSchema,
@@ -357,6 +375,29 @@ export const validateExecApprovalsNodeGetParams = ajv.compile<ExecApprovalsNodeG
 export const validateExecApprovalsNodeSetParams = ajv.compile<ExecApprovalsNodeSetParams>(
   ExecApprovalsNodeSetParamsSchema,
 );
+export const validateHooksListParams = ajv.compile<HooksListParams>(HooksListParamsSchema);
+export const validateHooksGetConfigParams = ajv.compile<HooksGetConfigParams>(
+  HooksGetConfigParamsSchema,
+);
+export const validateHooksUpdateConfigParams = ajv.compile<HooksUpdateConfigParams>(
+  HooksUpdateConfigParamsSchema,
+);
+export const validateHooksEnableParams = ajv.compile<HooksEnableParams>(HooksEnableParamsSchema);
+export const validateHooksDisableParams = ajv.compile<HooksDisableParams>(
+  HooksDisableParamsSchema,
+);
+export const validateHooksInstallParams = ajv.compile<HooksInstallParams>(
+  HooksInstallParamsSchema,
+);
+export const validateHooksUninstallParams = ajv.compile<HooksUninstallParams>(
+  HooksUninstallParamsSchema,
+);
+export const validateHooksValidateParams = ajv.compile<HooksValidateParams>(
+  HooksValidateParamsSchema,
+);
+export const validateHooksPriorityParams = ajv.compile<HooksPriorityParams>(
+  HooksPriorityParamsSchema,
+);
 export const validateLogsTailParams = ajv.compile<LogsTailParams>(LogsTailParamsSchema);
 export const validateChatHistoryParams = ajv.compile(ChatHistoryParamsSchema);
 export const validateChatSendParams = ajv.compile(ChatSendParamsSchema);
@@ -465,6 +506,15 @@ export {
   AuthProfilesReorderParamsSchema,
   OAuthStartParamsSchema,
   OAuthStatusParamsSchema,
+  HooksListParamsSchema,
+  HooksGetConfigParamsSchema,
+  HooksUpdateConfigParamsSchema,
+  HooksEnableParamsSchema,
+  HooksDisableParamsSchema,
+  HooksInstallParamsSchema,
+  HooksUninstallParamsSchema,
+  HooksValidateParamsSchema,
+  HooksPriorityParamsSchema,
   ModelsListParamsSchema,
   SkillsStatusParamsSchema,
   SkillsInstallParamsSchema,

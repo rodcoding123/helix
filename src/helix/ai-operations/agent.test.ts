@@ -13,15 +13,46 @@ import { executeAgentCommand, executeBatchAgentCommands, getAgentOperationsCost 
 import { router } from './router.js';
 import { costTracker } from './cost-tracker.js';
 import { approvalGate } from './approval-gate.js';
+import * as providers from './providers/index.js';
 
 // Mock dependencies
 vi.mock('./router.js');
 vi.mock('./cost-tracker.js');
 vi.mock('./approval-gate.js');
+vi.mock('./providers/index.js');
 
 describe('Agent Execution Operations', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Setup default provider mocks
+    vi.mocked(providers.executeWithDeepSeek).mockResolvedValue({
+      content: 'Test response from DeepSeek',
+      inputTokens: 50,
+      outputTokens: 100,
+      totalTokens: 150,
+      costUsd: 0.001,
+      stopReason: 'end_turn',
+    } as any);
+
+    vi.mocked(providers.executeSimpleRequest).mockResolvedValue({
+      content: 'Test response from Claude',
+      inputTokens: 50,
+      outputTokens: 100,
+      costUsd: 0.002,
+      model: 'claude-3-5-haiku-20241022',
+    } as any);
+
+    /* eslint-disable @typescript-eslint/await-thenable */
+    vi.mocked(providers.getGeminiClient).mockReturnValue({
+      getGenerativeModel: () => ({
+        generateContent: vi.fn().mockResolvedValue({
+          response: {
+            text: () => 'Test response from Gemini',
+          },
+        }),
+      }),
+    } as any);
   });
 
   describe('executeAgentCommand', () => {

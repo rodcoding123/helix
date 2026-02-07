@@ -15,6 +15,7 @@ import { calendarHandlers } from "./server-methods/calendar.js";
 import { emailHandlers } from "./server-methods/email.js";
 import { execApprovalsHandlers } from "./server-methods/exec-approvals.js";
 import { healthHandlers } from "./server-methods/health.js";
+import { hooksHandlers } from "./server-methods/hooks.js";
 import { logsHandlers } from "./server-methods/logs.js";
 import { memorySynthesisHandlers } from "./server-methods/memory-synthesis.js";
 import { modelsHandlers } from "./server-methods/models.js";
@@ -55,7 +56,7 @@ const PAIRING_METHODS = new Set([
   "device.token.revoke",
   "node.rename",
 ]);
-const ADMIN_METHOD_PREFIXES = ["exec.approvals."];
+const ADMIN_METHOD_PREFIXES = ["exec.approvals.", "hooks."];
 const READ_METHODS = new Set([
   "health",
   "logs.tail",
@@ -87,6 +88,10 @@ const READ_METHODS = new Set([
   // Phase I: Auth Profiles (read-only operations)
   "auth.profiles.list",
   "auth.profiles.check",
+  // Phase I: Hooks (read-only operations)
+  "hooks.list",
+  "hooks.getConfig",
+  "hooks.validate",
 ]);
 const WRITE_METHODS = new Set([
   "send",
@@ -230,6 +235,7 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...customToolHandlers,
   ...deviceHandlers,
   ...execApprovalsHandlers,
+  ...hooksHandlers,
   ...webHandlers,
   ...modelsHandlers,
   ...configHandlers,

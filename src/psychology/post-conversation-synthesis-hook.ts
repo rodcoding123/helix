@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment */
 /**
  * Post-Conversation Memory Synthesis Hook
  *
@@ -19,7 +20,11 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { AIOperationRouter } from '../helix/ai-operations/router.js';
-import { getAnthropicClient, getGeminiClient } from '../helix/ai-operations/providers/index.js';
+import {
+  executeSimpleRequest as executeSimpleAnthropicRequest,
+  executeWithDeepSeek,
+  getGeminiClient,
+} from '../helix/ai-operations/providers/index.js';
 import { psychologyFileWriter } from './psychology-file-writer.js';
 
 // ============================================================================
@@ -188,6 +193,23 @@ export class PostConversationSynthesisHook {
   // ==========================================
 
   /**
+   * Map routed model key to actual model ID
+   */
+  private getActualModelId(model: string): string {
+    // Simplified model names from routing decision
+    const modelMap: Record<string, string> = {
+      deepseek: 'deepseek-chat',
+      claude_haiku: 'claude-3-5-haiku-20241022',
+      claude_sonnet: 'claude-3-5-sonnet-20241022',
+      claude_opus: 'claude-opus-4-1-20250805',
+      gemini_flash: 'gemini-2.0-flash',
+      'gemini-flash': 'gemini-2.0-flash',
+    };
+
+    return modelMap[model] || model; // Return as-is if not mapped
+  }
+
+  /**
    * Load conversation from Supabase
    */
   private async loadConversation(conversationId: string): Promise<ConversationRow | null> {
@@ -211,19 +233,29 @@ export class PostConversationSynthesisHook {
   }
 
   /**
-   * Call routed model (Claude via Anthropic or Gemini via Google SDK)
+   * Call routed model using provider registry functions
+   * Routes to appropriate provider (DeepSeek, Claude, or Gemini)
    */
   private async callRoutedModel(model: string, prompt: string): Promise<SynthesisResult | null> {
     try {
       let responseText = '';
+      const actualModelId = this.getActualModelId(model);
 
-      // Determine which provider based on model name
-      if (model.includes('gemini') || model.includes('flash')) {
-        // Use Google Gemini
+      // Route to appropriate provider based on model selection from AIOperationRouter
+      if (model.includes('deepseek')) {
+        // Use DeepSeek provider
+        const result = await executeWithDeepSeek([{ role: 'user', content: prompt }], {
+          maxTokens: 2048,
+          temperature: 0.7,
+        });
+        responseText = result.content;
+      } else if (model.includes('gemini') || model.includes('flash')) {
+        // Use Gemini provider (direct SDK call)
         responseText = await this.callGemini(model, prompt);
       } else {
-        // Use Anthropic Claude (default)
-        responseText = await this.callClaude(model, prompt);
+        // Use Anthropic Claude provider (default)
+        const result = await executeSimpleAnthropicRequest(prompt, actualModelId);
+        responseText = result.content;
       }
 
       // Parse JSON from response
@@ -242,36 +274,8 @@ export class PostConversationSynthesisHook {
   }
 
   /**
-   * Call Claude via Anthropic SDK
-   */
-  private async callClaude(model: string, prompt: string): Promise<string> {
-    const client = getAnthropicClient();
-
-    // Map simplified model names to actual Claude models
-    const modelMap: Record<string, string> = {
-      claude_haiku: 'claude-3-5-haiku-20241022',
-      claude_sonnet: 'claude-3-5-sonnet-20241022',
-      claude_opus: 'claude-opus-4-1-20250805',
-    };
-
-    const actualModel = modelMap[model] || 'claude-3-5-haiku-20241022';
-
-    const response = await client.messages.create({
-      model: actualModel,
-      max_tokens: 2048,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-    });
-
-    return response.content[0]?.type === 'text' ? response.content[0].text : '';
-  }
-
-  /**
    * Call Gemini via Google SDK
+   * Used for Gemini models since generic execute wrapper doesn't exist yet
    */
   private async callGemini(model: string, prompt: string): Promise<string> {
     const client = getGeminiClient();

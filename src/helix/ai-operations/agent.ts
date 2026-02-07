@@ -10,6 +10,11 @@
 import { router } from './router.js';
 import { costTracker } from './cost-tracker.js';
 import { approvalGate } from './approval-gate.js';
+import {
+  executeSimpleRequest as executeSimpleAnthropicRequest,
+  executeWithDeepSeek,
+  getGeminiClient,
+} from './providers/index.js';
 
 /**
  * Agent execution configuration
@@ -102,35 +107,50 @@ export async function executeAgentCommand(
       }
     }
 
-    // Step 4: Get model client for routed model
-    const modelClient = getModelClientForOperation(routingDecision.model);
-    const modelId = getModelIdForRoute(routingDecision.model);
+    // Step 4: Execute with routed provider
+    const userMessage = `${config.context ? `Context: ${config.context}\n\n` : ''}${config.prompt}`;
+    let responseText = '';
+    let outputTokens = 0;
+    let costUsd = 0;
 
-    // Step 5: Execute with routed model
-    const message = await modelClient.messages.create({
-      model: modelId,
-      max_tokens: config.maxTokens || 2048,
-      temperature: config.temperature || 1.0,
-      system: config.systemPrompt,
-      messages: [
-        {
-          role: 'user',
-          content: `${config.context ? `Context: ${config.context}\n\n` : ''}${config.prompt}`,
-        },
-      ],
-    });
+    if (routingDecision.model.includes('deepseek')) {
+      // Use DeepSeek provider
+      const result = await executeWithDeepSeek([{ role: 'user', content: userMessage }], {
+        maxTokens: config.maxTokens || 2048,
+        temperature: config.temperature || 0.7,
+      });
+      responseText = result.content;
+      outputTokens = result.outputTokens;
+      costUsd = result.costUsd;
+    } else if (
+      routingDecision.model.includes('gemini') ||
+      routingDecision.model.includes('flash')
+    ) {
+      // Use Gemini provider (for now, just extract response via SDK)
+      const client = getGeminiClient();
+      const modelId = getGeminiModelId(routingDecision.model);
+      const generativeModel = client.getGenerativeModel({ model: modelId });
+      const response = await generativeModel.generateContent(userMessage);
+      responseText = response.response.text();
+      outputTokens = Math.ceil(responseText.length / 4); // Estimate output tokens
+      // Cost calculation for Gemini (rough estimate)
+      const inputTokensEstimate = Math.ceil(userMessage.length / 4);
+      costUsd = (inputTokensEstimate / 1000) * 0.00005 + (outputTokens / 1000) * 0.00015;
+    } else {
+      // Use Anthropic Claude provider (default)
+      const actualModelId = getClaudeModelId(routingDecision.model);
+      const result = await executeSimpleAnthropicRequest(
+        userMessage,
+        actualModelId,
+        config.systemPrompt
+      );
+      responseText = result.content;
+      outputTokens = result.outputTokens;
+      costUsd = result.costUsd;
+    }
 
-    // Step 6: Extract response
-    const responseText = message.content[0]?.type === 'text' ? message.content[0].text : '';
-
-    // Step 7: Calculate actual cost
-    const outputTokens = message.usage?.output_tokens || Math.ceil(responseText.length / 4);
+    // Step 5: Calculate total latency
     const totalLatency = Date.now() - startTime;
-    const costUsd = router['estimateCost'](
-      routingDecision.model,
-      estimatedInputTokens,
-      outputTokens
-    );
 
     // Step 8: Log operation to cost tracker
     await costTracker.logOperation(config.userId || 'system', {
@@ -199,51 +219,32 @@ export async function executeAgentCommand(
  * Phase 0.5: Uses Anthropic SDK with placeholders for DeepSeek/Gemini adapters
  */
 
-interface ModelClientResponse {
-  content: Array<{ type: string; text: string }>;
-  usage: { output_tokens: number };
-}
-
-interface ModelClient {
-  messages: {
-    create: (params: Record<string, unknown>) => Promise<ModelClientResponse>;
-  };
-}
-
-function getModelClientForOperation(_model: string): ModelClient {
-  // In production Phase 3, this would switch between different model clients
-  // For now, all route to Anthropic SDK with model ID placeholders
-  // Returns an Anthropic client instance with configured API key
-  return {
-    messages: {
-      create: async (_params: Record<string, unknown>): Promise<ModelClientResponse> => {
-        // Placeholder implementation - in production this would call actual API
-        await Promise.resolve(); // Placeholder await
-        return {
-          content: [{ type: 'text' as const, text: 'Model response' }],
-          usage: { output_tokens: 100 },
-        };
-      },
-    },
-  };
-}
-
 /**
- * Get model ID for API calls
- * Phase 0.5: Uses Claude as placeholder for DeepSeek/Gemini
- * Phase 3: Will use actual model APIs
+ * Map routed model key to actual Claude model ID
  */
-function getModelIdForRoute(model: string): string {
-  const modelIds: Record<string, string> = {
-    deepseek: 'claude-3-5-sonnet-20241022', // Placeholder - Phase 3: actual DeepSeek API
-    gemini_flash: 'claude-3-5-sonnet-20241022', // Placeholder - Phase 3: actual Gemini API
-    openai: 'gpt-4-turbo',
+function getClaudeModelId(model: string): string {
+  const modelMap: Record<string, string> = {
+    claude_haiku: 'claude-3-5-haiku-20241022',
+    claude_sonnet: 'claude-3-5-sonnet-20241022',
+    claude_opus: 'claude-opus-4-1-20250805',
     haiku: 'claude-3-5-haiku-20241022',
     sonnet: 'claude-3-5-sonnet-20241022',
     opus: 'claude-opus-4-1-20250805',
   };
 
-  return modelIds[model] || 'claude-3-5-sonnet-20241022';
+  return modelMap[model] || 'claude-3-5-haiku-20241022';
+}
+
+/**
+ * Map routed model key to actual Gemini model ID
+ */
+function getGeminiModelId(model: string): string {
+  const modelMap: Record<string, string> = {
+    gemini_flash: 'gemini-2.0-flash',
+    'gemini-flash': 'gemini-2.0-flash',
+  };
+
+  return modelMap[model] || 'gemini-2.0-flash';
 }
 
 /**
