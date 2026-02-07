@@ -66,12 +66,15 @@ export function ToolAnalytics() {
   const [sortBy, setSortBy] = useState<'invocations' | 'successRate' | 'avgDuration' | 'lastUsed'>('invocations');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [loading, setLoading] = useState(false);
+  const [usingPlaceholder, setUsingPlaceholder] = useState(true);
 
   useEffect(() => {
     loadAnalytics();
   }, [timeRange]);
 
   const loadAnalytics = async () => {
+    setLoading(true);
     const client = getGatewayClient();
     if (client?.connected) {
       try {
@@ -81,10 +84,19 @@ export function ToolAnalytics() {
         };
         setTools(result.tools);
         setDailyUsage(result.daily);
+        setUsingPlaceholder(false);
       } catch (err) {
-        console.error('Failed to load analytics:', err);
+        console.debug('[analytics] Gateway API not yet implemented, using placeholder data:', err);
+        setTools(PLACEHOLDER_TOOLS);
+        setDailyUsage(PLACEHOLDER_DAILY);
+        setUsingPlaceholder(true);
       }
+    } else {
+      setTools(PLACEHOLDER_TOOLS);
+      setDailyUsage(PLACEHOLDER_DAILY);
+      setUsingPlaceholder(true);
     }
+    setLoading(false);
   };
 
   const categories = Array.from(new Set(tools.map(t => t.category)));
@@ -157,12 +169,25 @@ export function ToolAnalytics() {
               key={range}
               className={`range-btn ${timeRange === range ? 'active' : ''}`}
               onClick={() => setTimeRange(range)}
+              disabled={loading}
             >
               {range}
             </button>
           ))}
         </div>
       </div>
+
+      {usingPlaceholder && (
+        <div className="data-source-banner info">
+          💡 Showing demo data - Real-time analytics require gateway implementation
+        </div>
+      )}
+
+      {loading && (
+        <div className="loading-banner">
+          ⏳ Loading analytics...
+        </div>
+      )}
 
       <div className="analytics-content">
         {/* Summary Cards */}

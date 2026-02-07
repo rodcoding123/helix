@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { invoke } from '../../lib/tauri-compat';
+import { open } from '@tauri-apps/plugin-dialog';
 import { useConfigStore } from '../../stores/configStore';
 import { OAuthFlowDialog } from '../auth/OAuthFlowDialog';
 import type { AuthProfile } from '../auth/AuthProfileManager';
@@ -11,6 +12,7 @@ export function AccountSettings() {
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showOAuthDialog, setShowOAuthDialog] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const isCloudConnected = config.account?.cloudSync ?? false;
 
@@ -60,6 +62,36 @@ export function AccountSettings() {
     } catch (error) {
       console.error('Failed to export data:', error);
       alert('Failed to export data. Check console for details.');
+    }
+  };
+
+  const handleAvatarUpload = async () => {
+    try {
+      setUploadingAvatar(true);
+      const file = await open({
+        multiple: false,
+        filters: [{
+          name: 'Images',
+          extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp']
+        }]
+      });
+
+      if (!file) {
+        setUploadingAvatar(false);
+        return;
+      }
+
+      // Read file and convert to data URL
+      const result = await invoke<string>('read_file_as_data_url', { path: file });
+
+      // Update config with avatar data URL
+      updateConfig('account', { avatar: result });
+
+      setUploadingAvatar(false);
+    } catch (error) {
+      console.error('Failed to upload avatar:', error);
+      alert('Failed to upload avatar. Check console for details.');
+      setUploadingAvatar(false);
     }
   };
 
@@ -136,8 +168,8 @@ export function AccountSettings() {
                 '👤'
               )}
             </div>
-            <button className="settings-button secondary" disabled>
-              Upload (Coming Soon)
+            <button className="settings-button secondary" onClick={handleAvatarUpload} disabled={uploadingAvatar}>
+              {uploadingAvatar ? 'Uploading...' : 'Upload'}
             </button>
           </div>
         </div>

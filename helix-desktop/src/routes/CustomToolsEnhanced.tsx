@@ -18,10 +18,12 @@ interface ToolCardProps {
   onCopyCode: (code: string) => void;
   onExport: (tool: Exportable) => void;
   onDelete: (toolId: string) => void;
+  onClone: (tool: CustomTool) => void;
+  onShare: (tool: CustomTool) => void;
   tauriLoading: boolean;
 }
 
-const ToolCard = memo(({ tool, activeTab, onExecute, onCopyCode, onExport, onDelete, tauriLoading }: ToolCardProps) => (
+const ToolCard = memo(({ tool, activeTab, onExecute, onCopyCode, onExport, onDelete, onClone, onShare, tauriLoading }: ToolCardProps) => (
   <div key={tool.id} className="tool-card">
     <div className="tool-icon">{tool.icon || '🔧'}</div>
     <h3 className="tool-name">{tool.name}</h3>
@@ -42,10 +44,10 @@ const ToolCard = memo(({ tool, activeTab, onExecute, onCopyCode, onExport, onDel
           <button className="btn btn-icon" title="Export" onClick={() => onExport(tool)} disabled={tauriLoading}>
             <Download size={18} />
           </button>
-          <button className="btn btn-icon" title="Clone">
+          <button className="btn btn-icon" title="Clone" onClick={() => onClone(tool)}>
             <Copy size={18} />
           </button>
-          <button className="btn btn-icon" title="Share" disabled={tool.visibility === 'private'}>
+          <button className="btn btn-icon" title="Share" onClick={() => onShare(tool)} disabled={tool.visibility === 'private'}>
             <Share2 size={18} />
           </button>
           <button className="btn btn-icon btn-danger" title="Delete" onClick={() => onDelete(tool.id)}>
@@ -270,6 +272,39 @@ export default function CustomToolsEnhanced() {
     }
   };
 
+  const handleCloneTool = async (tool: CustomTool) => {
+    try {
+      // Create a copy with new ID and " (Copy)" appended to name
+      await createCustomTool({
+        name: `${tool.name} (Copy)`,
+        description: tool.description,
+        code: tool.code,
+        icon: tool.icon,
+        capabilities: tool.capabilities || [],
+        sandboxProfile: tool.sandboxProfile || 'standard',
+        visibility: 'private', // Always clone as private
+        version: '1.0.0'
+      });
+      await loadCustomTools();
+    } catch (err) {
+      console.error('Failed to clone tool:', err);
+    }
+  };
+
+  const handleShareTool = async (tool: CustomTool) => {
+    try {
+      // Generate shareable link (would need backend implementation)
+      const shareUrl = `helix://tools/shared/${tool.id}`;
+      await navigator.clipboard.writeText(shareUrl);
+      alert(`Share link copied to clipboard:\n${shareUrl}\n\nNote: Sharing requires updating tool visibility to "public" or "shared"`);
+    } catch (err) {
+      console.error('Failed to share tool:', err);
+      // Fallback: just copy the tool ID
+      await navigator.clipboard.writeText(tool.id);
+      alert(`Tool ID copied to clipboard: ${tool.id}`);
+    }
+  };
+
   const tools =
     activeTab === 'my-tools'
       ? customTools
@@ -403,6 +438,8 @@ export default function CustomToolsEnhanced() {
                     onCopyCode={copyToClipboard}
                     onExport={exportTool}
                     onDelete={handleDeleteTool}
+                    onClone={handleCloneTool}
+                    onShare={handleShareTool}
                     tauriLoading={tauriLoading}
                   />
                 ))

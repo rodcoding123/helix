@@ -66,6 +66,35 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+.range-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Banners */
+.data-source-banner,
+.loading-banner {
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-left: 3px solid;
+  margin: 0 1.25rem;
+  margin-top: 1rem;
+  border-radius: 6px;
+}
+
+.data-source-banner.info {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.loading-banner {
+  background: rgba(234, 179, 8, 0.1);
+  border-color: #eab308;
+  color: #eab308;
+}
+
 /* Content */
 .analytics-content {
   flex: 1;
