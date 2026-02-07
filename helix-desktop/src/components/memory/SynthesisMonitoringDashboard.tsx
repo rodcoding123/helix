@@ -165,7 +165,7 @@ export function SynthesisMonitoringDashboard() {
           filteredJobs.map(job => (
             <div
               key={job.id}
-              className={`job-row ${job.status === 'selected' ? 'selected' : ''}`}
+              className={`job-row ${selectedJob?.id === job.id ? 'selected' : ''}`}
               onClick={() => setSelectedJob(selectedJob?.id === job.id ? null : job)}
             >
               <div className="job-status">

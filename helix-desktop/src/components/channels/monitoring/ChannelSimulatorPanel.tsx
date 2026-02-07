@@ -112,7 +112,7 @@ export function ChannelSimulatorPanel({ channel, onTestComplete }: ChannelSimula
           ...prev,
           {
             type: 'received',
-            content: result.result.response || 'No response',
+            content: result.result?.response || 'No response',
             timestamp: Date.now(),
           },
         ]);

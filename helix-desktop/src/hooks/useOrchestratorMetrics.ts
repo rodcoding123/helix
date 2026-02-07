@@ -129,7 +129,8 @@ export function useOrchestratorMetrics(
     fetchBurnRate();
 
     // Subscribe to cost.updated events (real-time)
-    const handleCostUpdated = (event: { payload: any }) => {
+    const handleCostUpdated = (evt: unknown) => {
+      const event = evt as { payload: any };
       const { costCents, budgetRemainingCents } = event.payload;
       setMetrics((prev) => {
         if (!prev) return prev;
@@ -146,7 +147,8 @@ export function useOrchestratorMetrics(
     };
 
     // Subscribe to state transitions
-    const handleStateChanged = (event: { payload: any }) => {
+    const handleStateChanged = (evt: unknown) => {
+      const event = evt as { payload: any };
       const { from, to, timestamp } = event.payload;
       setMetrics((prev) => {
         if (!prev) return prev;
@@ -162,7 +164,8 @@ export function useOrchestratorMetrics(
     };
 
     // Subscribe to agent activity
-    const handleAgentActive = (event: { payload: any }) => {
+    const handleAgentActive = (evt: unknown) => {
+      const event = evt as { payload: any };
       const { agent, task } = event.payload;
       setMetrics((prev) => {
         if (!prev) return prev;

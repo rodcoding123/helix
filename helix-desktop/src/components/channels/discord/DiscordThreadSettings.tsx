@@ -235,11 +235,11 @@ export function DiscordThreadSettings({
         throw new Error('Gateway not connected');
       }
 
-      const result = await client.request('channels.discord.reactions.add', {
+      const result = (await client.request('channels.discord.reactions.add', {
         accountId: account.id,
         emoji: newReaction.emoji,
         action: newReaction.action,
-      });
+      })) as { ok?: boolean };
 
       if (result?.ok) {
         setReactionWorkflows(prev => [

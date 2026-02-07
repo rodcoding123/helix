@@ -34,7 +34,6 @@ describe('GatewayClient', () => {
         url: 'ws://localhost:8765',
         token: 'test-token',
         role: 'operator',
-        timeout: 500,
       });
       expect(client).toBeDefined();
     });

@@ -175,7 +175,7 @@ const CheckpointRow: React.FC<CheckpointRowProps> = ({
 };
 
 export const CheckpointHistory: React.FC<CheckpointHistoryProps> = ({
-  _threadId,
+  threadId: _threadId,
   className = '',
   maxItems = 30,
 }) => {
@@ -183,7 +183,6 @@ export const CheckpointHistory: React.FC<CheckpointHistoryProps> = ({
   const [expandedIndices, setExpandedIndices] = useState<Set<number>>(new Set());
 
   const recentCheckpoints: OrchestratorCheckpointSnapshot[] = [];
-  const connectionStatus = 'connected';
   const error: string | null = null;
 
   // Prepare checkpoint data
@@ -227,25 +226,8 @@ export const CheckpointHistory: React.FC<CheckpointHistoryProps> = ({
     setExpandedIndices(newSet);
   };
 
-  // Loading state
-  if (connectionStatus === 'connecting') {
-    return (
-      <div className={`card-glass p-6 rounded-lg border border-border-secondary/50 ${className}`}>
-        <div className="flex items-center gap-2 mb-4">
-          <Save className="w-5 h-5 text-helix-400 opacity-50" />
-          <h3 className="text-sm font-semibold text-text-secondary">Checkpoint History</h3>
-        </div>
-        <div className="space-y-2">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-16 bg-bg-secondary/50 rounded-lg animate-pulse" />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   // Error state
-  if (connectionStatus === 'error' || error) {
+  if (error) {
     return (
       <div className={`card-glass p-6 rounded-lg border border-border-secondary/50 ${className}`}>
         <div className="flex items-center gap-2 mb-4">

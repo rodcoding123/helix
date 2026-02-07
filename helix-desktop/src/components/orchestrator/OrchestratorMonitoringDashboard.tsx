@@ -122,19 +122,14 @@ const MetricsCard: React.FC<{
 export const OrchestratorMonitoringDashboard: React.FC<
   OrchestratorMonitoringDashboardProps
 > = ({ threadId, className = '' }) => {
-  const metrics = useOrchestratorMetrics(threadId || '');
+  const { metrics, isConnected, isLoading, error } = useOrchestratorMetrics(threadId || null);
   const [viewMode, setViewMode] = useState<ViewMode>('overview');
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
-  const connectionStatus = 'connected'; // TODO: Get from metrics hook
-
   // Determine if metrics are available
   const hasData = useMemo(() => {
-    return (
-      connectionStatus === 'connected' &&
-      metrics !== undefined
-    );
-  }, [connectionStatus, metrics]);
+    return isConnected && metrics !== undefined;
+  }, [isConnected, metrics]);
 
   // Handle card expansion
   const toggleCardExpanded = useCallback((cardId: string) => {
@@ -191,7 +186,7 @@ export const OrchestratorMonitoringDashboard: React.FC<
           <h2 className="text-lg font-bold text-text-primary">Real-time Monitoring</h2>
           <p className="text-xs text-text-tertiary mt-1">
             {hasData
-              ? `Thread: ${threadId || 'auto'} • Status: ${connectionStatus}`
+              ? `Thread: ${threadId || 'auto'} • Status: ${isConnected ? 'connected' : 'disconnected'}`
               : 'Waiting for orchestration data...'}
           </p>
         </div>
@@ -226,9 +221,9 @@ export const OrchestratorMonitoringDashboard: React.FC<
         <div className="card-glass p-8 rounded-lg border border-border-secondary/50 text-center">
           <Activity className="w-8 h-8 text-text-tertiary mx-auto mb-3 opacity-50" />
           <p className="text-sm text-text-secondary">
-            {connectionStatus === 'connecting'
+            {isLoading
               ? 'Connecting to metrics...'
-              : connectionStatus === 'error'
+              : error
                 ? 'Connection lost. Please check your gateway connection.'
                 : 'No orchestration data available. Submit a job to get started.'}
           </p>

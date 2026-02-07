@@ -21,6 +21,8 @@ export interface ChannelConfig {
   platform?: 'all' | 'macos' | 'windows' | 'linux';
   features?: string[];
   comingSoon?: boolean;
+  enabled?: boolean;
+  [key: string]: unknown;
 }
 
 export interface ChannelSetupModalProps {

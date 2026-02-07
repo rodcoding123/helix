@@ -17,6 +17,7 @@ import './AgentActivityTimeline.css';
 
 interface AgentActivityTimelineProps {
   threadId: string;
+  maxItems?: number;
 }
 
 function formatTimeAgo(timestamp: number): string {

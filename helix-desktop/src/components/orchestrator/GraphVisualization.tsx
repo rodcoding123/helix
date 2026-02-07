@@ -141,15 +141,11 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
   threadId,
   className = '',
 }) => {
-  const metrics = useOrchestratorMetrics({ threadId });
+  const { metrics, stateTransitions, isConnected, isLoading, error } = useOrchestratorMetrics(threadId ?? null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const {
-    recentStateChanges,
-    currentMetrics,
-    connectionStatus,
-    error,
-  } = metrics;
+  const recentStateChanges = stateTransitions;
+  const currentMetrics = metrics;
 
   // Build diagram definition
   const diagramDefinition = useMemo(() => {
@@ -161,7 +157,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
     }
 
     return buildMermaidDiagram(
-      recentStateChanges,
+      recentStateChanges as OrchestratorStateChangeEvent[],
       currentMetrics?.currentNode,
       recentTransitions
     );
@@ -169,16 +165,16 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
 
   // Render diagram when definition changes
   useEffect(() => {
-    if (!containerRef.current || connectionStatus !== 'connected') {
+    if (!containerRef.current || !isConnected) {
       return;
     }
 
     const containerId = 'mermaid-diagram';
     renderMermaidDiagram(containerId, diagramDefinition);
-  }, [diagramDefinition, connectionStatus]);
+  }, [diagramDefinition, isConnected]);
 
   // Loading state
-  if (connectionStatus === 'connecting') {
+  if (isLoading) {
     return (
       <div className={`card-glass p-6 rounded-lg border border-border-secondary/50 ${className}`}>
         <div className="flex items-center gap-2 mb-4">
@@ -191,7 +187,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
   }
 
   // Error state
-  if (connectionStatus === 'error' || error) {
+  if (error) {
     return (
       <div className={`card-glass p-6 rounded-lg border border-border-secondary/50 ${className}`}>
         <div className="flex items-center gap-2 mb-4">
@@ -256,7 +252,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
               <div className="text-center">
                 <p className="text-text-tertiary mb-1">Nodes</p>
                 <p className="font-semibold text-text-secondary">
-                  {new Set(recentStateChanges.flatMap(c => [c.from, c.to])).size}
+                  {new Set(recentStateChanges.flatMap((c: typeof recentStateChanges[0]) => [c.from, c.to])).size}
                 </p>
               </div>
               <div className="text-center">

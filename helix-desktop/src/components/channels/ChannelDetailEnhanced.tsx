@@ -124,7 +124,7 @@ export function ChannelDetailEnhanced(props: ChannelDetailEnhancedProps) {
             <div className="feature-content">
               {selectedAccountId && (
                 <AccountCredentialManager
-                  account={{ id: selectedAccountId, name: selectedAccountId }}
+                  accountId={selectedAccountId}
                   channelId={props.channelId}
                   credentialTypes={[
                     { type: 'token', label: 'API Token', required: false },

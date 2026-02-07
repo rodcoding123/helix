@@ -17,7 +17,7 @@ interface FilterBuilderProps {
 
 export function FilterBuilder({ onSave, onCancel, initialFilter }: FilterBuilderProps) {
   const [name, setName] = useState(initialFilter?.name ?? '');
-  const [type, setType] = useState<'regex' | 'keyword'>(initialFilter?.type ?? 'keyword');
+  const [type, setType] = useState<MessageFilter['type']>(initialFilter?.type ?? 'keyword');
   const [pattern, setPattern] = useState(initialFilter?.pattern ?? '');
   const [action, setAction] = useState<'block' | 'allow' | 'route'>(initialFilter?.action ?? 'block');
   const [priority, setPriority] = useState(initialFilter?.priority ?? 0);
