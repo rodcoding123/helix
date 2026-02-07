@@ -9,7 +9,7 @@
  */
 
 import { useState, useCallback, useEffect } from 'react';
-import { Plus, Trash2, Send, Phone, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, Send, CheckCircle, Phone, Clock, AlertCircle } from 'lucide-react';
 import { getGatewayClient } from '../../../lib/gateway-client';
 import type { ChannelAccount } from '../ChannelAccountTabs';
 
@@ -31,14 +31,24 @@ export interface BroadcastMessage {
 }
 
 interface WhatsAppBroadcastsProps {
-  account: ChannelAccount;
+  account?: ChannelAccount;
   channelId: string;
 }
 
+interface WhatsAppBroadcastResponse {
+  ok?: boolean;
+  broadcasts?: BroadcastList[];
+  messages?: BroadcastMessage[];
+  broadcast?: BroadcastList;
+  messageId?: string;
+  recipientStatus?: Record<string, string>;
+}
+
 export function WhatsAppBroadcasts({
-  account,
-  channelId,
+  account: propsAccount,
+  _channelId,
 }: WhatsAppBroadcastsProps) {
+  const account = propsAccount || { id: 'default', name: 'Primary' };
   const [broadcasts, setBroadcasts] = useState<BroadcastList[]>([]);
   const [selectedBroadcast, setSelectedBroadcast] = useState<BroadcastList | null>(null);
   const [messages, setMessages] = useState<BroadcastMessage[]>([]);
@@ -63,7 +73,7 @@ export function WhatsAppBroadcasts({
 
       const result = await client.request('channels.whatsapp.broadcasts.list', {
         accountId: account.id,
-      });
+      }) as WhatsAppBroadcastResponse;
 
       if (result?.ok) {
         setBroadcasts(result.broadcasts || []);
@@ -90,7 +100,7 @@ export function WhatsAppBroadcasts({
         const result = await client.request('channels.whatsapp.broadcasts.messages', {
           accountId: account.id,
           broadcastId,
-        });
+        }) as WhatsAppBroadcastResponse;
 
         if (result?.ok) {
           setMessages(result.messages || []);
@@ -129,9 +139,9 @@ export function WhatsAppBroadcasts({
         accountId: account.id,
         name: newBroadcastName,
         recipients,
-      });
+      }) as WhatsAppBroadcastResponse;
 
-      if (result?.ok) {
+      if (result?.ok && result.broadcast) {
         const newBroadcast = result.broadcast;
         setBroadcasts(prev => [...prev, newBroadcast]);
         setSelectedBroadcast(newBroadcast);
@@ -166,9 +176,9 @@ export function WhatsAppBroadcasts({
         accountId: account.id,
         broadcastId: selectedBroadcast.id,
         content: messageContent,
-      });
+      }) as WhatsAppBroadcastResponse;
 
-      if (result?.ok) {
+      if (result?.ok && result.messageId) {
         // Add to messages list
         const newMessage: BroadcastMessage = {
           id: result.messageId,

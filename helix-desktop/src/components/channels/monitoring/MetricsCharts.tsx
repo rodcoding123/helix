@@ -26,7 +26,7 @@ export interface MetricsChartsProps {
   history: ChannelMetrics[];
 }
 
-export function MetricsCharts({ _channel, history }: MetricsChartsProps) {
+export function MetricsCharts({ channel: _unused_channel, history }: MetricsChartsProps) {
   // Calculate statistics
   const stats = useMemo(() => {
     if (!history.length) {

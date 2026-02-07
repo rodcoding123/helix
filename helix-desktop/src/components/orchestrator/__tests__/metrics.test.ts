@@ -84,7 +84,7 @@ describe('Phase 2.3: Continuous Monitoring Dashboard', () => {
   describe('Performance', () => {
     it('should keep event emission under 5ms', () => {
       const startTime = performance.now();
-      _eventName: { type: 'cost.updated' };
+      { 'cost.updated' };
       const endTime = performance.now();
       expect(endTime - startTime).toBeLessThan(5);
     });

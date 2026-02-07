@@ -19,7 +19,7 @@ interface IdentityLink {
 }
 
 export function IdentityLinksEditor() {
-  const { getClient, _connected } = useGateway();
+  const { getClient } = useGateway();
   const [links, setLinks] = useState<IdentityLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);

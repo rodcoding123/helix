@@ -13,11 +13,13 @@ import { PolicyEditor } from './PolicyEditor';
 import { FilterList } from './FilterList';
 import { ChannelAccountTabs } from './ChannelAccountTabs';
 
-interface ChannelDetailProps {
+export interface ChannelDetailProps {
   channelId: string;
   channelName: string;
   onClose?: () => void;
 }
+
+export type ChannelType = 'whatsapp' | 'telegram' | 'discord' | 'slack' | 'signal' | 'imessage' | 'line';
 
 type Tab = 'accounts' | 'policies' | 'filters' | 'settings';
 

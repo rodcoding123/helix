@@ -15,7 +15,7 @@ interface ManualSynthesisTriggerProps {
 }
 
 export function ManualSynthesisTrigger({ sessionKey }: ManualSynthesisTriggerProps) {
-  const { getClient, _connected } = useGateway();
+  const { getClient } = useGateway();
   const [selectedType, setSelectedType] = useState<SynthesisType>('emotional_patterns');
   const [triggering, setTriggering] = useState(false);
   const [jobId, setJobId] = useState<string | null>(null);

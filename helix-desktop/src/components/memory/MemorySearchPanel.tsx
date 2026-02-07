@@ -32,7 +32,7 @@ interface SearchResult {
 }
 
 export function MemorySearchPanel() {
-  const { getClient, _connected } = useGateway();
+  const { getClient } = useGateway();
   const [filters, setFilters] = useState<SearchFilters>({
     mode: 'hybrid',
     limit: 50,

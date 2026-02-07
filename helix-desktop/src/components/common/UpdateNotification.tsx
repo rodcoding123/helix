@@ -22,7 +22,7 @@ export function UpdateNotification() {
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
-    let unlisteners: UnlistenFn[] = [];
+    const unlisteners: UnlistenFn[] = [];
 
     const initListeners = async () => {
       // Listen for update available event

@@ -7,11 +7,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getGatewayClient } from '../../lib/gateway-client';
 
-interface Account {
+export interface ChannelAccount {
   id: string;
   name: string;
   [key: string]: unknown;
 }
+
+// Backward compatibility alias
+type Account = ChannelAccount;
 
 export function ChannelAccountTabs({
   channelId,

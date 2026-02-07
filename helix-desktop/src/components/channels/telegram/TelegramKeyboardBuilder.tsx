@@ -9,7 +9,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { Plus, Trash2, Copy, Download, GripVertical } from 'lucide-react';
+import { Plus, Trash2, Copy, Download } from 'lucide-react';
 import { getGatewayClient } from '../../../lib/gateway-client';
 import type { ChannelAccount } from '../ChannelAccountTabs';
 
@@ -30,20 +30,27 @@ export interface KeyboardTemplate {
 }
 
 interface TelegramKeyboardBuilderProps {
-  account: ChannelAccount;
+  account?: ChannelAccount;
   channelId: string;
 }
 
+interface TelegramKeyboardResponse {
+  ok?: boolean;
+  templates?: KeyboardTemplate[];
+  template?: KeyboardTemplate;
+}
+
 export function TelegramKeyboardBuilder({
-  account,
-  channelId,
+  account: propsAccount,
+  _channelId,
 }: TelegramKeyboardBuilderProps) {
+  const account = propsAccount || { id: 'default', name: 'Primary' };
   const [templates, setTemplates] = useState<KeyboardTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<KeyboardTemplate | null>(null);
   const [buttons, setButtons] = useState<KeyboardButton[]>([]);
   const [loading, setLoading] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
-  const [showButtonModal, setShowButtonModal] = useState(false);
+  const [showButtonModal, _setShowButtonModal] = useState(false);
   const [templateName, setTemplateName] = useState('');
   const [newButton, setNewButton] = useState({
     label: '',
@@ -51,10 +58,10 @@ export function TelegramKeyboardBuilder({
     row: 0,
   });
   const [error, setError] = useState<string | null>(null);
-  const [editingButtonId, setEditingButtonId] = useState<string | null>(null);
+  const [editingButtonId, _setEditingButtonId] = useState<string | null>(null);
 
   // Load templates
-  const loadTemplates = useCallback(async () => {
+  const _loadTemplates = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -66,7 +73,7 @@ export function TelegramKeyboardBuilder({
 
       const result = await client.request('channels.telegram.keyboards.list', {
         accountId: account.id,
-      });
+      }) as TelegramKeyboardResponse;
 
       if (result?.ok) {
         setTemplates(result.templates || []);
@@ -98,12 +105,11 @@ export function TelegramKeyboardBuilder({
         accountId: account.id,
         name: templateName,
         buttons,
-      });
+      }) as TelegramKeyboardResponse;
 
-      if (result?.ok) {
+      if (result?.ok && result.template) {
         const newTemplate = result.template;
         setTemplates(prev => [...prev, newTemplate]);
-        setTemplateInputs('');
         setTemplateName('');
         setShowTemplateModal(false);
       }

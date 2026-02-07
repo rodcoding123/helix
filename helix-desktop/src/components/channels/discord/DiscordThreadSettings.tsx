@@ -48,10 +48,19 @@ const EMBED_COLORS: EmbedColor[] = [
   { name: 'Gold', value: '#F39C12', preview: '#F39C12' },
 ];
 
+interface DiscordThreadResponse {
+  ok?: boolean;
+  keywords?: ThreadKeyword[];
+  embedColor?: string;
+  reactions?: Array<{ emoji: string; action: string }>;
+  keywordId?: string;
+}
+
 export function DiscordThreadSettings({
   account,
-  channelId,
+  _channelId,
 }: DiscordThreadSettingsProps) {
+  const _unused_channelId = _channelId;
   const [keywords, setKeywords] = useState<ThreadKeyword[]>([]);
   const [embedColor, setEmbedColor] = useState('#3498DB');
   const [newKeyword, setNewKeyword] = useState('');
@@ -77,7 +86,7 @@ export function DiscordThreadSettings({
 
       const result = await client.request('channels.discord.threads.settings', {
         accountId: account.id,
-      });
+      }) as DiscordThreadResponse;
 
       if (result?.ok) {
         setKeywords(result.keywords || []);
@@ -112,9 +121,9 @@ export function DiscordThreadSettings({
         keyword: newKeyword,
         autoArchiveMinutes,
         rateLimitPerHour,
-      });
+      }) as DiscordThreadResponse;
 
-      if (result?.ok) {
+      if (result?.ok && result.keywordId) {
         const newKw: ThreadKeyword = {
           id: result.keywordId,
           keyword: newKeyword,

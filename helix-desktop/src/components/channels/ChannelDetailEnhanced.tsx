@@ -20,7 +20,6 @@ import { TelegramKeyboardBuilder } from './telegram/TelegramKeyboardBuilder';
 import { DiscordThreadSettings } from './discord/DiscordThreadSettings';
 import { SlackBlockKitBuilder } from './slack/SlackBlockKitBuilder';
 import { ChannelMonitoringDashboard } from './ChannelMonitoringDashboard';
-import type { ChannelAccount } from './ChannelAccountTabs';
 import type { ChannelType } from './ChannelDetail';
 import './channel-detail-enhanced.css';
 
@@ -84,30 +83,16 @@ const TABS: TabDefinition[] = [
 
 export function ChannelDetailEnhanced(props: ChannelDetailEnhancedProps) {
   const [activeTab, setActiveTab] = useState<TabId>('general');
-  const [selectedAccount, setSelectedAccount] = useState<ChannelAccount | null>(null);
+  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
 
   const visibleTabs = TABS.filter(tab => tab.visible(props.channelType));
 
-  const handleAccountSelected = useCallback((account: ChannelAccount) => {
-    setSelectedAccount(account);
+  const handleAccountChange = useCallback((accountId: string) => {
+    setSelectedAccountId(accountId);
     setActiveTab('features');
   }, []);
 
   const renderTabContent = () => {
-    const mockAccount: ChannelAccount = {
-      id: 'account-mock',
-      channelId: props.channelType,
-      name: 'Primary Account',
-      displayName: 'Primary',
-      accountIdentifier: '1234567890',
-      isActive: true,
-      isPrimary: true,
-      status: props.status === 'connected' ? 'connected' : 'disconnected',
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    };
-
-    const accountToUse = selectedAccount || mockAccount;
 
     switch (activeTab) {
       case 'general':
@@ -122,8 +107,8 @@ export function ChannelDetailEnhanced(props: ChannelDetailEnhancedProps) {
             </p>
             <div className="feature-content">
               <ChannelAccountTabs
-                channelId={props.channelType}
-                onAccountSelected={handleAccountSelected}
+                channelId={props.channelId}
+                onAccountChange={handleAccountChange}
               />
             </div>
           </div>
@@ -137,15 +122,15 @@ export function ChannelDetailEnhanced(props: ChannelDetailEnhancedProps) {
               Store and manage API keys, tokens, and authentication credentials securely
             </p>
             <div className="feature-content">
-              {accountToUse && (
-                <AccountCredentialManager account={accountToUse} channelId={props.channelType} />
+              {selectedAccountId && (
+                <AccountCredentialManager accountId={selectedAccountId} channelId={props.channelId} />
               )}
             </div>
           </div>
         );
 
       case 'features':
-        if (!selectedAccount && accountToUse.id === 'account-mock') {
+        if (!selectedAccountId) {
           return (
             <div className="empty-state">
               <Zap size={48} />
@@ -158,23 +143,22 @@ export function ChannelDetailEnhanced(props: ChannelDetailEnhancedProps) {
         return (
           <div className="tab-section">
             <h3>{props.channelName} Features</h3>
-            <p className="section-desc">Account: {accountToUse.name}</p>
 
             <div className="feature-content">
               {props.channelType === 'whatsapp' && (
-                <WhatsAppBroadcasts account={accountToUse} channelId={props.channelType} />
+                <WhatsAppBroadcasts channelId={props.channelId} />
               )}
 
               {props.channelType === 'telegram' && (
-                <TelegramKeyboardBuilder account={accountToUse} channelId={props.channelType} />
+                <TelegramKeyboardBuilder channelId={props.channelId} />
               )}
 
               {props.channelType === 'discord' && (
-                <DiscordThreadSettings account={accountToUse} channelId={props.channelType} />
+                <DiscordThreadSettings channelId={props.channelId} />
               )}
 
               {props.channelType === 'slack' && (
-                <SlackBlockKitBuilder account={accountToUse} channelId={props.channelType} />
+                <SlackBlockKitBuilder channelId={props.channelId} />
               )}
 
               {!['whatsapp', 'telegram', 'discord', 'slack'].includes(props.channelType) && (
@@ -208,7 +192,7 @@ export function ChannelDetailEnhanced(props: ChannelDetailEnhancedProps) {
               View real-time metrics, connection status, message flow, and error logs
             </p>
             <div className="feature-content">
-              <ChannelMonitoringDashboard channelId={props.channelType} />
+              <ChannelMonitoringDashboard channelId={props.channelId} />
             </div>
           </div>
         );

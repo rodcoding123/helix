@@ -26,7 +26,7 @@ export interface ErrorLogPanelProps {
   errors: ChannelError[];
 }
 
-export function ErrorLogPanel({ _channel, errors }: ErrorLogPanelProps) {
+export function ErrorLogPanel({ channel: _unused_channel, errors }: ErrorLogPanelProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const unresolvedCount = errors.filter((e) => !e.resolved).length;

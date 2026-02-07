@@ -36,8 +36,14 @@ export interface BlockTemplate {
 }
 
 interface SlackBlockKitBuilderProps {
-  account: ChannelAccount;
+  account?: ChannelAccount;
   channelId: string;
+}
+
+interface SlackBlockResponse {
+  ok?: boolean;
+  templates?: BlockTemplate[];
+  template?: BlockTemplate;
 }
 
 const BLOCK_TYPE_OPTIONS: Array<{ value: BlockType; label: string; icon: React.ReactNode }> = [
@@ -49,9 +55,10 @@ const BLOCK_TYPE_OPTIONS: Array<{ value: BlockType; label: string; icon: React.R
 ];
 
 export function SlackBlockKitBuilder({
-  account,
+  account: propsAccount,
   channelId,
 }: SlackBlockKitBuilderProps) {
+  const account = propsAccount || { id: 'default', name: 'Primary' };
   const [templates, setTemplates] = useState<BlockTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<BlockTemplate | null>(null);
   const [blocks, setBlocks] = useState<SlackBlock[]>([]);
@@ -61,7 +68,7 @@ export function SlackBlockKitBuilder({
   const [blockPlaceholder, setBlockPlaceholder] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
+  const [showPreview, _setShowPreview] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [templateName, setTemplateName] = useState('');
 
@@ -78,7 +85,7 @@ export function SlackBlockKitBuilder({
 
       const result = await client.request('channels.slack.blocks.listTemplates', {
         accountId: account.id,
-      });
+      }) as SlackBlockResponse;
 
       if (result?.ok) {
         setTemplates(result.templates || []);
@@ -147,9 +154,9 @@ export function SlackBlockKitBuilder({
         accountId: account.id,
         name: templateName,
         blocks,
-      });
+      }) as SlackBlockResponse;
 
-      if (result?.ok) {
+      if (result?.ok && result.template) {
         const newTemplate = result.template;
         setTemplates(prev => [...prev, newTemplate]);
         setTemplateName('');
@@ -337,7 +344,7 @@ export function SlackBlockKitBuilder({
               </div>
             ) : (
               <div className="blocks-list">
-                {blocks.map((block, idx) => (
+                {blocks.map((block) => (
                   <div key={block.id} className="block-item">
                     <div className="block-badge">{block.type}</div>
                     <div className="block-content">
