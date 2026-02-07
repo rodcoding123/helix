@@ -31,15 +31,13 @@ export async function findAvailablePort(
       if (available) {
         return port;
       }
-    } catch (err) {
+    } catch {
       // Port check failed, try next
       continue;
     }
   }
 
-  throw new Error(
-    `No available ports between ${primaryPort} and ${primaryPort + maxAttempts - 1}`
-  );
+  throw new Error(`No available ports between ${primaryPort} and ${primaryPort + maxAttempts - 1}`);
 }
 
 /**
@@ -74,11 +72,7 @@ function isPortAvailable(port: number): Promise<boolean> {
 /**
  * Format port message for console output
  */
-export function formatPortMessage(
-  serviceName: string,
-  port: number,
-  primaryPort: number
-): string {
+export function formatPortMessage(serviceName: string, port: number, primaryPort: number): string {
   if (port === primaryPort) {
     return `✅ ${serviceName} ready at http://localhost:${port}`;
   }

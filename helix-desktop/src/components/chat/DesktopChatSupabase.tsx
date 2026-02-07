@@ -152,11 +152,25 @@ export function DesktopChatSupabase() {
 
     switch (command) {
       case 'help':
-        // TODO: Show help message
+        console.log('Available commands:');
+        console.log('  /help                - Show this help message');
+        console.log('  /clear               - Clear current conversation');
+        console.log('  /new, /reset         - Start a new conversation');
+        console.log('  /sync                - Force sync with server');
+        console.log('  /status              - Show sync status');
+        console.log('  /sessions            - Toggle session list');
         break;
 
       case 'clear':
-        // TODO: Clear conversation
+        if (currentSessionKey && displayMessages.length > 0) {
+          if (window.confirm('Are you sure you want to clear this conversation? This cannot be undone.')) {
+            createConversation('New Chat').catch((err) => {
+              console.error('Failed to clear conversation:', err);
+            });
+          }
+        } else {
+          console.log('Nothing to clear.');
+        }
         break;
 
       case 'new':

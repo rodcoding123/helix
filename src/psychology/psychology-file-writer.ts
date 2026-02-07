@@ -169,9 +169,7 @@ export class PsychologyFileWriter {
       const now = new Date().toISOString();
       for (const newTag of newTags) {
         const normalized = newTag.toLowerCase().trim();
-        const existing = tagFile.patterns.find(
-          (p) => p.tag.toLowerCase() === normalized
-        );
+        const existing = tagFile.patterns.find(p => p.tag.toLowerCase() === normalized);
 
         if (existing) {
           existing.frequency++;
@@ -222,7 +220,7 @@ export class PsychologyFileWriter {
       for (const newGoal of newGoals) {
         const goalText = newGoal.trim();
         const existing = goalsFile.goals.find(
-          (g) => g.description.toLowerCase() === goalText.toLowerCase()
+          g => g.description.toLowerCase() === goalText.toLowerCase()
         );
 
         if (existing) {
@@ -283,9 +281,7 @@ export class PsychologyFileWriter {
       const now = new Date().toISOString();
       for (const topic of topics) {
         const normalized = topic.toLowerCase().trim();
-        const existing = topicsFile.topics.find(
-          (t) => t.name.toLowerCase() === normalized
-        );
+        const existing = topicsFile.topics.find(t => t.name.toLowerCase() === normalized);
 
         if (existing) {
           existing.mentions++;
@@ -305,7 +301,9 @@ export class PsychologyFileWriter {
       topicsFile.lastUpdated = now;
 
       await this.writeJSON(filePath, topicsFile);
-      console.log(`[PSYCHOLOGY_WRITER] Updated meaningful_topics.json with ${topics.length} topics`);
+      console.log(
+        `[PSYCHOLOGY_WRITER] Updated meaningful_topics.json with ${topics.length} topics`
+      );
     } catch (error) {
       console.error('Failed to update meaningful topics:', error);
       throw error;
@@ -443,7 +441,7 @@ export class PsychologyFileWriter {
       return {
         emotionalTags: tagsFile?.patterns || [],
         goals: goalsFile?.goals || [],
-        topics: topicsFile?.topics.map((t) => t.name) || [],
+        topics: topicsFile?.topics.map(t => t.name) || [],
         state: stateFile?.states[stateFile.states.length - 1]?.state || 'initialized',
       };
     } catch (error) {

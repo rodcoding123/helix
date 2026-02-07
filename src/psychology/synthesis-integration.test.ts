@@ -10,7 +10,7 @@
  * 6. Results stored in Supabase
  */
 
-import { describe, it, expect, fail } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
   detectLocalPatterns,
   optimizeSynthesis,
@@ -279,8 +279,8 @@ describe('Phase 3: Memory Synthesis Pipeline - Integration', () => {
         // Haiku synthesis: minimal cost (< 0.001)
         expect(optimization.costEstimate).toBeLessThan(0.001);
       } else {
-        // Unknown method
-        fail(`Unexpected synthesis method: ${optimization.method}`);
+        // Unknown method - this shouldn't happen in tests
+        throw new Error(`Unexpected synthesis method: ${optimization.method}`);
       }
     });
   });

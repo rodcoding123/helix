@@ -100,7 +100,7 @@ export class DeepSeekClient {
     if (this.initialized) return;
 
     // Get API key from environment (set by secrets preloader or manually)
-    this.apiKey = process.env.DEEPSEEK_API_KEY;
+    this.apiKey = process.env.DEEPSEEK_API_KEY ?? null;
 
     if (!this.apiKey) {
       throw new Error(

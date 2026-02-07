@@ -30,7 +30,7 @@ describe('AdminApi', () => {
     // Setup quota manager mock
     mockQuotaManager = {
       getUsage: vi.fn().mockReturnValue(150),
-      getRemainingQuota: vi.fn((userId, tier) => {
+      getRemainingQuota: vi.fn((_userId, tier) => {
         const quotas: Record<string, number> = {
           free: 1000,
           pro: 10000,
@@ -221,7 +221,9 @@ describe('AdminApi', () => {
 
         const response = adminApi.handle(request);
 
-        expect(response.data?.message).toContain('Updated user-1 to enterprise tier');
+        expect((response.data as Record<string, string> | undefined)?.message).toContain(
+          'Updated user-1 to enterprise tier'
+        );
       });
 
       it('should fail without userId in body', () => {
@@ -249,7 +251,7 @@ describe('AdminApi', () => {
           const response = adminApi.handle(request);
 
           expect(response.success).toBe(true);
-          expect(response.data?.tier).toBe(tier);
+          expect((response.data as Record<string, string> | undefined)?.tier).toBe(tier);
         });
       });
     });
@@ -280,7 +282,9 @@ describe('AdminApi', () => {
 
         const response = adminApi.handle(request);
 
-        expect(response.data?.message).toContain('Token bucket rate limiter');
+        expect((response.data as Record<string, string> | undefined)?.message).toContain(
+          'Token bucket rate limiter'
+        );
       });
     });
 
@@ -305,7 +309,7 @@ describe('AdminApi', () => {
 
         const response = adminApi.handle(request);
 
-        expect(response.data?.message).toContain('reset');
+        expect((response.data as Record<string, string> | undefined)?.message).toContain('reset');
       });
     });
   });
@@ -410,8 +414,8 @@ describe('AdminApi', () => {
         const response = adminApi.handle(request);
 
         expect(response.success).toBe(true);
-        expect(response.data?.eventCount).toBe(2);
-        expect(response.data?.events).toHaveLength(2);
+        expect((response.data as Record<string, unknown> | undefined)?.eventCount).toBe(2);
+        expect((response.data as Record<string, unknown> | undefined)?.events).toHaveLength(2);
       });
 
       it('should filter by userId when provided', () => {
@@ -435,7 +439,9 @@ describe('AdminApi', () => {
 
         const response = adminApi.handle(request);
 
-        expect(response.data?.eventCount).toBeGreaterThan(0);
+        expect((response.data as Record<string, number> | undefined)?.eventCount).toBeGreaterThan(
+          0
+        );
       });
     });
 
@@ -559,7 +565,7 @@ describe('AdminApi', () => {
 
         expect(response.success).toBe(true);
         expect(response.data).toHaveLength(1);
-        expect(response.data?.[0]).toMatchObject({
+        expect((response.data as unknown[] | undefined)?.[0]).toMatchObject({
           id: 'webhook-123',
           userId: 'user-1',
         });
@@ -612,7 +618,9 @@ describe('AdminApi', () => {
 
         const response = adminApi.handle(request);
 
-        expect(response.data?.message).toContain('webhook-123');
+        expect((response.data as Record<string, string> | undefined)?.message).toContain(
+          'webhook-123'
+        );
       });
 
       it('should fail without webhookId parameter', () => {
@@ -727,7 +735,7 @@ describe('AdminApi', () => {
       };
       const updateResponse = adminApi.handle(updateRequest);
       expect(updateResponse.success).toBe(true);
-      expect(updateResponse.data?.tier).toBe('enterprise');
+      expect((updateResponse.data as Record<string, string> | undefined)?.tier).toBe('enterprise');
     });
 
     it('should handle webhook lifecycle', () => {
