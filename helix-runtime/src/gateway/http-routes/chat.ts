@@ -28,7 +28,7 @@ import { ApprovalGate } from '../../helix/ai-operations/approval-gate.js';
 import { loadHelixContextFiles, isHelixConfigured } from '../helix/context-loader.js';
 import { buildHelixSystemPrompt } from '../helix/prompt-builder.js';
 import { loadUserContext } from '../helix/user-context-loader.js';
-import { thanosMode } from '../../../src/psychology/thanos-mode.js';
+import { thanosHandler, isThanosModeTrigger } from '../../helix/thanos-mode.js';
 import { synthesisEngine } from '../../../src/psychology/synthesis-engine.js';
 import { memoryScheduler } from '../../../src/psychology/memory-scheduler.js';
 import { hashChain } from '../../helix/hash-chain.js';
@@ -170,6 +170,12 @@ async function handleChatMessage(
       return;
     }
 
+    // Validate Supabase client is configured
+    if (!context.supabase) {
+      sendJson(res, 503, { error: 'Database service not available. SUPABASE_URL and SUPABASE_SERVICE_ROLE must be configured.' });
+      return;
+    }
+
     // ============================================================
     // PHASE 1B: THANOS_MODE AUTHENTICATION (EARLY RETURN)
     // ============================================================
@@ -177,9 +183,9 @@ async function handleChatMessage(
     const thanosConversationId = `${userId}-${sessionKey}`;
 
     // Check if user is initiating THANOS_MODE challenge
-    if (thanosMode.isThanosaModeTrigger(message)) {
+    if (isThanosModeTrigger(message)) {
       // Initiate THANOS_MODE challenge
-      const challengeMessage = await thanosMode.initiateThanosMode(thanosConversationId);
+      const challengeMessage = thanosHandler.initiateThanosos(thanosConversationId);
 
       // Log to Discord hash chain
       await hashChain.addEntry({
@@ -240,14 +246,14 @@ async function handleChatMessage(
     }
 
     // Check if we're awaiting THANOS verification for this conversation
-    if (thanosMode.isAwaitingVerification(thanosConversationId)) {
+    if (thanosHandler.isAwaitingVerification(thanosConversationId)) {
       // User is providing the verification key
-      const verification = await thanosMode.verifyThanosKey(thanosConversationId, message);
+      const verification = await thanosHandler.verifyThanosKey(thanosConversationId, message);
 
       context.logGateway?.log?.('THANOS_MODE_VERIFICATION_ATTEMPT', {
         conversationId: thanosConversationId,
         userId,
-        verified: verification.verified,
+        success: verification.success,
       });
 
       // Store messages and return immediately
@@ -273,7 +279,7 @@ async function handleChatMessage(
           session_key: sessionKey,
           messages: updatedMessages,
           updated_at: new Date().toISOString(),
-          metadata: verification.verified ? { creatorVerified: true, verifiedAt: new Date().toISOString() } : {},
+          metadata: verification.success ? { creatorVerified: true, verifiedAt: new Date().toISOString() } : {},
         },
         { onConflict: 'user_id, session_key' }
       );
@@ -282,12 +288,11 @@ async function handleChatMessage(
 
       // EARLY RETURN - don't process further
       return sendJson(res, 200, {
-        success: verification.verified,
+        success: verification.success,
         response: verification.message,
         metadata: {
           thanos_verification: true,
-          verified: verification.verified,
-          trust_level: verification.trustLevel,
+          verified: verification.success,
         },
       });
     }
@@ -355,11 +360,16 @@ async function handleChatMessage(
     // BUILD SYSTEM PROMPT (Helix + User + Context)
     // ============================================================
 
+    // Check if creator is verified for this conversation
+    const isCreatorVerified = thanosHandler.isCreatorVerified(thanosConversationId);
+
     // Normal conversation: build full context-aware prompt
     const systemPrompt = buildHelixSystemPrompt({
       helixContextFiles,
       currentUserName: userContext.userName,
       currentUserId: userContext.userId,
+      isCreatorVerified,
+      creatorTrust: isCreatorVerified ? 1.0 : undefined,
       userTrustLevel: userContext.trustLevel,
       conversationCount: userContext.conversationCount,
     });
@@ -431,7 +441,7 @@ async function handleChatMessage(
 
     const executionLatency = Date.now() - executionStartTime;
 
-    assistantMessage =
+    let assistantMessage =
       response.content[0]?.type === 'text' ? response.content[0].text : 'Unable to generate response';
 
     // PHASE 0.5: Cost tracking

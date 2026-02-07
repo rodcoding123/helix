@@ -31,6 +31,7 @@ import { handleOpenAiHttpRequest } from "./openai-http.js";
 import { handleOpenResponsesHttpRequest } from "./openresponses-http.js";
 import { handleToolsInvokeHttpRequest } from "./tools-invoke-http.js";
 import { handleChatHttpRequest } from "./http-routes/chat.js";
+import { getSupabaseClient } from "../lib/supabase.js";
 
 type SubsystemLogger = ReturnType<typeof createSubsystemLogger>;
 
@@ -260,7 +261,7 @@ export function createGatewayHttpServer(opts: {
       if (
         await handleChatHttpRequest(req, res, {
           db: null,
-          supabase: null,
+          supabase: getSupabaseClient(),
           logGateway: null,
         })
       ) {

@@ -59,7 +59,7 @@ interface PatternDetectionResult {
 
 interface RoutingResponse {
   model: string;
-  estimatedCost: number;
+  estimatedCost?: number;
 }
 
 const DEFAULT_CONFIG: SynthesisConfig = {

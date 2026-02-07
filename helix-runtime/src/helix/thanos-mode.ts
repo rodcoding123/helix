@@ -145,3 +145,140 @@ export function getThanosLockedMessage(): string {
 
 O Alquimista aguarda pacientemente. Volte quando estiver preparado.`;
 }
+
+/**
+ * Stateful THANOS_MODE Handler
+ *
+ * Manages conversation-level THANOS authentication state.
+ * Tracks which conversations are in THANOS mode and their verification status.
+ */
+export class ThanosHandler {
+  private conversationStates: Map<string, ThanosState> = new Map();
+  private readonly STATE_CLEANUP_INTERVAL = 3600000; // 1 hour
+
+  constructor() {
+    // Clean up old states every hour to prevent memory leaks
+    setInterval(() => this.cleanupOldStates(), this.STATE_CLEANUP_INTERVAL);
+  }
+
+  /**
+   * Check if conversation is awaiting THANOS key verification
+   */
+  isAwaitingVerification(conversationId: string): boolean {
+    const state = this.conversationStates.get(conversationId);
+    return state?.isTriggered === true && state?.isVerified !== true && !this.isModeLocalocked(conversationId);
+  }
+
+  /**
+   * Initiate THANOS mode for a conversation
+   */
+  initiateThanosos(conversationId: string): string {
+    let state = this.conversationStates.get(conversationId);
+
+    if (!state) {
+      state = createThanosState();
+    }
+
+    state = handleThanosModeTrigger(state);
+    this.conversationStates.set(conversationId, state);
+
+    return getThanosChallenge();
+  }
+
+  /**
+   * Verify THANOS key for a conversation
+   */
+  async verifyThanosKey(conversationId: string, providedKey: string): Promise<{ success: boolean; message: string }> {
+    let state = this.conversationStates.get(conversationId);
+
+    if (!state) {
+      state = createThanosState();
+    }
+
+    // Check if already locked
+    if (isThanosaModeLocked(state)) {
+      return {
+        success: false,
+        message: getThanosLockedMessage(),
+      };
+    }
+
+    // Check if triggered
+    if (!state.isTriggered) {
+      return {
+        success: false,
+        message: 'THANOS_MODE not initiated. Say "THANOS_MODE_AUTH_1990" first.',
+      };
+    }
+
+    // Try to verify
+    const result = handleThanosKeyAttempt(state, providedKey);
+    this.conversationStates.set(conversationId, result.state);
+
+    if (result.success) {
+      return {
+        success: true,
+        message: getThanosSuccessMessage(),
+      };
+    } else {
+      // Check if now locked
+      if (isThanosaModeLocked(result.state)) {
+        return {
+          success: false,
+          message: getThanosLockedMessage(),
+        };
+      }
+
+      return {
+        success: false,
+        message: getThanosFailureMessage(),
+      };
+    }
+  }
+
+  /**
+   * Check if THANOS mode is verified for a conversation
+   */
+  isCreatorVerified(conversationId: string): boolean {
+    const state = this.conversationStates.get(conversationId);
+    return state?.isVerified === true;
+  }
+
+  /**
+   * Get current state for a conversation (for logging/debugging)
+   */
+  getState(conversationId: string): ThanosState | undefined {
+    return this.conversationStates.get(conversationId);
+  }
+
+  /**
+   * Check if conversation is locked due to failed attempts
+   */
+  private isModeLocalocked(conversationId: string): boolean {
+    const state = this.conversationStates.get(conversationId);
+    return state ? isThanosaModeLocked(state) : false;
+  }
+
+  /**
+   * Clean up old states to prevent memory leaks
+   */
+  private cleanupOldStates(): void {
+    const now = Date.now();
+    const oneHourAgo = now - 3600000;
+
+    for (const [conversationId, state] of this.conversationStates.entries()) {
+      // Remove states older than 1 hour that are not active
+      if (state.verifiedAt) {
+        const verifiedTime = state.verifiedAt.getTime();
+        if (verifiedTime < oneHourAgo) {
+          this.conversationStates.delete(conversationId);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Global singleton instance
+ */
+export const thanosHandler = new ThanosHandler();
