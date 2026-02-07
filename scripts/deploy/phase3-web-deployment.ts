@@ -107,24 +107,44 @@ async function buildReactApplication(): Promise<void> {
 async function configureVercelDeployment(): Promise<WebDeploymentConfig> {
   log('Configuring Vercel deployment...', 'info');
 
-  console.log('\n📋 Vercel Setup Instructions:');
-  console.log('   1. Install Vercel CLI: npm i -g vercel');
-  console.log('   2. Login: vercel login');
-  console.log('   3. We will deploy your project next\n');
+  // Check if Vercel CLI is installed
+  try {
+    executeCommand('vercel --version');
+  } catch {
+    log('Vercel CLI not found. Installing...', 'warn');
+    executeCommand('npm install -g vercel');
+  }
 
-  const projectName = await ask('  Project name (e.g., helix-observatory): ');
-  const domain = await ask('  Custom domain (e.g., helix.example.com or press Enter): ');
+  // Load Supabase config from 1Password or .env
+  let supabaseUrl: string;
+  let supabaseAnonKey: string;
 
-  // Load Supabase config from .env
-  const env = Object.fromEntries(
-    fs
-      .readFileSync('.env', 'utf-8')
-      .split('\n')
-      .filter(line => !line.startsWith('#') && line.includes('='))
-      .map(line => line.split('=') as [string, string])
-  );
+  try {
+    const { execSync } = require('child_process');
+    supabaseUrl = execSync('op read "op://Helix/Supabase Project URL/password"', { encoding: 'utf-8' }).trim();
+    supabaseAnonKey = execSync('op read "op://Helix/Supabase Anon Key/password"', { encoding: 'utf-8' }).trim();
+    log('✓ Loaded Supabase config from 1Password', 'success');
+  } catch {
+    // Fall back to .env
+    if (!fs.existsSync('.env')) {
+      log('Missing Supabase config. Run Phase 1 first.', 'error');
+      process.exit(1);
+    }
 
-  log('Deploying to Vercel...', 'info');
+    const env = Object.fromEntries(
+      fs
+        .readFileSync('.env', 'utf-8')
+        .split('\n')
+        .filter(line => !line.startsWith('#') && line.includes('='))
+        .map(line => line.split('=') as [string, string])
+    );
+
+    supabaseUrl = env.SUPABASE_URL;
+    supabaseAnonKey = env.SUPABASE_ANON_KEY;
+    log('✓ Loaded Supabase config from .env (fallback)', 'success');
+  }
+
+  log('Auto-deploying to Vercel...', 'info');
 
   try {
     // Create vercel.json if it doesn't exist
@@ -132,8 +152,8 @@ async function configureVercelDeployment(): Promise<WebDeploymentConfig> {
       buildCommand: 'npm run build',
       outputDirectory: 'dist',
       env: {
-        VITE_SUPABASE_URL: env.SUPABASE_URL,
-        VITE_SUPABASE_ANON_KEY: env.SUPABASE_ANON_KEY,
+        VITE_SUPABASE_URL: supabaseUrl,
+        VITE_SUPABASE_ANON_KEY: supabaseAnonKey,
       },
     };
 
@@ -142,27 +162,29 @@ async function configureVercelDeployment(): Promise<WebDeploymentConfig> {
       JSON.stringify(vercelConfig, null, 2)
     );
 
-    // Deploy with Vercel
-    const deployOutput = executeCommand(
-      `vercel --prod --name ${projectName} ${domain ? `--scope ${domain}` : ''} web/`
-    );
+    // Deploy with Vercel (--prod for production)
+    const deployOutput = executeCommand('vercel --prod web/', process.cwd());
     log('✓ Deployed to Vercel', 'success');
 
-    // Extract deployment URL from output
-    const deployUrl = deployOutput.includes('https://')
-      ? deployOutput.match(/https:\/\/[^\s]+/)?.[0] || `https://${projectName}.vercel.app`
-      : `https://${projectName}.vercel.app`;
+    // Extract project name and deployment URL from Vercel output
+    const projectNameMatch = deployOutput.match(/Project\s+"([^"]+)"/);
+    const deployUrlMatch = deployOutput.match(/https:\/\/([^\s]+vercel\.app)/);
+
+    const projectName = projectNameMatch ? projectNameMatch[1] : 'helix-observatory';
+    const deployUrl = deployUrlMatch ? `https://${deployUrlMatch[1]}` : `https://${projectName}.vercel.app`;
+
+    log(`✓ Deployed at: ${deployUrl}`, 'success');
 
     return {
       platform: 'vercel',
       projectName,
-      domain: domain || deployUrl,
-      supabaseUrl: env.SUPABASE_URL,
-      supabaseAnonKey: env.SUPABASE_ANON_KEY,
+      domain: deployUrl,
+      supabaseUrl,
+      supabaseAnonKey,
       deployUrl,
     };
   } catch {
-    log('Vercel deployment failed. Install Vercel CLI and try again.', 'error');
+    log('Vercel deployment failed. Ensure Vercel CLI is logged in (vercel login)', 'error');
     process.exit(1);
   }
 }
@@ -445,15 +467,31 @@ async function main(): Promise<void> {
     // Step 1: Build React application
     await buildReactApplication();
 
-    // Step 2: Select deployment platform
-    const platform = await selectDeploymentPlatform();
-
-    // Step 3: Deploy to selected platform
+    // Step 2: Detect deployment platform from 1Password or auto-detect CLI
     let config: WebDeploymentConfig;
-    if (platform === 'vercel') {
-      config = await configureVercelDeployment();
-    } else {
-      config = await configureNetlifyDeployment();
+
+    try {
+      const { execSync } = require('child_process');
+      const platform = execSync('op read "op://Helix/Web Platform/password"', { encoding: 'utf-8' }).trim().toLowerCase();
+
+      if (platform.includes('netlify')) {
+        log('✓ Detected Netlify from 1Password config', 'success');
+        config = await configureNetlifyDeployment();
+      } else {
+        log('✓ Using Vercel (default or from 1Password)', 'success');
+        config = await configureVercelDeployment();
+      }
+    } catch {
+      // Auto-detect: try Vercel CLI first, fall back to Netlify
+      try {
+        const { execSync } = require('child_process');
+        execSync('vercel --version', { stdio: 'ignore' });
+        log('✓ Detected Vercel CLI installed', 'success');
+        config = await configureVercelDeployment();
+      } catch {
+        log('Vercel not detected, trying Netlify...', 'warn');
+        config = await configureNetlifyDeployment();
+      }
     }
 
     // Step 4: Configure DNS and SSL
